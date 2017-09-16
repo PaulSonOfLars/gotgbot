@@ -1,4 +1,4 @@
-package library
+package Types
 
 type User struct {
 	Id            int

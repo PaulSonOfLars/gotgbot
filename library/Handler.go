@@ -1,5 +1,6 @@
 package library
 
+import "bot/library/Types"
 
 type Handler interface {
 	HandleUpdate(update Update, d Dispatcher)
@@ -9,13 +10,13 @@ type Handler interface {
 
 type Update struct {
 	Update_id            int
-	Message              *Message
-	Edited_message       *Message
-	Channel_post         *Message
-	Edited_channel_post  *Message
-	Inline_query         *InlineQuery
+	Message              *Types.Message
+	Edited_message       *Types.Message
+	Channel_post         *Types.Message
+	Edited_channel_post  *Types.Message
+	Inline_query         *Types.Message
 	Chosen_inline_result *ChosenInlineResult
-	Callback_query       *CallbackQuery
+	Callback_query       *Types.CallbackQuery
 	Shipping_query       *ShippingQuery
 	Pre_checkout_query   *PreCheckoutQuery
 

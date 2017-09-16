@@ -1,12 +1,14 @@
 package library
 
+import "bot/library/Bot"
+
 type Dispatcher struct {
-	Bot      Bot
+	Bot      Bot.Bot
 	updates  chan Update
 	handlers *[]Handler
 }
 
-func NewDispatcher(bot Bot, updates chan Update) Dispatcher {
+func NewDispatcher(bot Bot.Bot, updates chan Update) Dispatcher {
 	d := Dispatcher{}
 	d.Bot = bot
 	d.updates = updates
@@ -22,8 +24,8 @@ func (d Dispatcher) Start() {
 
 func (d Dispatcher) process_update(update Update) {
 	for _, handler := range *d.handlers {
-		if handler.Check_update(update) {
-			handler.Handle_update(update, d)
+		if handler.CheckUpdate(update) {
+			handler.HandleUpdate(update, d)
 			break
 		}
 	}

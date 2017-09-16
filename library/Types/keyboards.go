@@ -1,4 +1,4 @@
-package library
+package Types
 
 type ReplyKeyboardMarkup struct {
 	Keyboard          [][]KeyboardButton

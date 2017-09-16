@@ -5,10 +5,11 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"bot/library/Bot"
 )
 
 type Updater struct {
-	bot        Bot
+	bot        Bot.Bot
 	updates    chan Update
 	Dispatcher Dispatcher
 }
@@ -31,32 +32,13 @@ type PreCheckoutQuery struct {
 
 func NewUpdater(token string) Updater {
 	u := Updater{}
-	u.bot = Bot{token}
+	u.bot = Bot.Bot{Token: token}
 	u.updates = make(chan Update)
 	u.Dispatcher = NewDispatcher(u.bot, u.updates)
 	return u
 }
 
 func (u Updater) Start_polling() {
-	//m := make(map[string]string)
-	//m["offset"] = strconv.Itoa(0)
-	//m["timeout"] = strconv.Itoa(10)
-	//r := Get(u.bot, "getUpdates", m)
-	//
-	//if !r.Ok {
-	//	log.Fatal("You done goofed, API Res for getUpdates was not OK")
-	//
-	//}
-	//
-	//fmt.Println(string(r.Result))
-	//
-	//var uu []Update
-	//json.Unmarshal(r.Result, &uu)
-	//fmt.Println(uu)
-	//
-	//for _, upd := range uu {
-	//	u.updates <- upd
-	//}
 	go u.Dispatcher.Start()
 	go u.start_polling()
 }
@@ -67,7 +49,7 @@ func (u Updater) start_polling() {
 	m["offset"] = strconv.Itoa(0)
 	m["timeout"] = strconv.Itoa(0)
 	for {
-		r := Get(u.bot, "getUpdates", m)
+		r := Bot.Get(u.bot, "getUpdates", m)
 		if !r.Ok {
 			log.Fatal("You done goofed, API Res for getUpdates was not OK")
 

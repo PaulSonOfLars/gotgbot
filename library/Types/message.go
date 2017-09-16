@@ -1,4 +1,4 @@
-package library
+package Types
 
 type MessageEntity struct {
 	Type   string
@@ -136,10 +136,4 @@ type Message struct {
 	Pinned_message          *Message
 	Invoice                 *Invoice
 	Successful_payment      *SuccessfulPayment
-}
-
-func (m Message) ReplyText(reply string) Result{
-
-	//r = Get()
-	return Result{}
 }

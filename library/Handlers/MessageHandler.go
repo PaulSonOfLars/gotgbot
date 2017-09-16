@@ -1,17 +1,20 @@
-package handlers
+package Handlers
 
 import (
 	"bot/library"
+	"bot/library/Bot"
+	"bot/library/Types"
 )
 
 
 type Message struct {
-	filterFunc func(message *library.Message) bool
-	response   func(b library.Bot, u library.Update)
+	filterFunc func(message *Types.Message) bool
+	response   func(b Bot.Bot, u library.Update)
 
 }
 
-func NewMessage(filterFunc func(message *library.Message) bool, response func(b library.Bot, u library.Update)) Message {
+func NewMessage(filterFunc func(message *Types.Message) bool,
+				response func(b Bot.Bot, u library.Update)) Message {
 	h := Message{}
 	h.filterFunc = filterFunc
 	h.response = response

@@ -1,9 +1,10 @@
-package library
+package Bot
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"bot/library/Types"
 )
 
 var client = &http.Client{}
@@ -15,8 +16,8 @@ type Response struct {
 
 type Result struct {
 	Message_id int
-	From       *User
-	Chat       *Chat
+	From       *Types.User
+	Chat       *Types.Chat
 	Date       int
 	Text       string
 }

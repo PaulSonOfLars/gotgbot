@@ -1,18 +1,19 @@
-package handlers
+package Handlers
 
 import (
 	"bot/library"
 	"regexp"
 	"log"
+	"bot/library/Bot"
 )
 
 type Regex struct {
 	match string
-	response func(b library.Bot, u library.Update)
+	response func(b Bot.Bot, u library.Update)
 
 }
 
-func NewRegex(match string, response func(b library.Bot, u library.Update)) Regex {
+func NewRegex(match string, response func(b Bot.Bot, u library.Update)) Regex {
 	h := Regex{}
 	h.match = match
 	h.response = response
