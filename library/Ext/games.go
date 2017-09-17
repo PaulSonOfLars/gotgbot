@@ -38,7 +38,7 @@ func (b Bot) SetGameScore(user_id int, score int, chat_id int, message_id int) b
 
 	r := Get(b, "setGameScore", m)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for sendGame was not OK")
+		log.Fatal("You done goofed, API Res for setGameScore was not OK")
 	}
 
 	var bb bool
@@ -58,7 +58,7 @@ func (b Bot) SetGameScoreInline(user_id int, score int, inline_message_id string
 
 	r := Get(b, "setGameScore", m)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for sendGame was not OK")
+		log.Fatal("You done goofed, API Res for setGameScore was not OK")
 	}
 
 	var bb bool
@@ -75,7 +75,7 @@ func (b Bot) GetGameHighScores(user_id int, chat_id int, message_id int) []Types
 
 	r := Get(b, "getGameHighScores", m)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for sendGame was not OK")
+		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
 	}
 
 	var ghs []Types.GameHighScore
@@ -91,7 +91,7 @@ func (b Bot) GetGameHighScoresInline(user_id int, inline_message_id string) []Ty
 
 	r := Get(b, "getGameHighScores", m)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for sendGame was not OK")
+		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
 	}
 
 	var ghs []Types.GameHighScore
