@@ -43,6 +43,7 @@ func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Types
 	return mess
 }
 
+// TODO: create InputFile version of all the Str's
 func (b Bot) SendPhotoStr(chat_id int, photo string) Types.Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)

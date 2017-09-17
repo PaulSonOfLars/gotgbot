@@ -85,6 +85,7 @@ func (b Bot) ExportChatLink(chat_id int) string {
 
 }
 
+// TODO: figure out InputFiles
 // TODO: r.OK or unmarshal??
 //func (b Ext) SetChatPhoto(chat_id int, photo Types.InputFile) bool {
 //	m := make(map[string]string)
