@@ -8,7 +8,6 @@ import (
 )
 
 // TODO: inputfile version
-// TODO: reply version
 // TODO: reply_markup version
 func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
 	m := make(map[string]string)
@@ -25,6 +24,21 @@ func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
 
 }
 
+func (b Bot) ReplyStickerStr(chat_id int, sticker string, reply_to_message_id int) Message {
+	m := make(map[string]string)
+	m["chat_id"] = strconv.Itoa(chat_id)
+	m["sticker"] = sticker
+	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+
+	r := Get(b, "sendSticker", m)
+	if !r.Ok {
+		log.Println("You done goofed")
+		log.Println(r)
+	}
+
+	return b.ParseMessage(r.Result)
+
+}
 func (b Bot) GetStickerSet(name string) Types.StickerSet {
 	m := make(map[string]string)
 	m["name"] = name

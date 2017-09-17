@@ -22,10 +22,50 @@ func (b Bot) NewMessage(message *Types.Message) *Message {
 
 }
 
-func (m Message) Reply_text(text string) Message {
-	return m.bot.SendMessage(text, m.Chat.Id)
+func (m Message) ReplyMessage(text string) Message {
+	return m.bot.ReplyMessage(m.Chat.Id, text, m.Message_id)
 }
 
-func (m Message) DeleteMessage() bool {
+func (m Message) ReplyAudioStr(audio string) Message {
+	return m.bot.ReplyAudioStr(m.Chat.Id, audio, m.Message_id)
+}
+
+func (m Message) ReplyDocumentStr(document string) Message {
+	return m.bot.ReplyDocumentStr(m.Chat.Id, document, m.Message_id)
+}
+
+func (m Message) ReplyLocation(latitude float64, longitude float64) Message {
+	return m.bot.ReplyLocation(m.Chat.Id, latitude, longitude, m.Message_id)
+}
+
+func (m Message) ReplyPhotoStr(photo string) Message {
+	return m.bot.ReplyPhotoStr(m.Chat.Id, photo, m.Message_id)
+}
+
+func (m Message) ReplyStickerStr(sticker string) Message {
+	return m.bot.ReplyStickerStr(m.Chat.Id, sticker, m.Message_id)
+}
+
+func (m Message) ReplyVenue(latitude float64, longitude float64, title string, address string) Message {
+	return m.bot.ReplyVenue(m.Chat.Id, latitude, longitude, title, address, m.Message_id)
+}
+
+func (m Message) ReplyVideoStr(video string) Message {
+	return m.bot.ReplyVideoStr(m.Chat.Id, video, m.Message_id)
+}
+
+func (m Message) ReplyVideoNoteStr(video_note string) Message {
+	return m.bot.ReplyVideoNoteStr(m.Chat.Id, video_note, m.Message_id)
+}
+
+func (m Message) ReplyVoiceStr(voice string) Message {
+	return m.bot.ReplyVoiceStr(m.Chat.Id, voice, m.Message_id)
+}
+
+func (m Message) Delete() bool {
 	return m.bot.DeleteMessage(m.Chat.Id, m.Message_id)
+}
+
+func (m Message) Forward(chat_id int) Message {
+	return m.bot.ForwardMessage(chat_id, m.Chat.Id, m.Message_id)
 }
