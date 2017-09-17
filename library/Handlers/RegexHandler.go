@@ -21,7 +21,7 @@ func NewRegex(match string, response func(b Ext.Bot, u library.Update)) Regex {
 }
 
 func (h Regex) HandleUpdate(update library.Update, d library.Dispatcher) {
-	h.response(d.Bot, update)
+	go h.response(d.Bot, update)
 
 }
 

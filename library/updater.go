@@ -14,22 +14,6 @@ type Updater struct {
 	Dispatcher Dispatcher
 }
 
-type InlineQuery struct {
-
-}
-
-type ChosenInlineResult struct {
-
-}
-
-type ShippingQuery struct {
-
-}
-
-type PreCheckoutQuery struct {
-
-}
-
 func NewUpdater(token string) Updater {
 	u := Updater{}
 	u.bot = Ext.Bot{Token: token}
@@ -60,6 +44,22 @@ func (u Updater) start_polling() {
 			var res []Update
 			json.Unmarshal(r.Result, &res)
 			for _, upd := range res {
+				if upd.Message != nil {
+					upd.Effective_message = u.bot.NewMessage(upd.Message)
+					//&Ext.Message{Message: *upd.Message, Bot: u.bot}
+				} else if upd.Edited_message != nil {
+					upd.Effective_message = u.bot.NewMessage(upd.Edited_message)
+
+				} else if upd.Channel_post != nil {
+					upd.Effective_message = u.bot.NewMessage(upd.Channel_post)
+
+				} else if upd.Edited_channel_post != nil {
+					upd.Effective_message = u.bot.NewMessage(upd.Edited_channel_post)
+
+				} else if upd.Inline_query != nil {
+					upd.Effective_message = u.bot.NewMessage(upd.Inline_query)
+
+				}
 				u.updates <- upd
 			}
 			if len(res) > 0 {
@@ -78,3 +78,4 @@ func (u Updater) Idle() {
 	}
 
 }
+// TODO: finish handling updates on sigint

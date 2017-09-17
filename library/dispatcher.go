@@ -1,6 +1,8 @@
 package library
 
-import "bot/library/Ext"
+import (
+	"bot/library/Ext"
+)
 
 type Dispatcher struct {
 	Bot      Ext.Bot

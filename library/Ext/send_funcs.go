@@ -14,7 +14,7 @@ func (b Bot) SendMessage(msg string, chat_id int) Message {
 	r := Get(b, "sendMessage", m)
 	if !r.Ok {
 		log.Println("You done goofed")
-		log.Println(r)
+		log.Printf("%+v\n", r)
 	}
 	return b.ParseMessage(r.Result)
 }

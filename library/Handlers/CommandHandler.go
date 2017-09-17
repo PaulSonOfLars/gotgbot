@@ -19,7 +19,7 @@ func NewCommand(command string, response func(b Ext.Bot, u library.Update)) Comm
 }
 
 func (h Command) HandleUpdate(update library.Update, d library.Dispatcher) {
-	h.response(d.Bot, update)
+	go h.response(d.Bot, update)
 }
 
 func (h Command) CheckUpdate(update library.Update) bool {
