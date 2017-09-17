@@ -1,14 +1,14 @@
 package library
 
-import "bot/library/Bot"
+import "bot/library/Ext"
 
 type Dispatcher struct {
-	Bot      Bot.Bot
+	Bot      Ext.Bot
 	updates  chan Update
 	handlers *[]Handler
 }
 
-func NewDispatcher(bot Bot.Bot, updates chan Update) Dispatcher {
+func NewDispatcher(bot Ext.Bot, updates chan Update) Dispatcher {
 	d := Dispatcher{}
 	d.Bot = bot
 	d.updates = updates

@@ -1,34 +1,11 @@
-package Bot
+package Ext
 
 import (
-	"log"
+	"bot/library/Types"
 	"encoding/json"
 	"strconv"
-	"bot/library/Types"
+	"log"
 )
-
-var url = "https://api.telegram.org/bot"
-
-type Bot struct {
-	Token string
-
-}
-
-func (b Bot) GetMe() Types.User {
-	m := make(map[string]string)
-
-	r := Get(b, "getChat", m)
-
-	var u Types.User
-	json.Unmarshal(r.Result, &u)
-
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getMe was not OK")
-	}
-
-	return u
-
-}
 
 // TODO: Markdown and HTML - two different funcs?
 func (b Bot) SendMessage(msg string, chat_id int) Types.Message {
@@ -225,6 +202,7 @@ func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Ty
 	return mess
 }
 
+// TODO: r.OK or unmarshal??
 func (b Bot) SendChatAction(chat_id int, phone_number string, first_name string) bool {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
@@ -238,97 +216,4 @@ func (b Bot) SendChatAction(chat_id int, phone_number string, first_name string)
 	}
 
 	return r.Ok
-}
-
-func (b Bot) GetUserProfilePhotos(user_id int) Types.UserProfilePhotos {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-
-
-	r := Get(b, "getUserProfilePhotos", m)
-	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
-	}
-
-	var userProfilePhotos Types.UserProfilePhotos
-	json.Unmarshal(r.Result, &userProfilePhotos)
-
-	return userProfilePhotos
-}
-
-
-func (b Bot) GetFile(file_id string) Types.File {
-	m := make(map[string]string)
-	m["file_id"] = file_id
-
-	r := Get(b, "getFile", m)
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getFile was not OK")
-	}
-
-	var f Types.File
-	json.Unmarshal(r.Result, &f)
-
-
-	return f
-
-}
-
-func (b Bot) KickChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
-
-	r := Get(b, "kickChatMember", m)
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for kickChatMember was not OK")
-	}
-
-	return r.Ok
-
-}
-
-func (b Bot) UnbanChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
-
-	r := Get(b, "unbanChatMember", m)
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for unbanChatMember was not OK")
-	}
-
-	return r.Ok
-
-}
-
-func (b Bot) RestrictChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
-
-	r := Get(b, "restrictChatMember", m)
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for kickChatMember was not OK")
-	}
-
-	return r.Ok
-
-}
-
-func (b Bot) GetChat(chat_id int) Types.Chat {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-
-	r := Get(b, "getChat", m)
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getChat was not OK")
-	}
-
-	var c Types.Chat
-	json.Unmarshal(r.Result, &c)
-
-	return c
-
 }

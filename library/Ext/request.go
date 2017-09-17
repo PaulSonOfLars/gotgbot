@@ -1,4 +1,4 @@
-package Bot
+package Ext
 
 import (
 	"encoding/json"

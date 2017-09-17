@@ -4,16 +4,16 @@ import (
 	"bot/library"
 	"regexp"
 	"log"
-	"bot/library/Bot"
+	"bot/library/Ext"
 )
 
 type Regex struct {
 	match string
-	response func(b Bot.Bot, u library.Update)
+	response func(b Ext.Bot, u library.Update)
 
 }
 
-func NewRegex(match string, response func(b Bot.Bot, u library.Update)) Regex {
+func NewRegex(match string, response func(b Ext.Bot, u library.Update)) Regex {
 	h := Regex{}
 	h.match = match
 	h.response = response

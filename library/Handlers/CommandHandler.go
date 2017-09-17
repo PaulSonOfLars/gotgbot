@@ -3,15 +3,15 @@ package Handlers
 import (
 	"strings"
 	"bot/library"
-	"bot/library/Bot"
+	"bot/library/Ext"
 )
 
 type Command struct {
 	command  string
-	response func(b Bot.Bot, u library.Update)
+	response func(b Ext.Bot, u library.Update)
 }
 
-func NewCommand(command string, response func(b Bot.Bot, u library.Update)) Command {
+func NewCommand(command string, response func(b Ext.Bot, u library.Update)) Command {
 	h := Command{}
 	h.command = command
 	h.response = response
