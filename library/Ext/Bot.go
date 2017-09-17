@@ -11,7 +11,6 @@ var url = "https://api.telegram.org/bot"
 
 type Bot struct {
 	Token string
-
 }
 
 func (b Bot) GetMe() Types.User {

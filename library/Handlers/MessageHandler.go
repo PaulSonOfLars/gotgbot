@@ -3,17 +3,16 @@ package Handlers
 import (
 	"bot/library"
 	"bot/library/Ext"
-	"bot/library/Types"
 )
 
 
 type Message struct {
-	filterFunc func(message *Types.Message) bool
+	filterFunc func(message *Ext.Message) bool
 	response   func(b Ext.Bot, u library.Update)
 
 }
 
-func NewMessage(filterFunc func(message *Types.Message) bool,
+func NewMessage(filterFunc func(message *Ext.Message) bool,
 				response func(b Ext.Bot, u library.Update)) Message {
 	h := Message{}
 	h.filterFunc = filterFunc
@@ -27,5 +26,5 @@ func (h Message) HandleUpdate(update library.Update, d library.Dispatcher) {
 }
 
 func (h Message) CheckUpdate(update library.Update) bool {
-	return h.filterFunc(update.Message)
+	return update.Message != nil && h.filterFunc(update.Message)
 }

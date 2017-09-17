@@ -10,7 +10,7 @@ import (
 // TODO: inputfile version
 // TODO: reply version
 // TODO: reply_markup version
-func (b Bot) SendStickerStr(chat_id int, sticker string) Types.Message {
+func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["sticker"] = sticker
@@ -21,10 +21,8 @@ func (b Bot) SendStickerStr(chat_id int, sticker string) Types.Message {
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
 func (b Bot) GetStickerSet(name string) Types.StickerSet {

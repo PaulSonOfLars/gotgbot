@@ -9,7 +9,7 @@ import (
 
 // TODO: reply version
 // TODO: no notif version
-func (b Bot) SendGame(chat_id int, game_short_name string) Types.Message {
+func (b Bot) SendGame(chat_id int, game_short_name string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["game_short_name"] = game_short_name
@@ -19,10 +19,7 @@ func (b Bot) SendGame(chat_id int, game_short_name string) Types.Message {
 		log.Fatal("You done goofed, API Res for sendGame was not OK")
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
+	return b.ParseMessage(r.Result)
 }
 
 

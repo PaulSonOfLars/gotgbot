@@ -9,7 +9,7 @@ import (
 // TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chat_id int, title string, description string, payload string,
 						provider_token string, start_parameter string, currency string,
-						prices []Types.LabeledPrice) Types.Message {
+						prices []Types.LabeledPrice) Message {
 	prices_str, err := json.Marshal(prices)
 	if err != nil {
 		log.Println("Err in send_invoice")
@@ -31,10 +31,8 @@ func (b Bot) SendInvoice(chat_id int, title string, description string, payload 
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
 // TODO: shipping options

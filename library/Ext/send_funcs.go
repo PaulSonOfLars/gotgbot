@@ -1,14 +1,12 @@
 package Ext
 
 import (
-	"bot/library/Types"
-	"encoding/json"
 	"strconv"
 	"log"
 )
 
 // TODO: Markdown and HTML - two different funcs?
-func (b Bot) SendMessage(msg string, chat_id int) Types.Message {
+func (b Bot) SendMessage(msg string, chat_id int) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["text"] = msg
@@ -18,14 +16,10 @@ func (b Bot) SendMessage(msg string, chat_id int) Types.Message {
 		log.Println("You done goofed")
 		log.Println(r)
 	}
-
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
+	return b.ParseMessage(r.Result)
 }
 
-func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Types.Message {
+func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["from_chat_id"] = strconv.Itoa(from_chat_id)
@@ -36,15 +30,11 @@ func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Types
 		log.Println("You done goofed")
 		log.Println(r)
 	}
-
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
+	return b.ParseMessage(r.Result)
 }
 
 // TODO: create InputFile version of all the Str's
-func (b Bot) SendPhotoStr(chat_id int, photo string) Types.Message {
+func (b Bot) SendPhotoStr(chat_id int, photo string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["photo"] = photo
@@ -54,14 +44,10 @@ func (b Bot) SendPhotoStr(chat_id int, photo string) Types.Message {
 		log.Println("You done goofed")
 		log.Println(r)
 	}
-
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
+	return b.ParseMessage(r.Result)
 }
 
-func (b Bot) SendAudioStr(chat_id int, audio string) Types.Message {
+func (b Bot) SendAudioStr(chat_id int, audio string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["audio"] = audio
@@ -71,14 +57,11 @@ func (b Bot) SendAudioStr(chat_id int, audio string) Types.Message {
 		log.Println("You done goofed")
 		log.Println(r)
 	}
+	return b.ParseMessage(r.Result)
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
 }
 
-func (b Bot) SendDocumentStr(chat_id int, document string) Types.Message {
+func (b Bot) SendDocumentStr(chat_id int, document string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["document"] = document
@@ -89,14 +72,12 @@ func (b Bot) SendDocumentStr(chat_id int, document string) Types.Message {
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
 
-func (b Bot) SendVideoStr(chat_id int, video string) Types.Message {
+func (b Bot) SendVideoStr(chat_id int, video string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["video"] = video
@@ -107,13 +88,11 @@ func (b Bot) SendVideoStr(chat_id int, video string) Types.Message {
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
-func (b Bot) SendVoiceStr(chat_id int, voice string) Types.Message {
+func (b Bot) SendVoiceStr(chat_id int, voice string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["voice"] = voice
@@ -124,13 +103,11 @@ func (b Bot) SendVoiceStr(chat_id int, voice string) Types.Message {
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
-func (b Bot) SendVideoNoteStr(chat_id int, note string) Types.Message {
+func (b Bot) SendVideoNoteStr(chat_id int, note string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["video_note"] = note
@@ -141,13 +118,11 @@ func (b Bot) SendVideoNoteStr(chat_id int, note string) Types.Message {
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
-func (b Bot) SendLocation(chat_id int, latitude float64, longitude float64) Types.Message {
+func (b Bot) SendLocation(chat_id int, latitude float64, longitude float64) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
@@ -159,13 +134,11 @@ func (b Bot) SendLocation(chat_id int, latitude float64, longitude float64) Type
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
-func (b Bot) SendVenue(chat_id int, latitude float64, longitude float64, title string, address string) Types.Message {
+func (b Bot) SendVenue(chat_id int, latitude float64, longitude float64, title string, address string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
@@ -178,14 +151,11 @@ func (b Bot) SendVenue(chat_id int, latitude float64, longitude float64, title s
 		log.Println("You done goofed")
 		log.Println(r)
 	}
+	return b.ParseMessage(r.Result)
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
-
-	return mess
 }
 
-func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Types.Message {
+func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Message {
 	m := make(map[string]string)
 	m["chat_id"] = strconv.Itoa(chat_id)
 	m["phone_number"] = phone_number
@@ -197,10 +167,8 @@ func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Ty
 		log.Println(r)
 	}
 
-	var mess Types.Message
-	json.Unmarshal(r.Result, &mess)
+	return b.ParseMessage(r.Result)
 
-	return mess
 }
 
 // TODO: r.OK or unmarshal??

@@ -26,9 +26,13 @@ func (h Regex) HandleUpdate(update library.Update, d library.Dispatcher) {
 }
 
 func (h Regex) CheckUpdate(update library.Update) bool {
-	res, err := regexp.Match(h.match, []byte(update.Message.Text))
-	if err != nil {
-		log.Fatal(err)
+	if update.Message != nil {
+		res, err := regexp.Match(h.match, []byte(update.Message.Text))
+		if err != nil {
+			log.Fatal(err)
+		}
+		return res
+	} else {
+		return false
 	}
-	return res
 }
