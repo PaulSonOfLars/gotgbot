@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	"bot/library/Ext"
+	"net/url"
 )
 
 type Updater struct {
@@ -29,11 +30,11 @@ func (u Updater) Start_polling() {
 
 
 func (u Updater) start_polling() {
-	m := make(map[string]string)
-	m["offset"] = strconv.Itoa(0)
-	m["timeout"] = strconv.Itoa(0)
+	v := url.Values{}
+	v.Add("offset", strconv.Itoa(0))
+	v.Add("timeout", strconv.Itoa(0))
 	for {
-		r := Ext.Get(u.bot, "getUpdates", m)
+		r := Ext.Get(u.bot, "getUpdates", v)
 		if !r.Ok {
 			log.Fatal("You done goofed, API Res for getUpdates was not OK")
 
@@ -67,7 +68,7 @@ func (u Updater) start_polling() {
 			}
 		}
 
-		m["offset"] = strconv.Itoa(offset)
+		v.Set("offset", strconv.Itoa(offset))
 
 	}
 }

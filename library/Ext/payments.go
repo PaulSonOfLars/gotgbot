@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"log"
 	"encoding/json"
+	"net/url"
 )
 // TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chat_id int, title string, description string, payload string,
@@ -15,17 +16,17 @@ func (b Bot) SendInvoice(chat_id int, title string, description string, payload 
 		log.Println("Err in send_invoice")
 		log.Fatal(err)
 	}
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["title"] = title
-	m["description"] = description
-	m["payload"] = payload
-	m["provider_token"] = provider_token
-	m["start_parameter"] = start_parameter
-	m["currency"] = currency
-	m["prices"] = string(prices_str)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("title", title)
+	v.Add("description", description)
+	v.Add("payload", payload)
+	v.Add("provider_token", provider_token)
+	v.Add("start_parameter", start_parameter)
+	v.Add("currency", currency)
+	v.Add("prices", string(prices_str))
 
-	r := Get(b, "sendInvoice", m)
+	r := Get(b, "sendInvoice", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -38,11 +39,11 @@ func (b Bot) SendInvoice(chat_id int, title string, description string, payload 
 // TODO: shipping options
 // TODO: err_msg
 func (b Bot) AnswerShippingQuery(shipping_query_id string, ok bool) bool {
-	m := make(map[string]string)
-	m["shipping_query_id"] = shipping_query_id
-	m["ok"] = strconv.FormatBool(ok)
+	v := url.Values{}
+	v.Add("shipping_query_id", shipping_query_id)
+	v.Add("ok", strconv.FormatBool(ok))
 
-	r := Get(b, "answerShippingQuery", m)
+	r := Get(b, "answerShippingQuery", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -55,11 +56,11 @@ func (b Bot) AnswerShippingQuery(shipping_query_id string, ok bool) bool {
 }
 
 func (b Bot) AnswerPreCheckoutQuery(pre_checkout_query_id string, ok bool) bool {
-	m := make(map[string]string)
-	m["pre_checkout_query_id"] = pre_checkout_query_id
-	m["ok"] = strconv.FormatBool(ok)
+	v := url.Values{}
+	v.Add("pre_checkout_query_id", pre_checkout_query_id)
+	v.Add("ok", strconv.FormatBool(ok))
 
-	r := Get(b, "answerPreCheckoutQuery", m)
+	r := Get(b, "answerPreCheckoutQuery", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)

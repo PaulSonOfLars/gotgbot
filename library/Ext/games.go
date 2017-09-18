@@ -5,16 +5,17 @@ import (
 	"log"
 	"encoding/json"
 	"strconv"
+	"net/url"
 )
 
 // TODO: reply version
 // TODO: no notif version
 func (b Bot) SendGame(chat_id int, game_short_name string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["game_short_name"] = game_short_name
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("game_short_name", game_short_name)
 
-	r := Get(b, "sendGame", m)
+	r := Get(b, "sendGame", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for sendGame was not OK")
 	}
@@ -27,13 +28,13 @@ func (b Bot) SendGame(chat_id int, game_short_name string) Message {
 // TODO: Force version
 // TODO: possible error
 func (b Bot) SetGameScore(user_id int, score int, chat_id int, message_id int) bool {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["score"] = strconv.Itoa(score)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["message_id"] = strconv.Itoa(message_id)
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("score", strconv.Itoa(score))
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("message_id", strconv.Itoa(message_id))
 
-	r := Get(b, "setGameScore", m)
+	r := Get(b, "setGameScore", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for setGameScore was not OK")
 	}
@@ -48,12 +49,12 @@ func (b Bot) SetGameScore(user_id int, score int, chat_id int, message_id int) b
 // TODO: Force version
 // TODO: Possible error
 func (b Bot) SetGameScoreInline(user_id int, score int, inline_message_id string) bool {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["score"] = strconv.Itoa(score)
-	m["inline_message_id"] = inline_message_id
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("score", strconv.Itoa(score))
+	v.Add("inline_message_id", inline_message_id)
 
-	r := Get(b, "setGameScore", m)
+	r := Get(b, "setGameScore", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for setGameScore was not OK")
 	}
@@ -65,12 +66,12 @@ func (b Bot) SetGameScoreInline(user_id int, score int, inline_message_id string
 }
 
 func (b Bot) GetGameHighScores(user_id int, chat_id int, message_id int) []Types.GameHighScore {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["message_id"] = strconv.Itoa(message_id)
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("message_id", strconv.Itoa(message_id))
 
-	r := Get(b, "getGameHighScores", m)
+	r := Get(b, "getGameHighScores", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
 	}
@@ -82,11 +83,11 @@ func (b Bot) GetGameHighScores(user_id int, chat_id int, message_id int) []Types
 }
 
 func (b Bot) GetGameHighScoresInline(user_id int, inline_message_id string) []Types.GameHighScore {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["inline_message_id"] = inline_message_id
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("inline_message_id", inline_message_id)
 
-	r := Get(b, "getGameHighScores", m)
+	r := Get(b, "getGameHighScores", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
 	}

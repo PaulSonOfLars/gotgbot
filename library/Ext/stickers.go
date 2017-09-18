@@ -5,16 +5,17 @@ import (
 	"strconv"
 	"log"
 	"encoding/json"
+	"net/url"
 )
 
 // TODO: inputfile version
 // TODO: reply_markup version
 func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["sticker"] = sticker
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("sticker", sticker)
 
-	r := Get(b, "sendSticker", m)
+	r := Get(b, "sendSticker", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -25,12 +26,12 @@ func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
 }
 
 func (b Bot) ReplyStickerStr(chat_id int, sticker string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["sticker"] = sticker
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("sticker", sticker)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendSticker", m)
+	r := Get(b, "sendSticker", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -40,10 +41,10 @@ func (b Bot) ReplyStickerStr(chat_id int, sticker string, reply_to_message_id in
 
 }
 func (b Bot) GetStickerSet(name string) Types.StickerSet {
-	m := make(map[string]string)
-	m["name"] = name
+	v := url.Values{}
+	v.Add("name", name)
 
-	r := Get(b, "getStickerSet", m)
+	r := Get(b, "getStickerSet", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -64,14 +65,14 @@ func (b Bot) GetStickerSet(name string) Types.StickerSet {
 // TODO: InputFile version
 // TODO: check return
 func (b Bot) CreateNewStickerSetStr(user_id int, name string, title string, png_sticker string, emojis string) bool {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["name"] = name
-	m["title"] = title
-	m["png_sticker"] = png_sticker
-	m["emojis"] = emojis
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("name", name)
+	v.Add("title", title)
+	v.Add("png_sticker", png_sticker)
+	v.Add("emojis", emojis)
 
-	r := Get(b, "createNewStickerSet", m)
+	r := Get(b, "createNewStickerSet", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -86,13 +87,13 @@ func (b Bot) CreateNewStickerSetStr(user_id int, name string, title string, png_
 // TODO: InputFile version
 // TODO: mask position version
 func (b Bot) AddStickerToSetStr(user_id int, name string, png_sticker string, emojis string) bool {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
-	m["name"] = name
-	m["png_sticker"] = png_sticker
-	m["emojis"] = emojis
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("name", name)
+	v.Add("png_sticker", png_sticker)
+	v.Add("emojis", emojis)
 
-	r := Get(b, "addStickerToSet", m)
+	r := Get(b, "addStickerToSet", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -105,11 +106,11 @@ func (b Bot) AddStickerToSetStr(user_id int, name string, png_sticker string, em
 }
 
 func (b Bot) SetStickerPositionInSet(sticker string, position int) bool {
-	m := make(map[string]string)
-	m["sticker"] = sticker
-	m["position"] = strconv.Itoa(position)
+	v := url.Values{}
+	v.Add("sticker", sticker)
+	v.Add("position", strconv.Itoa(position))
 
-	r := Get(b, "setStickerPositionInSet", m)
+	r := Get(b, "setStickerPositionInSet", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -122,10 +123,10 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) bool {
 }
 
 func (b Bot) DeleteStickerFromSet(sticker string) bool {
-	m := make(map[string]string)
-	m["sticker"] = sticker
+	v := url.Values{}
+	v.Add("sticker", sticker)
 
-	r := Get(b, "deleteStickerFromSet", m)
+	r := Get(b, "deleteStickerFromSet", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)

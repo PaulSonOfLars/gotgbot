@@ -3,15 +3,16 @@ package Ext
 import (
 	"strconv"
 	"log"
+	"net/url"
 )
 
 // TODO: Markdown and HTML - two different funcs?
 func (b Bot) SendMessage(chat_id int, msg string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["text"] = msg
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("text", msg)
 
-	r := Get(b, "sendMessage", m)
+	r := Get(b, "sendMessage", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Printf("%+v\n", r)
@@ -20,12 +21,12 @@ func (b Bot) SendMessage(chat_id int, msg string) Message {
 }
 
 func (b Bot) ReplyMessage(chat_id int, msg string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["text"] = msg
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("text", msg)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendMessage", m)
+	r := Get(b, "sendMessage", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Printf("%+v\n", r)
@@ -34,12 +35,12 @@ func (b Bot) ReplyMessage(chat_id int, msg string, reply_to_message_id int) Mess
 }
 
 func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["from_chat_id"] = strconv.Itoa(from_chat_id)
-	m["message_id"] = strconv.Itoa(message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("from_chat_id", strconv.Itoa(from_chat_id))
+	v.Add("message_id", strconv.Itoa(message_id))
 
-	r := Get(b, "forwardMessage", m)
+	r := Get(b, "forwardMessage", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -49,11 +50,11 @@ func (b Bot) ForwardMessage(chat_id int, from_chat_id int, message_id int) Messa
 
 // TODO: create InputFile version of all the Str's
 func (b Bot) SendPhotoStr(chat_id int, photo string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["photo"] = photo
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("photo", photo)
 
-	r := Get(b, "sendPhoto", m)
+	r := Get(b, "sendPhoto", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -62,12 +63,12 @@ func (b Bot) SendPhotoStr(chat_id int, photo string) Message {
 }
 
 func (b Bot) ReplyPhotoStr(chat_id int, photo string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["photo"] = photo
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("photo", photo)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendPhoto", m)
+	r := Get(b, "sendPhoto", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -76,11 +77,11 @@ func (b Bot) ReplyPhotoStr(chat_id int, photo string, reply_to_message_id int) M
 }
 
 func (b Bot) SendAudioStr(chat_id int, audio string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["audio"] = audio
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("audio", audio)
 
-	r := Get(b, "sendAudio", m)
+	r := Get(b, "sendAudio", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -89,12 +90,12 @@ func (b Bot) SendAudioStr(chat_id int, audio string) Message {
 
 }
 func (b Bot) ReplyAudioStr(chat_id int, audio string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["audio"] = audio
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("audio", audio)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendAudio", m)
+	r := Get(b, "sendAudio", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -104,11 +105,11 @@ func (b Bot) ReplyAudioStr(chat_id int, audio string, reply_to_message_id int) M
 }
 
 func (b Bot) SendDocumentStr(chat_id int, document string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["document"] = document
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("document", document)
 
-	r := Get(b, "sendDocument", m)
+	r := Get(b, "sendDocument", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -118,12 +119,12 @@ func (b Bot) SendDocumentStr(chat_id int, document string) Message {
 
 }
 func (b Bot) ReplyDocumentStr(chat_id int, document string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["document"] = document
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("document", document)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendDocument", m)
+	r := Get(b, "sendDocument", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -135,11 +136,11 @@ func (b Bot) ReplyDocumentStr(chat_id int, document string, reply_to_message_id 
 
 
 func (b Bot) SendVideoStr(chat_id int, video string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["video"] = video
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("video", video)
 
-	r := Get(b, "sendVideo", m)
+	r := Get(b, "sendVideo", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -149,12 +150,12 @@ func (b Bot) SendVideoStr(chat_id int, video string) Message {
 
 }
 func (b Bot) ReplyVideoStr(chat_id int, video string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["video"] = video
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("video", video)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendVideo", m)
+	r := Get(b, "sendVideo", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -165,11 +166,11 @@ func (b Bot) ReplyVideoStr(chat_id int, video string, reply_to_message_id int) M
 }
 
 func (b Bot) SendVoiceStr(chat_id int, voice string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["voice"] = voice
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("voice", voice)
 
-	r := Get(b, "sendVoice", m)
+	r := Get(b, "sendVoice", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -179,12 +180,12 @@ func (b Bot) SendVoiceStr(chat_id int, voice string) Message {
 
 }
 func (b Bot) ReplyVoiceStr(chat_id int, voice string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["voice"] = voice
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("voice", voice)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendVoice", m)
+	r := Get(b, "sendVoice", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -195,11 +196,11 @@ func (b Bot) ReplyVoiceStr(chat_id int, voice string, reply_to_message_id int) M
 }
 
 func (b Bot) SendVideoNoteStr(chat_id int, note string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["video_note"] = note
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("video_note", note)
 
-	r := Get(b, "sendVideoNote", m)
+	r := Get(b, "sendVideoNote", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -209,12 +210,12 @@ func (b Bot) SendVideoNoteStr(chat_id int, note string) Message {
 
 }
 func (b Bot) ReplyVideoNoteStr(chat_id int, video_note string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["video_note"] = video_note
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("video_note", video_note)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendVideoNote", m)
+	r := Get(b, "sendVideoNote", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -225,12 +226,12 @@ func (b Bot) ReplyVideoNoteStr(chat_id int, video_note string, reply_to_message_
 }
 
 func (b Bot) SendLocation(chat_id int, latitude float64, longitude float64) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
-	m["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
 
-	r := Get(b, "sendLocation", m)
+	r := Get(b, "sendLocation", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -240,13 +241,13 @@ func (b Bot) SendLocation(chat_id int, latitude float64, longitude float64) Mess
 
 }
 func (b Bot) ReplyLocation(chat_id int, latitude float64, longitude float64, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
-	m["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendLocation", m)
+	r := Get(b, "sendLocation", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -257,14 +258,14 @@ func (b Bot) ReplyLocation(chat_id int, latitude float64, longitude float64, rep
 }
 
 func (b Bot) SendVenue(chat_id int, latitude float64, longitude float64, title string, address string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
-	m["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
-	m["title"] = title
-	m["address"] = address
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	v.Add("title", title)
+	v.Add("address", address)
 
-	r := Get(b, "sendVenue", m)
+	r := Get(b, "sendVenue", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -273,15 +274,15 @@ func (b Bot) SendVenue(chat_id int, latitude float64, longitude float64, title s
 
 }
 func (b Bot) ReplyVenue(chat_id int, latitude float64, longitude float64, title string, address string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
-	m["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
-	m["title"] = title
-	m["address"] = address
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	v.Add("title", title)
+	v.Add("address", address)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendVenue", m)
+	r := Get(b, "sendVenue", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -291,12 +292,12 @@ func (b Bot) ReplyVenue(chat_id int, latitude float64, longitude float64, title 
 }
 
 func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["phone_number"] = phone_number
-	m["first_name"] = first_name
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("phone_number", phone_number)
+	v.Add("first_name", first_name)
 
-	r := Get(b, "sendContact", m)
+	r := Get(b, "sendContact", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -306,13 +307,13 @@ func (b Bot) SendContact(chat_id int, phone_number string, first_name string) Me
 
 }
 func (b Bot) ReplyContact(chat_id int, phone_number string, first_name string, reply_to_message_id int) Message {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["phone_number"] = phone_number
-	m["first_name"] = first_name
-	m["reply_to_message_id"] = strconv.Itoa(reply_to_message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("phone_number", phone_number)
+	v.Add("first_name", first_name)
+	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
 
-	r := Get(b, "sendContact", m)
+	r := Get(b, "sendContact", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -324,12 +325,12 @@ func (b Bot) ReplyContact(chat_id int, phone_number string, first_name string, r
 
 // TODO: r.OK or unmarshal??
 func (b Bot) SendChatAction(chat_id int, phone_number string, first_name string) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["phone_number"] = phone_number
-	m["first_name"] = first_name
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("phone_number", phone_number)
+	v.Add("first_name", first_name)
 
-	r := Get(b, "sendChatAction", m)
+	r := Get(b, "sendChatAction", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)

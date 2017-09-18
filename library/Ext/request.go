@@ -1,11 +1,14 @@
 package Ext
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
+	"encoding/json"
 	"bot/library/Types"
+	"net/url"
+	"log"
 )
+
+var api_url = "https://api.telegram.org/bot"
 
 var client = &http.Client{}
 
@@ -22,16 +25,12 @@ type Result struct {
 	Text       string
 }
 
-func Get(bot Bot, method string, params map[string]string) Response {
-	req, err := http.NewRequest("GET", url + bot.Token + "/" + method, nil)
+func Get(bot Bot, method string, params url.Values) Response {
+	req, err := http.NewRequest("GET", api_url + bot.Token + "/" + method, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	q := req.URL.Query()
-	for k, v := range params {
-		q.Add(k,v)
-	}
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = params.Encode()
 
 	resp , err := client.Do(req)
 	if err != nil {

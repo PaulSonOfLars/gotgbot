@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"strconv"
 	"bot/library/Types"
+	"net/url"
 )
-
-var url = "https://api.telegram.org/bot"
 
 type Bot struct {
 	Token string
 }
 
 func (b Bot) GetMe() Types.User {
-	m := make(map[string]string)
+	v := url.Values{}
 
-	r := Get(b, "getChat", m)
+	r := Get(b, "getChat", v)
 
 	var u Types.User
 	json.Unmarshal(r.Result, &u)
@@ -30,11 +29,11 @@ func (b Bot) GetMe() Types.User {
 }
 
 func (b Bot) GetUserProfilePhotos(user_id int) Types.UserProfilePhotos {
-	m := make(map[string]string)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(user_id))
 
 
-	r := Get(b, "getUserProfilePhotos", m)
+	r := Get(b, "getUserProfilePhotos", v)
 	if !r.Ok {
 		log.Println("You done goofed")
 		log.Println(r)
@@ -48,10 +47,10 @@ func (b Bot) GetUserProfilePhotos(user_id int) Types.UserProfilePhotos {
 
 
 func (b Bot) GetFile(file_id string) Types.File {
-	m := make(map[string]string)
-	m["file_id"] = file_id
+	v := url.Values{}
+	v.Add("file_id", file_id)
 
-	r := Get(b, "getFile", m)
+	r := Get(b, "getFile", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getFile was not OK")
 	}
@@ -65,10 +64,10 @@ func (b Bot) GetFile(file_id string) Types.File {
 // TODO: options here
 // TODO: r.OK or unmarshal??
 func (b Bot) AnswerCallbackQuery(callback_query_id string) bool {
-	m := make(map[string]string)
-	m["callback_query_id"] = callback_query_id
+	v := url.Values{}
+	v.Add("callback_query_id", callback_query_id)
 
-	r := Get(b, "answerCallbackQuery", m)
+	r := Get(b, "answerCallbackQuery", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for answerCallbackQuery was not OK")
 	}

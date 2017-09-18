@@ -5,15 +5,16 @@ import (
 	"bot/library/Types"
 	"encoding/json"
 	"strconv"
+	"net/url"
 )
 
 // TODO: r.OK or unmarshal??
 func (b Bot) KickChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("user_id", strconv.Itoa(user_id))
 
-	r := Get(b, "kickChatMember", m)
+	r := Get(b, "kickChatMember", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for kickChatMember was not OK")
 	}
@@ -24,11 +25,11 @@ func (b Bot) KickChatMember(chat_id int, user_id int) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) UnbanChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("user_id", strconv.Itoa(user_id))
 
-	r := Get(b, "unbanChatMember", m)
+	r := Get(b, "unbanChatMember", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for unbanChatMember was not OK")
 	}
@@ -40,11 +41,11 @@ func (b Bot) UnbanChatMember(chat_id int, user_id int) bool {
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
 func (b Bot) RestrictChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("user_id", strconv.Itoa(user_id))
 
-	r := Get(b, "restrictChatMember", m)
+	r := Get(b, "restrictChatMember", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for restrictChatMember was not OK")
 	}
@@ -56,11 +57,11 @@ func (b Bot) RestrictChatMember(chat_id int, user_id int) bool {
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
 func (b Bot) PromoteChatMember(chat_id int, user_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("user_id", strconv.Itoa(user_id))
 
-	r := Get(b, "promoteChatMember", m)
+	r := Get(b, "promoteChatMember", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for promoteChatMember was not OK")
 	}
@@ -70,10 +71,10 @@ func (b Bot) PromoteChatMember(chat_id int, user_id int) bool {
 }
 
 func (b Bot) ExportChatLink(chat_id int) string {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "exportChatLink", m)
+	r := Get(b, "exportChatLink", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for exportChatLink was not OK")
 	}
@@ -88,11 +89,11 @@ func (b Bot) ExportChatLink(chat_id int) string {
 // TODO: figure out InputFiles
 // TODO: r.OK or unmarshal??
 //func (b Ext) SetChatPhoto(chat_id int, photo Types.InputFile) bool {
-//	m := make(map[string]string)
-//	m["chat_id"] = strconv.Itoa(chat_id)
-//	m["photo"] = photo
+//	v := api_url.Values{}
+//	v.Add("chat_id", strconv.Itoa(chat_id))
+//	v.Add("photo", photo)
 //
-//	r := Get(b, "setChatPhoto", m)
+//	r := Get(b, "setChatPhoto", v)
 //	if !r.Ok {
 //		log.Fatal("You done goofed, API Res for setChatPhoto was not OK")
 //	}
@@ -106,10 +107,10 @@ func (b Bot) ExportChatLink(chat_id int) string {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) DeleteChatPhoto(chat_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "deleteChatPhoto", m)
+	r := Get(b, "deleteChatPhoto", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for deleteChatPhoto was not OK")
 	}
@@ -123,11 +124,11 @@ func (b Bot) DeleteChatPhoto(chat_id int) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) SetChatTitle(chat_id int, title string) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["title"] = title
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("title", title)
 
-	r := Get(b, "setChatTitle", m)
+	r := Get(b, "setChatTitle", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for setChatTitle was not OK")
 	}
@@ -140,11 +141,11 @@ func (b Bot) SetChatTitle(chat_id int, title string) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) SetChatDescription(chat_id int, description string) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["description"] = description
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("description", description)
 
-	r := Get(b, "setChatDescription", m)
+	r := Get(b, "setChatDescription", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for setChatDescription was not OK")
 	}
@@ -157,11 +158,11 @@ func (b Bot) SetChatDescription(chat_id int, description string) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) PinChatMessage(chat_id int, message_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["message_id"] = strconv.Itoa(message_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("message_id", strconv.Itoa(message_id))
 
-	r := Get(b, "pinChatMessage", m)
+	r := Get(b, "pinChatMessage", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for pinChatMessage was not OK")
 	}
@@ -174,10 +175,10 @@ func (b Bot) PinChatMessage(chat_id int, message_id int) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) UnpinChatMessage(chat_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "unpinChatMessage", m)
+	r := Get(b, "unpinChatMessage", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for unpinChatMessage was not OK")
 	}
@@ -190,10 +191,10 @@ func (b Bot) UnpinChatMessage(chat_id int) bool {
 
 // TODO: r.OK or unmarshal??
 func (b Bot) LeaveChat(chat_id int) bool {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "leaveChat", m)
+	r := Get(b, "leaveChat", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for leaveChat was not OK")
 	}
@@ -205,10 +206,10 @@ func (b Bot) LeaveChat(chat_id int) bool {
 }
 
 func (b Bot) GetChat(chat_id int) Types.Chat {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "getChat", m)
+	r := Get(b, "getChat", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getChat was not OK")
 	}
@@ -220,10 +221,10 @@ func (b Bot) GetChat(chat_id int) Types.Chat {
 }
 
 func (b Bot) GetChatAdministrators(chat_id int) []Types.ChatMember {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "getChatAdministrators", m)
+	r := Get(b, "getChatAdministrators", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getChatAdministrators was not OK")
 	}
@@ -235,10 +236,10 @@ func (b Bot) GetChatAdministrators(chat_id int) []Types.ChatMember {
 }
 
 func (b Bot) GetChatMembersCount(chat_id int) int {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
 
-	r := Get(b, "getChatMembersCount", m)
+	r := Get(b, "getChatMembersCount", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getChatMembersCount was not OK")
 	}
@@ -250,11 +251,11 @@ func (b Bot) GetChatMembersCount(chat_id int) int {
 }
 
 func (b Bot) GetChatMember(chat_id int, user_id int) Types.ChatMember {
-	m := make(map[string]string)
-	m["chat_id"] = strconv.Itoa(chat_id)
-	m["user_id"] = strconv.Itoa(user_id)
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("user_id", strconv.Itoa(user_id))
 
-	r := Get(b, "getChatMember", m)
+	r := Get(b, "getChatMember", v)
 	if !r.Ok {
 		log.Fatal("You done goofed, API Res for getChatMember was not OK")
 	}
