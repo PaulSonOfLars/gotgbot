@@ -1,12 +1,12 @@
 package library
 
 import (
+	"bot/library/Ext"
 	"encoding/json"
 	"log"
+	"net/url"
 	"strconv"
 	"time"
-	"bot/library/Ext"
-	"net/url"
 )
 
 type Updater struct {
@@ -27,7 +27,6 @@ func (u Updater) Start_polling() {
 	go u.Dispatcher.Start()
 	go u.start_polling()
 }
-
 
 func (u Updater) start_polling() {
 	v := url.Values{}
@@ -79,4 +78,5 @@ func (u Updater) Idle() {
 	}
 
 }
+
 // TODO: finish handling updates on sigint

@@ -1,15 +1,14 @@
 package library
 
 import (
-	"bot/library/Types"
 	"bot/library/Ext"
+	"bot/library/Types"
 )
 
 type Handler interface {
 	HandleUpdate(update Update, d Dispatcher)
 	CheckUpdate(update Update) bool
 }
-
 
 type Update struct {
 	Update_id            int
@@ -24,6 +23,5 @@ type Update struct {
 	Pre_checkout_query   *Types.PreCheckoutQuery
 
 	// Self added type
-	Effective_message    *Ext.Message
+	Effective_message *Ext.Message
 }
-

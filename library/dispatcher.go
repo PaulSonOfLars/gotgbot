@@ -33,7 +33,6 @@ func (d Dispatcher) process_update(update Update) {
 	}
 }
 
-
 func (d Dispatcher) Add_handler(handler Handler) {
 	*d.handlers = append(*d.handlers, handler)
 

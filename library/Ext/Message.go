@@ -10,6 +10,10 @@ type Message struct {
 	bot Bot
 }
 
+func (b Bot) Message(chat_id int, text string) Message {
+	return Message{}
+}
+
 func (b Bot) ParseMessage(message json.RawMessage) Message {
 	var mess Message
 	json.Unmarshal(message, &mess)
@@ -19,7 +23,6 @@ func (b Bot) ParseMessage(message json.RawMessage) Message {
 
 func (b Bot) NewMessage(message *Types.Message) *Message {
 	return &Message{*message, b}
-
 }
 
 func (m Message) ReplyMessage(text string) Message {
