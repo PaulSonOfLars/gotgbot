@@ -2,7 +2,6 @@ package ext
 
 import (
 	"strconv"
-	"log"
 	"net/url"
 	"github.com/pkg/errors"
 )
@@ -50,18 +49,10 @@ func (b Bot) ReplyPhotoCaptionStr(chatId int, photo string, caption string, repl
 }
 
 func (b Bot) replyPhotoStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("photo", photo)
-	v.Add("caption", caption)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendPhoto", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	photoMsg := b.NewSendablePhoto(chatId, caption)
+	photoMsg.PhotoString = photo
+	photoMsg.ReplyToMessageId = replyToMessageId
+	return photoMsg.Send()
 }
 
 func (b Bot) SendAudioStr(chatId int, audio string) (*Message, error) {
@@ -73,48 +64,33 @@ func (b Bot) ReplyAudioStr(chatId int, audio string, replyToMessageId int) (*Mes
 }
 
 func (b Bot) replyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("audio", audio)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendAudio", v)
-	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
-	}
-	return b.ParseMessage(r.Result), nil
+	audioMsg := b.NewSendableAudio(chatId, "")
+	audioMsg.AudioString = audio
+	audioMsg.ReplyToMessageId = replyToMessageId
+	return audioMsg.Send()
 }
 
 func (b Bot) SendDocumentStr(chatId int, document string) (*Message, error) {
-	return b.replyDocumentStr(chatId, document,"", 0)
+	return b.replyDocumentStr(chatId, document, "", 0)
 }
 
-func (b Bot) SendDocumentCaptionStr(chatId int, photo string, caption string) (*Message, error) {
-	return b.replyDocumentStr(chatId, photo, caption, 0)
+func (b Bot) SendDocumentCaptionStr(chatId int, document string, caption string) (*Message, error) {
+	return b.replyDocumentStr(chatId, document, caption, 0)
 }
 
 func (b Bot) ReplyDocumentStr(chatId int, document string, replyToMessageId int) (*Message, error) {
 	return b.replyDocumentStr(chatId, document, "", replyToMessageId)
 }
 
-func (b Bot) ReplyDocumentCaptionStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {
-	return b.replyDocumentStr(chatId, photo, caption, replyToMessageId)
+func (b Bot) ReplyDocumentCaptionStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyDocumentStr(chatId, document, caption, replyToMessageId)
 }
 
 func (b Bot) replyDocumentStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("document", document)
-	v.Add("caption", caption)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendDocument", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	docMsg := b.NewSendableDocument(chatId, caption)
+	docMsg.DocString = document
+	docMsg.ReplyToMessageId = replyToMessageId
+	return docMsg.Send()
 }
 
 func (b Bot) SendVideoStr(chatId int, video string) (*Message, error) {
@@ -126,17 +102,10 @@ func (b Bot) ReplyVideoStr(chatId int, video string, replyToMessageId int) (*Mes
 }
 
 func (b Bot) replyVideoStr(chatId int, video string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("video", video)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendVideo", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	videoMsg := b.NewSendableVideo(chatId, "")
+	videoMsg.VideoString = video
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
 }
 
 func (b Bot) SendVoiceStr(chatId int, voice string) (*Message, error) {
@@ -148,17 +117,10 @@ func (b Bot) ReplyVoiceStr(chatId int, voice string, replyToMessageId int) (*Mes
 }
 
 func (b Bot) replyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("voice", voice)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendVoice", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	voiceMsg := b.NewSendableVoice(chatId, "")
+	voiceMsg.VoiceString = voice
+	voiceMsg.ReplyToMessageId = replyToMessageId
+	return voiceMsg.Send()
 }
 
 func (b Bot) SendVideoNoteStr(chatId int, videoNote string) (*Message, error) {
@@ -170,17 +132,10 @@ func (b Bot) ReplyVideoNoteStr(chatId int, videoNote string, replyToMessageId in
 }
 
 func (b Bot) replyVideoNoteStr(chatId int, videoNote string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("video_note", videoNote)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendVideoNote", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	videoMsg := b.NewSendableVideoNote(chatId)
+	videoMsg.VideoNoteString = videoNote
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
 }
 
 func (b Bot) SendLocation(chatId int, latitude float64, longitude float64) (*Message, error) {
@@ -190,43 +145,31 @@ func (b Bot) SendLocation(chatId int, latitude float64, longitude float64) (*Mes
 func (b Bot) ReplyLocation(chatId int, latitude float64, longitude float64, replyToMessageId int) (*Message, error) {
 	return b.replyLocation(chatId, latitude, longitude, replyToMessageId)
 }
+
 func (b Bot) replyLocation(chatId int, latitude float64, longitude float64, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendLocation", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	locationMsg := b.NewSendableLocation(chatId)
+	locationMsg.Latitude = latitude
+	locationMsg.Longitude = longitude
+	locationMsg.ReplyToMessageId = replyToMessageId
+	return locationMsg.Send()
 }
 
 func (b Bot) SendVenue(chatId int, latitude float64, longitude float64, title string, address string) (*Message, error) {
 	return b.replyVenue(chatId, latitude, longitude, title, address, 0)
-
 }
 
 func (b Bot) ReplyVenue(chatId int, latitude float64, longitude float64, title string, address string, replyToMessageId int) (*Message, error) {
 	return b.replyVenue(chatId, latitude, longitude, title, address, replyToMessageId)
 }
-func (b Bot) replyVenue(chatId int, latitude float64, longitude float64, title string, address string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	v.Add("title", title)
-	v.Add("address", address)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
 
-	r := Get(b, "sendVenue", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-	return b.ParseMessage(r.Result), nil
+func (b Bot) replyVenue(chatId int, latitude float64, longitude float64, title string, address string, replyToMessageId int) (*Message, error) {
+	venueMsg := b.NewSendableVenue(chatId)
+	venueMsg.Latitude = latitude
+	venueMsg.Longitude = longitude
+	venueMsg.Title = title
+	venueMsg.Address = address
+	venueMsg.ReplyToMessageId = replyToMessageId
+	return venueMsg.Send()
 }
 
 func (b Bot) SendContact(chatId int, phoneNumber string, firstName string) (*Message, error) {
@@ -238,31 +181,16 @@ func (b Bot) ReplyContact(chatId int, phoneNumber string, firstName string, repl
 }
 
 func (b Bot) replyContact(chatId int, phoneNumber string, firstName string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("phone_number", phoneNumber)
-	v.Add("first_name", firstName)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
-
-	r := Get(b, "sendContact", v)
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
+	contactMsg := b.NewSendableContact(chatId)
+	contactMsg.PhoneNumber = phoneNumber
+	contactMsg.FirstName = firstName
+	contactMsg.ReplyToMessageId = replyToMessageId
+	return contactMsg.Send()
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) SendChatAction(chatId int, phoneNumber string, firstName string) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("phone_number", phoneNumber)
-	v.Add("first_name", firstName)
-
-	r := Get(b, "sendChatAction", v)
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	return r.Ok, nil
+func (b Bot) SendChatAction(chatId int, action string) (*Message, error) {
+	contactMsg := b.NewSendableChatAction(chatId)
+	contactMsg.action = action
+	return contactMsg.Send()
 }
