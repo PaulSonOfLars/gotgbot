@@ -1,11 +1,11 @@
 package ext
 
 import (
-	"log"
 	"net/url"
 	"strconv"
 	"encoding/json"
 	"gotgbot/types"
+	"github.com/pkg/errors"
 )
 
 type newMessage struct {
@@ -48,9 +48,7 @@ func (msg *newMessage) Send() (*Message, error) {
 	r := Get(msg.bot, "sendMessage", v)
 
 	if !r.Ok {
-		log.Println(r.ErrorCode)
-		log.Println(r.Description)
-		log.Println("Fucked it")
+		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
 	newMsg.bot = msg.bot

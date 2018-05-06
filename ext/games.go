@@ -6,21 +6,22 @@ import (
 	"encoding/json"
 	"strconv"
 	"net/url"
+	"github.com/pkg/errors"
 )
 
 // TODO: reply version
 // TODO: no notif version
-func (b Bot) SendGame(chatId int, gameShortName string) Message {
+func (b Bot) SendGame(chatId int, gameShortName string) (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("game_short_name", gameShortName)
 
 	r := Get(b, "sendGame", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for sendGame was not OK")
+		return nil, errors.New(r.Description)
 	}
 
-	return b.ParseMessage(r.Result)
+	return b.ParseMessage(r.Result), nil
 }
 
 

@@ -6,26 +6,26 @@ import (
 	"log"
 	"encoding/json"
 	"net/url"
+	"github.com/pkg/errors"
 )
 
 // TODO: inputfile version
 // TODO: reply_markup version
-func (b Bot) SendStickerStr(chatId int, sticker string) Message {
+func (b Bot) SendStickerStr(chatId int, sticker string) (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker", sticker)
 
 	r := Get(b, "sendSticker", v)
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return nil, errors.New(r.Description)
 	}
 
-	return b.ParseMessage(r.Result)
+	return b.ParseMessage(r.Result), nil
 
 }
 
-func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) Message {
+func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker", sticker)
@@ -33,11 +33,10 @@ func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) M
 
 	r := Get(b, "sendSticker", v)
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return nil, errors.New(r.Description)
 	}
 
-	return b.ParseMessage(r.Result)
+	return b.ParseMessage(r.Result), nil
 
 }
 func (b Bot) GetStickerSet(name string) types.StickerSet {

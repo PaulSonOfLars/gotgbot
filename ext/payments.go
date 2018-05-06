@@ -6,11 +6,12 @@ import (
 	"log"
 	"encoding/json"
 	"net/url"
+	"github.com/pkg/errors"
 )
 // TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chatId int, title string, description string, payload string,
 						providerToken string, startParameter string, currency string,
-						prices []types.LabeledPrice) Message {
+						prices []types.LabeledPrice) (*Message, error) {
 	pricesStr, err := json.Marshal(prices)
 	if err != nil {
 		log.Println("Err in send_invoice")
@@ -28,11 +29,10 @@ func (b Bot) SendInvoice(chatId int, title string, description string, payload s
 
 	r := Get(b, "sendInvoice", v)
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return nil, errors.New(r.Description)
 	}
 
-	return b.ParseMessage(r.Result)
+	return b.ParseMessage(r.Result), nil
 
 }
 
