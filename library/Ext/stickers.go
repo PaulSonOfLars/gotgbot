@@ -10,9 +10,9 @@ import (
 
 // TODO: inputfile version
 // TODO: reply_markup version
-func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
+func (b Bot) SendStickerStr(chatId int, sticker string) Message {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker", sticker)
 
 	r := Get(b, "sendSticker", v)
@@ -25,11 +25,11 @@ func (b Bot) SendStickerStr(chat_id int, sticker string) Message {
 
 }
 
-func (b Bot) ReplyStickerStr(chat_id int, sticker string, reply_to_message_id int) Message {
+func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) Message {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker", sticker)
-	v.Add("reply_to_message_id", strconv.Itoa(reply_to_message_id))
+	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
 
 	r := Get(b, "sendSticker", v)
 	if !r.Ok {
@@ -64,12 +64,12 @@ func (b Bot) GetStickerSet(name string) Types.StickerSet {
 // TODO: contains mask + mask position version
 // TODO: InputFile version
 // TODO: check return
-func (b Bot) CreateNewStickerSetStr(user_id int, name string, title string, png_sticker string, emojis string) bool {
+func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngSticker string, emojis string) bool {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("name", name)
 	v.Add("title", title)
-	v.Add("png_sticker", png_sticker)
+	v.Add("png_sticker", pngSticker)
 	v.Add("emojis", emojis)
 
 	r := Get(b, "createNewStickerSet", v)
@@ -86,11 +86,11 @@ func (b Bot) CreateNewStickerSetStr(user_id int, name string, title string, png_
 
 // TODO: InputFile version
 // TODO: mask position version
-func (b Bot) AddStickerToSetStr(user_id int, name string, png_sticker string, emojis string) bool {
+func (b Bot) AddStickerToSetStr(userId int, name string, pngSticker string, emojis string) bool {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("name", name)
-	v.Add("png_sticker", png_sticker)
+	v.Add("png_sticker", pngSticker)
 	v.Add("emojis", emojis)
 
 	r := Get(b, "addStickerToSet", v)

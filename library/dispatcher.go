@@ -20,11 +20,11 @@ func NewDispatcher(bot Ext.Bot, updates chan Update) Dispatcher {
 
 func (d Dispatcher) Start() {
 	for upd := range d.updates {
-		d.process_update(upd)
+		d.processUpdate(upd)
 	}
 }
 
-func (d Dispatcher) process_update(update Update) {
+func (d Dispatcher) processUpdate(update Update) {
 	for _, handler := range *d.handlers {
 		if handler.CheckUpdate(update) {
 			handler.HandleUpdate(update, d)
@@ -33,7 +33,7 @@ func (d Dispatcher) process_update(update Update) {
 	}
 }
 
-func (d Dispatcher) Add_handler(handler Handler) {
+func (d Dispatcher) AddHandler(handler Handler) {
 	*d.handlers = append(*d.handlers, handler)
 
 }

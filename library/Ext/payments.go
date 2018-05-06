@@ -8,23 +8,23 @@ import (
 	"net/url"
 )
 // TODO: all the optionals here. Best option is probably to use a builder.
-func (b Bot) SendInvoice(chat_id int, title string, description string, payload string,
-						provider_token string, start_parameter string, currency string,
+func (b Bot) SendInvoice(chatId int, title string, description string, payload string,
+						providerToken string, startParameter string, currency string,
 						prices []Types.LabeledPrice) Message {
-	prices_str, err := json.Marshal(prices)
+	pricesStr, err := json.Marshal(prices)
 	if err != nil {
 		log.Println("Err in send_invoice")
 		log.Fatal(err)
 	}
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("title", title)
 	v.Add("description", description)
 	v.Add("payload", payload)
-	v.Add("provider_token", provider_token)
-	v.Add("start_parameter", start_parameter)
+	v.Add("provider_token", providerToken)
+	v.Add("start_parameter", startParameter)
 	v.Add("currency", currency)
-	v.Add("prices", string(prices_str))
+	v.Add("prices", string(pricesStr))
 
 	r := Get(b, "sendInvoice", v)
 	if !r.Ok {
@@ -38,9 +38,9 @@ func (b Bot) SendInvoice(chat_id int, title string, description string, payload 
 
 // TODO: shipping options
 // TODO: err_msg
-func (b Bot) AnswerShippingQuery(shipping_query_id string, ok bool) bool {
+func (b Bot) AnswerShippingQuery(shippingQueryId string, ok bool) bool {
 	v := url.Values{}
-	v.Add("shipping_query_id", shipping_query_id)
+	v.Add("shipping_query_id", shippingQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
 
 	r := Get(b, "answerShippingQuery", v)
@@ -55,9 +55,9 @@ func (b Bot) AnswerShippingQuery(shipping_query_id string, ok bool) bool {
 	return bb
 }
 
-func (b Bot) AnswerPreCheckoutQuery(pre_checkout_query_id string, ok bool) bool {
+func (b Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool) bool {
 	v := url.Values{}
-	v.Add("pre_checkout_query_id", pre_checkout_query_id)
+	v.Add("pre_checkout_query_id", preCheckoutQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
 
 	r := Get(b, "answerPreCheckoutQuery", v)

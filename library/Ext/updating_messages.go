@@ -10,10 +10,10 @@ import (
 
 // TODO: Check return type
 // TODO: set parsemode
-func (b Bot) EditMessageText(chat_id int, message_id int, text string) bool {
+func (b Bot) EditMessageText(chatId int, messageId int, text string) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("text", text)
 
 	r := Get(b, "editMessageText", v)
@@ -29,9 +29,9 @@ func (b Bot) EditMessageText(chat_id int, message_id int, text string) bool {
 
 // TODO: Check return type
 // TODO: set parsemode
-func (b Bot) EditMessageTextInline(inline_message_id string, text string) bool {
+func (b Bot) EditMessageTextInline(inlineMessageId string, text string) bool {
 	v := url.Values{}
-	v.Add("inline_message_id", inline_message_id)
+	v.Add("inline_message_id", inlineMessageId)
 	v.Add("text", text)
 
 	r := Get(b, "editMessageText", v)
@@ -46,10 +46,10 @@ func (b Bot) EditMessageTextInline(inline_message_id string, text string) bool {
 }
 
 // TODO: Check return type
-func (b Bot) EditMessageCaption(chat_id int, message_id int, caption string) bool {
+func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("caption", caption)
 
 	r := Get(b, "editMessageCaption", v)
@@ -64,9 +64,9 @@ func (b Bot) EditMessageCaption(chat_id int, message_id int, caption string) boo
 }
 
 // TODO: Check return type
-func (b Bot) EditMessageCaptionInline(inline_message_id string, caption string) bool {
+func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) bool {
 	v := url.Values{}
-	v.Add("inline_message_id", inline_message_id)
+	v.Add("inline_message_id", inlineMessageId)
 	v.Add("caption", caption)
 
 	r := Get(b, "editMessageCaption", v)
@@ -81,16 +81,16 @@ func (b Bot) EditMessageCaptionInline(inline_message_id string, caption string) 
 }
 
 // TODO: Check return
-func (b Bot) EditMessageReplyMarkup(chat_id int, message_id int, reply_markup Types.InlineKeyboardMarkup) bool {
-	markup_str, err := json.Marshal(reply_markup)
+func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup Types.InlineKeyboardMarkup) bool {
+	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
 		log.Println("could not unmarshal in editMessageReplyMarkup")
 		log.Fatal(err)
 	}
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
-	v.Add("reply_markup", string(markup_str))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
+	v.Add("reply_markup", string(markupStr))
 
 	r := Get(b, "editMessageReplyMarkup", v)
 	if !r.Ok {
@@ -104,15 +104,15 @@ func (b Bot) EditMessageReplyMarkup(chat_id int, message_id int, reply_markup Ty
 }
 
 // TODO: Check return
-func (b Bot) EditMessageReplyMarkupInline(inline_message_id string, reply_markup Types.InlineKeyboardMarkup) bool {
-	markup_str, err := json.Marshal(reply_markup)
+func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup Types.InlineKeyboardMarkup) bool {
+	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
 		log.Println("could not unmarshal in editMessageReplyMarkupInline")
 		log.Fatal(err)
 	}
 	v := url.Values{}
-	v.Add("inline_message_id", inline_message_id)
-	v.Add("reply_markup", string(markup_str))
+	v.Add("inline_message_id", inlineMessageId)
+	v.Add("reply_markup", string(markupStr))
 
 	r := Get(b, "editMessageReplyMarkup", v)
 	if !r.Ok {
@@ -126,10 +126,10 @@ func (b Bot) EditMessageReplyMarkupInline(inline_message_id string, reply_markup
 }
 
 // TODO: ensure not a private chat! cant delete in private chats.
-func (b Bot) DeleteMessage(chat_id int, message_id int) bool {
+func (b Bot) DeleteMessage(chatId int, messageId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 
 	r := Get(b, "deleteMessage", v)
 	if !r.Ok {

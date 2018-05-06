@@ -9,10 +9,10 @@ import (
 )
 
 // TODO: r.OK or unmarshal??
-func (b Bot) KickChatMember(chat_id int, user_id int) bool {
+func (b Bot) KickChatMember(chatId int, userId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "kickChatMember", v)
 	if !r.Ok {
@@ -24,10 +24,10 @@ func (b Bot) KickChatMember(chat_id int, user_id int) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) UnbanChatMember(chat_id int, user_id int) bool {
+func (b Bot) UnbanChatMember(chatId int, userId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "unbanChatMember", v)
 	if !r.Ok {
@@ -40,10 +40,10 @@ func (b Bot) UnbanChatMember(chat_id int, user_id int) bool {
 
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
-func (b Bot) RestrictChatMember(chat_id int, user_id int) bool {
+func (b Bot) RestrictChatMember(chatId int, userId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "restrictChatMember", v)
 	if !r.Ok {
@@ -56,10 +56,10 @@ func (b Bot) RestrictChatMember(chat_id int, user_id int) bool {
 
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
-func (b Bot) PromoteChatMember(chat_id int, user_id int) bool {
+func (b Bot) PromoteChatMember(chatId int, userId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "promoteChatMember", v)
 	if !r.Ok {
@@ -70,9 +70,9 @@ func (b Bot) PromoteChatMember(chat_id int, user_id int) bool {
 
 }
 
-func (b Bot) ExportChatLink(chat_id int) string {
+func (b Bot) ExportChatLink(chatId int) string {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "exportChatLink", v)
 	if !r.Ok {
@@ -88,9 +88,9 @@ func (b Bot) ExportChatLink(chat_id int) string {
 
 // TODO: figure out InputFiles
 // TODO: r.OK or unmarshal??
-//func (b Ext) SetChatPhoto(chat_id int, photo Types.InputFile) bool {
+//func (b Ext) SetChatPhoto(chatId int, photo Types.InputFile) bool {
 //	v := api_url.Values{}
-//	v.Add("chat_id", strconv.Itoa(chat_id))
+//	v.Add("chat_id", strconv.Itoa(chatId))
 //	v.Add("photo", photo)
 //
 //	r := Get(b, "setChatPhoto", v)
@@ -106,9 +106,9 @@ func (b Bot) ExportChatLink(chat_id int) string {
 //}
 
 // TODO: r.OK or unmarshal??
-func (b Bot) DeleteChatPhoto(chat_id int) bool {
+func (b Bot) DeleteChatPhoto(chatId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "deleteChatPhoto", v)
 	if !r.Ok {
@@ -123,9 +123,9 @@ func (b Bot) DeleteChatPhoto(chat_id int) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) SetChatTitle(chat_id int, title string) bool {
+func (b Bot) SetChatTitle(chatId int, title string) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("title", title)
 
 	r := Get(b, "setChatTitle", v)
@@ -140,9 +140,9 @@ func (b Bot) SetChatTitle(chat_id int, title string) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) SetChatDescription(chat_id int, description string) bool {
+func (b Bot) SetChatDescription(chatId int, description string) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("description", description)
 
 	r := Get(b, "setChatDescription", v)
@@ -157,10 +157,10 @@ func (b Bot) SetChatDescription(chat_id int, description string) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) PinChatMessage(chat_id int, message_id int) bool {
+func (b Bot) PinChatMessage(chatId int, messageId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 
 	r := Get(b, "pinChatMessage", v)
 	if !r.Ok {
@@ -174,9 +174,9 @@ func (b Bot) PinChatMessage(chat_id int, message_id int) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) UnpinChatMessage(chat_id int) bool {
+func (b Bot) UnpinChatMessage(chatId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "unpinChatMessage", v)
 	if !r.Ok {
@@ -190,9 +190,9 @@ func (b Bot) UnpinChatMessage(chat_id int) bool {
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) LeaveChat(chat_id int) bool {
+func (b Bot) LeaveChat(chatId int) bool {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "leaveChat", v)
 	if !r.Ok {
@@ -205,12 +205,13 @@ func (b Bot) LeaveChat(chat_id int) bool {
 	return bb
 }
 
-func (b Bot) GetChat(chat_id int) Types.Chat {
+func (b Bot) GetChat(chatId int) Types.Chat {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChat", v)
 	if !r.Ok {
+		log.Println(r)
 		log.Fatal("You done goofed, API Res for getChat was not OK")
 	}
 
@@ -220,9 +221,9 @@ func (b Bot) GetChat(chat_id int) Types.Chat {
 	return c
 }
 
-func (b Bot) GetChatAdministrators(chat_id int) []Types.ChatMember {
+func (b Bot) GetChatAdministrators(chatId int) []Types.ChatMember {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChatAdministrators", v)
 	if !r.Ok {
@@ -235,9 +236,9 @@ func (b Bot) GetChatAdministrators(chat_id int) []Types.ChatMember {
 	return cm
 }
 
-func (b Bot) GetChatMembersCount(chat_id int) int {
+func (b Bot) GetChatMembersCount(chatId int) int {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChatMembersCount", v)
 	if !r.Ok {
@@ -250,10 +251,10 @@ func (b Bot) GetChatMembersCount(chat_id int) int {
 	return c
 }
 
-func (b Bot) GetChatMember(chat_id int, user_id int) Types.ChatMember {
+func (b Bot) GetChatMember(chatId int, userId int) Types.ChatMember {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "getChatMember", v)
 	if !r.Ok {

@@ -23,12 +23,12 @@ func NewUpdater(token string) Updater {
 	return u
 }
 
-func (u Updater) Start_polling() {
+func (u Updater) StartPolling() {
 	go u.Dispatcher.Start()
-	go u.start_polling()
+	go u.startPolling()
 }
 
-func (u Updater) start_polling() {
+func (u Updater) startPolling() {
 	v := url.Values{}
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))

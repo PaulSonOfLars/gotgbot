@@ -10,10 +10,10 @@ import (
 
 // TODO: reply version
 // TODO: no notif version
-func (b Bot) SendGame(chat_id int, game_short_name string) Message {
+func (b Bot) SendGame(chatId int, gameShortName string) Message {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("game_short_name", game_short_name)
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("game_short_name", gameShortName)
 
 	r := Get(b, "sendGame", v)
 	if !r.Ok {
@@ -27,12 +27,12 @@ func (b Bot) SendGame(chat_id int, game_short_name string) Message {
 // TODO Check return - message or bool?
 // TODO: Force version
 // TODO: possible error
-func (b Bot) SetGameScore(user_id int, score int, chat_id int, message_id int) bool {
+func (b Bot) SetGameScore(userId int, score int, chatId int, messageId int) bool {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("score", strconv.Itoa(score))
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 
 	r := Get(b, "setGameScore", v)
 	if !r.Ok {
@@ -48,11 +48,11 @@ func (b Bot) SetGameScore(user_id int, score int, chat_id int, message_id int) b
 // TODO Check return - message or bool?
 // TODO: Force version
 // TODO: Possible error
-func (b Bot) SetGameScoreInline(user_id int, score int, inline_message_id string) bool {
+func (b Bot) SetGameScoreInline(userId int, score int, inlineMessageId string) bool {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("score", strconv.Itoa(score))
-	v.Add("inline_message_id", inline_message_id)
+	v.Add("inline_message_id", inlineMessageId)
 
 	r := Get(b, "setGameScore", v)
 	if !r.Ok {
@@ -65,11 +65,11 @@ func (b Bot) SetGameScoreInline(user_id int, score int, inline_message_id string
 	return bb
 }
 
-func (b Bot) GetGameHighScores(user_id int, chat_id int, message_id int) []Types.GameHighScore {
+func (b Bot) GetGameHighScores(userId int, chatId int, messageId int) []Types.GameHighScore {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
-	v.Add("chat_id", strconv.Itoa(chat_id))
-	v.Add("message_id", strconv.Itoa(message_id))
+	v.Add("user_id", strconv.Itoa(userId))
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 
 	r := Get(b, "getGameHighScores", v)
 	if !r.Ok {
@@ -82,10 +82,10 @@ func (b Bot) GetGameHighScores(user_id int, chat_id int, message_id int) []Types
 	return ghs
 }
 
-func (b Bot) GetGameHighScoresInline(user_id int, inline_message_id string) []Types.GameHighScore {
+func (b Bot) GetGameHighScoresInline(userId int, inlineMessageId string) []Types.GameHighScore {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
-	v.Add("inline_message_id", inline_message_id)
+	v.Add("user_id", strconv.Itoa(userId))
+	v.Add("inline_message_id", inlineMessageId)
 
 	r := Get(b, "getGameHighScores", v)
 	if !r.Ok {

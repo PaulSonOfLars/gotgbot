@@ -10,8 +10,8 @@ type Message struct {
 	bot Bot
 }
 
-func (b Bot) Message(chat_id int, text string) Message {
-	return Message{}
+func (b Bot) Message(chatId int, text string) Message {
+	return Message{bot: b}
 }
 
 func (b Bot) ParseMessage(message json.RawMessage) Message {
@@ -57,8 +57,8 @@ func (m Message) ReplyVideoStr(video string) Message {
 	return m.bot.ReplyVideoStr(m.Chat.Id, video, m.Message_id)
 }
 
-func (m Message) ReplyVideoNoteStr(video_note string) Message {
-	return m.bot.ReplyVideoNoteStr(m.Chat.Id, video_note, m.Message_id)
+func (m Message) ReplyVideoNoteStr(videoNote string) Message {
+	return m.bot.ReplyVideoNoteStr(m.Chat.Id, videoNote, m.Message_id)
 }
 
 func (m Message) ReplyVoiceStr(voice string) Message {
@@ -69,6 +69,6 @@ func (m Message) Delete() bool {
 	return m.bot.DeleteMessage(m.Chat.Id, m.Message_id)
 }
 
-func (m Message) Forward(chat_id int) Message {
-	return m.bot.ForwardMessage(chat_id, m.Chat.Id, m.Message_id)
+func (m Message) Forward(chatId int) Message {
+	return m.bot.ForwardMessage(chatId, m.Chat.Id, m.Message_id)
 }

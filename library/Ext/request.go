@@ -3,12 +3,11 @@ package Ext
 import (
 	"net/http"
 	"encoding/json"
-	"bot/library/Types"
 	"net/url"
 	"log"
 )
 
-var api_url = "https://api.telegram.org/bot"
+var apiUrl = "https://api.telegram.org/bot"
 
 var client = &http.Client{}
 
@@ -17,16 +16,8 @@ type Response struct {
 	Result json.RawMessage
 }
 
-type Result struct {
-	Message_id int
-	From       *Types.User
-	Chat       *Types.Chat
-	Date       int
-	Text       string
-}
-
 func Get(bot Bot, method string, params url.Values) Response {
-	req, err := http.NewRequest("GET", api_url + bot.Token + "/" + method, nil)
+	req, err := http.NewRequest("GET", apiUrl+ bot.Token + "/" + method, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
