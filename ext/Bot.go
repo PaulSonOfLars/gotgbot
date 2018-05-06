@@ -28,9 +28,9 @@ func (b Bot) GetMe() types.User {
 
 }
 
-func (b Bot) GetUserProfilePhotos(user_id int) types.UserProfilePhotos {
+func (b Bot) GetUserProfilePhotos(userId int) types.UserProfilePhotos {
 	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(user_id))
+	v.Add("user_id", strconv.Itoa(userId))
 
 
 	r := Get(b, "getUserProfilePhotos", v)
@@ -46,9 +46,9 @@ func (b Bot) GetUserProfilePhotos(user_id int) types.UserProfilePhotos {
 }
 
 
-func (b Bot) GetFile(file_id string) types.File {
+func (b Bot) GetFile(fileId string) types.File {
 	v := url.Values{}
-	v.Add("file_id", file_id)
+	v.Add("file_id", fileId)
 
 	r := Get(b, "getFile", v)
 	if !r.Ok {
@@ -63,9 +63,9 @@ func (b Bot) GetFile(file_id string) types.File {
 
 // TODO: options here
 // TODO: r.OK or unmarshal??
-func (b Bot) AnswerCallbackQuery(callback_query_id string) bool {
+func (b Bot) AnswerCallbackQuery(callbackQueryId string) bool {
 	v := url.Values{}
-	v.Add("callback_query_id", callback_query_id)
+	v.Add("callback_query_id", callbackQueryId)
 
 	r := Get(b, "answerCallbackQuery", v)
 	if !r.Ok {

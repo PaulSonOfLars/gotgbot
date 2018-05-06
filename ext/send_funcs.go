@@ -15,7 +15,7 @@ func (b Bot) SendMessage(chatId int, text string) (*Message, error) {
 
 func (b Bot) ReplyMessage(chatId int, text string, replyToMessageId int) (*Message, error) {
 	newMsg := b.NewSendableMessage(chatId, text)
-	newMsg.ReplyToMsgId(replyToMessageId)
+	newMsg.ReplyToMessageId = replyToMessageId
 	return newMsg.Send()
 }
 

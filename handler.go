@@ -11,17 +11,17 @@ type Handler interface {
 }
 
 type Update struct {
-	Update_id            int
-	Message              *types.Message
-	Edited_message       *types.Message
-	Channel_post         *types.Message
-	Edited_channel_post  *types.Message
-	Inline_query         *types.Message
-	Chosen_inline_result *types.ChosenInlineResult
-	Callback_query       *types.CallbackQuery
-	Shipping_query       *types.ShippingQuery
-	Pre_checkout_query   *types.PreCheckoutQuery
+	UpdateId           int                       `json:"update_id"`
+	Message            *types.Message            `json:"message"`
+	EditedMessage      *types.Message            `json:"edited_message"`
+	ChannelPost        *types.Message            `json:"channel_post"`
+	EditedChannelPost  *types.Message            `json:"edited_channel_post"`
+	InlineQuery        *types.Message            `json:"inline_query"`
+	ChosenInlineResult *types.ChosenInlineResult `json:"chosen_inline_result"`
+	CallbackQuery      *types.CallbackQuery      `json:"callback_query"`
+	ShippingQuery      *types.ShippingQuery      `json:"shipping_query"`
+	PreCheckoutQuery   *types.PreCheckoutQuery   `json:"pre_checkout_query"`
 
 	// Self added type
-	Effective_message *ext.Message
+	EffectiveMessage *ext.Message `json:"effective_message"`
 }

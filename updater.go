@@ -45,25 +45,25 @@ func (u Updater) startPolling() {
 			json.Unmarshal(r.Result, &res)
 			for _, upd := range res {
 				if upd.Message != nil {
-					upd.Effective_message = u.bot.NewMessage(upd.Message)
+					upd.EffectiveMessage = u.bot.NewMessage(upd.Message)
 					//&ext.Message{Message: *upd.Message, Bot: u.gobot}
-				} else if upd.Edited_message != nil {
-					upd.Effective_message = u.bot.NewMessage(upd.Edited_message)
+				} else if upd.EditedMessage != nil {
+					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedMessage)
 
-				} else if upd.Channel_post != nil {
-					upd.Effective_message = u.bot.NewMessage(upd.Channel_post)
+				} else if upd.ChannelPost != nil {
+					upd.EffectiveMessage = u.bot.NewMessage(upd.ChannelPost)
 
-				} else if upd.Edited_channel_post != nil {
-					upd.Effective_message = u.bot.NewMessage(upd.Edited_channel_post)
+				} else if upd.EditedChannelPost != nil {
+					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedChannelPost)
 
-				} else if upd.Inline_query != nil {
-					upd.Effective_message = u.bot.NewMessage(upd.Inline_query)
+				} else if upd.InlineQuery != nil {
+					upd.EffectiveMessage = u.bot.NewMessage(upd.InlineQuery)
 
 				}
 				u.updates <- upd
 			}
 			if len(res) > 0 {
-				offset = res[len(res)-1].Update_id + 1
+				offset = res[len(res)-1].UpdateId + 1
 			}
 		}
 
