@@ -44,17 +44,21 @@ func (u Updater) startPolling() {
 			var res []Update
 			json.Unmarshal(r.Result, &res)
 			for _, upd := range res {
-				switch upd.Message {
-				case upd.Message:
+				if upd.Message != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Message)
-				case upd.Edited_message:
+					//&ext.Message{Message: *upd.Message, Bot: u.gobot}
+				} else if upd.Edited_message != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Edited_message)
-				case upd.Channel_post:
+
+				} else if upd.Channel_post != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Channel_post)
-				case upd.Edited_channel_post:
+
+				} else if upd.Edited_channel_post != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Edited_channel_post)
-				case upd.Inline_query:
+
+				} else if upd.Inline_query != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Inline_query)
+
 				}
 				u.updates <- upd
 			}

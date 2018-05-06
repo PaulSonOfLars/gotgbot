@@ -133,6 +133,8 @@ func (b Bot) DeleteMessage(chatId int, messageId int) bool {
 
 	r := Get(b, "deleteMessage", v)
 	if !r.Ok {
+		log.Println(r.ErrorCode)
+		log.Println(r.Description)
 		log.Fatal("You done goofed, API Res for deleteMessage was not OK")
 	}
 
