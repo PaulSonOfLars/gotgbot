@@ -21,7 +21,7 @@ func Command(message *types.Message) bool {
 
 
 func Reply(message *types.Message) bool {
-	return message.Reply_to_message != nil
+	return message.ReplyToMessage != nil
 }
 
 
@@ -58,7 +58,7 @@ func Venue(message *types.Message) bool {
 }
 
 func Forwarded(message *types.Message) bool {
-	return message.Forward_date != 0
+	return message.ForwardDate != 0
 }
 
 func Game(message *types.Message) bool {

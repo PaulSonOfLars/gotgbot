@@ -1,48 +1,48 @@
 package types
 
 type ReplyKeyboardMarkup struct {
-	Keyboard          [][]KeyboardButton
-	Resize_keyboard   bool
-	One_time_keyboard bool
-	Selective         bool
+	Keyboard        [][]KeyboardButton `json:"keyboard"`
+	ResizeKeyboard  bool               `json:"resize_keyboard"`
+	OneTimeKeyboard bool               `json:"one_time_keyboard"`
+	Selective       bool               `json:"selective"`
 }
 
 type KeyboardButton struct {
-	Text             string
-	Request_contact  bool
-	Request_location bool
+	Text            string `json:"text"`
+	RequestContact  bool   `json:"request_contact"`
+	RequestLocation bool   `json:"request_location"`
 }
 
 type ReplyKeyboardRemove struct {
-	Remove_keyboard bool
-	Selective       bool
+	RemoveKeyboard bool `json:"remove_keyboard"`
+	Selective      bool `json:"selective"`
 }
 
 type InlineKeyboardMarkup struct {
-	Inline_keyboard [][]InlineKeyboardButton
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
 }
 
 type InlineKeyboardButton struct {
-	Text                             string
-	Url                              string
-	Callback_data                    string
-	Switch_inline_query              string
-	Switch_inline_query_current_chat string
+	Text                         string `json:"text"`
+	Url                          string `json:"url"`
+	CallbackData                 string `json:"callback_data"`
+	SwitchInlineQuery            string `json:"switch_inline_query"`
+	SwitchInlineQueryCurrentChat string `json:"switch_inline_query_current_chat"`
 	//Callback_game                    *CallbackGame
-	Pay                              bool
+	Pay bool `json:"pay"`
 }
 
 type CallbackQuery struct {
-	Id                string
-	From              *User
-	Message           *Message
-	Inline_message_id string
-	Chat_instance     string
-	Data              string
-	Game_short_name   string
+	Id              string   `json:"id"`
+	From            *User    `json:"from"`
+	Message         *Message `json:"message"`
+	InlineMessageId string   `json:"inline_message_id"`
+	ChatInstance    string   `json:"chat_instance"`
+	Data            string   `json:"data"`
+	GameShortName   string   `json:"game_short_name"`
 }
 
 type ForceReply struct {
-	ForceReply bool
-	Selective  bool
+	ForceReply bool `json:"force_reply"`
+	Selective  bool `json:"selective"`
 }

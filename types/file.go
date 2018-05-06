@@ -1,8 +1,7 @@
 package types
 
 type File struct {
-	File_id   string
-	File_size int
-	File_path string
+	FileId   string `json:"file_id"`
+	FileSize int    `json:"file_size"`
+	FilePath string `json:"file_path"`
 }
-

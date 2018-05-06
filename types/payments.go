@@ -1,54 +1,53 @@
 package types
 
-
 type Invoice struct {
-	Title           string
-	Description     string
-	Start_parameter string
-	Currency        string
-	Total_amount    int
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	StartParameter string `json:"start_parameter"`
+	Currency       string `json:"currency"`
+	TotalAmount    int    `json:"total_amount"`
 }
 
 type LabeledPrice struct {
-	Label  string
-	Amount int
+	Label  string `json:"label"`
+	Amount int    `json:"amount"`
 }
 
 type ShippingAddress struct {
-	Country_code string
-	State        string
-	City         string
-	Street_line1 string
-	Street_line2 string
-	Post_code    string
+	CountryCode string `json:"country_code"`
+	State       string `json:"state"`
+	City        string `json:"city"`
+	StreetLine1 string `json:"street_line1"`
+	StreetLine2 string `json:"street_line2"`
+	PostCode    string `json:"post_code"`
 }
 
 type OrderInfo struct {
-	Name             string
-	Phone_number     string
-	Email            string
-	Shipping_address ShippingAddress
+	Name            string          `json:"name"`
+	PhoneNumber     string          `json:"phone_number"`
+	Email           string          `json:"email"`
+	ShippingAddress ShippingAddress `json:"shipping_address"`
 }
 
 type ShippingOption struct {
-	Id     string
-	Title  string
-	Prices []LabeledPrice
+	Id     string         `json:"id"`
+	Title  string         `json:"title"`
+	Prices []LabeledPrice `json:"prices"`
 }
 
 type SuccessfulPayment struct {
-	Currency                   string
-	Total_amount               int
-	Invoice_payload            string
-	Shipping_option_id         string
-	Order_info                 OrderInfo
-	Telegram_payment_charge_id string
-	Provider_payment_charge_id string
+	Currency                string    `json:"currency"`
+	TotalAmount             int       `json:"total_amount"`
+	InvoicePayload          string    `json:"invoice_payload"`
+	ShippingOptionId        string    `json:"shipping_option_id"`
+	OrderInfo               OrderInfo `json:"order_info"`
+	TelegramPaymentChargeId string    `json:"telegram_payment_charge_id"`
+	ProviderPaymentChargeId string    `json:"provider_payment_charge_id"`
 }
 
 type ShippingQuery struct {
-	Id               string
-	From             User
-	Invoice_payload  string
-	Shipping_address ShippingAddress
+	Id              string          `json:"id"`
+	From            User            `json:"from"`
+	InvoicePayload  string          `json:"invoice_payload"`
+	ShippingAddress ShippingAddress `json:"shipping_address"`
 }

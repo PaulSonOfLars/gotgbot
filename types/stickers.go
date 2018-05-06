@@ -1,27 +1,26 @@
 package types
 
 type Sticker struct {
-	File_id       string
-	Width         int
-	Height        int
-	Thumb         PhotoSize
-	Emoji         string
-	Set_name      string
-	Mask_position MaskPosition
-	File_size     int
+	FileId       string       `json:"file_id"`
+	Width        int          `json:"width"`
+	Height       int          `json:"height"`
+	Thumb        PhotoSize    `json:"thumb"`
+	Emoji        string       `json:"emoji"`
+	SetName      string       `json:"set_name"`
+	MaskPosition MaskPosition `json:"mask_position"`
+	FileSize     int          `json:"file_size"`
 }
 
 type StickerSet struct {
-	Name           string
-	Title          string
-	Contains_masks bool
-	Stickers       []Sticker
+	Name          string    `json:"name"`
+	Title         string    `json:"title"`
+	ContainsMasks bool      `json:"contains_masks"`
+	Stickers      []Sticker `json:"stickers"`
 }
 
 type MaskPosition struct {
-	Point   string
-	X_shift float64
-	Y_shift float64
-	Scale   float64
+	Point  string  `json:"point"`
+	XShift float64 `json:"x_shift"`
+	YShift float64 `json:"y_shift"`
+	Scale  float64 `json:"scale"`
 }
-

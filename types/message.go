@@ -1,133 +1,130 @@
 package types
 
 type MessageEntity struct {
-	Type   string
-	Offset int
-	Length int
-	Url    string
-	User   User
+	Type   string `json:"type"`
+	Offset int    `json:"offset"`
+	Length int    `json:"length"`
+	Url    string `json:"url"`
+	User   User   `json:"user"`
 }
 
 type Audio struct {
-	File_id   string
-	Duration  int
-	Performer string
-	Title     string
-	Mime_type string
-	File_size int
+	FileId    string `json:"file_id"`
+	Duration  int    `json:"duration"`
+	Performer string `json:"performer"`
+	Title     string `json:"title"`
+	MimeType  string `json:"mime_type"`
+	FileSize  int    `json:"file_size"`
 }
 
 type Document struct {
-	File_id   string
-	Thumb     PhotoSize
-	File_name string
-	Mime_type string
-	File_size int
+	FileId   string    `json:"file_id"`
+	Thumb    PhotoSize `json:"thumb"`
+	FileName string    `json:"file_name"`
+	MimeType string    `json:"mime_type"`
+	FileSize int       `json:"file_size"`
 }
 
 type PhotoSize struct {
-	File_id   string
-	Width     int
-	Height    int
-	File_size int
-
+	FileId   string `json:"file_id"`
+	Width    int    `json:"width"`
+	Height   int    `json:"height"`
+	FileSize int    `json:"file_size"`
 }
 
 type Video struct {
-	File_id   string
-	Width     int
-	Height    int
-	Duration  int
-	Thumb     PhotoSize
-	Mime_type string
-	File_size int
+	FileId   string    `json:"file_id"`
+	Width    int       `json:"width"`
+	Height   int       `json:"height"`
+	Duration int       `json:"duration"`
+	Thumb    PhotoSize `json:"thumb"`
+	MimeType string    `json:"mime_type"`
+	FileSize int       `json:"file_size"`
 }
 
 type Voice struct {
-	File_id   string
-	Duration  int
-	Mime_type string
-	File_size int
+	FileId   string `json:"file_id"`
+	Duration int    `json:"duration"`
+	MimeType string `json:"mime_type"`
+	FileSize int    `json:"file_size"`
 }
 
 type VideoNote struct {
-	File_id   string
-	Length    int
-	Duration  int
-	Thumb     PhotoSize
-	File_size int
+	FileId   string    `json:"file_id"`
+	Length   int       `json:"length"`
+	Duration int       `json:"duration"`
+	Thumb    PhotoSize `json:"thumb"`
+	FileSize int       `json:"file_size"`
 }
 
 type Contact struct {
-	Phone_number string
-	First_name   string
-	Last_name    string
-	User_id      int
+	PhoneNumber string `json:"phone_number"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	UserId      int    `json:"user_id"`
 }
 
 type Location struct {
-	Longitude float64
-	Latitude  float64
-
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
 }
 
 type Venue struct {
-	Location      Location
-	Title         string
-	Address       string
-	Foursquare_id string
-
+	Location     Location `json:"location"`
+	Title        string   `json:"title"`
+	Address      string   `json:"address"`
+	FoursquareId string   `json:"foursquare_id"`
 }
 
 type PreCheckoutQuery struct {
-	Id                 string
-	From               User
-	Currency           string
-	Total_amount       int
-	Invoice_payload    string
-	Shipping_option_id string
-	Order_info         OrderInfo
+	Id               string    `json:"id"`
+	From             User      `json:"from"`
+	Currency         string    `json:"currency"`
+	TotalAmount      int       `json:"total_amount"`
+	InvoicePayload   string    `json:"invoice_payload"`
+	ShippingOptionId string    `json:"shipping_option_id"`
+	OrderInfo        OrderInfo `json:"order_info"`
 }
 
 type Message struct {
-	Message_id              int
-	From                    *User
-	Date                    int
-	Chat                    *Chat
-	Forward_from            *User
-	Forward_from_chat       *Chat
-	Forward_from_message_id int
-	Forward_signature       string
-	Forward_date            int
-	Reply_to_message        *Message
-	Edit_date               int
-	Author_signature        string
-	Text                    string
-	Entities                []MessageEntity
-	Audio                   *Audio
-	Document                *Document
-	Game                    *Game
-	Photo                   *PhotoSize
-	Sticker                 *Sticker
-	Video                   *Video
-	Voice                   *Voice
-	Video_note              *VideoNote
-	New_chat_members        []User
-	Caption                 string
-	Contact                 *Contact
-	Location                *Location
-	Venue                   *Venue
-	New_chat_member         *User
-	Left_chat_member        *User
-	New_chat_title          string
-	New_chat_phot           []PhotoSize
-	Delete_chat_photo       bool
-	Group_chat_created      bool
-	Supergroup_chat_created bool
-	Channel_chat_created    bool
-	Migrate_to_chat_id      int
-	Migrate_from_chat_id    int
-	Pinned_message          *Message
-	Invoice                 *Invoice
-	Successful_payment      *SuccessfulPayment
+	MessageId             int                `json:"message_id"`
+	From                  *User              `json:"from"`
+	Date                  int                `json:"date"`
+	Chat                  *Chat              `json:"chat"`
+	ForwardFrom           *User              `json:"forward_from"`
+	ForwardFromChat       *Chat              `json:"forward_from_chat"`
+	ForwardFromMessageId  int                `json:"forward_from_message_id"`
+	ForwardSignature      string             `json:"forward_signature"`
+	ForwardDate           int                `json:"forward_date"`
+	ReplyToMessage        *Message           `json:"reply_to_message"`
+	EditDate              int                `json:"edit_date"`
+	AuthorSignature       string             `json:"author_signature"`
+	Text                  string             `json:"text"`
+	Entities              []MessageEntity    `json:"entities"`
+	Audio                 *Audio             `json:"audio"`
+	Document              *Document          `json:"document"`
+	Game                  *Game              `json:"game"`
+	Photo                 *PhotoSize         `json:"photo"`
+	Sticker               *Sticker           `json:"sticker"`
+	Video                 *Video             `json:"video"`
+	Voice                 *Voice             `json:"voice"`
+	VideoNote             *VideoNote         `json:"video_note"`
+	NewChatMembers        []User             `json:"new_chat_members"`
+	Caption               string             `json:"caption"`
+	Contact               *Contact           `json:"contact"`
+	Location              *Location          `json:"location"`
+	Venue                 *Venue             `json:"venue"`
+	NewChatMember         *User              `json:"new_chat_member"`
+	LeftChatMember        *User              `json:"left_chat_member"`
+	NewChatTitle          string             `json:"new_chat_title"`
+	NewChatPhot           []PhotoSize        `json:"new_chat_phot"`
+	DeleteChatPhoto       bool               `json:"delete_chat_photo"`
+	GroupChatCreated      bool               `json:"group_chat_created"`
+	SupergroupChatCreated bool               `json:"supergroup_chat_created"`
+	ChannelChatCreated    bool               `json:"channel_chat_created"`
+	MigrateToChatId       int                `json:"migrate_to_chat_id"`
+	MigrateFromChatId     int                `json:"migrate_from_chat_id"`
+	PinnedMessage         *Message           `json:"pinned_message"`
+	Invoice               *Invoice           `json:"invoice"`
+	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
 }

@@ -1,6 +1,6 @@
 package types
 
 type ResponseParameters struct {
-	Migrate_to_chat_id int
-	Retry_after        int
+	MigrateToChatId int `json:"migrate_to_chat_id"`
+	RetryAfter      int `json:"retry_after"`
 }
