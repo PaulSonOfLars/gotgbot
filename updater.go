@@ -1,8 +1,8 @@
 package gotgbot
 
 import (
-	"gotgbot/ext"
 	"encoding/json"
+	"gotgbot/ext"
 	"log"
 	"net/url"
 	"strconv"

@@ -8,11 +8,6 @@ import (
 	"log"
 )
 
-const (
-	Markdown = "Markdown"
-	Html     = "HTML"
-)
-
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{bot: b, ChatId: chatId, Text: text}
 }
