@@ -188,8 +188,7 @@ func (b Bot) replyContact(chatId int, phoneNumber string, firstName string, repl
 	return contactMsg.Send()
 }
 
-// TODO: r.OK or unmarshal??
-func (b Bot) SendChatAction(chatId int, action string) (*Message, error) {
+func (b Bot) SendChatAction(chatId int, action string) (bool, error) {
 	contactMsg := b.NewSendableChatAction(chatId)
 	contactMsg.action = action
 	return contactMsg.Send()

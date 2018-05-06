@@ -478,7 +478,7 @@ type sendableChatAction struct {
 	action string
 }
 
-func (msg *sendableChatAction) Send() (*Message, error) {
+func (msg *sendableChatAction) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("action", msg.action)
@@ -486,10 +486,9 @@ func (msg *sendableChatAction) Send() (*Message, error) {
 	r := Get(msg.bot, "sendChatAction", v)
 
 	if !r.Ok {
-		return nil, errors.New(r.Description)
+		return false, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	var newMsg bool
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
