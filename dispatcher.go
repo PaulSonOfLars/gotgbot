@@ -1,7 +1,7 @@
-package library
+package gotgbot
 
 import (
-	"bot/library/Ext"
+	"gotgbot/Ext"
 )
 
 type Dispatcher struct {

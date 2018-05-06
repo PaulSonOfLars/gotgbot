@@ -1,7 +1,7 @@
-package library
+package gotgbot
 
 import (
-	"bot/library/Ext"
+	"gotgbot/Ext"
 	"encoding/json"
 	"log"
 	"net/url"
@@ -35,6 +35,7 @@ func (u Updater) startPolling() {
 	for {
 		r := Ext.Get(u.bot, "getUpdates", v)
 		if !r.Ok {
+			log.Println(r)
 			log.Fatal("You done goofed, API Res for getUpdates was not OK")
 
 		}
@@ -46,7 +47,7 @@ func (u Updater) startPolling() {
 			for _, upd := range res {
 				if upd.Message != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Message)
-					//&Ext.Message{Message: *upd.Message, Bot: u.bot}
+					//&Ext.Message{Message: *upd.Message, Bot: u.gobot}
 				} else if upd.Edited_message != nil {
 					upd.Effective_message = u.bot.NewMessage(upd.Edited_message)
 

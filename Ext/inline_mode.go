@@ -1,7 +1,7 @@
 package Ext
 
 import (
-	"bot/library/Types"
+	"gotgbot/Types"
 	"encoding/json"
 	"log"
 	"net/url"

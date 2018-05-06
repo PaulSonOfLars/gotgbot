@@ -1,31 +1,31 @@
 package Handlers
 
 import (
-	"bot/library"
-	"bot/library/Ext"
-	"bot/library/Types"
+	"gotgbot/Ext"
+	"gotgbot/Types"
+	"gotgbot"
 )
 
 
 type Message struct {
 	filterFunc func(message *Types.Message) bool
-	response   func(b Ext.Bot, u library.Update)
+	response   func(b Ext.Bot, u gotgbot.Update)
 
 }
 
 func NewMessage(filterFunc func(message *Types.Message) bool,
-				response func(b Ext.Bot, u library.Update)) Message {
+				response func(b Ext.Bot, u gotgbot.Update)) Message {
 	h := Message{}
 	h.filterFunc = filterFunc
 	h.response = response
 	return h
 }
 
-func (h Message) HandleUpdate(update library.Update, d library.Dispatcher) {
+func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 	go h.response(d.Bot, update)
 
 }
 
-func (h Message) CheckUpdate(update library.Update) bool {
+func (h Message) CheckUpdate(update gotgbot.Update) bool {
 	return update.Message != nil && h.filterFunc(update.Message)
 }

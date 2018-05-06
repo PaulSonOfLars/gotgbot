@@ -2,7 +2,7 @@ package Ext
 
 import (
 	"log"
-	"bot/library/Types"
+	"gotgbot/Types"
 	"encoding/json"
 	"strconv"
 	"net/url"

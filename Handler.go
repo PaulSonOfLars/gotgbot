@@ -1,8 +1,8 @@
-package library
+package gotgbot
 
 import (
-	"bot/library/Ext"
-	"bot/library/Types"
+	"gotgbot/Ext"
+	"gotgbot/Types"
 )
 
 type Handler interface {

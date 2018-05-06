@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"log"
 	"encoding/json"
-	"bot/library/Types"
+	"gotgbot/Types"
 	"net/url"
 )
 
