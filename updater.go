@@ -1,7 +1,7 @@
 package gotgbot
 
 import (
-	"gotgbot/Ext"
+	"gotgbot/ext"
 	"encoding/json"
 	"log"
 	"net/url"
@@ -10,14 +10,14 @@ import (
 )
 
 type Updater struct {
-	bot        Ext.Bot
+	bot        ext.Bot
 	updates    chan Update
 	Dispatcher Dispatcher
 }
 
 func NewUpdater(token string) Updater {
 	u := Updater{}
-	u.bot = Ext.Bot{Token: token}
+	u.bot = ext.Bot{Token: token}
 	u.updates = make(chan Update)
 	u.Dispatcher = NewDispatcher(u.bot, u.updates)
 	return u
@@ -33,11 +33,10 @@ func (u Updater) startPolling() {
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))
 	for {
-		r := Ext.Get(u.bot, "getUpdates", v)
+		r := ext.Get(u.bot, "getUpdates", v)
 		if !r.Ok {
 			log.Println(r)
 			log.Fatal("You done goofed, API Res for getUpdates was not OK")
-
 		}
 		offset := 0
 		if r.Result != nil {
@@ -45,21 +44,17 @@ func (u Updater) startPolling() {
 			var res []Update
 			json.Unmarshal(r.Result, &res)
 			for _, upd := range res {
-				if upd.Message != nil {
+				switch upd.Message {
+				case upd.Message:
 					upd.Effective_message = u.bot.NewMessage(upd.Message)
-					//&Ext.Message{Message: *upd.Message, Bot: u.gobot}
-				} else if upd.Edited_message != nil {
+				case upd.Edited_message:
 					upd.Effective_message = u.bot.NewMessage(upd.Edited_message)
-
-				} else if upd.Channel_post != nil {
+				case upd.Channel_post:
 					upd.Effective_message = u.bot.NewMessage(upd.Channel_post)
-
-				} else if upd.Edited_channel_post != nil {
+				case upd.Edited_channel_post:
 					upd.Effective_message = u.bot.NewMessage(upd.Edited_channel_post)
-
-				} else if upd.Inline_query != nil {
+				case upd.Inline_query:
 					upd.Effective_message = u.bot.NewMessage(upd.Inline_query)
-
 				}
 				u.updates <- upd
 			}
@@ -69,7 +64,6 @@ func (u Updater) startPolling() {
 		}
 
 		v.Set("offset", strconv.Itoa(offset))
-
 	}
 }
 

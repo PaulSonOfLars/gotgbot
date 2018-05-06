@@ -1,16 +1,16 @@
 package gotgbot
 
 import (
-	"gotgbot/Ext"
+	"gotgbot/ext"
 )
 
 type Dispatcher struct {
-	Bot      Ext.Bot
+	Bot      ext.Bot
 	updates  chan Update
 	handlers *[]Handler
 }
 
-func NewDispatcher(bot Ext.Bot, updates chan Update) Dispatcher {
+func NewDispatcher(bot ext.Bot, updates chan Update) Dispatcher {
 	d := Dispatcher{}
 	d.Bot = bot
 	d.updates = updates
