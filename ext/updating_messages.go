@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"gotgbot/types"
 	"net/url"
+	"github.com/pkg/errors"
 )
 
 // TODO: Check return type
@@ -126,7 +127,7 @@ func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup ty
 }
 
 // TODO: ensure not a private chat! cant delete in private chats.
-func (b Bot) DeleteMessage(chatId int, messageId int) bool {
+func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error){
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
@@ -135,11 +136,12 @@ func (b Bot) DeleteMessage(chatId int, messageId int) bool {
 	if !r.Ok {
 		log.Println(r.ErrorCode)
 		log.Println(r.Description)
-		log.Fatal("You done goofed, API Res for deleteMessage was not OK")
+		//log.Fatal("You done goofed, API Res for deleteMessage was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }

@@ -1,5 +1,7 @@
 package ext
 
+import "gotgbot/types"
+
 type Sendable interface {
-	send()
+	send() (*types.Message, error)
 }

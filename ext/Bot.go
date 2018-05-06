@@ -77,3 +77,7 @@ func (b Bot) AnswerCallbackQuery(callback_query_id string) bool {
 
 	return bb
 }
+
+func (b Bot) Send(msg Sendable) (*types.Message, error) {
+	return msg.send()
+}

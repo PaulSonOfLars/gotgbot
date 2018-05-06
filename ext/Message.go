@@ -65,7 +65,7 @@ func (m Message) ReplyVoiceStr(voice string) Message {
 	return m.bot.ReplyVoiceStr(m.Chat.Id, voice, m.Message_id)
 }
 
-func (m Message) Delete() bool {
+func (m Message) Delete() (bool, error) {
 	return m.bot.DeleteMessage(m.Chat.Id, m.Message_id)
 }
 
