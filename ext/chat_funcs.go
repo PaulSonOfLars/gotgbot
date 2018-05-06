@@ -1,268 +1,291 @@
 package ext
 
 import (
-	"log"
 	"gotgbot/types"
 	"encoding/json"
 	"strconv"
 	"net/url"
+	"github.com/pkg/errors"
 )
 
 // TODO: r.OK or unmarshal??
-func (b Bot) KickChatMember(chatId int, userId int) bool {
+func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "kickChatMember", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for kickChatMember was not OK")
+		return false, errors.New(r.Description)
 	}
 
-	return r.Ok
-
+	return r.Ok, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) UnbanChatMember(chatId int, userId int) bool {
+func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "unbanChatMember", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for unbanChatMember was not OK")
+		return false, errors.New(r.Description)
 	}
 
-	return r.Ok
-
+	return r.Ok, nil
 }
 
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
-func (b Bot) RestrictChatMember(chatId int, userId int) bool {
+func (b Bot) RestrictChatMember(chatId int, userId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "restrictChatMember", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for restrictChatMember was not OK")
+		return false, errors.New(r.Description)
 	}
 
-	return r.Ok
-
+	return r.Ok, nil
 }
 
 // TODO: Add a nice way for all the methods
 // TODO: r.OK or unmarshal??
-func (b Bot) PromoteChatMember(chatId int, userId int) bool {
+func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "promoteChatMember", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for promoteChatMember was not OK")
+		return false, errors.New(r.Description)
 	}
 
-	return r.Ok
-
+	return r.Ok, nil
 }
 
-func (b Bot) ExportChatLink(chatId int) string {
+func (b Bot) ExportChatLink(chatId int) (string, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "exportChatLink", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for exportChatLink was not OK")
+		return "", errors.New(r.Description)
 	}
 
 	var s string
 	json.Unmarshal(r.Result, &s)
 
-	return s
-
+	return s, nil
 }
 
 // TODO: figure out InputFiles
 // TODO: r.OK or unmarshal??
-//func (b ext) SetChatPhoto(chatId int, photo types.InputFile) bool {
+//func (b ext) SetChatPhoto(chatId int, photo types.InputFile) (bool, error) {
 //	v := api_url.Values{}
 //	v.Add("chat_id", strconv.Itoa(chatId))
 //	v.Add("photo", photo)
 //
 //	r := Get(b, "setChatPhoto", v)
 //	if !r.Ok {
-//		log.Fatal("You done goofed, API Res for setChatPhoto was not OK")
+//		return false, errors.New(r.Description)
 //	}
 //
 //	var bb bool
 //	json.Unmarshal(r.Result, &bb)
 //
-//	return bb
-//
+//	return bb, nil
 //}
 
 // TODO: r.OK or unmarshal??
-func (b Bot) DeleteChatPhoto(chatId int) bool {
+func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "deleteChatPhoto", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for deleteChatPhoto was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
-
+	return bb, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) SetChatTitle(chatId int, title string) bool {
+func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("title", title)
 
 	r := Get(b, "setChatTitle", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for setChatTitle was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) SetChatDescription(chatId int, description string) bool {
+func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("description", description)
 
 	r := Get(b, "setChatDescription", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for setChatDescription was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) PinChatMessage(chatId int, messageId int) bool {
+func (b Bot) PinChatMessage(chatId int, messageId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
 	r := Get(b, "pinChatMessage", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for pinChatMessage was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) UnpinChatMessage(chatId int) bool {
+func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "unpinChatMessage", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for unpinChatMessage was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }
 
 // TODO: r.OK or unmarshal??
-func (b Bot) LeaveChat(chatId int) bool {
+func (b Bot) LeaveChat(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "leaveChat", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for leaveChat was not OK")
+		return false, errors.New(r.Description)
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
 
-	return bb
+	return bb, nil
 }
 
-func (b Bot) GetChat(chatId int) types.Chat {
+func (b Bot) GetChat(chatId int) (*Chat, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChat", v)
 	if !r.Ok {
-		log.Println(r)
-		log.Fatal("You done goofed, API Res for getChat was not OK")
+		return nil, errors.New(r.Description)
 	}
 
-	var c types.Chat
+	var c Chat
 	json.Unmarshal(r.Result, &c)
 
-	return c
+	return &c, nil
 }
 
-func (b Bot) GetChatAdministrators(chatId int) []types.ChatMember {
+func (b Bot) GetChatAdministrators(chatId int) ([]types.ChatMember, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChatAdministrators", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getChatAdministrators was not OK")
+		return nil, errors.New(r.Description)
 	}
 
 	var cm []types.ChatMember
 	json.Unmarshal(r.Result, &cm)
 
-	return cm
+	return cm, nil
 }
 
-func (b Bot) GetChatMembersCount(chatId int) int {
+func (b Bot) GetChatMembersCount(chatId int) (int, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
 	r := Get(b, "getChatMembersCount", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getChatMembersCount was not OK")
+		return 0, errors.New(r.Description)
 	}
 
 	var c int
 	json.Unmarshal(r.Result, &c)
 
-	return c
+	return c, nil
 }
 
-func (b Bot) GetChatMember(chatId int, userId int) types.ChatMember {
+func (b Bot) GetChatMember(chatId int, userId int) (*types.ChatMember, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
 	r := Get(b, "getChatMember", v)
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getChatMember was not OK")
+		return nil, errors.New(r.Description)
 	}
 
 	var cm types.ChatMember
 	json.Unmarshal(r.Result, &cm)
 
-	return cm
+	return &cm, nil
+}
+
+func (b Bot) SetChatStickerSet(chatId int, stickerSetName string) (bool, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("sticker_set_name", stickerSetName)
+
+	r := Get(b, "setChatStickerSet", v)
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
+}
+
+func (b Bot) DeleteChatStickerSet(chatId int) (bool, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+
+	r := Get(b, "deleteChatStickerSet", v)
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
 }

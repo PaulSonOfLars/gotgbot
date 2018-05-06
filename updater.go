@@ -46,20 +46,42 @@ func (u Updater) startPolling() {
 			for _, upd := range res {
 				if upd.Message != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.Message)
-					//&ext.Message{Message: *upd.Message, Bot: u.gobot}
+					upd.EffectiveChat = u.bot.NewChat(upd.Message.Chat)
+					upd.EffectiveUser = u.bot.NewUser(upd.Message.From)
+
 				} else if upd.EditedMessage != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedMessage)
+					upd.EffectiveChat = u.bot.NewChat(upd.EditedMessage.Chat)
+					upd.EffectiveUser = u.bot.NewUser(upd.EditedMessage.From)
 
 				} else if upd.ChannelPost != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.ChannelPost)
+					upd.EffectiveChat = u.bot.NewChat(upd.ChannelPost.Chat)
 
 				} else if upd.EditedChannelPost != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedChannelPost)
+					upd.EffectiveChat = u.bot.NewChat(upd.EditedChannelPost.Chat)
 
 				} else if upd.InlineQuery != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.InlineQuery)
+					upd.EffectiveUser = u.bot.NewUser(upd.InlineQuery.From)
+
+				} else if upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil {
+					upd.EffectiveChat = u.bot.NewChat(upd.CallbackQuery.Message.Chat)
+					upd.EffectiveUser = u.bot.NewUser(upd.CallbackQuery.From)
+
+				} else if upd.ChosenInlineResult != nil {
+					upd.EffectiveUser = u.bot.NewUser(upd.ChosenInlineResult.From)
+
+				} else if upd.ShippingQuery != nil {
+					upd.EffectiveUser = u.bot.NewUser(upd.ShippingQuery.From)
+
+				} else if upd.PreCheckoutQuery != nil {
+					upd.EffectiveUser = u.bot.NewUser(upd.PreCheckoutQuery.From)
 
 				}
+
+
 				u.updates <- upd
 			}
 			if len(res) > 0 {

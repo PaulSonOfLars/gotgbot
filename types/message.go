@@ -78,7 +78,7 @@ type Venue struct {
 
 type PreCheckoutQuery struct {
 	Id               string    `json:"id"`
-	From             User      `json:"from"`
+	From             *User      `json:"from"`
 	Currency         string    `json:"currency"`
 	TotalAmount      int       `json:"total_amount"`
 	InvoicePayload   string    `json:"invoice_payload"`

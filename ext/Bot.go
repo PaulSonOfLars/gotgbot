@@ -28,7 +28,7 @@ func (b Bot) GetMe() types.User {
 
 }
 
-func (b Bot) GetUserProfilePhotos(userId int) types.UserProfilePhotos {
+func (b Bot) GetUserProfilePhotos(userId int) *types.UserProfilePhotos {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 
@@ -42,7 +42,7 @@ func (b Bot) GetUserProfilePhotos(userId int) types.UserProfilePhotos {
 	var userProfilePhotos types.UserProfilePhotos
 	json.Unmarshal(r.Result, &userProfilePhotos)
 
-	return userProfilePhotos
+	return &userProfilePhotos
 }
 
 

@@ -25,6 +25,14 @@ func (b Bot) NewMessage(message *types.Message) *Message {
 	return &Message{*message, b}
 }
 
+func (b Bot) NewChat(chat *types.Chat) *Chat{
+	return &Chat{*chat, b}
+}
+
+func (b Bot) NewUser(user *types.User) *User{
+	return &User{*user, b}
+}
+
 func (m Message) ReplyMessage(text string) (*Message, error) {
 	return m.bot.ReplyMessage(m.Chat.Id, text, m.MessageId)
 }

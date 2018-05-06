@@ -24,4 +24,6 @@ type Update struct {
 
 	// Self added type
 	EffectiveMessage *ext.Message `json:"effective_message"`
+	EffectiveChat    *ext.Chat    `json:"effective_chat"`
+	EffectiveUser    *ext.User    `json:"effective_user"`
 }
