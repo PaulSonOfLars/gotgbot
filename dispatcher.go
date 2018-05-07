@@ -28,7 +28,7 @@ func (d Dispatcher) Start() {
 func (d Dispatcher) processUpdate(update Update) {
 	for _, handler := range *d.handlers {
 		if res, err := handler.CheckUpdate(update); res {
-			handler.HandleUpdate(update, d)
+			go handler.HandleUpdate(update, d)
 			break
 		} else if err != nil {
 			logrus.WithError(err).Error("Failed to parse update")

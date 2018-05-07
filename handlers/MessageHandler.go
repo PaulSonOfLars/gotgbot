@@ -22,7 +22,7 @@ func NewMessage(filterFunc func(message *types.Message) bool,
 }
 
 func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
-	go h.response(d.Bot, update)
+	h.response(d.Bot, update)
 
 }
 

@@ -19,7 +19,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Comm
 }
 
 func (h Command) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
-	go h.response(d.Bot, update)
+	h.response(d.Bot, update)
 }
 
 func (h Command) CheckUpdate(update gotgbot.Update) (bool, error) {

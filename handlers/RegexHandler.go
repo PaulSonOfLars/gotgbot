@@ -20,7 +20,7 @@ func NewRegex(match string, response func(b ext.Bot, u gotgbot.Update)) Regex {
 }
 
 func (h Regex) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
-	go h.response(d.Bot, update)
+	h.response(d.Bot, update)
 
 }
 
