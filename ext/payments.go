@@ -3,19 +3,18 @@ package ext
 import (
 	"gotgbot/types"
 	"strconv"
-	"log"
 	"encoding/json"
 	"net/url"
 	"github.com/pkg/errors"
 )
+
 // TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chatId int, title string, description string, payload string,
-						providerToken string, startParameter string, currency string,
-						prices []types.LabeledPrice) (*Message, error) {
+	providerToken string, startParameter string, currency string,
+	prices []types.LabeledPrice) (*Message, error) {
 	pricesStr, err := json.Marshal(prices)
 	if err != nil {
-		log.Println("Err in send_invoice")
-		log.Fatal(err)
+		return nil, errors.Wrapf(err, "could not unmarshal invoice prices")
 	}
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -27,7 +26,10 @@ func (b Bot) SendInvoice(chatId int, title string, description string, payload s
 	v.Add("currency", currency)
 	v.Add("prices", string(pricesStr))
 
-	r := Get(b, "sendInvoice", v)
+	r, err := Get(b, "sendInvoice", v)
+	if err != nil {
+		return nil, errors.New(r.Description)
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -38,36 +40,38 @@ func (b Bot) SendInvoice(chatId int, title string, description string, payload s
 
 // TODO: shipping options
 // TODO: err_msg
-func (b Bot) AnswerShippingQuery(shippingQueryId string, ok bool) bool {
+func (b Bot) AnswerShippingQuery(shippingQueryId string, ok bool) (bool, error) {
 	v := url.Values{}
 	v.Add("shipping_query_id", shippingQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
 
-	r := Get(b, "answerShippingQuery", v)
+	r, err := Get(b, "answerShippingQuery", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to answerShippingQuery")
+	}
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return false, errors.New("invalid answerShippingQuery")
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
-
-	return bb
+	return bb, nil
 }
 
-func (b Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool) bool {
+func (b Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool) (bool, error) {
 	v := url.Values{}
 	v.Add("pre_checkout_query_id", preCheckoutQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
 
-	r := Get(b, "answerPreCheckoutQuery", v)
+	r, err := Get(b, "answerPreCheckoutQuery", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to answerPreCheckoutQuery")
+	}
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return false, errors.New("invalid answerPreCheckoutQuery")
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
-
-	return bb
+	return bb, nil
 }

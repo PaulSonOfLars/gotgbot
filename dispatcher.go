@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"github.com/sirupsen/logrus"
 	"gotgbot/ext"
 )
 
@@ -26,9 +27,11 @@ func (d Dispatcher) Start() {
 
 func (d Dispatcher) processUpdate(update Update) {
 	for _, handler := range *d.handlers {
-		if handler.CheckUpdate(update) {
+		if res, err := handler.CheckUpdate(update); res {
 			handler.HandleUpdate(update, d)
 			break
+		} else if err != nil {
+			logrus.WithError(err).Error("Failed to parse update")
 		}
 	}
 }

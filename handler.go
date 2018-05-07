@@ -7,7 +7,7 @@ import (
 
 type Handler interface {
 	HandleUpdate(update Update, d Dispatcher)
-	CheckUpdate(update Update) bool
+	CheckUpdate(update Update) (bool, error)
 }
 
 type Update struct {

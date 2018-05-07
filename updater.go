@@ -2,8 +2,8 @@ package gotgbot
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"gotgbot/ext"
-	"log"
 	"net/url"
 	"strconv"
 	"time"
@@ -33,10 +33,14 @@ func (u Updater) startPolling() {
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))
 	for {
-		r := ext.Get(u.bot, "getUpdates", v)
-		if !r.Ok {
-			log.Println(r)
-			log.Fatal("You done goofed, API Res for getUpdates was not OK")
+		r, err := ext.Get(u.bot, "getUpdates", v)
+		if err != nil {
+			logrus.WithError(err).Error("unable to getUpdates")
+		} else if !r.Ok {
+			logrus.Errorf("getUpdates error: %v", r.Description)
+			logrus.Errorf("Sleeping for 1 second...")
+			time.Sleep(time.Second)
+			continue
 		}
 		offset := 0
 		if r.Result != nil {
@@ -80,7 +84,6 @@ func (u Updater) startPolling() {
 					upd.EffectiveUser = u.bot.NewUser(upd.PreCheckoutQuery.From)
 
 				}
-
 
 				u.updates <- upd
 			}

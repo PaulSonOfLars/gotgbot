@@ -24,7 +24,10 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	v.Add("from_chat_id", strconv.Itoa(fromChatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
-	r := Get(b, "forwardMessage", v)
+	r, err := Get(b, "forwardMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to forwardMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}

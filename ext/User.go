@@ -7,6 +7,6 @@ type User struct {
 	bot Bot
 }
 
-func (user User) GetProfilePhotos(offset int, limit int) *types.UserProfilePhotos {
+func (user User) GetProfilePhotos(offset int, limit int) (*types.UserProfilePhotos, error) {
 	return user.bot.GetUserProfilePhotos(user.Id)
 }

@@ -15,7 +15,10 @@ func (b Bot) SendStickerStr(chatId int, sticker string) (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker", sticker)
 
-	r := Get(b, "sendSticker", v)
+	r, err := Get(b, "sendSticker", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendSticker")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -30,7 +33,10 @@ func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) (
 	v.Add("sticker", sticker)
 	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
 
-	r := Get(b, "sendSticker", v)
+	r, err := Get(b, "sendSticker", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendSticker")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -42,7 +48,10 @@ func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
 	v := url.Values{}
 	v.Add("name", name)
 
-	r := Get(b, "getStickerSet", v)
+	r, err := Get(b, "getStickerSet", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to getStickerSet")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 
@@ -70,7 +79,10 @@ func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngSt
 	v.Add("png_sticker", pngSticker)
 	v.Add("emojis", emojis)
 
-	r := Get(b, "createNewStickerSet", v)
+	r, err := Get(b, "createNewStickerSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to createNewStickerSet")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -90,7 +102,10 @@ func (b Bot) AddStickerToSetStr(userId int, name string, pngSticker string, emoj
 	v.Add("png_sticker", pngSticker)
 	v.Add("emojis", emojis)
 
-	r := Get(b, "addStickerToSet", v)
+	r, err := Get(b, "addStickerToSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to addStickerToSet")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -106,7 +121,10 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error)
 	v.Add("sticker", sticker)
 	v.Add("position", strconv.Itoa(position))
 
-	r := Get(b, "setStickerPositionInSet", v)
+	r, err := Get(b, "setStickerPositionInSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to setStickerPositionInSet")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -121,7 +139,10 @@ func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	v := url.Values{}
 	v.Add("sticker", sticker)
 
-	r := Get(b, "deleteStickerFromSet", v)
+	r, err := Get(b, "deleteStickerFromSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to deleteStickerFromSet")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}

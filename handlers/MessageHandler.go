@@ -26,6 +26,6 @@ func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 
 }
 
-func (h Message) CheckUpdate(update gotgbot.Update) bool {
-	return update.Message != nil && h.filterFunc(update.Message)
+func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {
+	return update.Message != nil && h.filterFunc(update.Message), nil
 }

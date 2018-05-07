@@ -1,81 +1,88 @@
 package ext
 
 import (
-	"log"
 	"encoding/json"
 	"strconv"
 	"gotgbot/types"
 	"net/url"
+	"github.com/pkg/errors"
 )
 
 type Bot struct {
 	Token string
 }
 
-func (b Bot) GetMe() types.User {
+func (b Bot) GetMe() (*types.User, error) {
 	v := url.Values{}
 
-	r := Get(b, "getChat", v)
+	r, err := Get(b, "getMe", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not getMe")
+	}
+	if !r.Ok {
+		return nil, errors.New("invalid getMe request")
+	}
 
 	var u types.User
 	json.Unmarshal(r.Result, &u)
-
-	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getMe was not OK")
-	}
-
-	return u
+	return &u, nil
 
 }
 
-func (b Bot) GetUserProfilePhotos(userId int) *types.UserProfilePhotos {
+func (b Bot) GetUserProfilePhotos(userId int) (*types.UserProfilePhotos, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 
 
-	r := Get(b, "getUserProfilePhotos", v)
+	r, err := Get(b, "getUserProfilePhotos", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not get user profile photos")
+	}
 	if !r.Ok {
-		log.Println("You done goofed")
-		log.Println(r)
+		return nil, errors.New("invalid getUserProfilePhotos request")
 	}
 
 	var userProfilePhotos types.UserProfilePhotos
 	json.Unmarshal(r.Result, &userProfilePhotos)
 
-	return &userProfilePhotos
+	return &userProfilePhotos, nil
 }
 
 
-func (b Bot) GetFile(fileId string) types.File {
+func (b Bot) GetFile(fileId string) (*types.File, error) {
 	v := url.Values{}
 	v.Add("file_id", fileId)
 
-	r := Get(b, "getFile", v)
+	r, err := Get(b, "getFile", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not complete getFile request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getFile was not OK")
+		return nil, errors.New("invalid getFile request")
 	}
 
 	var f types.File
 	json.Unmarshal(r.Result, &f)
-
-	return f
+	return &f, nil
 }
 
 // TODO: options here
 // TODO: r.OK or unmarshal??
-func (b Bot) AnswerCallbackQuery(callbackQueryId string) bool {
+func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)
 
-	r := Get(b, "answerCallbackQuery", v)
+	r, err := Get(b, "answerCallbackQuery", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "could not complete getFile request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for answerCallbackQuery was not OK")
+		return false, errors.New("invalid answerCallbackQuery request")
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
-
-	return bb
+	return bb, nil
 }
 
 func (b Bot) Send(msg Sendable) (*types.Message, error) {

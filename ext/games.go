@@ -2,7 +2,6 @@ package ext
 
 import (
 	"gotgbot/types"
-	"log"
 	"encoding/json"
 	"strconv"
 	"net/url"
@@ -16,9 +15,12 @@ func (b Bot) SendGame(chatId int, gameShortName string) (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("game_short_name", gameShortName)
 
-	r := Get(b, "sendGame", v)
+	r, err := Get(b, "sendGame", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to execute sendGame request")
+	}
 	if !r.Ok {
-		return nil, errors.New(r.Description)
+		return nil, errors.Wrapf(err, "invalid sendGame request")
 	}
 
 	return b.ParseMessage(r.Result), nil
@@ -27,74 +29,80 @@ func (b Bot) SendGame(chatId int, gameShortName string) (*Message, error) {
 
 // TODO Check return - message or bool?
 // TODO: Force version
-// TODO: possible error
-func (b Bot) SetGameScore(userId int, score int, chatId int, messageId int) bool {
+func (b Bot) SetGameScore(userId int, score int, chatId int, messageId int) (bool, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("score", strconv.Itoa(score))
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
-	r := Get(b, "setGameScore", v)
+	r, err := Get(b, "setGameScore", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to execute setGameScore request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for setGameScore was not OK")
+		return false, errors.Wrapf(err, "invalid setGameScore request")
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
-
-	return bb
+	return bb, nil
 }
 
 // TODO Check return - message or bool?
 // TODO: Force version
-// TODO: Possible error
-func (b Bot) SetGameScoreInline(userId int, score int, inlineMessageId string) bool {
+func (b Bot) SetGameScoreInline(userId int, score int, inlineMessageId string) (bool, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("score", strconv.Itoa(score))
 	v.Add("inline_message_id", inlineMessageId)
-
-	r := Get(b, "setGameScore", v)
+	r, err := Get(b, "setGameScore", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to execute setGameScore request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for setGameScore was not OK")
+		return false, errors.Wrapf(err, "invalid setGameScore request")
 	}
 
 	var bb bool
 	json.Unmarshal(r.Result, &bb)
-
-	return bb
+	return bb, nil
 }
 
-func (b Bot) GetGameHighScores(userId int, chatId int, messageId int) []types.GameHighScore {
+func (b Bot) GetGameHighScores(userId int, chatId int, messageId int) ([]types.GameHighScore, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
-	r := Get(b, "getGameHighScores", v)
+	r, err := Get(b, "getGameHighScores", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to execute getGameHighScores request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
+		return nil, errors.Wrapf(err, "invalid getGameHighScores request")
 	}
 
 	var ghs []types.GameHighScore
 	json.Unmarshal(r.Result, &ghs)
-
-	return ghs
+	return ghs, nil
 }
 
-func (b Bot) GetGameHighScoresInline(userId int, inlineMessageId string) []types.GameHighScore {
+func (b Bot) GetGameHighScoresInline(userId int, inlineMessageId string) ([]types.GameHighScore, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 	v.Add("inline_message_id", inlineMessageId)
 
-	r := Get(b, "getGameHighScores", v)
+	r, err := Get(b, "getGameHighScores", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to execute getGameHighScores request")
+	}
 	if !r.Ok {
-		log.Fatal("You done goofed, API Res for getGameHighScores was not OK")
+		return nil, errors.Wrapf(err, "invalid getGameHighScores request")
 	}
 
 	var ghs []types.GameHighScore
 	json.Unmarshal(r.Result, &ghs)
 
-	return ghs
+	return ghs, nil
 }

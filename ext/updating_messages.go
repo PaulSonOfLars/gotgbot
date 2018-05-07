@@ -2,7 +2,6 @@ package ext
 
 import (
 	"strconv"
-	"log"
 	"encoding/json"
 	"gotgbot/types"
 	"net/url"
@@ -17,7 +16,10 @@ func (b Bot) EditMessageText(chatId int, messageId int, text string) (bool, erro
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("text", text)
 
-	r := Get(b, "editMessageText", v)
+	r, err := Get(b, "editMessageText", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to editMessageText")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -35,7 +37,10 @@ func (b Bot) EditMessageTextInline(inlineMessageId string, text string) (bool, e
 	v.Add("inline_message_id", inlineMessageId)
 	v.Add("text", text)
 
-	r := Get(b, "editMessageText", v)
+	r, err := Get(b, "editMessageText", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to editMessageText")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -53,7 +58,10 @@ func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (bool
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("caption", caption)
 
-	r := Get(b, "editMessageCaption", v)
+	r, err := Get(b, "editMessageCaption", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to editMessageCaption")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -70,7 +78,10 @@ func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (b
 	v.Add("inline_message_id", inlineMessageId)
 	v.Add("caption", caption)
 
-	r := Get(b, "editMessageCaption", v)
+	r, err := Get(b, "editMessageCaption", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to editMessageCaption")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -85,15 +96,17 @@ func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (b
 func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup types.InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
-		log.Println("could not unmarshal in editMessageReplyMarkup")
-		log.Fatal(err)
+		return false, nil
 	}
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("reply_markup", string(markupStr))
 
-	r := Get(b, "editMessageReplyMarkup", v)
+	r, err := Get(b, "editMessageReplyMarkup", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to edit message")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -108,14 +121,16 @@ func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup types
 func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup types.InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
-		log.Println("could not unmarshal in editMessageReplyMarkupInline")
-		log.Fatal(err)
+		return false, errors.Wrapf(err, "error editing inline markup reply")
 	}
 	v := url.Values{}
 	v.Add("inline_message_id", inlineMessageId)
 	v.Add("reply_markup", string(markupStr))
 
-	r := Get(b, "editMessageReplyMarkup", v)
+	r, err := Get(b, "editMessageReplyMarkup", v)
+	if err != nil {
+		return false, errors.New(r.Description)
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
@@ -132,7 +147,10 @@ func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
-	r := Get(b, "deleteMessage", v)
+	r, err := Get(b, "deleteMessage", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to deleteMessage")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}

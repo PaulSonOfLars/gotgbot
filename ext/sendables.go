@@ -77,8 +77,10 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -117,8 +119,10 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendPhoto", v)
-
+	r, err := Get(msg.bot, "sendPhoto", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendPhoto")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -162,8 +166,10 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendAudio", v)
-
+	r, err := Get(msg.bot, "sendAudio", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendAudio")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -200,8 +206,10 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendDocument", v)
-
+	r, err := Get(msg.bot, "sendDocument", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendDocument")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -246,8 +254,10 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -286,8 +296,10 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -324,8 +336,10 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -353,8 +367,10 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -385,8 +401,10 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -424,8 +442,10 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -456,8 +476,10 @@ func (msg *sendableContact) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r := Get(msg.bot, "sendMessage", v)
-
+	r, err := Get(msg.bot, "sendMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendMessage")
+	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
@@ -478,8 +500,10 @@ func (msg *sendableChatAction) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("action", msg.action)
 
-	r := Get(msg.bot, "sendChatAction", v)
-
+	r, err := Get(msg.bot, "sendChatAction", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to sendChatAction")
+	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}

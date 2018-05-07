@@ -2,15 +2,14 @@ package handlers
 
 import (
 	"regexp"
-	"log"
 	"gotgbot/ext"
 	"gotgbot"
+	"github.com/pkg/errors"
 )
 
 type Regex struct {
 	match string
 	response func(b ext.Bot, u gotgbot.Update)
-
 }
 
 func NewRegex(match string, response func(b ext.Bot, u gotgbot.Update)) Regex {
@@ -25,14 +24,13 @@ func (h Regex) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 
 }
 
-func (h Regex) CheckUpdate(update gotgbot.Update) bool {
-	if update.Message != nil {
-		res, err := regexp.Match(h.match, []byte(update.Message.Text))
-		if err != nil {
-			log.Fatal(err)
-		}
-		return res
-	} else {
-		return false
+func (h Regex) CheckUpdate(update gotgbot.Update) (bool, error) {
+	if update.Message == nil {
+		return false, nil
 	}
+	res, err := regexp.Match(h.match, []byte(update.Message.Text))
+	if err != nil {
+		return false, errors.Wrapf(err, "Could not match regexp")
+	}
+	return res, nil
 }

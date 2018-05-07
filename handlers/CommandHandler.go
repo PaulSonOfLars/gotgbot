@@ -22,7 +22,7 @@ func (h Command) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 	go h.response(d.Bot, update)
 }
 
-func (h Command) CheckUpdate(update gotgbot.Update) bool {
+func (h Command) CheckUpdate(update gotgbot.Update) (bool, error) {
 	return update.Message != nil && update.Message.Text != "" &&
-		strings.Split(strings.Fields(update.Message.Text)[0], "@")[0] == "/" + h.command
+		strings.Split(strings.Fields(update.Message.Text)[0], "@")[0] == "/" + h.command, nil
 }
