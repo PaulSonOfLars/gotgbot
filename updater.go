@@ -32,18 +32,20 @@ func (u Updater) startPolling() {
 	v := url.Values{}
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))
+	offset := 0
 	for {
 		r, err := ext.Get(u.bot, "getUpdates", v)
 		if err != nil {
 			logrus.WithError(err).Error("unable to getUpdates")
+			continue
+
 		} else if !r.Ok {
 			logrus.Errorf("getUpdates error: %v", r.Description)
 			logrus.Errorf("Sleeping for 1 second...")
 			time.Sleep(time.Second)
 			continue
-		}
-		offset := 0
-		if r.Result != nil {
+
+		} else if r.Result != nil {
 			//fmt.Println(r)
 			var res []Update
 			json.Unmarshal(r.Result, &res)
