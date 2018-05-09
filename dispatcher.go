@@ -1,8 +1,8 @@
 package gotgbot
 
 import (
+	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
-	"gotgbot/ext"
 )
 
 type Dispatcher struct {

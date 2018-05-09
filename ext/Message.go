@@ -1,7 +1,8 @@
 package ext
 
 import (
-	"gotgbot/types"
+	"github.com/PaulSonOfLars/gotgbot/types"
+
 	"encoding/json"
 )
 

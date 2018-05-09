@@ -2,8 +2,8 @@ package gotgbot
 
 import (
 	"encoding/json"
+	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
-	"gotgbot/ext"
 	"net/url"
 	"strconv"
 	"time"

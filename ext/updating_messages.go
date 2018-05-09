@@ -3,7 +3,7 @@ package ext
 import (
 	"strconv"
 	"encoding/json"
-	"gotgbot/types"
+	"github.com/PaulSonOfLars/gotgbot/types"
 	"net/url"
 	"github.com/pkg/errors"
 )

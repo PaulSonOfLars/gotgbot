@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"strings"
-	"gotgbot/ext"
-	"gotgbot"
+	"github.com/PaulSonOfLars/gotgbot"
+	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
 type Command struct {
@@ -24,5 +24,5 @@ func (h Command) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 
 func (h Command) CheckUpdate(update gotgbot.Update) (bool, error) {
 	return update.Message != nil && update.Message.Text != "" &&
-		strings.Split(strings.Fields(update.Message.Text)[0], "@")[0] == "/" + h.command, nil
+		strings.Split(strings.Fields(update.Message.Text)[0], "@")[0] == "/"+h.command, nil
 }

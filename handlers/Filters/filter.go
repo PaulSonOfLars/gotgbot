@@ -2,7 +2,7 @@ package Filters
 
 import (
 	"strings"
-	"gotgbot/types"
+	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 

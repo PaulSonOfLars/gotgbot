@@ -1,6 +1,6 @@
 package ext
 
-import "gotgbot/types"
+import "github.com/PaulSonOfLars/gotgbot/types"
 
 type Chat struct {
 	types.Chat

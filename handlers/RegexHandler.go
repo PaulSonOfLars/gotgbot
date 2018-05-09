@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"regexp"
-	"gotgbot/ext"
-	"gotgbot"
 	"github.com/pkg/errors"
+	"github.com/PaulSonOfLars/gotgbot/ext"
+	"github.com/PaulSonOfLars/gotgbot"
 )
 
 type Regex struct {

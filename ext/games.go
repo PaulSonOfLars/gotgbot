@@ -1,11 +1,11 @@
 package ext
 
 import (
-	"gotgbot/types"
 	"encoding/json"
 	"strconv"
 	"net/url"
 	"github.com/pkg/errors"
+	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 // TODO: reply version

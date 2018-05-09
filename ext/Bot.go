@@ -3,9 +3,9 @@ package ext
 import (
 	"encoding/json"
 	"strconv"
-	"gotgbot/types"
 	"net/url"
 	"github.com/pkg/errors"
+	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 type Bot struct {

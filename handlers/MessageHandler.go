@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"gotgbot/ext"
-	"gotgbot/types"
-	"gotgbot"
+	"github.com/PaulSonOfLars/gotgbot/ext"
+	"github.com/PaulSonOfLars/gotgbot/types"
+	"github.com/PaulSonOfLars/gotgbot"
+
 )
 
 
