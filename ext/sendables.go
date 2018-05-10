@@ -58,6 +58,14 @@ func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 	return &sendableChatAction{bot: b, ChatId: chatId}
 }
 
+type file struct {
+	bot    Bot
+	Name string
+	FileId string
+	Path   string
+	Reader io.Reader
+	URL    string
+}
 type sendableTextMessage struct {
 	bot                 Bot
 	ChatId              int
@@ -93,10 +101,9 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 }
 
 type sendablePhoto struct {
-	bot         Bot
-	ChatId      int
-	PhotoString string
-	//photoFile
+	bot                 Bot
+	ChatId              int
+	file
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -107,21 +114,13 @@ type sendablePhoto struct {
 func (msg *sendablePhoto) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.PhotoString == "" {
-		v.Add("photo", msg.PhotoString)
-
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement photofiles")
-	}
-
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendPhoto", v)
+	r, err := sendFile(msg.file, "sendPhoto", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendPhoto")
 	}
@@ -135,10 +134,9 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 }
 
 type sendableAudio struct {
-	bot         Bot
-	ChatId      int
-	AudioString string
-	//audioFile
+	bot                 Bot
+	ChatId              int
+	file
 	Caption             string
 	ParseMode           string
 	Duration            int
@@ -152,13 +150,6 @@ type sendableAudio struct {
 func (msg *sendableAudio) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.AudioString == "" {
-		v.Add("audio", msg.AudioString)
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement audiofiles")
-	}
-
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("duration", strconv.Itoa(msg.Duration))
@@ -168,7 +159,8 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendAudio", v)
+	r, err := sendFile(msg.file, "sendAudio", v)
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
 	}
@@ -184,10 +176,8 @@ func (msg *sendableAudio) Send() (*Message, error) {
 type sendableDocument struct {
 	bot                 Bot
 	ChatId              int
-	DocName             string    // file name
-	DocString           string    // file id on tg servers
-	DocPath             string    // path to file on machine
-	DocReader           io.Reader // open file, bytesreader, whatever
+	DocName             string // file name
+	file
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -204,27 +194,8 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	var r *Response
-	var err error
+	r, err := sendFile(msg.file, "sendDocument", v)
 
-	if msg.DocString != "" {
-		v.Add("document", msg.DocString)
-		r, err = Get(msg.bot, "sendDocument", v)
-
-
-	} else if msg.DocPath != "" {
-		file, err := os.Open(msg.DocPath)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-
-		r, err = Post(msg.bot, "sendDocument", v, file, file.Name())
-	} else if msg.DocReader != nil {
-		r, err = Post(msg.bot, "sendDocument", v, msg.DocReader, "file")
-	} else {
-		return nil, errors.New("no document type was specified")
-	}
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
 	}
@@ -238,10 +209,9 @@ func (msg *sendableDocument) Send() (*Message, error) {
 }
 
 type sendableVideo struct {
-	bot         Bot
-	ChatId      int
-	VideoString string
-	//videoFile
+	bot                 Bot
+	ChatId              int
+	file
 	Duration            int
 	Width               int
 	Height              int
@@ -256,12 +226,6 @@ type sendableVideo struct {
 func (msg *sendableVideo) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.VideoString == "" {
-		v.Add("video", msg.VideoString)
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement videofiles")
-	}
 	v.Add("duration", strconv.Itoa(msg.Duration))
 	v.Add("width", strconv.Itoa(msg.Width))
 	v.Add("height", strconv.Itoa(msg.Height))
@@ -272,9 +236,10 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := sendFile(msg.file, "sendVideo", v)
+
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendVideo")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -286,10 +251,9 @@ func (msg *sendableVideo) Send() (*Message, error) {
 }
 
 type sendableVoice struct {
-	bot         Bot
-	ChatId      int
-	VoiceString string
-	//voiceFile
+	bot                 Bot
+	ChatId              int
+	file
 	Caption             string
 	ParseMode           string
 	Duration            int
@@ -301,12 +265,6 @@ type sendableVoice struct {
 func (msg *sendableVoice) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.VoiceString == "" {
-		v.Add("voice", msg.VoiceString)
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement voicefiles")
-	}
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("duration", strconv.Itoa(msg.Duration))
@@ -314,9 +272,10 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := sendFile(msg.file, "sendVoice", v)
+
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendVoice")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -328,10 +287,9 @@ func (msg *sendableVoice) Send() (*Message, error) {
 }
 
 type sendableVideoNote struct {
-	bot             Bot
-	ChatId          int
-	VideoNoteString string
-	//videoNoteFile
+	bot                 Bot
+	ChatId              int
+	file
 	Duration            int
 	Length              int
 	DisableNotification bool
@@ -342,21 +300,16 @@ type sendableVideoNote struct {
 func (msg *sendableVideoNote) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.VideoNoteString == "" {
-		v.Add("video_note", msg.VideoNoteString)
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement videonotefiles")
-	}
 	v.Add("duration", strconv.Itoa(msg.Duration))
 	v.Add("length", strconv.Itoa(msg.Length))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := sendFile(msg.file, "sendVideoNote", v)
+
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendVideoNote")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -367,6 +320,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	return newMsg, nil
 }
 
+// TODO
 type sendableMediaGroup struct {
 	bot    Bot
 	ChatId int
@@ -385,9 +339,9 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := Get(msg.bot, "sendMediaGroup", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendMediaGroup")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -419,9 +373,9 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := Get(msg.bot, "sendLocation", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendLocation")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -460,9 +414,9 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := Get(msg.bot, "sendVenue", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendVenue")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -494,9 +448,9 @@ func (msg *sendableContact) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := Get(msg.bot, "sendContact", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, errors.Wrapf(err, "unable to sendContact")
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
@@ -528,4 +482,22 @@ func (msg *sendableChatAction) Send() (bool, error) {
 	var newMsg bool
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
+}
+
+func sendFile(msg file, endpoint string, params url.Values) (*Response, error) {
+	if msg.FileId != "" {
+		return Get(msg.bot, endpoint, params)
+	} else if msg.Path != "" {
+		file, err := os.Open(msg.Path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		return Post(msg.bot, endpoint, params, file, msg.Name)
+	} else if msg.Reader != nil {
+		return Post(msg.bot, endpoint, params, msg.Reader, msg.Name)
+	} else {
+		return nil, errors.New("the message had no files that could be sent")
+	}
 }

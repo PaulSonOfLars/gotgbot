@@ -54,7 +54,7 @@ func (b Bot) ReplyPhotoCaptionStr(chatId int, photo string, caption string, repl
 
 func (b Bot) replyPhotoStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {
 	photoMsg := b.NewSendablePhoto(chatId, caption)
-	photoMsg.PhotoString = photo
+	photoMsg.FileId = photo
 	photoMsg.ReplyToMessageId = replyToMessageId
 	return photoMsg.Send()
 }
@@ -69,7 +69,7 @@ func (b Bot) ReplyAudioStr(chatId int, audio string, replyToMessageId int) (*Mes
 
 func (b Bot) replyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
 	audioMsg := b.NewSendableAudio(chatId, "")
-	audioMsg.AudioString = audio
+	audioMsg.FileId = audio
 	audioMsg.ReplyToMessageId = replyToMessageId
 	return audioMsg.Send()
 }
@@ -100,21 +100,21 @@ func (b Bot) ReplyDocumentCaptionPath(chatId int, path string, caption string, r
 
 func (b Bot) replyDocumentStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
 	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.DocString = document
+	docMsg.FileId = document
 	docMsg.ReplyToMessageId = replyToMessageId
 	return docMsg.Send()
 }
 
 func (b Bot) replyDocumentPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
 	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.DocPath = path
+	docMsg.Path = path
 	docMsg.ReplyToMessageId = replyToMessageId
 	return docMsg.Send()
 }
 
 func (b Bot) replyDocumentReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
 	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.DocReader = reader
+	docMsg.Reader = reader
 	docMsg.ReplyToMessageId = replyToMessageId
 	return docMsg.Send()
 }
@@ -129,7 +129,7 @@ func (b Bot) ReplyVideoStr(chatId int, video string, replyToMessageId int) (*Mes
 
 func (b Bot) replyVideoStr(chatId int, video string, replyToMessageId int) (*Message, error) {
 	videoMsg := b.NewSendableVideo(chatId, "")
-	videoMsg.VideoString = video
+	videoMsg.FileId = video
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }
@@ -144,7 +144,7 @@ func (b Bot) ReplyVoiceStr(chatId int, voice string, replyToMessageId int) (*Mes
 
 func (b Bot) replyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {
 	voiceMsg := b.NewSendableVoice(chatId, "")
-	voiceMsg.VoiceString = voice
+	voiceMsg.FileId = voice
 	voiceMsg.ReplyToMessageId = replyToMessageId
 	return voiceMsg.Send()
 }
@@ -159,7 +159,7 @@ func (b Bot) ReplyVideoNoteStr(chatId int, videoNote string, replyToMessageId in
 
 func (b Bot) replyVideoNoteStr(chatId int, videoNote string, replyToMessageId int) (*Message, error) {
 	videoMsg := b.NewSendableVideoNote(chatId)
-	videoMsg.VideoNoteString = videoNote
+	videoMsg.FileId = videoNote
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }

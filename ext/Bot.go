@@ -85,6 +85,6 @@ func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	return bb, nil
 }
 
-func (b Bot) Send(msg Sendable) (*types.Message, error) {
+func (b Bot) Send(msg Sendable) (*Message, error) {
 	return msg.send()
 }
