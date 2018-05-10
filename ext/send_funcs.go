@@ -35,7 +35,6 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	return b.ParseMessage(r.Result), nil
 }
 
-// TODO: create InputFile version of all the Str's
 func (b Bot) SendPhotoStr(chatId int, photo string) (*Message, error) {
 	return b.replyPhotoStr(chatId, photo, "", 0)
 }
@@ -59,17 +58,45 @@ func (b Bot) replyPhotoStr(chatId int, photo string, caption string, replyToMess
 	return photoMsg.Send()
 }
 
+func (b Bot) replyPhotoPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	photoMsg := b.NewSendablePhoto(chatId, caption)
+	photoMsg.Path = path
+	photoMsg.ReplyToMessageId = replyToMessageId
+	return photoMsg.Send()
+}
+
+func (b Bot) replyPhotoReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	photoMsg := b.NewSendablePhoto(chatId, caption)
+	photoMsg.Reader = reader
+	photoMsg.ReplyToMessageId = replyToMessageId
+	return photoMsg.Send()
+}
+
 func (b Bot) SendAudioStr(chatId int, audio string) (*Message, error) {
-	return b.replyAudioStr(chatId, audio, 0)
+	return b.replyAudioStr(chatId, audio, "",0)
 }
 
 func (b Bot) ReplyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
-	return b.replyAudioStr(chatId, audio, replyToMessageId)
+	return b.replyAudioStr(chatId, audio, "", replyToMessageId)
 }
 
-func (b Bot) replyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
-	audioMsg := b.NewSendableAudio(chatId, "")
+func (b Bot) replyAudioStr(chatId int, audio string, caption string, replyToMessageId int) (*Message, error) {
+	audioMsg := b.NewSendableAudio(chatId, caption)
 	audioMsg.FileId = audio
+	audioMsg.ReplyToMessageId = replyToMessageId
+	return audioMsg.Send()
+}
+
+func (b Bot) replyAudioPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	audioMsg := b.NewSendableAudio(chatId, caption)
+	audioMsg.Path = path
+	audioMsg.ReplyToMessageId = replyToMessageId
+	return audioMsg.Send()
+}
+
+func (b Bot) replyAudioReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	audioMsg := b.NewSendableAudio(chatId, caption)
+	audioMsg.Reader = reader
 	audioMsg.ReplyToMessageId = replyToMessageId
 	return audioMsg.Send()
 }
@@ -120,31 +147,59 @@ func (b Bot) replyDocumentReader(chatId int, reader io.Reader, caption string, r
 }
 
 func (b Bot) SendVideoStr(chatId int, video string) (*Message, error) {
-	return b.replyVideoStr(chatId, video, 0)
+	return b.replyVideoStr(chatId, video, "", 0)
 }
 
 func (b Bot) ReplyVideoStr(chatId int, video string, replyToMessageId int) (*Message, error) {
-	return b.replyVideoStr(chatId, video, replyToMessageId)
+	return b.replyVideoStr(chatId, video, "", replyToMessageId)
 }
 
-func (b Bot) replyVideoStr(chatId int, video string, replyToMessageId int) (*Message, error) {
-	videoMsg := b.NewSendableVideo(chatId, "")
+func (b Bot) replyVideoStr(chatId int, video string, caption string, replyToMessageId int) (*Message, error) {
+	videoMsg := b.NewSendableVideo(chatId, caption)
 	videoMsg.FileId = video
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }
 
+func (b Bot) replyVideoPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	videoMsg := b.NewSendableVideo(chatId, caption)
+	videoMsg.Path = path
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
+}
+
+func (b Bot) replyVideoReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	videoMsg := b.NewSendableVideo(chatId, caption)
+	videoMsg.Reader = reader
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
+}
+
 func (b Bot) SendVoiceStr(chatId int, voice string) (*Message, error) {
-	return b.replyVoiceStr(chatId, voice, 0)
+	return b.replyVoiceStr(chatId, voice, "",0)
 }
 
 func (b Bot) ReplyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {
-	return b.replyVoiceStr(chatId, voice, replyToMessageId)
+	return b.replyVoiceStr(chatId, voice, "", replyToMessageId)
 }
 
-func (b Bot) replyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {
-	voiceMsg := b.NewSendableVoice(chatId, "")
+func (b Bot) replyVoiceStr(chatId int, voice string, caption string, replyToMessageId int) (*Message, error) {
+	voiceMsg := b.NewSendableVoice(chatId, caption)
 	voiceMsg.FileId = voice
+	voiceMsg.ReplyToMessageId = replyToMessageId
+	return voiceMsg.Send()
+}
+
+func (b Bot) replyVoicePath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	voiceMsg := b.NewSendableVoice(chatId, caption)
+	voiceMsg.Path = path
+	voiceMsg.ReplyToMessageId = replyToMessageId
+	return voiceMsg.Send()
+}
+
+func (b Bot) replyVoiceReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	voiceMsg := b.NewSendableVoice(chatId, caption)
+	voiceMsg.Reader = reader
 	voiceMsg.ReplyToMessageId = replyToMessageId
 	return voiceMsg.Send()
 }
@@ -160,6 +215,20 @@ func (b Bot) ReplyVideoNoteStr(chatId int, videoNote string, replyToMessageId in
 func (b Bot) replyVideoNoteStr(chatId int, videoNote string, replyToMessageId int) (*Message, error) {
 	videoMsg := b.NewSendableVideoNote(chatId)
 	videoMsg.FileId = videoNote
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
+}
+
+func (b Bot) replyVideoNotePath(chatId int, path string, replyToMessageId int) (*Message, error) {
+	videoMsg := b.NewSendableVideoNote(chatId)
+	videoMsg.Path = path
+	videoMsg.ReplyToMessageId = replyToMessageId
+	return videoMsg.Send()
+}
+
+func (b Bot) replyVideoNoteReader(chatId int, reader io.Reader, replyToMessageId int) (*Message, error) {
+	videoMsg := b.NewSendableVideoNote(chatId)
+	videoMsg.Reader = reader
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }
