@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"net/url"
 	"github.com/pkg/errors"
+	"io"
 )
 
 // TODO: Markdown and HTML - two different funcs?
@@ -89,9 +90,31 @@ func (b Bot) ReplyDocumentCaptionStr(chatId int, document string, caption string
 	return b.replyDocumentStr(chatId, document, caption, replyToMessageId)
 }
 
+func (b Bot) ReplyDocumentPath(chatId int, path string, replyToMessageId int) (*Message, error) {
+	return b.replyDocumentPath(chatId, path, "", replyToMessageId)
+}
+
+func (b Bot) ReplyDocumentCaptionPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyDocumentPath(chatId, path, caption, replyToMessageId)
+}
+
 func (b Bot) replyDocumentStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
 	docMsg := b.NewSendableDocument(chatId, caption)
 	docMsg.DocString = document
+	docMsg.ReplyToMessageId = replyToMessageId
+	return docMsg.Send()
+}
+
+func (b Bot) replyDocumentPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	docMsg := b.NewSendableDocument(chatId, caption)
+	docMsg.DocPath = path
+	docMsg.ReplyToMessageId = replyToMessageId
+	return docMsg.Send()
+}
+
+func (b Bot) replyDocumentReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	docMsg := b.NewSendableDocument(chatId, caption)
+	docMsg.DocReader = reader
 	docMsg.ReplyToMessageId = replyToMessageId
 	return docMsg.Send()
 }

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"log"
+	"io"
+	"os"
 )
 
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
@@ -180,10 +182,12 @@ func (msg *sendableAudio) Send() (*Message, error) {
 }
 
 type sendableDocument struct {
-	bot       Bot
-	ChatId    int
-	DocString string
-	//docFile
+	bot                 Bot
+	ChatId              int
+	DocName             string    // file name
+	DocString           string    // file id on tg servers
+	DocPath             string    // path to file on machine
+	DocReader           io.Reader // open file, bytesreader, whatever
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -194,19 +198,33 @@ type sendableDocument struct {
 func (msg *sendableDocument) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	if msg.DocString == "" {
-		v.Add("document", msg.DocString)
-	} else {
-		// TODO figure out type here
-		log.Println("TODO: implement docfiles")
-	}
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	// v.Add("reply_markup", "")
 
-	r, err := Get(msg.bot, "sendDocument", v)
+	var r *Response
+	var err error
+
+	if msg.DocString != "" {
+		v.Add("document", msg.DocString)
+		r, err = Get(msg.bot, "sendDocument", v)
+
+
+	} else if msg.DocPath != "" {
+		file, err := os.Open(msg.DocPath)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		r, err = Post(msg.bot, "sendDocument", v, file, file.Name())
+	} else if msg.DocReader != nil {
+		r, err = Post(msg.bot, "sendDocument", v, msg.DocReader, "file")
+	} else {
+		return nil, errors.New("no document type was specified")
+	}
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
 	}
