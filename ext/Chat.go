@@ -28,7 +28,7 @@ func (chat Chat) PromoteMember(userId int) (bool, error) {
 }
 
 func (chat Chat) ExportInviteLink() (string, error) {
-	return chat.bot.ExportChatLink(chat.Id)
+	return chat.bot.ExportChatInviteLink(chat.Id)
 }
 
 // TODO

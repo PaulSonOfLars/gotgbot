@@ -78,13 +78,13 @@ func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
 	return r.Ok, nil
 }
 
-func (b Bot) ExportChatLink(chatId int) (string, error) {
+func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "exportChatLink", v)
+	r, err := Get(b, "exportChatInviteLink", v)
 	if err != nil {
-		return "", errors.Wrapf(err, "unable to exportChatLink")
+		return "", errors.Wrapf(err, "unable to exportChatInviteLink")
 	}
 	if !r.Ok {
 		return "", errors.New(r.Description)

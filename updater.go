@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"fmt"
 )
 
 type Updater struct {
@@ -25,10 +26,15 @@ func NewUpdater(token string) Updater {
 
 func (u Updater) StartPolling() {
 	go u.Dispatcher.Start()
-	go u.startPolling()
+	go u.startPolling(false)
 }
 
-func (u Updater) startPolling() {
+func (u Updater) StartCleanPolling() {
+	go u.Dispatcher.Start()
+	go u.startPolling(true)
+}
+
+func (u Updater) startPolling(clean bool) {
 	v := url.Values{}
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))
@@ -46,9 +52,18 @@ func (u Updater) startPolling() {
 			continue
 
 		} else if r.Result != nil {
-			//fmt.Println(r)
 			var res []Update
 			json.Unmarshal(r.Result, &res)
+			if len(res) > 0 {
+				offset = res[len(res)-1].UpdateId + 1
+				v.Set("offset", strconv.Itoa(offset))
+				if clean {
+					continue
+				}
+			} else if len(res) == 0 { // TODO: this is unsustainable, and may eventually break on higher loads.
+				clean = false
+			}
+
 			for _, upd := range res {
 				if upd.Message != nil {
 					upd.EffectiveMessage = u.bot.NewMessage(upd.Message)
@@ -89,12 +104,7 @@ func (u Updater) startPolling() {
 
 				u.updates <- upd
 			}
-			if len(res) > 0 {
-				offset = res[len(res)-1].UpdateId + 1
-			}
 		}
-
-		v.Set("offset", strconv.Itoa(offset))
 	}
 }
 
