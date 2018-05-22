@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-	"fmt"
 )
 
 type Updater struct {
