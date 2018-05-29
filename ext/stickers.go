@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"github.com/pkg/errors"
+	"io"
 )
 
 // TODO: inputfile version
@@ -54,7 +55,6 @@ func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
 	}
 	if !r.Ok {
 		return nil, errors.New(r.Description)
-
 	}
 
 	var ss types.StickerSet
@@ -63,10 +63,23 @@ func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
 	return &ss, nil
 }
 
-// TODO: input file stuff
-//func (b Bot) UploadStickerFile(user_id int, png_sticker types.InputFile) types.File {
-//
-//}
+func (b Bot) UploadStickerFileStr(userId int, pngStickerId string) (*File, error) {
+	uploadSticker := b.NewSendableUploadStickerFile(userId)
+	uploadSticker.FileId = pngStickerId
+	return uploadSticker.Send()
+}
+
+func (b Bot) UploadStickerFilePath(userId int, path string) (*File, error) {
+	uploadSticker := b.NewSendableUploadStickerFile(userId)
+	uploadSticker.Path = path
+	return uploadSticker.Send()
+}
+
+func (b Bot) UploadStickerFileReader(userId int, reader io.Reader) (*File, error) {
+	uploadSticker := b.NewSendableUploadStickerFile(userId)
+	uploadSticker.Reader = reader
+	return uploadSticker.Send()
+}
 
 // TODO: contains mask + mask position version
 // TODO: InputFile version
