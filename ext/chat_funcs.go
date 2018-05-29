@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"github.com/pkg/errors"
 	"github.com/PaulSonOfLars/gotgbot/types"
+	"io"
 )
 
 func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
@@ -88,23 +89,23 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	return s, nil
 }
 
-// TODO: figure out InputFiles
-// TODO: r.OK or unmarshal??
-//func (b ext) SetChatPhoto(chatId int, photo types.InputFile) (bool, error) {
-//	v := api_url.Values{}
-//	v.Add("chat_id", strconv.Itoa(chatId))
-//	v.Add("photo", photo)
-//
-//	r, err := Get(b, "setChatPhoto", v)
-//	if !r.Ok {
-//		return false, errors.New(r.Description)
-//	}
-//
-//	var bb bool
-//	json.Unmarshal(r.Result, &bb)
-//
-//	return bb, nil
-//}
+func (b Bot) SetChatPhotoStr(chatId int, photoId string) (bool, error) {
+	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
+	setChatPhoto.FileId = photoId
+	return setChatPhoto.Send()
+}
+
+func (b Bot) SetChatPhotoPath(chatId int, path string) (bool, error) {
+	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
+	setChatPhoto.Path = path
+	return setChatPhoto.Send()
+}
+
+func (b Bot) SetChatPhotoReader(chatId int, reader io.Reader) (bool, error) {
+	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
+	setChatPhoto.Reader = reader
+	return setChatPhoto.Send()
+}
 
 func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	v := url.Values{}

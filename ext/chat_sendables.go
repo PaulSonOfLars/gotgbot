@@ -183,3 +183,30 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 
 	return bb, nil
 }
+
+type sendableSetChatPhoto struct {
+	bot                 Bot
+	ChatId              int
+	file
+}
+
+func (b Bot) NewSendableSetChatPhoto(chatId int) *sendableSetChatPhoto {
+	return &sendableSetChatPhoto{bot:b, ChatId: chatId}
+}
+
+func (scp *sendableSetChatPhoto) Send() (bool, error){
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(scp.ChatId))
+
+	r, err := sendFile(scp.file, "setChatPhoto", v)
+
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to setChatPhoto")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+	var newMsg bool
+	json.Unmarshal(r.Result, newMsg)
+	return newMsg, nil
+}
