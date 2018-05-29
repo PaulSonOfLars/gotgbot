@@ -9,40 +9,43 @@ import (
 	"io"
 )
 
-// TODO: inputfile version
-// TODO: reply_markup version
-func (b Bot) SendStickerStr(chatId int, sticker string) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("sticker", sticker)
-
-	r, err := Get(b, "sendSticker", v)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendSticker")
-	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
-	return b.ParseMessage(r.Result), nil
-
+func (b Bot) SendStickerStr(chatId int, stickerId string) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.FileId = stickerId
+	return sticker.Send()
 }
 
-func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) (*Message, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("sticker", sticker)
-	v.Add("reply_to_message_id", strconv.Itoa(replyToMessageId))
+func (b Bot) SendStickerPath(chatId int, path string) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.Path = path
+	return sticker.Send()
+}
 
-	r, err := Get(b, "sendSticker", v)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendSticker")
-	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+func (b Bot) SendStickerReader(chatId int, reader io.Reader) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.Reader = reader
+	return sticker.Send()
+}
 
-	return b.ParseMessage(r.Result), nil
+func (b Bot) ReplyStickerStr(chatId int, stickerId string, replyToMessageId int) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.FileId = stickerId
+	sticker.ReplyToMessageId = replyToMessageId
+	return sticker.Send()
+}
+
+func (b Bot) ReplyStickerPath(chatId int, path string, replyToMessageId int) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.Path = path
+	sticker.ReplyToMessageId = replyToMessageId
+	return sticker.Send()
+}
+
+func (b Bot) ReplyStickerReader(chatId int, reader io.Reader, replyToMessageId int) (*Message, error) {
+	sticker := b.NewSendableSticker(chatId)
+	sticker.Reader = reader
+	sticker.ReplyToMessageId = replyToMessageId
+	return sticker.Send()
 }
 
 func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {

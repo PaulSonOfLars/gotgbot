@@ -13,6 +13,34 @@ type File struct {
 	bot Bot
 }
 
+type sendableSticker struct {
+	bot                 Bot
+	ChatId              int
+	file
+	DisableNotification bool
+	ReplyToMessageId    int
+	ReplyMarkup         types.ReplyKeyboardMarkup
+}
+
+func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
+	return &sendableSticker{bot: b, ChatId: chatId}
+}
+
+func (s *sendableSticker) Send() (*Message, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(s.ChatId))
+
+	r, err := sendFile(s.file, "sendSticker", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendSticker")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+
+	return s.bot.ParseMessage(r.Result), nil
+}
+
 type sendableUploadStickerFile struct {
 	bot    Bot
 	UserId int

@@ -541,6 +541,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 
 func sendFile(msg file, endpoint string, params url.Values) (*Response, error) {
 	if msg.FileId != "" {
+		// todo: test working with file ids
 		return Get(msg.bot, endpoint, params)
 	} else if msg.Path != "" {
 		file, err := os.Open(msg.Path)
