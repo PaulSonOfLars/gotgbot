@@ -8,6 +8,7 @@ import (
 	"log"
 	"io"
 	"os"
+	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
@@ -60,7 +61,7 @@ func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 
 type file struct {
 	bot    Bot
-	Name string
+	Name   string
 	FileId string
 	Path   string
 	Reader io.Reader
@@ -74,10 +75,15 @@ type sendableTextMessage struct {
 	DisableWebPreview   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	// replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableTextMessage) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("text", msg.Text)
@@ -85,7 +91,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	v.Add("disable_web_page_preview", strconv.FormatBool(msg.DisableWebPreview))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := Get(msg.bot, "sendMessage", v)
 	if err != nil {
@@ -108,17 +114,21 @@ type sendablePhoto struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendablePhoto) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendPhoto", v)
 	if err != nil {
@@ -144,10 +154,15 @@ type sendableAudio struct {
 	Title               string
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableAudio) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("caption", msg.Caption)
@@ -157,7 +172,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("title", msg.Title)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendAudio", v)
 
@@ -182,17 +197,22 @@ type sendableDocument struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableDocument) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendDocument", v)
 
@@ -220,10 +240,15 @@ type sendableVideo struct {
 	SupportsStreaming   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableVideo) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("duration", strconv.Itoa(msg.Duration))
@@ -234,7 +259,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("supports_streaming", strconv.FormatBool(msg.SupportsStreaming))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendVideo", v)
 
@@ -259,10 +284,15 @@ type sendableVoice struct {
 	Duration            int
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableVoice) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("caption", msg.Caption)
@@ -270,7 +300,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("duration", strconv.Itoa(msg.Duration))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendVoice", v)
 
@@ -294,17 +324,22 @@ type sendableVideoNote struct {
 	Length              int
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableVideoNote) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("duration", strconv.Itoa(msg.Duration))
 	v.Add("length", strconv.Itoa(msg.Length))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := sendFile(msg.file, "sendVideoNote", v)
 
@@ -327,17 +362,22 @@ type sendableMediaGroup struct {
 	//media
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableMediaGroup) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	log.Println("TODO: media groups") // TODO
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	//v.Add("media")
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := Get(msg.bot, "sendMediaGroup", v)
 	if err != nil {
@@ -360,10 +400,15 @@ type sendableLocation struct {
 	LivePeriod          int
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableLocation) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("latitude", strconv.FormatFloat(msg.Latitude, 'f', -1, 64))
@@ -371,7 +416,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	v.Add("live_period", strconv.Itoa(msg.LivePeriod))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := Get(msg.bot, "sendLocation", v)
 	if err != nil {
@@ -399,10 +444,15 @@ type sendableVenue struct {
 	FoursquareId        string
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableVenue) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("latitude", strconv.FormatFloat(msg.Latitude, 'f', -1, 64))
@@ -412,7 +462,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	v.Add("foursquare_id", msg.FoursquareId)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := Get(msg.bot, "sendVenue", v)
 	if err != nil {
@@ -435,10 +485,15 @@ type sendableContact struct {
 	LastName            string
 	DisableNotification bool
 	ReplyToMessageId    int
-	//replyMarkup
+	ReplyMarkup         types.ReplyKeyboardMarkup
 }
 
 func (msg *sendableContact) Send() (*Message, error) {
+	replyMarkup, err := json.Marshal(msg.ReplyMarkup)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("phone_number", msg.PhoneNumber)
@@ -446,7 +501,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 	v.Add("last_name", msg.LastName)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
-	// v.Add("reply_markup", "")
+	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := Get(msg.bot, "sendContact", v)
 	if err != nil {
