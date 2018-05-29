@@ -84,7 +84,3 @@ func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	json.Unmarshal(r.Result, &bb)
 	return bb, nil
 }
-
-func (b Bot) Send(msg Sendable) (*Message, error) {
-	return msg.send()
-}

@@ -42,8 +42,8 @@ func (b Bot) ReplyStickerStr(chatId int, sticker string, replyToMessageId int) (
 	}
 
 	return b.ParseMessage(r.Result), nil
-
 }
+
 func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
 	v := url.Values{}
 	v.Add("name", name)
