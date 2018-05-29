@@ -464,13 +464,13 @@ func (msg *sendableContact) Send() (*Message, error) {
 type sendableChatAction struct {
 	bot    Bot
 	ChatId int
-	action string
+	Action string
 }
 
 func (msg *sendableChatAction) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	v.Add("action", msg.action)
+	v.Add("Action", msg.Action)
 
 	r, err := Get(msg.bot, "sendChatAction", v)
 	if err != nil {

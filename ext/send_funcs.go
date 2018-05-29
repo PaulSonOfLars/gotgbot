@@ -285,6 +285,6 @@ func (b Bot) replyContact(chatId int, phoneNumber string, firstName string, repl
 
 func (b Bot) SendChatAction(chatId int, action string) (bool, error) {
 	contactMsg := b.NewSendableChatAction(chatId)
-	contactMsg.action = action
+	contactMsg.Action = action
 	return contactMsg.Send()
 }

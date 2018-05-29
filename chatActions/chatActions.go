@@ -1,4 +1,4 @@
-package chatactions
+package chatActions
 
 const (
 	Typing          = "typing"

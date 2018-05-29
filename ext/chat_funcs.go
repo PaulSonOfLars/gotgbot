@@ -8,24 +8,17 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
-// TODO: r.OK or unmarshal??
 func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("user_id", strconv.Itoa(userId))
-
-	r, err := Get(b, "kickChatMember", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "could not kickChatMember")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	return r.Ok, nil
+	kick := b.NewSendableKickChatMember(chatId, userId)
+	return kick.Send()
 }
 
-// TODO: r.OK or unmarshal??
+func (b Bot) KickChatMemberUntil(chatId int, userId int, untilDate int) (bool, error) {
+	kick := b.NewSendableKickChatMember(chatId, userId)
+	kick.UntilDate = untilDate
+	return kick.Send()
+}
+
 func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -39,43 +32,42 @@ func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 		return false, errors.New(r.Description)
 	}
 
-	return r.Ok, nil
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
 }
 
-// TODO: Add a nice way for all the methods
-// TODO: r.OK or unmarshal??
 func (b Bot) RestrictChatMember(chatId int, userId int) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("user_id", strconv.Itoa(userId))
-
-	r, err := Get(b, "restrictChatMember", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "could not restrictChatMember")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	return r.Ok, nil
+	restrict := b.NewSendableRestrictChatMember(chatId, userId)
+	return restrict.Send()
 }
 
-// TODO: Add a nice way for all the methods
-// TODO: r.OK or unmarshal??
+func (b Bot) UnRestrictChatMember(chatId int, userId int) (bool, error) {
+	unRestrict := b.NewSendableRestrictChatMember(chatId, userId)
+	unRestrict.CanSendMessages = true
+	unRestrict.CanSendMediaMessages = true
+	unRestrict.CanSendOtherMessages = true
+	unRestrict.CanAddWebPagePreviews = true
+	return unRestrict.Send()
+}
+
 func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("user_id", strconv.Itoa(userId))
+	promote := b.NewSendablePromoteChatMember(chatId, userId)
+	return promote.Send()
+}
 
-	r, err := Get(b, "promoteChatMember", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "could not promoteChatMember")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	return r.Ok, nil
+func (b Bot) DemoteChatMember(chatId int, userId int) (bool, error) {
+	demote := b.NewSendablePromoteChatMember(chatId, userId)
+	demote.CanChangeInfo = false
+	demote.CanPostMessages = false
+	demote.CanEditMessages = false
+	demote.CanDeleteMessages = false
+	demote.CanInviteUsers = false
+	demote.CanRestrictMembers = false
+	demote.CanPinMessages = false
+	demote.CanPromoteMembers = false
+	return demote.Send()
 }
 
 func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
@@ -114,7 +106,6 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 //	return bb, nil
 //}
 
-// TODO: r.OK or unmarshal??
 func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -133,7 +124,6 @@ func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	return bb, nil
 }
 
-// TODO: r.OK or unmarshal??
 func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -153,7 +143,6 @@ func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 	return bb, nil
 }
 
-// TODO: r.OK or unmarshal??
 func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -173,27 +162,16 @@ func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 	return bb, nil
 }
 
-// TODO: r.OK or unmarshal??
 func (b Bot) PinChatMessage(chatId int, messageId int) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("message_id", strconv.Itoa(messageId))
-
-	r, err := Get(b, "pinChatMessage", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to pinChatMessage")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	pin := b.NewSendablePinChatMessage(chatId, messageId)
+	return pin.Send()
+}
+func (b Bot) QuietPinChatMessage(chatId int, messageId int) (bool, error) {
+	pin := b.NewSendablePinChatMessage(chatId, messageId)
+	pin.DisableNotification = true
+	return pin.Send()
 }
 
-// TODO: r.OK or unmarshal??
 func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -212,7 +190,6 @@ func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 	return bb, nil
 }
 
-// TODO: r.OK or unmarshal??
 func (b Bot) LeaveChat(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
@@ -221,7 +198,7 @@ func (b Bot) LeaveChat(chatId int) (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to leaveChat")
 	}
-if !r.Ok {
+	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
 

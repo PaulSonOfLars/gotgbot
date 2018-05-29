@@ -1,11 +1,5 @@
 package helpers
 
-import (
-	"regexp"
-)
-
-var toEscape = regexp.MustCompile("([*_`[])")
-
 func EscapeMarkdown(input string) string {
 	var final []rune
 	for _, c := range input {
