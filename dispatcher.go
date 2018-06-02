@@ -3,19 +3,23 @@ package gotgbot
 import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
+	"sort"
 )
 
 type Dispatcher struct {
-	Bot      ext.Bot
-	updates  chan Update
-	handlers *[]Handler
+	Bot           ext.Bot
+	updates       chan Update
+	handlers      map[int][]Handler
+	handlerGroups *[]int
 }
 
 func NewDispatcher(bot ext.Bot, updates chan Update) Dispatcher {
-	d := Dispatcher{}
-	d.Bot = bot
-	d.updates = updates
-	d.handlers = new([]Handler)
+	d := Dispatcher{
+		Bot:           bot,
+		updates:       updates,
+		handlers:      map[int][]Handler{},
+		handlerGroups: &[]int{},
+	}
 	return d
 }
 
@@ -26,17 +30,28 @@ func (d Dispatcher) Start() {
 }
 
 func (d Dispatcher) processUpdate(update Update) {
-	for _, handler := range *d.handlers {
-		if res, err := handler.CheckUpdate(update); res {
-			go handler.HandleUpdate(update, d)
-			break
-		} else if err != nil {
-			logrus.WithError(err).Error("Failed to parse update")
+	for _, handlerGroupNum := range *d.handlerGroups {
+		for _, handler := range d.handlers[handlerGroupNum] {
+			if res, err := handler.CheckUpdate(update); res {
+				go handler.HandleUpdate(update, d)
+				break // move to next group
+			} else if err != nil {
+				logrus.WithError(err).Error("Failed to parse update")
+			}
 		}
 	}
 }
 
 func (d Dispatcher) AddHandler(handler Handler) {
-	*d.handlers = append(*d.handlers, handler)
+	//*d.handlers = append(*d.handlers, handler)
+	d.AddHandlerToGroup(handler, 0)
+}
 
+func (d Dispatcher) AddHandlerToGroup(handler Handler, group int) {
+	currHandlers, ok := d.handlers[group]
+	if !ok {
+		*d.handlerGroups = append(*d.handlerGroups, group)
+		sort.Ints(*d.handlerGroups)
+	}
+	d.handlers[group] = append(currHandlers, handler)
 }
