@@ -84,52 +84,40 @@ func (b Bot) UploadStickerFileReader(userId int, reader io.Reader) (*File, error
 	return uploadSticker.Send()
 }
 
-// TODO: contains mask + mask position version
-// TODO: InputFile version
-// TODO: check return
-func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngSticker string, emojis string) (bool, error) {
-	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(userId))
-	v.Add("name", name)
-	v.Add("title", title)
-	v.Add("png_sticker", pngSticker)
-	v.Add("emojis", emojis)
-
-	r, err := Get(b, "createNewStickerSet", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to createNewStickerSet")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngStickerid string, emojis string) (bool, error) {
+	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew.FileId = pngStickerid
+	return createNew.Send()
 }
 
-// TODO: InputFile version
-// TODO: mask position version
-func (b Bot) AddStickerToSetStr(userId int, name string, pngSticker string, emojis string) (bool, error) {
-	v := url.Values{}
-	v.Add("user_id", strconv.Itoa(userId))
-	v.Add("name", name)
-	v.Add("png_sticker", pngSticker)
-	v.Add("emojis", emojis)
+func (b Bot) CreateNewStickerSetPath(userId int, name string, title string, path string, emojis string) (bool, error) {
+	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew.Path = path
+	return createNew.Send()
+}
 
-	r, err := Get(b, "addStickerToSet", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to addStickerToSet")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
+func (b Bot) CreateNewStickerSetReader(userId int, name string, title string, reader io.Reader, emojis string) (bool, error) {
+	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew.Reader = reader
+	return createNew.Send()
+}
 
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
+func (b Bot) AddStickerToSetStr(userId int, name string, pngStickerId string, emojis string) (bool, error) {
+	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
+	addSticker.FileId = pngStickerId
+	return addSticker.Send()
+}
 
-	return bb, nil
+func (b Bot) AddStickerToSetPath(userId int, name string, path string, emojis string) (bool, error) {
+	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
+	addSticker.Path = path
+	return addSticker.Send()
+}
+
+func (b Bot) AddStickerToSetReader(userId int, name string, reader io.Reader, emojis string) (bool, error) {
+	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
+	addSticker.Reader = reader
+	return addSticker.Send()
 }
 
 func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error) {

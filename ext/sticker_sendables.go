@@ -75,3 +75,86 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	json.Unmarshal(r.Result, newFile)
 	return newFile, nil
 }
+
+type sendableCreateNewSticker struct {
+	bot           Bot
+	UserId        int
+	Name          string
+	Title         string
+	file
+	Emojis        string
+	ContainsMasks bool
+	MaskPosition  *types.MaskPosition
+}
+
+func (b Bot) NewSendableCreateNewSticker(userId int, name string, title string, emojis string) *sendableCreateNewSticker {
+	return &sendableCreateNewSticker{bot: b, UserId: userId, Name: name, Title: title, Emojis: emojis}
+}
+
+func (cns *sendableCreateNewSticker) Send() (bool, error) {
+	maskPos, err := json.Marshal(cns.MaskPosition)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to parse mask position")
+	}
+
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(cns.UserId))
+	v.Add("name", cns.Name)
+	v.Add("title", cns.Title)
+	v.Add("emojis", cns.Emojis)
+	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
+	v.Add("mask_position", string(maskPos))
+
+	r, err := sendFile(cns.file, "createNewStickerSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to createNewStickerSet")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
+}
+
+type sendableAddStickerToSet struct {
+	bot          Bot
+	UserId       int
+	Name         string
+	file
+	Emojis       string
+	MaskPosition *types.MaskPosition
+}
+
+
+func (b Bot) NewSendableAddStickerToSet(userId int, name string, emojis string) *sendableAddStickerToSet {
+	return &sendableAddStickerToSet{bot: b, UserId: userId, Name: name, Emojis: emojis}
+}
+
+func (asts *sendableAddStickerToSet) Send() (bool, error) {
+	maskPos, err := json.Marshal(asts.MaskPosition)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to parse mask position")
+	}
+
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(asts.UserId))
+	v.Add("name", asts.Name)
+	v.Add("emojis", asts.Emojis)
+	v.Add("mask_position", string(maskPos))
+
+	r, err := sendFile(asts.file, "addStickerToSet", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to addStickerToSet")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
+}
