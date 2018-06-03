@@ -60,7 +60,6 @@ func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 }
 
 type file struct {
-	bot    Bot
 	Name   string
 	FileId string
 	Path   string
@@ -131,7 +130,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendPhoto", v)
+	r, err := msg.bot.sendFile(msg.file, "photo","sendPhoto", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendPhoto")
 	}
@@ -175,7 +174,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendAudio", v)
+	r, err := msg.bot.sendFile(msg.file, "audio","sendAudio", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
@@ -215,7 +214,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendDocument", v)
+	r, err := msg.bot.sendFile(msg.file, "document","sendDocument", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
@@ -262,7 +261,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendVideo", v)
+	r, err := msg.bot.sendFile(msg.file, "video","sendVideo", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideo")
@@ -303,7 +302,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendVoice", v)
+	r, err := msg.bot.sendFile(msg.file, "voice", "sendVoice", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVoice")
@@ -342,7 +341,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := sendFile(msg.file, "sendVideoNote", v)
+	r, err := msg.bot.sendFile(msg.file, "video", "sendVideoNote", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideoNote")
@@ -540,10 +539,10 @@ func (msg *sendableChatAction) Send() (bool, error) {
 	return newMsg, nil
 }
 
-func sendFile(msg file, endpoint string, params url.Values) (*Response, error) {
+func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (*Response, error) {
 	if msg.FileId != "" {
-		// todo: test working with file ids
-		return Get(msg.bot, endpoint, params)
+		params.Add(fileType, msg.FileId)
+		return Get(b, endpoint, params)
 	} else if msg.Path != "" {
 		file, err := os.Open(msg.Path)
 		if err != nil {
@@ -551,9 +550,9 @@ func sendFile(msg file, endpoint string, params url.Values) (*Response, error) {
 		}
 		defer file.Close()
 
-		return Post(msg.bot, endpoint, params, file, msg.Name)
+		return Post(b, fileType, endpoint, params, file, msg.Name)
 	} else if msg.Reader != nil {
-		return Post(msg.bot, endpoint, params, msg.Reader, msg.Name)
+		return Post(b, fileType, endpoint, params, msg.Reader, msg.Name)
 	} else {
 		return nil, errors.New("the message had no files that could be sent")
 	}

@@ -35,20 +35,28 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	return b.ParseMessage(r.Result), nil
 }
 
-func (b Bot) SendPhotoStr(chatId int, photo string) (*Message, error) {
-	return b.replyPhotoStr(chatId, photo, "", 0)
+func (b Bot) SendPhotoStr(chatId int, photoId string) (*Message, error) {
+	return b.replyPhotoStr(chatId, photoId, "", 0)
 }
 
-func (b Bot) SendPhotoCaptionStr(chatId int, photo string, caption string) (*Message, error) {
-	return b.replyPhotoStr(chatId, photo, caption, 0)
+func (b Bot) SendPhotoCaptionStr(chatId int, photoId string, caption string) (*Message, error) {
+	return b.replyPhotoStr(chatId, photoId, caption, 0)
 }
 
-func (b Bot) ReplyPhotoStr(chatId int, photo string, replyToMessageId int) (*Message, error) {
-	return b.replyPhotoStr(chatId, photo, "", replyToMessageId)
+func (b Bot) ReplyPhotoStr(chatId int, photoId string, replyToMessageId int) (*Message, error) {
+	return b.replyPhotoStr(chatId, photoId, "", replyToMessageId)
 }
 
-func (b Bot) ReplyPhotoCaptionStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {
-	return b.replyPhotoStr(chatId, photo, caption, replyToMessageId)
+func (b Bot) ReplyPhotoCaptionStr(chatId int, photoId string, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyPhotoStr(chatId, photoId, caption, replyToMessageId)
+}
+
+func (b Bot) ReplyPhotoCaptionPath(chatId int, path string, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyPhotoPath(chatId, path, caption, replyToMessageId)
+}
+
+func (b Bot) ReplyPhotoCaptionReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyPhotoReader(chatId, reader, caption, replyToMessageId)
 }
 
 func (b Bot) replyPhotoStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {

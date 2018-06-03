@@ -34,11 +34,15 @@ func (s *sendableSticker) Send() (*Message, error) {
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(s.ChatId))
-	v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
-	v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
-	v.Add("reply_markup", string(replyMarkup))
+	//v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
+	if s.ReplyToMessageId != 0 {
+		v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
+	}
+	if s.ReplyMarkup != nil {
+		v.Add("reply_markup", string(replyMarkup))
+	}
 
-	r, err := sendFile(s.file, "sendSticker", v)
+	r, err := s.bot.sendFile(s.file, "sticker", "sendSticker", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendSticker")
 	}
@@ -63,7 +67,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(usf.UserId))
 
-	r, err := sendFile(usf.file, "uploadStickerFile", v)
+	r, err := usf.bot.sendFile(usf.file, "sticker","uploadStickerFile", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to uploadStickerFile")
 	}
@@ -105,7 +109,7 @@ func (cns *sendableCreateNewSticker) Send() (bool, error) {
 	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
 	v.Add("mask_position", string(maskPos))
 
-	r, err := sendFile(cns.file, "createNewStickerSet", v)
+	r, err := cns.bot.sendFile(cns.file, "sticker","createNewStickerSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to createNewStickerSet")
 	}
@@ -145,7 +149,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	v.Add("emojis", asts.Emojis)
 	v.Add("mask_position", string(maskPos))
 
-	r, err := sendFile(asts.file, "addStickerToSet", v)
+	r, err := asts.bot.sendFile(asts.file, "sticker","addStickerToSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to addStickerToSet")
 	}

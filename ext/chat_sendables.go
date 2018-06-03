@@ -198,7 +198,7 @@ func (scp *sendableSetChatPhoto) Send() (bool, error){
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(scp.ChatId))
 
-	r, err := sendFile(scp.file, "setChatPhoto", v)
+	r, err := scp.bot.sendFile(scp.file, "photo", "setChatPhoto", v)
 
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setChatPhoto")

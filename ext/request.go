@@ -19,7 +19,7 @@ var client = &http.Client{
 	Transport:     nil,
 	CheckRedirect: nil,
 	Jar:           nil,
-	Timeout: time.Second * 5,
+	Timeout:       time.Second * 5,
 }
 
 type Response struct {
@@ -33,27 +33,27 @@ type Response struct {
 func Get(bot Bot, method string, params url.Values) (*Response, error) {
 	req, err := http.NewRequest("GET", apiUrl+bot.Token+"/"+method, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to build get request")
+		return nil, errors.Wrapf(err, "unable to build get request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to execute get request")
+		return nil, errors.Wrapf(err, "unable to execute get request to %v", method)
 	}
 	defer resp.Body.Close()
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return nil, errors.Wrapf(err, "could not decode in Get call")
+		return nil, errors.Wrapf(err, "could not decode in Get %v call", method)
 	}
 	return &r, nil
 }
 
-func Post(bot Bot, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
 	b := bytes.Buffer{}
 	w := multipart.NewWriter(&b)
-	part, err := w.CreateFormFile("document", filename)
+	part, err := w.CreateFormFile(fileType, filename)
 	if err != nil {
 		return nil, err
 	}
@@ -67,9 +67,9 @@ func Post(bot Bot, method string, params url.Values, file io.Reader, filename st
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", apiUrl+bot.Token+"/sendDocument", &b)
+	req, err := http.NewRequest("POST", apiUrl+bot.Token+"/"+method, &b)
 	if err != nil {
-		logrus.WithError(err).Error("fucked the getDoc func")
+		logrus.WithError(err).Errorf("failed to send to %v func", method)
 	}
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
