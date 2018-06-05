@@ -51,6 +51,9 @@ func Get(bot Bot, method string, params url.Values) (*Response, error) {
 }
 
 func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+	if filename == "" {
+		filename = "unnamed_file"
+	}
 	b := bytes.Buffer{}
 	w := multipart.NewWriter(&b)
 	part, err := w.CreateFormFile(fileType, filename)
