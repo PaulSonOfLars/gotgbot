@@ -10,27 +10,35 @@ import (
 )
 
 type Updater struct {
-	bot        ext.Bot
+	Bot        ext.Bot
 	updates    chan Update
-	Dispatcher Dispatcher
+	Dispatcher *Dispatcher
 }
 
-func NewUpdater(token string) Updater {
-	u := Updater{}
-	u.bot = ext.Bot{Token: token}
+func NewUpdater(token string) *Updater {
+	u := &Updater{}
+	u.Bot = ext.Bot{Token: token}
 	u.updates = make(chan Update)
-	u.Dispatcher = NewDispatcher(u.bot, u.updates)
+	u.Dispatcher = NewDispatcher(u.Bot, u.updates)
 	return u
 }
 
-func (u Updater) StartPolling() {
+func (u Updater) StartPolling() error {
+	if _, err := u.Bot.GetMe(); err != nil {
+		return err
+	}
 	go u.Dispatcher.Start()
 	go u.startPolling(false)
+	return nil
 }
 
-func (u Updater) StartCleanPolling() {
+func (u Updater) StartCleanPolling() error {
+	if _, err := u.Bot.GetMe(); err != nil {
+		return err
+	}
 	go u.Dispatcher.Start()
 	go u.startPolling(true)
+	return nil
 }
 
 func (u Updater) startPolling(clean bool) {
@@ -39,7 +47,7 @@ func (u Updater) startPolling(clean bool) {
 	v.Add("timeout", strconv.Itoa(0))
 	offset := 0
 	for {
-		r, err := ext.Get(u.bot, "getUpdates", v)
+		r, err := ext.Get(u.Bot, "getUpdates", v)
 		if err != nil {
 			logrus.WithError(err).Error("unable to getUpdates")
 			continue
@@ -65,39 +73,39 @@ func (u Updater) startPolling(clean bool) {
 
 			for _, upd := range res {
 				if upd.Message != nil {
-					upd.EffectiveMessage = u.bot.NewMessage(upd.Message)
-					upd.EffectiveChat = u.bot.NewChat(upd.Message.Chat)
-					upd.EffectiveUser = u.bot.NewUser(upd.Message.From)
+					upd.EffectiveMessage = u.Bot.NewMessage(upd.Message)
+					upd.EffectiveChat = u.Bot.NewChat(upd.Message.Chat)
+					upd.EffectiveUser = u.Bot.NewUser(upd.Message.From)
 
 				} else if upd.EditedMessage != nil {
-					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedMessage)
-					upd.EffectiveChat = u.bot.NewChat(upd.EditedMessage.Chat)
-					upd.EffectiveUser = u.bot.NewUser(upd.EditedMessage.From)
+					upd.EffectiveMessage = u.Bot.NewMessage(upd.EditedMessage)
+					upd.EffectiveChat = u.Bot.NewChat(upd.EditedMessage.Chat)
+					upd.EffectiveUser = u.Bot.NewUser(upd.EditedMessage.From)
 
 				} else if upd.ChannelPost != nil {
-					upd.EffectiveMessage = u.bot.NewMessage(upd.ChannelPost)
-					upd.EffectiveChat = u.bot.NewChat(upd.ChannelPost.Chat)
+					upd.EffectiveMessage = u.Bot.NewMessage(upd.ChannelPost)
+					upd.EffectiveChat = u.Bot.NewChat(upd.ChannelPost.Chat)
 
 				} else if upd.EditedChannelPost != nil {
-					upd.EffectiveMessage = u.bot.NewMessage(upd.EditedChannelPost)
-					upd.EffectiveChat = u.bot.NewChat(upd.EditedChannelPost.Chat)
+					upd.EffectiveMessage = u.Bot.NewMessage(upd.EditedChannelPost)
+					upd.EffectiveChat = u.Bot.NewChat(upd.EditedChannelPost.Chat)
 
 				} else if upd.InlineQuery != nil {
-					upd.EffectiveMessage = u.bot.NewMessage(upd.InlineQuery)
-					upd.EffectiveUser = u.bot.NewUser(upd.InlineQuery.From)
+					upd.EffectiveMessage = u.Bot.NewMessage(upd.InlineQuery)
+					upd.EffectiveUser = u.Bot.NewUser(upd.InlineQuery.From)
 
 				} else if upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil {
-					upd.EffectiveChat = u.bot.NewChat(upd.CallbackQuery.Message.Chat)
-					upd.EffectiveUser = u.bot.NewUser(upd.CallbackQuery.From)
+					upd.EffectiveChat = u.Bot.NewChat(upd.CallbackQuery.Message.Chat)
+					upd.EffectiveUser = u.Bot.NewUser(upd.CallbackQuery.From)
 
 				} else if upd.ChosenInlineResult != nil {
-					upd.EffectiveUser = u.bot.NewUser(upd.ChosenInlineResult.From)
+					upd.EffectiveUser = u.Bot.NewUser(upd.ChosenInlineResult.From)
 
 				} else if upd.ShippingQuery != nil {
-					upd.EffectiveUser = u.bot.NewUser(upd.ShippingQuery.From)
+					upd.EffectiveUser = u.Bot.NewUser(upd.ShippingQuery.From)
 
 				} else if upd.PreCheckoutQuery != nil {
-					upd.EffectiveUser = u.bot.NewUser(upd.PreCheckoutQuery.From)
+					upd.EffectiveUser = u.Bot.NewUser(upd.PreCheckoutQuery.From)
 
 				}
 

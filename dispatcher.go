@@ -13,14 +13,13 @@ type Dispatcher struct {
 	handlerGroups *[]int
 }
 
-func NewDispatcher(bot ext.Bot, updates chan Update) Dispatcher {
-	d := Dispatcher{
+func NewDispatcher(bot ext.Bot, updates chan Update) *Dispatcher {
+	return &Dispatcher{
 		Bot:           bot,
 		updates:       updates,
 		handlers:      map[int][]Handler{},
 		handlerGroups: &[]int{},
 	}
-	return d
 }
 
 func (d Dispatcher) Start() {
