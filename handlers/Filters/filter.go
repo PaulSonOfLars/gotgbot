@@ -3,6 +3,7 @@ package Filters
 import (
 	"strings"
 	"github.com/PaulSonOfLars/gotgbot/types"
+	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
 
@@ -14,16 +15,13 @@ func Text(message *types.Message) bool {
 	return message.Text != ""
 }
 
-
 func Command(message *types.Message) bool {
 	return message.Text != "" && strings.HasPrefix(message.Text, "/")
 }
 
-
 func Reply(message *types.Message) bool {
 	return message.ReplyToMessage != nil
 }
-
 
 func Audio(message *types.Message) bool {
 	return message.Audio != nil
@@ -65,13 +63,13 @@ func Game(message *types.Message) bool {
 	return message.Game != nil
 }
 
-//func Private(message *ext.Message) bool {
-//	return message.Chat.Type == PRIVATE
-//}
-//
-//func Group(message *ext.Message) bool {
-//	return message.Chat.Type == GROUP or SUPERGROUP
-//}
+func Private(message *ext.Message) bool {
+	return message.Chat.Type == "private"
+}
+
+func Group(message *ext.Message) bool {
+	return message.Chat.Type == "group" || message.Chat.Type == "supergroup"
+}
 
 func Username(name string) func(message *types.Message) bool {
 	return func(m *types.Message) bool {
@@ -94,5 +92,23 @@ func Chatusername(name string) func(message *types.Message) bool {
 func ChatID(id int) func(message *types.Message) bool {
 	return func(m *types.Message) bool {
 		return m.Chat != nil && m.Chat.Id == id
+	}
+}
+
+func NewChatMembers() func(message *types.Message) bool {
+	return func(m *types.Message) bool {
+		return m.NewChatMembers != nil
+	}
+}
+
+func LeftChatMembers() func(message *types.Message) bool {
+	return func(m *types.Message) bool {
+		return m.LeftChatMember != nil
+	}
+}
+
+func Migrate() func(message *types.Message) bool {
+	return func(m *types.Message) bool {
+		return m.MigrateFromChatId != 0 || m.MigrateToChatId != 0
 	}
 }

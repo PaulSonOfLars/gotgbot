@@ -78,7 +78,7 @@ type Venue struct {
 
 type PreCheckoutQuery struct {
 	Id               string    `json:"id"`
-	From             *User      `json:"from"`
+	From             *User     `json:"from"`
 	Currency         string    `json:"currency"`
 	TotalAmount      int       `json:"total_amount"`
 	InvoicePayload   string    `json:"invoice_payload"`
@@ -114,10 +114,9 @@ type Message struct {
 	Contact               *Contact           `json:"contact"`
 	Location              *Location          `json:"location"`
 	Venue                 *Venue             `json:"venue"`
-	NewChatMember         *User              `json:"new_chat_member"`
 	LeftChatMember        *User              `json:"left_chat_member"`
 	NewChatTitle          string             `json:"new_chat_title"`
-	NewChatPhot           []PhotoSize        `json:"new_chat_phot"`
+	NewChatPhoto          []PhotoSize        `json:"new_chat_phot"`
 	DeleteChatPhoto       bool               `json:"delete_chat_photo"`
 	GroupChatCreated      bool               `json:"group_chat_created"`
 	SupergroupChatCreated bool               `json:"supergroup_chat_created"`
