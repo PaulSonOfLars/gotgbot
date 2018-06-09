@@ -122,6 +122,10 @@ func initUpdate(data json.RawMessage, bot ext.Bot) Update {
 
 	if upd.EffectiveMessage != nil {
 		upd.EffectiveMessage.Bot = bot
+		if upd.EffectiveMessage.ReplyToMessage != nil {
+			upd.EffectiveMessage.ReplyToMessage.Bot = bot
+			upd.EffectiveMessage.ReplyToMessage.From.Bot = bot
+		}
 	}
 	if upd.EffectiveChat != nil {
 		upd.EffectiveChat.Bot = bot

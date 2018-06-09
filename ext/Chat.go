@@ -60,6 +60,10 @@ func (chat Chat) PromoteMember(userId int) (bool, error) {
 	return chat.Bot.PromoteChatMember(chat.Id, userId)
 }
 
+func (chat Chat) DemoteMember(userId int) (bool, error) {
+	return chat.Bot.DemoteChatMember(chat.Id, userId)
+}
+
 func (chat Chat) ExportInviteLink() (string, error) {
 	return chat.Bot.ExportChatInviteLink(chat.Id)
 }
