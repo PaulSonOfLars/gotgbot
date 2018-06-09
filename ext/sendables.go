@@ -8,7 +8,6 @@ import (
 	"log"
 	"io"
 	"os"
-	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
@@ -74,7 +73,7 @@ type sendableTextMessage struct {
 	DisableWebPreview   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableTextMessage) Send() (*Message, error) {
@@ -100,7 +99,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -113,7 +112,7 @@ type sendablePhoto struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendablePhoto) Send() (*Message, error) {
@@ -138,7 +137,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -154,7 +153,7 @@ type sendableAudio struct {
 	Title               string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableAudio) Send() (*Message, error) {
@@ -183,7 +182,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -197,7 +196,7 @@ type sendableDocument struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableDocument) Send() (*Message, error) {
@@ -223,7 +222,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -240,7 +239,7 @@ type sendableVideo struct {
 	SupportsStreaming   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableVideo) Send() (*Message, error) {
@@ -270,7 +269,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -284,7 +283,7 @@ type sendableVoice struct {
 	Duration            int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableVoice) Send() (*Message, error) {
@@ -311,7 +310,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -324,7 +323,7 @@ type sendableVideoNote struct {
 	Length              int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableVideoNote) Send() (*Message, error) {
@@ -350,7 +349,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -362,7 +361,7 @@ type sendableMediaGroup struct {
 	//media
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableMediaGroup) Send() (*Message, error) {
@@ -387,7 +386,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -400,7 +399,7 @@ type sendableLocation struct {
 	LivePeriod          int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableLocation) Send() (*Message, error) {
@@ -426,7 +425,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -444,7 +443,7 @@ type sendableVenue struct {
 	FoursquareId        string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableVenue) Send() (*Message, error) {
@@ -472,7 +471,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }
@@ -485,7 +484,7 @@ type sendableContact struct {
 	LastName            string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (msg *sendableContact) Send() (*Message, error) {
@@ -511,7 +510,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	newMsg := &Message{}
-	newMsg.bot = msg.bot
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }

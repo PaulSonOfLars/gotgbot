@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"net/url"
 	"github.com/pkg/errors"
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"io"
 )
 
@@ -227,7 +226,7 @@ func (b Bot) GetChat(chatId int) (*Chat, error) {
 	return &c, nil
 }
 
-func (b Bot) GetChatAdministrators(chatId int) ([]types.ChatMember, error) {
+func (b Bot) GetChatAdministrators(chatId int) ([]ChatMember, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
@@ -239,7 +238,7 @@ func (b Bot) GetChatAdministrators(chatId int) ([]types.ChatMember, error) {
 		return nil, errors.New(r.Description)
 	}
 
-	var cm []types.ChatMember
+	var cm []ChatMember
 	json.Unmarshal(r.Result, &cm)
 
 	return cm, nil
@@ -263,7 +262,7 @@ func (b Bot) GetChatMembersCount(chatId int) (int, error) {
 	return c, nil
 }
 
-func (b Bot) GetChatMember(chatId int, userId int) (*types.ChatMember, error) {
+func (b Bot) GetChatMember(chatId int, userId int) (*ChatMember, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
@@ -276,7 +275,7 @@ func (b Bot) GetChatMember(chatId int, userId int) (*types.ChatMember, error) {
 		return nil, errors.New(r.Description)
 	}
 
-	var cm types.ChatMember
+	var cm ChatMember
 	json.Unmarshal(r.Result, &cm)
 
 	return &cm, nil

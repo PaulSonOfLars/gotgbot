@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"net/url"
@@ -9,8 +8,10 @@ import (
 )
 
 type File struct {
-	types.File
 	bot Bot
+	FileId   string `json:"file_id"`
+	FileSize int    `json:"file_size"`
+	FilePath string `json:"file_path"`
 }
 
 type sendableSticker struct {
@@ -19,7 +20,7 @@ type sendableSticker struct {
 	file
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *types.ReplyKeyboardMarkup
+	ReplyMarkup         *ReplyKeyboardMarkup
 }
 
 func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
@@ -88,7 +89,7 @@ type sendableCreateNewSticker struct {
 	file
 	Emojis        string
 	ContainsMasks bool
-	MaskPosition  *types.MaskPosition
+	MaskPosition  *MaskPosition
 }
 
 func (b Bot) NewSendableCreateNewSticker(userId int, name string, title string, emojis string) *sendableCreateNewSticker {
@@ -129,7 +130,7 @@ type sendableAddStickerToSet struct {
 	Name         string
 	file
 	Emojis       string
-	MaskPosition *types.MaskPosition
+	MaskPosition *MaskPosition
 }
 
 

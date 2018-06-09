@@ -2,19 +2,18 @@ package handlers
 
 import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"github.com/PaulSonOfLars/gotgbot"
 
 )
 
 
 type Message struct {
-	filterFunc func(message *types.Message) bool
+	filterFunc func(message *ext.Message) bool
 	response   func(b ext.Bot, u gotgbot.Update)
 
 }
 
-func NewMessage(filterFunc func(message *types.Message) bool,
+func NewMessage(filterFunc func(message *ext.Message) bool,
 				response func(b ext.Bot, u gotgbot.Update)) Message {
 	h := Message{}
 	h.filterFunc = filterFunc

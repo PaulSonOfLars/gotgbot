@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"net/url"
@@ -17,7 +16,7 @@ type sendableInvoice struct {
 	ProviderToken             string
 	StartParameter            string
 	Currency                  string
-	Prices                    []types.LabeledPrice
+	Prices                    []LabeledPrice
 	ProviderData              string
 	PhotoUrl                  string
 	PhotoSize                 int
@@ -32,10 +31,10 @@ type sendableInvoice struct {
 	IsFlexible                bool
 	DisableNotification       bool
 	ReplyToMessageId          int
-	ReplyMarkup               *types.ReplyKeyboardMarkup
+	ReplyMarkup               *ReplyKeyboardMarkup
 }
 
-func (b Bot) NewSendableInvoice(chatId int, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []types.LabeledPrice) *sendableInvoice {
+func (b Bot) NewSendableInvoice(chatId int, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []LabeledPrice) *sendableInvoice {
 	return &sendableInvoice{
 		bot:            b,
 		ChatId:         chatId,
@@ -99,7 +98,7 @@ type sendableAnswerShippingQuery struct {
 	bot             Bot
 	ShippingQueryId string
 	Ok              bool
-	ShippingOptions []types.ShippingOption
+	ShippingOptions []ShippingOption
 	ErrorMessage    string
 }
 
@@ -137,7 +136,7 @@ type sendableAnswerPreCheckoutQuery struct {
 	bot             Bot
 	ShippingQueryId string
 	Ok              bool
-	ShippingOptions []types.ShippingOption
+	ShippingOptions []ShippingOption
 	ErrorMessage    string
 }
 

@@ -1,13 +1,38 @@
 package ext
 
 import (
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"strconv"
 	"encoding/json"
 	"net/url"
 	"github.com/pkg/errors"
 	"io"
 )
+
+type Sticker struct {
+	FileId       string       `json:"file_id"`
+	Width        int          `json:"width"`
+	Height       int          `json:"height"`
+	Thumb        PhotoSize    `json:"thumb"`
+	Emoji        string       `json:"emoji"`
+	SetName      string       `json:"set_name"`
+	MaskPosition MaskPosition `json:"mask_position"`
+	FileSize     int          `json:"file_size"`
+}
+
+type StickerSet struct {
+	bot Bot
+	Name          string    `json:"name"`
+	Title         string    `json:"title"`
+	ContainsMasks bool      `json:"contains_masks"`
+	Stickers      []Sticker `json:"stickers"`
+}
+
+type MaskPosition struct {
+	Point  string  `json:"point"`
+	XShift float64 `json:"x_shift"`
+	YShift float64 `json:"y_shift"`
+	Scale  float64 `json:"scale"`
+}
 
 func (b Bot) SendStickerStr(chatId int, stickerId string) (*Message, error) {
 	sticker := b.NewSendableSticker(chatId)
@@ -48,7 +73,7 @@ func (b Bot) ReplyStickerReader(chatId int, reader io.Reader, replyToMessageId i
 	return sticker.Send()
 }
 
-func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
+func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 	v := url.Values{}
 	v.Add("name", name)
 
@@ -60,7 +85,7 @@ func (b Bot) GetStickerSet(name string) (*types.StickerSet, error) {
 		return nil, errors.New(r.Description)
 	}
 
-	var ss types.StickerSet
+	var ss StickerSet
 	json.Unmarshal(r.Result, &ss)
 
 	return &ss, nil

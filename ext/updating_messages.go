@@ -3,7 +3,6 @@ package ext
 import (
 	"strconv"
 	"encoding/json"
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"net/url"
 	"github.com/pkg/errors"
 )
@@ -93,7 +92,7 @@ func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (b
 }
 
 // TODO: Check return
-func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup types.InlineKeyboardMarkup) (bool, error) {
+func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
 		return false, nil
@@ -118,7 +117,7 @@ func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup types
 }
 
 // TODO: Check return
-func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup types.InlineKeyboardMarkup) (bool, error) {
+func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
 		return false, errors.Wrapf(err, "error editing inline markup reply")

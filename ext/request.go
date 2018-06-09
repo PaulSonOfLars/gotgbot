@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"bytes"
 	"mime/multipart"
-	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 var apiUrl = "https://api.telegram.org/bot"
@@ -89,16 +88,16 @@ func Post(bot Bot, fileType string, method string, params url.Values, file io.Re
 	return &r, nil
 }
 
-func marshalRepyMarkup(keyboardMarkup *types.ReplyKeyboardMarkup) ([]byte, error) {
+func marshalRepyMarkup(keyboardMarkup *ReplyKeyboardMarkup) ([]byte, error) {
 	if keyboardMarkup == nil {
-		keyboardMarkup = &types.ReplyKeyboardMarkup{
-			Keyboard:        &[][]types.KeyboardButton{},
+		keyboardMarkup = &ReplyKeyboardMarkup{
+			Keyboard:        &[][]KeyboardButton{},
 			ResizeKeyboard:  false,
 			OneTimeKeyboard: false,
 			Selective:       false,
 		}
 	} else if keyboardMarkup.Keyboard == nil {
-		keyboardMarkup.Keyboard = &[][]types.KeyboardButton{}
+		keyboardMarkup.Keyboard = &[][]KeyboardButton{}
 	}
 
 	replyMarkup, err := json.Marshal(keyboardMarkup)

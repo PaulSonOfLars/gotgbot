@@ -1,4 +1,4 @@
-package types
+package ext
 
 type ReplyKeyboardMarkup struct {
 	Keyboard        *[][]KeyboardButton `json:"keyboard"`

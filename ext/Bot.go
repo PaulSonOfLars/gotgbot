@@ -5,14 +5,13 @@ import (
 	"strconv"
 	"net/url"
 	"github.com/pkg/errors"
-	"github.com/PaulSonOfLars/gotgbot/types"
 )
 
 type Bot struct {
 	Token string
 }
 
-func (b Bot) GetMe() (*types.User, error) {
+func (b Bot) GetMe() (*User, error) {
 	v := url.Values{}
 
 	r, err := Get(b, "getMe", v)
@@ -23,13 +22,13 @@ func (b Bot) GetMe() (*types.User, error) {
 		return nil, errors.New("invalid getMe request")
 	}
 
-	var u types.User
+	var u User
 	json.Unmarshal(r.Result, &u)
 	return &u, nil
 
 }
 
-func (b Bot) GetUserProfilePhotos(userId int) (*types.UserProfilePhotos, error) {
+func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 
@@ -42,14 +41,14 @@ func (b Bot) GetUserProfilePhotos(userId int) (*types.UserProfilePhotos, error) 
 		return nil, errors.New("invalid getUserProfilePhotos request")
 	}
 
-	var userProfilePhotos types.UserProfilePhotos
+	var userProfilePhotos UserProfilePhotos
 	json.Unmarshal(r.Result, &userProfilePhotos)
 
 	return &userProfilePhotos, nil
 }
 
 
-func (b Bot) GetFile(fileId string) (*types.File, error) {
+func (b Bot) GetFile(fileId string) (*File, error) {
 	v := url.Values{}
 	v.Add("file_id", fileId)
 
@@ -61,7 +60,7 @@ func (b Bot) GetFile(fileId string) (*types.File, error) {
 		return nil, errors.New("invalid getFile request")
 	}
 
-	var f types.File
+	var f File
 	json.Unmarshal(r.Result, &f)
 	return &f, nil
 }

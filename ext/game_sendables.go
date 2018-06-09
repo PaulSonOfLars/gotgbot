@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"github.com/PaulSonOfLars/gotgbot/types"
 	"net/url"
 	"strconv"
 	"github.com/pkg/errors"
@@ -14,7 +13,7 @@ type sendableGame struct {
 	GameShortName string
 	DisableNotification bool
 	ReplyToMessageId int
-	ReplyMarkup types.InlineKeyboardMarkup
+	ReplyMarkup InlineKeyboardMarkup
 }
 
 func (b Bot) NewSendableGame(chatId int, gameShortName string) *sendableGame {
@@ -97,7 +96,7 @@ func (b Bot) NewSendableGetGameHighScoreInline(userId int, inlineMessageId strin
 	return &sendableGetGameHighScores{bot: b, UserId: userId, InlineMessageId: inlineMessageId}
 }
 
-func (gghs *sendableGetGameHighScores) Send() ([]types.GameHighScore, error){
+func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error){
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(gghs.UserId))
 	v.Add("chat_id", strconv.Itoa(gghs.ChatId))
@@ -112,7 +111,7 @@ func (gghs *sendableGetGameHighScores) Send() ([]types.GameHighScore, error){
 		return nil, errors.Wrapf(err, "invalid getGameHighScores request")
 	}
 
-	var ghs []types.GameHighScore
+	var ghs []GameHighScore
 	json.Unmarshal(r.Result, &ghs)
 
 	return ghs, nil
