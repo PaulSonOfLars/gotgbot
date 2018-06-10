@@ -10,7 +10,7 @@ type Handler interface {
 }
 
 type Update struct {
-	UpdateId           int                       `json:"update_id"`
+	UpdateId           int                     `json:"update_id"`
 	Message            *ext.Message            `json:"message"`
 	EditedMessage      *ext.Message            `json:"edited_message"`
 	ChannelPost        *ext.Message            `json:"channel_post"`

@@ -2,6 +2,7 @@ package ext
 
 import (
 	"encoding/json"
+	"unicode/utf16"
 )
 
 type MessageEntity struct {
@@ -9,7 +10,16 @@ type MessageEntity struct {
 	Offset int    `json:"offset"`
 	Length int    `json:"length"`
 	Url    string `json:"url"`
-	User   User   `json:"user"`
+	User   *User  `json:"user"`
+}
+
+type ParsedMessageEntity struct {
+	Type   string `json:"type"`
+	Offset int    `json:"offset"`
+	Length int    `json:"length"`
+	Url    string `json:"url"`
+	User   *User  `json:"user"`
+	Text   string `json:"text"`
 }
 
 type Audio struct {
@@ -91,7 +101,7 @@ type PreCheckoutQuery struct {
 }
 
 type Message struct {
-	Bot Bot
+	Bot                   Bot
 	MessageId             int                `json:"message_id"`
 	From                  *User              `json:"from"`
 	Date                  int                `json:"date"`
@@ -131,6 +141,10 @@ type Message struct {
 	PinnedMessage         *Message           `json:"pinned_message"`
 	Invoice               *Invoice           `json:"invoice"`
 	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
+
+	// internals
+	utf16Text    []uint16
+	originalText string
 }
 
 func (b Bot) Message(chatId int, text string) Message {
@@ -190,4 +204,60 @@ func (m Message) Delete() (bool, error) {
 
 func (m Message) Forward(chatId int) (*Message, error) {
 	return m.Bot.ForwardMessage(chatId, m.Chat.Id, m.MessageId)
+}
+
+func (m *Message) ParseEntities() []ParsedMessageEntity {
+	var out []ParsedMessageEntity
+	for _, ent := range m.Entities {
+		out = append(out, m.ParseEntity(ent))
+	}
+	return out
+}
+
+func (m *Message) ParseEntity(entity MessageEntity) ParsedMessageEntity {
+	if m.utf16Text == nil {
+		m.utf16Text = utf16.Encode([]rune(m.Text))
+	}
+	text := string(utf16.Decode(m.utf16Text[entity.Offset : entity.Offset+entity.Length]))
+	if entity.User != nil {
+		entity.User.Bot = m.Bot
+	}
+	return ParsedMessageEntity{
+		Type:   entity.Type,
+		Offset: len(string(utf16.Decode(m.utf16Text[:entity.Offset]))),
+		Length: len(text),
+		Url:    entity.Url,
+		User:   entity.User,
+		Text:   text,
+	}
+}
+
+var mdMap = map[string]string{
+	"bold":   "*",
+	"italic": "_",
+	"code":   "`",
+}
+
+func (m *Message) OriginalText() string {
+	if m.originalText != "" {
+		return m.originalText
+	}
+	if m.utf16Text == nil {
+		m.utf16Text = utf16.Encode([]rune(m.Text))
+	}
+	prev := 0
+	for _, ent := range m.Entities {
+		switch ent.Type {
+		case "bold", "italic", "code":
+			newPrev := ent.Offset + ent.Length
+			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Text[ent.Offset:newPrev])) + mdMap[ent.Type]
+			prev = newPrev
+		case "text_link":
+			newPrev := ent.Offset + ent.Length
+			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Text[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
+			prev = newPrev
+		}
+	}
+	m.originalText += string(utf16.Decode(m.utf16Text[prev:]))
+	return m.originalText
 }
