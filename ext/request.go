@@ -87,22 +87,3 @@ func Post(bot Bot, fileType string, method string, params url.Values, file io.Re
 	}
 	return &r, nil
 }
-
-func marshalRepyMarkup(keyboardMarkup *ReplyKeyboardMarkup) ([]byte, error) {
-	if keyboardMarkup == nil {
-		keyboardMarkup = &ReplyKeyboardMarkup{
-			Keyboard:        &[][]KeyboardButton{},
-			ResizeKeyboard:  false,
-			OneTimeKeyboard: false,
-			Selective:       false,
-		}
-	} else if keyboardMarkup.Keyboard == nil {
-		keyboardMarkup.Keyboard = &[][]KeyboardButton{}
-	}
-
-	replyMarkup, err := json.Marshal(keyboardMarkup)
-	if err != nil {
-		return nil, errors.Wrapf(err, "could not marshal reply markup")
-	}
-	return replyMarkup, nil
-}

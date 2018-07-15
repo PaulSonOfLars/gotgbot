@@ -1,10 +1,38 @@
 package ext
 
+import (
+	"encoding/json"
+	"github.com/pkg/errors"
+)
+
+type ReplyMarkup interface {
+	Marshal() ([]byte, error)
+}
+
 type ReplyKeyboardMarkup struct {
 	Keyboard        *[][]KeyboardButton `json:"keyboard"`
 	ResizeKeyboard  bool                `json:"resize_keyboard"`
 	OneTimeKeyboard bool                `json:"one_time_keyboard"`
 	Selective       bool                `json:"selective"`
+}
+
+func (rkm *ReplyKeyboardMarkup) Marshal() ([]byte, error) {
+	if rkm == nil {
+		rkm = &ReplyKeyboardMarkup{
+			Keyboard:        &[][]KeyboardButton{},
+			ResizeKeyboard:  false,
+			OneTimeKeyboard: false,
+			Selective:       false,
+		}
+	} else if rkm.Keyboard == nil {
+		rkm.Keyboard = &[][]KeyboardButton{}
+	}
+
+	replyMarkup, err := json.Marshal(rkm)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal reply markup")
+	}
+	return replyMarkup, nil
 }
 
 type KeyboardButton struct {
@@ -18,8 +46,39 @@ type ReplyKeyboardRemove struct {
 	Selective      bool `json:"selective"`
 }
 
+func (rkm *ReplyKeyboardRemove) Marshal() ([]byte, error) {
+	if rkm == nil {
+		rkm = &ReplyKeyboardRemove{
+			RemoveKeyboard: false,
+			Selective:      false,
+		}
+	}
+
+	kbRemove, err := json.Marshal(rkm)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal keyboard removal")
+	}
+	return kbRemove, nil
+}
+
 type InlineKeyboardMarkup struct {
-	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
+	InlineKeyboard *[][]InlineKeyboardButton `json:"inline_keyboard"`
+}
+
+func (rkm *InlineKeyboardMarkup) Marshal() ([]byte, error) {
+	if rkm == nil {
+		rkm = &InlineKeyboardMarkup{
+			InlineKeyboard: &[][]InlineKeyboardButton{},
+		}
+	} else if rkm.InlineKeyboard == nil {
+		rkm.InlineKeyboard = &[][]InlineKeyboardButton{}
+	}
+
+	inlineKBMarkup, err := json.Marshal(rkm)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal inline keyboard")
+	}
+	return inlineKBMarkup, nil
 }
 
 type InlineKeyboardButton struct {
@@ -45,4 +104,19 @@ type CallbackQuery struct {
 type ForceReply struct {
 	ForceReply bool `json:"force_reply"`
 	Selective  bool `json:"selective"`
+}
+
+func (rkm *ForceReply) Marshal() ([]byte, error) {
+	if rkm == nil {
+		rkm = &ForceReply{
+			ForceReply: false,
+			Selective:  false,
+		}
+	}
+
+	forceReply, err := json.Marshal(rkm)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not marshal force reply")
+	}
+	return forceReply, nil
 }

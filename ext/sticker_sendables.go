@@ -20,7 +20,7 @@ type sendableSticker struct {
 	file
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
@@ -28,9 +28,13 @@ func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
 }
 
 func (s *sendableSticker) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(s.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	replyMarkup := []byte("{}")
+	if s.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = s.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}

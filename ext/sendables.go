@@ -73,14 +73,19 @@ type sendableTextMessage struct {
 	DisableWebPreview   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableTextMessage) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
+
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
@@ -112,13 +117,17 @@ type sendablePhoto struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendablePhoto) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -153,13 +162,17 @@ type sendableAudio struct {
 	Title               string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableAudio) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -196,13 +209,17 @@ type sendableDocument struct {
 	ParseMode           string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableDocument) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -239,13 +256,17 @@ type sendableVideo struct {
 	SupportsStreaming   bool
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableVideo) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -283,14 +304,19 @@ type sendableVoice struct {
 	Duration            int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableVoice) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
+
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
@@ -323,13 +349,17 @@ type sendableVideoNote struct {
 	Length              int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableVideoNote) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -361,14 +391,19 @@ type sendableMediaGroup struct {
 	//media
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableMediaGroup) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
+
 
 	log.Println("TODO: media groups") // TODO
 	v := url.Values{}
@@ -399,13 +434,17 @@ type sendableLocation struct {
 	LivePeriod          int
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableLocation) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -443,13 +482,17 @@ type sendableVenue struct {
 	FoursquareId        string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableVenue) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
@@ -484,13 +527,17 @@ type sendableContact struct {
 	LastName            string
 	DisableNotification bool
 	ReplyToMessageId    int
-	ReplyMarkup         *ReplyKeyboardMarkup
+	ReplyMarkup         ReplyMarkup
 }
 
 func (msg *sendableContact) Send() (*Message, error) {
-	replyMarkup, err := marshalRepyMarkup(msg.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}

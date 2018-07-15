@@ -31,7 +31,7 @@ type sendableInvoice struct {
 	IsFlexible                bool
 	DisableNotification       bool
 	ReplyToMessageId          int
-	ReplyMarkup               *ReplyKeyboardMarkup
+	ReplyMarkup               ReplyMarkup
 }
 
 func (b Bot) NewSendableInvoice(chatId int, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []LabeledPrice) *sendableInvoice {
@@ -53,9 +53,12 @@ func (i *sendableInvoice) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not marshal invoice prices")
 	}
-	replyMarkup, err := marshalRepyMarkup(i.ReplyMarkup)
-	if err != nil {
-		return nil, err
+	var replyMarkup []byte
+	if i.ReplyMarkup != nil {
+		replyMarkup, err = i.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	v := url.Values{}
