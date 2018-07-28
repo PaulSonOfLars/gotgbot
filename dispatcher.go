@@ -32,7 +32,14 @@ func (d Dispatcher) processUpdate(update Update) {
 	for _, handlerGroupNum := range *d.handlerGroups {
 		for _, handler := range d.handlers[handlerGroupNum] {
 			if res, err := handler.CheckUpdate(update); res {
-				go handler.HandleUpdate(update, d)
+				go func() {
+					defer func() {
+						if r := recover(); r != nil {
+							logrus.Error(r)
+						}
+					}()
+					handler.HandleUpdate(update, d)
+				}()
 				break // move to next group
 			} else if err != nil {
 				logrus.WithError(err).Error("Failed to parse update")
