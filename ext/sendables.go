@@ -86,7 +86,6 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 		}
 	}
 
-
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("text", msg.Text)
@@ -110,8 +109,8 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 }
 
 type sendablePhoto struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	Caption             string
 	ParseMode           string
@@ -138,7 +137,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "photo","sendPhoto", v)
+	r, err := msg.bot.sendFile(msg.file, "photo", "sendPhoto", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendPhoto")
 	}
@@ -152,8 +151,8 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 }
 
 type sendableAudio struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	Caption             string
 	ParseMode           string
@@ -186,7 +185,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "audio","sendAudio", v)
+	r, err := msg.bot.sendFile(msg.file, "audio", "sendAudio", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
@@ -201,9 +200,9 @@ func (msg *sendableAudio) Send() (*Message, error) {
 }
 
 type sendableDocument struct {
-	bot                 Bot
-	ChatId              int
-	DocName             string // file name
+	bot     Bot
+	ChatId  int
+	DocName string // file name
 	file
 	Caption             string
 	ParseMode           string
@@ -230,7 +229,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "document","sendDocument", v)
+	r, err := msg.bot.sendFile(msg.file, "document", "sendDocument", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
@@ -245,8 +244,8 @@ func (msg *sendableDocument) Send() (*Message, error) {
 }
 
 type sendableVideo struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	Duration            int
 	Width               int
@@ -281,7 +280,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "video","sendVideo", v)
+	r, err := msg.bot.sendFile(msg.file, "video", "sendVideo", v)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideo")
@@ -296,8 +295,8 @@ func (msg *sendableVideo) Send() (*Message, error) {
 }
 
 type sendableVoice struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	Caption             string
 	ParseMode           string
@@ -316,7 +315,6 @@ func (msg *sendableVoice) Send() (*Message, error) {
 			return nil, err
 		}
 	}
-
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
@@ -342,8 +340,8 @@ func (msg *sendableVoice) Send() (*Message, error) {
 }
 
 type sendableVideoNote struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	Duration            int
 	Length              int
@@ -403,7 +401,6 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 			return nil, err
 		}
 	}
-
 
 	log.Println("TODO: media groups") // TODO
 	v := url.Values{}

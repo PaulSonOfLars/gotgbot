@@ -13,15 +13,14 @@ type Regex struct {
 }
 
 func NewRegex(match string, response func(b ext.Bot, u gotgbot.Update)) Regex {
-	h := Regex{}
-	h.match = match
-	h.response = response
-	return h
+	return Regex{
+		match:    match,
+		response: response,
+	}
 }
 
 func (h Regex) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 	h.response(d.Bot, update)
-
 }
 
 func (h Regex) CheckUpdate(update gotgbot.Update) (bool, error) {

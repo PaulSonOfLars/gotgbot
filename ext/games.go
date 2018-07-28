@@ -23,8 +23,6 @@ type GameHighScore struct {
 	Score    int  `json:"score"`
 }
 
-
-
 func (b Bot) SendGame(chatId int, gameShortName string) (*Message, error) {
 	return b.NewSendableGame(chatId, gameShortName).Send()
 }

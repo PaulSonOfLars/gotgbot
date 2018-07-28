@@ -15,10 +15,10 @@ type Message struct {
 
 func NewMessage(filterFunc func(message *ext.Message) bool,
 				response func(b ext.Bot, u gotgbot.Update)) Message {
-	h := Message{}
-	h.filterFunc = filterFunc
-	h.response = response
-	return h
+	return Message{
+		filterFunc: filterFunc,
+		response:   response,
+	}
 }
 
 func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {

@@ -1,7 +1,7 @@
 package ext
 
 type Chat struct {
-	Bot Bot
+	Bot             Bot
 	Id              int        `json:"id"`
 	Type            string     `json:"type"`
 	Title           string     `json:"title"`
@@ -38,7 +38,6 @@ type ChatMember struct {
 	CanSendOtherMessages  bool   `json:"can_send_other_messages"`
 	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"`
 }
-
 
 func (chat Chat) SendAction(action string) (bool, error) {
 	return chat.Bot.SendChatAction(chat.Id, action)

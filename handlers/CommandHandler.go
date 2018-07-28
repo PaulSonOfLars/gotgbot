@@ -21,17 +21,21 @@ type ArgsCommand struct {
 }
 
 func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Command {
-	h := Command{}
-	h.command = command
-	h.response = response
-	return h
+	return Command{
+		baseCommand: baseCommand{
+			command: command,
+		},
+		response:    response,
+	}
 }
 
 func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string)) ArgsCommand {
-	h := ArgsCommand{}
-	h.command = command
-	h.response = response
-	return h
+	return ArgsCommand{
+		baseCommand: baseCommand{
+			command: command,
+		},
+		response:    response,
+	}
 }
 
 func (h Command) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {

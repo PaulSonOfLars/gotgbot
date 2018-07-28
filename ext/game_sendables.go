@@ -8,19 +8,19 @@ import (
 )
 
 type sendableGame struct {
-	bot Bot
-	ChatId int
-	GameShortName string
+	bot                 Bot
+	ChatId              int
+	GameShortName       string
 	DisableNotification bool
-	ReplyToMessageId int
-	ReplyMarkup InlineKeyboardMarkup
+	ReplyToMessageId    int
+	ReplyMarkup         InlineKeyboardMarkup
 }
 
 func (b Bot) NewSendableGame(chatId int, gameShortName string) *sendableGame {
 	return &sendableGame{bot: b, ChatId: chatId, GameShortName: gameShortName}
 }
 
-func (g *sendableGame) Send() (*Message, error){
+func (g *sendableGame) Send() (*Message, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(g.ChatId))
 	v.Add("game_short_name", g.GameShortName)
@@ -37,25 +37,25 @@ func (g *sendableGame) Send() (*Message, error){
 }
 
 type sendableSetGameScore struct {
-	bot Bot
-	UserId int
-	Score int
-	Force bool
+	bot                Bot
+	UserId             int
+	Score              int
+	Force              bool
 	DisableEditMessage bool
-	ChatId int
-	MessageId int
-	InlineMessageId string
+	ChatId             int
+	MessageId          int
+	InlineMessageId    string
 }
 
 func (b Bot) NewSendableSetGameScore(userId int, score int, chatId int, messageId int) *sendableSetGameScore {
-	return &sendableSetGameScore{bot: b, UserId: userId, Score: score, ChatId: chatId, MessageId: messageId }
+	return &sendableSetGameScore{bot: b, UserId: userId, Score: score, ChatId: chatId, MessageId: messageId}
 }
 
 func (b Bot) NewSendableSetGameScoreInline(userId int, score int, inlineMessageId string) *sendableSetGameScore {
 	return &sendableSetGameScore{bot: b, UserId: userId, Score: score, InlineMessageId: inlineMessageId}
 }
 
-func (sgs *sendableSetGameScore) Send() (bool, error){
+func (sgs *sendableSetGameScore) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(sgs.UserId))
 	v.Add("score", strconv.Itoa(sgs.Score))
@@ -79,12 +79,11 @@ func (sgs *sendableSetGameScore) Send() (bool, error){
 	return bb, nil
 }
 
-
 type sendableGetGameHighScores struct {
-	bot Bot
-	UserId int
-	ChatId int
-	MessageId int
+	bot             Bot
+	UserId          int
+	ChatId          int
+	MessageId       int
 	InlineMessageId string
 }
 
@@ -96,7 +95,7 @@ func (b Bot) NewSendableGetGameHighScoreInline(userId int, inlineMessageId strin
 	return &sendableGetGameHighScores{bot: b, UserId: userId, InlineMessageId: inlineMessageId}
 }
 
-func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error){
+func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(gghs.UserId))
 	v.Add("chat_id", strconv.Itoa(gghs.ChatId))

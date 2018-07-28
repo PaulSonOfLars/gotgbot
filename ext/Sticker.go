@@ -20,7 +20,7 @@ type Sticker struct {
 }
 
 type StickerSet struct {
-	bot Bot
+	bot           Bot
 	Name          string    `json:"name"`
 	Title         string    `json:"title"`
 	ContainsMasks bool      `json:"contains_masks"`

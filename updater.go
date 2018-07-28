@@ -10,21 +10,21 @@ import (
 )
 
 type Updater struct {
-	Bot        ext.Bot
+	Bot        *ext.Bot
 	updates    chan Update
 	Dispatcher *Dispatcher
 }
 
 func NewUpdater(token string) *Updater {
 	u := &Updater{}
-	u.Bot = ext.Bot{Token: token}
+	u.Bot = &ext.Bot{Token: token}
 	u.updates = make(chan Update)
-	u.Dispatcher = NewDispatcher(u.Bot, u.updates)
+	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
 	return u
 }
 
 func (u Updater) StartPolling() error {
-	if _, err := u.Bot.GetMe(); err != nil {
+	if err := u.checkMe(); err != nil {
 		return err
 	}
 	go u.Dispatcher.Start()
@@ -33,11 +33,22 @@ func (u Updater) StartPolling() error {
 }
 
 func (u Updater) StartCleanPolling() error {
-	if _, err := u.Bot.GetMe(); err != nil {
+	if err := u.checkMe(); err != nil {
 		return err
 	}
 	go u.Dispatcher.Start()
 	go u.startPolling(true)
+	return nil
+}
+
+func (u Updater) checkMe() error {
+	b, err := u.Bot.GetMe();
+	if err != nil {
+		return err
+	}
+	u.Bot.Id = b.Id
+	u.Bot.FirstName = b.FirstName
+	u.Bot.UserName = b.Username
 	return nil
 }
 
@@ -47,7 +58,7 @@ func (u Updater) startPolling(clean bool) {
 	v.Add("timeout", strconv.Itoa(0))
 	offset := 0
 	for {
-		r, err := ext.Get(u.Bot, "getUpdates", v)
+		r, err := ext.Get(*u.Bot, "getUpdates", v)
 		if err != nil {
 			logrus.WithError(err).Error("unable to getUpdates")
 			continue
@@ -63,7 +74,7 @@ func (u Updater) startPolling(clean bool) {
 			json.Unmarshal(r.Result, &rawUpdates)
 			if len(rawUpdates) > 0 {
 				// parse last one here
-				lastUpd := initUpdate(rawUpdates[len(rawUpdates)-1], u.Bot)
+				lastUpd := initUpdate(rawUpdates[len(rawUpdates)-1], *u.Bot)
 				offset = lastUpd.UpdateId + 1
 				v.Set("offset", strconv.Itoa(offset))
 				if clean {
@@ -74,7 +85,7 @@ func (u Updater) startPolling(clean bool) {
 			}
 
 			for _, updData := range rawUpdates {
-				upd := initUpdate(updData, u.Bot)
+				upd := initUpdate(updData, *u.Bot)
 				u.updates <- upd
 			}
 		}

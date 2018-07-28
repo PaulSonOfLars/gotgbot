@@ -134,7 +134,6 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 	return bb, nil
 }
 
-
 type sendableAnswerPreCheckoutQuery struct {
 	bot             Bot
 	ShippingQueryId string

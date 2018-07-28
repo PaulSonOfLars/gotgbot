@@ -9,6 +9,9 @@ import (
 
 type Bot struct {
 	Token string
+	Id int
+	FirstName string
+	UserName string
 }
 
 func (b Bot) GetMe() (*User, error) {
@@ -25,7 +28,6 @@ func (b Bot) GetMe() (*User, error) {
 	var u User
 	json.Unmarshal(r.Result, &u)
 	return &u, nil
-
 }
 
 func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
