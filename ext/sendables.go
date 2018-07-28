@@ -10,6 +10,10 @@ import (
 	"os"
 )
 
+type Sendable interface {
+	Send() (*Message, error)
+}
+
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{bot: b, ChatId: chatId, Text: text}
 }
@@ -56,6 +60,9 @@ func (b Bot) NewSendableContact(chatId int) *sendableContact {
 
 func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 	return &sendableChatAction{bot: b, ChatId: chatId}
+}
+func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
+	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
 
 type file struct {

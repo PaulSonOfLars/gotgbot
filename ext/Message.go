@@ -120,7 +120,7 @@ type Message struct {
 	Document              *Document          `json:"document"`
 	Animation             *Animation         `json:"animation"`
 	Game                  *Game              `json:"game"`
-	Photo                 *PhotoSize         `json:"photo"`
+	Photo                 []PhotoSize        `json:"photo"`
 	Sticker               *Sticker           `json:"sticker"`
 	Video                 *Video             `json:"video"`
 	Voice                 *Voice             `json:"voice"`
