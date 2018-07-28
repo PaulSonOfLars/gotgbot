@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"github.com/pkg/errors"
 )
 
 type Updater struct {
@@ -15,40 +16,32 @@ type Updater struct {
 	Dispatcher *Dispatcher
 }
 
-func NewUpdater(token string) *Updater {
+func NewUpdater(token string) (*Updater, error) {
 	u := &Updater{}
-	u.Bot = &ext.Bot{Token: token}
+	user, err := ext.Bot{Token: token}.GetMe()
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to create new updater")
+	}
+	u.Bot = &ext.Bot{
+		Token:     token,
+		Id:        user.Id,
+		FirstName: user.FirstName,
+		UserName:  user.Username,
+	}
 	u.updates = make(chan Update)
 	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
-	return u
+	return u, nil
 }
 
 func (u Updater) StartPolling() error {
-	if err := u.checkMe(); err != nil {
-		return err
-	}
 	go u.Dispatcher.Start()
 	go u.startPolling(false)
 	return nil
 }
 
 func (u Updater) StartCleanPolling() error {
-	if err := u.checkMe(); err != nil {
-		return err
-	}
 	go u.Dispatcher.Start()
 	go u.startPolling(true)
-	return nil
-}
-
-func (u Updater) checkMe() error {
-	b, err := u.Bot.GetMe();
-	if err != nil {
-		return err
-	}
-	u.Bot.Id = b.Id
-	u.Bot.FirstName = b.FirstName
-	u.Bot.UserName = b.Username
 	return nil
 }
 

@@ -116,6 +116,7 @@ type Message struct {
 	AuthorSignature       string             `json:"author_signature"`
 	Text                  string             `json:"text"`
 	Entities              []MessageEntity    `json:"entities"`
+	CaptionEntities       []MessageEntity    `json:"caption_entities"`
 	Audio                 *Audio             `json:"audio"`
 	Document              *Document          `json:"document"`
 	Animation             *Animation         `json:"animation"`

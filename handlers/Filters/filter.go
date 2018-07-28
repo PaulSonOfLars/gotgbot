@@ -47,6 +47,14 @@ func Video(message *ext.Message) bool {
 	return message.Video != nil
 }
 
+func VideoNote(message *ext.Message) bool {
+	return message.VideoNote != nil
+}
+
+func Voice(message *ext.Message) bool {
+	return message.Voice != nil
+}
+
 func Contact(message *ext.Message) bool {
 	return message.Contact != nil
 }
@@ -78,6 +86,28 @@ func Group(message *ext.Message) bool {
 func Username(name string) func(message *ext.Message) bool {
 	return func(m *ext.Message) bool {
 		return m.From.Username == name
+	}
+}
+
+func Entity(entType string) func(message *ext.Message) bool {
+	return func(m *ext.Message) bool {
+		for _, ent := range m.Entities {
+			if ent.Type == entType {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func CaptionEntity(entType string) func(message *ext.Message) bool {
+	return func(m *ext.Message) bool {
+		for _, ent := range m.CaptionEntities {
+			if ent.Type == entType {
+				return true
+			}
+		}
+		return false
 	}
 }
 

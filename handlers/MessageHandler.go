@@ -13,7 +13,9 @@ type Message struct {
 
 }
 
-func NewMessage(filterFunc func(message *ext.Message) bool,
+type FilterAble func(message *ext.Message) bool
+
+func NewMessage(filterFunc FilterAble,
 				response func(b ext.Bot, u gotgbot.Update)) Message {
 	return Message{
 		filterFunc: filterFunc,
