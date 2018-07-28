@@ -23,7 +23,7 @@ type ArgsCommand struct {
 func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Command {
 	return Command{
 		baseCommand: baseCommand{
-			command: command,
+			command: strings.ToLower(command),
 		},
 		response:    response,
 	}
@@ -32,7 +32,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Comm
 func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string)) ArgsCommand {
 	return ArgsCommand{
 		baseCommand: baseCommand{
-			command: command,
+			command: strings.ToLower(command),
 		},
 		response:    response,
 	}

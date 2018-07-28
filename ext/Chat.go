@@ -119,3 +119,7 @@ func (chat Chat) SetStickerSet(stickerSetName string) (bool, error) {
 func (chat Chat) DeleteStickerSet() (bool, error) {
 	return chat.Bot.DeleteChatStickerSet(chat.Id)
 }
+
+func (chat Chat) DeleteMessage(messageId int) (bool, error) {
+	return chat.Bot.DeleteMessage(chat.Id, messageId)
+}
