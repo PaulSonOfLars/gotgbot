@@ -65,6 +65,7 @@ type file struct {
 	Reader io.Reader
 	URL    string
 }
+
 type sendableTextMessage struct {
 	bot                 Bot
 	ChatId              int
@@ -578,6 +579,57 @@ func (msg *sendableChatAction) Send() (bool, error) {
 		return false, errors.New(r.Description)
 	}
 	var newMsg bool
+	json.Unmarshal(r.Result, newMsg)
+	return newMsg, nil
+}
+
+type sendableAnimation struct {
+	bot    Bot
+	ChatId int
+	file
+	Duration int
+	Width    int
+	Height   int
+	//Thumb // TODO: support this
+	Caption             string
+	ParseMode           string
+	DisableNotification bool
+	ReplyToMessageId    int
+	ReplyMarkup         ReplyMarkup
+}
+
+func (msg *sendableAnimation) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("duration", strconv.Itoa(msg.Duration))
+	v.Add("width", strconv.Itoa(msg.Width))
+	v.Add("height", strconv.Itoa(msg.Height))
+	//v.Add("thumb", msg.Thumb)
+	v.Add("caption", msg.Caption)
+	v.Add("parse_mode", msg.ParseMode)
+	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
+	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := msg.bot.sendFile(msg.file, "animation", "sendAnimation", v)
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendAnimation")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	newMsg := &Message{}
+	newMsg.Bot = msg.bot
 	json.Unmarshal(r.Result, newMsg)
 	return newMsg, nil
 }

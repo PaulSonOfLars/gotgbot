@@ -35,6 +35,10 @@ func Photo(message *ext.Message) bool {
 	return message.Photo != nil
 }
 
+func Animation(message *ext.Message) bool {
+	return message.Animation != nil
+}
+
 func Sticker(message *ext.Message) bool {
 	return message.Sticker != nil
 }

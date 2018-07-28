@@ -118,6 +118,7 @@ type Message struct {
 	Entities              []MessageEntity    `json:"entities"`
 	Audio                 *Audio             `json:"audio"`
 	Document              *Document          `json:"document"`
+	Animation             *Animation         `json:"animation"`
 	Game                  *Game              `json:"game"`
 	Photo                 *PhotoSize         `json:"photo"`
 	Sticker               *Sticker           `json:"sticker"`
@@ -143,8 +144,10 @@ type Message struct {
 	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
 
 	// internals
-	utf16Text    []uint16
-	originalText string
+	utf16Text       []uint16
+	utf16Caption    []uint16
+	originalText    string
+	originalCaption string
 }
 
 func (b Bot) Message(chatId int, text string) Message {
@@ -260,4 +263,28 @@ func (m *Message) OriginalText() string {
 	}
 	m.originalText += string(utf16.Decode(m.utf16Text[prev:]))
 	return m.originalText
+}
+
+func (m *Message) OriginalCaption() string {
+	if m.originalCaption != "" {
+		return m.originalCaption
+	}
+	if m.utf16Caption == nil {
+		m.utf16Caption = utf16.Encode([]rune(m.Caption))
+	}
+	prev := 0
+	for _, ent := range m.Entities {
+		switch ent.Type {
+		case "bold", "italic", "code":
+			newPrev := ent.Offset + ent.Length
+			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Caption[ent.Offset:newPrev])) + mdMap[ent.Type]
+			prev = newPrev
+		case "text_link":
+			newPrev := ent.Offset + ent.Length
+			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Caption[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
+			prev = newPrev
+		}
+	}
+	m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:]))
+	return m.originalCaption
 }

@@ -11,6 +11,9 @@ type Game struct {
 
 type Animation struct {
 	FileId   string    `json:"file_id"`
+	Width    int       `json:"width"`
+	Height   int       `json:"height"`
+	Duration int       `json:"duration"`
 	Thumb    PhotoSize `json:"thumb"`
 	FileName string    `json:"file_name"`
 	MimeType string    `json:"mime_type"`
