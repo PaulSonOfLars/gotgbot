@@ -40,7 +40,7 @@ func hi(b ext.Bot, u gotgbot.Update) {
 
 func stickerDeleter(b ext.Bot, u gotgbot.Update) {
 	if _, err := u.EffectiveMessage.Delete(); err != nil {
-		u.EffectiveMessage.ReplyMessage("Can't delete, you're in PM!")
+		u.EffectiveMessage.ReplyText("Can't delete, you're in PM!")
 	} else {
 		msg := b.NewSendableMessage(u.Message.Chat.Id, "Don't you *dare* send _stickers_ here!")
 		msg.ParseMode = parsemode.Markdown
@@ -60,7 +60,7 @@ so can communicate accross channels if needed.
 ## Message sending
 
 As seen in the example, message sending can be done in two ways; via each received message's
-ReplyMessage() function, or by building your own; and calling msg.Send(). This allows for
+ReplyText() function, or by building your own; and calling msg.Send(). This allows for
 ease of use by having the most commonly used shortcuts readily available, while
 retaining the flexibility of building each message yourself, which wouldnt be
 available otherwise.

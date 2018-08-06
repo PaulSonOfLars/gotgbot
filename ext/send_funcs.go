@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"github.com/pkg/errors"
 	"io"
+	"github.com/PaulSonOfLars/gotgbot/parsemode"
 )
 
 // TODO: Markdown and HTML - two different funcs?
@@ -13,9 +14,23 @@ func (b Bot) SendMessage(chatId int, text string) (*Message, error) {
 	return newMsg.Send()
 }
 
-func (b Bot) ReplyMessage(chatId int, text string, replyToMessageId int) (*Message, error) {
+func (b Bot) ReplyText(chatId int, text string, replyToMessageId int) (*Message, error) {
 	newMsg := b.NewSendableMessage(chatId, text)
 	newMsg.ReplyToMessageId = replyToMessageId
+	return newMsg.Send()
+}
+
+func (b Bot) ReplyHTML(chatId int, text string, replyToMessageId int) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ReplyToMessageId = replyToMessageId
+	newMsg.ParseMode = parsemode.Html
+	return newMsg.Send()
+}
+
+func (b Bot) ReplyMarkdown(chatId int, text string, replyToMessageId int) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ReplyToMessageId = replyToMessageId
+	newMsg.ParseMode = parsemode.Markdown
 	return newMsg.Send()
 }
 

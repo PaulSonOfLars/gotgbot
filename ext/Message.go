@@ -162,8 +162,16 @@ func (b Bot) ParseMessage(message json.RawMessage) *Message {
 	return &mess
 }
 
-func (m Message) ReplyMessage(text string) (*Message, error) {
-	return m.Bot.ReplyMessage(m.Chat.Id, text, m.MessageId)
+func (m Message) ReplyText(text string) (*Message, error) {
+	return m.Bot.ReplyText(m.Chat.Id, text, m.MessageId)
+}
+
+func (m Message) ReplyHTML(text string) (*Message, error) {
+	return m.Bot.ReplyHTML(m.Chat.Id, text, m.MessageId)
+}
+
+func (m Message) ReplyMarkdown(text string) (*Message, error) {
+	return m.Bot.ReplyMarkdown(m.Chat.Id, text, m.MessageId)
 }
 
 func (m Message) ReplyAudioStr(audio string) (*Message, error) {
