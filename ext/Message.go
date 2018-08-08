@@ -3,6 +3,7 @@ package ext
 import (
 	"encoding/json"
 	"unicode/utf16"
+	"fmt"
 )
 
 type MessageEntity struct {
@@ -166,12 +167,24 @@ func (m Message) ReplyText(text string) (*Message, error) {
 	return m.Bot.ReplyText(m.Chat.Id, text, m.MessageId)
 }
 
+func (m Message) ReplyTextf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.ReplyText(m.Chat.Id, fmt.Sprintf(format, a...), m.MessageId)
+}
+
 func (m Message) ReplyHTML(text string) (*Message, error) {
 	return m.Bot.ReplyHTML(m.Chat.Id, text, m.MessageId)
 }
 
+func (m Message) ReplyHTMLf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.ReplyHTML(m.Chat.Id, fmt.Sprintf(format, a...), m.MessageId)
+}
+
 func (m Message) ReplyMarkdown(text string) (*Message, error) {
 	return m.Bot.ReplyMarkdown(m.Chat.Id, text, m.MessageId)
+}
+
+func (m Message) ReplyMarkdownf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.ReplyMarkdown(m.Chat.Id, fmt.Sprintf(format, a...), m.MessageId)
 }
 
 func (m Message) ReplyAudioStr(audio string) (*Message, error) {
