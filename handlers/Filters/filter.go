@@ -147,6 +147,18 @@ func Migrate() func(message *ext.Message) bool {
 	}
 }
 
+func MigrateFrom() func(message *ext.Message) bool {
+	return func(m *ext.Message) bool {
+		return m.MigrateFromChatId != 0
+	}
+}
+
+func MigrateTo() func(message *ext.Message) bool {
+	return func(m *ext.Message) bool {
+		return m.MigrateToChatId != 0
+	}
+}
+
 func StartsWith(prefix string) func(message *ext.Message) bool {
 	return func(m *ext.Message) bool {
 		return (m.Text != "" && strings.HasPrefix(m.Text, prefix)) || (m.Caption != "" && strings.HasPrefix(m.Caption, prefix))

@@ -10,7 +10,6 @@ import (
 type Message struct {
 	filterFunc func(message *ext.Message) bool
 	response   func(b ext.Bot, u gotgbot.Update)
-
 }
 
 type FilterAble func(message *ext.Message) bool
@@ -25,7 +24,6 @@ func NewMessage(filterFunc FilterAble,
 
 func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 	h.response(d.Bot, update)
-
 }
 
 func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {
