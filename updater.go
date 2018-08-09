@@ -111,6 +111,7 @@ func initUpdate(data json.RawMessage, bot ext.Bot) Update {
 		upd.EffectiveUser = upd.InlineQuery.From
 
 	} else if upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil {
+		upd.EffectiveMessage = upd.CallbackQuery.Message
 		upd.EffectiveChat = upd.CallbackQuery.Message.Chat
 		upd.EffectiveUser = upd.CallbackQuery.From
 
