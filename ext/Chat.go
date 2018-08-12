@@ -23,7 +23,7 @@ type ChatPhoto struct {
 type ChatMember struct {
 	User                  *User  `json:"user"`
 	Status                string `json:"status"`
-	UntilDate             int    `json:"until_date"`
+	UntilDate             int64  `json:"until_date"`
 	CanBeEdited           bool   `json:"can_be_edited"`
 	CanChangeInfo         bool   `json:"can_change_info"`
 	CanPostMessages       bool   `json:"can_post_messages"`

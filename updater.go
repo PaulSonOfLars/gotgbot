@@ -3,11 +3,11 @@ package gotgbot
 import (
 	"encoding/json"
 	"github.com/PaulSonOfLars/gotgbot/ext"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/url"
 	"strconv"
 	"time"
-	"github.com/pkg/errors"
 )
 
 type Updater struct {

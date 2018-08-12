@@ -11,22 +11,22 @@ type sendableKickChatMember struct {
 	bot       Bot
 	ChatId    int
 	UserId    int
-	UntilDate int
+	UntilDate int64
 }
 
 func (b Bot) NewSendableKickChatMember(chatId int, userId int) *sendableKickChatMember {
 	return &sendableKickChatMember{
-		bot:       b,
-		ChatId:    chatId,
-		UserId:    userId,
+		bot:    b,
+		ChatId: chatId,
+		UserId: userId,
 	}
 }
 
-func (kcm *sendableKickChatMember) Send() (bool, error){
+func (kcm *sendableKickChatMember) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(kcm.ChatId))
 	v.Add("user_id", strconv.Itoa(kcm.UserId))
-	v.Add("until_date", strconv.Itoa(kcm.UntilDate))
+	v.Add("until_date", strconv.FormatInt(kcm.UntilDate, 10))
 
 	r, err := Get(kcm.bot, "kickChatMember", v)
 	if err != nil {
@@ -46,7 +46,7 @@ type sendableRestrictChatMember struct {
 	bot                   Bot
 	ChatId                int
 	UserId                int
-	UntilDate             int
+	UntilDate             int64
 	CanSendMessages       bool
 	CanSendMediaMessages  bool
 	CanSendOtherMessages  bool
@@ -70,7 +70,7 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(rcm.ChatId))
 	v.Add("user_id", strconv.Itoa(rcm.UserId))
-	v.Add("until_date", strconv.Itoa(rcm.UntilDate))
+	v.Add("until_date", strconv.FormatInt(rcm.UntilDate, 10))
 	v.Add("can_send_messages", strconv.FormatBool(rcm.CanSendMessages))
 	v.Add("can_send_media_messages", strconv.FormatBool(rcm.CanSendMediaMessages))
 	v.Add("can_send_other_messages", strconv.FormatBool(rcm.CanSendOtherMessages))
@@ -185,16 +185,16 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 }
 
 type sendableSetChatPhoto struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 }
 
 func (b Bot) NewSendableSetChatPhoto(chatId int) *sendableSetChatPhoto {
-	return &sendableSetChatPhoto{bot:b, ChatId: chatId}
+	return &sendableSetChatPhoto{bot: b, ChatId: chatId}
 }
 
-func (scp *sendableSetChatPhoto) Send() (bool, error){
+func (scp *sendableSetChatPhoto) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(scp.ChatId))
 

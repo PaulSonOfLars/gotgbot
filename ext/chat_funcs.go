@@ -13,7 +13,7 @@ func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
 	return kick.Send()
 }
 
-func (b Bot) KickChatMemberUntil(chatId int, userId int, untilDate int) (bool, error) {
+func (b Bot) KickChatMemberUntil(chatId int, userId int, untilDate int64) (bool, error) {
 	kick := b.NewSendableKickChatMember(chatId, userId)
 	kick.UntilDate = untilDate
 	return kick.Send()
