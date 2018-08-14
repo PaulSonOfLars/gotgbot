@@ -3,22 +3,22 @@ package handlers
 import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/PaulSonOfLars/gotgbot"
-
 )
 
-
 type Message struct {
-	filterFunc func(message *ext.Message) bool
-	response   func(b ext.Bot, u gotgbot.Update)
+	AllowEdited bool
+	filterFunc  func(message *ext.Message) bool
+	response    func(b ext.Bot, u gotgbot.Update)
 }
 
 type FilterAble func(message *ext.Message) bool
 
 func NewMessage(filterFunc FilterAble,
-				response func(b ext.Bot, u gotgbot.Update)) Message {
+	response func(b ext.Bot, u gotgbot.Update)) Message {
 	return Message{
-		filterFunc: filterFunc,
-		response:   response,
+		AllowEdited: false,
+		filterFunc:  filterFunc,
+		response:    response,
 	}
 }
 
@@ -27,5 +27,6 @@ func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
 }
 
 func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {
-	return update.Message != nil && h.filterFunc(update.Message), nil
+	return (update.Message != nil && h.filterFunc(update.Message)) ||
+		(update.EditedMessage != nil && h.filterFunc(update.EditedMessage)), nil
 }

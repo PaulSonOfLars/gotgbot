@@ -8,7 +8,8 @@ import (
 )
 
 type baseCommand struct {
-	command string
+	AllowEdited bool
+	command     string
 }
 
 type Command struct {
@@ -48,10 +49,11 @@ func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) {
 }
 
 func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
-	if u.Message != nil && u.Message.Text != "" &&
-		len(u.Message.Entities) > 0 && u.Message.Entities[0].Type == "bot_command" {
-		cmd := strings.Split(strings.Fields(u.Message.Text)[0], "@")
-		return cmd[0] == "/"+h.command && (len(cmd) <= 1 || cmd[1] == u.Message.Bot.UserName), nil
+	if ((u.Message != nil && u.Message.Text != "") || (u.EditedMessage != nil && u.EditedMessage.Text != "")) &&
+		len(u.EffectiveMessage.Entities) > 0 && u.EffectiveMessage.Entities[0].Type == "bot_command" {
+		cmd := strings.Split(strings.Fields(strings.ToLower(u.EffectiveMessage.Text))[0], "@")
+		// TODO: remove repeated tolower of bot username
+		return cmd[0] == "/"+h.command && (len(cmd) <= 1 || cmd[1] == strings.ToLower(u.Message.Bot.UserName)), nil
 	}
 	return false, nil
 }
