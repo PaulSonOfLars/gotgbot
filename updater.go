@@ -85,6 +85,7 @@ func (u Updater) startPolling(clean bool) {
 	}
 }
 
+// todo: move this into dispatcher update processor to updater CPU cycles
 func initUpdate(data json.RawMessage, bot ext.Bot) Update {
 	var upd Update
 	json.Unmarshal(data, &upd)

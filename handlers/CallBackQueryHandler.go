@@ -9,18 +9,18 @@ import (
 
 type CallBack struct {
 	pattern  string
-	response func(b ext.Bot, u gotgbot.Update)
+	response func(b ext.Bot, u gotgbot.Update) error
 }
 
-func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update)) CallBack {
+func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update) error) CallBack {
 	return CallBack{
 		pattern:  pattern,
 		response: response,
 	}
 }
 
-func (cb CallBack) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
-	cb.response(d.Bot, update)
+func (cb CallBack) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
+	return cb.response(d.Bot, update)
 }
 
 func (cb CallBack) CheckUpdate(update gotgbot.Update) (bool, error) {

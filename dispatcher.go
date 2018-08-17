@@ -4,6 +4,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
 	"sort"
+	"runtime/debug"
 )
 
 type Dispatcher struct {
@@ -24,22 +25,38 @@ func NewDispatcher(bot ext.Bot, updates chan Update) *Dispatcher {
 
 func (d Dispatcher) Start() {
 	for upd := range d.updates {
-		d.processUpdate(upd)
+		go d.processUpdate(upd)
 	}
 }
 
+type EndGroups struct{}
+type ContinueGroups struct{}
+
+func (eg EndGroups) Error() string      { return "Group iteration ended" }
+func (eg ContinueGroups) Error() string { return "Group iteration has continued" }
+
 func (d Dispatcher) processUpdate(update Update) {
-	for _, handlerGroupNum := range *d.handlerGroups {
-		for _, handler := range d.handlers[handlerGroupNum] {
+	defer func() {
+		if r := recover(); r != nil {
+			logrus.Error(r)
+			debug.PrintStack()
+		}
+	}()
+
+	for _, groupNum := range *d.handlerGroups {
+		for _, handler := range d.handlers[groupNum] {
 			if res, err := handler.CheckUpdate(update); res {
-				go func() {
-					defer func() {
-						if r := recover(); r != nil {
-							logrus.Error(r)
-						}
-					}()
-					handler.HandleUpdate(update, d)
-				}()
+				err := handler.HandleUpdate(update, d)
+				if err != nil {
+					switch err.(type) {
+					case EndGroups:
+						return
+					case ContinueGroups:
+						continue
+					default:
+						logrus.Warning(err.Error())
+					}
+				}
 				break // move to next group
 			} else if err != nil {
 				logrus.WithError(err).Error("Failed to parse update")

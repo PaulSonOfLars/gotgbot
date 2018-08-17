@@ -14,15 +14,15 @@ type baseCommand struct {
 
 type Command struct {
 	baseCommand
-	response func(b ext.Bot, u gotgbot.Update)
+	response func(b ext.Bot, u gotgbot.Update) error
 }
 
 type ArgsCommand struct {
 	baseCommand
-	response func(b ext.Bot, u gotgbot.Update, args []string)
+	response func(b ext.Bot, u gotgbot.Update, args []string) error
 }
 
-func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Command {
+func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error) Command {
 	return Command{
 		baseCommand: baseCommand{
 			command: strings.ToLower(command),
@@ -31,7 +31,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update)) Comm
 	}
 }
 
-func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string)) ArgsCommand {
+func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string) error) ArgsCommand {
 	return ArgsCommand{
 		baseCommand: baseCommand{
 			command: strings.ToLower(command),
@@ -40,12 +40,12 @@ func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, a
 	}
 }
 
-func (h Command) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) {
-	h.response(d.Bot, u)
+func (h Command) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
+	return h.response(d.Bot, u)
 }
 
-func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) {
-	h.response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
+func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
+	return h.response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
 func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {

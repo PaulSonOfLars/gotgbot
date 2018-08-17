@@ -8,13 +8,12 @@ import (
 type Message struct {
 	AllowEdited bool
 	filterFunc  func(message *ext.Message) bool
-	response    func(b ext.Bot, u gotgbot.Update)
+	response    func(b ext.Bot, u gotgbot.Update) error
 }
 
 type FilterAble func(message *ext.Message) bool
 
-func NewMessage(filterFunc FilterAble,
-	response func(b ext.Bot, u gotgbot.Update)) Message {
+func NewMessage(filterFunc FilterAble, response func(b ext.Bot, u gotgbot.Update) error) Message {
 	return Message{
 		AllowEdited: false,
 		filterFunc:  filterFunc,
@@ -22,8 +21,8 @@ func NewMessage(filterFunc FilterAble,
 	}
 }
 
-func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) {
-	h.response(d.Bot, update)
+func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
+	return h.response(d.Bot, update)
 }
 
 func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {

@@ -5,7 +5,7 @@ import (
 )
 
 type Handler interface {
-	HandleUpdate(update Update, d Dispatcher)
+	HandleUpdate(update Update, d Dispatcher) error
 	CheckUpdate(update Update) (bool, error)
 }
 
