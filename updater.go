@@ -206,7 +206,7 @@ func (u Updater) RemoveWebhook() (bool, error) {
 	return bb, nil
 }
 
-func (u Updater) SetWebhook(webhook Webhook) (bool, error) {
+func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	allowedUpdates := webhook.AllowedUpdates
 	if allowedUpdates == nil {
 		allowedUpdates = []string{}
@@ -217,7 +217,7 @@ func (u Updater) SetWebhook(webhook Webhook) (bool, error) {
 	}
 
 	v := url.Values{}
-	v.Add("url", webhook.URL)
+	v.Add("url", webhook.URL + "/" + path)
 	//v.Add("certificate", ) // todo: add certificate support
 	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
 	v.Add("allowed_updates", string(allowed))
