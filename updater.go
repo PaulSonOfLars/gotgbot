@@ -8,6 +8,9 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"net/http"
+	"io/ioutil"
+	"fmt"
 )
 
 type Updater struct {
@@ -30,6 +33,13 @@ func NewUpdater(token string) (*Updater, error) {
 	}
 	u.updates = make(chan Update)
 	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
+	ok, err := u.RemoveWebhook() // just in case
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, fmt.Errorf("failed to remove webhook")
+	}
 	return u, nil
 }
 
@@ -146,7 +156,100 @@ func (u Updater) Idle() {
 	for {
 		time.Sleep(1 * time.Second)
 	}
-
 }
 
 // TODO: finish handling updates on sigint
+
+type Webhook struct {
+	Serve     string // base url to where you listen
+	ServePath string // path you listen to
+	ServePort int    // port you listen on
+	URL       string // where you set the webhook to send to
+	//CertPath       string   // TODO
+	MaxConnections int      // max connections; max 100, default 40
+	AllowedUpdates []string // which updates to allow
+}
+
+func (w Webhook) GetListenUrl() string {
+	if w.Serve == "" {
+		w.Serve = "0.0.0.0"
+	}
+	if w.ServePort == 0 {
+		w.ServePort = 443
+	}
+	return fmt.Sprintf("%s:%d", w.Serve, w.ServePort)
+}
+
+func (u Updater) StartWebhook(webhook Webhook) {
+	go u.Dispatcher.Start()
+	http.HandleFunc("/"+webhook.ServePath, func(w http.ResponseWriter, r *http.Request) {
+		bytes, _ := ioutil.ReadAll(r.Body)
+		u.updates <- initUpdate(bytes, *u.Bot)
+	})
+	go func() {
+		// todo: TLS when using certs
+		err := http.ListenAndServe(webhook.GetListenUrl(), nil)
+		if err != nil {
+			logrus.Fatal(errors.WithStack(err))
+		}
+	}()
+}
+
+func (u Updater) RemoveWebhook() (bool, error) {
+	r, err := ext.Get(*u.Bot, "deleteWebhook", nil)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to remove webhook")
+	}
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+
+	return bb, nil
+}
+
+func (u Updater) SetWebhook(webhook Webhook) (bool, error) {
+	allowedUpdates := webhook.AllowedUpdates
+	if allowedUpdates == nil {
+		allowedUpdates = []string{}
+	}
+	allowed, err := json.Marshal(allowedUpdates)
+	if err != nil {
+		return false, errors.Wrap(err, "cannot marshal allowedUpdates")
+	}
+
+	v := url.Values{}
+	v.Add("url", webhook.URL)
+	//v.Add("certificate", ) // todo: add certificate support
+	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
+	v.Add("allowed_updates", string(allowed))
+
+	r, err := ext.Get(*u.Bot, "setWebhook", v)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to set webhook")
+	}
+
+	var bb bool
+	json.Unmarshal(r.Result, &bb)
+	return bb, nil
+}
+
+type WebhookInfo struct {
+	URL                  string   `json:"url"`
+	HasCustomCertificate bool     `json:"has_custom_certificate"`
+	PendingUpdateCount   int      `json:"pending_update_count"`
+	LastErrorDate        int      `json:"last_error_date"`
+	LastErrorMessage     int      `json:"last_error_message"`
+	MaxConnections       int      `json:"max_connections"`
+	AllowedUpdates       []string `json:"allowed_updates"`
+}
+
+func (u Updater) GetWebhookInfo() (*WebhookInfo, error) {
+	r, err := ext.Get(*u.Bot, "getWebhookInfo", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var wh WebhookInfo
+	json.Unmarshal(r.Result, &wh)
+	return &wh, nil
+
+}
