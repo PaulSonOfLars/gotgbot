@@ -231,10 +231,18 @@ func (m Message) Forward(chatId int) (*Message, error) {
 	return m.Bot.ForwardMessage(chatId, m.Chat.Id, m.MessageId)
 }
 
-func (m *Message) ParseEntities() []ParsedMessageEntity {
-	var out []ParsedMessageEntity
+func (m *Message) ParseEntities() (out []ParsedMessageEntity) {
 	for _, ent := range m.Entities {
 		out = append(out, m.ParseEntity(ent))
+	}
+	return out
+}
+
+func (m *Message) ParseEntityTypes(accepted map[string]struct{}) (out []ParsedMessageEntity) {
+	for _, ent := range m.Entities {
+		if _, ok := accepted[ent.Type]; ok {
+			out = append(out, m.ParseEntity(ent))
+		}
 	}
 	return out
 }
