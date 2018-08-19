@@ -255,6 +255,9 @@ func (m *Message) ParseEntity(entity MessageEntity) ParsedMessageEntity {
 	if entity.User != nil {
 		entity.User.Bot = m.Bot
 	}
+	if entity.Type == "url" {
+		entity.Url = text
+	}
 	return ParsedMessageEntity{
 		Type:   entity.Type,
 		Offset: len(string(utf16.Decode(m.utf16Text[:entity.Offset]))),
