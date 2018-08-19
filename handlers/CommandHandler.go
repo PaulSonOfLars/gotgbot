@@ -49,11 +49,11 @@ func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error 
 }
 
 func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
-	if ((u.Message != nil && u.Message.Text != "") || (u.EditedMessage != nil && u.EditedMessage.Text != "")) &&
+	if ((u.Message != nil && u.Message.Text != "") || (h.AllowEdited && u.EditedMessage != nil && u.EditedMessage.Text != "")) &&
 		len(u.EffectiveMessage.Entities) > 0 && u.EffectiveMessage.Entities[0].Type == "bot_command" {
 		cmd := strings.Split(strings.Fields(strings.ToLower(u.EffectiveMessage.Text))[0], "@")
 		// TODO: remove repeated tolower of bot username
-		return cmd[0] == "/"+h.command && (len(cmd) <= 1 || cmd[1] == strings.ToLower(u.Message.Bot.UserName)), nil
+		return cmd[0] == "/"+h.command && (len(cmd) <= 1 || cmd[1] == strings.ToLower(u.EffectiveMessage.Bot.UserName)), nil
 	}
 	return false, nil
 }
