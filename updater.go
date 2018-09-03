@@ -2,15 +2,16 @@ package gotgbot
 
 import (
 	"encoding/json"
-	"github.com/PaulSonOfLars/gotgbot/ext"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
 	"time"
-	"net/http"
-	"io/ioutil"
-	"fmt"
+
+	"github.com/PaulSonOfLars/gotgbot/ext"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type Updater struct {
@@ -140,7 +141,9 @@ func initUpdate(data json.RawMessage, bot ext.Bot) Update {
 		upd.EffectiveMessage.Bot = bot
 		if upd.EffectiveMessage.ReplyToMessage != nil {
 			upd.EffectiveMessage.ReplyToMessage.Bot = bot
-			upd.EffectiveMessage.ReplyToMessage.From.Bot = bot
+			if upd.EffectiveMessage.ReplyToMessage.From != nil {
+				upd.EffectiveMessage.ReplyToMessage.From.Bot = bot
+			}
 		}
 	}
 	if upd.EffectiveChat != nil {
@@ -217,7 +220,7 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	}
 
 	v := url.Values{}
-	v.Add("url", webhook.URL + "/" + path)
+	v.Add("url", webhook.URL+"/"+path)
 	//v.Add("certificate", ) // todo: add certificate support
 	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
 	v.Add("allowed_updates", string(allowed))

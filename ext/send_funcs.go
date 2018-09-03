@@ -1,11 +1,12 @@
 package ext
 
 import (
-	"strconv"
-	"net/url"
-	"github.com/pkg/errors"
 	"io"
+	"net/url"
+	"strconv"
+
 	"github.com/PaulSonOfLars/gotgbot/parsemode"
+	"github.com/pkg/errors"
 )
 
 // TODO: Markdown and HTML - two different funcs?
@@ -96,7 +97,7 @@ func (b Bot) replyPhotoReader(chatId int, reader io.Reader, caption string, repl
 }
 
 func (b Bot) SendAudioStr(chatId int, audio string) (*Message, error) {
-	return b.replyAudioStr(chatId, audio, "",0)
+	return b.replyAudioStr(chatId, audio, "", 0)
 }
 
 func (b Bot) ReplyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
@@ -199,7 +200,7 @@ func (b Bot) replyVideoReader(chatId int, reader io.Reader, caption string, repl
 }
 
 func (b Bot) SendVoiceStr(chatId int, voice string) (*Message, error) {
-	return b.replyVoiceStr(chatId, voice, "",0)
+	return b.replyVoiceStr(chatId, voice, "", 0)
 }
 
 func (b Bot) ReplyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {

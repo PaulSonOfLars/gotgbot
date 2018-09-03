@@ -1,6 +1,5 @@
 package ext
 
-
 type Invoice struct {
 	Title          string `json:"title"`
 	Description    string `json:"description"`
@@ -48,11 +47,10 @@ type SuccessfulPayment struct {
 
 type ShippingQuery struct {
 	Id              string          `json:"id"`
-	From            *User            `json:"from"`
+	From            *User           `json:"from"`
 	InvoicePayload  string          `json:"invoice_payload"`
 	ShippingAddress ShippingAddress `json:"shipping_address"`
 }
-
 
 // TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chatId int, title string, description string, payload string,

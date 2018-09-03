@@ -2,8 +2,8 @@ package ext
 
 import (
 	"encoding/json"
-	"unicode/utf16"
 	"fmt"
+	"unicode/utf16"
 )
 
 type MessageEntity struct {

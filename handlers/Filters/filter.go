@@ -6,7 +6,6 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
-
 func All(message *ext.Message) bool {
 	return true
 }

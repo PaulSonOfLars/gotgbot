@@ -1,11 +1,12 @@
 package ext
 
 import (
-	"strconv"
 	"encoding/json"
-	"net/url"
-	"github.com/pkg/errors"
 	"io"
+	"net/url"
+	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type Sticker struct {

@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/PaulSonOfLars/gotgbot"
+	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
 type Message struct {

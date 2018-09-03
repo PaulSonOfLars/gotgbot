@@ -1,10 +1,11 @@
 package ext
 
 import (
+	"encoding/json"
 	"net/url"
 	"strconv"
+
 	"github.com/pkg/errors"
-	"encoding/json"
 )
 
 type sendableKickChatMember struct {

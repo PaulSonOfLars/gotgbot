@@ -1,13 +1,14 @@
 package ext
 
 import (
-	"net/url"
-	"strconv"
 	"encoding/json"
-	"github.com/pkg/errors"
-	"log"
 	"io"
+	"log"
+	"net/url"
 	"os"
+	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type Sendable interface {

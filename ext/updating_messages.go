@@ -1,9 +1,10 @@
 package ext
 
 import (
-	"strconv"
 	"encoding/json"
 	"net/url"
+	"strconv"
+
 	"github.com/pkg/errors"
 )
 

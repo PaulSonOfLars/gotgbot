@@ -2,9 +2,10 @@ package ext
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"net/url"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type sendableInvoice struct {

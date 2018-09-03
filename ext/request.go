@@ -1,15 +1,16 @@
 package ext
 
 import (
-	"net/http"
+	"bytes"
 	"encoding/json"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"net/url"
 	"time"
+
 	"github.com/pkg/errors"
-	"io"
 	"github.com/sirupsen/logrus"
-	"bytes"
-	"mime/multipart"
 )
 
 var apiUrl = "https://api.telegram.org/bot"

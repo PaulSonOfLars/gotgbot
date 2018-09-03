@@ -1,10 +1,11 @@
 package gotgbot
 
 import (
+	"runtime/debug"
+	"sort"
+
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
-	"sort"
-	"runtime/debug"
 )
 
 type Dispatcher struct {

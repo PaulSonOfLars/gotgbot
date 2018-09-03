@@ -2,16 +2,17 @@ package ext
 
 import (
 	"encoding/json"
-	"strconv"
 	"net/url"
+	"strconv"
+
 	"github.com/pkg/errors"
 )
 
 type Bot struct {
-	Token string
-	Id int
+	Token     string
+	Id        int
 	FirstName string
-	UserName string
+	UserName  string
 }
 
 func (b Bot) GetMe() (*User, error) {
@@ -34,7 +35,6 @@ func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
 
-
 	r, err := Get(b, "getUserProfilePhotos", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not get user profile photos")
@@ -48,7 +48,6 @@ func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 
 	return &userProfilePhotos, nil
 }
-
 
 func (b Bot) GetFile(fileId string) (*File, error) {
 	v := url.Values{}

@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"regexp"
+
 	"github.com/PaulSonOfLars/gotgbot"
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/pkg/errors"
-	"regexp"
 )
 
 type CallBack struct {

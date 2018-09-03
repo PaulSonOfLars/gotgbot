@@ -2,21 +2,22 @@ package ext
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"net/url"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type File struct {
-	bot Bot
+	bot      Bot
 	FileId   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
 	FilePath string `json:"file_path"`
 }
 
 type sendableSticker struct {
-	bot                 Bot
-	ChatId              int
+	bot    Bot
+	ChatId int
 	file
 	DisableNotification bool
 	ReplyToMessageId    int
@@ -72,7 +73,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(usf.UserId))
 
-	r, err := usf.bot.sendFile(usf.file, "sticker","uploadStickerFile", v)
+	r, err := usf.bot.sendFile(usf.file, "sticker", "uploadStickerFile", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to uploadStickerFile")
 	}
@@ -86,10 +87,10 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 }
 
 type sendableCreateNewSticker struct {
-	bot           Bot
-	UserId        int
-	Name          string
-	Title         string
+	bot    Bot
+	UserId int
+	Name   string
+	Title  string
 	file
 	Emojis        string
 	ContainsMasks bool
@@ -114,7 +115,7 @@ func (cns *sendableCreateNewSticker) Send() (bool, error) {
 	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
 	v.Add("mask_position", string(maskPos))
 
-	r, err := cns.bot.sendFile(cns.file, "sticker","createNewStickerSet", v)
+	r, err := cns.bot.sendFile(cns.file, "sticker", "createNewStickerSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to createNewStickerSet")
 	}
@@ -129,14 +130,13 @@ func (cns *sendableCreateNewSticker) Send() (bool, error) {
 }
 
 type sendableAddStickerToSet struct {
-	bot          Bot
-	UserId       int
-	Name         string
+	bot    Bot
+	UserId int
+	Name   string
 	file
 	Emojis       string
 	MaskPosition *MaskPosition
 }
-
 
 func (b Bot) NewSendableAddStickerToSet(userId int, name string, emojis string) *sendableAddStickerToSet {
 	return &sendableAddStickerToSet{bot: b, UserId: userId, Name: name, Emojis: emojis}
@@ -154,7 +154,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	v.Add("emojis", asts.Emojis)
 	v.Add("mask_position", string(maskPos))
 
-	r, err := asts.bot.sendFile(asts.file, "sticker","addStickerToSet", v)
+	r, err := asts.bot.sendFile(asts.file, "sticker", "addStickerToSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to addStickerToSet")
 	}

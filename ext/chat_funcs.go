@@ -2,10 +2,11 @@ package ext
 
 import (
 	"encoding/json"
-	"strconv"
-	"net/url"
-	"github.com/pkg/errors"
 	"io"
+	"net/url"
+	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {

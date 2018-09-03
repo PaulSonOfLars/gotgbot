@@ -3,8 +3,9 @@ package ext
 import (
 	"encoding/json"
 	"net/url"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type InlineQuery struct {
