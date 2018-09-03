@@ -10,14 +10,18 @@ import (
 
 type Dispatcher struct {
 	Bot           ext.Bot
+	MaxRoutines   int
 	updates       chan Update
 	handlers      map[int][]Handler
 	handlerGroups *[]int
 }
 
+const DefaultMaxDispatcherRoutines = 50
+
 func NewDispatcher(bot ext.Bot, updates chan Update) *Dispatcher {
 	return &Dispatcher{
 		Bot:           bot,
+		MaxRoutines:   DefaultMaxDispatcherRoutines,
 		updates:       updates,
 		handlers:      map[int][]Handler{},
 		handlerGroups: &[]int{},
@@ -25,8 +29,13 @@ func NewDispatcher(bot ext.Bot, updates chan Update) *Dispatcher {
 }
 
 func (d Dispatcher) Start() {
+	limiter := make(chan struct{}, d.MaxRoutines)
 	for upd := range d.updates {
-		go d.processUpdate(upd)
+		limiter <- struct{}{}
+		go func(upd Update) {
+			d.processUpdate(upd)
+			<-limiter
+		}(upd)
 	}
 }
 
