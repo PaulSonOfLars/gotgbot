@@ -88,6 +88,10 @@ func (chat Chat) PinMessage(messageId int) (bool, error) {
 	return chat.Bot.PinChatMessage(chat.Id, messageId)
 }
 
+func (chat Chat) PinMessageQuiet(messageId int) (bool, error) {
+	return chat.Bot.PinChatMessageQuiet(chat.Id, messageId)
+}
+
 func (chat Chat) UnpinMessage() (bool, error) {
 	return chat.Bot.UnpinChatMessage(chat.Id)
 }

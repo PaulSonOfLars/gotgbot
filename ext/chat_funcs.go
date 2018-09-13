@@ -167,7 +167,8 @@ func (b Bot) PinChatMessage(chatId int, messageId int) (bool, error) {
 	pin := b.NewSendablePinChatMessage(chatId, messageId)
 	return pin.Send()
 }
-func (b Bot) QuietPinChatMessage(chatId int, messageId int) (bool, error) {
+
+func (b Bot) PinChatMessageQuiet(chatId int, messageId int) (bool, error) {
 	pin := b.NewSendablePinChatMessage(chatId, messageId)
 	pin.DisableNotification = true
 	return pin.Send()
