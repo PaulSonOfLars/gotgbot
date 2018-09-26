@@ -237,9 +237,10 @@ func (m *Message) ParseEntities() (out []ParsedMessageEntity) {
 	}
 	return out
 }
+
 func (m *Message) ParseCaptionEntities() (out []ParsedMessageEntity) {
 	for _, ent := range m.CaptionEntities {
-		out = append(out, m.ParseEntity(ent))
+		out = append(out, m.ParseCaptionEntity(ent))
 	}
 	return out
 }
@@ -256,7 +257,7 @@ func (m *Message) ParseEntityTypes(accepted map[string]struct{}) (out []ParsedMe
 func (m *Message) ParseCaptionEntityTypes(accepted map[string]struct{}) (out []ParsedMessageEntity) {
 	for _, ent := range m.CaptionEntities {
 		if _, ok := accepted[ent.Type]; ok {
-			out = append(out, m.ParseEntity(ent))
+			out = append(out, m.ParseCaptionEntity(ent))
 		}
 	}
 	return out
@@ -276,6 +277,27 @@ func (m *Message) ParseEntity(entity MessageEntity) ParsedMessageEntity {
 	return ParsedMessageEntity{
 		Type:   entity.Type,
 		Offset: len(string(utf16.Decode(m.utf16Text[:entity.Offset]))),
+		Length: len(text),
+		Url:    entity.Url,
+		User:   entity.User,
+		Text:   text,
+	}
+}
+
+func (m *Message) ParseCaptionEntity(entity MessageEntity) ParsedMessageEntity {
+	if m.utf16Caption == nil {
+		m.utf16Caption = utf16.Encode([]rune(m.Caption))
+	}
+	text := string(utf16.Decode(m.utf16Caption[entity.Offset : entity.Offset+entity.Length]))
+	if entity.User != nil {
+		entity.User.Bot = m.Bot
+	}
+	if entity.Type == "url" {
+		entity.Url = text
+	}
+	return ParsedMessageEntity{
+		Type:   entity.Type,
+		Offset: len(string(utf16.Decode(m.utf16Caption[:entity.Offset]))),
 		Length: len(text),
 		Url:    entity.Url,
 		User:   entity.User,
