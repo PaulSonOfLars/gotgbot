@@ -237,9 +237,24 @@ func (m *Message) ParseEntities() (out []ParsedMessageEntity) {
 	}
 	return out
 }
+func (m *Message) ParseCaptionEntities() (out []ParsedMessageEntity) {
+	for _, ent := range m.CaptionEntities {
+		out = append(out, m.ParseEntity(ent))
+	}
+	return out
+}
 
 func (m *Message) ParseEntityTypes(accepted map[string]struct{}) (out []ParsedMessageEntity) {
 	for _, ent := range m.Entities {
+		if _, ok := accepted[ent.Type]; ok {
+			out = append(out, m.ParseEntity(ent))
+		}
+	}
+	return out
+}
+
+func (m *Message) ParseCaptionEntityTypes(accepted map[string]struct{}) (out []ParsedMessageEntity) {
+	for _, ent := range m.CaptionEntities {
 		if _, ok := accepted[ent.Type]; ok {
 			out = append(out, m.ParseEntity(ent))
 		}
@@ -306,7 +321,7 @@ func (m *Message) OriginalCaption() string {
 		m.utf16Caption = utf16.Encode([]rune(m.Caption))
 	}
 	prev := 0
-	for _, ent := range m.Entities {
+	for _, ent := range m.CaptionEntities {
 		switch ent.Type {
 		case "bold", "italic", "code":
 			newPrev := ent.Offset + ent.Length
