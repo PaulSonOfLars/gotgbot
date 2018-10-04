@@ -8,6 +8,7 @@ import (
 )
 
 type baseCommand struct {
+	Triggers    []rune
 	AllowEdited bool
 	command     string
 }
@@ -25,6 +26,7 @@ type ArgsCommand struct {
 func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error) Command {
 	return Command{
 		baseCommand: baseCommand{
+			Triggers: []rune("/"),
 			command: strings.ToLower(command),
 		},
 		response: response,
@@ -34,6 +36,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error
 func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string) error) ArgsCommand {
 	return ArgsCommand{
 		baseCommand: baseCommand{
+			Triggers: []rune("/"),
 			command: strings.ToLower(command),
 		},
 		response: response,
@@ -49,11 +52,32 @@ func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error 
 }
 
 func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
-	if ((u.Message != nil && u.Message.Text != "") || (h.AllowEdited && u.EditedMessage != nil && u.EditedMessage.Text != "")) &&
-		len(u.EffectiveMessage.Entities) > 0 && u.EffectiveMessage.Entities[0].Type == "bot_command" {
-		cmd := strings.Split(strings.Fields(strings.ToLower(u.EffectiveMessage.Text))[0], "@")
-		// TODO: remove repeated tolower of bot username
-		return cmd[0] == "/"+h.command && (len(cmd) <= 1 || cmd[1] == strings.ToLower(u.EffectiveMessage.Bot.UserName)), nil
+	if u.EffectiveMessage == nil || u.EffectiveMessage.Text == "" {
+		return false, nil
 	}
-	return false, nil
+	if !h.AllowEdited && u.EditedMessage != nil {
+		return false, nil
+	}
+
+	var cmd string
+	for _, x := range h.Triggers {
+		if []rune(u.EffectiveMessage.Text)[0] == x {
+			stuff := strings.Split(strings.ToLower(strings.Fields(u.EffectiveMessage.Text)[0]), "@")
+			// todo: remove repeated ToLower of username
+			if len(stuff) > 1 && stuff[1] != strings.ToLower(u.EffectiveMessage.Bot.UserName) {
+				return false, nil
+			}
+			cmd = strings.ToLower(stuff[0])[1:]
+			break
+		}
+	}
+	if cmd == "" {
+		return false, nil
+	}
+
+	if len(u.EffectiveMessage.Entities) != 0 && u.EffectiveMessage.Entities[0].Offset == 0 && u.EffectiveMessage.Entities[0].Type != "bot_command" {
+		return false, nil
+	}
+
+	return cmd == h.command, nil
 }
