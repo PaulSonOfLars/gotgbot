@@ -8,9 +8,10 @@ import (
 )
 
 type baseCommand struct {
-	Triggers    []rune
-	AllowEdited bool
-	command     string
+	Triggers     []rune
+	AllowEdited  bool
+	AllowChannel bool
+	command      string
 }
 
 type Command struct {
@@ -27,7 +28,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error
 	return Command{
 		baseCommand: baseCommand{
 			Triggers: []rune("/"),
-			command: strings.ToLower(command),
+			command:  strings.ToLower(command),
 		},
 		response: response,
 	}
@@ -37,7 +38,7 @@ func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, a
 	return ArgsCommand{
 		baseCommand: baseCommand{
 			Triggers: []rune("/"),
-			command: strings.ToLower(command),
+			command:  strings.ToLower(command),
 		},
 		response: response,
 	}
@@ -51,11 +52,21 @@ func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error 
 	return h.response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
+// todo optimise if statements?
 func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
 	if u.EffectiveMessage == nil || u.EffectiveMessage.Text == "" {
 		return false, nil
 	}
+	// if no edits and message is edited
 	if !h.AllowEdited && u.EditedMessage != nil {
+		return false, nil
+	}
+	// if no channel and message is channel message
+	if !h.AllowChannel && u.ChannelPost != nil {
+		return false, nil
+	}
+	// if no channel, no edits, and post is edited
+	if !h.AllowChannel && !h.AllowEdited && u.EditedChannelPost != nil {
 		return false, nil
 	}
 
