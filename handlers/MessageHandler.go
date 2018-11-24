@@ -5,27 +5,27 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
+type FilterFunc func(message *ext.Message) bool
+
 type Message struct {
 	AllowEdited bool
-	filterFunc  func(message *ext.Message) bool
-	response    func(b ext.Bot, u gotgbot.Update) error
+	Filter      FilterFunc
+	Response    func(b ext.Bot, u gotgbot.Update) error
 }
 
-type FilterAble func(message *ext.Message) bool
-
-func NewMessage(filterFunc FilterAble, response func(b ext.Bot, u gotgbot.Update) error) Message {
+func NewMessage(filterFunc FilterFunc, response func(b ext.Bot, u gotgbot.Update) error) Message {
 	return Message{
 		AllowEdited: false,
-		filterFunc:  filterFunc,
-		response:    response,
+		Filter:      filterFunc,
+		Response:    response,
 	}
 }
 
 func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.response(d.Bot, update)
+	return h.Response(d.Bot, update)
 }
 
 func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {
-	return (update.Message != nil && h.filterFunc(update.Message)) ||
-		(h.AllowEdited && update.EditedMessage != nil && h.filterFunc(update.EditedMessage)), nil
+	return (update.Message != nil && h.Filter(update.Message)) ||
+		(h.AllowEdited && update.EditedMessage != nil && h.Filter(update.EditedMessage)), nil
 }

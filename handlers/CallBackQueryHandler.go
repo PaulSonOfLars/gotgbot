@@ -9,27 +9,27 @@ import (
 )
 
 type CallBack struct {
-	pattern  string
-	response func(b ext.Bot, u gotgbot.Update) error
+	Pattern  string
+	Response func(b ext.Bot, u gotgbot.Update) error
 }
 
 func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update) error) CallBack {
 	return CallBack{
-		pattern:  pattern,
-		response: response,
+		Pattern:  pattern,
+		Response: response,
 	}
 }
 
 func (cb CallBack) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
-	return cb.response(d.Bot, update)
+	return cb.Response(d.Bot, update)
 }
 
 func (cb CallBack) CheckUpdate(update gotgbot.Update) (bool, error) {
 	if update.CallbackQuery == nil {
 		return false, nil
 	}
-	if cb.pattern != "" {
-		res, err := regexp.MatchString(cb.pattern, update.CallbackQuery.Data)
+	if cb.Pattern != "" {
+		res, err := regexp.MatchString(cb.Pattern, update.CallbackQuery.Data)
 		if err != nil {
 			return false, errors.Wrapf(err, "Could not match regexp")
 		}

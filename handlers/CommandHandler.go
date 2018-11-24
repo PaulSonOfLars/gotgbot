@@ -11,26 +11,26 @@ type baseCommand struct {
 	Triggers     []rune
 	AllowEdited  bool
 	AllowChannel bool
-	command      string
+	Command      string
 }
 
 type Command struct {
 	baseCommand
-	response func(b ext.Bot, u gotgbot.Update) error
+	Response func(b ext.Bot, u gotgbot.Update) error
 }
 
 type ArgsCommand struct {
 	baseCommand
-	response func(b ext.Bot, u gotgbot.Update, args []string) error
+	Response func(b ext.Bot, u gotgbot.Update, args []string) error
 }
 
 func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error) Command {
 	return Command{
 		baseCommand: baseCommand{
 			Triggers: []rune("/"),
-			command:  strings.ToLower(command),
+			Command:  strings.ToLower(command),
 		},
-		response: response,
+		Response: response,
 	}
 }
 
@@ -38,18 +38,18 @@ func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, a
 	return ArgsCommand{
 		baseCommand: baseCommand{
 			Triggers: []rune("/"),
-			command:  strings.ToLower(command),
+			Command:  strings.ToLower(command),
 		},
-		response: response,
+		Response: response,
 	}
 }
 
 func (h Command) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.response(d.Bot, u)
+	return h.Response(d.Bot, u)
 }
 
 func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
+	return h.Response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
 // todo optimise if statements?
@@ -90,5 +90,5 @@ func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
 		return false, nil
 	}
 
-	return cmd == h.command, nil
+	return cmd == h.Command, nil
 }

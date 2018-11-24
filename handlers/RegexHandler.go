@@ -9,26 +9,26 @@ import (
 )
 
 type Regex struct {
-	match    string
-	response func(b ext.Bot, u gotgbot.Update) error
+	Match    string
+	Response func(b ext.Bot, u gotgbot.Update) error
 }
 
 func NewRegex(match string, response func(b ext.Bot, u gotgbot.Update) error) Regex {
 	return Regex{
-		match:    match,
-		response: response,
+		Match:    match,
+		Response: response,
 	}
 }
 
 func (h Regex) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.response(d.Bot, update)
+	return h.Response(d.Bot, update)
 }
 
 func (h Regex) CheckUpdate(update gotgbot.Update) (bool, error) {
 	if update.Message == nil {
 		return false, nil
 	}
-	res, err := regexp.Match(h.match, []byte(update.Message.Text))
+	res, err := regexp.Match(h.Match, []byte(update.Message.Text))
 	if err != nil {
 		return false, errors.Wrapf(err, "Could not match regexp")
 	}
