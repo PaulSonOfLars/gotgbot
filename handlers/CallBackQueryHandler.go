@@ -9,14 +9,18 @@ import (
 )
 
 type CallBack struct {
+	baseHandler
 	Pattern  string
 	Response func(b ext.Bot, u gotgbot.Update) error
 }
 
 func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update) error) CallBack {
 	return CallBack{
-		Pattern:  pattern,
-		Response: response,
+		baseHandler: baseHandler{
+			Name: pattern,
+		},
+		Pattern:     pattern,
+		Response:    response,
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 type Handler interface {
 	HandleUpdate(update Update, d Dispatcher) error
 	CheckUpdate(update Update) (bool, error)
+	GetName() string
 }
 
 type Update struct {
@@ -25,4 +26,12 @@ type Update struct {
 	EffectiveMessage *ext.Message `json:"effective_message"`
 	EffectiveChat    *ext.Chat    `json:"effective_chat"`
 	EffectiveUser    *ext.User    `json:"effective_user"`
+	data             map[string]string
+}
+
+func (u *Update) GetData() map[string]string {
+	if u.data == nil {
+		u.data = make(map[string]string)
+	}
+	return u.data
 }

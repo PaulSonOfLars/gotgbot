@@ -8,6 +8,7 @@ import (
 type FilterFunc func(message *ext.Message) bool
 
 type Message struct {
+	baseHandler
 	AllowEdited bool
 	Filter      FilterFunc
 	Response    func(b ext.Bot, u gotgbot.Update) error
@@ -15,6 +16,9 @@ type Message struct {
 
 func NewMessage(filterFunc FilterFunc, response func(b ext.Bot, u gotgbot.Update) error) Message {
 	return Message{
+		baseHandler: baseHandler{
+			Name: "unnamedMessageHandler",
+		},
 		AllowEdited: false,
 		Filter:      filterFunc,
 		Response:    response,

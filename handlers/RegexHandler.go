@@ -9,14 +9,18 @@ import (
 )
 
 type Regex struct {
+	baseHandler
 	Match    string
 	Response func(b ext.Bot, u gotgbot.Update) error
 }
 
 func NewRegex(match string, response func(b ext.Bot, u gotgbot.Update) error) Regex {
 	return Regex{
-		Match:    match,
-		Response: response,
+		baseHandler: baseHandler{
+			Name: match,
+		},
+		Match:       match,
+		Response:    response,
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 )
 
 type baseCommand struct {
+	baseHandler
 	Triggers     []rune
 	AllowEdited  bool
 	AllowChannel bool
@@ -25,20 +26,32 @@ type ArgsCommand struct {
 }
 
 func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error) Command {
+	cmd := strings.ToLower(command)
 	return Command{
 		baseCommand: baseCommand{
-			Triggers: []rune("/"),
-			Command:  strings.ToLower(command),
+			baseHandler:  baseHandler{
+				Name: cmd,
+			},
+			Triggers:     []rune("/"),
+			AllowEdited:  false,
+			AllowChannel: false,
+			Command:      cmd,
 		},
 		Response: response,
 	}
 }
 
 func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string) error) ArgsCommand {
+	cmd := strings.ToLower(command)
 	return ArgsCommand{
 		baseCommand: baseCommand{
-			Triggers: []rune("/"),
-			Command:  strings.ToLower(command),
+			baseHandler:  baseHandler{
+				Name: cmd,
+			},
+			Triggers:     []rune("/"),
+			AllowEdited:  false,
+			AllowChannel: false,
+			Command:      cmd,
 		},
 		Response: response,
 	}
