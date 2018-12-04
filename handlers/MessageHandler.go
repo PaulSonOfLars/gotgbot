@@ -9,9 +9,10 @@ type FilterFunc func(message *ext.Message) bool
 
 type Message struct {
 	baseHandler
-	AllowEdited bool
-	Filter      FilterFunc
-	Response    func(b ext.Bot, u gotgbot.Update) error
+	AllowEdited  bool
+	AllowChannel bool
+	Filter       FilterFunc
+	Response     func(b ext.Bot, u gotgbot.Update) error
 }
 
 func NewMessage(filterFunc FilterFunc, response func(b ext.Bot, u gotgbot.Update) error) Message {
@@ -19,9 +20,10 @@ func NewMessage(filterFunc FilterFunc, response func(b ext.Bot, u gotgbot.Update
 		baseHandler: baseHandler{
 			Name: "unnamedMessageHandler",
 		},
-		AllowEdited: false,
-		Filter:      filterFunc,
-		Response:    response,
+		AllowEdited:  false,
+		AllowChannel: false,
+		Filter:       filterFunc,
+		Response:     response,
 	}
 }
 
@@ -30,6 +32,8 @@ func (h Message) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error
 }
 
 func (h Message) CheckUpdate(update gotgbot.Update) (bool, error) {
-	return (update.Message != nil && h.Filter(update.Message)) ||
-		(h.AllowEdited && update.EditedMessage != nil && h.Filter(update.EditedMessage)), nil
+	return (update.Message != nil ||
+		(h.AllowEdited && update.EditedMessage != nil) ||
+		(h.AllowChannel && update.ChannelPost != nil)) &&
+		h.Filter(update.EffectiveMessage), nil
 }
