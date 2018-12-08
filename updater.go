@@ -96,65 +96,6 @@ func (u Updater) startPolling(clean bool) {
 	}
 }
 
-// todo: move this into dispatcher update processor to updater CPU cycles
-func initUpdate(data json.RawMessage, bot ext.Bot) *Update {
-	var upd *Update
-	json.Unmarshal(data, upd)
-	if upd.Message != nil {
-		upd.EffectiveMessage = upd.Message
-		upd.EffectiveChat = upd.Message.Chat
-		upd.EffectiveUser = upd.Message.From
-
-	} else if upd.EditedMessage != nil {
-		upd.EffectiveMessage = upd.EditedMessage
-		upd.EffectiveChat = upd.EditedMessage.Chat
-		upd.EffectiveUser = upd.EditedMessage.From
-
-	} else if upd.ChannelPost != nil {
-		upd.EffectiveMessage = upd.ChannelPost
-		upd.EffectiveChat = upd.ChannelPost.Chat
-
-	} else if upd.EditedChannelPost != nil {
-		upd.EffectiveMessage = upd.EditedChannelPost
-		upd.EffectiveChat = upd.EditedChannelPost.Chat
-
-	} else if upd.InlineQuery != nil {
-		upd.EffectiveMessage = upd.InlineQuery
-		upd.EffectiveUser = upd.InlineQuery.From
-
-	} else if upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil {
-		upd.EffectiveMessage = upd.CallbackQuery.Message
-		upd.EffectiveChat = upd.CallbackQuery.Message.Chat
-		upd.EffectiveUser = upd.CallbackQuery.From
-
-	} else if upd.ChosenInlineResult != nil {
-		upd.EffectiveUser = upd.ChosenInlineResult.From
-
-	} else if upd.ShippingQuery != nil {
-		upd.EffectiveUser = upd.ShippingQuery.From
-
-	} else if upd.PreCheckoutQuery != nil {
-		upd.EffectiveUser = upd.PreCheckoutQuery.From
-	}
-
-	if upd.EffectiveMessage != nil {
-		upd.EffectiveMessage.Bot = bot
-		if upd.EffectiveMessage.ReplyToMessage != nil {
-			upd.EffectiveMessage.ReplyToMessage.Bot = bot
-			if upd.EffectiveMessage.ReplyToMessage.From != nil {
-				upd.EffectiveMessage.ReplyToMessage.From.Bot = bot
-			}
-		}
-	}
-	if upd.EffectiveChat != nil {
-		upd.EffectiveChat.Bot = bot
-	}
-	if upd.EffectiveUser != nil {
-		upd.EffectiveUser.Bot = bot
-	}
-	return upd
-}
-
 func (u Updater) Idle() {
 	for {
 		time.Sleep(1 * time.Second)
