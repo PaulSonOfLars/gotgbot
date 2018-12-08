@@ -33,8 +33,8 @@ type Update struct {
 
 // todo: move this into dispatcher update processor to updater CPU cycles
 func initUpdate(data json.RawMessage, bot ext.Bot) *Update {
-	var upd *Update
-	json.Unmarshal(data, upd)
+	var upd Update
+	json.Unmarshal(data, &upd)
 	if upd.Message != nil {
 		upd.EffectiveMessage = upd.Message
 		upd.EffectiveChat = upd.Message.Chat
@@ -88,5 +88,5 @@ func initUpdate(data json.RawMessage, bot ext.Bot) *Update {
 		upd.EffectiveUser.Bot = bot
 	}
 	upd.Data = make(map[string]string)
-	return upd
+	return &upd
 }
