@@ -11,10 +11,10 @@ import (
 type CallBack struct {
 	baseHandler
 	Pattern  string
-	Response func(b ext.Bot, u gotgbot.Update) error
+	Response func(b ext.Bot, u *gotgbot.Update) error
 }
 
-func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update) error) CallBack {
+func NewCallback(pattern string, response func(b ext.Bot, u *gotgbot.Update) error) CallBack {
 	return CallBack{
 		baseHandler: baseHandler{
 			Name: pattern,
@@ -24,16 +24,16 @@ func NewCallback(pattern string, response func(b ext.Bot, u gotgbot.Update) erro
 	}
 }
 
-func (cb CallBack) HandleUpdate(update gotgbot.Update, d gotgbot.Dispatcher) error {
-	return cb.Response(d.Bot, update)
+func (cb CallBack) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
+	return cb.Response(d.Bot, u)
 }
 
-func (cb CallBack) CheckUpdate(update gotgbot.Update) (bool, error) {
-	if update.CallbackQuery == nil {
+func (cb CallBack) CheckUpdate(u *gotgbot.Update) (bool, error) {
+	if u.CallbackQuery == nil {
 		return false, nil
 	}
 	if cb.Pattern != "" {
-		res, err := regexp.MatchString(cb.Pattern, update.CallbackQuery.Data)
+		res, err := regexp.MatchString(cb.Pattern, u.CallbackQuery.Data)
 		if err != nil {
 			return false, errors.Wrapf(err, "Could not match regexp")
 		}

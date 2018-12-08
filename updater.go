@@ -16,7 +16,7 @@ import (
 
 type Updater struct {
 	Bot        *ext.Bot
-	updates    chan Update
+	updates    chan *Update
 	Dispatcher *Dispatcher
 }
 
@@ -32,7 +32,7 @@ func NewUpdater(token string) (*Updater, error) {
 		FirstName: user.FirstName,
 		UserName:  user.Username,
 	}
-	u.updates = make(chan Update)
+	u.updates = make(chan *Update)
 	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
 	ok, err := u.RemoveWebhook() // just in case
 	if err != nil {
@@ -97,9 +97,9 @@ func (u Updater) startPolling(clean bool) {
 }
 
 // todo: move this into dispatcher update processor to updater CPU cycles
-func initUpdate(data json.RawMessage, bot ext.Bot) Update {
-	var upd Update
-	json.Unmarshal(data, &upd)
+func initUpdate(data json.RawMessage, bot ext.Bot) *Update {
+	var upd *Update
+	json.Unmarshal(data, upd)
 	if upd.Message != nil {
 		upd.EffectiveMessage = upd.Message
 		upd.EffectiveChat = upd.Message.Chat

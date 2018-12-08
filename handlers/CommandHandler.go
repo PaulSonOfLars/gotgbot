@@ -17,15 +17,15 @@ type baseCommand struct {
 
 type Command struct {
 	baseCommand
-	Response func(b ext.Bot, u gotgbot.Update) error
+	Response func(b ext.Bot, u *gotgbot.Update) error
 }
 
 type ArgsCommand struct {
 	baseCommand
-	Response func(b ext.Bot, u gotgbot.Update, args []string) error
+	Response func(b ext.Bot, u *gotgbot.Update, args []string) error
 }
 
-func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error) Command {
+func NewCommand(command string, response func(b ext.Bot, u *gotgbot.Update) error) Command {
 	cmd := strings.ToLower(command)
 	return Command{
 		baseCommand: baseCommand{
@@ -41,7 +41,7 @@ func NewCommand(command string, response func(b ext.Bot, u gotgbot.Update) error
 	}
 }
 
-func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, args []string) error) ArgsCommand {
+func NewArgsCommand(command string, response func(b ext.Bot, u *gotgbot.Update, args []string) error) ArgsCommand {
 	cmd := strings.ToLower(command)
 	return ArgsCommand{
 		baseCommand: baseCommand{
@@ -57,16 +57,16 @@ func NewArgsCommand(command string, response func(b ext.Bot, u gotgbot.Update, a
 	}
 }
 
-func (h Command) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
+func (h Command) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 	return h.Response(d.Bot, u)
 }
 
-func (h ArgsCommand) HandleUpdate(u gotgbot.Update, d gotgbot.Dispatcher) error {
+func (h ArgsCommand) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 	return h.Response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
 // todo optimise if statements?
-func (h baseCommand) CheckUpdate(u gotgbot.Update) (bool, error) {
+func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
 	if u.EffectiveMessage == nil || u.EffectiveMessage.Text == "" {
 		return false, nil
 	}

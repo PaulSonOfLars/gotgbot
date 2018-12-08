@@ -5,8 +5,8 @@ import (
 )
 
 type Handler interface {
-	HandleUpdate(update Update, d Dispatcher) error
-	CheckUpdate(update Update) (bool, error)
+	HandleUpdate(u *Update, d Dispatcher) error
+	CheckUpdate(u *Update) (bool, error)
 	GetName() string
 }
 

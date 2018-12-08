@@ -11,14 +11,14 @@ import (
 type Dispatcher struct {
 	Bot           ext.Bot
 	MaxRoutines   int
-	updates       chan Update
+	updates       chan *Update
 	handlers      map[int][]Handler
 	handlerGroups *[]int
 }
 
 const DefaultMaxDispatcherRoutines = 50
 
-func NewDispatcher(bot ext.Bot, updates chan Update) *Dispatcher {
+func NewDispatcher(bot ext.Bot, updates chan *Update) *Dispatcher {
 	return &Dispatcher{
 		Bot:           bot,
 		MaxRoutines:   DefaultMaxDispatcherRoutines,
@@ -32,7 +32,7 @@ func (d Dispatcher) Start() {
 	limiter := make(chan struct{}, d.MaxRoutines)
 	for upd := range d.updates {
 		limiter <- struct{}{}
-		go func(upd Update) {
+		go func(upd *Update) {
 			d.processUpdate(upd)
 			<-limiter
 		}(upd)
@@ -45,7 +45,7 @@ type ContinueGroups struct{}
 func (eg EndGroups) Error() string      { return "Group iteration ended" }
 func (eg ContinueGroups) Error() string { return "Group iteration has continued" }
 
-func (d Dispatcher) processUpdate(update Update) {
+func (d Dispatcher) processUpdate(update *Update) {
 	defer func() {
 		if r := recover(); r != nil {
 			logrus.Error(r)
