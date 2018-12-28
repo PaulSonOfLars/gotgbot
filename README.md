@@ -10,52 +10,18 @@ this aims to create a simple way to manage a concurrent and scalable bot.
 ## Getting started
 Install it as you would install your usual go library: `go get github.com/PaulSonOfLars/gotgbot`
 
-A sample bot would look something like this:
-
-```
-func main() {
-	log.Println("Starting gotgbot...")
-	updater := gotgbot.NewUpdater(YOUR_TOKEN_HERE)
-	// reply to /start messages
-	updater.Dispatcher.AddHandler(handlers.NewCommand("start", start))
-	// reply to messages satisfying this regex
-	updater.Dispatcher.AddHandler(handlers.NewRegex("(?i)hello", hi))
-	// reply to all messages satisfying the filter
-	updater.Dispatcher.AddHandler(handlers.NewMessage(Filters.Sticker, stickerDeleter))
-
-	// start getting updates
-	updater.StartPolling()
-
-	// wait
-	updater.Idle()
-}
-
-func start(b ext.Bot, u gotgbot.Update) {
-	b.SendMessage(u.Message.Chat.Id, "Congrats! You just issued a /start on your go bot!")
-}
-
-func hi(b ext.Bot, u gotgbot.Update) {
-	b.SendMessage(u.Message.Chat.Id, "Hello to you too!")
-}
-
-func stickerDeleter(b ext.Bot, u gotgbot.Update) {
-	if _, err := u.EffectiveMessage.Delete(); err != nil {
-		u.EffectiveMessage.ReplyText("Can't delete, you're in PM!")
-	} else {
-		msg := b.NewSendableMessage(u.Message.Chat.Id, "Don't you *dare* send _stickers_ here!")
-		msg.ParseMode = parsemode.Markdown
-		msg.Send()
-	}
-}
-```
+A sample bot can be found in `sampleBot/`. This bot covers the basics of adding a command, a filter, and a regex handler.
 
 
 An interesting feature to take note of is that due to go's
 handling of exceptions, if you choose not to handle an exception, your bot
 will simply keep on going happily and ignore any issues.
 
-All handlers are async; theyre all executed in their own go routine,
+All handlers are async; they're all executed in their own go routine,
 so can communicate accross channels if needed.
+The reason for the `error` return for the methods is to allow for passing `gotgbot.ContinueGroups{}`
+or `gotgbot.EndGroups{}`; which will determine whether or not to keep handling methods in that handler group,
+or stop handling further groups entirely.
 
 ## Message sending
 
