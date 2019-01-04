@@ -5,94 +5,71 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/PaulSonOfLars/gotgbot/parsemode"
 	"github.com/pkg/errors"
 )
 
-// TODO: Check return type
-// TODO: set parsemode
 func (b Bot) EditMessageText(chatId int, messageId int, text string) (bool, error) {
+	return b.EditMessage(chatId, messageId, text, "")
+}
+
+func (b Bot) EditMessageHTML(chatId int, messageId int, text string) (bool, error) {
+	return b.EditMessage(chatId, messageId, text, parsemode.Html)
+}
+
+func (b Bot) EditMessageMarkdown(chatId int, messageId int, text string) (bool, error) {
+	return b.EditMessage(chatId, messageId, text, parsemode.Markdown)
+}
+
+func (b Bot) EditMessage(chatId int, messageId int, text string, parseMode string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("text", text)
+	v.Add("parse_mode", parseMode)
 
-	r, err := Get(b, "editMessageText", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to editMessageText")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return b.boolSender("editMessageText", v)
 }
 
-// TODO: Check return type
-// TODO: set parsemode
-func (b Bot) EditMessageTextInline(inlineMessageId string, text string) (bool, error) {
+func (b Bot) EditMessageTextInline(messageId int, text string) (bool, error) {
+	return b.EditMessageInline(messageId, text, "")
+}
+
+func (b Bot) EditMessageHTMLInline(messageId int, text string) (bool, error) {
+	return b.EditMessageInline(messageId, text, parsemode.Html)
+}
+
+func (b Bot) EditMessageMarkdownInline(messageId int, text string) (bool, error) {
+	return b.EditMessageInline(messageId, text, parsemode.Markdown)
+}
+
+func (b Bot) EditMessageInline(messageId int, text string, parseMode string) (bool, error) {
 	v := url.Values{}
-	v.Add("inline_message_id", inlineMessageId)
+	v.Add("inline_message_id", strconv.Itoa(messageId))
 	v.Add("text", text)
+	v.Add("parse_mode", parseMode)
 
-	r, err := Get(b, "editMessageText", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to editMessageText")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return b.boolSender("editMessageText", v)
 }
 
-// TODO: Check return type
 func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("caption", caption)
 
-	r, err := Get(b, "editMessageCaption", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to editMessageCaption")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return b.boolSender("editMessageCaption", v)
 }
 
-// TODO: Check return type
 func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (bool, error) {
 	v := url.Values{}
 	v.Add("inline_message_id", inlineMessageId)
 	v.Add("caption", caption)
 
-	r, err := Get(b, "editMessageCaption", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to editMessageCaption")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
+	return b.boolSender("editMessageCaption", v)
 
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
 }
 
-// TODO: Check return
 func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
@@ -103,21 +80,9 @@ func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup Inlin
 	v.Add("message_id", strconv.Itoa(messageId))
 	v.Add("reply_markup", string(markupStr))
 
-	r, err := Get(b, "editMessageReplyMarkup", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "unable to edit message")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return b.boolSender("editMessageReplyMarkup", v)
 }
 
-// TODO: Check return
 func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup InlineKeyboardMarkup) (bool, error) {
 	markupStr, err := json.Marshal(replyMarkup)
 	if err != nil {
@@ -127,18 +92,7 @@ func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup In
 	v.Add("inline_message_id", inlineMessageId)
 	v.Add("reply_markup", string(markupStr))
 
-	r, err := Get(b, "editMessageReplyMarkup", v)
-	if err != nil {
-		return false, errors.New(r.Description)
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
-
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return b.boolSender("editMessageReplyMarkup", v)
 }
 
 // TODO: ensure not a private chat! cant delete in private chats.
@@ -147,16 +101,17 @@ func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("message_id", strconv.Itoa(messageId))
 
-	r, err := Get(b, "deleteMessage", v)
+	return b.boolSender("deleteMessage", v)
+}
+
+func (b Bot) boolSender(meth string, v url.Values) (bb bool, err error) {
+	r, err := Get(b, meth, v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to deleteMessage")
+		return false, errors.Wrapf(err, "unable to complete request for %s", meth)
 	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
 	}
 
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }

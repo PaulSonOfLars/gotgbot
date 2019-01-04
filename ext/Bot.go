@@ -27,8 +27,7 @@ func (b Bot) GetMe() (*User, error) {
 	}
 
 	var u User
-	json.Unmarshal(r.Result, &u)
-	return &u, nil
+	return &u, json.Unmarshal(r.Result, &u)
 }
 
 func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
@@ -44,9 +43,7 @@ func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 	}
 
 	var userProfilePhotos UserProfilePhotos
-	json.Unmarshal(r.Result, &userProfilePhotos)
-
-	return &userProfilePhotos, nil
+	return &userProfilePhotos, json.Unmarshal(r.Result, &userProfilePhotos)
 }
 
 func (b Bot) GetFile(fileId string) (*File, error) {
@@ -62,25 +59,29 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 	}
 
 	var f File
-	json.Unmarshal(r.Result, &f)
-	return &f, nil
+	return &f, json.Unmarshal(r.Result, &f)
 }
 
-// TODO: options here
-// TODO: r.OK or unmarshal??
 func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)
 
-	r, err := Get(b, "answerCallbackQuery", v)
-	if err != nil {
-		return false, errors.Wrapf(err, "could not complete getFile request")
-	}
-	if !r.Ok {
-		return false, errors.New("invalid answerCallbackQuery request")
-	}
+	return b.boolSender("answerCallbackQuery", v)
+}
 
-	var bb bool
-	json.Unmarshal(r.Result, &bb)
-	return bb, nil
+func (b Bot) AnswerCallbackQueryText(callbackQueryId string, text string, alert bool) (bool, error) {
+	v := url.Values{}
+	v.Add("callback_query_id", callbackQueryId)
+	v.Add("text", text)
+	v.Add("alert", strconv.FormatBool(alert))
+
+	return b.boolSender("answerCallbackQuery", v)
+}
+
+func (b Bot) AnswerCallbackQueryURL(callbackQueryId string, URL string) (bool, error) {
+	v := url.Values{}
+	v.Add("callback_query_id", callbackQueryId)
+	v.Add("url", URL)
+
+	return b.boolSender("answerCallbackQuery", v)
 }
