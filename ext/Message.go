@@ -3,6 +3,7 @@ package ext
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"unicode/utf16"
 )
 
@@ -320,13 +321,15 @@ func (m *Message) OriginalText() string {
 	}
 	prev := 0
 	for _, ent := range m.Entities {
+		newPrev := ent.Offset + ent.Length
 		switch ent.Type {
 		case "bold", "italic", "code":
-			newPrev := ent.Offset + ent.Length
 			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Text[ent.Offset:newPrev])) + mdMap[ent.Type]
 			prev = newPrev
+		case "text_mention":
+			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Text[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
+			prev = newPrev
 		case "text_link":
-			newPrev := ent.Offset + ent.Length
 			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Text[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
 			prev = newPrev
 		}
@@ -344,13 +347,15 @@ func (m *Message) OriginalCaption() string {
 	}
 	prev := 0
 	for _, ent := range m.CaptionEntities {
+		newPrev := ent.Offset + ent.Length
 		switch ent.Type {
 		case "bold", "italic", "code":
-			newPrev := ent.Offset + ent.Length
 			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Caption[ent.Offset:newPrev])) + mdMap[ent.Type]
 			prev = newPrev
+		case "text_mention":
+			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Caption[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
+			prev = newPrev
 		case "text_link":
-			newPrev := ent.Offset + ent.Length
 			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Caption[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
 			prev = newPrev
 		}
