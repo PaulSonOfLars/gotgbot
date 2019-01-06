@@ -319,22 +319,8 @@ func (m *Message) OriginalText() string {
 	if m.utf16Text == nil {
 		m.utf16Text = utf16.Encode([]rune(m.Text))
 	}
-	prev := 0
-	for _, ent := range m.Entities {
-		newPrev := ent.Offset + ent.Length
-		switch ent.Type {
-		case "bold", "italic", "code":
-			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Text[ent.Offset:newPrev])) + mdMap[ent.Type]
-			prev = newPrev
-		case "text_mention":
-			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Text[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
-			prev = newPrev
-		case "text_link":
-			m.originalText += string(utf16.Decode(m.utf16Text[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Text[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
-			prev = newPrev
-		}
-	}
-	m.originalText += string(utf16.Decode(m.utf16Text[prev:]))
+
+	m.originalText = getOrigMsgTxt(m.utf16Text, m.Entities)
 	return m.originalText
 }
 
@@ -345,21 +331,27 @@ func (m *Message) OriginalCaption() string {
 	if m.utf16Caption == nil {
 		m.utf16Caption = utf16.Encode([]rune(m.Caption))
 	}
+
+	m.originalCaption = getOrigMsgTxt(m.utf16Caption, m.CaptionEntities)
+	return m.originalCaption
+}
+
+func getOrigMsgTxt(utf16Data []uint16, ents []MessageEntity) (out string) {
 	prev := 0
-	for _, ent := range m.CaptionEntities {
+	for _, ent := range ents {
 		newPrev := ent.Offset + ent.Length
 		switch ent.Type {
 		case "bold", "italic", "code":
-			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(m.utf16Caption[ent.Offset:newPrev])) + mdMap[ent.Type]
+			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(utf16Data[ent.Offset:newPrev])) + mdMap[ent.Type]
 			prev = newPrev
 		case "text_mention":
-			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Caption[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
+			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + string(utf16.Decode(utf16Data[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
 			prev = newPrev
 		case "text_link":
-			m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:ent.Offset])) + "[" + string(utf16.Decode(m.utf16Caption[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
+			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + string(utf16.Decode(utf16Data[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
 			prev = newPrev
 		}
 	}
-	m.originalCaption += string(utf16.Decode(m.utf16Caption[prev:]))
-	return m.originalCaption
+	out += string(utf16.Decode(utf16Data[prev:]))
+	return out
 }
