@@ -29,7 +29,7 @@ func NewCommand(command string, response func(b ext.Bot, u *gotgbot.Update) erro
 	cmd := strings.ToLower(command)
 	return Command{
 		baseCommand: baseCommand{
-			baseHandler:  baseHandler{
+			baseHandler: baseHandler{
 				Name: cmd,
 			},
 			Triggers:     []rune("/"),
@@ -45,7 +45,7 @@ func NewArgsCommand(command string, response func(b ext.Bot, u *gotgbot.Update, 
 	cmd := strings.ToLower(command)
 	return ArgsCommand{
 		baseCommand: baseCommand{
-			baseHandler:  baseHandler{
+			baseHandler: baseHandler{
 				Name: cmd,
 			},
 			Triggers:     []rune("/"),

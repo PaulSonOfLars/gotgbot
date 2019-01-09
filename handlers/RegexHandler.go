@@ -19,8 +19,8 @@ func NewRegex(match string, response func(b ext.Bot, u *gotgbot.Update) error) R
 		baseHandler: baseHandler{
 			Name: match,
 		},
-		Match:       match,
-		Response:    response,
+		Match:    match,
+		Response: response,
 	}
 }
 

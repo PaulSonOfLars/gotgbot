@@ -19,8 +19,8 @@ func NewCallback(pattern string, response func(b ext.Bot, u *gotgbot.Update) err
 		baseHandler: baseHandler{
 			Name: pattern,
 		},
-		Pattern:     pattern,
-		Response:    response,
+		Pattern:  pattern,
+		Response: response,
 	}
 }
 
