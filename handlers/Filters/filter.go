@@ -14,8 +14,12 @@ func Text(message *ext.Message) bool {
 	return message.Text != ""
 }
 
+func Caption(message *ext.Message) bool {
+    return message.Caption != ""
+}
+
 func Command(message *ext.Message) bool {
-	return message.Text != "" && strings.HasPrefix(message.Text, "/")
+	return len(message.Entities) > 0 && message.Entities[0].Type == "bot_command" && message.Entities[0].Offset == 0
 }
 
 func Reply(message *ext.Message) bool {
