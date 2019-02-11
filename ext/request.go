@@ -13,13 +13,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var apiUrl = "https://api.telegram.org/bot"
+const ApiUrl = "https://api.telegram.org/bot"
 
-var client = &http.Client{
-	Transport:     nil,
-	CheckRedirect: nil,
-	Jar:           nil,
-	Timeout:       time.Second * 5,
+var DefaultTgBotGetter = TgBotGetter{
+	Client: &http.Client{
+		Transport:     nil,
+		CheckRedirect: nil,
+		Jar:           nil,
+		Timeout:       time.Second * 5,
+	},
+	ApiUrl: ApiUrl,
 }
 
 type Response struct {
@@ -30,14 +33,28 @@ type Response struct {
 	Parameters  json.RawMessage
 }
 
+type TgBotGetter struct {
+	Client *http.Client
+	ApiUrl string
+}
+
+type TgBotGetterInterface interface {
+	Get(bot Bot, method string, params url.Values) (*Response, error)
+	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error)
+}
+
 func Get(bot Bot, method string, params url.Values) (*Response, error) {
-	req, err := http.NewRequest("GET", apiUrl+bot.Token+"/"+method, nil)
+	return DefaultTgBotGetter.Get(bot, method, params)
+}
+
+func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Response, error) {
+	req, err := http.NewRequest("GET", tbg.ApiUrl+bot.Token+"/"+method, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to build get request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
 
-	resp, err := client.Do(req)
+	resp, err := tbg.Client.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to execute get request to %v", method)
 	}
@@ -50,7 +67,7 @@ func Get(bot Bot, method string, params url.Values) (*Response, error) {
 	return &r, nil
 }
 
-func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+func (tbg *TgBotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
 	if filename == "" {
 		filename = "unnamed_file"
 	}
@@ -70,14 +87,14 @@ func Post(bot Bot, fileType string, method string, params url.Values, file io.Re
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", apiUrl+bot.Token+"/"+method, &b)
+	req, err := http.NewRequest("POST", tbg.ApiUrl+bot.Token+"/"+method, &b)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to send to %v func", method)
 	}
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	resp, err := client.Do(req)
+	resp, err := tbg.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
