@@ -9,90 +9,68 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (b Bot) EditMessageText(chatId int, messageId int, text string) (bool, error) {
-	return b.EditMessage(chatId, messageId, text, "")
+func (b Bot) EditMessageText(chatId int, messageId int, text string) (*Message, error) {
+	return b.EditMessageMarkup(chatId, messageId, text, "", nil)
 }
 
-func (b Bot) EditMessageHTML(chatId int, messageId int, text string) (bool, error) {
-	return b.EditMessage(chatId, messageId, text, parsemode.Html)
+func (b Bot) EditMessageHTML(chatId int, messageId int, text string) (*Message, error) {
+	return b.EditMessageMarkup(chatId, messageId, text, parsemode.Html, nil)
 }
 
-func (b Bot) EditMessageMarkdown(chatId int, messageId int, text string) (bool, error) {
-	return b.EditMessage(chatId, messageId, text, parsemode.Markdown)
+func (b Bot) EditMessageMarkdown(chatId int, messageId int, text string) (*Message, error) {
+	return b.EditMessageMarkup(chatId, messageId, text, parsemode.Markdown, nil)
 }
 
-func (b Bot) EditMessage(chatId int, messageId int, text string, parseMode string) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("message_id", strconv.Itoa(messageId))
-	v.Add("text", text)
-	v.Add("parse_mode", parseMode)
-
-	return b.boolSender("editMessageText", v)
+func (b Bot) EditMessage(chatId int, messageId int, text string, parseMode string) (*Message, error) {
+	return b.EditMessageMarkup(chatId, messageId, text, parseMode, nil)
 }
 
-func (b Bot) EditMessageTextInline(messageId int, text string) (bool, error) {
-	return b.EditMessageInline(messageId, text, "")
+func (b Bot) EditMessageMarkup(chatId int, messageId int, text string, parseMode string, markup ReplyMarkup) (*Message, error) {
+	msg := b.NewSendableEditMessageText(chatId, messageId, text)
+	msg.ParseMode = parseMode
+	msg.ReplyMarkup = markup
+	return msg.Send()
 }
 
-func (b Bot) EditMessageHTMLInline(messageId int, text string) (bool, error) {
-	return b.EditMessageInline(messageId, text, parsemode.Html)
+func (b Bot) EditMessageTextInline(inlineMessageId string, text string) (*Message, error) {
+	return b.EditMessageInline(inlineMessageId, text, "")
 }
 
-func (b Bot) EditMessageMarkdownInline(messageId int, text string) (bool, error) {
-	return b.EditMessageInline(messageId, text, parsemode.Markdown)
+func (b Bot) EditMessageHTMLInline(inlineMessageId string, text string) (*Message, error) {
+	return b.EditMessageInline(inlineMessageId, text, parsemode.Html)
 }
 
-func (b Bot) EditMessageInline(messageId int, text string, parseMode string) (bool, error) {
-	v := url.Values{}
-	v.Add("inline_message_id", strconv.Itoa(messageId))
-	v.Add("text", text)
-	v.Add("parse_mode", parseMode)
-
-	return b.boolSender("editMessageText", v)
+func (b Bot) EditMessageMarkdownInline(inlineMessageId string, text string) (*Message, error) {
+	return b.EditMessageInline(inlineMessageId, text, parsemode.Markdown)
 }
 
-func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (bool, error) {
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("message_id", strconv.Itoa(messageId))
-	v.Add("caption", caption)
-
-	return b.boolSender("editMessageCaption", v)
+func (b Bot) EditMessageInline(inlineMessageId string, text string, parseMode string) (*Message, error) {
+	msg := b.NewSendableEditMessageText(0, 0, text)
+	msg.InlineMessageId = inlineMessageId
+	msg.ParseMode = parseMode
+	return msg.Send()
 }
 
-func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (bool, error) {
-	v := url.Values{}
-	v.Add("inline_message_id", inlineMessageId)
-	v.Add("caption", caption)
-
-	return b.boolSender("editMessageCaption", v)
-
+func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (*Message, error) {
+	msg := b.NewSendableEditMessageCaption(chatId, messageId, caption)
+	return msg.Send()
 }
 
-func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup InlineKeyboardMarkup) (bool, error) {
-	markupStr, err := json.Marshal(replyMarkup)
-	if err != nil {
-		return false, nil
-	}
-	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(chatId))
-	v.Add("message_id", strconv.Itoa(messageId))
-	v.Add("reply_markup", string(markupStr))
-
-	return b.boolSender("editMessageReplyMarkup", v)
+func (b Bot) EditMessageCaptionInline(inlineMessageId string, caption string) (*Message, error) {
+	msg := b.NewSendableEditMessageCaption(0, 0, caption)
+	msg.InlineMessageId = inlineMessageId
+	return msg.Send()
 }
 
-func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup InlineKeyboardMarkup) (bool, error) {
-	markupStr, err := json.Marshal(replyMarkup)
-	if err != nil {
-		return false, errors.Wrapf(err, "error editing inline markup reply")
-	}
-	v := url.Values{}
-	v.Add("inline_message_id", inlineMessageId)
-	v.Add("reply_markup", string(markupStr))
+func (b Bot) EditMessageReplyMarkup(chatId int, messageId int, replyMarkup InlineKeyboardMarkup) (*Message, error) {
+	msg := b.NewSendableEditMessageReplyMarkup(chatId, messageId, &replyMarkup)
+	return msg.Send()
+}
 
-	return b.boolSender("editMessageReplyMarkup", v)
+func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup InlineKeyboardMarkup) (*Message, error) {
+	msg := b.NewSendableEditMessageReplyMarkup(0, 0, &replyMarkup)
+	msg.InlineMessageId = inlineMessageId
+	return msg.Send()
 }
 
 // TODO: ensure not a private chat! cant delete in private chats.

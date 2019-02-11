@@ -47,6 +47,10 @@ func Get(bot Bot, method string, params url.Values) (*Response, error) {
 	return DefaultTgBotGetter.Get(bot, method, params)
 }
 
+func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+	return DefaultTgBotGetter.Post(bot, fileType, method, params, file, filename)
+}
+
 func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Response, error) {
 	req, err := http.NewRequest("GET", tbg.ApiUrl+bot.Token+"/"+method, nil)
 	if err != nil {

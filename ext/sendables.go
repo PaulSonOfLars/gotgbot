@@ -19,6 +19,33 @@ func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{bot: b, ChatId: chatId, Text: text}
 }
 
+func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) *sendableEditMessageText {
+	return &sendableEditMessageText{
+		bot:       b,
+		ChatId:    chatId,
+		MessageId: messageId,
+		Text:      text,
+	}
+}
+
+func (b Bot) NewSendableEditMessageCaption(chatId int, messageId int, caption string) *sendableEditMessageCaption {
+	return &sendableEditMessageCaption{
+		bot:       b,
+		ChatId:    chatId,
+		MessageId: messageId,
+		Caption:   caption,
+	}
+}
+
+func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup ReplyMarkup) *sendableEditMessageReplyMarkup {
+	return &sendableEditMessageReplyMarkup{
+		bot:         b,
+		ChatId:      chatId,
+		MessageId:   messageId,
+		ReplyMarkup: markup,
+	}
+}
+
 func (b Bot) NewSendablePhoto(chatId int, caption string) *sendablePhoto {
 	return &sendablePhoto{bot: b, ChatId: chatId, Caption: caption}
 }
@@ -47,6 +74,14 @@ func (b Bot) NewSendableMediaGroup(chatId int) *sendableMediaGroup {
 	return &sendableMediaGroup{bot: b, ChatId: chatId}
 }
 
+func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEditMessageMedia {
+	return &sendableEditMessageMedia{
+		bot:       b,
+		ChatId:    chatId,
+		MessageId: messageId,
+	}
+}
+
 func (b Bot) NewSendableLocation(chatId int) *sendableLocation {
 	return &sendableLocation{bot: b, ChatId: chatId}
 }
@@ -62,6 +97,7 @@ func (b Bot) NewSendableContact(chatId int) *sendableContact {
 func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 	return &sendableChatAction{bot: b, ChatId: chatId}
 }
+
 func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
 	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
@@ -113,8 +149,125 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
+}
+
+type sendableEditMessageText struct {
+	bot               Bot
+	ChatId            int
+	MessageId         int
+	InlineMessageId   string
+	Text              string
+	ParseMode         string
+	DisableWebPreview bool
+	ReplyMarkup       ReplyMarkup
+}
+
+func (msg *sendableEditMessageText) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("message_id", strconv.Itoa(msg.MessageId))
+	v.Add("inline_message_id", msg.InlineMessageId)
+	v.Add("text", msg.Text)
+	v.Add("parse_mode", msg.ParseMode)
+	v.Add("disable_web_page_preview", strconv.FormatBool(msg.DisableWebPreview))
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := Get(msg.bot, "editMessageText", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to editMessageText")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	newMsg := &Message{}
+	newMsg.Bot = msg.bot
+	return newMsg, json.Unmarshal(r.Result, newMsg)
+}
+
+type sendableEditMessageCaption struct {
+	bot             Bot
+	ChatId          int
+	MessageId       int
+	InlineMessageId string
+	Caption         string
+	ParseMode       string
+	ReplyMarkup     ReplyMarkup
+}
+
+func (msg *sendableEditMessageCaption) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("message_id", strconv.Itoa(msg.MessageId))
+	v.Add("inline_message_id", msg.InlineMessageId)
+	v.Add("caption", msg.Caption)
+	v.Add("parse_mode", msg.ParseMode)
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := Get(msg.bot, "editMessageCaption", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to editMessageCaption")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	newMsg := &Message{}
+	newMsg.Bot = msg.bot
+	return newMsg, json.Unmarshal(r.Result, newMsg)
+}
+
+type sendableEditMessageReplyMarkup struct {
+	bot             Bot
+	ChatId          int
+	MessageId       int
+	InlineMessageId string
+	ReplyMarkup     ReplyMarkup
+}
+
+func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("message_id", strconv.Itoa(msg.MessageId))
+	v.Add("inline_message_id", msg.InlineMessageId)
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := Get(msg.bot, "editMessageCaption", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to editMessageCaption")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	newMsg := &Message{}
+	newMsg.Bot = msg.bot
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendablePhoto struct {
@@ -155,8 +308,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableAudio struct {
@@ -195,7 +347,6 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "audio", "sendAudio", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
 	}
@@ -204,8 +355,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableDocument struct {
@@ -239,7 +389,6 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "document", "sendDocument", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
 	}
@@ -248,8 +397,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableVideo struct {
@@ -290,7 +438,6 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "video", "sendVideo", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideo")
 	}
@@ -299,8 +446,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableVoice struct {
@@ -335,7 +481,6 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "voice", "sendVoice", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVoice")
 	}
@@ -344,8 +489,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableVideoNote struct {
@@ -378,7 +522,6 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "video", "sendVideoNote", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideoNote")
 	}
@@ -387,8 +530,44 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
+}
+
+type sendableEditMessageMedia struct {
+	bot             Bot
+	ChatId          int
+	MessageId       int
+	InlineMessageId string
+	file
+	ReplyMarkup ReplyMarkup
+}
+
+func (msg *sendableEditMessageMedia) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("message_id", strconv.Itoa(msg.MessageId))
+	v.Add("inline_message_id", msg.InlineMessageId)
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := msg.bot.sendFile(msg.file, "media", "editMessageMedia", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to editMessageMedia")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	newMsg := &Message{}
+	newMsg.Bot = msg.bot
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 // TODO
@@ -428,8 +607,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableLocation struct {
@@ -471,8 +649,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 //TODO: edit live location
@@ -521,8 +698,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableContact struct {
@@ -564,8 +740,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableChatAction struct {
@@ -587,8 +762,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 		return false, errors.New(r.Description)
 	}
 	var newMsg bool
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 type sendableAnimation struct {
@@ -629,7 +803,6 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.sendFile(msg.file, "animation", "sendAnimation", v)
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAnimation")
 	}
@@ -638,8 +811,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	}
 	newMsg := &Message{}
 	newMsg.Bot = msg.bot
-	json.Unmarshal(r.Result, newMsg)
-	return newMsg, nil
+	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
 func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (*Response, error) {
