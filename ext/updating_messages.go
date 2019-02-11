@@ -10,22 +10,22 @@ import (
 )
 
 func (b Bot) EditMessageText(chatId int, messageId int, text string) (*Message, error) {
-	return b.EditMessageMarkup(chatId, messageId, text, "", nil)
+	return b.EditMessageTextMarkup(chatId, messageId, text, "", nil)
 }
 
 func (b Bot) EditMessageHTML(chatId int, messageId int, text string) (*Message, error) {
-	return b.EditMessageMarkup(chatId, messageId, text, parsemode.Html, nil)
+	return b.EditMessageTextMarkup(chatId, messageId, text, parsemode.Html, nil)
 }
 
 func (b Bot) EditMessageMarkdown(chatId int, messageId int, text string) (*Message, error) {
-	return b.EditMessageMarkup(chatId, messageId, text, parsemode.Markdown, nil)
+	return b.EditMessageTextMarkup(chatId, messageId, text, parsemode.Markdown, nil)
 }
 
 func (b Bot) EditMessage(chatId int, messageId int, text string, parseMode string) (*Message, error) {
-	return b.EditMessageMarkup(chatId, messageId, text, parseMode, nil)
+	return b.EditMessageTextMarkup(chatId, messageId, text, parseMode, nil)
 }
 
-func (b Bot) EditMessageMarkup(chatId int, messageId int, text string, parseMode string, markup ReplyMarkup) (*Message, error) {
+func (b Bot) EditMessageTextMarkup(chatId int, messageId int, text string, parseMode string, markup ReplyMarkup) (*Message, error) {
 	msg := b.NewSendableEditMessageText(chatId, messageId, text)
 	msg.ParseMode = parseMode
 	msg.ReplyMarkup = markup
@@ -52,7 +52,11 @@ func (b Bot) EditMessageInline(inlineMessageId string, text string, parseMode st
 }
 
 func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (*Message, error) {
+	return b.EditMessageCaptionMarkup(chatId, messageId, caption, nil)
+}
+func (b Bot) EditMessageCaptionMarkup(chatId int, messageId int, caption string, markup ReplyMarkup) (*Message, error) {
 	msg := b.NewSendableEditMessageCaption(chatId, messageId, caption)
+	msg.ReplyMarkup = markup
 	return msg.Send()
 }
 
