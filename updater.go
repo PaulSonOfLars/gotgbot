@@ -16,13 +16,13 @@ import (
 
 type Updater struct {
 	Bot        *ext.Bot
-	updates    chan *Update
+	updates    chan *RawUpdate
 	Dispatcher *Dispatcher
 }
 
 func NewUpdater(token string) (*Updater, error) {
 	u := &Updater{}
-	user, err := ext.Bot{Token: token}.GetMe()
+	user, err := ext.Bot{Token: token, Logger: logrus.New()}.GetMe()
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to create new updater")
 	}
@@ -31,8 +31,9 @@ func NewUpdater(token string) (*Updater, error) {
 		Id:        user.Id,
 		FirstName: user.FirstName,
 		UserName:  user.Username,
+		Logger:    logrus.New(),
 	}
-	u.updates = make(chan *Update)
+	u.updates = make(chan *RawUpdate)
 	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
 	ok, err := u.RemoveWebhook() // just in case
 	if err != nil {
@@ -74,7 +75,7 @@ func (u Updater) startPolling(clean bool) {
 			continue
 
 		} else if r.Result != nil {
-			var rawUpdates []json.RawMessage
+			var rawUpdates []RawUpdate
 			json.Unmarshal(r.Result, &rawUpdates)
 			if len(rawUpdates) > 0 {
 				// parse last one here
@@ -89,8 +90,8 @@ func (u Updater) startPolling(clean bool) {
 			}
 
 			for _, updData := range rawUpdates {
-				upd := initUpdate(updData, *u.Bot)
-				u.updates <- upd
+				temp := updData // necessary to avoid memory stuff from loops
+				u.updates <- &temp
 			}
 		}
 	}
@@ -128,7 +129,8 @@ func (u Updater) StartWebhook(webhook Webhook) {
 	go u.Dispatcher.Start()
 	http.HandleFunc("/"+webhook.ServePath, func(w http.ResponseWriter, r *http.Request) {
 		bytes, _ := ioutil.ReadAll(r.Body)
-		u.updates <- initUpdate(bytes, *u.Bot)
+		temp := RawUpdate(bytes)
+		u.updates <- &temp
 	})
 	go func() {
 		// todo: TLS when using certs

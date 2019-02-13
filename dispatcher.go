@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"encoding/json"
 	"runtime/debug"
 	"sort"
 
@@ -8,17 +9,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type RawUpdate json.RawMessage
+
 type Dispatcher struct {
 	Bot           ext.Bot
 	MaxRoutines   int
-	updates       chan *Update
+	updates       chan *RawUpdate
 	handlers      map[int][]Handler
 	handlerGroups *[]int
 }
 
 const DefaultMaxDispatcherRoutines = 50
 
-func NewDispatcher(bot ext.Bot, updates chan *Update) *Dispatcher {
+func NewDispatcher(bot ext.Bot, updates chan *RawUpdate) *Dispatcher {
 	return &Dispatcher{
 		Bot:           bot,
 		MaxRoutines:   DefaultMaxDispatcherRoutines,
@@ -32,7 +35,7 @@ func (d Dispatcher) Start() {
 	limiter := make(chan struct{}, d.MaxRoutines)
 	for upd := range d.updates {
 		limiter <- struct{}{}
-		go func(upd *Update) {
+		go func(upd *RawUpdate) {
 			d.processUpdate(upd)
 			<-limiter
 		}(upd)
@@ -45,13 +48,15 @@ type ContinueGroups struct{}
 func (eg EndGroups) Error() string      { return "Group iteration ended" }
 func (eg ContinueGroups) Error() string { return "Group iteration has continued" }
 
-func (d Dispatcher) processUpdate(update *Update) {
+func (d Dispatcher) processUpdate(upd *RawUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
 			logrus.Error(r)
 			debug.PrintStack()
 		}
 	}()
+
+	update := initUpdate(*upd, d.Bot)
 
 	for _, groupNum := range *d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
