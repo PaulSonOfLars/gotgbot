@@ -75,11 +75,11 @@ func (u Updater) startPolling(clean bool) {
 			continue
 
 		} else if r.Result != nil {
-			var rawUpdates []RawUpdate
+			var rawUpdates []json.RawMessage
 			json.Unmarshal(r.Result, &rawUpdates)
 			if len(rawUpdates) > 0 {
 				// parse last one here
-				lastUpd := initUpdate(rawUpdates[len(rawUpdates)-1], *u.Bot)
+				lastUpd := initUpdate(RawUpdate(rawUpdates[len(rawUpdates)-1]), *u.Bot)
 				offset = lastUpd.UpdateId + 1
 				v.Set("offset", strconv.Itoa(offset))
 				if clean {
@@ -90,7 +90,7 @@ func (u Updater) startPolling(clean bool) {
 			}
 
 			for _, updData := range rawUpdates {
-				temp := updData // necessary to avoid memory stuff from loops
+				temp := RawUpdate(updData) // necessary to avoid memory stuff from loops
 				u.updates <- &temp
 			}
 		}
