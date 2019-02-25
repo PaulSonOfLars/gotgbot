@@ -25,14 +25,34 @@ type ArgsCommand struct {
 	Response func(b ext.Bot, u *gotgbot.Update, args []string) error
 }
 
-func NewCommand(command string, response func(b ext.Bot, u *gotgbot.Update) error) Command {
+func NewPrefixCommand(command string, prefixes []rune, response func(b ext.Bot, u *gotgbot.Update) error) Command {
 	cmd := strings.ToLower(command)
 	return Command{
 		baseCommand: baseCommand{
 			baseHandler: baseHandler{
 				Name: cmd,
 			},
-			Triggers:     []rune("/"),
+			Triggers:     prefixes,
+			AllowEdited:  false,
+			AllowChannel: false,
+			Command:      cmd,
+		},
+		Response: response,
+	}
+}
+
+func NewCommand(command string, response func(b ext.Bot, u *gotgbot.Update) error) Command {
+	return NewPrefixCommand(command, []rune("/"), response)
+}
+
+func NewPrefixArgsCommand(command string, prefixes []rune, response func(b ext.Bot, u *gotgbot.Update, args []string) error) ArgsCommand {
+	cmd := strings.ToLower(command)
+	return ArgsCommand{
+		baseCommand: baseCommand{
+			baseHandler: baseHandler{
+				Name: cmd,
+			},
+			Triggers:     prefixes,
 			AllowEdited:  false,
 			AllowChannel: false,
 			Command:      cmd,
@@ -42,19 +62,7 @@ func NewCommand(command string, response func(b ext.Bot, u *gotgbot.Update) erro
 }
 
 func NewArgsCommand(command string, response func(b ext.Bot, u *gotgbot.Update, args []string) error) ArgsCommand {
-	cmd := strings.ToLower(command)
-	return ArgsCommand{
-		baseCommand: baseCommand{
-			baseHandler: baseHandler{
-				Name: cmd,
-			},
-			Triggers:     []rune("/"),
-			AllowEdited:  false,
-			AllowChannel: false,
-			Command:      cmd,
-		},
-		Response: response,
-	}
+	return NewPrefixArgsCommand(command, []rune("/"), response)
 }
 
 func (h Command) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
