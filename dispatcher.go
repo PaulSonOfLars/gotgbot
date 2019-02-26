@@ -34,7 +34,12 @@ func NewDispatcher(bot ext.Bot, updates chan *RawUpdate) *Dispatcher {
 func (d Dispatcher) Start() {
 	limiter := make(chan struct{}, d.MaxRoutines)
 	for upd := range d.updates {
-		limiter <- struct{}{}
+		select {
+		case limiter <- struct{}{}:
+		default:
+			logrus.Debugf("update dispatcher has reached limit of %d", d.MaxRoutines)
+			limiter <- struct{}{} // make sure to send anyway
+		}
 		go func(upd *RawUpdate) {
 			d.processUpdate(upd)
 			<-limiter
