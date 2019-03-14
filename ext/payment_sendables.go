@@ -95,7 +95,7 @@ func (i *sendableInvoice) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 
-	return i.bot.ParseMessage(r.Result), nil
+	return i.bot.ParseMessage(r.Result)
 }
 
 type sendableAnswerShippingQuery struct {

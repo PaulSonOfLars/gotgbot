@@ -31,9 +31,11 @@ type Update struct {
 	Data             map[string]string
 }
 
-func initUpdate(data RawUpdate, bot ext.Bot) *Update {
+func initUpdate(data RawUpdate, bot ext.Bot) (*Update, error) {
 	var upd Update
-	json.Unmarshal(data, &upd)
+	if err := json.Unmarshal(data, &upd); err != nil {
+		return nil, err
+	}
 	if upd.Message != nil {
 		upd.EffectiveMessage = upd.Message
 		upd.EffectiveChat = upd.Message.Chat
@@ -87,5 +89,5 @@ func initUpdate(data RawUpdate, bot ext.Bot) *Update {
 		upd.EffectiveUser.Bot = bot
 	}
 	upd.Data = make(map[string]string)
-	return &upd
+	return &upd, nil
 }

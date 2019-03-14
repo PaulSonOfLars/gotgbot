@@ -59,7 +59,7 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	return b.ParseMessage(r.Result), nil
+	return b.ParseMessage(r.Result)
 }
 
 func (b Bot) SendPhotoStr(chatId int, photoId string) (*Message, error) {

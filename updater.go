@@ -76,10 +76,17 @@ func (u Updater) startPolling(clean bool) {
 
 		} else if r.Result != nil {
 			var rawUpdates []json.RawMessage
-			json.Unmarshal(r.Result, &rawUpdates)
+			if err := json.Unmarshal(r.Result, &rawUpdates); err != nil {
+				logrus.WithError(err).Error("failed to unmarshal update while polling", r.Result)
+				continue
+			}
 			if len(rawUpdates) > 0 {
 				// parse last one here
-				lastUpd := initUpdate(RawUpdate(rawUpdates[len(rawUpdates)-1]), *u.Bot)
+				lastUpd, err := initUpdate(RawUpdate(rawUpdates[len(rawUpdates)-1]), *u.Bot)
+				if err != nil {
+					logrus.WithError(err).Error("failed to init update while polling", r.Result)
+					continue
+				}
 				offset = lastUpd.UpdateId + 1
 				v.Set("offset", strconv.Itoa(offset))
 				if clean {

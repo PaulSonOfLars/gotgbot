@@ -157,11 +157,9 @@ func (b Bot) Message(chatId int, text string) Message {
 	return Message{Bot: b}
 }
 
-func (b Bot) ParseMessage(message json.RawMessage) *Message {
-	var mess Message
-	json.Unmarshal(message, &mess)
+func (b Bot) ParseMessage(message json.RawMessage) (mess *Message, err error) {
 	mess.Bot = b
-	return &mess
+	return mess, json.Unmarshal(message, mess)
 }
 
 func (m Message) ReplyText(text string) (*Message, error) {

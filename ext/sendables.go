@@ -711,9 +711,9 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 
 	var media []byte
 	if msg.ArrInputMedia != nil {
-		var data []url.Values
-		for _, media := range msg.ArrInputMedia {
-			data = append(data, media.getValues(media.getType()))
+		data := make([]url.Values, len(msg.ArrInputMedia))
+		for i := 0; i <  len(msg.ArrInputMedia); i++ {
+			data[i] = msg.ArrInputMedia[i].getValues(msg.ArrInputMedia[i].getType())
 		}
 		vals, err := json.Marshal(data)
 		if err != nil {

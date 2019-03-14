@@ -56,7 +56,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 
-	return s.bot.ParseMessage(r.Result), nil
+	return s.bot.ParseMessage(r.Result)
 }
 
 type sendableUploadStickerFile struct {

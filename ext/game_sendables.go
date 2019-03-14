@@ -34,7 +34,7 @@ func (g *sendableGame) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "invalid sendGame request")
 	}
 
-	return g.bot.ParseMessage(r.Result), nil
+	return g.bot.ParseMessage(r.Result)
 }
 
 type sendableSetGameScore struct {

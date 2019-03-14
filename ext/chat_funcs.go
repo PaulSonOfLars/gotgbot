@@ -209,10 +209,8 @@ func (b Bot) GetChat(chatId int) (*Chat, error) {
 	}
 
 	var c Chat
-	json.Unmarshal(r.Result, &c)
 	c.Bot = b
-
-	return &c, nil
+	return &c, json.Unmarshal(r.Result, &c)
 }
 
 func (b Bot) GetChatAdministrators(chatId int) ([]ChatMember, error) {

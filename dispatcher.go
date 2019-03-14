@@ -61,8 +61,11 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 		}
 	}()
 
-	update := initUpdate(*upd, d.Bot)
-
+	update, err := initUpdate(*upd, d.Bot)
+	if err != nil {
+		logrus.WithError(err).Error("failed to init update while processing")
+		return
+	}
 	for _, groupNum := range *d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
 			if res, err := handler.CheckUpdate(update); res {
@@ -79,7 +82,8 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 				}
 				break // move to next group
 			} else if err != nil {
-				logrus.WithError(err).Error("Failed to parse update")
+				logrus.WithError(err).Error("failed to check update while processing")
+				return
 			}
 		}
 	}
