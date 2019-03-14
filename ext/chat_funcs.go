@@ -34,9 +34,7 @@ func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) RestrictChatMember(chatId int, userId int) (bool, error) {
@@ -84,9 +82,7 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	}
 
 	var s string
-	json.Unmarshal(r.Result, &s)
-
-	return s, nil
+	return s, json.Unmarshal(r.Result, &s)
 }
 
 func (b Bot) SetChatPhotoStr(chatId int, photoId string) (bool, error) {
@@ -120,9 +116,7 @@ func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
@@ -139,9 +133,7 @@ func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
@@ -158,9 +150,7 @@ func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) PinChatMessage(chatId int, messageId int) (bool, error) {
@@ -187,9 +177,7 @@ func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) LeaveChat(chatId int) (bool, error) {
@@ -205,9 +193,7 @@ func (b Bot) LeaveChat(chatId int) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) GetChat(chatId int) (*Chat, error) {
@@ -242,9 +228,7 @@ func (b Bot) GetChatAdministrators(chatId int) ([]ChatMember, error) {
 	}
 
 	var cm []ChatMember
-	json.Unmarshal(r.Result, &cm)
-
-	return cm, nil
+	return cm, json.Unmarshal(r.Result, &cm)
 }
 
 func (b Bot) GetChatMembersCount(chatId int) (int, error) {
@@ -260,9 +244,7 @@ func (b Bot) GetChatMembersCount(chatId int) (int, error) {
 	}
 
 	var c int
-	json.Unmarshal(r.Result, &c)
-
-	return c, nil
+	return c, json.Unmarshal(r.Result, &c)
 }
 
 func (b Bot) GetChatMember(chatId int, userId int) (*ChatMember, error) {
@@ -279,9 +261,7 @@ func (b Bot) GetChatMember(chatId int, userId int) (*ChatMember, error) {
 	}
 
 	var cm ChatMember
-	json.Unmarshal(r.Result, &cm)
-
-	return &cm, nil
+	return &cm, json.Unmarshal(r.Result, &cm)
 }
 
 func (b Bot) SetChatStickerSet(chatId int, stickerSetName string) (bool, error) {
@@ -298,9 +278,7 @@ func (b Bot) SetChatStickerSet(chatId int, stickerSetName string) (bool, error) 
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) DeleteChatStickerSet(chatId int) (bool, error) {
@@ -316,7 +294,5 @@ func (b Bot) DeleteChatStickerSet(chatId int) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }

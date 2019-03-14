@@ -82,8 +82,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	}
 	newFile := &File{}
 	newFile.bot = usf.bot
-	json.Unmarshal(r.Result, newFile)
-	return newFile, nil
+	return newFile, json.Unmarshal(r.Result, newFile)
 }
 
 type sendableCreateNewSticker struct {
@@ -124,9 +123,7 @@ func (cns *sendableCreateNewSticker) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 type sendableAddStickerToSet struct {
@@ -163,7 +160,5 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }

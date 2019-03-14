@@ -75,9 +75,7 @@ func (sgs *sendableSetGameScore) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 type sendableGetGameHighScores struct {
@@ -112,7 +110,5 @@ func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error) {
 	}
 
 	var ghs []GameHighScore
-	json.Unmarshal(r.Result, &ghs)
-
-	return ghs, nil
+	return ghs, json.Unmarshal(r.Result, &ghs)
 }

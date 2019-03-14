@@ -147,9 +147,7 @@ func (u Updater) RemoveWebhook() (bool, error) {
 		return false, errors.Wrapf(err, "failed to remove webhook")
 	}
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
@@ -174,8 +172,7 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 type WebhookInfo struct {
@@ -195,7 +192,6 @@ func (u Updater) GetWebhookInfo() (*WebhookInfo, error) {
 	}
 
 	var wh WebhookInfo
-	json.Unmarshal(r.Result, &wh)
-	return &wh, nil
+	return &wh, json.Unmarshal(r.Result, &wh)
 
 }

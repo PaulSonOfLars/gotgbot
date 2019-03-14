@@ -131,8 +131,7 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 type sendableAnswerPreCheckoutQuery struct {
@@ -168,6 +167,5 @@ func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }

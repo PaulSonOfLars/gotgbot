@@ -87,9 +87,7 @@ func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 	}
 
 	var ss StickerSet
-	json.Unmarshal(r.Result, &ss)
-
-	return &ss, nil
+	return &ss, json.Unmarshal(r.Result, &ss)
 }
 
 func (b Bot) UploadStickerFileStr(userId int, pngStickerId string) (*File, error) {
@@ -160,9 +158,7 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error)
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
@@ -178,7 +174,5 @@ func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }

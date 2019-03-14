@@ -353,8 +353,7 @@ func (aiq sendableAnswerInlineQuery) Send() (bool, error) {
 	}
 
 	var bb bool
-	json.Unmarshal(r.Result, &bb)
-	return bb, nil
+	return bb, json.Unmarshal(r.Result, &bb)
 }
 
 func (b Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryResult) (bool, error) {
