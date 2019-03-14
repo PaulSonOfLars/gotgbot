@@ -3,7 +3,6 @@ package ext
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -691,11 +690,10 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	return newMsg, json.Unmarshal(r.Result, newMsg)
 }
 
-// TODO
 type sendableMediaGroup struct {
-	bot    Bot
-	ChatId int
-	//media
+	bot                 Bot
+	ChatId              int
+	ArrInputMedia       []InputMedia
 	DisableNotification bool
 	ReplyToMessageId    int
 	ReplyMarkup         ReplyMarkup
@@ -703,18 +701,30 @@ type sendableMediaGroup struct {
 
 func (msg *sendableMediaGroup) Send() (*Message, error) {
 	var replyMarkup []byte
+	var err error
 	if msg.ReplyMarkup != nil {
-		var err error
 		replyMarkup, err = msg.ReplyMarkup.Marshal()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	log.Println("TODO: media groups") // TODO
+	var media []byte
+	if msg.ArrInputMedia != nil {
+		var data []url.Values
+		for _, media := range msg.ArrInputMedia {
+			data = append(data, media.getValues(media.getType()))
+		}
+		vals, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		media = vals
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
-	//v.Add("media")
+	v.Add("media", string(media))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))

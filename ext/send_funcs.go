@@ -9,9 +9,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TODO: Markdown and HTML - two different funcs?
 func (b Bot) SendMessage(chatId int, text string) (*Message, error) {
 	newMsg := b.NewSendableMessage(chatId, text)
+	return newMsg.Send()
+}
+
+func (b Bot) SendMessageHTML(chatId int, text string) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ParseMode = parsemode.Html
+	return newMsg.Send()
+}
+
+func (b Bot) SendMessageMarkdown(chatId int, text string) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ParseMode = parsemode.Markdown
 	return newMsg.Send()
 }
 

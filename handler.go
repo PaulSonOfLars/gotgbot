@@ -31,7 +31,6 @@ type Update struct {
 	Data             map[string]string
 }
 
-// todo: move this into dispatcher update processor to updater CPU cycles
 func initUpdate(data RawUpdate, bot ext.Bot) *Update {
 	var upd Update
 	json.Unmarshal(data, &upd)

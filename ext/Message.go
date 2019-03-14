@@ -135,7 +135,7 @@ type Message struct {
 	Venue                 *Venue             `json:"venue"`
 	LeftChatMember        *User              `json:"left_chat_member"`
 	NewChatTitle          string             `json:"new_chat_title"`
-	NewChatPhoto          []PhotoSize        `json:"new_chat_phot"`
+	NewChatPhoto          []PhotoSize        `json:"new_chat_photo"`
 	DeleteChatPhoto       bool               `json:"delete_chat_photo"`
 	GroupChatCreated      bool               `json:"group_chat_created"`
 	SupergroupChatCreated bool               `json:"supergroup_chat_created"`
