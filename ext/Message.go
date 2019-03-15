@@ -115,6 +115,7 @@ type Message struct {
 	ForwardDate           int                `json:"forward_date"`
 	ReplyToMessage        *Message           `json:"reply_to_message"`
 	EditDate              int                `json:"edit_date"`
+	MediaGroupId          string             `json:"media_group_id"`
 	AuthorSignature       string             `json:"author_signature"`
 	Text                  string             `json:"text"`
 	Entities              []MessageEntity    `json:"entities"`
@@ -128,11 +129,11 @@ type Message struct {
 	Video                 *Video             `json:"video"`
 	Voice                 *Voice             `json:"voice"`
 	VideoNote             *VideoNote         `json:"video_note"`
-	NewChatMembers        []User             `json:"new_chat_members"`
 	Caption               string             `json:"caption"`
 	Contact               *Contact           `json:"contact"`
 	Location              *Location          `json:"location"`
 	Venue                 *Venue             `json:"venue"`
+	NewChatMembers        []User             `json:"new_chat_members"`
 	LeftChatMember        *User              `json:"left_chat_member"`
 	NewChatTitle          string             `json:"new_chat_title"`
 	NewChatPhoto          []PhotoSize        `json:"new_chat_photo"`
@@ -145,6 +146,8 @@ type Message struct {
 	PinnedMessage         *Message           `json:"pinned_message"`
 	Invoice               *Invoice           `json:"invoice"`
 	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
+	ConnectedWebsite      string             `json:"connected_website"`
+	PassportData          PassportData       `json:"passport_data"`
 
 	// internals
 	utf16Text       []uint16
