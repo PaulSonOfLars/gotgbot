@@ -161,7 +161,7 @@ func (b Bot) Message(chatId int, text string) Message {
 }
 
 func (b Bot) ParseMessage(message json.RawMessage) (mess *Message, err error) {
-	mess.Bot = b
+	mess = &Message{Bot: b}
 	return mess, json.Unmarshal(message, mess)
 }
 
