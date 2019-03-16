@@ -32,8 +32,21 @@ func (h Message) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 }
 
 func (h Message) CheckUpdate(u *gotgbot.Update) (bool, error) {
-	return (u.Message != nil ||
-		(h.AllowEdited && u.EditedMessage != nil) ||
-		(h.AllowChannel && u.ChannelPost != nil)) &&
-		h.Filter(u.EffectiveMessage), nil
+	if u.EffectiveMessage == nil {
+		return false, nil
+	}
+	// if no edits and message is edited
+	if !h.AllowEdited && u.EditedMessage != nil {
+		return false, nil
+	}
+	// if no channel and message is channel message
+	if !h.AllowChannel && u.ChannelPost != nil {
+		return false, nil
+	}
+	// if no channel, no edits, and post is edited
+	if !h.AllowChannel && !h.AllowEdited && u.EditedChannelPost != nil {
+		return false, nil
+	}
+
+	return h.Filter(u.EffectiveMessage), nil
 }
