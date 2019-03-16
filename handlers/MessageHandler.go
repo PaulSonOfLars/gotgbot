@@ -32,7 +32,7 @@ func (h Message) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 }
 
 func (h Message) CheckUpdate(u *gotgbot.Update) (bool, error) {
-	if u.EffectiveMessage == nil {
+	if u.EffectiveMessage == nil || u.CallbackQuery != nil { // don't trigger on callback query messages
 		return false, nil
 	}
 	// if no edits and message is edited
