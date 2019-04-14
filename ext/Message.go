@@ -189,6 +189,30 @@ func (m Message) ReplyMarkdownf(format string, a ...interface{}) (*Message, erro
 	return m.Bot.ReplyMarkdown(m.Chat.Id, fmt.Sprintf(format, a...), m.MessageId)
 }
 
+func (m Message) EditText(text string) (*Message, error) {
+	return m.Bot.EditMessageText(m.Chat.Id, m.MessageId, text)
+}
+
+func (m Message) EditTextf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.EditMessageText(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
+}
+
+func (m Message) EditHTML(text string) (*Message, error) {
+	return m.Bot.EditMessageHTML(m.Chat.Id, m.MessageId, text)
+}
+
+func (m Message) EditHTMLf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.EditMessageHTML(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
+}
+
+func (m Message) EditMarkdown(text string) (*Message, error) {
+	return m.Bot.EditMessageMarkdown(m.Chat.Id, m.MessageId, text)
+}
+
+func (m Message) EditMarkdownf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.EditMessageMarkdown(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
+}
+
 func (m Message) ReplyAudioStr(audio string) (*Message, error) {
 	return m.Bot.ReplyAudioStr(m.Chat.Id, audio, m.MessageId)
 }
