@@ -102,6 +102,18 @@ type PreCheckoutQuery struct {
 	OrderInfo        OrderInfo `json:"order_info"`
 }
 
+type PollOption struct {
+	Text       string
+	VoterCount int
+}
+
+type Poll struct {
+	Id       string
+	Question string
+	Options  []PollOption
+	IsClosed bool
+}
+
 type Message struct {
 	Bot                   Bot
 	MessageId             int                `json:"message_id"`
@@ -148,6 +160,7 @@ type Message struct {
 	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
 	ConnectedWebsite      string             `json:"connected_website"`
 	PassportData          PassportData       `json:"passport_data"`
+	Poll                  Poll               `json:"poll"`
 
 	// internals
 	utf16Text       []uint16
