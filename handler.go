@@ -23,6 +23,7 @@ type Update struct {
 	CallbackQuery      *ext.CallbackQuery      `json:"callback_query"`
 	ShippingQuery      *ext.ShippingQuery      `json:"shipping_query"`
 	PreCheckoutQuery   *ext.PreCheckoutQuery   `json:"pre_checkout_query"`
+	Poll               *ext.Poll               `json:"poll"`
 
 	// Self added type
 	EffectiveMessage *ext.Message `json:"effective_message"`

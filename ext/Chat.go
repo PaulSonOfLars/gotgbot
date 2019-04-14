@@ -37,6 +37,7 @@ type ChatMember struct {
 	CanRestrictMembers    bool   `json:"can_restrict_members"`
 	CanPinMessages        bool   `json:"can_pin_messages"`
 	CanPromoteMembers     bool   `json:"can_promote_members"`
+	IsMember              bool   `json:"is_member"`
 	CanSendMessages       bool   `json:"can_send_messages"`
 	CanSendMediaMessages  bool   `json:"can_send_media_messages"`
 	CanSendOtherMessages  bool   `json:"can_send_other_messages"`

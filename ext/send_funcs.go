@@ -1,12 +1,14 @@
 package ext
 
 import (
+	"encoding/json"
 	"io"
 	"net/url"
 	"strconv"
 
-	"github.com/PaulSonOfLars/gotgbot/parsemode"
 	"github.com/pkg/errors"
+
+	"github.com/PaulSonOfLars/gotgbot/parsemode"
 )
 
 func (b Bot) SendMessage(chatId int, text string) (*Message, error) {
@@ -322,4 +324,53 @@ func (b Bot) SendChatAction(chatId int, action string) (bool, error) {
 	contactMsg := b.NewSendableChatAction(chatId)
 	contactMsg.Action = action
 	return contactMsg.Send()
+}
+
+func (b Bot) sendPoll(chatId int, question string, option []string, disableNotification bool, replyToMessageId int) (*Message, error) {
+	pollMsg := b.NewSendablePoll(chatId, question, option)
+	pollMsg.DisableNotification = disableNotification
+	pollMsg.ReplyToMessageId = replyToMessageId
+	return pollMsg.Send()
+}
+
+func (b Bot) SendPoll(chatId int, question string, options []string) (*Message, error) {
+	return b.sendPoll(chatId, question, options, false, 0)
+}
+
+func (b Bot) ReplyPoll(chatId int, question string, options []string, replyToMessageId int) (*Message, error) {
+	return b.sendPoll(chatId, question, options, false, replyToMessageId)
+}
+
+func (b Bot) stopPoll(chatId int, messageId int, replyMarkup *InlineKeyboardMarkup) (*Poll, error) {
+	var replyMarkupBytes []byte
+	if replyMarkup != nil {
+		var err error
+		replyMarkupBytes, err = replyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
+	v.Add("reply_markup", string(replyMarkupBytes))
+
+	r, err := Get(b, "forwardMessage", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to forwardMessage")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	poll := &Poll{Bot: b}
+	return poll, json.Unmarshal(r.Result, poll)
+}
+
+func (b Bot) StopPoll(chatId int, messageId int) (*Poll, error) {
+	return b.stopPoll(chatId, messageId, nil)
+}
+
+func (b Bot) StopPollMarkup(chatId int, messageId int, replyMarkup InlineKeyboardMarkup) (*Poll, error) {
+	return b.stopPoll(chatId, messageId, &replyMarkup)
 }

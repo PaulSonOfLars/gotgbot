@@ -101,6 +101,10 @@ func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation
 	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
 
+func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sendablePoll {
+	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
+}
+
 type file struct {
 	Name   string
 	FileId string
@@ -262,9 +266,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableEditMessageText struct {
@@ -304,9 +306,7 @@ func (msg *sendableEditMessageText) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableEditMessageCaption struct {
@@ -344,9 +344,7 @@ func (msg *sendableEditMessageCaption) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableEditMessageReplyMarkup struct {
@@ -380,9 +378,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendablePhoto struct {
@@ -421,9 +417,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableAudio struct {
@@ -468,9 +462,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableDocument struct {
@@ -510,9 +502,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableVideo struct {
@@ -559,9 +549,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableVoice struct {
@@ -602,9 +590,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableVideoNote struct {
@@ -643,9 +629,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableEditMessageMedia struct {
@@ -685,9 +669,7 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableMediaGroup struct {
@@ -712,7 +694,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	var media []byte
 	if msg.ArrInputMedia != nil {
 		data := make([]url.Values, len(msg.ArrInputMedia))
-		for i := 0; i <  len(msg.ArrInputMedia); i++ {
+		for i := 0; i < len(msg.ArrInputMedia); i++ {
 			data[i] = msg.ArrInputMedia[i].getValues(msg.ArrInputMedia[i].getType())
 		}
 		vals, err := json.Marshal(data)
@@ -736,9 +718,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableLocation struct {
@@ -778,9 +758,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 //TODO: edit live location
@@ -827,9 +805,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableContact struct {
@@ -869,9 +845,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
 }
 
 type sendableChatAction struct {
@@ -940,9 +914,52 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	if !r.Ok {
 		return nil, errors.New(r.Description)
 	}
-	newMsg := &Message{}
-	newMsg.Bot = msg.bot
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return msg.bot.ParseMessage(r.Result)
+}
+
+type sendablePoll struct {
+	bot                 Bot
+	ChatId              int
+	Question            string
+	Options             []string
+	DisableNotification bool
+	ReplyToMessageId    int
+	ReplyMarkup         ReplyMarkup
+}
+
+func (msg *sendablePoll) Send() (*Message, error) {
+	var replyMarkup []byte
+	if msg.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = msg.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if msg.Options == nil {
+		msg.Options = []string{}
+	}
+
+	optionsBytes, err := json.Marshal(msg.Options)
+	if err != nil {
+		return nil, err
+	}
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(msg.ChatId))
+	v.Add("question", msg.Question)
+	v.Add("options", string(optionsBytes))
+	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
+	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := Get(msg.bot, "sendChatPoll", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendChatPoll")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	return msg.bot.ParseMessage(r.Result)
 }
 
 func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (*Response, error) {

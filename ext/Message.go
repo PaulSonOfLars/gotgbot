@@ -108,6 +108,7 @@ type PollOption struct {
 }
 
 type Poll struct {
+	Bot      Bot
 	Id       string
 	Question string
 	Options  []PollOption
@@ -124,6 +125,7 @@ type Message struct {
 	ForwardFromChat       *Chat              `json:"forward_from_chat"`
 	ForwardFromMessageId  int                `json:"forward_from_message_id"`
 	ForwardSignature      string             `json:"forward_signature"`
+	ForwardSenderName     string             `json:"forward_sender_name"`
 	ForwardDate           int                `json:"forward_date"`
 	ReplyToMessage        *Message           `json:"reply_to_message"`
 	EditDate              int                `json:"edit_date"`
@@ -145,6 +147,7 @@ type Message struct {
 	Contact               *Contact           `json:"contact"`
 	Location              *Location          `json:"location"`
 	Venue                 *Venue             `json:"venue"`
+	Poll                  *Poll              `json:"poll"`
 	NewChatMembers        []User             `json:"new_chat_members"`
 	LeftChatMember        *User              `json:"left_chat_member"`
 	NewChatTitle          string             `json:"new_chat_title"`
@@ -160,7 +163,6 @@ type Message struct {
 	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`
 	ConnectedWebsite      string             `json:"connected_website"`
 	PassportData          PassportData       `json:"passport_data"`
-	Poll                  Poll               `json:"poll"`
 
 	// internals
 	utf16Text       []uint16

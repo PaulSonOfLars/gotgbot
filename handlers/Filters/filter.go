@@ -15,7 +15,7 @@ func Text(message *ext.Message) bool {
 }
 
 func Caption(message *ext.Message) bool {
-    return message.Caption != ""
+	return message.Caption != ""
 }
 
 func Command(message *ext.Message) bool {
@@ -166,4 +166,8 @@ func StartsWith(prefix string) func(message *ext.Message) bool {
 	return func(m *ext.Message) bool {
 		return (m.Text != "" && strings.HasPrefix(m.Text, prefix)) || (m.Caption != "" && strings.HasPrefix(m.Caption, prefix))
 	}
+}
+
+func Poll(message *ext.Message) bool {
+	return message.Poll != nil
 }
