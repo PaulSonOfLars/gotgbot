@@ -66,11 +66,11 @@ func NewArgsCommand(command string, response func(b ext.Bot, u *gotgbot.Update, 
 }
 
 func (h Command) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.Response(d.Bot, u)
+	return h.Response(*d.Bot, u)
 }
 
 func (h ArgsCommand) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.Response(d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
+	return h.Response(*d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
 // todo optimise if statements?

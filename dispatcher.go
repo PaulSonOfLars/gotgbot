@@ -12,7 +12,7 @@ import (
 type RawUpdate json.RawMessage
 
 type Dispatcher struct {
-	Bot           ext.Bot
+	Bot           *ext.Bot
 	MaxRoutines   int
 	updates       chan *RawUpdate
 	handlers      map[int][]Handler
@@ -21,7 +21,7 @@ type Dispatcher struct {
 
 const DefaultMaxDispatcherRoutines = 50
 
-func NewDispatcher(bot ext.Bot, updates chan *RawUpdate) *Dispatcher {
+func NewDispatcher(bot *ext.Bot, updates chan *RawUpdate) *Dispatcher {
 	return &Dispatcher{
 		Bot:           bot,
 		MaxRoutines:   DefaultMaxDispatcherRoutines,
@@ -61,7 +61,7 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 		}
 	}()
 
-	update, err := initUpdate(*upd, d.Bot)
+	update, err := initUpdate(*upd, *d.Bot)
 	if err != nil {
 		logrus.WithError(err).Error("failed to init update while processing")
 		return

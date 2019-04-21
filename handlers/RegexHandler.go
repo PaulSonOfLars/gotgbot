@@ -25,7 +25,7 @@ func NewRegex(match string, response func(b ext.Bot, u *gotgbot.Update) error) R
 }
 
 func (h Regex) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.Response(d.Bot, u)
+	return h.Response(*d.Bot, u)
 }
 
 func (h Regex) CheckUpdate(u *gotgbot.Update) (bool, error) {

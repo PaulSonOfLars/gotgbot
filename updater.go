@@ -34,7 +34,7 @@ func NewUpdater(token string) (*Updater, error) {
 		Logger:    logrus.New(),
 	}
 	u.updates = make(chan *RawUpdate)
-	u.Dispatcher = NewDispatcher(*u.Bot, u.updates)
+	u.Dispatcher = NewDispatcher(u.Bot, u.updates)
 	ok, err := u.RemoveWebhook() // just in case
 	if err != nil {
 		return nil, err

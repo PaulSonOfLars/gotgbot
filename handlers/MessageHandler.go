@@ -28,7 +28,7 @@ func NewMessage(filterFunc FilterFunc, response func(b ext.Bot, u *gotgbot.Updat
 }
 
 func (h Message) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.Response(d.Bot, u)
+	return h.Response(*d.Bot, u)
 }
 
 func (h Message) CheckUpdate(u *gotgbot.Update) (bool, error) {

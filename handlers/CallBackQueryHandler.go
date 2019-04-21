@@ -25,7 +25,7 @@ func NewCallback(pattern string, response func(b ext.Bot, u *gotgbot.Update) err
 }
 
 func (cb CallBack) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return cb.Response(d.Bot, u)
+	return cb.Response(*d.Bot, u)
 }
 
 func (cb CallBack) CheckUpdate(u *gotgbot.Update) (bool, error) {
