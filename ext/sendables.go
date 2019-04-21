@@ -15,15 +15,21 @@ type Sendable interface {
 }
 
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
-	return &sendableTextMessage{bot: b, ChatId: chatId, Text: text}
+	return &sendableTextMessage{
+		bot:               b,
+		ChatId:            chatId,
+		Text:              text,
+		DisableWebPreview: b.DisableWebPreview,
+	}
 }
 
 func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) *sendableEditMessageText {
 	return &sendableEditMessageText{
-		bot:       b,
-		ChatId:    chatId,
-		MessageId: messageId,
-		Text:      text,
+		bot:               b,
+		ChatId:            chatId,
+		MessageId:         messageId,
+		Text:              text,
+		DisableWebPreview: b.DisableWebPreview,
 	}
 }
 

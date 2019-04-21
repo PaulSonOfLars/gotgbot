@@ -2,19 +2,21 @@ package ext
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"net/url"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 )
 
 type Bot struct {
-	Token     string
-	Id        int
-	FirstName string
-	UserName  string
-	Logger    *logrus.Logger
+	Token             string
+	Id                int
+	FirstName         string
+	UserName          string
+	Logger            *logrus.Logger
+	DisableWebPreview bool
 }
 
 func (b Bot) GetMe() (*User, error) {
