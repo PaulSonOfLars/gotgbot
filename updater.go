@@ -9,17 +9,21 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
+//Updater The main updater process. Receives incoming updates, then sends them to the dispatcher goroutine
+// via an update channel for them to be handled.
 type Updater struct {
 	Bot        *ext.Bot
 	updates    chan *RawUpdate
 	Dispatcher *Dispatcher
 }
 
+//NewUpdater Creates a new updater object, paired with the necessary dispatcher and bot objects.
 func NewUpdater(token string) (*Updater, error) {
 	u := &Updater{}
 	user, err := ext.Bot{Token: token, Logger: logrus.New()}.GetMe()
@@ -45,12 +49,14 @@ func NewUpdater(token string) (*Updater, error) {
 	return u, nil
 }
 
+//StartPolling Starts the polling logic
 func (u Updater) StartPolling() error {
 	go u.Dispatcher.Start()
 	go u.startPolling(false)
 	return nil
 }
 
+//StartCleanPolling Starts clean polling (ignoring stale updates)
 func (u Updater) StartCleanPolling() error {
 	go u.Dispatcher.Start()
 	go u.startPolling(true)
@@ -104,6 +110,7 @@ func (u Updater) startPolling(clean bool) {
 	}
 }
 
+//Idle sets the main thread to idle, allowing the background processes to run as expected (dispatcher and update handlers)
 func (u Updater) Idle() {
 	for {
 		time.Sleep(1 * time.Second)
@@ -132,6 +139,7 @@ func (w Webhook) GetListenUrl() string {
 	return fmt.Sprintf("%s:%d", w.Serve, w.ServePort)
 }
 
+//StartWebhook Start the webhook server
 func (u Updater) StartWebhook(webhook Webhook) {
 	go u.Dispatcher.Start()
 	http.HandleFunc("/"+webhook.ServePath, func(w http.ResponseWriter, r *http.Request) {
@@ -148,6 +156,7 @@ func (u Updater) StartWebhook(webhook Webhook) {
 	}()
 }
 
+//RemoveWebhook remove the webhook url from telegram servers
 func (u Updater) RemoveWebhook() (bool, error) {
 	r, err := ext.Get(*u.Bot, "deleteWebhook", nil)
 	if err != nil {
@@ -157,6 +166,7 @@ func (u Updater) RemoveWebhook() (bool, error) {
 	return bb, json.Unmarshal(r.Result, &bb)
 }
 
+//SetWebhook Set the webhook url for telegram to contact with updates
 func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	allowedUpdates := webhook.AllowedUpdates
 	if allowedUpdates == nil {
@@ -192,6 +202,7 @@ type WebhookInfo struct {
 	AllowedUpdates       []string `json:"allowed_updates"`
 }
 
+//GetWebhookInfo Get webhook info from telegram servers
 func (u Updater) GetWebhookInfo() (*WebhookInfo, error) {
 	r, err := ext.Get(*u.Bot, "getWebhookInfo", nil)
 	if err != nil {

@@ -7,11 +7,16 @@ import (
 )
 
 type Handler interface {
+	//HandleUpdate processes the update. The error return can be used to return either EndGroups{} or ContinueGroups{}
+	// errors, which allows for either continuing execution of the current group, or stopping all further execution.
 	HandleUpdate(u *Update, d Dispatcher) error
+	//CheckUpdate checks whether the update should be processes or not.
 	CheckUpdate(u *Update) (bool, error)
+	//GetName gets the handler name; used to differentiate handlers programmatically.
 	GetName() string
 }
 
+//Update Incoming updates from telegram servers (including extra, internally used fields added for convenience)
 type Update struct {
 	UpdateId           int                     `json:"update_id"`
 	Message            *ext.Message            `json:"message"`

@@ -14,6 +14,7 @@ type Sendable interface {
 	Send() (*Message, error)
 }
 
+//NewSendableMessage create a new message object to send
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{
 		bot:               b,
@@ -23,6 +24,7 @@ func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	}
 }
 
+//NewSendableEditMessageText create a new message editing object to send
 func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) *sendableEditMessageText {
 	return &sendableEditMessageText{
 		bot:               b,
@@ -33,6 +35,7 @@ func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) 
 	}
 }
 
+//NewSendableEditMessageCaption create a new caption editing object to send
 func (b Bot) NewSendableEditMessageCaption(chatId int, messageId int, caption string) *sendableEditMessageCaption {
 	return &sendableEditMessageCaption{
 		bot:       b,
@@ -42,6 +45,7 @@ func (b Bot) NewSendableEditMessageCaption(chatId int, messageId int, caption st
 	}
 }
 
+//NewSendableEditMessageReplyMarkup creates a new markup editing object to send
 func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup ReplyMarkup) *sendableEditMessageReplyMarkup {
 	return &sendableEditMessageReplyMarkup{
 		bot:         b,
@@ -51,34 +55,42 @@ func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup
 	}
 }
 
+//NewSendablePhoto creates a new photo object to send
 func (b Bot) NewSendablePhoto(chatId int, caption string) *sendablePhoto {
 	return &sendablePhoto{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendableAudio creates a new audio object to send
 func (b Bot) NewSendableAudio(chatId int, caption string) *sendableAudio {
 	return &sendableAudio{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendableDocument creates a new document object to send
 func (b Bot) NewSendableDocument(chatId int, caption string) *sendableDocument {
 	return &sendableDocument{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendableVideo creates a new video object to send
 func (b Bot) NewSendableVideo(chatId int, caption string) *sendableVideo {
 	return &sendableVideo{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendableVoice creates a new voice object to send
 func (b Bot) NewSendableVoice(chatId int, caption string) *sendableVoice {
 	return &sendableVoice{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendableVideoNote creates a new videonote object to send
 func (b Bot) NewSendableVideoNote(chatId int) *sendableVideoNote {
 	return &sendableVideoNote{bot: b, ChatId: chatId}
 }
 
+//NewSendableMediaGroup creates a new mediagroup object to send
 func (b Bot) NewSendableMediaGroup(chatId int) *sendableMediaGroup {
 	return &sendableMediaGroup{bot: b, ChatId: chatId}
 }
 
+//NewSendableEditMessageMedia creates a new editmessage media object to send
 func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEditMessageMedia {
 	return &sendableEditMessageMedia{
 		bot:       b,
@@ -87,26 +99,32 @@ func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEdi
 	}
 }
 
+//NewSendableLocation creates a new location object to send
 func (b Bot) NewSendableLocation(chatId int) *sendableLocation {
 	return &sendableLocation{bot: b, ChatId: chatId}
 }
 
+//NewSendableVenue creates a new venue object to send
 func (b Bot) NewSendableVenue(chatId int) *sendableVenue {
 	return &sendableVenue{bot: b, ChatId: chatId}
 }
 
+//NewSendableContact creates a new contact object to send
 func (b Bot) NewSendableContact(chatId int) *sendableContact {
 	return &sendableContact{bot: b, ChatId: chatId}
 }
 
+//NewSendableChatAction creates a new chat action object to send
 func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 	return &sendableChatAction{bot: b, ChatId: chatId}
 }
 
+//NewSendableAnimation creates a new animation object to send
 func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
 	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
 
+//NewSendablePoll creates a new poll object to send
 func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sendablePoll {
 	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
 }
