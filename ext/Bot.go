@@ -19,7 +19,7 @@ type Bot struct {
 	DisableWebPreview bool
 }
 
-//GetMe get the bot info
+// GetMe get the bot info
 func (b Bot) GetMe() (*User, error) {
 	v := url.Values{}
 
@@ -35,7 +35,7 @@ func (b Bot) GetMe() (*User, error) {
 	return &u, json.Unmarshal(r.Result, &u)
 }
 
-//GetUserProfilePhotos Retrieves a user's profile pictures
+// GetUserProfilePhotos Retrieves a user's profile pictures
 func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
@@ -52,7 +52,7 @@ func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 	return &userProfilePhotos, json.Unmarshal(r.Result, &userProfilePhotos)
 }
 
-//GetFile Retrieve a file from the bot api
+// GetFile Retrieve a file from the bot api
 func (b Bot) GetFile(fileId string) (*File, error) {
 	v := url.Values{}
 	v.Add("file_id", fileId)
@@ -69,7 +69,7 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 	return &f, json.Unmarshal(r.Result, &f)
 }
 
-//AnswerCallbackQuery answer a callback query
+// AnswerCallbackQuery answer a callback query
 func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)
@@ -77,7 +77,7 @@ func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
 	return b.boolSender("answerCallbackQuery", v)
 }
 
-//AnswerCallbackQueryText answer a callback query with text
+// AnswerCallbackQueryText answer a callback query with text
 func (b Bot) AnswerCallbackQueryText(callbackQueryId string, text string, alert bool) (bool, error) {
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)
@@ -87,7 +87,7 @@ func (b Bot) AnswerCallbackQueryText(callbackQueryId string, text string, alert 
 	return b.boolSender("answerCallbackQuery", v)
 }
 
-//AnswerCallbackQueryURL answer a callback query with a URL
+// AnswerCallbackQueryURL answer a callback query with a URL
 func (b Bot) AnswerCallbackQueryURL(callbackQueryId string, URL string) (bool, error) {
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)

@@ -40,7 +40,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(s.ChatId))
-	//v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
+	// v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
 	if s.ReplyToMessageId != 0 {
 		v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
 	}

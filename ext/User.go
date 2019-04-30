@@ -15,7 +15,7 @@ type UserProfilePhotos struct {
 	Photos     [][]PhotoSize `json:"photos"`
 }
 
-//GetProfilePhotos Retrieves a user's profile pictures
+// GetProfilePhotos Retrieves a user's profile pictures
 func (user User) GetProfilePhotos(offset int, limit int) (*UserProfilePhotos, error) {
 	return user.Bot.GetUserProfilePhotos(user.Id)
 }

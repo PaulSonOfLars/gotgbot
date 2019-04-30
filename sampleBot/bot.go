@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+
 	"github.com/PaulSonOfLars/gotgbot"
 	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/PaulSonOfLars/gotgbot/handlers"
 	"github.com/PaulSonOfLars/gotgbot/handlers/Filters"
 	"github.com/PaulSonOfLars/gotgbot/parsemode"
-	"log"
 )
 
 func main() {

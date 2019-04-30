@@ -5,14 +5,15 @@ import (
 	"runtime/debug"
 	"sort"
 
-	"github.com/PaulSonOfLars/gotgbot/ext"
 	"github.com/sirupsen/logrus"
+
+	"github.com/PaulSonOfLars/gotgbot/ext"
 )
 
-//RawUpdate alias to json.RawMessage
+// RawUpdate alias to json.RawMessage
 type RawUpdate json.RawMessage
 
-//Dispatcher Store data for the dispatcher to work as expected; such as the incoming update channel,
+// Dispatcher Store data for the dispatcher to work as expected; such as the incoming update channel,
 // handler mappings and maximum number of goroutines allowed to be run at once
 type Dispatcher struct {
 	Bot           *ext.Bot
@@ -34,7 +35,7 @@ func NewDispatcher(bot *ext.Bot, updates chan *RawUpdate) *Dispatcher {
 	}
 }
 
-//Start Begin dispatching updates
+// Start Begin dispatching updates
 func (d Dispatcher) Start() {
 	limiter := make(chan struct{}, d.MaxRoutines)
 	for upd := range d.updates {
@@ -93,14 +94,14 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 	}
 }
 
-//AddHandler adds a new handler to the dispatcher. The dispatcher will call CheckUpdate() to see whether the handler
+// AddHandler adds a new handler to the dispatcher. The dispatcher will call CheckUpdate() to see whether the handler
 // should be executed, and then HandleUpdate() to execute it.
 func (d Dispatcher) AddHandler(handler Handler) {
-	//*d.handlers = append(*d.handlers, handler)
+	// *d.handlers = append(*d.handlers, handler)
 	d.AddHandlerToGroup(handler, 0)
 }
 
-//AddHandlerToGroup adds a handler to a specific group; lowest number will be processed first.
+// AddHandlerToGroup adds a handler to a specific group; lowest number will be processed first.
 func (d Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	currHandlers, ok := d.handlers[group]
 	if !ok {

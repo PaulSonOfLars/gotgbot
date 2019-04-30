@@ -88,7 +88,7 @@ type InlineKeyboardButton struct {
 	CallbackData                 string `json:"callback_data"`
 	SwitchInlineQuery            string `json:"switch_inline_query"`
 	SwitchInlineQueryCurrentChat string `json:"switch_inline_query_current_chat"`
-	//Callback_game                    *CallbackGame
+	// Callback_game                    *CallbackGame
 	Pay bool `json:"pay"`
 }
 

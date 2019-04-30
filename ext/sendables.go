@@ -14,7 +14,7 @@ type Sendable interface {
 	Send() (*Message, error)
 }
 
-//NewSendableMessage create a new message object to send
+// NewSendableMessage create a new message object to send
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{
 		bot:               b,
@@ -24,7 +24,7 @@ func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	}
 }
 
-//NewSendableEditMessageText create a new message editing object to send
+// NewSendableEditMessageText create a new message editing object to send
 func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) *sendableEditMessageText {
 	return &sendableEditMessageText{
 		bot:               b,
@@ -35,7 +35,7 @@ func (b Bot) NewSendableEditMessageText(chatId int, messageId int, text string) 
 	}
 }
 
-//NewSendableEditMessageCaption create a new caption editing object to send
+// NewSendableEditMessageCaption create a new caption editing object to send
 func (b Bot) NewSendableEditMessageCaption(chatId int, messageId int, caption string) *sendableEditMessageCaption {
 	return &sendableEditMessageCaption{
 		bot:       b,
@@ -45,7 +45,7 @@ func (b Bot) NewSendableEditMessageCaption(chatId int, messageId int, caption st
 	}
 }
 
-//NewSendableEditMessageReplyMarkup creates a new markup editing object to send
+// NewSendableEditMessageReplyMarkup creates a new markup editing object to send
 func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup ReplyMarkup) *sendableEditMessageReplyMarkup {
 	return &sendableEditMessageReplyMarkup{
 		bot:         b,
@@ -55,42 +55,42 @@ func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup
 	}
 }
 
-//NewSendablePhoto creates a new photo object to send
+// NewSendablePhoto creates a new photo object to send
 func (b Bot) NewSendablePhoto(chatId int, caption string) *sendablePhoto {
 	return &sendablePhoto{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendableAudio creates a new audio object to send
+// NewSendableAudio creates a new audio object to send
 func (b Bot) NewSendableAudio(chatId int, caption string) *sendableAudio {
 	return &sendableAudio{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendableDocument creates a new document object to send
+// NewSendableDocument creates a new document object to send
 func (b Bot) NewSendableDocument(chatId int, caption string) *sendableDocument {
 	return &sendableDocument{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendableVideo creates a new video object to send
+// NewSendableVideo creates a new video object to send
 func (b Bot) NewSendableVideo(chatId int, caption string) *sendableVideo {
 	return &sendableVideo{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendableVoice creates a new voice object to send
+// NewSendableVoice creates a new voice object to send
 func (b Bot) NewSendableVoice(chatId int, caption string) *sendableVoice {
 	return &sendableVoice{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendableVideoNote creates a new videonote object to send
+// NewSendableVideoNote creates a new videonote object to send
 func (b Bot) NewSendableVideoNote(chatId int) *sendableVideoNote {
 	return &sendableVideoNote{bot: b, ChatId: chatId}
 }
 
-//NewSendableMediaGroup creates a new mediagroup object to send
+// NewSendableMediaGroup creates a new mediagroup object to send
 func (b Bot) NewSendableMediaGroup(chatId int) *sendableMediaGroup {
 	return &sendableMediaGroup{bot: b, ChatId: chatId}
 }
 
-//NewSendableEditMessageMedia creates a new editmessage media object to send
+// NewSendableEditMessageMedia creates a new editmessage media object to send
 func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEditMessageMedia {
 	return &sendableEditMessageMedia{
 		bot:       b,
@@ -99,32 +99,31 @@ func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEdi
 	}
 }
 
-//NewSendableLocation creates a new location object to send
 func (b Bot) NewSendableLocation(chatId int) *sendableLocation {
 	return &sendableLocation{bot: b, ChatId: chatId}
 }
 
-//NewSendableVenue creates a new venue object to send
+// NewSendableVenue creates a new venue object to send
 func (b Bot) NewSendableVenue(chatId int) *sendableVenue {
 	return &sendableVenue{bot: b, ChatId: chatId}
 }
 
-//NewSendableContact creates a new contact object to send
+// NewSendableContact creates a new contact object to send
 func (b Bot) NewSendableContact(chatId int) *sendableContact {
 	return &sendableContact{bot: b, ChatId: chatId}
 }
 
-//NewSendableChatAction creates a new chat action object to send
+// NewSendableChatAction creates a new chat action object to send
 func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 	return &sendableChatAction{bot: b, ChatId: chatId}
 }
 
-//NewSendableAnimation creates a new animation object to send
+// NewSendableAnimation creates a new animation object to send
 func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
 	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
 
-//NewSendablePoll creates a new poll object to send
+// NewSendablePoll creates a new poll object to send
 func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sendablePoll {
 	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
 }
@@ -147,7 +146,7 @@ type baseInputMedia struct {
 	Caption   string
 	ParseMode string
 	// TODO: sort out "attach" logic
-	//Attached  io.Reader
+	// Attached  io.Reader
 }
 
 func (bim baseInputMedia) getValues(valType string) url.Values {
@@ -156,14 +155,14 @@ func (bim baseInputMedia) getValues(valType string) url.Values {
 	v.Add("media", bim.Media)
 	v.Add("caption", bim.Caption)
 	v.Add("parse_mode", bim.ParseMode)
-	//v.Add("attached")
+	// v.Add("attached")
 	return v
 }
 
 type InputMediaAnimation struct {
 	baseInputMedia
 	// TODO: sort out thumbnails
-	//Thumb    file
+	// Thumb    file
 	Width    int
 	Height   int
 	Duration int
@@ -175,7 +174,7 @@ func (ima InputMediaAnimation) getType() string {
 
 func (ima InputMediaAnimation) getValues(valType string) url.Values {
 	v := ima.baseInputMedia.getValues(ima.getType())
-	//v.Add("thumb")
+	// v.Add("thumb")
 	v.Add("width", strconv.Itoa(ima.Width))
 	v.Add("height", strconv.Itoa(ima.Height))
 	v.Add("duration", strconv.Itoa(ima.Duration))
@@ -193,7 +192,7 @@ func (imd InputMediaDocument) getType() string {
 
 func (imd InputMediaDocument) getValues(valType string) url.Values {
 	v := imd.baseInputMedia.getValues(imd.getType())
-	//v.Add("thumb")
+	// v.Add("thumb")
 	return v
 }
 
@@ -211,7 +210,7 @@ func (ima InputMediaAudio) getType() string {
 
 func (ima InputMediaAudio) getValues(valType string) url.Values {
 	v := ima.baseInputMedia.getValues(ima.getType())
-	//v.Add("thumb")
+	// v.Add("thumb")
 	v.Add("duration", strconv.Itoa(ima.Duration))
 	v.Add("performer", ima.Performer)
 	v.Add("title", ima.Title)
@@ -245,7 +244,7 @@ func (imv InputMediaVideo) getType() string {
 
 func (imv InputMediaVideo) getValues(valType string) url.Values {
 	v := imv.baseInputMedia.getValues(imv.getType())
-	//v.Add("thumb")
+	// v.Add("thumb")
 	v.Add("width", strconv.Itoa(imv.Width))
 	v.Add("height", strconv.Itoa(imv.Height))
 	v.Add("duration", strconv.Itoa(imv.Duration))
@@ -785,8 +784,8 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	return msg.bot.ParseMessage(r.Result)
 }
 
-//TODO: edit live location
-//TODO: stop live location
+// TODO: edit live location
+// TODO: stop live location
 
 type sendableVenue struct {
 	bot                 Bot
@@ -901,7 +900,7 @@ type sendableAnimation struct {
 	Duration int
 	Width    int
 	Height   int
-	//Thumb // TODO: support this
+	// Thumb // TODO: support this
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -924,7 +923,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	v.Add("duration", strconv.Itoa(msg.Duration))
 	v.Add("width", strconv.Itoa(msg.Width))
 	v.Add("height", strconv.Itoa(msg.Height))
-	//v.Add("thumb", msg.Thumb)
+	// v.Add("thumb", msg.Thumb)
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
