@@ -82,12 +82,20 @@ func (rkm *InlineKeyboardMarkup) Marshal() ([]byte, error) {
 	return inlineKBMarkup, nil
 }
 
+type LoginUrl struct {
+	Url                string `json:"url"`
+	ForwardText        string `json:"forward_text"`
+	BotUsername        string `json:"bot_username"`
+	RequestWriteAccess bool   `json:"request_write_access"`
+}
+
 type InlineKeyboardButton struct {
-	Text                         string `json:"text"`
-	Url                          string `json:"url"`
-	CallbackData                 string `json:"callback_data"`
-	SwitchInlineQuery            string `json:"switch_inline_query"`
-	SwitchInlineQueryCurrentChat string `json:"switch_inline_query_current_chat"`
+	Text                         string    `json:"text"`
+	Url                          string    `json:"url"`
+	LoginUrl                     *LoginUrl `json:"login_url"`
+	CallbackData                 string    `json:"callback_data"`
+	SwitchInlineQuery            string    `json:"switch_inline_query"`
+	SwitchInlineQueryCurrentChat string    `json:"switch_inline_query_current_chat"`
 	// Callback_game                    *CallbackGame
 	Pay bool `json:"pay"`
 }

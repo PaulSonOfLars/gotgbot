@@ -171,3 +171,7 @@ func StartsWith(prefix string) func(message *ext.Message) bool {
 func Poll(message *ext.Message) bool {
 	return message.Poll != nil
 }
+
+func Buttons(message *ext.Message) bool {
+	return message.ReplyMarkup != nil
+}
