@@ -15,7 +15,7 @@ type Bot struct {
 	Id                int
 	FirstName         string
 	UserName          string
-	Logger            *logrus.Logger
+	Logger            *logrus.Logger `json:"-"`
 	DisableWebPreview bool
 }
 
