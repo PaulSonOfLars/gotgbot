@@ -316,7 +316,7 @@ type ChosenInlineResult struct {
 }
 
 type sendableAnswerInlineQuery struct {
-	bot               Bot
+	bot               Bot `json:"-"`
 	InlineQueryId     string
 	Results           []InlineQueryResult
 	CacheTime         int

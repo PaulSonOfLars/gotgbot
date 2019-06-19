@@ -1,7 +1,7 @@
 package ext
 
 type User struct {
-	Bot          Bot
+	Bot          Bot `json:"-"`
 	Id           int    `json:"id"`
 	IsBot        bool   `json:"is_bot"`
 	FirstName    string `json:"first_name"`

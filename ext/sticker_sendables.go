@@ -9,14 +9,14 @@ import (
 )
 
 type File struct {
-	bot      Bot
+	bot      Bot    `json:"-"`
 	FileId   string `json:"file_id"`
 	FileSize int    `json:"file_size"`
 	FilePath string `json:"file_path"`
 }
 
 type sendableSticker struct {
-	bot    Bot
+	bot    Bot `json:"-"`
 	ChatId int
 	file
 	DisableNotification bool
@@ -60,7 +60,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 }
 
 type sendableUploadStickerFile struct {
-	bot    Bot
+	bot    Bot `json:"-"`
 	UserId int
 	file
 }
@@ -86,7 +86,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 }
 
 type sendableCreateNewSticker struct {
-	bot    Bot
+	bot    Bot `json:"-"`
 	UserId int
 	Name   string
 	Title  string
@@ -127,7 +127,7 @@ func (cns *sendableCreateNewSticker) Send() (bool, error) {
 }
 
 type sendableAddStickerToSet struct {
-	bot    Bot
+	bot    Bot `json:"-"`
 	UserId int
 	Name   string
 	file

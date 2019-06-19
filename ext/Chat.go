@@ -5,7 +5,7 @@ import (
 )
 
 type Chat struct {
-	Bot             Bot
+	Bot             Bot        `json:"-"`
 	Id              int        `json:"id"`
 	Type            string     `json:"type"`
 	Title           string     `json:"title"`

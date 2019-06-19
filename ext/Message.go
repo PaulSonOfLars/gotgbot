@@ -103,20 +103,20 @@ type PreCheckoutQuery struct {
 }
 
 type PollOption struct {
-	Text       string
-	VoterCount int
+	Text       string `json:"text"`
+	VoterCount int    `json:"voter_count"`
 }
 
 type Poll struct {
-	Bot      Bot
-	Id       string
-	Question string
-	Options  []PollOption
-	IsClosed bool
+	Bot      Bot          `json:"-"`
+	Id       string       `json:"id"`
+	Question string       `json:"question"`
+	Options  []PollOption `json:"options"`
+	IsClosed bool         `json:"is_closed"`
 }
 
 type Message struct {
-	Bot                   Bot
+	Bot                   Bot                   `json:"-"`
 	MessageId             int                   `json:"message_id"`
 	From                  *User                 `json:"from"`
 	Date                  int                   `json:"date"`
