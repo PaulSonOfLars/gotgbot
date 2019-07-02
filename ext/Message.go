@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"unicode/utf16"
 )
 
@@ -353,6 +354,8 @@ var mdMap = map[string]string{
 	"code":   "`",
 }
 
+var htmlMDs = []rune("[]()")
+
 func (m *Message) OriginalText() string {
 	if m.originalText != "" {
 		return m.originalText
@@ -377,22 +380,44 @@ func (m *Message) OriginalCaption() string {
 	return m.originalCaption
 }
 
-func getOrigMsgTxt(utf16Data []uint16, ents []MessageEntity) (out string) {
+func getOrigMsgTxt(utf16Data []uint16, ents []MessageEntity) string {
+	out := strings.Builder{}
 	prev := 0
 	for _, ent := range ents {
 		newPrev := ent.Offset + ent.Length
 		switch ent.Type {
 		case "bold", "italic", "code":
-			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + mdMap[ent.Type] + string(utf16.Decode(utf16Data[ent.Offset:newPrev])) + mdMap[ent.Type]
-			prev = newPrev
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + mdMap[ent.Type] + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune(mdMap[ent.Type])) + mdMap[ent.Type])
 		case "text_mention":
-			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + string(utf16.Decode(utf16Data[ent.Offset:ent.Offset+ent.Length])) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
-			prev = newPrev
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")")
 		case "text_link":
-			out += string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + string(utf16.Decode(utf16Data[ent.Offset:ent.Offset+ent.Length])) + "](" + ent.Url + ")"
-			prev = newPrev
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](" + ent.Url + ")")
+		default:
+			continue
+		}
+		prev = newPrev
+
+	}
+	out.WriteString(string(utf16.Decode(utf16Data[prev:])))
+	return out.String()
+}
+
+func escapeContainedMD(data []rune, mdType []rune) string {
+	out := strings.Builder{}
+	for _, x := range data {
+		if contains(x, mdType) {
+			out.WriteRune('\\')
+		}
+		out.WriteRune(x)
+	}
+	return out.String()
+}
+
+func contains(r rune, rs []rune) bool {
+	for _, rr := range rs {
+		if r == rr {
+			return true
 		}
 	}
-	out += string(utf16.Decode(utf16Data[prev:]))
-	return out
+	return false
 }
