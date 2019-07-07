@@ -19,7 +19,7 @@ var DefaultTgBotGetter = TgBotGetter{
 		Transport:     nil,
 		CheckRedirect: nil,
 		Jar:           nil,
-		Timeout:       time.Second * 0.5,
+		Timeout:       time.Millisecond * 500,
 	},
 	ApiUrl: ApiUrl,
 }
