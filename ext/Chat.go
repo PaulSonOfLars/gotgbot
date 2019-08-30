@@ -5,18 +5,31 @@ import (
 )
 
 type Chat struct {
-	Bot             Bot        `json:"-"`
-	Id              int        `json:"id"`
-	Type            string     `json:"type"`
-	Title           string     `json:"title"`
-	Username        string     `json:"username"`
-	FirstName       string     `json:"first_name"`
-	LastName        string     `json:"last_name"`
-	AllMembersAdmin bool       `json:"all_members_admin"`
-	Photo           *ChatPhoto `json:"photo"`
-	Description     string     `json:"description"`
-	InviteLink      string     `json:"invite_link"`
-	PinnedMessage   *Message   `json:"pinned_message"`
+	Bot              Bot              `json:"-"`
+	Id               int              `json:"id"`
+	Type             string           `json:"type"`
+	Title            string           `json:"title"`
+	Username         string           `json:"username"`
+	FirstName        string           `json:"first_name"`
+	LastName         string           `json:"last_name"`
+	Photo            *ChatPhoto       `json:"photo"`
+	Description      string           `json:"description"`
+	InviteLink       string           `json:"invite_link"`
+	PinnedMessage    *Message         `json:"pinned_message"`
+	Permissions      *ChatPermissions `json:"permissions"`
+	StickerSetName   string           `json:"sticker_set_name"`
+	CanSetStickerSet bool             `json:"can_set_sticker_set"`
+}
+
+type ChatPermissions struct {
+	CanSendMessages       bool `json:"can_send_messages"`
+	CanSendMediaMessages  bool `json:"can_send_media_messages"`
+	CanSendPolls          bool `json:"can_send_polls"`
+	CanSendOtherMessages  bool `json:"can_send_other_messages"`
+	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
+	CanChangeInfo         bool `json:"can_change_info"`
+	CanInviteUsers        bool `json:"can_invite_users"`
+	CanPinMessages        bool `json:"can_pin_messages"`
 }
 
 type ChatPhoto struct {
@@ -29,17 +42,18 @@ type ChatMember struct {
 	Status                string `json:"status"`
 	UntilDate             int64  `json:"until_date"`
 	CanBeEdited           bool   `json:"can_be_edited"`
-	CanChangeInfo         bool   `json:"can_change_info"`
 	CanPostMessages       bool   `json:"can_post_messages"`
 	CanEditMessages       bool   `json:"can_edit_messages"`
 	CanDeleteMessages     bool   `json:"can_delete_messages"`
-	CanInviteUsers        bool   `json:"can_invite_users"`
 	CanRestrictMembers    bool   `json:"can_restrict_members"`
-	CanPinMessages        bool   `json:"can_pin_messages"`
 	CanPromoteMembers     bool   `json:"can_promote_members"`
+	CanChangeInfo         bool   `json:"can_change_info"`
+	CanInviteUsers        bool   `json:"can_invite_users"`
+	CanPinMessages        bool   `json:"can_pin_messages"`
 	IsMember              bool   `json:"is_member"`
 	CanSendMessages       bool   `json:"can_send_messages"`
 	CanSendMediaMessages  bool   `json:"can_send_media_messages"`
+	CanSendPolls          bool   `json:"can_send_media_messages"`
 	CanSendOtherMessages  bool   `json:"can_send_other_messages"`
 	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"`
 }
@@ -66,6 +80,10 @@ func (chat Chat) PromoteMember(userId int) (bool, error) {
 
 func (chat Chat) DemoteMember(userId int) (bool, error) {
 	return chat.Bot.DemoteChatMember(chat.Id, userId)
+}
+
+func (chat Chat) SetChatPermissions(perms ChatPermissions) (bool, error) {
+	return chat.Bot.SetChatPermissions(chat.Id, perms)
 }
 
 func (chat Chat) ExportInviteLink() (string, error) {

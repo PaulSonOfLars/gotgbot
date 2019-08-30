@@ -13,6 +13,7 @@ type Sticker struct {
 	FileId       string       `json:"file_id"`
 	Width        int          `json:"width"`
 	Height       int          `json:"height"`
+	IsAnimated   bool         `json:"is_animated"`
 	Thumb        PhotoSize    `json:"thumb"`
 	Emoji        string       `json:"emoji"`
 	SetName      string       `json:"set_name"`
@@ -24,6 +25,7 @@ type StickerSet struct {
 	bot           Bot       `json:"-"`
 	Name          string    `json:"name"`
 	Title         string    `json:"title"`
+	IsAnimated    bool      `json:"is_animated"`
 	ContainsMasks bool      `json:"contains_masks"`
 	Stickers      []Sticker `json:"stickers"`
 }

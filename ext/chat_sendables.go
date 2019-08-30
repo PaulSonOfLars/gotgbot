@@ -42,26 +42,29 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 }
 
 type sendableRestrictChatMember struct {
-	bot                   Bot `json:"-"`
-	ChatId                int
-	UserId                int
-	UntilDate             int64
-	CanSendMessages       bool
-	CanSendMediaMessages  bool
-	CanSendOtherMessages  bool
-	CanAddWebPagePreviews bool
+	bot         Bot `json:"-"`
+	ChatId      int
+	UserId      int
+	Permissions ChatPermissions
+	UntilDate   int64
 }
 
 func (b Bot) NewSendableRestrictChatMember(chatId int, userId int) *sendableRestrictChatMember {
 	return &sendableRestrictChatMember{
-		bot:                   b,
-		ChatId:                chatId,
-		UserId:                userId,
-		UntilDate:             0,
-		CanSendMessages:       false,
-		CanSendMediaMessages:  false,
-		CanSendOtherMessages:  false,
-		CanAddWebPagePreviews: false,
+		bot:       b,
+		ChatId:    chatId,
+		UserId:    userId,
+		UntilDate: 0,
+		Permissions: ChatPermissions{
+			CanSendMessages:       false,
+			CanSendMediaMessages:  false,
+			CanSendPolls:          false,
+			CanSendOtherMessages:  false,
+			CanAddWebPagePreviews: false,
+			CanChangeInfo:         false,
+			CanInviteUsers:        false,
+			CanPinMessages:        false,
+		},
 	}
 }
 
@@ -70,10 +73,13 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(rcm.ChatId))
 	v.Add("user_id", strconv.Itoa(rcm.UserId))
 	v.Add("until_date", strconv.FormatInt(rcm.UntilDate, 10))
-	v.Add("can_send_messages", strconv.FormatBool(rcm.CanSendMessages))
-	v.Add("can_send_media_messages", strconv.FormatBool(rcm.CanSendMediaMessages))
-	v.Add("can_send_other_messages", strconv.FormatBool(rcm.CanSendOtherMessages))
-	v.Add("can_add_web_page_previews", strconv.FormatBool(rcm.CanAddWebPagePreviews))
+
+	perms, err := json.Marshal(&rcm.Permissions)
+	if err != nil {
+		return false, errors.Wrapf(err, "could not marshal permissions")
+	}
+
+	v.Add("permissions", string(perms))
 
 	r, err := Get(rcm.bot, "restrictChatMember", v)
 	if err != nil {
@@ -134,6 +140,44 @@ func (rcm *sendablePromoteChatMember) Send() (bool, error) {
 	r, err := Get(rcm.bot, "promoteChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not promoteChatMember")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	return bb, json.Unmarshal(r.Result, &bb)
+}
+
+type sendableSetChatPermissions struct {
+	bot         Bot `json:"-"`
+	ChatId      int
+	Permissions ChatPermissions
+}
+
+// note: set all as true for promotion by default
+func (b Bot) NewSendableSetChatPermissions(chatId int, perms ChatPermissions) *sendableSetChatPermissions {
+	return &sendableSetChatPermissions{
+		bot:         b,
+		ChatId:      chatId,
+		Permissions: perms,
+	}
+}
+
+func (scp *sendableSetChatPermissions) Send() (bool, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(scp.ChatId))
+
+	perms, err := json.Marshal(&scp.Permissions)
+	if err != nil {
+		return false, errors.Wrapf(err, "could not marshal permissions")
+	}
+
+	v.Add("permissions", string(perms))
+
+	r, err := Get(scp.bot, "setChatPermissions", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "could not setChatPermissions")
 	}
 	if !r.Ok {
 		return false, errors.New(r.Description)
