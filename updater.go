@@ -18,9 +18,10 @@ import (
 // Updater The main updater process. Receives incoming updates, then sends them to the dispatcher goroutine
 // via an update channel for them to be handled.
 type Updater struct {
-	Bot        *ext.Bot
-	updates    chan *RawUpdate
-	Dispatcher *Dispatcher
+	Bot          *ext.Bot
+	updates      chan *RawUpdate
+	Dispatcher   *Dispatcher
+	UpdateGetter *ext.TgBotGetter
 }
 
 // NewUpdater Creates a new updater object, paired with the necessary dispatcher and bot objects.
@@ -39,6 +40,15 @@ func NewUpdater(token string) (*Updater, error) {
 	}
 	u.updates = make(chan *RawUpdate)
 	u.Dispatcher = NewDispatcher(u.Bot, u.updates)
+	u.UpdateGetter = &ext.TgBotGetter{
+		Client: &http.Client{
+			Transport:     nil,
+			CheckRedirect: nil,
+			Jar:           nil,
+			Timeout:       time.Second * 5,
+		},
+		ApiUrl: ext.ApiUrl,
+	}
 	ok, err := u.RemoveWebhook() // just in case
 	if err != nil {
 		return nil, err
@@ -69,7 +79,7 @@ func (u Updater) startPolling(clean bool) {
 	v.Add("timeout", strconv.Itoa(0))
 	offset := 0
 	for {
-		r, err := ext.Get(*u.Bot, "getUpdates", v)
+		r, err := u.UpdateGetter.Get(*u.Bot, "getUpdates", v)
 		if err != nil {
 			logrus.WithError(err).Error("unable to getUpdates")
 			continue
