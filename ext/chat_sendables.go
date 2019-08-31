@@ -50,20 +50,21 @@ type sendableRestrictChatMember struct {
 }
 
 func (b Bot) NewSendableRestrictChatMember(chatId int, userId int) *sendableRestrictChatMember {
+	temp := false
 	return &sendableRestrictChatMember{
 		bot:       b,
 		ChatId:    chatId,
 		UserId:    userId,
 		UntilDate: 0,
 		Permissions: ChatPermissions{
-			CanSendMessages:       false,
-			CanSendMediaMessages:  false,
-			CanSendPolls:          false,
-			CanSendOtherMessages:  false,
-			CanAddWebPagePreviews: false,
-			CanChangeInfo:         false,
-			CanInviteUsers:        false,
-			CanPinMessages:        false,
+			CanSendMessages:       &temp,
+			CanSendMediaMessages:  &temp,
+			CanSendPolls:          &temp,
+			CanSendOtherMessages:  &temp,
+			CanAddWebPagePreviews: &temp,
+			CanChangeInfo:         &temp,
+			CanInviteUsers:        &temp,
+			CanPinMessages:        &temp,
 		},
 	}
 }

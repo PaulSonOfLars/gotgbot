@@ -44,11 +44,12 @@ func (b Bot) RestrictChatMember(chatId int, userId int) (bool, error) {
 
 func (b Bot) UnRestrictChatMember(chatId int, userId int) (bool, error) {
 	unRestrict := b.NewSendableRestrictChatMember(chatId, userId)
-	unRestrict.Permissions.CanSendMessages = true
-	unRestrict.Permissions.CanSendMediaMessages = true
-	unRestrict.Permissions.CanSendPolls = true
-	unRestrict.Permissions.CanSendOtherMessages = true
-	unRestrict.Permissions.CanAddWebPagePreviews = true
+	temp := true
+	unRestrict.Permissions.CanSendMessages = &temp
+	unRestrict.Permissions.CanSendMediaMessages = &temp
+	unRestrict.Permissions.CanSendPolls = &temp
+	unRestrict.Permissions.CanSendOtherMessages = &temp
+	unRestrict.Permissions.CanAddWebPagePreviews = &temp
 	return unRestrict.Send()
 }
 
