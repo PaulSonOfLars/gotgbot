@@ -11,8 +11,10 @@ import (
 
 type Regex struct {
 	baseHandler
-	Match    string
-	Response func(b ext.Bot, u *gotgbot.Update) error
+	AllowEdited  bool
+	AllowChannel bool
+	Match        string
+	Response     func(b ext.Bot, u *gotgbot.Update) error
 }
 
 func NewRegex(match string, response func(b ext.Bot, u *gotgbot.Update) error) Regex {
@@ -30,9 +32,22 @@ func (h Regex) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 }
 
 func (h Regex) CheckUpdate(u *gotgbot.Update) (bool, error) {
-	if u.EffectiveMessage == nil {
+	if u.EffectiveMessage == nil || u.CallbackQuery != nil {
 		return false, nil
 	}
+	// if no edits and message is edited
+	if !h.AllowEdited && u.EditedMessage != nil {
+		return false, nil
+	}
+	// if no channel and message is channel message
+	if !h.AllowChannel && u.ChannelPost != nil {
+		return false, nil
+	}
+	// if no channel, no edits, and post is edited
+	if !h.AllowChannel && !h.AllowEdited && u.EditedChannelPost != nil {
+		return false, nil
+	}
+
 	text := u.EffectiveMessage.Text
 	if text == "" {
 		text = u.EffectiveMessage.Caption

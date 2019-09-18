@@ -11,8 +11,10 @@ import (
 
 type CallBack struct {
 	baseHandler
-	Pattern  string
-	Response func(b ext.Bot, u *gotgbot.Update) error
+	AllowEdited  bool
+	AllowChannel bool
+	Pattern      string
+	Response     func(b ext.Bot, u *gotgbot.Update) error
 }
 
 func NewCallback(pattern string, response func(b ext.Bot, u *gotgbot.Update) error) CallBack {
@@ -33,6 +35,19 @@ func (cb CallBack) CheckUpdate(u *gotgbot.Update) (bool, error) {
 	if u.CallbackQuery == nil {
 		return false, nil
 	}
+	// if no edits and message is edited
+	if !cb.AllowEdited && u.EditedMessage != nil {
+		return false, nil
+	}
+	// if no channel and message is channel message
+	if !cb.AllowChannel && u.ChannelPost != nil {
+		return false, nil
+	}
+	// if no channel, no edits, and post is edited
+	if !cb.AllowChannel && !cb.AllowEdited && u.EditedChannelPost != nil {
+		return false, nil
+	}
+
 	if cb.Pattern != "" {
 		res, err := regexp.MatchString(cb.Pattern, u.CallbackQuery.Data)
 		if err != nil {
