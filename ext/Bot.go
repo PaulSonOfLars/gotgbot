@@ -82,7 +82,7 @@ func (b Bot) AnswerCallbackQueryText(callbackQueryId string, text string, alert 
 	v := url.Values{}
 	v.Add("callback_query_id", callbackQueryId)
 	v.Add("text", text)
-	v.Add("alert", strconv.FormatBool(alert))
+	v.Add("show_alert", strconv.FormatBool(alert))
 
 	return b.boolSender("answerCallbackQuery", v)
 }
