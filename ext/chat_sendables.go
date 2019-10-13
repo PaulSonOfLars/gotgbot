@@ -115,8 +115,6 @@ func (b Bot) NewSendablePromoteChatMember(chatId int, userId int) *sendablePromo
 		ChatId:             chatId,
 		UserId:             userId,
 		CanChangeInfo:      true,
-		CanPostMessages:    true,
-		CanEditMessages:    true,
 		CanDeleteMessages:  true,
 		CanInviteUsers:     true,
 		CanRestrictMembers: true,

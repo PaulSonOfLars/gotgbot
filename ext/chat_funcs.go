@@ -61,6 +61,8 @@ func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
 func (b Bot) DemoteChatMember(chatId int, userId int) (bool, error) {
 	demote := b.NewSendablePromoteChatMember(chatId, userId)
 	demote.CanChangeInfo = false
+	demote.CanPostMessages = false
+	demote.CanEditMessages = false
 	demote.CanDeleteMessages = false
 	demote.CanInviteUsers = false
 	demote.CanRestrictMembers = false
