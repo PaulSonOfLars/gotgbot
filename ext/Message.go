@@ -3,6 +3,7 @@ package ext
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"strconv"
 	"strings"
 	"unicode/utf16"
@@ -167,10 +168,12 @@ type Message struct {
 	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup"`
 
 	// internals
-	utf16Text       []uint16
-	utf16Caption    []uint16
-	originalText    string
-	originalCaption string
+	utf16Text           []uint16
+	utf16Caption        []uint16
+	originalTextMD      string
+	originalTextHTML    string
+	originalCaptionMD   string
+	originalCaptionHTML string
 }
 
 func (b Bot) Message(chatId int, text string) Message {
@@ -354,33 +357,78 @@ var mdMap = map[string]string{
 	"code":   "`",
 }
 
+var htmlMap = map[string]string{
+	"bold":   "b",
+	"italic": "i",
+	"code":   "code",
+}
+
 var htmlMDs = []rune("[]()")
 
 func (m *Message) OriginalText() string {
-	if m.originalText != "" {
-		return m.originalText
+	return m.originalMD()
+}
+
+func (m *Message) OriginalHTML() string {
+	return m.originalHTML()
+}
+
+func (m *Message) originalMD() string {
+	if m.originalTextMD != "" {
+		return m.originalTextMD
 	}
 	if m.utf16Text == nil {
 		m.utf16Text = utf16.Encode([]rune(m.Text))
 	}
 
-	m.originalText = getOrigMsgTxt(m.utf16Text, m.Entities)
-	return m.originalText
+	m.originalTextMD = getOrigMsgMD(m.utf16Text, m.Entities)
+	return m.originalTextMD
+}
+func (m *Message) originalHTML() string {
+	if m.originalTextHTML != "" {
+		return m.originalTextHTML
+	}
+	if m.utf16Text == nil {
+		m.utf16Text = utf16.Encode([]rune(m.Text))
+	}
+
+	m.originalTextHTML = getOrigMsgHTML(m.utf16Text, m.Entities)
+	return m.originalTextHTML
 }
 
 func (m *Message) OriginalCaption() string {
-	if m.originalCaption != "" {
-		return m.originalCaption
+	return m.originalCaptionTextMD()
+}
+
+func (m *Message) OriginalCaptionHTML() string {
+	return m.originalCaptionTextHTML()
+}
+
+func (m *Message) originalCaptionTextMD() string {
+	if m.originalCaptionMD != "" {
+		return m.originalCaptionMD
 	}
 	if m.utf16Caption == nil {
 		m.utf16Caption = utf16.Encode([]rune(m.Caption))
 	}
 
-	m.originalCaption = getOrigMsgTxt(m.utf16Caption, m.CaptionEntities)
-	return m.originalCaption
+	m.originalCaptionMD = getOrigMsgMD(m.utf16Caption, m.CaptionEntities)
+	return m.originalCaptionMD
 }
 
-func getOrigMsgTxt(utf16Data []uint16, ents []MessageEntity) string {
+func (m *Message) originalCaptionTextHTML() string {
+	if m.originalCaptionHTML != "" {
+		return m.originalCaptionHTML
+	}
+	if m.utf16Caption == nil {
+		m.utf16Caption = utf16.Encode([]rune(m.Caption))
+	}
+
+	m.originalCaptionHTML = getOrigMsgHTML(m.utf16Caption, m.CaptionEntities)
+	return m.originalCaptionHTML
+}
+
+func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 	out := strings.Builder{}
 	prev := 0
 	for _, ent := range ents {
@@ -392,6 +440,28 @@ func getOrigMsgTxt(utf16Data []uint16, ents []MessageEntity) string {
 			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")")
 		case "text_link":
 			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](" + ent.Url + ")")
+		default:
+			continue
+		}
+		prev = newPrev
+
+	}
+	out.WriteString(string(utf16.Decode(utf16Data[prev:])))
+	return out.String()
+}
+
+func getOrigMsgHTML(utf16Data []uint16, ents []MessageEntity) string {
+	out := strings.Builder{}
+	prev := 0
+	for _, ent := range ents {
+		newPrev := ent.Offset + ent.Length
+		switch ent.Type {
+		case "bold", "italic", "code":
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "<" + htmlMap[ent.Type] + ">" + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</" + htmlMap[ent.Type] + ">")
+		case "text_mention":
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + `<a href="tg://user?id=` + strconv.Itoa(ent.User.Id) + `">` + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</a>")
+		case "text_link":
+			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + `<a href="` + ent.Url + `">` + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</a>")
 		default:
 			continue
 		}
