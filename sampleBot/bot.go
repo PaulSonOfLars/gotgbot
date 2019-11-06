@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"os"
+	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/PaulSonOfLars/gotgbot"
 	"github.com/PaulSonOfLars/gotgbot/ext"
@@ -12,7 +17,9 @@ import (
 
 func main() {
 	log.Println("Starting gotgbot...")
-	updater, err := gotgbot.NewUpdater("YOUR_TOKEN_HERE")
+	token := os.Getenv("TOKEN")
+	log.Println("token:", token)
+	updater, err := gotgbot.NewUpdater(token)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,8 +30,29 @@ func main() {
 	// reply to all messages satisfying the filter
 	updater.Dispatcher.AddHandler(handlers.NewMessage(Filters.Sticker, stickerDeleter))
 
-	// start getting updates
-	updater.StartPolling()
+	if os.Getenv("USE_WEBHOOKS") == "t" {
+		// start getting updates
+		webhook := gotgbot.Webhook{
+			Serve:          "0.0.0.0",
+			ServePort:      8080,
+			ServePath:      updater.Bot.Token,
+			URL:            os.Getenv("WEBHOOK_URL"),
+			MaxConnections: 30,
+		}
+		updater.StartWebhook(webhook)
+		ok, err := updater.SetWebhook(updater.Bot.Token, webhook)
+		if err != nil {
+			logrus.WithError(err).Fatal("Failed to start bot due to: ", err)
+		}
+		if !ok {
+			logrus.Fatal("Failed to set webhook")
+		}
+	} else {
+		err := updater.StartPolling()
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to start polling")
+		}
+	}
 
 	// wait
 	updater.Idle()
@@ -49,4 +77,43 @@ func stickerDeleter(b ext.Bot, u *gotgbot.Update) error {
 		msg.Send()
 	}
 	return nil
+}
+
+// can be used to run local load tests
+func doLocalLoadTest(u *gotgbot.Updater) {
+	lim := 30000
+	text := "hi"
+
+	ups := make([]gotgbot.RawUpdate, lim)
+	for i := 0; i < lim; i++ {
+		x, _ := json.Marshal(gotgbot.Update{
+			UpdateId: 1 + i,
+			Message: &ext.Message{
+				MessageId: 1 + i,
+				From: &ext.User{
+					Id:           666,
+					IsBot:        false,
+					FirstName:    "test",
+					LanguageCode: "en",
+				},
+				Chat: &ext.Chat{
+					Id:        666,
+					FirstName: "testchat",
+					Type:      "private",
+				},
+				Text: text,
+				Date: int(time.Now().Unix()),
+			},
+		})
+		ups[i] = x
+	}
+
+	t := time.Now()
+
+	for _, x := range ups {
+		u.Updates <- &x
+	}
+
+	logrus.Println(time.Since(t), "to send", lim, "updates.")
+	time.Sleep(1)
 }
