@@ -123,9 +123,14 @@ func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation
 	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
 }
 
-// NewSendablePoll creates a new poll object to send
+// NewSendablePoll creates a new poll object to send.
 func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sendablePoll {
 	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
+}
+
+// NewSendablePoll creates a new callbackQuery object to send.
+func (b Bot) NewSendableAnswerCallbackQuery(queryId string) *sendableCallbackQuery {
+	return &sendableCallbackQuery{bot: b, CallbackQueryId: queryId}
 }
 
 type file struct {
@@ -983,6 +988,26 @@ func (msg *sendablePoll) Send() (*Message, error) {
 		return nil, errors.New(r.Description)
 	}
 	return msg.bot.ParseMessage(r.Result)
+}
+
+type sendableCallbackQuery struct {
+	bot             Bot
+	CallbackQueryId string `json:"callback_query_id"`
+	Text            string `json:"text"`
+	ShowAlert       bool   `json:"show_alert"`
+	Url             string `json:"url"`
+	CacheTime       int    `json:"cache_time"`
+}
+
+func (cbq *sendableCallbackQuery) Send() (bool, error) {
+	v := url.Values{}
+	v.Add("callback_query_id", cbq.CallbackQueryId)
+	v.Add("text", cbq.Text)
+	v.Add("show_alert", strconv.FormatBool(cbq.ShowAlert))
+	v.Add("url", cbq.Url)
+	v.Add("cache_time", strconv.Itoa(cbq.CacheTime))
+
+	return cbq.bot.boolSender("answerCallbackQuery", v)
 }
 
 func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (*Response, error) {

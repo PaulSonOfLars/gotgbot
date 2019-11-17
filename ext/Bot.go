@@ -68,30 +68,3 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 	var f File
 	return &f, json.Unmarshal(r.Result, &f)
 }
-
-// AnswerCallbackQuery answer a callback query
-func (b Bot) AnswerCallbackQuery(callbackQueryId string) (bool, error) {
-	v := url.Values{}
-	v.Add("callback_query_id", callbackQueryId)
-
-	return b.boolSender("answerCallbackQuery", v)
-}
-
-// AnswerCallbackQueryText answer a callback query with text
-func (b Bot) AnswerCallbackQueryText(callbackQueryId string, text string, alert bool) (bool, error) {
-	v := url.Values{}
-	v.Add("callback_query_id", callbackQueryId)
-	v.Add("text", text)
-	v.Add("show_alert", strconv.FormatBool(alert))
-
-	return b.boolSender("answerCallbackQuery", v)
-}
-
-// AnswerCallbackQueryURL answer a callback query with a URL
-func (b Bot) AnswerCallbackQueryURL(callbackQueryId string, URL string) (bool, error) {
-	v := url.Values{}
-	v.Add("callback_query_id", callbackQueryId)
-	v.Add("url", URL)
-
-	return b.boolSender("answerCallbackQuery", v)
-}
