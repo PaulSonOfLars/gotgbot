@@ -24,7 +24,7 @@ type Updater struct {
 	UpdateGetter *ext.TgBotGetter
 }
 
-// NewUpdater Creates a new updater object, paired with the necessary dispatcher and bot objects.
+// NewUpdater Creates a new updater struct, paired with the necessary dispatcher and bot structs.
 func NewUpdater(token string) (*Updater, error) {
 	u := &Updater{}
 	user, err := ext.Bot{Token: token, Logger: logrus.New()}.GetMe()
