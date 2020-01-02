@@ -22,6 +22,10 @@ func (b Bot) EditMessageMarkdown(chatId int, messageId int, text string) (*Messa
 	return b.EditMessageTextMarkup(chatId, messageId, text, parsemode.Markdown, nil)
 }
 
+func (b Bot) EditMessageMarkdownV2(chatId int, messageId int, text string) (*Message, error) {
+	return b.EditMessageTextMarkup(chatId, messageId, text, parsemode.MarkdownV2, nil)
+}
+
 func (b Bot) EditMessage(chatId int, messageId int, text string, parseMode string) (*Message, error) {
 	return b.EditMessageTextMarkup(chatId, messageId, text, parseMode, nil)
 }
@@ -43,6 +47,10 @@ func (b Bot) EditMessageHTMLInline(inlineMessageId string, text string) (*Messag
 
 func (b Bot) EditMessageMarkdownInline(inlineMessageId string, text string) (*Message, error) {
 	return b.EditMessageInline(inlineMessageId, text, parsemode.Markdown)
+}
+
+func (b Bot) EditMessageMarkdownV2Inline(inlineMessageId string, text string) (*Message, error) {
+	return b.EditMessageInline(inlineMessageId, text, parsemode.MarkdownV2)
 }
 
 func (b Bot) EditMessageInline(inlineMessageId string, text string, parseMode string) (*Message, error) {

@@ -11,6 +11,7 @@ import (
 
 type Sticker struct {
 	FileId       string       `json:"file_id"`
+	FileUniqueId string       `json:"file_unique_id"`
 	Width        int          `json:"width"`
 	Height       int          `json:"height"`
 	IsAnimated   bool         `json:"is_animated"`

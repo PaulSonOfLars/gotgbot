@@ -59,6 +59,11 @@ func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
 	return promote.Send()
 }
 
+func (b Bot) SetChatAdministratorCustomTitle(chatId int, userId int, customTitle string) (bool, error) {
+	setTitle := b.NewSendableSetChatAdministratorCustomTitle(chatId, userId, customTitle)
+	return setTitle.Send()
+}
+
 func (b Bot) DemoteChatMember(chatId int, userId int) (bool, error) {
 	demote := b.NewSendablePromoteChatMember(chatId, userId)
 	demote.CanChangeInfo = false

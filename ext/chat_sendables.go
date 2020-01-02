@@ -123,22 +123,57 @@ func (b Bot) NewSendablePromoteChatMember(chatId int, userId int) *sendablePromo
 	}
 }
 
-func (rcm *sendablePromoteChatMember) Send() (bool, error) {
+func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	v := url.Values{}
-	v.Add("chat_id", strconv.Itoa(rcm.ChatId))
-	v.Add("user_id", strconv.Itoa(rcm.UserId))
-	v.Add("can_change_info", strconv.FormatBool(rcm.CanChangeInfo))
-	v.Add("can_post_messages", strconv.FormatBool(rcm.CanPostMessages))
-	v.Add("can_edit_messages", strconv.FormatBool(rcm.CanEditMessages))
-	v.Add("can_delete_messages", strconv.FormatBool(rcm.CanDeleteMessages))
-	v.Add("can_invite_users", strconv.FormatBool(rcm.CanInviteUsers))
-	v.Add("can_restrict_members", strconv.FormatBool(rcm.CanRestrictMembers))
-	v.Add("can_pin_messages", strconv.FormatBool(rcm.CanPinMessages))
-	v.Add("can_promote_members", strconv.FormatBool(rcm.CanPromoteMembers))
+	v.Add("chat_id", strconv.Itoa(pcm.ChatId))
+	v.Add("user_id", strconv.Itoa(pcm.UserId))
+	v.Add("can_change_info", strconv.FormatBool(pcm.CanChangeInfo))
+	v.Add("can_post_messages", strconv.FormatBool(pcm.CanPostMessages))
+	v.Add("can_edit_messages", strconv.FormatBool(pcm.CanEditMessages))
+	v.Add("can_delete_messages", strconv.FormatBool(pcm.CanDeleteMessages))
+	v.Add("can_invite_users", strconv.FormatBool(pcm.CanInviteUsers))
+	v.Add("can_restrict_members", strconv.FormatBool(pcm.CanRestrictMembers))
+	v.Add("can_pin_messages", strconv.FormatBool(pcm.CanPinMessages))
+	v.Add("can_promote_members", strconv.FormatBool(pcm.CanPromoteMembers))
 
-	r, err := Get(rcm.bot, "promoteChatMember", v)
+	r, err := Get(pcm.bot, "promoteChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not promoteChatMember")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	return bb, json.Unmarshal(r.Result, &bb)
+}
+
+type sendableSetChatAdministratorCustomTitle struct {
+	bot         Bot `json:"-"`
+	ChatId      int
+	UserId      int
+	CustomTitle string
+}
+
+// note: set all as true for promotion by default
+func (b Bot) NewSendableSetChatAdministratorCustomTitle(chatId int, userId int, customTitle string) *sendableSetChatAdministratorCustomTitle {
+	return &sendableSetChatAdministratorCustomTitle{
+		bot:         b,
+		ChatId:      chatId,
+		UserId:      userId,
+		CustomTitle: customTitle,
+	}
+}
+
+func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(scact.ChatId))
+	v.Add("user_id", strconv.Itoa(scact.UserId))
+	v.Add("custom_title", scact.CustomTitle)
+
+	r, err := Get(scact.bot, "setChatAdministratorCustomTitle", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "could not setChatAdministratorCustomTitle")
 	}
 	if !r.Ok {
 		return false, errors.New(r.Description)

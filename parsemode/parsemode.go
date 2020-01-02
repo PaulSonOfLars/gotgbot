@@ -1,6 +1,7 @@
 package parsemode
 
 const (
-	Markdown = "Markdown"
-	Html     = "HTML"
+	MarkdownV2 = "MarkdownV2"
+	Markdown   = "Markdown"
+	Html       = "HTML"
 )

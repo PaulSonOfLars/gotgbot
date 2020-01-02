@@ -28,6 +28,12 @@ func (b Bot) SendMessageMarkdown(chatId int, text string) (*Message, error) {
 	return newMsg.Send()
 }
 
+func (b Bot) SendMessageMarkdownV2(chatId int, text string) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ParseMode = parsemode.MarkdownV2
+	return newMsg.Send()
+}
+
 func (b Bot) ReplyText(chatId int, text string, replyToMessageId int) (*Message, error) {
 	newMsg := b.NewSendableMessage(chatId, text)
 	newMsg.ReplyToMessageId = replyToMessageId
@@ -45,6 +51,13 @@ func (b Bot) ReplyMarkdown(chatId int, text string, replyToMessageId int) (*Mess
 	newMsg := b.NewSendableMessage(chatId, text)
 	newMsg.ReplyToMessageId = replyToMessageId
 	newMsg.ParseMode = parsemode.Markdown
+	return newMsg.Send()
+}
+
+func (b Bot) ReplyMarkdownV2(chatId int, text string, replyToMessageId int) (*Message, error) {
+	newMsg := b.NewSendableMessage(chatId, text)
+	newMsg.ReplyToMessageId = replyToMessageId
+	newMsg.ParseMode = parsemode.MarkdownV2
 	return newMsg.Send()
 }
 

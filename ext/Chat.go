@@ -17,6 +17,7 @@ type Chat struct {
 	InviteLink       string           `json:"invite_link"`
 	PinnedMessage    *Message         `json:"pinned_message"`
 	Permissions      *ChatPermissions `json:"permissions"`
+	SlowModeDelay    int              `json:"slow_mode_delay"`
 	StickerSetName   string           `json:"sticker_set_name"`
 	CanSetStickerSet bool             `json:"can_set_sticker_set"`
 }
@@ -33,13 +34,16 @@ type ChatPermissions struct {
 }
 
 type ChatPhoto struct {
-	SmallFileId string `json:"small_file_id"`
-	BigFileId   string `json:"big_file_id"`
+	SmallFileId       string `json:"small_file_id"`
+	SmallFileUniqueId string `json:"small_file_unique_id"`
+	BigFileId         string `json:"big_file_id"`
+	BigFileUniqueId   string `json:"big_file_unique_id"`
 }
 
 type ChatMember struct {
 	User                  *User  `json:"user"`
 	Status                string `json:"status"`
+	CustomTitle           string `json:"custom_title"`
 	UntilDate             int64  `json:"until_date"`
 	CanBeEdited           bool   `json:"can_be_edited"`
 	CanPostMessages       bool   `json:"can_post_messages"`
@@ -76,6 +80,10 @@ func (chat Chat) RestrictMember(userId int) (bool, error) {
 
 func (chat Chat) PromoteMember(userId int) (bool, error) {
 	return chat.Bot.PromoteChatMember(chat.Id, userId)
+}
+
+func (chat Chat) SetAdministratorCustomTitle(userId int, customTitle string) (bool, error) {
+	return chat.Bot.SetChatAdministratorCustomTitle(chat.Id, userId, customTitle)
 }
 
 func (chat Chat) DemoteMember(userId int) (bool, error) {
