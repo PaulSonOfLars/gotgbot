@@ -25,6 +25,8 @@ func main() {
 	}
 	// reply to /start messages
 	updater.Dispatcher.AddHandler(handlers.NewCommand("start", start))
+	// get the message HTML
+	updater.Dispatcher.AddHandler(handlers.NewCommand("get", get))
 	// reply to messages satisfying this regex
 	updater.Dispatcher.AddHandler(handlers.NewRegex("(?i)hello", hi))
 	// reply to all messages satisfying the filter
@@ -56,6 +58,17 @@ func main() {
 
 	// wait
 	updater.Idle()
+}
+
+// return the HTML
+func get(b ext.Bot, u *gotgbot.Update) error {
+	if u.EffectiveMessage.ReplyToMessage == nil {
+		u.EffectiveMessage.ReplyText("Please reply to a message!")
+		return nil
+	}
+
+	u.EffectiveMessage.ReplyText(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
+	return nil
 }
 
 func start(b ext.Bot, u *gotgbot.Update) error {

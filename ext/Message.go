@@ -177,13 +177,11 @@ type Message struct {
 	utf16Text           []uint16
 	utf16Caption        []uint16
 	originalTextMD      string
+	originalTextMDV2    string
 	originalTextHTML    string
 	originalCaptionMD   string
+	originalCaptionMDV2 string
 	originalCaptionHTML string
-}
-
-func (b Bot) Message(chatId int, text string) Message {
-	return Message{Bot: b}
 }
 
 func (b Bot) ParseMessage(message json.RawMessage) (mess *Message, err error) {
@@ -363,6 +361,14 @@ var mdMap = map[string]string{
 	"code":   "`",
 }
 
+var mdV2Map = map[string]string{
+	"bold":          "*",
+	"italic":        "_",
+	"code":          "`",
+	"underline":     "__",
+	"strikethrough": "~",
+}
+
 var htmlMap = map[string]string{
 	"bold":          "b",
 	"italic":        "i",
@@ -370,8 +376,6 @@ var htmlMap = map[string]string{
 	"underline":     "u",
 	"strikethrough": "s",
 }
-
-var htmlMDs = []rune("[]()")
 
 func (m *Message) OriginalText() string {
 	return m.originalMD()
@@ -392,6 +396,7 @@ func (m *Message) originalMD() string {
 	m.originalTextMD = getOrigMsgMD(m.utf16Text, m.Entities)
 	return m.originalTextMD
 }
+
 func (m *Message) originalHTML() string {
 	if m.originalTextHTML != "" {
 		return m.originalTextHTML
@@ -402,6 +407,18 @@ func (m *Message) originalHTML() string {
 
 	m.originalTextHTML = getOrigMsgHTML(m.utf16Text, m.Entities)
 	return m.originalTextHTML
+}
+
+func (m *Message) originalMDV2() string {
+	if m.originalTextMDV2 != "" {
+		return m.originalTextMDV2
+	}
+	if m.utf16Text == nil {
+		m.utf16Text = utf16.Encode([]rune(m.Text))
+	}
+
+	m.originalTextMDV2 = getOrigMsgMDV2(m.utf16Text, m.Entities)
+	return m.originalTextMDV2
 }
 
 func (m *Message) OriginalCaption() string {
@@ -436,51 +453,199 @@ func (m *Message) originalCaptionTextHTML() string {
 	return m.originalCaptionHTML
 }
 
+func (m *Message) originalCaptionTextMDV2() string {
+	if m.originalCaptionMDV2 != "" {
+		return m.originalCaptionMDV2
+	}
+	if m.utf16Caption == nil {
+		m.utf16Caption = utf16.Encode([]rune(m.Caption))
+	}
+
+	m.originalCaptionMDV2 = getOrigMsgMDV2(m.utf16Caption, m.CaptionEntities)
+	return m.originalCaptionMDV2
+}
+
+// Does not support nesting. only look at upper entities.
 func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 	out := strings.Builder{}
 	prev := 0
-	for _, ent := range ents {
+	for _, ent := range getUpperEntities(ents) {
 		newPrev := ent.Offset + ent.Length
+		prevText := string(utf16.Decode(utf16Data[prev:ent.Offset]))
 		switch ent.Type {
 		case "bold", "italic", "code":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + mdMap[ent.Type] + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune(mdMap[ent.Type])) + mdMap[ent.Type])
+			out.WriteString(prevText + mdMap[ent.Type] + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune(mdMap[ent.Type])) + mdMap[ent.Type])
 		case "text_mention":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")")
+			out.WriteString(prevText + "[" + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune("[]()")) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")")
 		case "text_link":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "[" + escapeContainedMD(utf16.Decode(utf16Data[ent.Offset:newPrev]), htmlMDs) + "](" + ent.Url + ")")
+			out.WriteString(prevText + "[" + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune("[]()")) + "](" + ent.Url + ")")
 		default:
 			continue
 		}
 		prev = newPrev
-
 	}
+
 	out.WriteString(string(utf16.Decode(utf16Data[prev:])))
 	return out.String()
 }
 
 func getOrigMsgHTML(utf16Data []uint16, ents []MessageEntity) string {
-	out := strings.Builder{}
-	prev := 0
-	for _, ent := range ents {
-		newPrev := ent.Offset + ent.Length
-		switch ent.Type {
-		case "bold", "italic", "code":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + "<" + htmlMap[ent.Type] + ">" + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</" + htmlMap[ent.Type] + ">")
-		case "text_mention":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + `<a href="tg://user?id=` + strconv.Itoa(ent.User.Id) + `">` + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</a>")
-		case "text_link":
-			out.WriteString(string(utf16.Decode(utf16Data[prev:ent.Offset])) + `<a href="` + ent.Url + `">` + html.EscapeString(string(utf16.Decode(utf16Data[ent.Offset:newPrev]))) + "</a>")
-		default:
-			continue
-		}
-		prev = newPrev
-
+	if len(ents) == 0 {
+		return html.EscapeString(string(utf16.Decode(utf16Data)))
 	}
-	out.WriteString(string(utf16.Decode(utf16Data[prev:])))
-	return out.String()
+
+	bd := strings.Builder{}
+	prev := 0
+	for _, e := range getUpperEntities(ents) {
+		data, end := fillNestedHTML(utf16Data, e, prev, getChildEntities(e, ents))
+		bd.WriteString(data)
+		prev = end
+	}
+
+	bd.WriteString(html.EscapeString(string(utf16.Decode(utf16Data[prev:]))))
+	return bd.String()
 }
 
-func escapeContainedMD(data []rune, mdType []rune) string {
+func getOrigMsgMDV2(utf16Data []uint16, ents []MessageEntity) string {
+	if len(ents) == 0 {
+		return escapeMarkdownV2String(string(utf16.Decode(utf16Data)))
+	}
+
+	bd := strings.Builder{}
+	prev := 0
+	for _, e := range getUpperEntities(ents) {
+		data, end := fillNestedMarkdownV2(utf16Data, e, prev, getChildEntities(e, ents))
+		bd.WriteString(data)
+		prev = end
+	}
+
+	bd.WriteString(escapeMarkdownV2String(string(utf16.Decode(utf16Data[prev:]))))
+	return bd.String()
+}
+
+var allMdV2 = []string{"_", "*", "`", "~", "[", "]", "(", ")", "\\"} // __ is not necessary because of _
+var repl = strings.NewReplacer(func() (out []string) {
+	for _, x := range allMdV2 {
+		out = append(out, x, "\\"+x)
+	}
+	return out
+}()...)
+
+func escapeMarkdownV2String(s string) string {
+	return repl.Replace(s)
+}
+
+func fillNestedHTML(data []uint16, ent MessageEntity, start int, entities []MessageEntity) (string, int) {
+	entEnd := ent.Offset + ent.Length
+	if len(entities) == 0 || entEnd < entities[0].Offset {
+		// no nesting; just return straight away and move to next.
+		return writeFinalHTML(data, ent, start, html.EscapeString(string(utf16.Decode(data[ent.Offset:entEnd])))), entEnd
+	}
+	subPrev := ent.Offset
+	subEnd := ent.Offset
+	bd := strings.Builder{}
+	for _, e := range entities {
+		if e.Offset < subEnd || e == ent {
+			continue
+		}
+		if e.Offset >= entEnd {
+			break
+		}
+
+		out, end := fillNestedHTML(data, e, subPrev, getChildEntities(e, entities))
+		bd.WriteString(out)
+		subPrev = end
+	}
+
+	bd.WriteString(html.EscapeString(string(utf16.Decode(data[subPrev:entEnd]))))
+
+	return writeFinalHTML(data, ent, 0, bd.String()), entEnd
+}
+
+func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities []MessageEntity) (string, int) {
+	entEnd := ent.Offset + ent.Length
+	if len(entities) == 0 || entEnd < entities[0].Offset {
+		// no nesting; just return straight away and move to next.
+		return writeFinalMarkdownV2(data, ent, start, escapeMarkdownV2String(string(utf16.Decode(data[ent.Offset:entEnd])))), entEnd
+	}
+	subPrev := ent.Offset
+	subEnd := ent.Offset
+	bd := strings.Builder{}
+	for _, e := range entities {
+		if e.Offset < subEnd || e == ent {
+			continue
+		}
+		if e.Offset >= entEnd {
+			break
+		}
+
+		out, end := fillNestedMarkdownV2(data, e, subPrev, getChildEntities(e, entities))
+		bd.WriteString(out)
+		subPrev = end
+	}
+
+	bd.WriteString(escapeMarkdownV2String(string(utf16.Decode(data[subPrev:entEnd]))))
+
+	return writeFinalMarkdownV2(data, ent, 0, bd.String()), entEnd
+}
+
+func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {
+	prevText := html.EscapeString(string(utf16.Decode(data[start:ent.Offset])))
+	switch ent.Type {
+	case "bold", "italic", "code", "underline", "strikethrough":
+		return prevText + "<" + htmlMap[ent.Type] + ">" + cntnt + "</" + htmlMap[ent.Type] + ">"
+	case "text_mention":
+		return prevText + `<a href="tg://user?id=` + strconv.Itoa(ent.User.Id) + `">` + cntnt + "</a>"
+	case "text_link":
+		return prevText + `<a href="` + ent.Url + `">` + cntnt + "</a>"
+	default:
+		return prevText + cntnt
+	}
+}
+
+func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int, cntnt string) string {
+	prevText := escapeMarkdownV2String(string(utf16.Decode(data[start:ent.Offset])))
+	switch ent.Type {
+	case "bold", "italic", "code", "underline", "strikethrough":
+		return prevText + mdV2Map[ent.Type] + cntnt + mdV2Map[ent.Type]
+	case "text_mention":
+		return prevText + "[" + cntnt + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
+	case "text_link":
+		return prevText + "[" + cntnt + "](" + ent.Url + ")"
+	default:
+		return prevText + cntnt
+	}
+}
+
+func getUpperEntities(ents []MessageEntity) []MessageEntity {
+	prev := 0
+	var uppers []MessageEntity
+	for _, e := range ents {
+		if e.Offset < prev {
+			continue
+		}
+		uppers = append(uppers, e)
+		prev = e.Offset + e.Length
+	}
+	return uppers
+}
+
+func getChildEntities(ent MessageEntity, ents []MessageEntity) []MessageEntity {
+	end := ent.Offset + ent.Length
+	var children []MessageEntity
+	for _, e := range ents {
+		if e.Offset < ent.Offset || e == ent {
+			continue
+		}
+		if e.Offset >= end {
+			break
+		}
+		children = append(children, e)
+	}
+	return children
+}
+
+func escapeContainedMDV1(data []rune, mdType []rune) string {
 	out := strings.Builder{}
 	for _, x := range data {
 		if contains(x, mdType) {
