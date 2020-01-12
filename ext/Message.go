@@ -554,7 +554,7 @@ func fillNestedHTML(data []uint16, ent MessageEntity, start int, entities []Mess
 	subPrev := ent.Offset
 	subEnd := ent.Offset
 	bd := strings.Builder{}
-	for _, e := range entities {
+	for _, e := range getUpperEntities(entities) {
 		if e.Offset < subEnd || e == ent {
 			continue
 		}
@@ -569,7 +569,7 @@ func fillNestedHTML(data []uint16, ent MessageEntity, start int, entities []Mess
 
 	bd.WriteString(html.EscapeString(string(utf16.Decode(data[subPrev:entEnd]))))
 
-	return writeFinalHTML(data, ent, 0, bd.String()), entEnd
+	return writeFinalHTML(data, ent, ent.Offset, bd.String()), entEnd
 }
 
 func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities []MessageEntity) (string, int) {
@@ -581,7 +581,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 	subPrev := ent.Offset
 	subEnd := ent.Offset
 	bd := strings.Builder{}
-	for _, e := range entities {
+	for _, e := range getUpperEntities(entities) {
 		if e.Offset < subEnd || e == ent {
 			continue
 		}
@@ -596,7 +596,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 
 	bd.WriteString(string(utf16.Decode(data[subPrev:entEnd])))
 
-	return writeFinalMarkdownV2(data, ent, 0, bd.String()), entEnd
+	return writeFinalMarkdownV2(data, ent, ent.Offset, bd.String()), entEnd
 }
 
 func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {

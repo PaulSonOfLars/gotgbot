@@ -68,6 +68,7 @@ func get(b ext.Bot, u *gotgbot.Update) error {
 	}
 
 	u.EffectiveMessage.ReplyText(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
+	u.EffectiveMessage.ReplyHTML(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
 	return nil
 }
 
