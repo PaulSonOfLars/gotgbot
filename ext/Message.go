@@ -431,6 +431,10 @@ func (m *Message) OriginalCaption() string {
 	return m.originalCaptionTextMD()
 }
 
+func (m *Message) OriginalCaptionV2() string {
+	return m.originalCaptionTextMDV2()
+}
+
 func (m *Message) OriginalCaptionHTML() string {
 	return m.originalCaptionTextHTML()
 }
