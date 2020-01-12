@@ -365,6 +365,7 @@ var mdV2Map = map[string]string{
 	"bold":          "*",
 	"italic":        "_",
 	"code":          "`",
+	"pre":           "```",
 	"underline":     "__",
 	"strikethrough": "~",
 }
@@ -373,12 +374,17 @@ var htmlMap = map[string]string{
 	"bold":          "b",
 	"italic":        "i",
 	"code":          "code",
+	"pre":           "pre",
 	"underline":     "u",
 	"strikethrough": "s",
 }
 
 func (m *Message) OriginalText() string {
 	return m.originalMD()
+}
+
+func (m *Message) OriginalTextV2() string {
+	return m.originalMDV2()
 }
 
 func (m *Message) OriginalHTML() string {
@@ -592,7 +598,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {
 	prevText := html.EscapeString(string(utf16.Decode(data[start:ent.Offset])))
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough":
+	case "bold", "italic", "code", "underline", "strikethrough", "pre":
 		return prevText + "<" + htmlMap[ent.Type] + ">" + cntnt + "</" + htmlMap[ent.Type] + ">"
 	case "text_mention":
 		return prevText + `<a href="tg://user?id=` + strconv.Itoa(ent.User.Id) + `">` + cntnt + "</a>"
