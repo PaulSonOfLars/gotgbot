@@ -518,7 +518,7 @@ func getOrigMsgHTML(utf16Data []uint16, ents []MessageEntity) string {
 
 func getOrigMsgMDV2(utf16Data []uint16, ents []MessageEntity) string {
 	if len(ents) == 0 {
-		return escapeMarkdownV2String(string(utf16.Decode(utf16Data)))
+		return string(utf16.Decode(utf16Data))
 	}
 
 	bd := strings.Builder{}
@@ -529,7 +529,7 @@ func getOrigMsgMDV2(utf16Data []uint16, ents []MessageEntity) string {
 		prev = end
 	}
 
-	bd.WriteString(escapeMarkdownV2String(string(utf16.Decode(utf16Data[prev:]))))
+	bd.WriteString(string(utf16.Decode(utf16Data[prev:])))
 	return bd.String()
 }
 
@@ -576,7 +576,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 	entEnd := ent.Offset + ent.Length
 	if len(entities) == 0 || entEnd < entities[0].Offset {
 		// no nesting; just return straight away and move to next.
-		return writeFinalMarkdownV2(data, ent, start, escapeMarkdownV2String(string(utf16.Decode(data[ent.Offset:entEnd])))), entEnd
+		return writeFinalMarkdownV2(data, ent, start, string(utf16.Decode(data[ent.Offset:entEnd]))), entEnd
 	}
 	subPrev := ent.Offset
 	subEnd := ent.Offset
@@ -594,7 +594,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 		subPrev = end
 	}
 
-	bd.WriteString(escapeMarkdownV2String(string(utf16.Decode(data[subPrev:entEnd]))))
+	bd.WriteString(string(utf16.Decode(data[subPrev:entEnd])))
 
 	return writeFinalMarkdownV2(data, ent, 0, bd.String()), entEnd
 }
@@ -614,7 +614,7 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) s
 }
 
 func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int, cntnt string) string {
-	prevText := escapeMarkdownV2String(string(utf16.Decode(data[start:ent.Offset])))
+	prevText := string(utf16.Decode(data[start:ent.Offset]))
 	switch ent.Type {
 	case "bold", "italic", "code", "underline", "strikethrough":
 		return prevText + mdV2Map[ent.Type] + cntnt + mdV2Map[ent.Type]
