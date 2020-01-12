@@ -616,7 +616,7 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) s
 func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int, cntnt string) string {
 	prevText := string(utf16.Decode(data[start:ent.Offset]))
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough":
+	case "bold", "italic", "code", "underline", "strikethrough", "pre":
 		return prevText + mdV2Map[ent.Type] + cntnt + mdV2Map[ent.Type]
 	case "text_mention":
 		return prevText + "[" + cntnt + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
