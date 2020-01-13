@@ -569,7 +569,7 @@ func fillNestedHTML(data []uint16, ent MessageEntity, start int, entities []Mess
 
 	bd.WriteString(html.EscapeString(string(utf16.Decode(data[subPrev:entEnd]))))
 
-	return writeFinalHTML(data, ent, ent.Offset, bd.String()), entEnd
+	return writeFinalHTML(data, ent, start, bd.String()), entEnd
 }
 
 func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities []MessageEntity) (string, int) {
@@ -596,7 +596,7 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 
 	bd.WriteString(string(utf16.Decode(data[subPrev:entEnd])))
 
-	return writeFinalMarkdownV2(data, ent, ent.Offset, bd.String()), entEnd
+	return writeFinalMarkdownV2(data, ent, start, bd.String()), entEnd
 }
 
 func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {
