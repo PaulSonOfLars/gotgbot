@@ -50,7 +50,9 @@ func (b Bot) UnRestrictChatMember(chatId int, userId int) (bool, error) {
 	unRestrict.Permissions.CanSendPolls = &temp
 	unRestrict.Permissions.CanSendOtherMessages = &temp
 	unRestrict.Permissions.CanAddWebPagePreviews = &temp
+	unRestrict.Permissions.CanChangeInfo = &temp
 	unRestrict.Permissions.CanInviteUsers = &temp
+	unRestrict.Permissions.CanPinMessages = &temp
 	return unRestrict.Send()
 }
 
