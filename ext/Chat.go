@@ -78,6 +78,10 @@ func (chat Chat) RestrictMember(userId int) (bool, error) {
 	return chat.Bot.RestrictChatMember(chat.Id, userId)
 }
 
+func (chat Chat) UnRestrictMember(userId int) (bool, error) {
+	return chat.Bot.UnRestrictChatMember(chat.Id, userId)
+}
+
 func (chat Chat) PromoteMember(userId int) (bool, error) {
 	return chat.Bot.PromoteChatMember(chat.Id, userId)
 }
