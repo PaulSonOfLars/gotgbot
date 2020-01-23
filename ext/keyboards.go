@@ -36,10 +36,15 @@ func (rkm *ReplyKeyboardMarkup) Marshal() ([]byte, error) {
 	return replyMarkup, nil
 }
 
+type KeyboardButtonPollType struct {
+	Type []string `json:"type"`
+}
+
 type KeyboardButton struct {
-	Text            string `json:"text"`
-	RequestContact  bool   `json:"request_contact"`
-	RequestLocation bool   `json:"request_location"`
+	Text            string                  `json:"text"`
+	RequestContact  bool                    `json:"request_contact"`
+	RequestLocation bool                    `json:"request_location"`
+	RequestPoll     *KeyboardButtonPollType `json:"request_poll"`
 }
 
 type ReplyKeyboardRemove struct {

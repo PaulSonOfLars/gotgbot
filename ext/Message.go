@@ -10,11 +10,12 @@ import (
 )
 
 type MessageEntity struct {
-	Type   string `json:"type"`
-	Offset int    `json:"offset"`
-	Length int    `json:"length"`
-	Url    string `json:"url"`
-	User   *User  `json:"user"`
+	Type     string `json:"type"`
+	Offset   int    `json:"offset"`
+	Length   int    `json:"length"`
+	Url      string `json:"url"`
+	User     *User  `json:"user"`
+	Language string `json:"language"`
 }
 
 type ParsedMessageEntity struct {
@@ -116,11 +117,22 @@ type PollOption struct {
 }
 
 type Poll struct {
-	Bot      Bot          `json:"-"`
-	Id       string       `json:"id"`
-	Question string       `json:"question"`
-	Options  []PollOption `json:"options"`
-	IsClosed bool         `json:"is_closed"`
+	Bot                   Bot          `json:"-"`
+	Id                    string       `json:"id"`
+	Question              string       `json:"question"`
+	Options               []PollOption `json:"options"`
+	TotalVoterCount       int          `json:"total_voter_count"`
+	IsClosed              bool         `json:"is_closed"`
+	IsAnonymous           bool         `json:"is_anonymous"`
+	Type                  string       `json:"type"`
+	AllowsMultipleAnswers bool         `json:"allows_multiple_answers"`
+	CorrectOptionId       int          `json:"correct_option_id"`
+}
+type PollAnswer struct {
+	Bot       Bot    `json:"-"`
+	PollId    string `json:"poll_id"`
+	User      *User  `json:"user"`
+	OptionIds []int  `json:"option_ids"`
 }
 
 type Message struct {
@@ -602,8 +614,15 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {
 	prevText := html.EscapeString(string(utf16.Decode(data[start:ent.Offset])))
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough", "pre":
+	case "bold", "italic", "code", "underline", "strikethrough":
 		return prevText + "<" + htmlMap[ent.Type] + ">" + cntnt + "</" + htmlMap[ent.Type] + ">"
+	case "pre":
+		// <pre>text</pre>
+		if ent.Language == "" {
+			return prevText + "<pre>" + cntnt + "</pre>"
+		}
+		// <pre><code class="lang">text</code></pre>
+		return prevText + `<pre><code class="` + ent.Language + `">` + cntnt + "</code></pre>"
 	case "text_mention":
 		return prevText + `<a href="tg://user?id=` + strconv.Itoa(ent.User.Id) + `">` + cntnt + "</a>"
 	case "text_link":

@@ -946,13 +946,18 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 }
 
 type sendablePoll struct {
-	bot                 Bot
-	ChatId              int
-	Question            string
-	Options             []string
-	DisableNotification bool
-	ReplyToMessageId    int
-	ReplyMarkup         ReplyMarkup
+	bot                   Bot
+	ChatId                int
+	Question              string
+	Options               []string
+	IsAnonymous           bool
+	Type                  string
+	AllowsMultipleAnswers bool
+	CorrectOptionId       int
+	IsClosed              bool
+	DisableNotification   bool
+	ReplyToMessageId      int
+	ReplyMarkup           ReplyMarkup
 }
 
 func (msg *sendablePoll) Send() (*Message, error) {
@@ -976,6 +981,11 @@ func (msg *sendablePoll) Send() (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("question", msg.Question)
 	v.Add("options", string(optionsBytes))
+	v.Add("is_anonymous", strconv.FormatBool(msg.IsAnonymous))
+	v.Add("type", msg.Type)
+	v.Add("allows_multiple_answers", strconv.FormatBool(msg.AllowsMultipleAnswers))
+	v.Add("correct_option_id", strconv.Itoa(msg.CorrectOptionId))
+	v.Add("is_closed", strconv.FormatBool(msg.IsClosed))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
