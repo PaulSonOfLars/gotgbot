@@ -23,7 +23,7 @@ type Update struct {
 	EditedMessage      *ext.Message            `json:"edited_message"`
 	ChannelPost        *ext.Message            `json:"channel_post"`
 	EditedChannelPost  *ext.Message            `json:"edited_channel_post"`
-	InlineQuery        *ext.Message            `json:"inline_query"`
+	InlineQuery        *ext.InlineQuery        `json:"inline_query"`
 	ChosenInlineResult *ext.ChosenInlineResult `json:"chosen_inline_result"`
 	CallbackQuery      *ext.CallbackQuery      `json:"callback_query"`
 	ShippingQuery      *ext.ShippingQuery      `json:"shipping_query"`
@@ -62,7 +62,6 @@ func initUpdate(data RawUpdate, bot ext.Bot) (*Update, error) {
 		upd.EffectiveChat = upd.EditedChannelPost.Chat
 
 	} else if upd.InlineQuery != nil {
-		upd.EffectiveMessage = upd.InlineQuery
 		upd.EffectiveUser = upd.InlineQuery.From
 
 	} else if upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil {
