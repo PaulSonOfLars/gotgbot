@@ -58,7 +58,7 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 	}
 	req.URL.RawQuery = params.Encode()
 
-	bot.Logger.Debug("executing GET: %+v", req)
+	bot.Logger.Debugf("executing GET: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
 		bot.Logger.Debugw("failed to execute GET request", "method", method, zap.Error(err))
@@ -105,8 +105,8 @@ func (tbg *TgBotGetter) Post(bot Bot, fileType string, method string, params url
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	bot.Logger.Debug("POST request with body: %+v", b)
-	bot.Logger.Debug("executing POST: %+v", req)
+	bot.Logger.Debugf("POST request with body: %+v", b)
+	bot.Logger.Debugf("executing POST: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
 		return nil, err
