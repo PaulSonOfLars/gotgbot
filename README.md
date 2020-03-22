@@ -1,11 +1,13 @@
 # Go Telegram Bot
 
-**This library is WIP; it does not currently support all of the telegram api methods.**
+**This library is WIP; it may not currently support all of the telegram api methods.**
 
 This library attempts to create a user-friendly wrapper around the telegram bot api.
 
 Heavily inspired by the [python-telegram-bot library](github.com/python-telegram-bot/python-telegram-bot),
-this aims to create a simple way to manage a concurrent and scalable bot.
+this aims to create a simple way to manage a concurrent and scalable bot. It has been in use by [Rose](https://t.me/MissRose_bot) since september 2018, so is heavily battle tested.
+
+If you have any questions, come ask in the [telegram support chat](https://t.me/GotgbotChat).
 
 ## Getting started
 Install it as you would install your usual go library: `go get github.com/PaulSonOfLars/gotgbot`
