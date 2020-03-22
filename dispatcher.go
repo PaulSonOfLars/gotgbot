@@ -5,7 +5,7 @@ import (
 	"runtime/debug"
 	"sort"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/PaulSonOfLars/gotgbot/ext"
 )
@@ -42,7 +42,7 @@ func (d Dispatcher) Start() {
 		select {
 		case limiter <- struct{}{}:
 		default:
-			logrus.Debugf("update dispatcher has reached limit of %d", d.MaxRoutines)
+			d.Bot.Logger.Warnf("update dispatcher has reached limit of %d", d.MaxRoutines)
 			limiter <- struct{}{} // make sure to send anyway
 		}
 		go func(upd *RawUpdate) {
@@ -61,14 +61,14 @@ func (eg ContinueGroups) Error() string { return "Group iteration has continued"
 func (d Dispatcher) processUpdate(upd *RawUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.Error(r)
+			d.Bot.Logger.Error(r)
 			debug.PrintStack()
 		}
 	}()
 
 	update, err := initUpdate(*upd, *d.Bot)
 	if err != nil {
-		logrus.WithError(err).Error("failed to init update while processing")
+		d.Bot.Logger.Errorw("failed to init update while processing", zap.Error(err))
 		return
 	}
 	for _, groupNum := range *d.handlerGroups {
@@ -82,12 +82,12 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 					case ContinueGroups:
 						continue
 					default:
-						logrus.Warning(err.Error())
+						d.Bot.Logger.Warnw("error handling update", err.Error())
 					}
 				}
 				break // move to next group
 			} else if err != nil {
-				logrus.WithError(err).Error("failed to check update while processing")
+				d.Bot.Logger.Errorw("failed to check update while processing", zap.Error(err))
 				return
 			}
 		}

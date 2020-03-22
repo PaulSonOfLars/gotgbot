@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/PaulSonOfLars/gotgbot/ext"
 )
@@ -25,9 +25,9 @@ type Updater struct {
 }
 
 // NewUpdater Creates a new updater struct, paired with the necessary dispatcher and bot structs.
-func NewUpdater(token string) (*Updater, error) {
+func NewUpdater(token string, l *zap.Logger) (*Updater, error) {
 	u := &Updater{}
-	user, err := ext.Bot{Token: token, Logger: logrus.New()}.GetMe()
+	user, err := ext.Bot{Token: token, Logger: l.Sugar()}.GetMe()
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to create new updater")
 	}
@@ -36,7 +36,7 @@ func NewUpdater(token string) (*Updater, error) {
 		Id:        user.Id,
 		FirstName: user.FirstName,
 		UserName:  user.Username,
-		Logger:    logrus.New(),
+		Logger:    l.Sugar(),
 	}
 	u.Updates = make(chan *RawUpdate)
 	u.Dispatcher = NewDispatcher(u.Bot, u.Updates)
@@ -81,26 +81,26 @@ func (u Updater) startPolling(clean bool) {
 	for {
 		r, err := u.UpdateGetter.Get(*u.Bot, "getUpdates", v)
 		if err != nil {
-			logrus.WithError(err).Error("unable to getUpdates")
+			u.Bot.Logger.Errorw("unable to getUpdates", zap.Error(err))
 			continue
 
 		} else if !r.Ok {
-			logrus.Errorf("getUpdates error: %v", r.Description)
-			logrus.Errorf("Sleeping for 1 second...")
+			u.Bot.Logger.Errorf("getUpdates error: %v", r.Description)
+			u.Bot.Logger.Error("Sleeping for 1 second...")
 			time.Sleep(time.Second)
 			continue
 
 		} else if r.Result != nil {
 			var rawUpdates []json.RawMessage
 			if err := json.Unmarshal(r.Result, &rawUpdates); err != nil {
-				logrus.WithError(err).Error("failed to unmarshal update while polling", r.Result)
+				u.Bot.Logger.Errorw("failed to unmarshal update while polling", "result", r.Result, zap.Error(err))
 				continue
 			}
 			if len(rawUpdates) > 0 {
 				// parse last one here
 				lastUpd, err := initUpdate(RawUpdate(rawUpdates[len(rawUpdates)-1]), *u.Bot)
 				if err != nil {
-					logrus.WithError(err).Error("failed to init update while polling", r.Result)
+					u.Bot.Logger.Errorw("failed to init update while polling", "result", r.Result, zap.Error(err))
 					continue
 				}
 				offset = lastUpd.UpdateId + 1
@@ -161,7 +161,7 @@ func (u Updater) StartWebhook(webhook Webhook) {
 		// todo: TLS when using certs
 		err := http.ListenAndServe(webhook.GetListenUrl(), nil)
 		if err != nil {
-			logrus.Fatal(errors.WithStack(err))
+			u.Bot.Logger.Errorw("failed to init update while polling", zap.Error(errors.WithStack(err)))
 		}
 	}()
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 const ApiUrl = "https://api.telegram.org/bot"
@@ -60,7 +61,7 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 	bot.Logger.Debug("executing GET: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
-		bot.Logger.WithError(err).Debugf("failed to execute GET request to %v", method)
+		bot.Logger.Debugw("failed to execute GET request", "method", method, zap.Error(err))
 		return nil, errors.Wrapf(err, "unable to execute GET request to %v", method)
 	}
 	defer resp.Body.Close()
@@ -68,7 +69,7 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.WithError(err).Debugf("failed to deserialize GET response body for %s", method)
+		bot.Logger.Debugw("failed to deserialize GET response body", "method", method, zap.Error(err))
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
 	bot.Logger.Debugf("received result: %+v", r)
@@ -98,7 +99,7 @@ func (tbg *TgBotGetter) Post(bot Bot, fileType string, method string, params url
 
 	req, err := http.NewRequest("POST", tbg.ApiUrl+bot.Token+"/"+method, &b)
 	if err != nil {
-		bot.Logger.WithError(err).Debugf("failed to execute POST request to %v", method)
+		bot.Logger.Debugw("failed to execute POST request", "method", method, zap.Error(err))
 		return nil, errors.Wrapf(err, "unable to execute POST request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
@@ -115,7 +116,7 @@ func (tbg *TgBotGetter) Post(bot Bot, fileType string, method string, params url
 
 	var r Response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.WithError(err).Debug("failed to deserialize POST response body for %s", method)
+		bot.Logger.Debugw("failed to deserialize POST response body", "method", method, zap.Error(err))
 		return nil, errors.Wrapf(err, "could not decode in POST %v call", method)
 	}
 	bot.Logger.Debugf("received result: %+v", r)

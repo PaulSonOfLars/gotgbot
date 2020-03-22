@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/PaulSonOfLars/gotgbot"
 	"github.com/PaulSonOfLars/gotgbot/ext"
@@ -16,13 +16,22 @@ import (
 )
 
 func main() {
-	log.Println("Starting gotgbot...")
+	cfg := zap.NewProductionEncoderConfig()
+	cfg.EncodeLevel = zapcore.CapitalLevelEncoder
+	cfg.EncodeTime = zapcore.RFC3339TimeEncoder
+
+	logger := zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(cfg), os.Stdout, zap.InfoLevel))
+	defer logger.Sync() // flushes buffer, if any
+	l := logger.Sugar()
+
+	l.Info("Starting gotgbot...")
 	token := os.Getenv("TOKEN")
-	log.Println("token:", token)
-	updater, err := gotgbot.NewUpdater(token)
+	l.Info("token: ", token)
+	updater, err := gotgbot.NewUpdater(token, logger)
 	if err != nil {
-		log.Fatal(err)
+		l.Fatalw("failed to start updater", zap.Error(err))
 	}
+
 	// reply to /start messages
 	updater.Dispatcher.AddHandler(handlers.NewCommand("start", start))
 	// get the message HTML
@@ -44,15 +53,15 @@ func main() {
 		updater.StartWebhook(webhook)
 		ok, err := updater.SetWebhook(updater.Bot.Token, webhook)
 		if err != nil {
-			logrus.WithError(err).Fatal("Failed to start bot due to: ", err)
+			l.Fatalw("Failed to start bot", zap.Error(err))
 		}
 		if !ok {
-			logrus.Fatal("Failed to set webhook")
+			l.Fatalw("Failed to set webhook", zap.Error(err))
 		}
 	} else {
 		err := updater.StartPolling()
 		if err != nil {
-			logrus.WithError(err).Fatal("failed to start polling")
+			l.Fatalw("Failed to start polling", zap.Error(err))
 		}
 	}
 
@@ -128,6 +137,6 @@ func doLocalLoadTest(u *gotgbot.Updater) {
 		u.Updates <- &x
 	}
 
-	logrus.Println(time.Since(t), "to send", lim, "updates.")
+	u.Bot.Logger.Info(time.Since(t), "to send", lim, "updates.")
 	time.Sleep(1)
 }

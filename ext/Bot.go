@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 )
@@ -15,7 +15,7 @@ type Bot struct {
 	Id                int
 	FirstName         string
 	UserName          string
-	Logger            *logrus.Logger `json:"-"`
+	Logger            *zap.SugaredLogger `json:"-"`
 	DisableWebPreview bool
 }
 
