@@ -128,7 +128,7 @@ func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sen
 	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
 }
 
-// NewSendablePoll creates a new poll struct to send.
+// NewSendableDice creates a new poll struct to send.
 func (b Bot) NewSendableDice(chatId int) *sendableDice {
 	return &sendableDice{bot: b, ChatId: chatId}
 }
