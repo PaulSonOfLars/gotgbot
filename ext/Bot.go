@@ -19,7 +19,12 @@ type Bot struct {
 	DisableWebPreview bool
 }
 
-// GetMe get the bot info
+type BotCommand struct {
+	Command     string `json:"command"`
+	Description string `json:"description"`
+}
+
+// GetMe gets the bot info
 func (b Bot) GetMe() (*User, error) {
 	v := url.Values{}
 
@@ -33,6 +38,38 @@ func (b Bot) GetMe() (*User, error) {
 
 	var u User
 	return &u, json.Unmarshal(r.Result, &u)
+}
+
+// GetMyCommands gets the list of bot commands assigned to the bot.
+func (b Bot) GetMyCommands() ([]BotCommand, error) {
+	v := url.Values{}
+
+	r, err := Get(b, "getMyCommands", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not getMyCommands")
+	}
+	if !r.Ok {
+		return nil, errors.New("invalid getMyCommands request")
+	}
+
+	var bc []BotCommand
+	return bc, json.Unmarshal(r.Result, &bc)
+}
+
+// SetMyCommands gets the list of bot commands assigned to the bot.
+func (b Bot) SetMyCommands(cmds []BotCommand) (bool, error) {
+	if cmds == nil {
+		cmds = []BotCommand{}
+	}
+
+	v := url.Values{}
+	cmdBytes, err := json.Marshal(cmds)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to marshal commands")
+	}
+	v.Add("commands", string(cmdBytes))
+
+	return b.boolSender("setMyCommands", v)
 }
 
 // GetUserProfilePhotos Retrieves a user's profile pictures

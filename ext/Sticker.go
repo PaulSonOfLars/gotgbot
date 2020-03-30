@@ -15,7 +15,7 @@ type Sticker struct {
 	Width        int          `json:"width"`
 	Height       int          `json:"height"`
 	IsAnimated   bool         `json:"is_animated"`
-	Thumb        PhotoSize    `json:"thumb"`
+	Thumb        *PhotoSize   `json:"thumb"`
 	Emoji        string       `json:"emoji"`
 	SetName      string       `json:"set_name"`
 	MaskPosition MaskPosition `json:"mask_position"`
@@ -23,12 +23,13 @@ type Sticker struct {
 }
 
 type StickerSet struct {
-	bot           Bot       `json:"-"`
-	Name          string    `json:"name"`
-	Title         string    `json:"title"`
-	IsAnimated    bool      `json:"is_animated"`
-	ContainsMasks bool      `json:"contains_masks"`
-	Stickers      []Sticker `json:"stickers"`
+	bot           Bot        `json:"-"`
+	Name          string     `json:"name"`
+	Title         string     `json:"title"`
+	IsAnimated    bool       `json:"is_animated"`
+	ContainsMasks bool       `json:"contains_masks"`
+	Stickers      []Sticker  `json:"stickers"`
+	Thumb         *PhotoSize `json:"thumb"`
 }
 
 type MaskPosition struct {
@@ -112,19 +113,19 @@ func (b Bot) UploadStickerFileReader(userId int, reader io.Reader) (*File, error
 }
 
 func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngStickerid string, emojis string) (bool, error) {
-	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
 	createNew.FileId = pngStickerid
 	return createNew.Send()
 }
 
 func (b Bot) CreateNewStickerSetPath(userId int, name string, title string, path string, emojis string) (bool, error) {
-	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
 	createNew.Path = path
 	return createNew.Send()
 }
 
 func (b Bot) CreateNewStickerSetReader(userId int, name string, title string, reader io.Reader, emojis string) (bool, error) {
-	createNew := b.NewSendableCreateNewSticker(userId, name, title, emojis)
+	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
 	createNew.Reader = reader
 	return createNew.Send()
 }

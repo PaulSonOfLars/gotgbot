@@ -6,19 +6,19 @@ type Game struct {
 	Photo        []PhotoSize     `json:"photo"`
 	Text         string          `json:"text"`
 	TextEntities []MessageEntity `json:"text_entities"`
-	Animation    Animation       `json:"animation"`
+	Animation    *Animation      `json:"animation"`
 }
 
 type Animation struct {
-	FileId       string    `json:"file_id"`
-	FileUniqueId string    `json:"file_unique_id"`
-	Width        int       `json:"width"`
-	Height       int       `json:"height"`
-	Duration     int       `json:"duration"`
-	Thumb        PhotoSize `json:"thumb"`
-	FileName     string    `json:"file_name"`
-	MimeType     string    `json:"mime_type"`
-	FileSize     int       `json:"file_size"`
+	FileId       string     `json:"file_id"`
+	FileUniqueId string     `json:"file_unique_id"`
+	Width        int        `json:"width"`
+	Height       int        `json:"height"`
+	Duration     int        `json:"duration"`
+	Thumb        *PhotoSize `json:"thumb"`
+	FileName     string     `json:"file_name"`
+	MimeType     string     `json:"mime_type"`
+	FileSize     int        `json:"file_size"`
 }
 
 type GameHighScore struct {

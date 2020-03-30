@@ -86,7 +86,8 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	return newFile, json.Unmarshal(r.Result, newFile)
 }
 
-type sendableCreateNewSticker struct {
+// TODO: check whether uploading tgs_stickers works
+type sendableCreateNewStickerSet struct {
 	bot    Bot `json:"-"`
 	UserId int
 	Name   string
@@ -97,11 +98,11 @@ type sendableCreateNewSticker struct {
 	MaskPosition  *MaskPosition
 }
 
-func (b Bot) NewSendableCreateNewSticker(userId int, name string, title string, emojis string) *sendableCreateNewSticker {
-	return &sendableCreateNewSticker{bot: b, UserId: userId, Name: name, Title: title, Emojis: emojis}
+func (b Bot) NewSendableCreateNewStickerSet(userId int, name string, title string, emojis string) *sendableCreateNewStickerSet {
+	return &sendableCreateNewStickerSet{bot: b, UserId: userId, Name: name, Title: title, Emojis: emojis}
 }
 
-func (cns *sendableCreateNewSticker) Send() (bool, error) {
+func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	maskPos, err := json.Marshal(cns.MaskPosition)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to parse mask position")
@@ -155,6 +156,32 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	r, err := asts.bot.sendFile(asts.file, "sticker", "addStickerToSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to addStickerToSet")
+	}
+	if !r.Ok {
+		return false, errors.New(r.Description)
+	}
+
+	var bb bool
+	return bb, json.Unmarshal(r.Result, &bb)
+}
+
+type sendableSetStickerSetThumb struct {
+	bot    Bot `json:"-"`
+	UserId int
+	file
+}
+
+func (b Bot) NewSendableSetStickerSetThumb(userId int) *sendableSetStickerSetThumb {
+	return &sendableSetStickerSetThumb{bot: b, UserId: userId}
+}
+
+func (ssst *sendableSetStickerSetThumb) Send() (bool, error) {
+	v := url.Values{}
+	v.Add("user_id", strconv.Itoa(ssst.UserId))
+
+	r, err := ssst.bot.sendFile(ssst.file, "sticker", "setStickerSetThumb", v)
+	if err != nil {
+		return false, errors.Wrapf(err, "unable to setStickerSetThumb")
 	}
 	if !r.Ok {
 		return false, errors.New(r.Description)

@@ -128,7 +128,12 @@ func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sen
 	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
 }
 
-// NewSendablePoll creates a new callbackQuery struct to send.
+// NewSendablePoll creates a new poll struct to send.
+func (b Bot) NewSendableDice(chatId int, question string, options []string) *sendableDice {
+	return &sendableDice{bot: b, ChatId: chatId}
+}
+
+// NewSendableAnswerCallbackQuery creates a new callbackQuery struct to send.
 func (b Bot) NewSendableAnswerCallbackQuery(queryId string) *sendableCallbackQuery {
 	return &sendableCallbackQuery{bot: b, CallbackQueryId: queryId}
 }
@@ -1000,13 +1005,47 @@ func (msg *sendablePoll) Send() (*Message, error) {
 	return msg.bot.ParseMessage(r.Result)
 }
 
+type sendableDice struct {
+	bot                 Bot
+	ChatId              int
+	DisableNotification bool
+	ReplyToMessageId    int
+	ReplyMarkup         ReplyMarkup
+}
+
+func (d *sendableDice) Send() (*Message, error) {
+	var replyMarkup []byte
+	if d.ReplyMarkup != nil {
+		var err error
+		replyMarkup, err = d.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(d.ChatId))
+	v.Add("disable_notification", strconv.FormatBool(d.DisableNotification))
+	v.Add("reply_to_message_id", strconv.Itoa(d.ReplyToMessageId))
+	v.Add("reply_markup", string(replyMarkup))
+
+	r, err := Get(d.bot, "sendDice", v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to sendDice")
+	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+	return d.bot.ParseMessage(r.Result)
+}
+
 type sendableCallbackQuery struct {
 	bot             Bot
-	CallbackQueryId string `json:"callback_query_id"`
-	Text            string `json:"text"`
-	ShowAlert       bool   `json:"show_alert"`
-	Url             string `json:"url"`
-	CacheTime       int    `json:"cache_time"`
+	CallbackQueryId string
+	Text            string
+	ShowAlert       bool
+	Url             string
+	CacheTime       int
 }
 
 func (cbq *sendableCallbackQuery) Send() (bool, error) {
