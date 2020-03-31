@@ -33,7 +33,7 @@ func (b Bot) GetMe() (*User, error) {
 		return nil, errors.Wrapf(err, "could not getMe")
 	}
 	if !r.Ok {
-		return nil, errors.New("invalid getMe request")
+		return nil, errors.New("invalid getMe request: " + r.Description)
 	}
 
 	var u User
@@ -49,7 +49,7 @@ func (b Bot) GetMyCommands() ([]BotCommand, error) {
 		return nil, errors.Wrapf(err, "could not getMyCommands")
 	}
 	if !r.Ok {
-		return nil, errors.New("invalid getMyCommands request")
+		return nil, errors.New("invalid getMyCommands request: " + r.Description)
 	}
 
 	var bc []BotCommand
@@ -82,7 +82,7 @@ func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
 		return nil, errors.Wrapf(err, "could not get user profile photos")
 	}
 	if !r.Ok {
-		return nil, errors.New("invalid getUserProfilePhotos request")
+		return nil, errors.New("invalid getUserProfilePhotos request: " + r.Description)
 	}
 
 	var userProfilePhotos UserProfilePhotos
@@ -99,7 +99,7 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 		return nil, errors.Wrapf(err, "could not complete getFile request")
 	}
 	if !r.Ok {
-		return nil, errors.New("invalid getFile request")
+		return nil, errors.New("invalid getFile request: " + r.Description)
 	}
 
 	var f File

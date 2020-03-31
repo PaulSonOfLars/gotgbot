@@ -139,7 +139,7 @@ type PollAnswer struct {
 
 type Dice struct {
 	Bot  Bot `json:"-"`
-	Dice int `json:"value"`
+	Value int `json:"value"`
 }
 
 type Message struct {

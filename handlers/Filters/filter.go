@@ -86,6 +86,14 @@ func Group(message *ext.Message) bool {
 	return message.Chat.Type == "group" || message.Chat.Type == "supergroup"
 }
 
+func Dice(message *ext.Message) bool {
+	return message.Dice != nil
+}
+
+func DiceValue(message *ext.Message, val int) bool {
+	return message.Dice != nil && message.Dice.Value == val
+}
+
 func Username(name string) func(message *ext.Message) bool {
 	return func(m *ext.Message) bool {
 		return m.From.Username == name
