@@ -138,7 +138,7 @@ type PollAnswer struct {
 }
 
 type Dice struct {
-	Bot  Bot `json:"-"`
+	Bot   Bot `json:"-"`
 	Value int `json:"value"`
 }
 
@@ -551,18 +551,6 @@ func getOrigMsgMDV2(utf16Data []uint16, ents []MessageEntity) string {
 
 	bd.WriteString(string(utf16.Decode(utf16Data[prev:])))
 	return bd.String()
-}
-
-var allMdV2 = []string{"_", "*", "`", "~", "[", "]", "(", ")", "\\"} // __ is not necessary because of _
-var repl = strings.NewReplacer(func() (out []string) {
-	for _, x := range allMdV2 {
-		out = append(out, x, "\\"+x)
-	}
-	return out
-}()...)
-
-func escapeMarkdownV2String(s string) string {
-	return repl.Replace(s)
 }
 
 func fillNestedHTML(data []uint16, ent MessageEntity, start int, entities []MessageEntity) (string, int) {

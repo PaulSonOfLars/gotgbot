@@ -76,8 +76,22 @@ func get(b ext.Bot, u *gotgbot.Update) error {
 		return nil
 	}
 
-	u.EffectiveMessage.ReplyText(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
-	u.EffectiveMessage.ReplyHTML(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
+	_, err := u.EffectiveMessage.ReplyText(u.EffectiveMessage.ReplyToMessage.OriginalTextV2())
+	if err != nil {
+		b.Logger.Warnw("Error sending text", zap.Error(err))
+	}
+
+	_, err = u.EffectiveMessage.ReplyHTML(u.EffectiveMessage.ReplyToMessage.OriginalHTML())
+	if err != nil {
+		b.Logger.Warnw("Error sending HTML", zap.Error(err))
+	}
+
+	m := b.NewSendableMessage(u.EffectiveChat.Id, u.EffectiveMessage.ReplyToMessage.OriginalTextV2())
+	m.ParseMode = parsemode.MarkdownV2
+	_, err = m.Send()
+	if err != nil {
+		b.Logger.Warnw("Error sending V2", zap.Error(err))
+	}
 	return nil
 }
 
