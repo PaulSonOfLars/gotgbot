@@ -42,7 +42,8 @@ func (d Dispatcher) Start() {
 		select {
 		case limiter <- struct{}{}:
 		default:
-			d.Bot.Logger.Warnf("update dispatcher has reached limit of %d", d.MaxRoutines)
+			// There is value in having this as a warn, but its also causing logspam... so let's not.
+			d.Bot.Logger.Debugf("update dispatcher has reached limit of %d", d.MaxRoutines)
 			limiter <- struct{}{} // make sure to send anyway
 		}
 		go func(upd *RawUpdate) {

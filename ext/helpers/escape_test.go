@@ -6,14 +6,6 @@ import (
 
 var sampleText = "Hey this is _markdown_ text with _items _ contained_ `everywhere`, [how](does) that ~look~ to *you*?"
 
-func BenchmarkEscapeRune(b *testing.B) {
-	var v string
-	for i := 0; i < b.N; i++ {
-		v = EscapeRune(sampleText, '_')
-	}
-	_ = v
-}
-
 func BenchmarkEscapeMarkdown(b *testing.B) {
 	var v string
 	for i := 0; i < b.N; i++ {
