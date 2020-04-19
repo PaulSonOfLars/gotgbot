@@ -86,6 +86,10 @@ func Group(message *ext.Message) bool {
 	return message.Chat.Type == "group" || message.Chat.Type == "supergroup"
 }
 
+func SuperGroup(message *ext.Message) bool {
+	return message.Chat.Type == "group"
+}
+
 func Pin(message *ext.Message) bool {
 	return message.PinnedMessage != nil
 }
