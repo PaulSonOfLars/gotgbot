@@ -959,6 +959,10 @@ type sendablePoll struct {
 	Type                  string
 	AllowsMultipleAnswers bool
 	CorrectOptionId       int
+	Explanation           string
+	ExplanationParseMode  string
+	OpenPeriod            int
+	CloseDate             int
 	IsClosed              bool
 	DisableNotification   bool
 	ReplyToMessageId      int
@@ -990,12 +994,16 @@ func (msg *sendablePoll) Send() (*Message, error) {
 	v.Add("type", msg.Type)
 	v.Add("allows_multiple_answers", strconv.FormatBool(msg.AllowsMultipleAnswers))
 	v.Add("correct_option_id", strconv.Itoa(msg.CorrectOptionId))
+	v.Add("explanation", msg.Explanation)
+	v.Add("explanation_parse_mode", msg.ExplanationParseMode)
+	v.Add("open_period", strconv.Itoa(msg.OpenPeriod))
+	v.Add("close_date", strconv.Itoa(msg.CloseDate))
 	v.Add("is_closed", strconv.FormatBool(msg.IsClosed))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendChatPoll", v)
+	r, err := Get(msg.bot, "sendPoll", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendChatPoll")
 	}
@@ -1008,6 +1016,7 @@ func (msg *sendablePoll) Send() (*Message, error) {
 type sendableDice struct {
 	bot                 Bot
 	ChatId              int
+	Emoji               string
 	DisableNotification bool
 	ReplyToMessageId    int
 	ReplyMarkup         ReplyMarkup
@@ -1025,6 +1034,7 @@ func (d *sendableDice) Send() (*Message, error) {
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(d.ChatId))
+	v.Add("emoji", d.Emoji)
 	v.Add("disable_notification", strconv.FormatBool(d.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(d.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
