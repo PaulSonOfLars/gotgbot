@@ -88,10 +88,11 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 
 // TODO: check whether uploading tgs_stickers works
 type sendableCreateNewStickerSet struct {
-	bot    Bot `json:"-"`
-	UserId int
-	Name   string
-	Title  string
+	bot         Bot    `json:"-"`
+	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
+	UserId      int
+	Name        string
+	Title       string
 	file
 	Emojis        string
 	ContainsMasks bool
@@ -103,9 +104,17 @@ func (b Bot) NewSendableCreateNewStickerSet(userId int, name string, title strin
 }
 
 func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
-	maskPos, err := json.Marshal(cns.MaskPosition)
-	if err != nil {
-		return false, errors.Wrapf(err, "failed to parse mask position")
+	var maskPos []byte
+	if cns.MaskPosition != nil {
+		var err error
+		maskPos, err = json.Marshal(cns.MaskPosition)
+		if err != nil {
+			return false, errors.Wrapf(err, "failed to parse mask position")
+		}
+	}
+
+	if cns.StickerType == "" {
+		cns.StickerType = "png_sticker"
 	}
 
 	v := url.Values{}
@@ -116,7 +125,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
 	v.Add("mask_position", string(maskPos))
 
-	r, err := cns.bot.sendFile(cns.file, "sticker", "createNewStickerSet", v)
+	r, err := cns.bot.sendFile(cns.file, cns.StickerType, "createNewStickerSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to createNewStickerSet")
 	}
@@ -129,9 +138,10 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 }
 
 type sendableAddStickerToSet struct {
-	bot    Bot `json:"-"`
-	UserId int
-	Name   string
+	bot         Bot    `json:"-"`
+	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
+	UserId      int
+	Name        string
 	file
 	Emojis       string
 	MaskPosition *MaskPosition
@@ -142,9 +152,17 @@ func (b Bot) NewSendableAddStickerToSet(userId int, name string, emojis string) 
 }
 
 func (asts *sendableAddStickerToSet) Send() (bool, error) {
-	maskPos, err := json.Marshal(asts.MaskPosition)
-	if err != nil {
-		return false, errors.Wrapf(err, "failed to parse mask position")
+	var maskPos []byte
+	if asts.MaskPosition != nil {
+		var err error
+		maskPos, err = json.Marshal(asts.MaskPosition)
+		if err != nil {
+			return false, errors.Wrapf(err, "failed to parse mask position")
+		}
+	}
+
+	if asts.StickerType == "" {
+		asts.StickerType = "png_sticker"
 	}
 
 	v := url.Values{}
@@ -153,7 +171,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	v.Add("emojis", asts.Emojis)
 	v.Add("mask_position", string(maskPos))
 
-	r, err := asts.bot.sendFile(asts.file, "sticker", "addStickerToSet", v)
+	r, err := asts.bot.sendFile(asts.file, asts.StickerType, "addStickerToSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to addStickerToSet")
 	}
