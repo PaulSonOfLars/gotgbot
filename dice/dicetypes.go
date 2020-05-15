@@ -1,6 +1,7 @@
 package dice
 
 const (
-	Dice = "🎲"
-	Dart = "🎯"
+	Dice       = "🎲"
+	Dart       = "🎯"
+	Basketball = "🏀"
 )

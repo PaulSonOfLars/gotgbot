@@ -104,6 +104,10 @@ func Dart(message *ext.Message) bool {
 	return message.Dice != nil && message.Dice.Emoji == dice.Dart
 }
 
+func Basketball(message *ext.Message) bool {
+	return message.Dice != nil && message.Dice.Emoji == dice.Basketball
+}
+
 func DiceValue(message *ext.Message, val int) bool {
 	return message.Dice != nil && message.Dice.Value == val
 }
