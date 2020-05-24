@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -188,12 +189,9 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	}
 
 	v := url.Values{}
-	if webhook.URL[len(webhook.URL)-1:] != "/" {
-		v.Add("url", webhook.URL+"/"+path)
-	} else {
-		v.Add("url", webhook.URL+path)
-	}
 	
+	webhookURL := strings.TrimSuffix(webhook.URL, "/") + path
+	v.Add("url", webhookURL)
 	// v.Add("certificate", ) // todo: add certificate support
 	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
 	v.Add("allowed_updates", string(allowed))
