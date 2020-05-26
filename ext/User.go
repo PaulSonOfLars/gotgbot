@@ -19,6 +19,11 @@ type UserProfilePhotos struct {
 }
 
 // GetProfilePhotos Retrieves a user's profile pictures
-func (user User) GetProfilePhotos(offset int, limit int) (*UserProfilePhotos, error) {
-	return user.Bot.GetUserProfilePhotos(user.Id)
+func (user User) GetProfilePhotos() (*UserProfilePhotos, error) {
+	return user.Bot.GetUserProfilePhotos(user.Id, 0, 0)
+}
+
+// GetProfilePhotosOffset Retrieves a user's profile pictures
+func (user User) GetProfilePhotosOffset(offset int, limit int) (*UserProfilePhotos, error) {
+	return user.Bot.GetUserProfilePhotos(user.Id, offset, limit)
 }

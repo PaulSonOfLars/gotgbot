@@ -900,7 +900,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 		return false, errors.New(r.Description)
 	}
 	var newMsg bool
-	return newMsg, json.Unmarshal(r.Result, newMsg)
+	return newMsg, json.Unmarshal(r.Result, &newMsg)
 }
 
 type sendableAnimation struct {

@@ -73,9 +73,17 @@ func (b Bot) SetMyCommands(cmds []BotCommand) (bool, error) {
 }
 
 // GetUserProfilePhotos Retrieves a user's profile pictures
-func (b Bot) GetUserProfilePhotos(userId int) (*UserProfilePhotos, error) {
+func (b Bot) GetUserProfilePhotos(userId int, offset int, limit int) (*UserProfilePhotos, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(userId))
+
+	if offset != 0 {
+		v.Add("offset", strconv.Itoa(offset))
+	}
+	
+	if limit != 0 {
+		v.Add("limit", strconv.Itoa(limit))
+	}
 
 	r, err := Get(b, "getUserProfilePhotos", v)
 	if err != nil {
