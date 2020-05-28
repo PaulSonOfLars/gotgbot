@@ -96,14 +96,42 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
 	if !r.Ok {
+		bot.Logger.Debugw("error from GET",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zapcore.Field{
+				Key:     "error_code",
+				Type:    zapcore.Int64Type,
+				Integer: int64(r.ErrorCode),
+			},
+			zapcore.Field{
+				Key:    "description",
+				Type:   zapcore.StringType,
+				String: r.Description,
+			},
+		)
 		return nil, &TelegramError{
 			Code:        r.ErrorCode,
 			Description: r.Description,
 		}
 	}
 
-	bot.Logger.Debugf("received result: %+v", r)
-	bot.Logger.Debugf("result response: %v", string(r.Result))
+	bot.Logger.Debugw("obtained GET result",
+		zapcore.Field{
+			Key:    "method",
+			Type:   zapcore.StringType,
+			String: method,
+		},
+		zapcore.Field{
+			Key:    "result",
+			Type:   zapcore.StringType,
+			String: string(r.Result),
+		},
+	)
+
 	return r.Result, nil
 }
 
@@ -162,13 +190,41 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 		return nil, errors.Wrapf(err, "could not decode in POST %v call", method)
 	}
 	if !r.Ok {
+		bot.Logger.Debugw("error from POST",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zapcore.Field{
+				Key:     "error_code",
+				Type:    zapcore.Int64Type,
+				Integer: int64(r.ErrorCode),
+			},
+			zapcore.Field{
+				Key:    "description",
+				Type:   zapcore.StringType,
+				String: r.Description,
+			},
+		)
 		return nil, &TelegramError{
 			Code:        r.ErrorCode,
 			Description: r.Description,
 		}
 	}
 
-	bot.Logger.Debugf("received result: %+v", r)
-	bot.Logger.Debugf("result response: %v", string(r.Result))
+	bot.Logger.Debugw("obtained POST result",
+		zapcore.Field{
+			Key:    "method",
+			Type:   zapcore.StringType,
+			String: method,
+		},
+		zapcore.Field{
+			Key:    "result",
+			Type:   zapcore.StringType,
+			String: string(r.Result),
+		},
+	)
+
 	return r.Result, nil
 }
