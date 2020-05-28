@@ -190,7 +190,12 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 
 	v := url.Values{}
 	
-	webhookURL := strings.TrimSuffix(webhook.URL, "/") + path
+	/*
+	** if URL has "/" symbol, we doesn't want to add second "/"
+	** function TrimSuffix remove "/", if it exists
+	** after this we can add "/" symbol
+	*/
+	webhookURL := strings.TrimSuffix(webhook.URL, "/") + "/" + path
 	v.Add("url", webhookURL)
 	// v.Add("certificate", ) // todo: add certificate support
 	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
