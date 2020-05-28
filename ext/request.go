@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const ApiUrl = "https://api.telegram.org/bot"
@@ -26,7 +27,7 @@ var DefaultTgBotGetter = BotGetter{
 	ApiUrl: ApiUrl,
 }
 
-type Response struct {
+type response struct {
 	Ok          bool
 	Result      json.RawMessage
 	ErrorCode   int `json:"error_code"`
@@ -71,15 +72,27 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 	bot.Logger.Debugf("executing GET: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
-		bot.Logger.Debugw("failed to execute GET request", "method", method, zap.Error(err))
+		bot.Logger.Debugw("failed to execute GET request",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zap.Error(err))
 		return nil, errors.Wrapf(err, "unable to execute GET request to %v", method)
 	}
 	defer resp.Body.Close()
 	bot.Logger.Debugf("successful GET request: %+v", resp)
 
-	var r Response
+	var r response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.Debugw("failed to deserialize GET response body", "method", method, zap.Error(err))
+		bot.Logger.Debugw("failed to deserialize GET response body",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zap.Error(err))
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
 	if !r.Ok {
@@ -116,7 +129,13 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 
 	req, err := http.NewRequest("POST", tbg.ApiUrl+bot.Token+"/"+method, &b)
 	if err != nil {
-		bot.Logger.Debugw("failed to execute POST request", "method", method, zap.Error(err))
+		bot.Logger.Debugw("failed to execute POST request",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zap.Error(err))
 		return nil, errors.Wrapf(err, "unable to execute POST request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
@@ -131,11 +150,24 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 	defer resp.Body.Close()
 	bot.Logger.Debugf("successful POST request: %+v", resp)
 
-	var r Response
+	var r response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.Debugw("failed to deserialize POST response body", "method", method, zap.Error(err))
+		bot.Logger.Debugw("failed to deserialize POST response body",
+			zapcore.Field{
+				Key:    "method",
+				Type:   zapcore.StringType,
+				String: method,
+			},
+			zap.Error(err))
 		return nil, errors.Wrapf(err, "could not decode in POST %v call", method)
 	}
+	if !r.Ok {
+		return nil, &TelegramError{
+			Code:        r.ErrorCode,
+			Description: r.Description,
+		}
+	}
+
 	bot.Logger.Debugf("received result: %+v", r)
 	bot.Logger.Debugf("result response: %v", string(r.Result))
 	return r.Result, nil
