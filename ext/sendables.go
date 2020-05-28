@@ -296,9 +296,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendMessage")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -336,9 +334,7 @@ func (msg *sendableEditMessageText) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageText")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -374,9 +370,7 @@ func (msg *sendableEditMessageCaption) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -408,9 +402,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -447,9 +439,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendPhoto")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -492,9 +482,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -532,9 +520,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -579,9 +565,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideo")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -620,9 +604,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVoice")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -659,9 +641,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVideoNote")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -699,9 +679,7 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageMedia")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -748,9 +726,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendMediaGroup")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -788,9 +764,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendLocation")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -835,9 +809,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVenue")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -875,9 +847,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendContact")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -896,9 +866,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to sendChatAction")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
+
 	var newMsg bool
 	return newMsg, json.Unmarshal(r.Result, &newMsg)
 }
@@ -944,9 +912,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendAnimation")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -1007,9 +973,7 @@ func (msg *sendablePoll) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendChatPoll")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return msg.bot.ParseMessage(r.Result)
 }
 
@@ -1043,9 +1007,7 @@ func (d *sendableDice) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDice")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return d.bot.ParseMessage(r.Result)
 }
 

@@ -83,10 +83,6 @@ func (u Updater) startPolling(clean bool) {
 		r, err := u.UpdateGetter.Get(*u.Bot, "getUpdates", v)
 		if err != nil {
 			u.Bot.Logger.Errorw("unable to getUpdates", zap.Error(err))
-			continue
-
-		} else if !r.Ok {
-			u.Bot.Logger.Errorf("getUpdates error: %v", r.Description)
 			u.Bot.Logger.Error("Sleeping for 1 second...")
 			time.Sleep(time.Second)
 			continue
@@ -198,9 +194,6 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	r, err := ext.Get(*u.Bot, "setWebhook", v)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to set webhook")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
 	}
 
 	var bb bool

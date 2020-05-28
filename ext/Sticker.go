@@ -86,10 +86,6 @@ func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to getStickerSet")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
-
 	var ss StickerSet
 	return &ss, json.Unmarshal(r.Result, &ss)
 }
@@ -157,9 +153,6 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setStickerPositionInSet")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
 
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
@@ -172,9 +165,6 @@ func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	r, err := Get(b, "deleteStickerFromSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to deleteStickerFromSet")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
 	}
 
 	var bb bool

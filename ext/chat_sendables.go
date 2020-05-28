@@ -34,9 +34,6 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 		return false, errors.Wrapf(err, "could not kickChatMember")
 	}
 
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
 }
@@ -85,9 +82,6 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 	r, err := Get(rcm.bot, "restrictChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not restrictChatMember")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
 	}
 
 	var bb bool
@@ -140,9 +134,6 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "could not promoteChatMember")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
 
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
@@ -174,9 +165,6 @@ func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
 	r, err := Get(scact.bot, "setChatAdministratorCustomTitle", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not setChatAdministratorCustomTitle")
-	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
 	}
 
 	var bb bool
@@ -213,9 +201,6 @@ func (scp *sendableSetChatPermissions) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "could not setChatPermissions")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
 
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
@@ -247,9 +232,6 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to pinChatMessage")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
 
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
@@ -270,13 +252,10 @@ func (scp *sendableSetChatPhoto) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(scp.ChatId))
 
 	r, err := scp.bot.sendFile(scp.file, "photo", "setChatPhoto", v)
-
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setChatPhoto")
 	}
-	if !r.Ok {
-		return false, errors.New(r.Description)
-	}
+
 	var newMsg bool
 	return newMsg, json.Unmarshal(r.Result, &newMsg)
 }

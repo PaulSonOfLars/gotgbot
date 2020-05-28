@@ -91,9 +91,6 @@ func (i *sendableInvoice) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.New(r.Description)
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
 
 	return i.bot.ParseMessage(r.Result)
 }
@@ -125,9 +122,6 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 	r, err := Get(asq.bot, "answerShippingQuery", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to answerShippingQuery")
-	}
-	if !r.Ok {
-		return false, errors.New("invalid answerShippingQuery: " + r.Description)
 	}
 
 	var bb bool
@@ -162,10 +156,6 @@ func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to answerPreCheckoutQuery")
 	}
-	if !r.Ok {
-		return false, errors.New("invalid answerPreCheckoutQuery: " + r.Description)
-	}
-
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
 }

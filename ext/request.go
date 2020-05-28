@@ -72,6 +72,10 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 		bot.Logger.Debugw("failed to deserialize GET response body", "method", method, zap.Error(err))
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
+	if !r.Ok {
+		return nil, errors.New(r.Description)
+	}
+
 	bot.Logger.Debugf("received result: %+v", r)
 	bot.Logger.Debugf("result response: %v", string(r.Result))
 	return &r, nil

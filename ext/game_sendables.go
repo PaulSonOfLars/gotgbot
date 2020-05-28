@@ -30,9 +30,6 @@ func (g *sendableGame) Send() (*Message, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to execute sendGame request")
 	}
-	if !r.Ok {
-		return nil, errors.Wrapf(err, "invalid sendGame request")
-	}
 
 	return g.bot.ParseMessage(r.Result)
 }
@@ -70,10 +67,6 @@ func (sgs *sendableSetGameScore) Send() (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to execute setGameScore request")
 	}
-	if !r.Ok {
-		return false, errors.Wrapf(err, "invalid setGameScore request")
-	}
-
 	var bb bool
 	return bb, json.Unmarshal(r.Result, &bb)
 }
@@ -105,10 +98,6 @@ func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to execute getGameHighScores request")
 	}
-	if !r.Ok {
-		return nil, errors.Wrapf(err, "invalid getGameHighScores request")
-	}
-
 	var ghs []GameHighScore
 	return ghs, json.Unmarshal(r.Result, &ghs)
 }

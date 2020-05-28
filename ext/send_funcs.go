@@ -71,9 +71,7 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to forwardMessage")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	return b.ParseMessage(r.Result)
 }
 
@@ -373,9 +371,7 @@ func (b Bot) stopPoll(chatId int, messageId int, replyMarkup *InlineKeyboardMark
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to forwardMessage")
 	}
-	if !r.Ok {
-		return nil, errors.New(r.Description)
-	}
+
 	poll := &Poll{Bot: b}
 	return poll, json.Unmarshal(r.Result, poll)
 }
