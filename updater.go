@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/PaulSonOfLars/gotgbot/ext"
 )
@@ -87,17 +88,27 @@ func (u Updater) startPolling(clean bool) {
 			time.Sleep(time.Second)
 			continue
 
-		} else if r.Result != nil {
+		} else if r != nil {
 			var rawUpdates []json.RawMessage
-			if err := json.Unmarshal(r.Result, &rawUpdates); err != nil {
-				u.Bot.Logger.Errorw("failed to unmarshal update while polling", "result", r.Result, zap.Error(err))
+			if err := json.Unmarshal(r, &rawUpdates); err != nil {
+				u.Bot.Logger.Errorw("failed to unmarshal update while polling",
+					zap.Field{
+						Key:    "result",
+						Type:   zapcore.StringType,
+						String: string(r)},
+					zap.Error(err))
 				continue
 			}
 			if len(rawUpdates) > 0 {
 				// parse last one here
 				lastUpd, err := initUpdate(RawUpdate(rawUpdates[len(rawUpdates)-1]), *u.Bot)
 				if err != nil {
-					u.Bot.Logger.Errorw("failed to init update while polling", "result", r.Result, zap.Error(err))
+					u.Bot.Logger.Errorw("failed to init update while polling",
+						zap.Field{
+							Key:    "result",
+							Type:   zapcore.StringType,
+							String: string(r)},
+						zap.Error(err))
 					continue
 				}
 				offset = lastUpd.UpdateId + 1
@@ -170,7 +181,7 @@ func (u Updater) RemoveWebhook() (bool, error) {
 		return false, errors.Wrapf(err, "failed to remove webhook")
 	}
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 // SetWebhook Set the webhook url for telegram to contact with updates
@@ -197,7 +208,7 @@ func (u Updater) SetWebhook(path string, webhook Webhook) (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type WebhookInfo struct {
@@ -218,6 +229,6 @@ func (u Updater) GetWebhookInfo() (*WebhookInfo, error) {
 	}
 
 	var wh WebhookInfo
-	return &wh, json.Unmarshal(r.Result, &wh)
+	return &wh, json.Unmarshal(r, &wh)
 
 }

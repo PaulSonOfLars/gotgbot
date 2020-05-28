@@ -49,19 +49,19 @@ func (t *TelegramError) Error() string {
 }
 
 type Getter interface {
-	Get(bot Bot, method string, params url.Values) (*Response, error)
-	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error)
+	Get(bot Bot, method string, params url.Values) (json.RawMessage, error)
+	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error)
 }
 
-func Get(bot Bot, method string, params url.Values) (*Response, error) {
+func Get(bot Bot, method string, params url.Values) (json.RawMessage, error) {
 	return DefaultTgBotGetter.Get(bot, method, params)
 }
 
-func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error) {
 	return DefaultTgBotGetter.Post(bot, fileType, method, params, file, filename)
 }
 
-func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (*Response, error) {
+func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMessage, error) {
 	req, err := http.NewRequest("GET", tbg.ApiUrl+bot.Token+"/"+method, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to build GET request to %v", method)
@@ -91,10 +91,10 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (*Response,
 
 	bot.Logger.Debugf("received result: %+v", r)
 	bot.Logger.Debugf("result response: %v", string(r.Result))
-	return &r, nil
+	return r.Result, nil
 }
 
-func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error) {
 	if filename == "" {
 		filename = "unnamed_file"
 	}
@@ -138,5 +138,5 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 	}
 	bot.Logger.Debugf("received result: %+v", r)
 	bot.Logger.Debugf("result response: %v", string(r.Result))
-	return &r, nil
+	return r.Result, nil
 }

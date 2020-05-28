@@ -31,7 +31,7 @@ func (g *sendableGame) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to execute sendGame request")
 	}
 
-	return g.bot.ParseMessage(r.Result)
+	return g.bot.ParseMessage(r)
 }
 
 type sendableSetGameScore struct {
@@ -68,7 +68,7 @@ func (sgs *sendableSetGameScore) Send() (bool, error) {
 		return false, errors.Wrapf(err, "unable to execute setGameScore request")
 	}
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableGetGameHighScores struct {
@@ -99,5 +99,5 @@ func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error) {
 		return nil, errors.Wrapf(err, "unable to execute getGameHighScores request")
 	}
 	var ghs []GameHighScore
-	return ghs, json.Unmarshal(r.Result, &ghs)
+	return ghs, json.Unmarshal(r, &ghs)
 }

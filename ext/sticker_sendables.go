@@ -54,7 +54,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendSticker")
 	}
 
-	return s.bot.ParseMessage(r.Result)
+	return s.bot.ParseMessage(r)
 }
 
 type sendableUploadStickerFile struct {
@@ -78,7 +78,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 
 	newFile := &File{}
 	newFile.bot = usf.bot
-	return newFile, json.Unmarshal(r.Result, newFile)
+	return newFile, json.Unmarshal(r, newFile)
 }
 
 // TODO: check whether uploading tgs_stickers works
@@ -126,7 +126,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableAddStickerToSet struct {
@@ -169,7 +169,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableSetStickerSetThumb struct {
@@ -192,5 +192,5 @@ func (ssst *sendableSetStickerSetThumb) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }

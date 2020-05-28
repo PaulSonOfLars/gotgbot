@@ -34,7 +34,7 @@ func (b Bot) GetMe() (*User, error) {
 	}
 
 	var u User
-	return &u, json.Unmarshal(r.Result, &u)
+	return &u, json.Unmarshal(r, &u)
 }
 
 // GetMyCommands gets the list of bot commands assigned to the bot.
@@ -47,7 +47,7 @@ func (b Bot) GetMyCommands() ([]BotCommand, error) {
 	}
 
 	var bc []BotCommand
-	return bc, json.Unmarshal(r.Result, &bc)
+	return bc, json.Unmarshal(r, &bc)
 }
 
 // SetMyCommands gets the list of bot commands assigned to the bot.
@@ -85,7 +85,7 @@ func (b Bot) GetUserProfilePhotos(userId int, offset int, limit int) (*UserProfi
 	}
 
 	var userProfilePhotos UserProfilePhotos
-	return &userProfilePhotos, json.Unmarshal(r.Result, &userProfilePhotos)
+	return &userProfilePhotos, json.Unmarshal(r, &userProfilePhotos)
 }
 
 // GetFile Retrieve a file from the bot api
@@ -99,5 +99,5 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 	}
 
 	var f File
-	return &f, json.Unmarshal(r.Result, &f)
+	return &f, json.Unmarshal(r, &f)
 }

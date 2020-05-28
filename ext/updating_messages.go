@@ -101,5 +101,5 @@ func (b Bot) boolSender(meth string, v url.Values) (bb bool, err error) {
 		return false, errors.Wrapf(err, "unable to complete request for %s", meth)
 	}
 
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }

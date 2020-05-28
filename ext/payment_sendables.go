@@ -89,10 +89,10 @@ func (i *sendableInvoice) Send() (*Message, error) {
 
 	r, err := Get(i.bot, "sendInvoice", v)
 	if err != nil {
-		return nil, errors.New(r.Description)
+		return nil, err
 	}
 
-	return i.bot.ParseMessage(r.Result)
+	return i.bot.ParseMessage(r)
 }
 
 type sendableAnswerShippingQuery struct {
@@ -125,7 +125,7 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableAnswerPreCheckoutQuery struct {
@@ -157,5 +157,5 @@ func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
 		return false, errors.Wrapf(err, "unable to answerPreCheckoutQuery")
 	}
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }

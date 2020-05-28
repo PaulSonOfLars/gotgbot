@@ -297,7 +297,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendMessage")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableEditMessageText struct {
@@ -335,7 +335,7 @@ func (msg *sendableEditMessageText) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to editMessageText")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableEditMessageCaption struct {
@@ -371,7 +371,7 @@ func (msg *sendableEditMessageCaption) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableEditMessageReplyMarkup struct {
@@ -403,7 +403,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendablePhoto struct {
@@ -440,7 +440,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendPhoto")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableAudio struct {
@@ -483,7 +483,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendAudio")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableDocument struct {
@@ -521,7 +521,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendDocument")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableVideo struct {
@@ -566,7 +566,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendVideo")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableVoice struct {
@@ -605,7 +605,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendVoice")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableVideoNote struct {
@@ -642,7 +642,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendVideoNote")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableEditMessageMedia struct {
@@ -680,7 +680,7 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to editMessageMedia")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableMediaGroup struct {
@@ -727,7 +727,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendMediaGroup")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableLocation struct {
@@ -765,7 +765,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendLocation")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 // TODO: edit live location
@@ -810,7 +810,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendVenue")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableContact struct {
@@ -848,7 +848,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendContact")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableChatAction struct {
@@ -867,8 +867,8 @@ func (msg *sendableChatAction) Send() (bool, error) {
 		return false, errors.Wrapf(err, "unable to sendChatAction")
 	}
 
-	var newMsg bool
-	return newMsg, json.Unmarshal(r.Result, &newMsg)
+	var bb bool
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableAnimation struct {
@@ -913,7 +913,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendAnimation")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendablePoll struct {
@@ -974,7 +974,7 @@ func (msg *sendablePoll) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendChatPoll")
 	}
 
-	return msg.bot.ParseMessage(r.Result)
+	return msg.bot.ParseMessage(r)
 }
 
 type sendableDice struct {
@@ -1008,7 +1008,7 @@ func (d *sendableDice) Send() (*Message, error) {
 		return nil, errors.Wrapf(err, "unable to sendDice")
 	}
 
-	return d.bot.ParseMessage(r.Result)
+	return d.bot.ParseMessage(r)
 }
 
 type sendableCallbackQuery struct {
@@ -1031,7 +1031,7 @@ func (cbq *sendableCallbackQuery) Send() (bool, error) {
 	return cbq.bot.boolSender("answerCallbackQuery", v)
 }
 
-func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (*Response, error) {
+func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (json.RawMessage, error) {
 	if msg.FileId != "" {
 		params.Add(fileType, msg.FileId)
 		return Get(b, endpoint, params)

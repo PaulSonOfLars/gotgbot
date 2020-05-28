@@ -35,7 +35,7 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableRestrictChatMember struct {
@@ -85,7 +85,7 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendablePromoteChatMember struct {
@@ -136,7 +136,7 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableSetChatAdministratorCustomTitle struct {
@@ -168,7 +168,7 @@ func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableSetChatPermissions struct {
@@ -203,7 +203,7 @@ func (scp *sendableSetChatPermissions) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendablePinChatMessage struct {
@@ -234,7 +234,7 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 	}
 
 	var bb bool
-	return bb, json.Unmarshal(r.Result, &bb)
+	return bb, json.Unmarshal(r, &bb)
 }
 
 type sendableSetChatPhoto struct {
@@ -256,6 +256,6 @@ func (scp *sendableSetChatPhoto) Send() (bool, error) {
 		return false, errors.Wrapf(err, "unable to setChatPhoto")
 	}
 
-	var newMsg bool
-	return newMsg, json.Unmarshal(r.Result, &newMsg)
+	var bb bool
+	return bb, json.Unmarshal(r, &bb)
 }
