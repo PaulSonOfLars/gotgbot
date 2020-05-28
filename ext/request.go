@@ -3,6 +3,7 @@ package ext
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 
 const ApiUrl = "https://api.telegram.org/bot"
 
-var DefaultTgBotGetter = TgBotGetter{
+var DefaultTgBotGetter = BotGetter{
 	Client: &http.Client{
 		Transport:     nil,
 		CheckRedirect: nil,
@@ -33,12 +34,21 @@ type Response struct {
 	Parameters  json.RawMessage
 }
 
-type TgBotGetter struct {
+type BotGetter struct {
 	Client *http.Client
 	ApiUrl string
 }
 
-type TgBotGetterInterface interface {
+type TelegramError struct {
+	Code        int
+	Description string
+}
+
+func (t *TelegramError) Error() string {
+	return fmt.Sprintf("%d: %s", t.Code, t.Description)
+}
+
+type Getter interface {
 	Get(bot Bot, method string, params url.Values) (*Response, error)
 	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error)
 }
@@ -51,7 +61,7 @@ func Post(bot Bot, fileType string, method string, params url.Values, file io.Re
 	return DefaultTgBotGetter.Post(bot, fileType, method, params, file, filename)
 }
 
-func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Response, error) {
+func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (*Response, error) {
 	req, err := http.NewRequest("GET", tbg.ApiUrl+bot.Token+"/"+method, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to build GET request to %v", method)
@@ -73,7 +83,10 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
 	if !r.Ok {
-		return nil, errors.New(r.Description)
+		return nil, &TelegramError{
+			Code:        r.ErrorCode,
+			Description: r.Description,
+		}
 	}
 
 	bot.Logger.Debugf("received result: %+v", r)
@@ -81,7 +94,7 @@ func (tbg *TgBotGetter) Get(bot Bot, method string, params url.Values) (*Respons
 	return &r, nil
 }
 
-func (tbg *TgBotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
+func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (*Response, error) {
 	if filename == "" {
 		filename = "unnamed_file"
 	}
