@@ -3,7 +3,6 @@ package ext
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -46,7 +45,7 @@ type TelegramError struct {
 }
 
 func (t *TelegramError) Error() string {
-	return fmt.Sprintf("%d: %s", t.Code, t.Description)
+	return t.Description
 }
 
 type Getter interface {
