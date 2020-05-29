@@ -6,6 +6,7 @@ import (
 	"html"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf16"
 )
 
@@ -507,13 +508,18 @@ func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 	for _, ent := range getUpperEntities(ents) {
 		newPrev := ent.Offset + ent.Length
 		prevText := string(utf16.Decode(utf16Data[prev:ent.Offset]))
+
+		text := utf16.Decode(utf16Data[ent.Offset:newPrev])
+		pre, cleanCntnt, post := splitEdgeWhitespace(string(text))
+		cleanCntntRune := []rune(cleanCntnt)
+
 		switch ent.Type {
 		case "bold", "italic", "code":
-			out.WriteString(prevText + mdMap[ent.Type] + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune(mdMap[ent.Type])) + mdMap[ent.Type])
+			out.WriteString(prevText + pre + mdMap[ent.Type] + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
 		case "text_mention":
-			out.WriteString(prevText + "[" + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune("[]()")) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")")
+			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")" + post)
 		case "text_link":
-			out.WriteString(prevText + "[" + escapeContainedMDV1(utf16.Decode(utf16Data[ent.Offset:newPrev]), []rune("[]()")) + "](" + ent.Url + ")")
+			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](" + ent.Url + ")" + post)
 		default:
 			continue
 		}
@@ -612,6 +618,23 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int, entities 
 	return writeFinalMarkdownV2(data, ent, start, bd.String()), entEnd
 }
 
+func splitEdgeWhitespace(text string) (pre string, cntnt string, post string) {
+	bd := strings.Builder{}
+	rText := []rune(text)
+	for i := 0; i < len(rText) && unicode.IsSpace(rText[i]); i++ {
+		bd.WriteRune(rText[i])
+	}
+	pre = bd.String()
+	text = strings.TrimPrefix(text, pre)
+
+	bd.Reset()
+	for i := len(rText) - 1; i >= 0 && unicode.IsSpace(rText[i]); i-- {
+		bd.WriteRune(rText[i])
+	}
+	post = bd.String()
+	return pre, strings.TrimSuffix(text, post), post
+}
+
 func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) string {
 	prevText := html.EscapeString(string(utf16.Decode(data[start:ent.Offset])))
 	switch ent.Type {
@@ -635,13 +658,14 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int, cntnt string) s
 
 func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int, cntnt string) string {
 	prevText := string(utf16.Decode(data[start:ent.Offset]))
+	pre, cleanCntnt, post := splitEdgeWhitespace(cntnt)
 	switch ent.Type {
 	case "bold", "italic", "code", "underline", "strikethrough", "pre":
-		return prevText + mdV2Map[ent.Type] + cntnt + mdV2Map[ent.Type]
+		return prevText + pre + mdV2Map[ent.Type] + cleanCntnt + mdV2Map[ent.Type] + post
 	case "text_mention":
-		return prevText + "[" + cntnt + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")"
+		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.Itoa(ent.User.Id) + ")" + post
 	case "text_link":
-		return prevText + "[" + cntnt + "](" + ent.Url + ")"
+		return prevText + pre + "[" + cleanCntnt + "](" + ent.Url + ")" + post
 	default:
 		return prevText + cntnt
 	}
