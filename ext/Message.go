@@ -161,6 +161,7 @@ type Message struct {
 	ForwardSenderName     string                `json:"forward_sender_name"`
 	ForwardDate           int                   `json:"forward_date"`
 	ReplyToMessage        *Message              `json:"reply_to_message"`
+	ViaBot                *User                 `json:"via_bot"`
 	EditDate              int                   `json:"edit_date"`
 	MediaGroupId          string                `json:"media_group_id"`
 	AuthorSignature       string                `json:"author_signature"`

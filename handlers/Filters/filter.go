@@ -112,6 +112,10 @@ func DiceValue(message *ext.Message, val int) bool {
 	return message.Dice != nil && message.Dice.Value == val
 }
 
+func ViaBot(message *ext.Message) bool {
+	return message.ViaBot != nil
+}
+
 func Username(name string) func(message *ext.Message) bool {
 	return func(m *ext.Message) bool {
 		return m.From.Username == name
