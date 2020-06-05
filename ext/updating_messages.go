@@ -96,7 +96,7 @@ func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error) {
 }
 
 func (b Bot) boolSender(meth string, v url.Values) (bb bool, err error) {
-	r, err := Get(b, meth, v)
+	r, err := b.Get(meth, v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to complete request for %s", meth)
 	}

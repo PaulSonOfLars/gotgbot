@@ -16,12 +16,9 @@ import (
 
 const ApiUrl = "https://api.telegram.org/bot"
 
-var DefaultTgBotGetter = BotGetter{
-	Client: &http.Client{
-		Transport:     nil,
-		CheckRedirect: nil,
-		Jar:           nil,
-		Timeout:       time.Millisecond * 1500,
+var DefaultTgBotRequester = Requester{
+	Client: http.Client{
+		Timeout: time.Millisecond * 1500,
 	},
 	ApiUrl: ApiUrl,
 }
@@ -34,8 +31,8 @@ type response struct {
 	Parameters  json.RawMessage
 }
 
-type BotGetter struct {
-	Client *http.Client
+type Requester struct {
+	Client http.Client
 	ApiUrl string
 }
 
@@ -53,25 +50,22 @@ type Getter interface {
 	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error)
 }
 
-func Get(bot Bot, method string, params url.Values) (json.RawMessage, error) {
-	return DefaultTgBotGetter.Get(bot, method, params)
-}
+func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error) {
+	endpoint := tbg.ApiUrl
+	if endpoint == "" {
+		endpoint = ApiUrl
+	}
 
-func Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error) {
-	return DefaultTgBotGetter.Post(bot, fileType, method, params, file, filename)
-}
-
-func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMessage, error) {
-	req, err := http.NewRequest("GET", tbg.ApiUrl+bot.Token+"/"+method, nil)
+	req, err := http.NewRequest("GET", endpoint+token+"/"+method, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to build GET request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
 
-	bot.Logger.Debugf("executing GET: %+v", req)
+	l.Debugf("executing GET: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
-		bot.Logger.Debugw("failed to execute GET request",
+		l.Debugw("failed to execute GET request",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -81,11 +75,11 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 		return nil, errors.Wrapf(err, "unable to execute GET request to %v", method)
 	}
 	defer resp.Body.Close()
-	bot.Logger.Debugf("successful GET request: %+v", resp)
+	l.Debugf("successful GET request: %+v", resp)
 
 	var r response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.Debugw("failed to deserialize GET response body",
+		l.Debugw("failed to deserialize GET response body",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -95,7 +89,7 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
 	}
 	if !r.Ok {
-		bot.Logger.Debugw("error from GET",
+		l.Debugw("error from GET",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -118,7 +112,7 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 		}
 	}
 
-	bot.Logger.Debugw("obtained GET result",
+	l.Debugw("obtained GET result",
 		zapcore.Field{
 			Key:    "method",
 			Type:   zapcore.StringType,
@@ -134,7 +128,12 @@ func (tbg *BotGetter) Get(bot Bot, method string, params url.Values) (json.RawMe
 	return r.Result, nil
 }
 
-func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error) {
+func (tbg Requester) Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error) {
+	endpoint := tbg.ApiUrl
+	if endpoint == "" {
+		endpoint = ApiUrl
+	}
+
 	if filename == "" {
 		filename = "unnamed_file"
 	}
@@ -154,9 +153,9 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", tbg.ApiUrl+bot.Token+"/"+method, &b)
+	req, err := http.NewRequest("POST", endpoint+token+"/"+method, &b)
 	if err != nil {
-		bot.Logger.Debugw("failed to execute POST request",
+		l.Debugw("failed to execute POST request",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -168,18 +167,18 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
-	bot.Logger.Debugf("POST request with body: %+v", b)
-	bot.Logger.Debugf("executing POST: %+v", req)
+	l.Debugf("POST request with body: %+v", b)
+	l.Debugf("executing POST: %+v", req)
 	resp, err := tbg.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	bot.Logger.Debugf("successful POST request: %+v", resp)
+	l.Debugf("successful POST request: %+v", resp)
 
 	var r response
 	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		bot.Logger.Debugw("failed to deserialize POST response body",
+		l.Debugw("failed to deserialize POST response body",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -189,7 +188,7 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 		return nil, errors.Wrapf(err, "could not decode in POST %v call", method)
 	}
 	if !r.Ok {
-		bot.Logger.Debugw("error from POST",
+		l.Debugw("error from POST",
 			zapcore.Field{
 				Key:    "method",
 				Type:   zapcore.StringType,
@@ -212,7 +211,7 @@ func (tbg *BotGetter) Post(bot Bot, fileType string, method string, params url.V
 		}
 	}
 
-	bot.Logger.Debugw("obtained POST result",
+	l.Debugw("obtained POST result",
 		zapcore.Field{
 			Key:    "method",
 			Type:   zapcore.StringType,

@@ -87,7 +87,7 @@ func (i *sendableInvoice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(i.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(i.bot, "sendInvoice", v)
+	r, err := i.bot.Get("sendInvoice", v)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 	v.Add("shipping_options", string(shippingOptions))
 	v.Add("error_message", asq.ErrorMessage)
 
-	r, err := Get(asq.bot, "answerShippingQuery", v)
+	r, err := asq.bot.Get("answerShippingQuery", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to answerShippingQuery")
 	}
@@ -152,7 +152,7 @@ func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
 	v.Add("shipping_options", string(shippingOptions))
 	v.Add("error_message", apcq.ErrorMessage)
 
-	r, err := Get(apcq.bot, "answerPreCheckoutQuery", v)
+	r, err := apcq.bot.Get("answerPreCheckoutQuery", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to answerPreCheckoutQuery")
 	}

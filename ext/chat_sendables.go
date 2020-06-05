@@ -29,7 +29,7 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 	v.Add("user_id", strconv.Itoa(kcm.UserId))
 	v.Add("until_date", strconv.FormatInt(kcm.UntilDate, 10))
 
-	r, err := Get(kcm.bot, "kickChatMember", v)
+	r, err := kcm.bot.Get("kickChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not kickChatMember")
 	}
@@ -79,7 +79,7 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 
 	v.Add("permissions", string(perms))
 
-	r, err := Get(rcm.bot, "restrictChatMember", v)
+	r, err := rcm.bot.Get("restrictChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not restrictChatMember")
 	}
@@ -130,7 +130,7 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	v.Add("can_pin_messages", strconv.FormatBool(pcm.CanPinMessages))
 	v.Add("can_promote_members", strconv.FormatBool(pcm.CanPromoteMembers))
 
-	r, err := Get(pcm.bot, "promoteChatMember", v)
+	r, err := pcm.bot.Get("promoteChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not promoteChatMember")
 	}
@@ -162,7 +162,7 @@ func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
 	v.Add("user_id", strconv.Itoa(scact.UserId))
 	v.Add("custom_title", scact.CustomTitle)
 
-	r, err := Get(scact.bot, "setChatAdministratorCustomTitle", v)
+	r, err := scact.bot.Get("setChatAdministratorCustomTitle", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not setChatAdministratorCustomTitle")
 	}
@@ -197,7 +197,7 @@ func (scp *sendableSetChatPermissions) Send() (bool, error) {
 
 	v.Add("permissions", string(perms))
 
-	r, err := Get(scp.bot, "setChatPermissions", v)
+	r, err := scp.bot.Get("setChatPermissions", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not setChatPermissions")
 	}
@@ -228,7 +228,7 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 	v.Add("message_id", strconv.Itoa(pcm.MessageId))
 	v.Add("disable_notification", strconv.FormatBool(pcm.DisableNotification))
 
-	r, err := Get(pcm.bot, "pinChatMessage", v)
+	r, err := pcm.bot.Get("pinChatMessage", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to pinChatMessage")
 	}

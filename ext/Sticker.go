@@ -82,7 +82,7 @@ func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 	v := url.Values{}
 	v.Add("name", name)
 
-	r, err := Get(b, "getStickerSet", v)
+	r, err := b.Get("getStickerSet", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to getStickerSet")
 	}
@@ -149,7 +149,7 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error)
 	v.Add("sticker", sticker)
 	v.Add("position", strconv.Itoa(position))
 
-	r, err := Get(b, "setStickerPositionInSet", v)
+	r, err := b.Get("setStickerPositionInSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setStickerPositionInSet")
 	}
@@ -162,7 +162,7 @@ func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	v := url.Values{}
 	v.Add("sticker", sticker)
 
-	r, err := Get(b, "deleteStickerFromSet", v)
+	r, err := b.Get("deleteStickerFromSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to deleteStickerFromSet")
 	}

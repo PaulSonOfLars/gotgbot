@@ -292,7 +292,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendMessage", v)
+	r, err := msg.bot.Get("sendMessage", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendMessage")
 	}
@@ -330,7 +330,7 @@ func (msg *sendableEditMessageText) Send() (*Message, error) {
 	v.Add("disable_web_page_preview", strconv.FormatBool(msg.DisableWebPreview))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "editMessageText", v)
+	r, err := msg.bot.Get("editMessageText", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageText")
 	}
@@ -366,7 +366,7 @@ func (msg *sendableEditMessageCaption) Send() (*Message, error) {
 	v.Add("parse_mode", msg.ParseMode)
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "editMessageCaption", v)
+	r, err := msg.bot.Get("editMessageCaption", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
@@ -398,7 +398,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 	v.Add("inline_message_id", msg.InlineMessageId)
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "editMessageCaption", v)
+	r, err := msg.bot.Get("editMessageCaption", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageCaption")
 	}
@@ -675,7 +675,7 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	}
 	v.Add("media", string(vals))
 
-	r, err := Get(msg.bot, "editMessageMedia", v)
+	r, err := msg.bot.Get("editMessageMedia", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to editMessageMedia")
 	}
@@ -722,7 +722,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendMediaGroup", v)
+	r, err := msg.bot.Get("sendMediaGroup", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendMediaGroup")
 	}
@@ -760,7 +760,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendLocation", v)
+	r, err := msg.bot.Get("sendLocation", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendLocation")
 	}
@@ -805,7 +805,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendVenue", v)
+	r, err := msg.bot.Get("sendVenue", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendVenue")
 	}
@@ -843,7 +843,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendContact", v)
+	r, err := msg.bot.Get("sendContact", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendContact")
 	}
@@ -862,7 +862,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("Action", msg.Action)
 
-	r, err := Get(msg.bot, "sendChatAction", v)
+	r, err := msg.bot.Get("sendChatAction", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to sendChatAction")
 	}
@@ -969,7 +969,7 @@ func (msg *sendablePoll) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(msg.bot, "sendPoll", v)
+	r, err := msg.bot.Get("sendPoll", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendChatPoll")
 	}
@@ -1003,7 +1003,7 @@ func (d *sendableDice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(d.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := Get(d.bot, "sendDice", v)
+	r, err := d.bot.Get("sendDice", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to sendDice")
 	}
@@ -1034,7 +1034,7 @@ func (cbq *sendableCallbackQuery) Send() (bool, error) {
 func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (json.RawMessage, error) {
 	if msg.FileId != "" {
 		params.Add(fileType, msg.FileId)
-		return Get(b, endpoint, params)
+		return b.Get(endpoint, params)
 	} else if msg.Path != "" {
 		file, err := os.Open(msg.Path)
 		if err != nil {
@@ -1042,9 +1042,9 @@ func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Val
 		}
 		defer file.Close()
 
-		return Post(b, fileType, endpoint, params, file, msg.Name)
+		return b.Post(endpoint, params, fileType, file, msg.Name)
 	} else if msg.Reader != nil {
-		return Post(b, fileType, endpoint, params, msg.Reader, msg.Name)
+		return b.Post(endpoint, params, fileType, msg.Reader, msg.Name)
 	} else {
 		return nil, errors.New("the message had no files that could be sent")
 	}

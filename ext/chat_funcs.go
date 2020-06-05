@@ -25,7 +25,7 @@ func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
-	r, err := Get(b, "unbanChatMember", v)
+	r, err := b.Get("unbanChatMember", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "could not unbanChatMember")
 	}
@@ -85,7 +85,7 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "exportChatInviteLink", v)
+	r, err := b.Get("exportChatInviteLink", v)
 	if err != nil {
 		return "", errors.Wrapf(err, "unable to exportChatInviteLink")
 	}
@@ -116,7 +116,7 @@ func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "deleteChatPhoto", v)
+	r, err := b.Get("deleteChatPhoto", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to deleteChatPhoto")
 	}
@@ -130,7 +130,7 @@ func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("title", title)
 
-	r, err := Get(b, "setChatTitle", v)
+	r, err := b.Get("setChatTitle", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setChatTitle")
 	}
@@ -144,7 +144,7 @@ func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("description", description)
 
-	r, err := Get(b, "setChatDescription", v)
+	r, err := b.Get("setChatDescription", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setChatDescription")
 	}
@@ -168,7 +168,7 @@ func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "unpinChatMessage", v)
+	r, err := b.Get("unpinChatMessage", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to unpinChatMessage")
 	}
@@ -181,7 +181,7 @@ func (b Bot) LeaveChat(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "leaveChat", v)
+	r, err := b.Get("leaveChat", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to leaveChat")
 	}
@@ -194,7 +194,7 @@ func (b Bot) GetChat(chatId int) (*Chat, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "getChat", v)
+	r, err := b.Get("getChat", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to getChat")
 	}
@@ -207,7 +207,7 @@ func (b Bot) GetChatAdministrators(chatId int) ([]ChatMember, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "getChatAdministrators", v)
+	r, err := b.Get("getChatAdministrators", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to getChatAdministrators")
 	}
@@ -220,7 +220,7 @@ func (b Bot) GetChatMembersCount(chatId int) (int, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "getChatMembersCount", v)
+	r, err := b.Get("getChatMembersCount", v)
 	if err != nil {
 		return 0, errors.Wrapf(err, "unable to getChatMembersCount")
 	}
@@ -234,7 +234,7 @@ func (b Bot) GetChatMember(chatId int, userId int) (*ChatMember, error) {
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
 
-	r, err := Get(b, "getChatMember", v)
+	r, err := b.Get("getChatMember", v)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to getChatMember")
 	}
@@ -248,7 +248,7 @@ func (b Bot) SetChatStickerSet(chatId int, stickerSetName string) (bool, error) 
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("sticker_set_name", stickerSetName)
 
-	r, err := Get(b, "setChatStickerSet", v)
+	r, err := b.Get("setChatStickerSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to setChatStickerSet")
 	}
@@ -261,7 +261,7 @@ func (b Bot) DeleteChatStickerSet(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 
-	r, err := Get(b, "deleteChatStickerSet", v)
+	r, err := b.Get("deleteChatStickerSet", v)
 	if err != nil {
 		return false, errors.Wrapf(err, "unable to deleteChatStickerSet")
 	}

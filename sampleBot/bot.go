@@ -26,7 +26,6 @@ func main() {
 
 	l.Info("Starting gotgbot...")
 	token := os.Getenv("TOKEN")
-	l.Info("token: ", token)
 	updater, err := gotgbot.NewUpdater(token, logger)
 	if err != nil {
 		l.Fatalw("failed to start updater", zap.Error(err))
@@ -43,7 +42,7 @@ func main() {
 
 	if os.Getenv("USE_WEBHOOKS") == "t" {
 		// start getting updates
-		webhook := gotgbot.Webhook{
+		webhook := ext.Webhook{
 			Serve:          "0.0.0.0",
 			ServePort:      8080,
 			ServePath:      updater.Bot.Token,
@@ -65,6 +64,7 @@ func main() {
 		}
 	}
 
+	l.Info("... Bot now running.")
 	// wait
 	updater.Idle()
 }
