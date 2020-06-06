@@ -29,6 +29,10 @@ type Updater struct {
 func NewUpdater(l *zap.Logger, token string) (*Updater, error) {
 	u := &Updater{}
 	bot, err := ext.NewBot(l, token)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get bot")
+	}
+
 	u.Bot = bot
 	u.Updates = make(chan *RawUpdate)
 	u.Dispatcher = NewDispatcher(u.Bot, u.Updates)
