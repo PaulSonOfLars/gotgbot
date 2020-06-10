@@ -26,7 +26,7 @@ func main() {
 
 	l.Info("Starting gotgbot...")
 	token := os.Getenv("TOKEN")
-	updater, err := gotgbot.NewUpdater(token, logger)
+	updater, err := gotgbot.NewUpdater(logger, token)
 	if err != nil {
 		l.Fatalw("failed to start updater", zap.Error(err))
 	}
