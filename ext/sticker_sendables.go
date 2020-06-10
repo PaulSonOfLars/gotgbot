@@ -83,7 +83,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 
 // TODO: check whether uploading tgs_stickers works
 type sendableCreateNewStickerSet struct {
-	bot         Bot    `json:"-"`
+	bot         Bot
 	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
 	UserId      int
 	Name        string
@@ -130,7 +130,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 }
 
 type sendableAddStickerToSet struct {
-	bot         Bot    `json:"-"`
+	bot         Bot
 	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
 	UserId      int
 	Name        string
