@@ -5,8 +5,6 @@ import (
 	"io"
 	"net/url"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 type Sticker struct {
@@ -84,7 +82,7 @@ func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 
 	r, err := b.Get("getStickerSet", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to getStickerSet")
+		return nil, err
 	}
 	var ss StickerSet
 	return &ss, json.Unmarshal(r, &ss)
@@ -151,7 +149,7 @@ func (b Bot) SetStickerPositionInSet(sticker string, position int) (bool, error)
 
 	r, err := b.Get("setStickerPositionInSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setStickerPositionInSet")
+		return false, err
 	}
 
 	var bb bool
@@ -164,7 +162,7 @@ func (b Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 
 	r, err := b.Get("deleteStickerFromSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to deleteStickerFromSet")
+		return false, err
 	}
 
 	var bb bool

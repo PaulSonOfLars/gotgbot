@@ -121,7 +121,7 @@ func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
 
 	r, err := asq.bot.Get("answerShippingQuery", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to answerShippingQuery")
+		return false, err
 	}
 
 	var bb bool
@@ -154,7 +154,7 @@ func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
 
 	r, err := apcq.bot.Get("answerPreCheckoutQuery", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to answerPreCheckoutQuery")
+		return false, err
 	}
 	var bb bool
 	return bb, json.Unmarshal(r, &bb)

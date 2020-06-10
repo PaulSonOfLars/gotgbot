@@ -294,7 +294,7 @@ func (msg *sendableTextMessage) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendMessage", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMessage")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -332,7 +332,7 @@ func (msg *sendableEditMessageText) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("editMessageText", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to editMessageText")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -368,7 +368,7 @@ func (msg *sendableEditMessageCaption) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("editMessageCaption", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to editMessageCaption")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -400,7 +400,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("editMessageCaption", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to editMessageCaption")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -437,7 +437,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "photo", "sendPhoto", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendPhoto")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -480,7 +480,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "audio", "sendAudio", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendAudio")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -518,7 +518,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "document", "sendDocument", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendDocument")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -563,7 +563,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "video", "sendVideo", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendVideo")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -602,7 +602,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "voice", "sendVoice", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendVoice")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -639,7 +639,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "video", "sendVideoNote", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendVideoNote")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -677,7 +677,7 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("editMessageMedia", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to editMessageMedia")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -724,7 +724,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendMediaGroup", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendMediaGroup")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -762,7 +762,7 @@ func (msg *sendableLocation) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendLocation", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendLocation")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -807,7 +807,7 @@ func (msg *sendableVenue) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendVenue", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendVenue")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -845,7 +845,7 @@ func (msg *sendableContact) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendContact", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendContact")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -864,7 +864,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 
 	r, err := msg.bot.Get("sendChatAction", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to sendChatAction")
+		return false, err
 	}
 
 	var bb bool
@@ -910,7 +910,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 
 	r, err := msg.bot.sendFile(msg.file, "animation", "sendAnimation", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendAnimation")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -971,7 +971,7 @@ func (msg *sendablePoll) Send() (*Message, error) {
 
 	r, err := msg.bot.Get("sendPoll", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendChatPoll")
+		return nil, err
 	}
 
 	return msg.bot.ParseMessage(r)
@@ -1005,7 +1005,7 @@ func (d *sendableDice) Send() (*Message, error) {
 
 	r, err := d.bot.Get("sendDice", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendDice")
+		return nil, err
 	}
 
 	return d.bot.ParseMessage(r)

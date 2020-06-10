@@ -22,7 +22,7 @@ type Updater struct {
 	Bot          *ext.Bot
 	Updates      chan *RawUpdate
 	Dispatcher   *Dispatcher
-	UpdateGetter ext.Requester
+	UpdateGetter ext.BaseRequester
 }
 
 // NewUpdater Creates a new updater struct, paired with the necessary dispatcher and bot structs.
@@ -36,7 +36,7 @@ func NewUpdater(l *zap.Logger, token string) (*Updater, error) {
 	u.Bot = bot
 	u.Updates = make(chan *RawUpdate)
 	u.Dispatcher = NewDispatcher(u.Bot, u.Updates)
-	u.UpdateGetter = ext.Requester{
+	u.UpdateGetter = ext.BaseRequester{
 		Client: http.Client{
 			Transport:     nil,
 			CheckRedirect: nil,

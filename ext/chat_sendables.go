@@ -31,7 +31,7 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 
 	r, err := kcm.bot.Get("kickChatMember", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not kickChatMember")
+		return false, err
 	}
 
 	var bb bool
@@ -81,7 +81,7 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 
 	r, err := rcm.bot.Get("restrictChatMember", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not restrictChatMember")
+		return false, err
 	}
 
 	var bb bool
@@ -132,7 +132,7 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 
 	r, err := pcm.bot.Get("promoteChatMember", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not promoteChatMember")
+		return false, err
 	}
 
 	var bb bool
@@ -164,7 +164,7 @@ func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
 
 	r, err := scact.bot.Get("setChatAdministratorCustomTitle", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not setChatAdministratorCustomTitle")
+		return false, err
 	}
 
 	var bb bool
@@ -199,7 +199,7 @@ func (scp *sendableSetChatPermissions) Send() (bool, error) {
 
 	r, err := scp.bot.Get("setChatPermissions", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not setChatPermissions")
+		return false, err
 	}
 
 	var bb bool
@@ -230,7 +230,7 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 
 	r, err := pcm.bot.Get("pinChatMessage", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to pinChatMessage")
+		return false, err
 	}
 
 	var bb bool
@@ -253,7 +253,7 @@ func (scp *sendableSetChatPhoto) Send() (bool, error) {
 
 	r, err := scp.bot.sendFile(scp.file, "photo", "setChatPhoto", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setChatPhoto")
+		return false, err
 	}
 
 	var bb bool

@@ -346,7 +346,7 @@ func (aiq sendableAnswerInlineQuery) Send() (bool, error) {
 
 	r, err := aiq.bot.Get("answerInlineQuery", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to execute answerInlineQuery request")
+		return false, err
 	}
 
 	var bb bool

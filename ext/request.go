@@ -3,6 +3,7 @@ package ext
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 
 const ApiUrl = "https://api.telegram.org/bot"
 
-var DefaultTgBotRequester = Requester{
+var DefaultTgBotRequester = BaseRequester{
 	Client: http.Client{
 		Timeout: time.Millisecond * 1500,
 	},
@@ -31,26 +32,28 @@ type response struct {
 	Parameters  json.RawMessage
 }
 
-type Requester struct {
+type BaseRequester struct {
 	Client http.Client
 	ApiUrl string
 }
 
 type TelegramError struct {
+	Method      string
+	Values      url.Values
 	Code        int
 	Description string
 }
 
 func (t *TelegramError) Error() string {
-	return t.Description
+	return fmt.Sprintf("unable to %s: %s", t.Method, t.Description)
 }
 
-type Getter interface {
-	Get(bot Bot, method string, params url.Values) (json.RawMessage, error)
-	Post(bot Bot, fileType string, method string, params url.Values, file io.Reader, filename string) (json.RawMessage, error)
+type Requester interface {
+	Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error)
+	Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error)
 }
 
-func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error) {
+func (tbg BaseRequester) Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error) {
 	endpoint := tbg.ApiUrl
 	if endpoint == "" {
 		endpoint = ApiUrl
@@ -72,7 +75,7 @@ func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, para
 				String: method,
 			},
 			zap.Error(err))
-		return nil, errors.Wrapf(err, "unable to execute GET request to %v", method)
+		return nil, errors.Wrapf(err, "client error executing GET request to %v", method)
 	}
 	defer resp.Body.Close()
 	l.Debugf("successful GET request: %+v", resp)
@@ -86,7 +89,7 @@ func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, para
 				String: method,
 			},
 			zap.Error(err))
-		return nil, errors.Wrapf(err, "could not decode in GET %v call", method)
+		return nil, errors.Wrapf(err, "decoding error while reading GET request to %v", method)
 	}
 	if !r.Ok {
 		l.Debugw("error from GET",
@@ -107,6 +110,8 @@ func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, para
 			},
 		)
 		return nil, &TelegramError{
+			Method:      method,
+			Values:      params,
 			Code:        r.ErrorCode,
 			Description: r.Description,
 		}
@@ -128,7 +133,7 @@ func (tbg Requester) Get(l *zap.SugaredLogger, token string, method string, para
 	return r.Result, nil
 }
 
-func (tbg Requester) Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error) {
+func (tbg BaseRequester) Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error) {
 	endpoint := tbg.ApiUrl
 	if endpoint == "" {
 		endpoint = ApiUrl
@@ -162,7 +167,7 @@ func (tbg Requester) Post(l *zap.SugaredLogger, token string, method string, par
 				String: method,
 			},
 			zap.Error(err))
-		return nil, errors.Wrapf(err, "unable to execute POST request to %v", method)
+		return nil, errors.Wrapf(err, "client error executing POST request to %v", method)
 	}
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
@@ -185,7 +190,7 @@ func (tbg Requester) Post(l *zap.SugaredLogger, token string, method string, par
 				String: method,
 			},
 			zap.Error(err))
-		return nil, errors.Wrapf(err, "could not decode in POST %v call", method)
+		return nil, errors.Wrapf(err, "decoding error while reading POST request to %v", method)
 	}
 	if !r.Ok {
 		l.Debugw("error from POST",
@@ -206,6 +211,8 @@ func (tbg Requester) Post(l *zap.SugaredLogger, token string, method string, par
 			},
 		)
 		return nil, &TelegramError{
+			Method:      method,
+			Values:      params,
 			Code:        r.ErrorCode,
 			Description: r.Description,
 		}

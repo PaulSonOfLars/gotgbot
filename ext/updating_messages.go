@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/pkg/errors"
-
 	"github.com/PaulSonOfLars/gotgbot/parsemode"
 )
 
@@ -98,7 +96,7 @@ func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error) {
 func (b Bot) boolSender(meth string, v url.Values) (bb bool, err error) {
 	r, err := b.Get(meth, v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to complete request for %s", meth)
+		return false, err
 	}
 
 	return bb, json.Unmarshal(r, &bb)

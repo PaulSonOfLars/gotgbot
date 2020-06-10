@@ -51,7 +51,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 
 	r, err := s.bot.sendFile(s.file, "sticker", "sendSticker", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to sendSticker")
+		return nil, err
 	}
 
 	return s.bot.ParseMessage(r)
@@ -73,7 +73,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 
 	r, err := usf.bot.sendFile(usf.file, "sticker", "uploadStickerFile", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to uploadStickerFile")
+		return nil, err
 	}
 
 	newFile := &File{}
@@ -122,7 +122,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 
 	r, err := cns.bot.sendFile(cns.file, cns.StickerType, "createNewStickerSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to createNewStickerSet")
+		return false, err
 	}
 
 	var bb bool
@@ -165,7 +165,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 
 	r, err := asts.bot.sendFile(asts.file, asts.StickerType, "addStickerToSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to addStickerToSet")
+		return false, err
 	}
 
 	var bb bool
@@ -188,7 +188,7 @@ func (ssst *sendableSetStickerSetThumb) Send() (bool, error) {
 
 	r, err := ssst.bot.sendFile(ssst.file, "sticker", "setStickerSetThumb", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setStickerSetThumb")
+		return false, err
 	}
 
 	var bb bool

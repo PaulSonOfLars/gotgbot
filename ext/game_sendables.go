@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/url"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 type sendableGame struct {
@@ -28,7 +26,7 @@ func (g *sendableGame) Send() (*Message, error) {
 
 	r, err := g.bot.Get("sendGame", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to execute sendGame request")
+		return nil, err
 	}
 
 	return g.bot.ParseMessage(r)
@@ -65,7 +63,7 @@ func (sgs *sendableSetGameScore) Send() (bool, error) {
 
 	r, err := sgs.bot.Get("setGameScore", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to execute setGameScore request")
+		return false, err
 	}
 	var bb bool
 	return bb, json.Unmarshal(r, &bb)
@@ -96,7 +94,7 @@ func (gghs *sendableGetGameHighScores) Send() ([]GameHighScore, error) {
 
 	r, err := gghs.bot.Get("getGameHighScores", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to execute getGameHighScores request")
+		return nil, err
 	}
 	var ghs []GameHighScore
 	return ghs, json.Unmarshal(r, &ghs)

@@ -56,7 +56,7 @@ func NewBot(l *zap.Logger, token string) (*Bot, error) {
 		Token:  token,
 		Logger: l.Sugar(),
 		// getMe often times out, so add a large 5 second timeout for lots of leeway
-		Requester: Requester{Client: http.Client{Timeout: time.Second * 5}},
+		Requester: BaseRequester{Client: http.Client{Timeout: time.Second * 5}},
 	}.GetMe()
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to create new bot")
@@ -86,7 +86,7 @@ func (b Bot) GetMe() (*User, error) {
 
 	r, err := b.Get("getMe", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not getMe")
+		return nil, err
 	}
 
 	var u User
@@ -99,7 +99,7 @@ func (b Bot) GetMyCommands() ([]BotCommand, error) {
 
 	r, err := b.Get("getMyCommands", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not getMyCommands")
+		return nil, err
 	}
 
 	var bc []BotCommand
@@ -137,7 +137,7 @@ func (b Bot) GetUserProfilePhotos(userId int, offset int, limit int) (*UserProfi
 
 	r, err := b.Get("getUserProfilePhotos", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not get user profile photos")
+		return nil, err
 	}
 
 	var userProfilePhotos UserProfilePhotos
@@ -151,7 +151,7 @@ func (b Bot) GetFile(fileId string) (*File, error) {
 
 	r, err := b.Get("getFile", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not complete getFile request")
+		return nil, err
 	}
 
 	var f File
@@ -199,7 +199,7 @@ func (b Bot) SetWebhook(path string, webhook Webhook) (bool, error) {
 
 	r, err := b.Get("setWebhook", v)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to set webhook")
+		return false, err
 	}
 
 	var bb bool
@@ -209,7 +209,7 @@ func (b Bot) SetWebhook(path string, webhook Webhook) (bool, error) {
 func (b Bot) DeleteWebhook() (bool, error) {
 	r, err := b.Get("deleteWebhook", nil)
 	if err != nil {
-		return false, errors.Wrapf(err, "failed to remove webhook")
+		return false, err
 	}
 	var bb bool
 	return bb, json.Unmarshal(r, &bb)

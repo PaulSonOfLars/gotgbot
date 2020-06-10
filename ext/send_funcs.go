@@ -6,8 +6,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/pkg/errors"
-
 	"github.com/PaulSonOfLars/gotgbot/parsemode"
 )
 
@@ -69,7 +67,7 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 
 	r, err := b.Get("forwardMessage", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to forwardMessage")
+		return nil, err
 	}
 
 	return b.ParseMessage(r)
@@ -369,7 +367,7 @@ func (b Bot) stopPoll(chatId int, messageId int, replyMarkup *InlineKeyboardMark
 
 	r, err := b.Get("forwardMessage", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to forwardMessage")
+		return nil, err
 	}
 
 	poll := &Poll{Bot: b}

@@ -5,8 +5,6 @@ import (
 	"io"
 	"net/url"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
@@ -27,7 +25,7 @@ func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
 
 	r, err := b.Get("unbanChatMember", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not unbanChatMember")
+		return false, err
 	}
 
 	var bb bool
@@ -87,7 +85,7 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 
 	r, err := b.Get("exportChatInviteLink", v)
 	if err != nil {
-		return "", errors.Wrapf(err, "unable to exportChatInviteLink")
+		return "", err
 	}
 
 	var s string
@@ -118,7 +116,7 @@ func (b Bot) DeleteChatPhoto(chatId int) (bool, error) {
 
 	r, err := b.Get("deleteChatPhoto", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to deleteChatPhoto")
+		return false, err
 	}
 
 	var bb bool
@@ -132,7 +130,7 @@ func (b Bot) SetChatTitle(chatId int, title string) (bool, error) {
 
 	r, err := b.Get("setChatTitle", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setChatTitle")
+		return false, err
 	}
 
 	var bb bool
@@ -146,7 +144,7 @@ func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 
 	r, err := b.Get("setChatDescription", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setChatDescription")
+		return false, err
 	}
 
 	var bb bool
@@ -170,7 +168,7 @@ func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
 
 	r, err := b.Get("unpinChatMessage", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to unpinChatMessage")
+		return false, err
 	}
 
 	var bb bool
@@ -183,7 +181,7 @@ func (b Bot) LeaveChat(chatId int) (bool, error) {
 
 	r, err := b.Get("leaveChat", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to leaveChat")
+		return false, err
 	}
 
 	var bb bool
@@ -196,7 +194,7 @@ func (b Bot) GetChat(chatId int) (*Chat, error) {
 
 	r, err := b.Get("getChat", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to getChat")
+		return nil, err
 	}
 
 	c := Chat{Bot: b}
@@ -209,7 +207,7 @@ func (b Bot) GetChatAdministrators(chatId int) ([]ChatMember, error) {
 
 	r, err := b.Get("getChatAdministrators", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to getChatAdministrators")
+		return nil, err
 	}
 
 	var cm []ChatMember
@@ -222,7 +220,7 @@ func (b Bot) GetChatMembersCount(chatId int) (int, error) {
 
 	r, err := b.Get("getChatMembersCount", v)
 	if err != nil {
-		return 0, errors.Wrapf(err, "unable to getChatMembersCount")
+		return 0, err
 	}
 
 	var c int
@@ -236,7 +234,7 @@ func (b Bot) GetChatMember(chatId int, userId int) (*ChatMember, error) {
 
 	r, err := b.Get("getChatMember", v)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to getChatMember")
+		return nil, err
 	}
 
 	var cm ChatMember
@@ -250,7 +248,7 @@ func (b Bot) SetChatStickerSet(chatId int, stickerSetName string) (bool, error) 
 
 	r, err := b.Get("setChatStickerSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to setChatStickerSet")
+		return false, err
 	}
 
 	var bb bool
@@ -263,7 +261,7 @@ func (b Bot) DeleteChatStickerSet(chatId int) (bool, error) {
 
 	r, err := b.Get("deleteChatStickerSet", v)
 	if err != nil {
-		return false, errors.Wrapf(err, "unable to deleteChatStickerSet")
+		return false, err
 	}
 
 	var bb bool
