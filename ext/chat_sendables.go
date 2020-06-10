@@ -9,7 +9,7 @@ import (
 )
 
 type sendableKickChatMember struct {
-	bot       Bot `json:"-"`
+	bot       Bot
 	ChatId    int
 	UserId    int
 	UntilDate int64
@@ -39,7 +39,7 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 }
 
 type sendableRestrictChatMember struct {
-	bot         Bot `json:"-"`
+	bot         Bot
 	ChatId      int
 	UserId      int
 	Permissions ChatPermissions
@@ -89,7 +89,7 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 }
 
 type sendablePromoteChatMember struct {
-	bot                Bot `json:"-"`
+	bot                Bot
 	ChatId             int
 	UserId             int
 	CanChangeInfo      bool
@@ -140,7 +140,7 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 }
 
 type sendableSetChatAdministratorCustomTitle struct {
-	bot         Bot `json:"-"`
+	bot         Bot
 	ChatId      int
 	UserId      int
 	CustomTitle string
@@ -172,7 +172,7 @@ func (scact *sendableSetChatAdministratorCustomTitle) Send() (bool, error) {
 }
 
 type sendableSetChatPermissions struct {
-	bot         Bot `json:"-"`
+	bot         Bot
 	ChatId      int
 	Permissions ChatPermissions
 }
@@ -207,7 +207,7 @@ func (scp *sendableSetChatPermissions) Send() (bool, error) {
 }
 
 type sendablePinChatMessage struct {
-	bot                 Bot `json:"-"`
+	bot                 Bot
 	ChatId              int
 	MessageId           int
 	DisableNotification bool
@@ -238,7 +238,7 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 }
 
 type sendableSetChatPhoto struct {
-	bot    Bot `json:"-"`
+	bot    Bot
 	ChatId int
 	file
 }

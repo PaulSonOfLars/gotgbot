@@ -7,7 +7,7 @@ import (
 )
 
 type sendableGame struct {
-	bot                 Bot `json:"-"`
+	bot                 Bot
 	ChatId              int
 	GameShortName       string
 	DisableNotification bool
@@ -33,7 +33,7 @@ func (g *sendableGame) Send() (*Message, error) {
 }
 
 type sendableSetGameScore struct {
-	bot                Bot `json:"-"`
+	bot                Bot
 	UserId             int
 	Score              int
 	Force              bool
@@ -70,7 +70,7 @@ func (sgs *sendableSetGameScore) Send() (bool, error) {
 }
 
 type sendableGetGameHighScores struct {
-	bot             Bot `json:"-"`
+	bot             Bot
 	UserId          int
 	ChatId          int
 	MessageId       int

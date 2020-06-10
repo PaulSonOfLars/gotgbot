@@ -21,7 +21,6 @@ type Sticker struct {
 }
 
 type StickerSet struct {
-	bot           Bot        `json:"-"`
 	Name          string     `json:"name"`
 	Title         string     `json:"title"`
 	IsAnimated    bool       `json:"is_animated"`
