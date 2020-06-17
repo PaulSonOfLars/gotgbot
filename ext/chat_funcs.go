@@ -98,9 +98,9 @@ func (b Bot) SetChatPhotoStr(chatId int, photoId string) (bool, error) {
 	return setChatPhoto.Send()
 }
 
-func (b Bot) SetChatPhotoPath(chatId int, path string) (bool, error) {
+func (b Bot) SetChatPhotoURL(chatId int, url string) (bool, error) {
 	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
-	setChatPhoto.Path = path
+	setChatPhoto.URL = url
 	return setChatPhoto.Send()
 }
 

@@ -106,8 +106,8 @@ func (chat Chat) SetChatPhotoStr(photoId string) (bool, error) {
 	return chat.Bot.SetChatPhotoStr(chat.Id, photoId)
 }
 
-func (chat Chat) SetChatPhotoPath(path string) (bool, error) {
-	return chat.Bot.SetChatPhotoPath(chat.Id, path)
+func (chat Chat) SetChatPhotoURL(url string) (bool, error) {
+	return chat.Bot.SetChatPhotoURL(chat.Id, url)
 }
 
 func (chat Chat) SetChatPhotoReader(reader io.Reader) (bool, error) {

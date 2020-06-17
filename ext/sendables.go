@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
-	"os"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -141,36 +140,40 @@ func (b Bot) NewSendableAnswerCallbackQuery(queryId string) *sendableCallbackQue
 type file struct {
 	Name   string
 	FileId string
-	Path   string
 	Reader io.Reader
 	URL    string
 }
 
 type InputMedia interface {
-	getType() string
-	getValues(valType string) url.Values
+	getValues() url.Values
+	getBase() BaseInputMedia
 }
 
-type baseInputMedia struct {
+type BaseInputMedia struct {
 	Media     string
 	Caption   string
 	ParseMode string
-	// TODO: sort out "attach" logic
-	// Attached  io.Reader
+	Attached  io.Reader
 }
 
-func (bim baseInputMedia) getValues(valType string) url.Values {
+func (bim BaseInputMedia) getValues() url.Values {
 	v := url.Values{}
-	v.Add("type", valType)
-	v.Add("media", bim.Media)
+	media := bim.Media
+	if bim.Attached != nil {
+		media = "attach://file"
+	}
+	v.Add("media", media)
 	v.Add("caption", bim.Caption)
 	v.Add("parse_mode", bim.ParseMode)
-	// v.Add("attached")
 	return v
 }
 
+func (bim BaseInputMedia) getBase() BaseInputMedia {
+	return bim
+}
+
 type InputMediaAnimation struct {
-	baseInputMedia
+	BaseInputMedia
 	// TODO: sort out thumbnails
 	// Thumb    file
 	Width    int
@@ -178,13 +181,10 @@ type InputMediaAnimation struct {
 	Duration int
 }
 
-func (ima InputMediaAnimation) getType() string {
-	return "animation"
-}
-
-func (ima InputMediaAnimation) getValues(valType string) url.Values {
-	v := ima.baseInputMedia.getValues(ima.getType())
+func (ima InputMediaAnimation) getValues() url.Values {
+	v := ima.BaseInputMedia.getValues()
 	// v.Add("thumb")
+	v.Add("type", "animation")
 	v.Add("width", strconv.Itoa(ima.Width))
 	v.Add("height", strconv.Itoa(ima.Height))
 	v.Add("duration", strconv.Itoa(ima.Duration))
@@ -192,35 +192,29 @@ func (ima InputMediaAnimation) getValues(valType string) url.Values {
 }
 
 type InputMediaDocument struct {
-	baseInputMedia
+	BaseInputMedia
 	Thumb file
 }
 
-func (imd InputMediaDocument) getType() string {
-	return "document"
-}
-
-func (imd InputMediaDocument) getValues(valType string) url.Values {
-	v := imd.baseInputMedia.getValues(imd.getType())
+func (imd InputMediaDocument) getValues() url.Values {
+	v := imd.BaseInputMedia.getValues()
 	// v.Add("thumb")
+	v.Add("type", "document")
 	return v
 }
 
 type InputMediaAudio struct {
-	baseInputMedia
+	BaseInputMedia
 	Thumb     file
 	Duration  int
 	Performer string
 	Title     string
 }
 
-func (ima InputMediaAudio) getType() string {
-	return "audio"
-}
-
-func (ima InputMediaAudio) getValues(valType string) url.Values {
-	v := ima.baseInputMedia.getValues(ima.getType())
+func (ima InputMediaAudio) getValues() url.Values {
+	v := ima.BaseInputMedia.getValues()
 	// v.Add("thumb")
+	v.Add("type", "audio")
 	v.Add("duration", strconv.Itoa(ima.Duration))
 	v.Add("performer", ima.Performer)
 	v.Add("title", ima.Title)
@@ -228,19 +222,17 @@ func (ima InputMediaAudio) getValues(valType string) url.Values {
 }
 
 type InputMediaPhoto struct {
-	baseInputMedia
+	BaseInputMedia
 }
 
-func (imp InputMediaPhoto) getType() string {
-	return "photo"
-}
-
-func (imp InputMediaPhoto) getValues(valType string) url.Values {
-	return imp.baseInputMedia.getValues(imp.getType())
+func (imp InputMediaPhoto) getValues() url.Values {
+	v := imp.BaseInputMedia.getValues()
+	v.Add("type", "photo")
+	return v
 }
 
 type InputMediaVideo struct {
-	baseInputMedia
+	BaseInputMedia
 	Thumb            file
 	Width            int
 	Height           int
@@ -248,13 +240,10 @@ type InputMediaVideo struct {
 	SupportStreaming bool
 }
 
-func (imv InputMediaVideo) getType() string {
-	return "video"
-}
-
-func (imv InputMediaVideo) getValues(valType string) url.Values {
-	v := imv.baseInputMedia.getValues(imv.getType())
+func (imv InputMediaVideo) getValues() url.Values {
+	v := imv.BaseInputMedia.getValues()
 	// v.Add("thumb")
+	v.Add("type", "video")
 	v.Add("width", strconv.Itoa(imv.Width))
 	v.Add("height", strconv.Itoa(imv.Height))
 	v.Add("duration", strconv.Itoa(imv.Duration))
@@ -669,13 +658,23 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	v.Add("message_id", strconv.Itoa(msg.MessageId))
 	v.Add("inline_message_id", msg.InlineMessageId)
 	v.Add("reply_markup", string(replyMarkup))
-	vals, err := json.Marshal(msg.Media.getValues(msg.Media.getType()))
-	if err != nil {
-		return nil, err
+	if msg.Media != nil {
+		vals, err := json.Marshal(msg.Media.getValues())
+		if err != nil {
+			return nil, err
+		}
+		v.Add("media", string(vals))
 	}
-	v.Add("media", string(vals))
 
-	r, err := msg.bot.Get("editMessageMedia", v)
+	var r json.RawMessage
+	var err error
+	if msg.Media != nil && msg.Media.getBase().Attached != nil {
+		b := msg.Media.getBase()
+		t := v.Get("type")
+		r, err = msg.bot.sendFile(file{"file", "", b.Attached, ""}, t, "editMessageMedia", v)
+	} else {
+		r, err = msg.bot.Get("editMessageMedia", v)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -706,7 +705,7 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 	if msg.ArrInputMedia != nil {
 		data := make([]url.Values, len(msg.ArrInputMedia))
 		for i := 0; i < len(msg.ArrInputMedia); i++ {
-			data[i] = msg.ArrInputMedia[i].getValues(msg.ArrInputMedia[i].getType())
+			data[i] = msg.ArrInputMedia[i].getValues()
 		}
 		vals, err := json.Marshal(data)
 		if err != nil {
@@ -1035,14 +1034,9 @@ func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Val
 	if msg.FileId != "" {
 		params.Add(fileType, msg.FileId)
 		return b.Get(endpoint, params)
-	} else if msg.Path != "" {
-		file, err := os.Open(msg.Path)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-
-		return b.Post(endpoint, params, fileType, file, msg.Name)
+	} else if msg.URL != "" {
+		params.Add(fileType, msg.URL)
+		return b.Get(fileType, params)
 	} else if msg.Reader != nil {
 		return b.Post(endpoint, params, fileType, msg.Reader, msg.Name)
 	} else {

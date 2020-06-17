@@ -71,7 +71,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(usf.UserId))
 
-	r, err := usf.bot.sendFile(usf.file, "sticker", "uploadStickerFile", v)
+	r, err := usf.bot.sendFile(usf.file, "png_sticker", "uploadStickerFile", v)
 	if err != nil {
 		return nil, err
 	}

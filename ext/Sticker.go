@@ -42,9 +42,9 @@ func (b Bot) SendStickerStr(chatId int, stickerId string) (*Message, error) {
 	return sticker.Send()
 }
 
-func (b Bot) SendStickerPath(chatId int, path string) (*Message, error) {
+func (b Bot) SendStickerURL(chatId int, url string) (*Message, error) {
 	sticker := b.NewSendableSticker(chatId)
-	sticker.Path = path
+	sticker.URL = url
 	return sticker.Send()
 }
 
@@ -61,9 +61,9 @@ func (b Bot) ReplyStickerStr(chatId int, stickerId string, replyToMessageId int)
 	return sticker.Send()
 }
 
-func (b Bot) ReplyStickerPath(chatId int, path string, replyToMessageId int) (*Message, error) {
+func (b Bot) ReplyStickerURL(chatId int, url string, replyToMessageId int) (*Message, error) {
 	sticker := b.NewSendableSticker(chatId)
-	sticker.Path = path
+	sticker.URL = url
 	sticker.ReplyToMessageId = replyToMessageId
 	return sticker.Send()
 }
@@ -93,9 +93,9 @@ func (b Bot) UploadStickerFileStr(userId int, pngStickerId string) (*File, error
 	return uploadSticker.Send()
 }
 
-func (b Bot) UploadStickerFilePath(userId int, path string) (*File, error) {
+func (b Bot) UploadStickerFileURL(userId int, url string) (*File, error) {
 	uploadSticker := b.NewSendableUploadStickerFile(userId)
-	uploadSticker.Path = path
+	uploadSticker.URL = url
 	return uploadSticker.Send()
 }
 
@@ -111,9 +111,9 @@ func (b Bot) CreateNewStickerSetStr(userId int, name string, title string, pngSt
 	return createNew.Send()
 }
 
-func (b Bot) CreateNewStickerSetPath(userId int, name string, title string, path string, emojis string) (bool, error) {
+func (b Bot) CreateNewStickerSetURL(userId int, name string, title string, url string, emojis string) (bool, error) {
 	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
-	createNew.Path = path
+	createNew.URL = url
 	return createNew.Send()
 }
 
@@ -129,9 +129,9 @@ func (b Bot) AddStickerToSetStr(userId int, name string, pngStickerId string, em
 	return addSticker.Send()
 }
 
-func (b Bot) AddStickerToSetPath(userId int, name string, path string, emojis string) (bool, error) {
+func (b Bot) AddStickerToSetURL(userId int, name string, url string, emojis string) (bool, error) {
 	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
-	addSticker.Path = path
+	addSticker.URL = url
 	return addSticker.Send()
 }
 
