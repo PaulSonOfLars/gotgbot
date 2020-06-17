@@ -2,7 +2,6 @@ package ext
 
 import (
 	"encoding/json"
-	"io"
 	"net/url"
 	"strconv"
 )
@@ -92,21 +91,9 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	return s, json.Unmarshal(r, &s)
 }
 
-func (b Bot) SetChatPhotoStr(chatId int, photoId string) (bool, error) {
+func (b Bot) SetChatPhoto(chatId int, photo InputFile) (bool, error) {
 	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
-	setChatPhoto.FileId = photoId
-	return setChatPhoto.Send()
-}
-
-func (b Bot) SetChatPhotoURL(chatId int, url string) (bool, error) {
-	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
-	setChatPhoto.URL = url
-	return setChatPhoto.Send()
-}
-
-func (b Bot) SetChatPhotoReader(chatId int, reader io.Reader) (bool, error) {
-	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
-	setChatPhoto.Reader = reader
+	setChatPhoto.InputFile = photo
 	return setChatPhoto.Send()
 }
 

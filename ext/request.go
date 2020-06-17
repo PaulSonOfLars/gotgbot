@@ -172,6 +172,8 @@ func (tbg BaseRequester) Post(l *zap.SugaredLogger, token string, method string,
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
+	fmt.Println(params)
+
 	l.Debugf("POST request with body: %+v", b)
 	l.Debugf("executing POST: %+v", req)
 	resp, err := tbg.Client.Do(req)

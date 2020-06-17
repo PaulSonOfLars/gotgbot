@@ -138,31 +138,74 @@ func (b Bot) NewSendableAnswerCallbackQuery(queryId string) *sendableCallbackQue
 }
 
 type file struct {
+	b      Bot
 	Name   string
 	FileId string
 	Reader io.Reader
 	URL    string
 }
 
+type InputFile interface {
+	send(endpoint string, params url.Values, fileType string) (json.RawMessage, error)
+}
+
+func (f *file) send(endpoint string, params url.Values, fileType string) (json.RawMessage, error) {
+	if f.FileId != "" {
+		params.Add(fileType, f.FileId)
+		return f.b.Get(endpoint, params)
+	} else if f.URL != "" {
+		params.Add(fileType, f.URL)
+		return f.b.Get(fileType, params)
+	} else if f.Reader != nil {
+		return f.b.Post(endpoint, params, fileType, f.Reader, f.Name)
+	} else {
+		return nil, errors.New("the message had no files that could be sent")
+	}
+}
+
+func (b Bot) NewFileId(fileId string) InputFile {
+	return &file{
+		b:      b,
+		FileId: fileId,
+	}
+}
+
+func (b Bot) NewFileURL(url string) InputFile {
+	return &file{
+		b:   b,
+		URL: url,
+	}
+}
+
+func (b Bot) NewFileReader(name string, r io.Reader) InputFile {
+	if name == "" {
+		name = "file"
+	}
+	return &file{
+		b:      b,
+		Name:   name,
+		Reader: r,
+	}
+}
+
 type InputMedia interface {
 	getValues() url.Values
 	getBase() BaseInputMedia
+	InputFile
 }
 
 type BaseInputMedia struct {
-	Media     string
+	Media     InputFile
 	Caption   string
 	ParseMode string
-	Attached  io.Reader
+}
+
+func (bim BaseInputMedia) send(endpoint string, params url.Values, fileType string) (json.RawMessage, error) {
+	return bim.Media.send(endpoint, params, fileType)
 }
 
 func (bim BaseInputMedia) getValues() url.Values {
 	v := url.Values{}
-	media := bim.Media
-	if bim.Attached != nil {
-		media = "attach://file"
-	}
-	v.Add("media", media)
 	v.Add("caption", bim.Caption)
 	v.Add("parse_mode", bim.ParseMode)
 	return v
@@ -193,7 +236,7 @@ func (ima InputMediaAnimation) getValues() url.Values {
 
 type InputMediaDocument struct {
 	BaseInputMedia
-	Thumb file
+	Thumb InputFile
 }
 
 func (imd InputMediaDocument) getValues() url.Values {
@@ -205,7 +248,7 @@ func (imd InputMediaDocument) getValues() url.Values {
 
 type InputMediaAudio struct {
 	BaseInputMedia
-	Thumb     file
+	Thumb     InputFile
 	Duration  int
 	Performer string
 	Title     string
@@ -233,7 +276,7 @@ func (imp InputMediaPhoto) getValues() url.Values {
 
 type InputMediaVideo struct {
 	BaseInputMedia
-	Thumb            file
+	Thumb            InputFile
 	Width            int
 	Height           int
 	Duration         int
@@ -398,7 +441,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 type sendablePhoto struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -424,7 +467,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "photo", "sendPhoto", v)
+	r, err := msg.InputFile.send("sendPhoto", v, "photo")
 	if err != nil {
 		return nil, err
 	}
@@ -435,7 +478,7 @@ func (msg *sendablePhoto) Send() (*Message, error) {
 type sendableAudio struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Caption             string
 	ParseMode           string
 	Duration            int
@@ -467,7 +510,7 @@ func (msg *sendableAudio) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "audio", "sendAudio", v)
+	r, err := msg.InputFile.send("sendAudio", v, "audio")
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +522,7 @@ type sendableDocument struct {
 	bot     Bot
 	ChatId  int
 	DocName string // file name
-	file
+	InputFile
 	Caption             string
 	ParseMode           string
 	DisableNotification bool
@@ -505,7 +548,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "document", "sendDocument", v)
+	r, err := msg.InputFile.send("sendDocument", v, "document")
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +559,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 type sendableVideo struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Duration            int
 	Width               int
 	Height              int
@@ -550,7 +593,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "video", "sendVideo", v)
+	r, err := msg.InputFile.send("sendVideo", v, "video")
 	if err != nil {
 		return nil, err
 	}
@@ -561,7 +604,7 @@ func (msg *sendableVideo) Send() (*Message, error) {
 type sendableVoice struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Caption             string
 	ParseMode           string
 	Duration            int
@@ -589,7 +632,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "voice", "sendVoice", v)
+	r, err := msg.InputFile.send("sendVoice", v, "voice")
 	if err != nil {
 		return nil, err
 	}
@@ -600,7 +643,7 @@ func (msg *sendableVoice) Send() (*Message, error) {
 type sendableVideoNote struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Duration            int
 	Length              int
 	DisableNotification bool
@@ -626,7 +669,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "video", "sendVideoNote", v)
+	r, err := msg.InputFile.send("sendVideoNote", v, "videonote")
 	if err != nil {
 		return nil, err
 	}
@@ -639,8 +682,8 @@ type sendableEditMessageMedia struct {
 	ChatId          int
 	MessageId       int
 	InlineMessageId string
-	Media           InputMedia
-	ReplyMarkup     ReplyMarkup
+	InputMedia
+	ReplyMarkup ReplyMarkup
 }
 
 func (msg *sendableEditMessageMedia) Send() (*Message, error) {
@@ -658,23 +701,8 @@ func (msg *sendableEditMessageMedia) Send() (*Message, error) {
 	v.Add("message_id", strconv.Itoa(msg.MessageId))
 	v.Add("inline_message_id", msg.InlineMessageId)
 	v.Add("reply_markup", string(replyMarkup))
-	if msg.Media != nil {
-		vals, err := json.Marshal(msg.Media.getValues())
-		if err != nil {
-			return nil, err
-		}
-		v.Add("media", string(vals))
-	}
 
-	var r json.RawMessage
-	var err error
-	if msg.Media != nil && msg.Media.getBase().Attached != nil {
-		b := msg.Media.getBase()
-		t := v.Get("type")
-		r, err = msg.bot.sendFile(file{"file", "", b.Attached, ""}, t, "editMessageMedia", v)
-	} else {
-		r, err = msg.bot.Get("editMessageMedia", v)
-	}
+	r, err := msg.InputMedia.send("editMessageMedia", v, "media")
 	if err != nil {
 		return nil, err
 	}
@@ -873,7 +901,7 @@ func (msg *sendableChatAction) Send() (bool, error) {
 type sendableAnimation struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	Duration int
 	Width    int
 	Height   int
@@ -907,7 +935,7 @@ func (msg *sendableAnimation) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.sendFile(msg.file, "animation", "sendAnimation", v)
+	r, err := msg.InputFile.send("sendAnimation", v, "animation")
 	if err != nil {
 		return nil, err
 	}
@@ -1028,18 +1056,4 @@ func (cbq *sendableCallbackQuery) Send() (bool, error) {
 	v.Add("cache_time", strconv.Itoa(cbq.CacheTime))
 
 	return cbq.bot.boolSender("answerCallbackQuery", v)
-}
-
-func (b Bot) sendFile(msg file, fileType string, endpoint string, params url.Values) (json.RawMessage, error) {
-	if msg.FileId != "" {
-		params.Add(fileType, msg.FileId)
-		return b.Get(endpoint, params)
-	} else if msg.URL != "" {
-		params.Add(fileType, msg.URL)
-		return b.Get(fileType, params)
-	} else if msg.Reader != nil {
-		return b.Post(endpoint, params, fileType, msg.Reader, msg.Name)
-	} else {
-		return nil, errors.New("the message had no files that could be sent")
-	}
 }

@@ -264,40 +264,40 @@ func (m Message) EditMarkdownf(format string, a ...interface{}) (*Message, error
 	return m.Bot.EditMessageMarkdown(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
 }
 
-func (m Message) ReplyAudioStr(audio string) (*Message, error) {
-	return m.Bot.ReplyAudioStr(m.Chat.Id, audio, m.MessageId)
+func (m Message) ReplyAudio(audio InputFile) (*Message, error) {
+	return m.Bot.ReplyAudio(m.Chat.Id, audio, m.MessageId)
 }
 
-func (m Message) ReplyDocumentStr(document string) (*Message, error) {
-	return m.Bot.ReplyDocumentStr(m.Chat.Id, document, m.MessageId)
+func (m Message) ReplyDocument(document InputFile) (*Message, error) {
+	return m.Bot.ReplyDocument(m.Chat.Id, document, m.MessageId)
 }
 
 func (m Message) ReplyLocation(latitude float64, longitude float64) (*Message, error) {
 	return m.Bot.ReplyLocation(m.Chat.Id, latitude, longitude, m.MessageId)
 }
 
-func (m Message) ReplyPhotoStr(photo string) (*Message, error) {
-	return m.Bot.ReplyPhotoStr(m.Chat.Id, photo, m.MessageId)
+func (m Message) ReplyPhoto(photo InputFile) (*Message, error) {
+	return m.Bot.ReplyPhoto(m.Chat.Id, photo, m.MessageId)
 }
 
-func (m Message) ReplyStickerStr(sticker string) (*Message, error) {
-	return m.Bot.ReplyStickerStr(m.Chat.Id, sticker, m.MessageId)
+func (m Message) ReplySticker(sticker InputFile) (*Message, error) {
+	return m.Bot.ReplySticker(m.Chat.Id, sticker, m.MessageId)
 }
 
 func (m Message) ReplyVenue(latitude float64, longitude float64, title string, address string) (*Message, error) {
 	return m.Bot.ReplyVenue(m.Chat.Id, latitude, longitude, title, address, m.MessageId)
 }
 
-func (m Message) ReplyVideoStr(video string) (*Message, error) {
-	return m.Bot.ReplyVideoStr(m.Chat.Id, video, m.MessageId)
+func (m Message) ReplyVideo(video InputFile) (*Message, error) {
+	return m.Bot.ReplyVideo(m.Chat.Id, video, m.MessageId)
 }
 
-func (m Message) ReplyVideoNoteStr(videoNote string) (*Message, error) {
-	return m.Bot.ReplyVideoNoteStr(m.Chat.Id, videoNote, m.MessageId)
+func (m Message) ReplyVideoNote(videoNote InputFile) (*Message, error) {
+	return m.Bot.ReplyVideoNote(m.Chat.Id, videoNote, m.MessageId)
 }
 
-func (m Message) ReplyVoiceStr(voice string) (*Message, error) {
-	return m.Bot.ReplyVoiceStr(m.Chat.Id, voice, m.MessageId)
+func (m Message) ReplyVoice(voice InputFile) (*Message, error) {
+	return m.Bot.ReplyVoice(m.Chat.Id, voice, m.MessageId)
 }
 
 func (m Message) Delete() (bool, error) {

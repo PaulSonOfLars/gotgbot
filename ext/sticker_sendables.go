@@ -19,7 +19,7 @@ type File struct {
 type sendableSticker struct {
 	bot    Bot
 	ChatId int
-	file
+	InputFile
 	DisableNotification bool
 	ReplyToMessageId    int
 	ReplyMarkup         ReplyMarkup
@@ -49,7 +49,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 		v.Add("reply_markup", string(replyMarkup))
 	}
 
-	r, err := s.bot.sendFile(s.file, "sticker", "sendSticker", v)
+	r, err := s.InputFile.send("sendSticker", v, "sticker")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 type sendableUploadStickerFile struct {
 	bot    Bot
 	UserId int
-	file
+	InputFile
 }
 
 func (b Bot) NewSendableUploadStickerFile(userId int) *sendableUploadStickerFile {
@@ -71,7 +71,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(usf.UserId))
 
-	r, err := usf.bot.sendFile(usf.file, "png_sticker", "uploadStickerFile", v)
+	r, err := usf.InputFile.send("uploadStickerFile", v, "png_sticker")
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ type sendableCreateNewStickerSet struct {
 	UserId      int
 	Name        string
 	Title       string
-	file
+	InputFile
 	Emojis        string
 	ContainsMasks bool
 	MaskPosition  *MaskPosition
@@ -120,7 +120,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
 	v.Add("mask_position", string(maskPos))
 
-	r, err := cns.bot.sendFile(cns.file, cns.StickerType, "createNewStickerSet", v)
+	r, err := cns.InputFile.send("createNewStickerSet", v, cns.StickerType)
 	if err != nil {
 		return false, err
 	}
@@ -134,7 +134,7 @@ type sendableAddStickerToSet struct {
 	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
 	UserId      int
 	Name        string
-	file
+	InputFile
 	Emojis       string
 	MaskPosition *MaskPosition
 }
@@ -163,7 +163,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	v.Add("emojis", asts.Emojis)
 	v.Add("mask_position", string(maskPos))
 
-	r, err := asts.bot.sendFile(asts.file, asts.StickerType, "addStickerToSet", v)
+	r, err := asts.InputFile.send("addStickerToSet", v, asts.StickerType)
 	if err != nil {
 		return false, err
 	}
@@ -175,7 +175,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 type sendableSetStickerSetThumb struct {
 	bot    Bot
 	UserId int
-	file
+	InputFile
 }
 
 func (b Bot) NewSendableSetStickerSetThumb(userId int) *sendableSetStickerSetThumb {
@@ -186,7 +186,7 @@ func (ssst *sendableSetStickerSetThumb) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(ssst.UserId))
 
-	r, err := ssst.bot.sendFile(ssst.file, "sticker", "setStickerSetThumb", v)
+	r, err := ssst.InputFile.send("setStickerSetThumb", v, "sticker")
 	if err != nil {
 		return false, err
 	}

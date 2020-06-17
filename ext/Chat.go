@@ -1,9 +1,5 @@
 package ext
 
-import (
-	"io"
-)
-
 type Chat struct {
 	Bot              Bot              `json:"-"`
 	Id               int              `json:"id"`
@@ -102,16 +98,8 @@ func (chat Chat) ExportInviteLink() (string, error) {
 	return chat.Bot.ExportChatInviteLink(chat.Id)
 }
 
-func (chat Chat) SetChatPhotoStr(photoId string) (bool, error) {
-	return chat.Bot.SetChatPhotoStr(chat.Id, photoId)
-}
-
-func (chat Chat) SetChatPhotoURL(url string) (bool, error) {
-	return chat.Bot.SetChatPhotoURL(chat.Id, url)
-}
-
-func (chat Chat) SetChatPhotoReader(reader io.Reader) (bool, error) {
-	return chat.Bot.SetChatPhotoReader(chat.Id, reader)
+func (chat Chat) SetChatPhoto(photo InputFile) (bool, error) {
+	return chat.Bot.SetChatPhoto(chat.Id, photo)
 }
 
 func (chat Chat) DeletePhoto() (bool, error) {

@@ -2,7 +2,6 @@ package ext
 
 import (
 	"encoding/json"
-	"io"
 	"net/url"
 	"strconv"
 
@@ -73,208 +72,108 @@ func (b Bot) ForwardMessage(chatId int, fromChatId int, messageId int) (*Message
 	return b.ParseMessage(r)
 }
 
-func (b Bot) SendPhotoStr(chatId int, photoId string) (*Message, error) {
-	return b.replyPhotoStr(chatId, photoId, "", 0)
+func (b Bot) SendPhoto(chatId int, photo InputFile) (*Message, error) {
+	return b.replyPhoto(chatId, photo, "", 0)
 }
 
-func (b Bot) SendPhotoCaptionStr(chatId int, photoId string, caption string) (*Message, error) {
-	return b.replyPhotoStr(chatId, photoId, caption, 0)
+func (b Bot) SendPhotoCaption(chatId int, photo InputFile, caption string) (*Message, error) {
+	return b.replyPhoto(chatId, photo, caption, 0)
 }
 
-func (b Bot) ReplyPhotoStr(chatId int, photoId string, replyToMessageId int) (*Message, error) {
-	return b.replyPhotoStr(chatId, photoId, "", replyToMessageId)
+func (b Bot) ReplyPhoto(chatId int, photo InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyPhoto(chatId, photo, "", replyToMessageId)
 }
 
-func (b Bot) ReplyPhotoCaptionStr(chatId int, photoId string, caption string, replyToMessageId int) (*Message, error) {
-	return b.replyPhotoStr(chatId, photoId, caption, replyToMessageId)
+func (b Bot) ReplyPhotoCaption(chatId int, photo InputFile, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyPhoto(chatId, photo, caption, replyToMessageId)
 }
 
-func (b Bot) ReplyPhotoCaptionURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	return b.ReplyPhotoURL(chatId, url, caption, replyToMessageId)
-}
-
-func (b Bot) ReplyPhotoCaptionReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	return b.ReplyPhotoReader(chatId, reader, caption, replyToMessageId)
-}
-
-func (b Bot) replyPhotoStr(chatId int, photo string, caption string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyPhoto(chatId int, photo InputFile, caption string, replyToMessageId int) (*Message, error) {
 	photoMsg := b.NewSendablePhoto(chatId, caption)
-	photoMsg.FileId = photo
+	photoMsg.InputFile = photo
 	photoMsg.ReplyToMessageId = replyToMessageId
 	return photoMsg.Send()
 }
 
-func (b Bot) ReplyPhotoURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	photoMsg := b.NewSendablePhoto(chatId, caption)
-	photoMsg.URL = url
-	photoMsg.ReplyToMessageId = replyToMessageId
-	return photoMsg.Send()
+func (b Bot) SendAudio(chatId int, audio InputFile) (*Message, error) {
+	return b.replyAudio(chatId, audio, "", 0)
 }
 
-func (b Bot) ReplyPhotoReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	photoMsg := b.NewSendablePhoto(chatId, caption)
-	photoMsg.Reader = reader
-	photoMsg.ReplyToMessageId = replyToMessageId
-	return photoMsg.Send()
+func (b Bot) ReplyAudio(chatId int, audio InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyAudio(chatId, audio, "", replyToMessageId)
 }
 
-func (b Bot) SendAudioStr(chatId int, audio string) (*Message, error) {
-	return b.replyAudioStr(chatId, audio, "", 0)
-}
-
-func (b Bot) ReplyAudioStr(chatId int, audio string, replyToMessageId int) (*Message, error) {
-	return b.replyAudioStr(chatId, audio, "", replyToMessageId)
-}
-
-func (b Bot) replyAudioStr(chatId int, audio string, caption string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyAudio(chatId int, audio InputFile, caption string, replyToMessageId int) (*Message, error) {
 	audioMsg := b.NewSendableAudio(chatId, caption)
-	audioMsg.FileId = audio
+	audioMsg.InputFile = audio
 	audioMsg.ReplyToMessageId = replyToMessageId
 	return audioMsg.Send()
 }
 
-func (b Bot) ReplyAudioURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	audioMsg := b.NewSendableAudio(chatId, caption)
-	audioMsg.URL = url
-	audioMsg.ReplyToMessageId = replyToMessageId
-	return audioMsg.Send()
+func (b Bot) SendDocument(chatId int, document InputFile) (*Message, error) {
+	return b.replyDocument(chatId, document, "", 0)
 }
 
-func (b Bot) ReplyAudioReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	audioMsg := b.NewSendableAudio(chatId, caption)
-	audioMsg.Reader = reader
-	audioMsg.ReplyToMessageId = replyToMessageId
-	return audioMsg.Send()
+func (b Bot) SendDocumentCaption(chatId int, document InputFile, caption string) (*Message, error) {
+	return b.replyDocument(chatId, document, caption, 0)
 }
 
-func (b Bot) SendDocumentStr(chatId int, document string) (*Message, error) {
-	return b.replyDocumentStr(chatId, document, "", 0)
+func (b Bot) ReplyDocument(chatId int, document InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyDocument(chatId, document, "", replyToMessageId)
 }
 
-func (b Bot) SendDocumentCaptionStr(chatId int, document string, caption string) (*Message, error) {
-	return b.replyDocumentStr(chatId, document, caption, 0)
+func (b Bot) ReplyDocumentCaption(chatId int, document InputFile, caption string, replyToMessageId int) (*Message, error) {
+	return b.replyDocument(chatId, document, caption, replyToMessageId)
 }
 
-func (b Bot) ReplyDocumentStr(chatId int, document string, replyToMessageId int) (*Message, error) {
-	return b.replyDocumentStr(chatId, document, "", replyToMessageId)
-}
-
-func (b Bot) ReplyDocumentCaptionStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
-	return b.replyDocumentStr(chatId, document, caption, replyToMessageId)
-}
-
-func (b Bot) ReplyDocumentURL(chatId int, url string, replyToMessageId int) (*Message, error) {
-	return b.replyDocumentURL(chatId, url, "", replyToMessageId)
-}
-
-func (b Bot) ReplyDocumentCaptionURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	return b.replyDocumentURL(chatId, url, caption, replyToMessageId)
-}
-
-func (b Bot) replyDocumentStr(chatId int, document string, caption string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyDocument(chatId int, document InputFile, caption string, replyToMessageId int) (*Message, error) {
 	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.FileId = document
+	docMsg.InputFile = document
 	docMsg.ReplyToMessageId = replyToMessageId
 	return docMsg.Send()
 }
 
-func (b Bot) replyDocumentURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.URL = url
-	docMsg.ReplyToMessageId = replyToMessageId
-	return docMsg.Send()
+func (b Bot) SendVideo(chatId int, video InputFile) (*Message, error) {
+	return b.replyVideo(chatId, video, "", 0)
 }
 
-func (b Bot) ReplyDocumentReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	docMsg := b.NewSendableDocument(chatId, caption)
-	docMsg.Reader = reader
-	docMsg.ReplyToMessageId = replyToMessageId
-	return docMsg.Send()
+func (b Bot) ReplyVideo(chatId int, video InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyVideo(chatId, video, "", replyToMessageId)
 }
 
-func (b Bot) SendVideoStr(chatId int, video string) (*Message, error) {
-	return b.replyVideoStr(chatId, video, "", 0)
-}
-
-func (b Bot) ReplyVideoStr(chatId int, video string, replyToMessageId int) (*Message, error) {
-	return b.replyVideoStr(chatId, video, "", replyToMessageId)
-}
-
-func (b Bot) replyVideoStr(chatId int, video string, caption string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyVideo(chatId int, video InputFile, caption string, replyToMessageId int) (*Message, error) {
 	videoMsg := b.NewSendableVideo(chatId, caption)
-	videoMsg.FileId = video
+	videoMsg.InputFile = video
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }
 
-func (b Bot) ReplyVideoURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	videoMsg := b.NewSendableVideo(chatId, caption)
-	videoMsg.URL = url
-	videoMsg.ReplyToMessageId = replyToMessageId
-	return videoMsg.Send()
+func (b Bot) SendVoice(chatId int, voice InputFile) (*Message, error) {
+	return b.replyVoice(chatId, voice, "", 0)
 }
 
-func (b Bot) ReplyVideoReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	videoMsg := b.NewSendableVideo(chatId, caption)
-	videoMsg.Reader = reader
-	videoMsg.ReplyToMessageId = replyToMessageId
-	return videoMsg.Send()
+func (b Bot) ReplyVoice(chatId int, voice InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyVoice(chatId, voice, "", replyToMessageId)
 }
 
-func (b Bot) SendVoiceStr(chatId int, voice string) (*Message, error) {
-	return b.replyVoiceStr(chatId, voice, "", 0)
-}
-
-func (b Bot) ReplyVoiceStr(chatId int, voice string, replyToMessageId int) (*Message, error) {
-	return b.replyVoiceStr(chatId, voice, "", replyToMessageId)
-}
-
-func (b Bot) replyVoiceStr(chatId int, voice string, caption string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyVoice(chatId int, voice InputFile, caption string, replyToMessageId int) (*Message, error) {
 	voiceMsg := b.NewSendableVoice(chatId, caption)
-	voiceMsg.FileId = voice
+	voiceMsg.InputFile = voice
 	voiceMsg.ReplyToMessageId = replyToMessageId
 	return voiceMsg.Send()
 }
 
-func (b Bot) ReplyVoiceURL(chatId int, url string, caption string, replyToMessageId int) (*Message, error) {
-	voiceMsg := b.NewSendableVoice(chatId, caption)
-	voiceMsg.URL = url
-	voiceMsg.ReplyToMessageId = replyToMessageId
-	return voiceMsg.Send()
+func (b Bot) SendVideoNote(chatId int, videoNote InputFile) (*Message, error) {
+	return b.replyVideoNote(chatId, videoNote, 0)
 }
 
-func (b Bot) ReplyVoiceReader(chatId int, reader io.Reader, caption string, replyToMessageId int) (*Message, error) {
-	voiceMsg := b.NewSendableVoice(chatId, caption)
-	voiceMsg.Reader = reader
-	voiceMsg.ReplyToMessageId = replyToMessageId
-	return voiceMsg.Send()
+func (b Bot) ReplyVideoNote(chatId int, videoNote InputFile, replyToMessageId int) (*Message, error) {
+	return b.replyVideoNote(chatId, videoNote, replyToMessageId)
 }
 
-func (b Bot) SendVideoNoteStr(chatId int, videoNote string) (*Message, error) {
-	return b.replyVideoNoteStr(chatId, videoNote, 0)
-}
-
-func (b Bot) ReplyVideoNoteStr(chatId int, videoNote string, replyToMessageId int) (*Message, error) {
-	return b.replyVideoNoteStr(chatId, videoNote, replyToMessageId)
-}
-
-func (b Bot) replyVideoNoteStr(chatId int, videoNote string, replyToMessageId int) (*Message, error) {
+func (b Bot) replyVideoNote(chatId int, videoNote InputFile, replyToMessageId int) (*Message, error) {
 	videoMsg := b.NewSendableVideoNote(chatId)
-	videoMsg.FileId = videoNote
-	videoMsg.ReplyToMessageId = replyToMessageId
-	return videoMsg.Send()
-}
-
-func (b Bot) ReplyVideoNoteURL(chatId int, url string, replyToMessageId int) (*Message, error) {
-	videoMsg := b.NewSendableVideoNote(chatId)
-	videoMsg.URL = url
-	videoMsg.ReplyToMessageId = replyToMessageId
-	return videoMsg.Send()
-}
-
-func (b Bot) ReplyVideoNoteReader(chatId int, reader io.Reader, replyToMessageId int) (*Message, error) {
-	videoMsg := b.NewSendableVideoNote(chatId)
-	videoMsg.Reader = reader
+	videoMsg.InputFile = videoNote
 	videoMsg.ReplyToMessageId = replyToMessageId
 	return videoMsg.Send()
 }
