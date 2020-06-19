@@ -8,6 +8,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf16"
+
+	"github.com/PaulSonOfLars/gotgbot/parsemode"
 )
 
 type MessageEntity struct {
@@ -262,6 +264,30 @@ func (m Message) EditMarkdown(text string) (*Message, error) {
 
 func (m Message) EditMarkdownf(format string, a ...interface{}) (*Message, error) {
 	return m.Bot.EditMessageMarkdown(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
+}
+
+func (m Message) EditCaption(text string) (*Message, error) {
+	return m.Bot.EditMessageCaption(m.Chat.Id, m.MessageId, text)
+}
+
+func (m Message) EditCaptionf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.EditMessageCaption(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...))
+}
+
+func (m Message) EditCaptionHTML(text string) (*Message, error) {
+	return m.Bot.editMessageCaption(m.Chat.Id, m.MessageId, text, nil, parsemode.Html)
+}
+
+func (m Message) EditCaptionHTMLf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.editMessageCaption(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...), nil, parsemode.Html)
+}
+
+func (m Message) EditCaptionMarkdown(text string) (*Message, error) {
+	return m.Bot.editMessageCaption(m.Chat.Id, m.MessageId, text, nil, parsemode.Markdown)
+}
+
+func (m Message) EditCaptionMarkdownf(format string, a ...interface{}) (*Message, error) {
+	return m.Bot.editMessageCaption(m.Chat.Id, m.MessageId, fmt.Sprintf(format, a...), nil, parsemode.Markdown)
 }
 
 func (m Message) ReplyAudio(audio InputFile) (*Message, error) {
