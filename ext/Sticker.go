@@ -37,13 +37,13 @@ type MaskPosition struct {
 
 func (b Bot) SendSticker(chatId int, s InputFile) (*Message, error) {
 	sticker := b.NewSendableSticker(chatId)
-	sticker.InputFile = s
+	sticker.Sticker = s
 	return sticker.Send()
 }
 
 func (b Bot) ReplySticker(chatId int, s InputFile, replyToMessageId int) (*Message, error) {
 	sticker := b.NewSendableSticker(chatId)
-	sticker.InputFile = s
+	sticker.Sticker = s
 	sticker.ReplyToMessageId = replyToMessageId
 	return sticker.Send()
 }
@@ -62,19 +62,31 @@ func (b Bot) GetStickerSet(name string) (*StickerSet, error) {
 
 func (b Bot) UploadSticker(userId int, s InputFile) (*File, error) {
 	uploadSticker := b.NewSendableUploadStickerFile(userId)
-	uploadSticker.InputFile = s
+	uploadSticker.PngSticker = s
 	return uploadSticker.Send()
 }
 
-func (b Bot) CreateNewStickerSet(userId int, name string, title string, pngSticker InputFile, emojis string) (bool, error) {
+func (b Bot) CreateNewPngStickerSet(userId int, name string, title string, pngSticker InputFile, emojis string) (bool, error) {
 	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
-	createNew.InputFile = pngSticker
+	createNew.PngSticker = &pngSticker
 	return createNew.Send()
 }
 
-func (b Bot) AddStickerToSet(userId int, name string, pngSticker InputFile, emojis string) (bool, error) {
+func (b Bot) CreateNewTgsStickerSet(userId int, name string, title string, tgsSticker InputFile, emojis string) (bool, error) {
+	createNew := b.NewSendableCreateNewStickerSet(userId, name, title, emojis)
+	createNew.TgsSticker = &tgsSticker
+	return createNew.Send()
+}
+
+func (b Bot) AddPngStickerToSet(userId int, name string, pngSticker InputFile, emojis string) (bool, error) {
 	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
-	addSticker.InputFile = pngSticker
+	addSticker.PngSticker = &pngSticker
+	return addSticker.Send()
+}
+
+func (b Bot) AddTgsStickerToSet(userId int, name string, tgsSticker InputFile, emojis string) (bool, error) {
+	addSticker := b.NewSendableAddStickerToSet(userId, name, emojis)
+	addSticker.TgsSticker = &tgsSticker
 	return addSticker.Send()
 }
 

@@ -59,11 +59,21 @@ func (b Bot) EditMessageInline(inlineMessageId string, text string, parseMode st
 }
 
 func (b Bot) EditMessageCaption(chatId int, messageId int, caption string) (*Message, error) {
-	return b.EditMessageCaptionMarkup(chatId, messageId, caption, nil)
+	return b.editMessageCaption(chatId, messageId, caption, nil, "")
 }
+
 func (b Bot) EditMessageCaptionMarkup(chatId int, messageId int, caption string, markup ReplyMarkup) (*Message, error) {
+	return b.editMessageCaption(chatId, messageId, caption, markup, "")
+}
+
+func (b Bot) EditMessageCaptionParseMode(chatId int, messageId int, caption string, parseMode string) (*Message, error) {
+	return b.editMessageCaption(chatId, messageId, caption, nil, parseMode)
+}
+
+func (b Bot) editMessageCaption(chatId int, messageId int, caption string, markup ReplyMarkup, parseMode string) (*Message, error) {
 	msg := b.NewSendableEditMessageCaption(chatId, messageId, caption)
 	msg.ReplyMarkup = markup
+	msg.ParseMode = parseMode
 	return msg.Send()
 }
 
@@ -84,7 +94,6 @@ func (b Bot) EditMessageReplyMarkupInline(inlineMessageId string, replyMarkup In
 	return msg.Send()
 }
 
-// TODO: ensure not a private chat! cant delete in private chats.
 func (b Bot) DeleteMessage(chatId int, messageId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))

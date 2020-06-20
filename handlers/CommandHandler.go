@@ -73,7 +73,6 @@ func (h ArgsCommand) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error
 	return h.Response(*d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
 }
 
-// todo optimise if statements?
 func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
 	if u.EffectiveMessage == nil || u.EffectiveMessage.Text == "" {
 		return false, nil
@@ -93,15 +92,16 @@ func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
 
 	var cmd string
 	for _, x := range h.Triggers {
-		if []rune(u.EffectiveMessage.Text)[0] == x {
-			stuff := strings.Split(strings.ToLower(strings.Fields(u.EffectiveMessage.Text)[0]), "@")
-			// todo: remove repeated ToLower of username
-			if len(stuff) > 1 && stuff[1] != strings.ToLower(u.EffectiveMessage.Bot.UserName) {
-				return false, nil
-			}
-			cmd = strings.ToLower(stuff[0])[1:]
-			break
+		if []rune(u.EffectiveMessage.Text)[0] != x {
+			continue
 		}
+
+		split := strings.Split(strings.ToLower(strings.Fields(u.EffectiveMessage.Text)[0]), "@")
+		if len(split) > 1 && split[1] != strings.ToLower(u.EffectiveMessage.Bot.UserName) {
+			return false, nil
+		}
+		cmd = strings.ToLower(split[0])[1:]
+		break
 	}
 	if cmd == "" {
 		return false, nil

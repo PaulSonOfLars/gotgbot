@@ -3,7 +3,6 @@ package ext
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -76,8 +75,10 @@ func (b Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 	return b.Requester.Get(b.Logger, b.Token, method, params)
 }
 
-func (b Bot) Post(method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error) {
-	return b.Requester.Post(b.Logger, b.Token, method, params, fileType, file, filename)
+// Post -> convenience function to execute commands against the TG API.
+// the "data" map is used to fill out the multipart form data to send to TG.
+func (b Bot) Post(method string, params url.Values, data map[string]PostFile) (json.RawMessage, error) {
+	return b.Requester.Post(b.Logger, b.Token, method, params, data)
 }
 
 // GetMe gets the bot info

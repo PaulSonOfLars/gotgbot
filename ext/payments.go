@@ -52,7 +52,6 @@ type ShippingQuery struct {
 	ShippingAddress ShippingAddress `json:"shipping_address"`
 }
 
-// TODO: all the optionals here. Best option is probably to use a builder.
 func (b Bot) SendInvoice(chatId int, title string, description string, payload string,
 	providerToken string, startParameter string, currency string,
 	prices []LabeledPrice) (*Message, error) {

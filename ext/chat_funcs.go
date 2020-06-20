@@ -93,7 +93,7 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 
 func (b Bot) SetChatPhoto(chatId int, photo InputFile) (bool, error) {
 	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
-	setChatPhoto.InputFile = photo
+	setChatPhoto.Photo = photo
 	return setChatPhoto.Send()
 }
 

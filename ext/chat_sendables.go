@@ -240,7 +240,7 @@ func (pcm *sendablePinChatMessage) Send() (bool, error) {
 type sendableSetChatPhoto struct {
 	bot    Bot
 	ChatId int
-	InputFile
+	Photo  InputFile
 }
 
 func (b Bot) NewSendableSetChatPhoto(chatId int) *sendableSetChatPhoto {
@@ -251,7 +251,7 @@ func (scp *sendableSetChatPhoto) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(scp.ChatId))
 
-	r, err := scp.InputFile.send("setChatPhoto", v, "photo")
+	r, err := scp.Photo.send("setChatPhoto", v, "photo")
 	if err != nil {
 		return false, err
 	}

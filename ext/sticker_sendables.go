@@ -17,9 +17,9 @@ type File struct {
 }
 
 type sendableSticker struct {
-	bot    Bot
-	ChatId int
-	InputFile
+	bot                 Bot
+	ChatId              int
+	Sticker             InputFile
 	DisableNotification bool
 	ReplyToMessageId    int
 	ReplyMarkup         ReplyMarkup
@@ -30,7 +30,7 @@ func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
 }
 
 func (s *sendableSticker) Send() (*Message, error) {
-	replyMarkup := []byte("{}")
+	var replyMarkup []byte
 	if s.ReplyMarkup != nil {
 		var err error
 		replyMarkup, err = s.ReplyMarkup.Marshal()
@@ -41,15 +41,11 @@ func (s *sendableSticker) Send() (*Message, error) {
 
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(s.ChatId))
-	// v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
-	if s.ReplyToMessageId != 0 {
-		v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
-	}
-	if s.ReplyMarkup != nil {
-		v.Add("reply_markup", string(replyMarkup))
-	}
+	v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
+	v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
+	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := s.InputFile.send("sendSticker", v, "sticker")
+	r, err := s.Sticker.send("sendSticker", v, "sticker")
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +54,9 @@ func (s *sendableSticker) Send() (*Message, error) {
 }
 
 type sendableUploadStickerFile struct {
-	bot    Bot
-	UserId int
-	InputFile
+	bot        Bot
+	UserId     int
+	PngSticker InputFile
 }
 
 func (b Bot) NewSendableUploadStickerFile(userId int) *sendableUploadStickerFile {
@@ -71,7 +67,7 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(usf.UserId))
 
-	r, err := usf.InputFile.send("uploadStickerFile", v, "png_sticker")
+	r, err := usf.PngSticker.send("uploadStickerFile", v, "png_sticker")
 	if err != nil {
 		return nil, err
 	}
@@ -81,14 +77,13 @@ func (usf *sendableUploadStickerFile) Send() (*File, error) {
 	return newFile, json.Unmarshal(r, newFile)
 }
 
-// TODO: check whether uploading tgs_stickers works
 type sendableCreateNewStickerSet struct {
-	bot         Bot
-	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
-	UserId      int
-	Name        string
-	Title       string
-	InputFile
+	bot           Bot
+	UserId        int
+	Name          string
+	Title         string
+	PngSticker    *InputFile
+	TgsSticker    *InputFile
 	Emojis        string
 	ContainsMasks bool
 	MaskPosition  *MaskPosition
@@ -108,10 +103,6 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 		}
 	}
 
-	if cns.StickerType == "" {
-		cns.StickerType = "png_sticker"
-	}
-
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(cns.UserId))
 	v.Add("name", cns.Name)
@@ -120,7 +111,15 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	v.Add("contains_mask", strconv.FormatBool(cns.ContainsMasks))
 	v.Add("mask_position", string(maskPos))
 
-	r, err := cns.InputFile.send("createNewStickerSet", v, cns.StickerType)
+	var r json.RawMessage
+	var err error
+	if cns.PngSticker != nil && cns.TgsSticker != nil {
+		return false, errors.New("can only specify one stickertype; png or tgs")
+	} else if cns.PngSticker != nil {
+		r, err = cns.PngSticker.send("createNewStickerSet", v, "png_sticker")
+	} else {
+		r, err = cns.PngSticker.send("createNewStickerSet", v, "tgs_sticker")
+	}
 	if err != nil {
 		return false, err
 	}
@@ -130,11 +129,11 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 }
 
 type sendableAddStickerToSet struct {
-	bot         Bot
-	StickerType string `json:"-"` // "png_sticker" or "tgs_sticker"
-	UserId      int
-	Name        string
-	InputFile
+	bot          Bot
+	UserId       int
+	Name         string
+	PngSticker   *InputFile
+	TgsSticker   *InputFile
 	Emojis       string
 	MaskPosition *MaskPosition
 }
@@ -153,17 +152,21 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 		}
 	}
 
-	if asts.StickerType == "" {
-		asts.StickerType = "png_sticker"
-	}
-
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(asts.UserId))
 	v.Add("name", asts.Name)
 	v.Add("emojis", asts.Emojis)
 	v.Add("mask_position", string(maskPos))
 
-	r, err := asts.InputFile.send("addStickerToSet", v, asts.StickerType)
+	var r json.RawMessage
+	var err error
+	if asts.PngSticker != nil && asts.TgsSticker != nil {
+		return false, errors.New("can only specify one stickertype; png or tgs")
+	} else if asts.PngSticker != nil {
+		r, err = asts.PngSticker.send("addStickerToSet", v, "png_sticker")
+	} else {
+		r, err = asts.PngSticker.send("addStickerToSet", v, "tgs_sticker")
+	}
 	if err != nil {
 		return false, err
 	}
@@ -175,7 +178,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 type sendableSetStickerSetThumb struct {
 	bot    Bot
 	UserId int
-	InputFile
+	Thumb  InputFile
 }
 
 func (b Bot) NewSendableSetStickerSetThumb(userId int) *sendableSetStickerSetThumb {
@@ -186,7 +189,7 @@ func (ssst *sendableSetStickerSetThumb) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("user_id", strconv.Itoa(ssst.UserId))
 
-	r, err := ssst.InputFile.send("setStickerSetThumb", v, "sticker")
+	r, err := ssst.Thumb.send("setStickerSetThumb", v, "thumb")
 	if err != nil {
 		return false, err
 	}

@@ -50,7 +50,7 @@ func (t *TelegramError) Error() string {
 
 type Requester interface {
 	Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error)
-	Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error)
+	Post(l *zap.SugaredLogger, token string, method string, params url.Values, data map[string]PostFile) (json.RawMessage, error)
 }
 
 func (tbg BaseRequester) Get(l *zap.SugaredLogger, token string, method string, params url.Values) (json.RawMessage, error) {
@@ -133,27 +133,39 @@ func (tbg BaseRequester) Get(l *zap.SugaredLogger, token string, method string, 
 	return r.Result, nil
 }
 
-func (tbg BaseRequester) Post(l *zap.SugaredLogger, token string, method string, params url.Values, fileType string, file io.Reader, filename string) (json.RawMessage, error) {
+type PostFile struct {
+	File     io.Reader
+	FileName string
+}
+
+func (tbg BaseRequester) Post(l *zap.SugaredLogger, token string, method string, params url.Values, data map[string]PostFile) (json.RawMessage, error) {
 	endpoint := tbg.ApiUrl
 	if endpoint == "" {
 		endpoint = ApiUrl
 	}
 
-	if filename == "" {
-		filename = "unnamed_file"
-	}
 	b := bytes.Buffer{}
 	w := multipart.NewWriter(&b)
-	part, err := w.CreateFormFile(fileType, filename)
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-	if err != nil {
-		return nil, err
+	defer w.Close()
+
+	for field, x := range data {
+		fileName := x.FileName
+		if fileName == "" {
+			fileName = "unnamed_file"
+		}
+
+		part, err := w.CreateFormFile(field, fileName)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = io.Copy(part, x.File)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = w.Close()
+	err := w.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -171,8 +183,6 @@ func (tbg BaseRequester) Post(l *zap.SugaredLogger, token string, method string,
 	}
 	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", w.FormDataContentType())
-
-	fmt.Println(params)
 
 	l.Debugf("POST request with body: %+v", b)
 	l.Debugf("executing POST: %+v", req)

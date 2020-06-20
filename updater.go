@@ -111,12 +111,12 @@ func (u Updater) startPolling(clean bool) {
 				if clean {
 					continue
 				}
-			} else if len(rawUpdates) == 0 { // TODO: this is unsustainable, and may eventually break on higher loads.
+			} else if len(rawUpdates) == 0 { // TODO: check this is fine on high loads
 				clean = false
 			}
 
 			for _, updData := range rawUpdates {
-				temp := RawUpdate(updData) // necessary to avoid memory stuff from loops
+				temp := RawUpdate(updData) // can't take address of a cast
 				u.Updates <- &temp
 			}
 		}
