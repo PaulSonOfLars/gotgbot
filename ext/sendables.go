@@ -717,7 +717,7 @@ func (msg *sendableVideoNote) Send() (*Message, error) {
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.VideoNote.send("sendVideoNote", v, "videonote")
+	r, err := msg.VideoNote.send("sendVideoNote", v, "video_note")
 	if err != nil {
 		return nil, err
 	}
