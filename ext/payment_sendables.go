@@ -104,7 +104,7 @@ type sendableAnswerShippingQuery struct {
 }
 
 func (b Bot) NewSendableAnswerShippingQuery(shippingQueryId string, ok bool) *sendableAnswerShippingQuery {
-	return &sendableAnswerShippingQuery{ShippingQueryId: shippingQueryId, Ok: ok}
+	return &sendableAnswerShippingQuery{bot: b, ShippingQueryId: shippingQueryId, Ok: ok}
 }
 
 func (asq *sendableAnswerShippingQuery) Send() (bool, error) {
@@ -132,24 +132,17 @@ type sendableAnswerPreCheckoutQuery struct {
 	bot             Bot
 	ShippingQueryId string
 	Ok              bool
-	ShippingOptions []ShippingOption
 	ErrorMessage    string
 }
 
 func (b Bot) NewSendableAnswerPreCheckoutQuery(shippingQueryId string, ok bool) *sendableAnswerPreCheckoutQuery {
-	return &sendableAnswerPreCheckoutQuery{ShippingQueryId: shippingQueryId, Ok: ok}
+	return &sendableAnswerPreCheckoutQuery{bot: b, ShippingQueryId: shippingQueryId, Ok: ok}
 }
 
 func (apcq *sendableAnswerPreCheckoutQuery) Send() (bool, error) {
-	shippingOptions, err := json.Marshal(apcq.ShippingOptions)
-	if err != nil {
-		return false, errors.Wrapf(err, "could not marshal pre checkout query shipping options")
-	}
-
 	v := url.Values{}
-	v.Add("shipping_query_id", apcq.ShippingQueryId)
+	v.Add("pre_checkout_query_id", apcq.ShippingQueryId)
 	v.Add("ok", strconv.FormatBool(apcq.Ok))
-	v.Add("shipping_options", string(shippingOptions))
 	v.Add("error_message", apcq.ErrorMessage)
 
 	r, err := apcq.bot.Get("answerPreCheckoutQuery", v)
