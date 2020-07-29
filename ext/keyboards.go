@@ -106,6 +106,7 @@ type InlineKeyboardButton struct {
 }
 
 type CallbackQuery struct {
+	Bot             Bot      `json:"-"`
 	Id              string   `json:"id"`
 	From            *User    `json:"from"`
 	Message         *Message `json:"message"`
@@ -115,20 +116,32 @@ type CallbackQuery struct {
 	GameShortName   string   `json:"game_short_name"`
 }
 
+func (cq *CallbackQuery) AnswerCallbackQuery() (bool, error) {
+	return cq.Bot.AnswerCallbackQuery(cq.Id)
+}
+
+func (cq *CallbackQuery) AnswerCallbackQueryText(text string, alert bool) (bool, error) {
+	return cq.Bot.AnswerCallbackQueryText(cq.Id, text, alert)
+}
+
+func (cq *CallbackQuery) AnswerCallbackQueryURL(url string) (bool, error) {
+	return cq.Bot.AnswerCallbackQueryURL(cq.Id, url)
+}
+
 type ForceReply struct {
 	ForceReply bool `json:"force_reply"`
 	Selective  bool `json:"selective"`
 }
 
-func (rkm *ForceReply) Marshal() ([]byte, error) {
-	if rkm == nil {
-		rkm = &ForceReply{
+func (fr *ForceReply) Marshal() ([]byte, error) {
+	if fr == nil {
+		fr = &ForceReply{
 			ForceReply: false,
 			Selective:  false,
 		}
 	}
 
-	forceReply, err := json.Marshal(rkm)
+	forceReply, err := json.Marshal(fr)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not marshal force reply")
 	}

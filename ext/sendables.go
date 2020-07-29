@@ -126,8 +126,8 @@ func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
 }
 
 // NewSendableAnimation creates a new animation struct to send
-func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
-	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
+func (b Bot) NewSendableAnimation(chatId int) *sendableAnimation {
+	return &sendableAnimation{bot: b, ChatId: chatId}
 }
 
 // NewSendablePoll creates a new poll struct to send.
