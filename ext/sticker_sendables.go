@@ -117,8 +117,10 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 		return false, errors.New("can only specify one stickertype; png or tgs")
 	} else if cns.PngSticker != nil {
 		r, err = cns.PngSticker.send("createNewStickerSet", v, "png_sticker")
-	} else {
+	} else if cns.TgsSticker != nil {
 		r, err = cns.TgsSticker.send("createNewStickerSet", v, "tgs_sticker")
+	} else {
+		return false, errors.New("no stickertypes specified")
 	}
 	if err != nil {
 		return false, err
@@ -164,8 +166,10 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 		return false, errors.New("can only specify one stickertype; png or tgs")
 	} else if asts.PngSticker != nil {
 		r, err = asts.PngSticker.send("addStickerToSet", v, "png_sticker")
-	} else {
+	} else if asts.TgsSticker != nil {
 		r, err = asts.TgsSticker.send("addStickerToSet", v, "tgs_sticker")
+	} else {
+		return false, errors.New("no stickertypes specified")
 	}
 	if err != nil {
 		return false, err
