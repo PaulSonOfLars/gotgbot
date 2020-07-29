@@ -118,7 +118,7 @@ func (cns *sendableCreateNewStickerSet) Send() (bool, error) {
 	} else if cns.PngSticker != nil {
 		r, err = cns.PngSticker.send("createNewStickerSet", v, "png_sticker")
 	} else {
-		r, err = cns.PngSticker.send("createNewStickerSet", v, "tgs_sticker")
+		r, err = cns.TgsSticker.send("createNewStickerSet", v, "tgs_sticker")
 	}
 	if err != nil {
 		return false, err
@@ -165,7 +165,7 @@ func (asts *sendableAddStickerToSet) Send() (bool, error) {
 	} else if asts.PngSticker != nil {
 		r, err = asts.PngSticker.send("addStickerToSet", v, "png_sticker")
 	} else {
-		r, err = asts.PngSticker.send("addStickerToSet", v, "tgs_sticker")
+		r, err = asts.TgsSticker.send("addStickerToSet", v, "tgs_sticker")
 	}
 	if err != nil {
 		return false, err
