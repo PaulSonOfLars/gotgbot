@@ -48,7 +48,7 @@ type ChatMember struct {
 	User                  *User  `json:"user"`
 	Status                string `json:"status"`
 	CustomTitle           string `json:"custom_title"`
-	UntilDate             int64  `json:"until_date"`
+	IsAnonymous           bool   `json:"is_anonymous"`
 	CanBeEdited           bool   `json:"can_be_edited"`
 	CanPostMessages       bool   `json:"can_post_messages"`
 	CanEditMessages       bool   `json:"can_edit_messages"`
@@ -64,6 +64,7 @@ type ChatMember struct {
 	CanSendPolls          bool   `json:"can_send_polls"`
 	CanSendOtherMessages  bool   `json:"can_send_other_messages"`
 	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"`
+	UntilDate             int64  `json:"until_date"`
 }
 
 func (chat Chat) SendAction(action string) (bool, error) {

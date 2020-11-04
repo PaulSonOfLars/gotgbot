@@ -92,6 +92,7 @@ type sendablePromoteChatMember struct {
 	bot                Bot
 	ChatId             int
 	UserId             int
+	IsAnonymous        bool
 	CanChangeInfo      bool
 	CanPostMessages    bool
 	CanEditMessages    bool
@@ -121,6 +122,7 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(pcm.ChatId))
 	v.Add("user_id", strconv.Itoa(pcm.UserId))
+	v.Add("is_anonymous", strconv.FormatBool(pcm.IsAnonymous))
 	v.Add("can_change_info", strconv.FormatBool(pcm.CanChangeInfo))
 	v.Add("can_post_messages", strconv.FormatBool(pcm.CanPostMessages))
 	v.Add("can_edit_messages", strconv.FormatBool(pcm.CanEditMessages))

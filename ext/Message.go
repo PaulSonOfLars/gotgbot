@@ -166,6 +166,7 @@ type Message struct {
 	Bot                     Bot                      `json:"-"`
 	MessageId               int                      `json:"message_id"`
 	From                    *User                    `json:"from"`
+	SenderChat              *Chat                    `json:"sender_chat"`
 	Date                    int                      `json:"date"`
 	Chat                    *Chat                    `json:"chat"`
 	ForwardFrom             *User                    `json:"forward_from"`
