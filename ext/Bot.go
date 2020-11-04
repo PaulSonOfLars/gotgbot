@@ -36,8 +36,10 @@ type Webhook struct {
 	ServePort int    // port you listen on
 	URL       string // where you set the webhook to send to
 	// CertPath       string   // TODO
-	MaxConnections int      // max connections; max 100, default 40
-	AllowedUpdates []string // which updates to allow
+	IPAddress          string   // where you set the webhook to send to
+	MaxConnections     int      // max connections; max 100, default 40
+	AllowedUpdates     []string // which updates to allow
+	DropPendingUpdates bool     // should start from scratch on the new updates
 }
 
 func (w Webhook) GetListenUrl() string {
@@ -163,6 +165,7 @@ type WebhookInfo struct {
 	URL                  string   `json:"url"`
 	HasCustomCertificate bool     `json:"has_custom_certificate"`
 	PendingUpdateCount   int      `json:"pending_update_count"`
+	IPAddress            string   `json:"ip_address"`
 	LastErrorDate        int      `json:"last_error_date"`
 	LastErrorMessage     int      `json:"last_error_message"`
 	MaxConnections       int      `json:"max_connections"`
@@ -195,8 +198,10 @@ func (b Bot) SetWebhook(path string, webhook Webhook) (bool, error) {
 
 	v.Add("url", strings.TrimSuffix(webhook.URL, "/")+"/"+strings.TrimPrefix(path, "/"))
 	// v.Add("certificate", ) // todo: add certificate support
+	v.Add("ip_address", webhook.IPAddress)
 	v.Add("max_connections", strconv.Itoa(webhook.MaxConnections))
 	v.Add("allowed_updates", string(allowed))
+	v.Add("drop_pending_updates", strconv.FormatBool(webhook.DropPendingUpdates))
 
 	r, err := b.Get("setWebhook", v)
 	if err != nil {
@@ -208,7 +213,14 @@ func (b Bot) SetWebhook(path string, webhook Webhook) (bool, error) {
 }
 
 func (b Bot) DeleteWebhook() (bool, error) {
-	r, err := b.Get("deleteWebhook", nil)
+	return b.DeleteWebhookDrop(false)
+}
+
+func (b Bot) DeleteWebhookDrop(dropUpdates bool) (bool, error) {
+	v := url.Values{}
+	v.Add("drop_pending_updates", strconv.FormatBool(dropUpdates))
+
+	r, err := b.Get("deleteWebhook", v)
 	if err != nil {
 		return false, err
 	}
