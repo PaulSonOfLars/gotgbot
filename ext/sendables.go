@@ -834,14 +834,17 @@ func (msg *sendableMediaGroup) Send() (*Message, error) {
 }
 
 type sendableLocation struct {
-	bot                 Bot
-	ChatId              int
-	Latitude            float64
-	Longitude           float64
-	LivePeriod          int
-	DisableNotification bool
-	ReplyToMessageId    int
-	ReplyMarkup         ReplyMarkup
+	bot                  Bot
+	ChatId               int
+	Latitude             float64
+	Longitude            float64
+	HorizontalAccuracy   float64
+	LivePeriod           int
+	Heading              int
+	ProximityAlertRadius int
+	DisableNotification  bool
+	ReplyToMessageId     int
+	ReplyMarkup          ReplyMarkup
 }
 
 func (msg *sendableLocation) Send() (*Message, error) {
@@ -858,7 +861,10 @@ func (msg *sendableLocation) Send() (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("latitude", strconv.FormatFloat(msg.Latitude, 'f', -1, 64))
 	v.Add("longitude", strconv.FormatFloat(msg.Longitude, 'f', -1, 64))
+	v.Add("horizontal_accuracy", strconv.FormatFloat(msg.HorizontalAccuracy, 'f', -1, 64))
 	v.Add("live_period", strconv.Itoa(msg.LivePeriod))
+	v.Add("heading", strconv.Itoa(msg.Heading))
+	v.Add("proximity_alert_radius", strconv.Itoa(msg.ProximityAlertRadius))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
@@ -872,13 +878,16 @@ func (msg *sendableLocation) Send() (*Message, error) {
 }
 
 type sendableEditMessageLiveLocation struct {
-	bot             Bot
-	ChatId          int
-	MessageId       int
-	InlineMessageId string
-	Latitude        float64
-	Longitude       float64
-	ReplyMarkup     ReplyMarkup
+	bot                  Bot
+	ChatId               int
+	MessageId            int
+	InlineMessageId      string
+	Latitude             float64
+	Longitude            float64
+	HorizontalAccuracy   float64
+	Heading              int
+	ProximityAlertRadius int
+	ReplyMarkup          ReplyMarkup
 }
 
 func (msg *sendableEditMessageLiveLocation) Send() (*Message, error) {
@@ -897,6 +906,9 @@ func (msg *sendableEditMessageLiveLocation) Send() (*Message, error) {
 	v.Add("inline_message_id", msg.InlineMessageId)
 	v.Add("latitude", strconv.FormatFloat(msg.Latitude, 'f', -1, 64))
 	v.Add("longitude", strconv.FormatFloat(msg.Longitude, 'f', -1, 64))
+	v.Add("horizontal_accuracy", strconv.FormatFloat(msg.HorizontalAccuracy, 'f', -1, 64))
+	v.Add("heading", strconv.Itoa(msg.Heading))
+	v.Add("proximity_alert_radius", strconv.Itoa(msg.ProximityAlertRadius))
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := msg.bot.Get("editMessageLiveLocation", v)

@@ -138,16 +138,20 @@ type InlineQueryResultDocument struct {
 
 type InlineQueryResultLocation struct {
 	InlineQueryResult
-	Type                string               `json:"type"`
-	Id                  string               `json:"id"`
-	Latitude            float64              `json:"latitude"`
-	Longitude           float64              `json:"longitude"`
-	Title               string               `json:"title"`
-	ReplyMarkup         InlineKeyboardMarkup `json:"reply_markup"`
-	InputMessageContent InputMessageContent  `json:"input_message_content"`
-	ThumbUrl            string               `json:"thumb_url"`
-	ThumbWidth          int                  `json:"thumb_width"`
-	ThumbHeight         int                  `json:"thumb_height"`
+	Type                 string               `json:"type"`
+	Id                   string               `json:"id"`
+	Latitude             float64              `json:"latitude"`
+	Longitude            float64              `json:"longitude"`
+	Title                string               `json:"title"`
+	HorizontalAccuracy   float64              `json:"horizontal_accuracy"`
+	LivePeriod           int                  `json:"live_period"`
+	Heading              int                  `json:"heading"`
+	ProximityAlertRadius int                  `json:"proximity_alert_radius"`
+	ReplyMarkup          InlineKeyboardMarkup `json:"reply_markup"`
+	InputMessageContent  InputMessageContent  `json:"input_message_content"`
+	ThumbUrl             string               `json:"thumb_url"`
+	ThumbWidth           int                  `json:"thumb_width"`
+	ThumbHeight          int                  `json:"thumb_height"`
 }
 
 type InlineQueryResultVenue struct {
@@ -287,8 +291,12 @@ type InputTextMessageContent struct {
 
 type InputLocationMessageContent struct {
 	InputMessageContent
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Latitude             float64 `json:"latitude"`
+	Longitude            float64 `json:"longitude"`
+	HorizontalAccuracy   float64 `json:"horizontal_accuracy"`
+	LivePeriod           int     `json:"live_period"`
+	Heading              int     `json:"heading"`
+	ProximityAlertRadius int     `json:"proximity_alert_radius"`
 }
 
 type InputVenueMessageContent struct {
