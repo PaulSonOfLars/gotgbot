@@ -27,7 +27,11 @@ type sendableSticker struct {
 }
 
 func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
-	return &sendableSticker{bot: b, ChatId: chatId}
+	return &sendableSticker{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 func (s *sendableSticker) Send() (*Message, error) {

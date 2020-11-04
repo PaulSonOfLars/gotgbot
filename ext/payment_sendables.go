@@ -38,15 +38,16 @@ type sendableInvoice struct {
 
 func (b Bot) NewSendableInvoice(chatId int, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []LabeledPrice) *sendableInvoice {
 	return &sendableInvoice{
-		bot:            b,
-		ChatId:         chatId,
-		Title:          title,
-		Description:    description,
-		Payload:        payload,
-		ProviderToken:  providerToken,
-		StartParameter: startParameter,
-		Currency:       currency,
-		Prices:         prices,
+		bot:                      b,
+		ChatId:                   chatId,
+		Title:                    title,
+		Description:              description,
+		Payload:                  payload,
+		ProviderToken:            providerToken,
+		StartParameter:           startParameter,
+		Currency:                 currency,
+		Prices:                   prices,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
 	}
 }
 

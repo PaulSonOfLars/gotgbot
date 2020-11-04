@@ -20,8 +20,9 @@ type Bot struct {
 	FirstName string
 	UserName  string
 
-	Logger            *zap.SugaredLogger `json:"-"`
-	DisableWebPreview bool
+	Logger                   *zap.SugaredLogger `json:"-"`
+	DisableWebPreview        bool
+	AllowSendingWithoutReply bool
 	Requester
 }
 

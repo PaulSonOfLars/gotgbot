@@ -16,10 +16,22 @@ type Sendable interface {
 // NewSendableMessage create a new message struct to send
 func (b Bot) NewSendableMessage(chatId int, text string) *sendableTextMessage {
 	return &sendableTextMessage{
-		bot:               b,
-		ChatId:            chatId,
-		Text:              text,
-		DisableWebPreview: b.DisableWebPreview,
+		bot:                      b,
+		ChatId:                   chatId,
+		Text:                     text,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+		DisableWebPreview:        b.DisableWebPreview,
+	}
+}
+
+// NewSendableMessage create a new message struct to send
+func (b Bot) NewSendableCopyMessage(chatId int, fromChatId int, messageId int) *sendableCopyMessage {
+	return &sendableCopyMessage{
+		bot:                      b,
+		ChatId:                   chatId,
+		FromChatId:               fromChatId,
+		MessageId:                messageId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
 	}
 }
 
@@ -56,37 +68,70 @@ func (b Bot) NewSendableEditMessageReplyMarkup(chatId int, messageId int, markup
 
 // NewSendablePhoto creates a new photo struct to send
 func (b Bot) NewSendablePhoto(chatId int, caption string) *sendablePhoto {
-	return &sendablePhoto{bot: b, ChatId: chatId, Caption: caption}
+	return &sendablePhoto{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableAudio creates a new audio struct to send
 func (b Bot) NewSendableAudio(chatId int, caption string) *sendableAudio {
-	return &sendableAudio{bot: b, ChatId: chatId, Caption: caption}
+	return &sendableAudio{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableDocument creates a new document struct to send
 func (b Bot) NewSendableDocument(chatId int, caption string) *sendableDocument {
-	return &sendableDocument{bot: b, ChatId: chatId, Caption: caption}
+	return &sendableDocument{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableVideo creates a new video struct to send
 func (b Bot) NewSendableVideo(chatId int, caption string) *sendableVideo {
-	return &sendableVideo{bot: b, ChatId: chatId, Caption: caption}
+	return &sendableVideo{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableVoice creates a new voice struct to send
 func (b Bot) NewSendableVoice(chatId int, caption string) *sendableVoice {
-	return &sendableVoice{bot: b, ChatId: chatId, Caption: caption}
+	return &sendableVoice{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableVideoNote creates a new videonote struct to send
 func (b Bot) NewSendableVideoNote(chatId int) *sendableVideoNote {
-	return &sendableVideoNote{bot: b, ChatId: chatId}
+	return &sendableVideoNote{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableMediaGroup creates a new mediagroup struct to send
 func (b Bot) NewSendableMediaGroup(chatId int) *sendableMediaGroup {
-	return &sendableMediaGroup{bot: b, ChatId: chatId}
+	return &sendableMediaGroup{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableEditMessageMedia creates a new editmessage media struct to send
@@ -99,7 +144,11 @@ func (b Bot) NewSendableEditMessageMedia(chatId int, messageId int) *sendableEdi
 }
 
 func (b Bot) NewSendableLocation(chatId int) *sendableLocation {
-	return &sendableLocation{bot: b, ChatId: chatId}
+	return &sendableLocation{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 func (b Bot) NewSendableEditMessageLiveLocation(chatId int, latitude float64, longitude float64) *sendableEditMessageLiveLocation {
@@ -112,37 +161,66 @@ func (b Bot) NewSendableStopMessageLiveLocation(chatId int) *sendableStopMessage
 
 // NewSendableVenue creates a new venue struct to send
 func (b Bot) NewSendableVenue(chatId int) *sendableVenue {
-	return &sendableVenue{bot: b, ChatId: chatId}
+	return &sendableVenue{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableContact creates a new contact struct to send
 func (b Bot) NewSendableContact(chatId int) *sendableContact {
-	return &sendableContact{bot: b, ChatId: chatId}
+	return &sendableContact{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableChatAction creates a new chat action struct to send
 func (b Bot) NewSendableChatAction(chatId int) *sendableChatAction {
-	return &sendableChatAction{bot: b, ChatId: chatId}
+	return &sendableChatAction{
+		bot:    b,
+		ChatId: chatId,
+	}
 }
 
 // NewSendableAnimation creates a new animation struct to send
 func (b Bot) NewSendableAnimation(chatId int, caption string) *sendableAnimation {
-	return &sendableAnimation{bot: b, ChatId: chatId, Caption: caption}
+	return &sendableAnimation{
+		bot:                      b,
+		ChatId:                   chatId,
+		Caption:                  caption,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendablePoll creates a new poll struct to send.
 func (b Bot) NewSendablePoll(chatId int, question string, options []string) *sendablePoll {
-	return &sendablePoll{bot: b, ChatId: chatId, Question: question, Options: options}
+	return &sendablePoll{
+		bot:                      b,
+		ChatId:                   chatId,
+		Question:                 question,
+		Options:                  options,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableDice creates a new poll struct to send.
 func (b Bot) NewSendableDice(chatId int) *sendableDice {
-	return &sendableDice{bot: b, ChatId: chatId}
+	return &sendableDice{
+		bot:                      b,
+		ChatId:                   chatId,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 // NewSendableAnswerCallbackQuery creates a new callbackQuery struct to send.
 func (b Bot) NewSendableAnswerCallbackQuery(queryId string) *sendableCallbackQuery {
-	return &sendableCallbackQuery{bot: b, CallbackQueryId: queryId}
+	return &sendableCallbackQuery{
+		bot:             b,
+		CallbackQueryId: queryId,
+	}
 }
 
 type InputFile struct {

@@ -17,7 +17,12 @@ type sendableGame struct {
 }
 
 func (b Bot) NewSendableGame(chatId int, gameShortName string) *sendableGame {
-	return &sendableGame{bot: b, ChatId: chatId, GameShortName: gameShortName}
+	return &sendableGame{
+		bot:                      b,
+		ChatId:                   chatId,
+		GameShortName:            gameShortName,
+		AllowSendingWithoutReply: b.AllowSendingWithoutReply,
+	}
 }
 
 func (g *sendableGame) Send() (*Message, error) {
