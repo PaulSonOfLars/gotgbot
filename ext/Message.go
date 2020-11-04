@@ -36,6 +36,7 @@ type Audio struct {
 	Duration     int        `json:"duration"`
 	Performer    string     `json:"performer"`
 	Title        string     `json:"title"`
+	FileName     string     `json:"file_name"`
 	MimeType     string     `json:"mime_type"`
 	FileSize     int        `json:"file_size"`
 	Thumb        *PhotoSize `json:"thumb"`
@@ -65,6 +66,7 @@ type Video struct {
 	Height       int        `json:"height"`
 	Duration     int        `json:"duration"`
 	Thumb        *PhotoSize `json:"thumb"`
+	FileName     string     `json:"file_name"`
 	MimeType     string     `json:"mime_type"`
 	FileSize     int        `json:"file_size"`
 }

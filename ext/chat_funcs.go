@@ -154,9 +154,27 @@ func (b Bot) PinChatMessageQuiet(chatId int, messageId int) (bool, error) {
 	return pin.Send()
 }
 
-func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
+func (b Bot) UnpinAllChatMessages(chatId int) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
+
+	r, err := b.Get("unpinAllChatMessages", v)
+	if err != nil {
+		return false, err
+	}
+
+	var bb bool
+	return bb, json.Unmarshal(r, &bb)
+}
+
+func (b Bot) UnpinChatMessage(chatId int) (bool, error) {
+	return b.UnpinChatMessageById(chatId, 0)
+}
+
+func (b Bot) UnpinChatMessageById(chatId int, messageId int) (bool, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("message_id", strconv.Itoa(messageId))
 
 	r, err := b.Get("unpinChatMessage", v)
 	if err != nil {

@@ -250,17 +250,19 @@ type InputMediaDocument struct {
 	Caption   string
 	ParseMode string
 
-	Thumb *InputFile
+	DisableContentTypeDetection bool
+	Thumb                       *InputFile
 }
 
 func (imd InputMediaDocument) toJson(idx int) (map[string]string, map[string]PostFile) {
 	data := make(map[string]PostFile)
 	media := imd.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	m := map[string]string{
-		"type":       "document",
-		"media":      media,
-		"caption":    imd.Caption,
-		"parse_mode": imd.ParseMode,
+		"type":                           "document",
+		"media":                          media,
+		"caption":                        imd.Caption,
+		"parse_mode":                     imd.ParseMode,
+		"disable_content_type_detection": strconv.FormatBool(imd.DisableContentTypeDetection),
 	}
 	if imd.Thumb != nil {
 		m["thumb"] = imd.Thumb.GetMediaType("thumb"+strconv.Itoa(idx), data)
@@ -568,14 +570,15 @@ func (msg *sendableAudio) Send() (*Message, error) {
 }
 
 type sendableDocument struct {
-	bot                 Bot
-	ChatId              int
-	Document            InputFile
-	Caption             string
-	ParseMode           string
-	DisableNotification bool
-	ReplyToMessageId    int
-	ReplyMarkup         ReplyMarkup
+	bot                         Bot
+	ChatId                      int
+	Document                    InputFile
+	Caption                     string
+	ParseMode                   string
+	DisableContentTypeDetection bool
+	DisableNotification         bool
+	ReplyToMessageId            int
+	ReplyMarkup                 ReplyMarkup
 }
 
 func (msg *sendableDocument) Send() (*Message, error) {
@@ -592,6 +595,7 @@ func (msg *sendableDocument) Send() (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(msg.ChatId))
 	v.Add("caption", msg.Caption)
 	v.Add("parse_mode", msg.ParseMode)
+	v.Add("disable_content_type_detection", strconv.FormatBool(msg.DisableContentTypeDetection))
 	v.Add("disable_notification", strconv.FormatBool(msg.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(msg.ReplyToMessageId))
 	v.Add("reply_markup", string(replyMarkup))
