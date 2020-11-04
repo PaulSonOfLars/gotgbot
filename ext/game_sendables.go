@@ -7,12 +7,13 @@ import (
 )
 
 type sendableGame struct {
-	bot                 Bot
-	ChatId              int
-	GameShortName       string
-	DisableNotification bool
-	ReplyToMessageId    int
-	ReplyMarkup         InlineKeyboardMarkup
+	bot                      Bot
+	ChatId                   int
+	GameShortName            string
+	DisableNotification      bool
+	ReplyToMessageId         int
+	AllowSendingWithoutReply bool
+	ReplyMarkup              *InlineKeyboardMarkup
 }
 
 func (b Bot) NewSendableGame(chatId int, gameShortName string) *sendableGame {
@@ -20,9 +21,22 @@ func (b Bot) NewSendableGame(chatId int, gameShortName string) *sendableGame {
 }
 
 func (g *sendableGame) Send() (*Message, error) {
+	var replyMarkupBytes []byte
+	if g.ReplyMarkup != nil {
+		var err error
+		replyMarkupBytes, err = g.ReplyMarkup.Marshal()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(g.ChatId))
 	v.Add("game_short_name", g.GameShortName)
+	v.Add("disable_notification", strconv.FormatBool(g.DisableNotification))
+	v.Add("reply_to_message_id", strconv.Itoa(g.ReplyToMessageId))
+	v.Add("allow_sending_without_reply", strconv.FormatBool(g.AllowSendingWithoutReply))
+	v.Add("reply_markup", string(replyMarkupBytes))
 
 	r, err := g.bot.Get("sendGame", v)
 	if err != nil {

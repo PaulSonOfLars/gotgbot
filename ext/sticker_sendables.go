@@ -17,12 +17,13 @@ type File struct {
 }
 
 type sendableSticker struct {
-	bot                 Bot
-	ChatId              int
-	Sticker             InputFile
-	DisableNotification bool
-	ReplyToMessageId    int
-	ReplyMarkup         ReplyMarkup
+	bot                      Bot
+	ChatId                   int
+	Sticker                  InputFile
+	DisableNotification      bool
+	ReplyToMessageId         int
+	AllowSendingWithoutReply bool
+	ReplyMarkup              ReplyMarkup
 }
 
 func (b Bot) NewSendableSticker(chatId int) *sendableSticker {
@@ -43,6 +44,7 @@ func (s *sendableSticker) Send() (*Message, error) {
 	v.Add("chat_id", strconv.Itoa(s.ChatId))
 	v.Add("disable_notification", strconv.FormatBool(s.DisableNotification))
 	v.Add("reply_to_message_id", strconv.Itoa(s.ReplyToMessageId))
+	v.Add("allow_sending_without_reply", strconv.FormatBool(s.AllowSendingWithoutReply))
 	v.Add("reply_markup", string(replyMarkup))
 
 	r, err := s.Sticker.send("sendSticker", v, "sticker")
