@@ -18,9 +18,14 @@ func (b Bot) KickChatMemberUntil(chatId int, userId int, untilDate int64) (bool,
 }
 
 func (b Bot) UnbanChatMember(chatId int, userId int) (bool, error) {
+	return b.UnbanChatMemberOnlyIfBanned(chatId, userId, false)
+}
+
+func (b Bot) UnbanChatMemberOnlyIfBanned(chatId int, userId int, onlyIfBanned bool) (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(chatId))
 	v.Add("user_id", strconv.Itoa(userId))
+	v.Add("only_if_banned", strconv.FormatBool(onlyIfBanned))
 
 	r, err := b.Get("unbanChatMember", v)
 	if err != nil {

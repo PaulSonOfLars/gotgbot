@@ -9,6 +9,7 @@ type Chat struct {
 	FirstName        string           `json:"first_name"`
 	LastName         string           `json:"last_name"`
 	Photo            *ChatPhoto       `json:"photo"`
+	Bio              string           `json:"bio"`
 	Description      string           `json:"description"`
 	InviteLink       string           `json:"invite_link"`
 	PinnedMessage    *Message         `json:"pinned_message"`
@@ -16,6 +17,8 @@ type Chat struct {
 	SlowModeDelay    int              `json:"slow_mode_delay"`
 	StickerSetName   string           `json:"sticker_set_name"`
 	CanSetStickerSet bool             `json:"can_set_sticker_set"`
+	LinkedChatId     int              `json:"linked_chat_id"`
+	Location         ChatLocation     `json:"location"`
 }
 
 type ChatPermissions struct {
@@ -27,6 +30,11 @@ type ChatPermissions struct {
 	CanChangeInfo         *bool `json:"can_change_info,omitempty"`
 	CanInviteUsers        *bool `json:"can_invite_users,omitempty"`
 	CanPinMessages        *bool `json:"can_pin_messages,omitempty"`
+}
+
+type ChatLocation struct {
+	Location Location `json:"location"`
+	Address  string   `json:"address"`
 }
 
 type ChatPhoto struct {
