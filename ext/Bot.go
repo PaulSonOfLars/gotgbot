@@ -96,6 +96,14 @@ func (b Bot) GetMe() (*User, error) {
 	return &u, json.Unmarshal(r, &u)
 }
 
+func (b Bot) LogOut() (bool, error) {
+	return b.boolSender("logOut", nil)
+}
+
+func (b Bot) Close() (bool, error) {
+	return b.boolSender("close", nil)
+}
+
 // GetMyCommands gets the list of bot commands assigned to the bot.
 func (b Bot) GetMyCommands() ([]BotCommand, error) {
 	v := url.Values{}
