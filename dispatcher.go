@@ -47,7 +47,7 @@ func (d Dispatcher) Start() {
 			limiter <- struct{}{} // make sure to send anyway
 		}
 		go func(upd *RawUpdate) {
-			d.processUpdate(upd)
+			d.ProcessRawUpdate(upd)
 			<-limiter
 		}(upd)
 	}
@@ -59,7 +59,7 @@ type ContinueGroups struct{}
 func (eg EndGroups) Error() string      { return "Group iteration ended" }
 func (eg ContinueGroups) Error() string { return "Group iteration has continued" }
 
-func (d Dispatcher) processUpdate(upd *RawUpdate) {
+func (d Dispatcher) ProcessRawUpdate(upd *RawUpdate) {
 	defer func() {
 		if r := recover(); r != nil {
 			d.Bot.Logger.Error(r)
@@ -72,6 +72,10 @@ func (d Dispatcher) processUpdate(upd *RawUpdate) {
 		d.Bot.Logger.Errorw("failed to init update while processing", zap.Error(err))
 		return
 	}
+	d.ProcessUpdate(update)
+}
+
+func (d Dispatcher) ProcessUpdate(update *Update) {
 	for _, groupNum := range *d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
 			if res, err := handler.CheckUpdate(update); res {
