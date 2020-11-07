@@ -135,6 +135,10 @@ func (chat Chat) UnpinMessage() (bool, error) {
 	return chat.Bot.UnpinChatMessage(chat.Id)
 }
 
+func (chat Chat) UnpinMessageById(messageId int) (bool, error) {
+	return chat.Bot.UnpinChatMessageById(chat.Id, messageId)
+}
+
 func (chat Chat) Leave() (bool, error) {
 	return chat.Bot.LeaveChat(chat.Id)
 }
