@@ -158,11 +158,15 @@ package gen
 		}
 		defaultRetVal := getDefaultReturnVal(retType)
 
+		args, optionalsStruct := getArgs(tgMethodName, tgMethod)
+		if optionalsStruct != "" {
+			file.WriteString("\n" + optionalsStruct)
+		}
+
 		for _, d := range tgMethod.Description {
 			file.WriteString("\n// " + d)
 		}
-		// TODO: add optional parameter support
-		file.WriteString("\nfunc " + strings.Title(tgMethodName) + "(" + getNonOptionalArgs(tgMethod) + ") (" + retType + ", error) {")
+		file.WriteString("\nfunc " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
 		file.WriteString("\n// This method has content") // TODO
 		file.WriteString("\nreturn " + defaultRetVal + ", nil")
 		file.WriteString("\n}")
@@ -171,16 +175,32 @@ package gen
 	return writeGenToFile(file, "gen/methods.go")
 }
 
-func getNonOptionalArgs(method MethodDescription) string {
-	var args []string
+func getArgs(name string, method MethodDescription) (string, string) {
+	var requiredArgs []string
+	var optionalArgs []string
 	for _, f := range method.Fields {
 		if f.Required != "Yes" {
+			optionalArgs = append(optionalArgs, fmt.Sprintf("%s %s", snakeToTitle(f.Parameter), toGoTypes(f.Types[0])))
 			continue
 		}
 		// TODO: Not just assume first type
-		args = append(args, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
+		requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
 	}
-	return strings.Join(args, ", ")
+	optionalsStruct := ""
+	if len(optionalArgs) > 0 {
+		optionalsName := snakeToTitle(name) + "Opts"
+		bd := strings.Builder{}
+		bd.WriteString("\ntype " + optionalsName + " struct {")
+		for _, opt := range optionalArgs {
+			bd.WriteString("\n" + opt)
+		}
+		bd.WriteString("\n}")
+		optionalsStruct = bd.String()
+
+		requiredArgs = append(requiredArgs, fmt.Sprintf("opts %s", optionalsName))
+	}
+
+	return strings.Join(requiredArgs, ", "), optionalsStruct
 }
 
 func snakeToTitle(s string) string {
