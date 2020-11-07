@@ -15,7 +15,7 @@ type APIDescription struct {
 }
 
 type TypeDescription struct {
-	Description string       `json:"description"`
+	Description []string     `json:"description"`
 	Fields      []TypeFields `json:"fields"`
 }
 
@@ -28,7 +28,7 @@ type TypeFields struct {
 type MethodDescription struct {
 	Fields      []MethodFields `json:"fields"`
 	Returns     []string       `json:"returns"`
-	Description string         `json:"description"`
+	Description []string       `json:"description"`
 }
 
 type MethodFields struct {
@@ -79,17 +79,19 @@ package gen
 	for _, tgTypeName := range types {
 		tgType := d.Types[tgTypeName]
 
-		file.WriteString("\n// " + tgType.Description)
+		for _, d := range tgType.Description {
+			file.WriteString("\n// " + d)
+		}
 		file.WriteString("\ntype " + tgTypeName + " struct {")
 		for _, fields := range tgType.Fields {
 			file.WriteString("\n// " + fields.Description)
 
-			goType := toGoTypes(fields.Types[0])
+			goType := toGoTypes(fields.Types[0]) // TODO: NOT just default to first type
 			if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
 				goType = "*" + goType
 			}
 
-			file.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType) // TODO: NOT just default to first type
+			file.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
 		}
 
 		file.WriteString("\n}")
@@ -156,7 +158,9 @@ package gen
 		}
 		defaultRetVal := getDefaultReturnVal(retType)
 
-		file.WriteString("\n// " + tgMethod.Description)
+		for _, d := range tgMethod.Description {
+			file.WriteString("\n// " + d)
+		}
 		// TODO: add optional parameter support
 		file.WriteString("\nfunc " + strings.Title(tgMethodName) + "(" + getNonOptionalArgs(tgMethod) + ") (" + retType + ", error) {")
 		file.WriteString("\n// This method has content") // TODO
