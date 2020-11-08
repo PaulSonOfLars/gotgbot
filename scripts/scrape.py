@@ -41,7 +41,7 @@ def retrieve_api_info() -> Dict:
             curr_desc = []
 
         if curr_type and curr_name and x.name == "p":
-            description = x.get_text()
+            description = x.get_text().strip()
             # we only need returns for methods. If we have no no desription has been checked for returns yes
             if curr_type == METHODS and not curr_desc:
                 get_method_return_type(curr_name, curr_type, description, items)

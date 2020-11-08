@@ -98,7 +98,7 @@ package gen
 
 	}
 
-	return writeGenToFile(file, "gen/types.go")
+	return writeGenToFile(file, "gen/gen_types.go")
 }
 
 func writeGenToFile(file strings.Builder, filename string) error {
@@ -138,7 +138,11 @@ func generateMethods(d APIDescription) error {
 // Regen by running 'go generate' in the repo root.
 
 package gen
-
+import (
+	urlLib "net/url" // renamed to avoid clashes with url vars
+	"encoding/json"
+	"strconv"
+)
 `)
 
 	// TODO: Obtain ordered map to retain tg ordering
@@ -166,25 +170,87 @@ package gen
 		for _, d := range tgMethod.Description {
 			file.WriteString("\n// " + d)
 		}
-		file.WriteString("\nfunc " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
-		file.WriteString("\n// This method has content") // TODO
+		file.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
+		file.WriteString("\nv := urlLib.Values{}")
+
+		file.WriteString(methodArgsToValues(d, tgMethod))
+
+		// TODO: pass something better than nil for data
+		file.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
+		file.WriteString("\nif err != nil {")
 		file.WriteString("\nreturn " + defaultRetVal + ", nil")
+		file.WriteString("\n}")
+		file.WriteString("\n")
+
+		retVarType := retType
+		retVarName := getRetVarName(retVarType)
+		isPointer := strings.HasPrefix(retVarType, "*")
+		addr := ""
+		if isPointer {
+			retVarType = strings.TrimLeft(retVarType, "*")
+			addr = "&"
+		}
+		file.WriteString("\nvar " + retVarName + " " + retVarType)
+		file.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 		file.WriteString("\n}")
 	}
 
-	return writeGenToFile(file, "gen/methods.go")
+	return writeGenToFile(file, "gen/gen_methods.go")
+}
+
+func methodArgsToValues(d APIDescription, method MethodDescription) string {
+	bd := strings.Builder{}
+	for _, f := range method.Fields {
+		var param string
+
+		t := f.Types[0] // TODO: more than one type
+		for strings.HasPrefix(t, "Array of ") {
+			t = strings.TrimPrefix(t, "Array of ")
+		}
+		if _, ok := d.Types[t]; ok {
+			// todo: Hookup marshallers to add custom tg types
+			fmt.Println(f.Types[0], "is a tg type")
+			continue
+		} else {
+			converter, ok := goTypeToString(toGoTypes(f.Types[0]))
+			if !ok {
+				// todo: Hookup complex types
+				fmt.Println(f.Types[0], "is a complex type")
+				continue
+			}
+
+			if isRequiredField(f) {
+				param = fmt.Sprintf(converter, snakeToCamel(f.Parameter))
+			} else {
+				param = fmt.Sprintf(converter, "opts."+snakeToTitle(f.Parameter))
+			}
+			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + param + ")")
+		}
+	}
+
+	return bd.String()
+}
+
+func getRetVarName(retType string) string {
+	for strings.HasPrefix(retType, "*") {
+		retType = strings.TrimPrefix(retType, "*")
+	}
+	for strings.HasPrefix(retType, "[]") {
+		retType = strings.TrimPrefix(retType, "[]")
+	}
+	return strings.ToLower(retType[:1])
 }
 
 func getArgs(name string, method MethodDescription) (string, string) {
 	var requiredArgs []string
 	var optionalArgs []string
 	for _, f := range method.Fields {
-		if f.Required != "Yes" {
-			optionalArgs = append(optionalArgs, fmt.Sprintf("%s %s", snakeToTitle(f.Parameter), toGoTypes(f.Types[0])))
+		if isRequiredField(f) {
+			// TODO: Not just assume first type
+			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
 			continue
 		}
-		// TODO: Not just assume first type
-		requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
+		optionalArgs = append(optionalArgs, fmt.Sprintf("%s %s", snakeToTitle(f.Parameter), toGoTypes(f.Types[0])))
 	}
 	optionalsStruct := ""
 	if len(optionalArgs) > 0 {
@@ -201,6 +267,10 @@ func getArgs(name string, method MethodDescription) (string, string) {
 	}
 
 	return strings.Join(requiredArgs, ", "), optionalsStruct
+}
+
+func isRequiredField(f MethodFields) bool {
+	return f.Required == "Yes"
 }
 
 func snakeToTitle(s string) string {
@@ -254,4 +324,19 @@ func getDefaultReturnVal(s string) string {
 
 	// this isnt great
 	return s
+}
+
+func goTypeToString(t string) (string, bool) {
+	switch t {
+	case "int64":
+		return "strconv.FormatInt(%s, 10)", true
+	case "float64":
+		return "strconv.FormatFloat(%s, 'f', -1, 64)", true
+	case "bool":
+		return "strconv.FormatBool(%s)", true
+	case "string":
+		return "%s", true
+	default:
+		return "", false
+	}
 }
