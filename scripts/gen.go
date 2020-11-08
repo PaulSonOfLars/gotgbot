@@ -77,28 +77,33 @@ package gen
 	sort.Strings(types)
 
 	for _, tgTypeName := range types {
-		tgType := d.Types[tgTypeName]
-
-		for _, d := range tgType.Description {
-			file.WriteString("\n// " + d)
-		}
-		file.WriteString("\ntype " + tgTypeName + " struct {")
-		for _, fields := range tgType.Fields {
-			file.WriteString("\n// " + fields.Description)
-
-			goType := toGoTypes(fields.Types[0]) // TODO: NOT just default to first type
-			if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
-				goType = "*" + goType
-			}
-
-			file.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
-		}
-
-		file.WriteString("\n}")
-
+		file.WriteString(generateTypeDef(d, tgTypeName))
 	}
 
 	return writeGenToFile(file, "gen/gen_types.go")
+}
+
+func generateTypeDef(d APIDescription, tgTypeName string) string {
+	typeDef := strings.Builder{}
+	tgType := d.Types[tgTypeName]
+
+	for _, d := range tgType.Description {
+		typeDef.WriteString("\n// " + d)
+	}
+	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
+	for _, fields := range tgType.Fields {
+		typeDef.WriteString("\n// " + fields.Description)
+
+		goType := toGoTypes(fields.Types[0]) // TODO: NOT just default to first type
+		if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
+			goType = "*" + goType
+		}
+
+		typeDef.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
+	}
+
+	typeDef.WriteString("\n}")
+	return typeDef.String()
 }
 
 func writeGenToFile(file strings.Builder, filename string) error {
@@ -153,49 +158,56 @@ import (
 	sort.Strings(methods)
 
 	for _, tgMethodName := range methods {
-		tgMethod := d.Methods[tgMethodName]
-
-		// defaulting to [0] is ok because its either message or bool
-		retType := toGoTypes(tgMethod.Returns[0])
-		if isTgType(d.Types, retType) {
-			retType = "*" + retType
-		}
-		defaultRetVal := getDefaultReturnVal(retType)
-
-		args, optionalsStruct := getArgs(tgMethodName, tgMethod)
-		if optionalsStruct != "" {
-			file.WriteString("\n" + optionalsStruct)
-		}
-
-		for _, d := range tgMethod.Description {
-			file.WriteString("\n// " + d)
-		}
-		file.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
-		file.WriteString("\nv := urlLib.Values{}")
-
-		file.WriteString(methodArgsToValues(d, tgMethod))
-
-		// TODO: pass something better than nil for data
-		file.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
-		file.WriteString("\nif err != nil {")
-		file.WriteString("\nreturn " + defaultRetVal + ", nil")
-		file.WriteString("\n}")
-		file.WriteString("\n")
-
-		retVarType := retType
-		retVarName := getRetVarName(retVarType)
-		isPointer := strings.HasPrefix(retVarType, "*")
-		addr := ""
-		if isPointer {
-			retVarType = strings.TrimLeft(retVarType, "*")
-			addr = "&"
-		}
-		file.WriteString("\nvar " + retVarName + " " + retVarType)
-		file.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
-		file.WriteString("\n}")
+		file.WriteString(generateMethodDef(d, tgMethodName))
 	}
 
 	return writeGenToFile(file, "gen/gen_methods.go")
+}
+
+func generateMethodDef(d APIDescription, tgMethodName string) string {
+	method := strings.Builder{}
+	tgMethod := d.Methods[tgMethodName]
+
+	// defaulting to [0] is ok because its either message or bool
+	retType := toGoTypes(tgMethod.Returns[0])
+	if isTgType(d.Types, retType) {
+		retType = "*" + retType
+	}
+	defaultRetVal := getDefaultReturnVal(retType)
+
+	args, optionalsStruct := getArgs(tgMethodName, tgMethod)
+	if optionalsStruct != "" {
+		method.WriteString("\n" + optionalsStruct)
+	}
+
+	for _, d := range tgMethod.Description {
+		method.WriteString("\n// " + d)
+	}
+	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
+	method.WriteString("\nv := urlLib.Values{}")
+
+	method.WriteString(methodArgsToValues(d, tgMethod))
+
+	// TODO: pass something better than nil for data
+	method.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
+	method.WriteString("\nif err != nil {")
+	method.WriteString("\nreturn " + defaultRetVal + ", nil")
+	method.WriteString("\n}")
+	method.WriteString("\n")
+
+	retVarType := retType
+	retVarName := getRetVarName(retVarType)
+	isPointer := strings.HasPrefix(retVarType, "*")
+	addr := ""
+	if isPointer {
+		retVarType = strings.TrimLeft(retVarType, "*")
+		addr = "&"
+	}
+	method.WriteString("\nvar " + retVarName + " " + retVarType)
+	method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+	method.WriteString("\n}")
+
+	return method.String()
 }
 
 func methodArgsToValues(d APIDescription, method MethodDescription) string {
@@ -203,22 +215,25 @@ func methodArgsToValues(d APIDescription, method MethodDescription) string {
 	for _, f := range method.Fields {
 		var param string
 
+		complex := false
 		t := f.Types[0] // TODO: more than one type
 		for strings.HasPrefix(t, "Array of ") {
+			complex = true
 			t = strings.TrimPrefix(t, "Array of ")
 		}
 		if _, ok := d.Types[t]; ok {
 			// todo: Hookup marshallers to add custom tg types
 			fmt.Println(f.Types[0], "is a tg type")
 			continue
+		} else if complex {
+			// todo: Hookup complex types
+			fmt.Println(f.Types[0], "is a complex type")
+			continue
 		} else {
-			converter, ok := goTypeToString(toGoTypes(f.Types[0]))
-			if !ok {
-				// todo: Hookup complex types
-				fmt.Println(f.Types[0], "is a complex type")
-				continue
+			converter := goTypeToString(toGoTypes(f.Types[0]))
+			if converter == "" {
+				fmt.Println("Unknown stringer for", f.Types[0])
 			}
-
 			if isRequiredField(f) {
 				param = fmt.Sprintf(converter, snakeToCamel(f.Parameter))
 			} else {
@@ -326,17 +341,17 @@ func getDefaultReturnVal(s string) string {
 	return s
 }
 
-func goTypeToString(t string) (string, bool) {
+func goTypeToString(t string) string {
 	switch t {
 	case "int64":
-		return "strconv.FormatInt(%s, 10)", true
+		return "strconv.FormatInt(%s, 10)"
 	case "float64":
-		return "strconv.FormatFloat(%s, 'f', -1, 64)", true
+		return "strconv.FormatFloat(%s, 'f', -1, 64)"
 	case "bool":
-		return "strconv.FormatBool(%s)", true
+		return "strconv.FormatBool(%s)"
 	case "string":
-		return "%s", true
+		return "%s"
 	default:
-		return "", false
+		return ""
 	}
 }
