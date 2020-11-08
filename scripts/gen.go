@@ -188,12 +188,13 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 
-	method.WriteString(methodArgsToValues(d, tgMethod, defaultRetVal))
+	method.WriteString(methodArgsToValues(tgMethod, defaultRetVal))
 
 	// TODO: pass something better than nil for data
+	method.WriteString("\n")
 	method.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
 	method.WriteString("\n	if err != nil {")
-	method.WriteString("\n		return " + defaultRetVal + ", nil")
+	method.WriteString("\n		return " + defaultRetVal + ", err")
 	method.WriteString("\n	}")
 	method.WriteString("\n")
 
@@ -212,7 +213,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	return method.String()
 }
 
-func methodArgsToValues(d APIDescription, method MethodDescription, defaultRetVal string) string {
+func methodArgsToValues(method MethodDescription, defaultRetVal string) string {
 	bd := strings.Builder{}
 	for _, f := range method.Fields {
 		goParam := snakeToCamel(f.Parameter)
@@ -220,35 +221,29 @@ func methodArgsToValues(d APIDescription, method MethodDescription, defaultRetVa
 			goParam = "opts." + snakeToTitle(f.Parameter)
 		}
 
-		complex := false
-		t := f.Types[0] // TODO: more than one type
-		for strings.HasPrefix(t, "Array of ") {
-			complex = true
-			t = strings.TrimPrefix(t, "Array of ")
-		}
-		if _, ok := d.Types[t]; ok {
-			// todo: Hookup marshallers to add custom tg types
-			fmt.Println(f.Types[0], "is a tg type")
-			continue
-		} else if complex {
+		// TODO: more than one type
+		converter := goTypeToString(toGoTypes(f.Types[0]))
+		if converter == "" {
+			if strings.HasPrefix(f.Types[0], "Input") {
+				fmt.Println("Purposefully skipping file item to allow for later data logic")
+				continue
+			}
 			// dont use goParam since that contains the `opts.` section
 			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
-			bd.WriteString("\nvar " + bytesVarName + " []byte")
-			bd.WriteString("\nif " + goParam + " != nil {")
-			bd.WriteString("\n	var err error")
-			bd.WriteString("\n	" + bytesVarName + ", err = json.Marshal(" + goParam + ")")
-			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + " %w\", err)")
-			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
-			bd.WriteString("\n}")
-
-		} else {
-			converter := goTypeToString(toGoTypes(f.Types[0]))
-			if converter == "" {
-				fmt.Println("Unknown stringer for", f.Types[0])
+			if strings.HasPrefix(f.Types[0], "Array of ") {
+				bd.WriteString("\nif " + goParam + " != nil {")
 			}
 
+			bd.WriteString("\n	" + bytesVarName + ", err := json.Marshal(" + goParam + ")")
+			bd.WriteString("\n	if err != nil {")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + ": %w\", err)")
+			bd.WriteString("\n	}")
+			bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
+
+			if strings.HasPrefix(f.Types[0], "Array of ") {
+				bd.WriteString("\n}")
+			}
+		} else {
 			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
 		}
 	}
