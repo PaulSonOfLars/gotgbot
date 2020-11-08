@@ -49,6 +49,7 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: Use golang templates instead of string builders
 	err = generateTypes(d)
 	if err != nil {
 		panic(err)
@@ -147,6 +148,7 @@ import (
 	urlLib "net/url" // renamed to avoid clashes with url vars
 	"encoding/json"
 	"strconv"
+	"fmt"
 )
 `)
 
@@ -158,15 +160,15 @@ import (
 	sort.Strings(methods)
 
 	for _, tgMethodName := range methods {
-		file.WriteString(generateMethodDef(d, tgMethodName))
+		tgMethod := d.Methods[tgMethodName]
+		file.WriteString(generateMethodDef(d, tgMethod, tgMethodName))
 	}
 
 	return writeGenToFile(file, "gen/gen_methods.go")
 }
 
-func generateMethodDef(d APIDescription, tgMethodName string) string {
+func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodName string) string {
 	method := strings.Builder{}
-	tgMethod := d.Methods[tgMethodName]
 
 	// defaulting to [0] is ok because its either message or bool
 	retType := toGoTypes(tgMethod.Returns[0])
@@ -184,15 +186,15 @@ func generateMethodDef(d APIDescription, tgMethodName string) string {
 		method.WriteString("\n// " + d)
 	}
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
-	method.WriteString("\nv := urlLib.Values{}")
+	method.WriteString("\n	v := urlLib.Values{}")
 
-	method.WriteString(methodArgsToValues(d, tgMethod))
+	method.WriteString(methodArgsToValues(d, tgMethod, defaultRetVal))
 
 	// TODO: pass something better than nil for data
 	method.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
-	method.WriteString("\nif err != nil {")
-	method.WriteString("\nreturn " + defaultRetVal + ", nil")
-	method.WriteString("\n}")
+	method.WriteString("\n	if err != nil {")
+	method.WriteString("\n		return " + defaultRetVal + ", nil")
+	method.WriteString("\n	}")
 	method.WriteString("\n")
 
 	retVarType := retType
@@ -210,10 +212,13 @@ func generateMethodDef(d APIDescription, tgMethodName string) string {
 	return method.String()
 }
 
-func methodArgsToValues(d APIDescription, method MethodDescription) string {
+func methodArgsToValues(d APIDescription, method MethodDescription, defaultRetVal string) string {
 	bd := strings.Builder{}
 	for _, f := range method.Fields {
-		var param string
+		goParam := snakeToCamel(f.Parameter)
+		if !isRequiredField(f) {
+			goParam = "opts." + snakeToTitle(f.Parameter)
+		}
 
 		complex := false
 		t := f.Types[0] // TODO: more than one type
@@ -226,20 +231,25 @@ func methodArgsToValues(d APIDescription, method MethodDescription) string {
 			fmt.Println(f.Types[0], "is a tg type")
 			continue
 		} else if complex {
-			// todo: Hookup complex types
-			fmt.Println(f.Types[0], "is a complex type")
-			continue
+			// dont use goParam since that contains the `opts.` section
+			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
+			bd.WriteString("\nvar " + bytesVarName + " []byte")
+			bd.WriteString("\nif " + goParam + " != nil {")
+			bd.WriteString("\n	var err error")
+			bd.WriteString("\n	" + bytesVarName + ", err = json.Marshal(" + goParam + ")")
+			bd.WriteString("\n	if err != nil {")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + " %w\", err)")
+			bd.WriteString("\n	}")
+			bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
+			bd.WriteString("\n}")
+
 		} else {
 			converter := goTypeToString(toGoTypes(f.Types[0]))
 			if converter == "" {
 				fmt.Println("Unknown stringer for", f.Types[0])
 			}
-			if isRequiredField(f) {
-				param = fmt.Sprintf(converter, snakeToCamel(f.Parameter))
-			} else {
-				param = fmt.Sprintf(converter, "opts."+snakeToTitle(f.Parameter))
-			}
-			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + param + ")")
+
+			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
 		}
 	}
 
