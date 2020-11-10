@@ -269,14 +269,14 @@ func getRetVarName(retType string) string {
 
 func getArgs(name string, method MethodDescription) (string, string) {
 	var requiredArgs []string
-	var optionalArgs []string
+	var optionalArgs []MethodFields
 	for _, f := range method.Fields {
 		if isRequiredField(f) {
 			// TODO: Not just assume first type
 			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
 			continue
 		}
-		optionalArgs = append(optionalArgs, fmt.Sprintf("%s %s", snakeToTitle(f.Parameter), toGoTypes(f.Types[0])))
+		optionalArgs = append(optionalArgs, f)
 	}
 	optionalsStruct := ""
 	if len(optionalArgs) > 0 {
@@ -284,7 +284,8 @@ func getArgs(name string, method MethodDescription) (string, string) {
 		bd := strings.Builder{}
 		bd.WriteString("\ntype " + optionalsName + " struct {")
 		for _, opt := range optionalArgs {
-			bd.WriteString("\n" + opt)
+			bd.WriteString("\n// " + opt.Description)
+			bd.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(opt.Parameter), toGoTypes(opt.Types[0])))
 		}
 		bd.WriteString("\n}")
 		optionalsStruct = bd.String()
