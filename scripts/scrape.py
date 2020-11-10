@@ -42,7 +42,10 @@ def retrieve_api_info() -> Dict:
             curr_name, curr_type = get_type_and_name(x, anchor, items)
             curr_desc = []
 
-        if curr_type and curr_name and x.name == "p":
+        if not curr_type or not curr_name:
+            continue
+
+        if x.name == "p":
             description = x.get_text().strip()
             # we only need returns for methods. If we have no no desription has been checked for returns yes
             if curr_type == METHODS and not curr_desc:
@@ -54,7 +57,22 @@ def retrieve_api_info() -> Dict:
         if x.name == "table":
             get_fields(curr_name, curr_type, x, items)
 
+        if x.name == "ul":
+            get_subtypes(curr_name, curr_type, x, items)
+
     return items
+
+
+def get_subtypes(curr_name: str, curr_type: str, x, items: dict):
+    if curr_name == "InputFile":  # Has no interesting subtypes
+        return
+
+    subtypes = []
+    for li in x.find_all("li"):
+        subtype_name = li.get_text()
+        subtypes.append(subtype_name)
+
+    items[curr_type][curr_name]["subtypes"] = subtypes
 
 
 def get_fields(curr_name: str, curr_type: str, x, items: dict):
@@ -170,7 +188,14 @@ def verify_type_parameters(items: Dict):
 
         fields = values.get("fields", [])
         if len(fields) == 0:
-            print("TYPE", t, "HAS NO FIELDS")
+            subtypes = values.get("subtypes", [])
+            if not subtypes:
+                print("TYPE", t, "HAS NO FIELDS OR SUBTYPES")
+                continue
+
+            for st in subtypes:
+                if st not in items[TYPES]:
+                    print("TYPE", t, "USES INVALID SUBTYPE", st)
 
         # check all parameter types are valid
         for param in fields:
