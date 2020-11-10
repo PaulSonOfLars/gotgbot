@@ -7,13 +7,14 @@ import requests
 from bs4 import BeautifulSoup
 
 TG_CORE_TYPES = ["String", "Boolean", "Integer", "Float"]
+API_URL = "https://core.telegram.org/bots/api"
 
 METHODS = "methods"
 TYPES = "types"
 
 
 def retrieve_api_info() -> Dict:
-    r = requests.get("https://core.telegram.org/bots/api")
+    r = requests.get(API_URL)
     soup = BeautifulSoup(r.text, features="html.parser")
     dev_rules = soup.find("div", {"id": "dev_page_content"})
     curr_type = ""
@@ -33,11 +34,12 @@ def retrieve_api_info() -> Dict:
             curr_desc = []
 
         if x.name == "h4":
-            name = x.find("a").get("name")
+            anchor = x.find("a")
+            name = anchor.get("name")
             if name and "-" in name:
                 continue
 
-            curr_name, curr_type = get_type_and_name(x, items)
+            curr_name, curr_type = get_type_and_name(x, anchor, items)
             curr_desc = []
 
         if curr_type and curr_name and x.name == "p":
@@ -55,7 +57,7 @@ def retrieve_api_info() -> Dict:
     return items
 
 
-def get_fields(curr_name, curr_type, x, items):
+def get_fields(curr_name: str, curr_type: str, x, items: dict):
     body = x.find("tbody")
     fields = []
     for tr in body.find_all("tr"):
@@ -101,13 +103,17 @@ def get_method_return_type(curr_name, curr_type, description, items):
         print("Failed to get return type for", curr_name)
 
 
-def get_type_and_name(x, items):
+def get_type_and_name(x, anchor, items):
     if x.text[0].isupper():
         curr_type = TYPES
     else:
         curr_type = METHODS
     curr_name = x.get_text()
     items[curr_type][curr_name] = {}
+
+    href = anchor.get("href")
+    if href:
+        items[curr_type][curr_name]["href"] = API_URL + href
 
     return curr_name, curr_type
 
@@ -157,6 +163,11 @@ def clean_tg_type(t: str) -> List[str]:
 
 def verify_type_parameters(items: Dict):
     for t, values in items[TYPES].items():
+        # check all values have a URL
+        if not values.get("href"):
+            print(f"{t} has no link!")
+            continue
+
         fields = values.get("fields", [])
         if len(fields) == 0:
             print("TYPE", t, "HAS NO FIELDS")
@@ -175,6 +186,11 @@ def verify_type_parameters(items: Dict):
 def verify_method_parameters(items: Dict):
     # Type check all methods
     for method, values in items[METHODS].items():
+        # check all values have a URL
+        if not values.get("href"):
+            print(f"{method} has no link!")
+            continue
+
         # check all methods have a return
         if not values.get("returns"):
             print(f"{method} has no return types!")
