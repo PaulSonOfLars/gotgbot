@@ -173,10 +173,15 @@ def get_proper_type(t: str) -> str:
 
 
 def clean_tg_type(t: str) -> List[str]:
+    pref = ""
+    if t.startswith("Array of "):
+        pref = "Array of "
+        t = t[len("Array of "):]
+
     fixed_ors = [x.strip() for x in t.split(" or ")]  # Fix situations like "A or B"
     fixed_ands = [x.strip() for fo in fixed_ors for x in fo.split(" and ")]  # Fix situations like "A and B"
     fixed_commas = [x.strip() for fa in fixed_ands for x in fa.split(", ")]  # Fix situations like "A, B"
-    return [get_proper_type(x) for x in fixed_commas]
+    return [pref + get_proper_type(x) for x in fixed_commas]
 
 
 def verify_type_parameters(items: Dict):
