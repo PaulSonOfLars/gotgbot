@@ -157,8 +157,12 @@ def clean_tg_type(t: str) -> List[str]:
 
 def verify_type_parameters(items: Dict):
     for t, values in items[TYPES].items():
+        fields = values.get("fields", [])
+        if len(fields) == 0:
+            print("TYPE", t, "HAS NO FIELDS")
+
         # check all parameter types are valid
-        for param in values.get("fields", []):
+        for param in fields:
             types = param.get("types")
             for t in types:
                 while t.startswith("Array of "):
