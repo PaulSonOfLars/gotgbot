@@ -17,6 +17,7 @@ type APIDescription struct {
 type TypeDescription struct {
 	Description []string     `json:"description"`
 	Fields      []TypeFields `json:"fields"`
+	Href        string       `json:"href"`
 }
 
 type TypeFields struct {
@@ -29,6 +30,7 @@ type MethodDescription struct {
 	Fields      []MethodFields `json:"fields"`
 	Returns     []string       `json:"returns"`
 	Description []string       `json:"description"`
+	Href        string         `json:"href"`
 }
 
 type MethodFields struct {
@@ -91,6 +93,8 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 	for _, d := range tgType.Description {
 		typeDef.WriteString("\n// " + d)
 	}
+	typeDef.WriteString("\n// " + tgType.Href)
+
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, fields := range tgType.Fields {
 		typeDef.WriteString("\n// " + fields.Description)
@@ -185,6 +189,8 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	for _, d := range tgMethod.Description {
 		method.WriteString("\n// " + d)
 	}
+	method.WriteString("\n// " + tgMethod.Href)
+
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 
