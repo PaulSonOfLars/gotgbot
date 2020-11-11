@@ -275,23 +275,27 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		if converter == "" {
 			if f.Types[0] == "InputFile" {
 				// TODO: support case where its just inputfile and not string
-				// TODO: support passing filenames
+
 				hasData = true
 				bd.WriteString("\nif " + goParam + "!= nil {")
 				bd.WriteString("\n	if s, ok := " + goParam + ".(string); ok {")
 				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", s)")
 				bd.WriteString("\n	} else if r, ok := " + goParam + ".(io.Reader); ok {")
-				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")") // todo: check if this works
-				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = r")
+				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")")
+				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = NamedReader{File: r}")
+				bd.WriteString("\n	} else if nf, ok := " + goParam + ".(NamedReader); ok {")
+				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")")
+				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = nf")
 				bd.WriteString("\n	} else {")
 				bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"unknown type for InputFile: %T\"," + goParam + ")")
 				bd.WriteString("\n	}")
 				bd.WriteString("\n}")
 			} else if strings.HasPrefix(f.Types[0], "Input") {
+				// TODO: Add InputMedia support; use interfaces
 				fmt.Println("Purposefully skipping unhandled file item to allow for later data logic", f.Types)
 				continue
 			}
-			// TODO: Add custom MarshalJSONs for all sending types which could contain nil arrays (unsupported by tg)
+
 			// dont use goParam since that contains the `opts.` section
 			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
 			if isTgArray(f.Types[0]) {
@@ -313,7 +317,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 	}
 
 	if hasData {
-		return "\ndata := map[string]io.Reader{}" + bd.String(), hasData
+		return "\ndata := map[string]NamedReader{}" + bd.String(), hasData
 	}
 
 	return bd.String(), hasData
