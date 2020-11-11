@@ -94,6 +94,10 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		typeDef.WriteString("\n// " + d)
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
+	if len(tgType.Fields) == 0 {
+		typeDef.WriteString("\ntype " + tgTypeName + " interface{}")
+		return typeDef.String()
+	}
 
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, fields := range tgType.Fields {
@@ -153,6 +157,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"fmt"
+	"io"
 )
 `)
 
@@ -194,11 +199,16 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 
-	method.WriteString(methodArgsToValues(tgMethod, defaultRetVal))
+	valueGen, hasData := methodArgsToValues(tgMethod, defaultRetVal)
+	method.WriteString(valueGen)
 
-	// TODO: pass something better than nil for data
 	method.WriteString("\n")
-	method.WriteString("\nr, err := bot.Request(\"" + tgMethodName + "\", v, nil)")
+
+	if hasData {
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethodName + "\", v, data)")
+	} else {
+		method.WriteString("\nr, err := bot.Get(\"" + tgMethodName + "\", v)")
+	}
 	method.WriteString("\n	if err != nil {")
 	method.WriteString("\n		return " + defaultRetVal + ", err")
 	method.WriteString("\n	}")
@@ -219,7 +229,8 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	return method.String()
 }
 
-func methodArgsToValues(method MethodDescription, defaultRetVal string) string {
+func methodArgsToValues(method MethodDescription, defaultRetVal string) (string, bool) {
+	hasData := false
 	bd := strings.Builder{}
 	for _, f := range method.Fields {
 		goParam := snakeToCamel(f.Parameter)
@@ -230,10 +241,25 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) string {
 		// TODO: more than one type
 		converter := goTypeToString(toGoTypes(f.Types[0]))
 		if converter == "" {
-			if strings.HasPrefix(f.Types[0], "Input") {
-				fmt.Println("Purposefully skipping file item to allow for later data logic")
+			if f.Types[0] == "InputFile" {
+				// TODO: support case where its just inputfile and not string
+				// TODO: support passing filenames
+				hasData = true
+				bd.WriteString("\nif " + goParam + "!= nil {")
+				bd.WriteString("\n	if s, ok := " + goParam + ".(string); ok {")
+				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", s)")
+				bd.WriteString("\n	} else if r, ok := " + goParam + ".(io.Reader); ok {")
+				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")") // todo: check if this works
+				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = r")
+				bd.WriteString("\n	} else {")
+				bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"unknown type for InputFile: %T\"," + goParam + ")")
+				bd.WriteString("\n	}")
+				bd.WriteString("\n}")
+			} else if strings.HasPrefix(f.Types[0], "Input") {
+				fmt.Println("Purposefully skipping unhandled file item to allow for later data logic", f.Types)
 				continue
 			}
+			// TODO: Add custom MarshalJSONs for all sending types which could contain nil arrays (unsupported by tg)
 			// dont use goParam since that contains the `opts.` section
 			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
 			if strings.HasPrefix(f.Types[0], "Array of ") {
@@ -254,7 +280,11 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) string {
 		}
 	}
 
-	return bd.String()
+	if hasData {
+		return "\ndata := map[string]io.Reader{}" + bd.String(), hasData
+	}
+
+	return bd.String(), hasData
 }
 
 func getRetVarName(retType string) string {
