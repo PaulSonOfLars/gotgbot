@@ -18,6 +18,7 @@ type TypeDescription struct {
 	Description []string     `json:"description"`
 	Fields      []TypeFields `json:"fields"`
 	Href        string       `json:"href"`
+	SubtypeOf   []string     `json:"subtype_of"`
 }
 
 type TypeFields struct {
@@ -97,6 +98,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
+		// todo: Generate interface methods for child functions
 		typeDef.WriteString("\ntype " + tgTypeName + " interface{}")
 		return typeDef.String()
 	}

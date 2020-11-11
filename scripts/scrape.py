@@ -199,7 +199,12 @@ def verify_type_parameters(items: Dict):
                 continue
 
             for st in subtypes:
-                if st not in items[TYPES]:
+                if st in items[TYPES]:
+                    if "subtype_of" in items[TYPES][st]:
+                        items[TYPES][st]["subtype_of"].append(t)
+                    else:
+                        items[TYPES][st]["subtype_of"] = [t]
+                else:
                     print("TYPE", t, "USES INVALID SUBTYPE", st)
 
         # check all parameter types are valid
