@@ -70,6 +70,8 @@ func generateTypes(d APIDescription) error {
 
 package gen
 
+import "encoding/json"
+
 `)
 
 	// TODO: Obtain ordered map to retain tg ordering
@@ -99,6 +101,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		return typeDef.String()
 	}
 
+	var genCustomMarshalFields []TypeFields
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, fields := range tgType.Fields {
 		typeDef.WriteString("\n// " + fields.Description)
@@ -108,11 +111,40 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 			goType = "*" + goType
 		}
 
+		if isTgArray(fields.Types[0]) { // TODO: NOT just default to first type
+			genCustomMarshalFields = append(genCustomMarshalFields, fields)
+		}
+
 		typeDef.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
 	}
 
 	typeDef.WriteString("\n}")
+
+	if len(genCustomMarshalFields) > 0 {
+		typeDef.WriteString(genCustomMarshal(tgTypeName, genCustomMarshalFields))
+	}
+
 	return typeDef.String()
+}
+
+func genCustomMarshal(name string, fields []TypeFields) string {
+	marshalDef := strings.Builder{}
+
+	marshalDef.WriteString("\n")
+	marshalDef.WriteString("\nfunc (v " + name + ") MarshalJSON() ([]byte, error) {")
+	marshalDef.WriteString("\n	type alias " + name)
+	marshalDef.WriteString("\n	a := struct{alias}{")
+	marshalDef.WriteString("\n		alias: (alias)(v),")
+	marshalDef.WriteString("\n	}")
+	for _, f := range fields {
+		marshalDef.WriteString("\n	if a." + snakeToTitle(f.Field) + " == nil {")
+		marshalDef.WriteString("\n		a." + snakeToTitle(f.Field) + " = make(" + toGoTypes(f.Types[0]) + ", 0)")
+		marshalDef.WriteString("\n	}")
+	}
+	marshalDef.WriteString("\nreturn json.Marshal(a)")
+	marshalDef.WriteString("\n}")
+
+	return marshalDef.String()
 }
 
 func writeGenToFile(file strings.Builder, filename string) error {
@@ -262,7 +294,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			// TODO: Add custom MarshalJSONs for all sending types which could contain nil arrays (unsupported by tg)
 			// dont use goParam since that contains the `opts.` section
 			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
-			if strings.HasPrefix(f.Types[0], "Array of ") {
+			if isTgArray(f.Types[0]) {
 				bd.WriteString("\nif " + goParam + " != nil {")
 			}
 
@@ -272,7 +304,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			bd.WriteString("\n	}")
 			bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
 
-			if strings.HasPrefix(f.Types[0], "Array of ") {
+			if isTgArray(f.Types[0]) {
 				bd.WriteString("\n}")
 			}
 		} else {
@@ -345,7 +377,7 @@ func snakeToCamel(s string) string {
 
 func toGoTypes(s string) string {
 	pref := ""
-	for strings.HasPrefix(s, "Array of ") {
+	for isTgArray(s) {
 		pref += "[]"
 		s = strings.TrimPrefix(s, "Array of ")
 	}
@@ -361,6 +393,10 @@ func toGoTypes(s string) string {
 		return pref + "string"
 	}
 	return pref + s
+}
+
+func isTgArray(s string) bool {
+	return strings.HasPrefix(s, "Array of ")
 }
 
 func getDefaultReturnVal(s string) string {
