@@ -16,6 +16,7 @@ type TypeDescription struct {
 	Description []string     `json:"description"`
 	Fields      []TypeFields `json:"fields"`
 	Href        string       `json:"href"`
+	Subtypes    []string     `json:"subtypes"`
 	SubtypeOf   []string     `json:"subtype_of"`
 }
 

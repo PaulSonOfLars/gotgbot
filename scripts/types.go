@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -13,8 +14,11 @@ func generateTypes(d APIDescription) error {
 
 package gen
 
-import "encoding/json"
-
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+)
 `)
 
 	// TODO: Obtain ordered map to retain tg ordering
@@ -41,25 +45,39 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
 		// todo: Generate interface methods for child functions
-		typeDef.WriteString("\ntype " + tgTypeName + " interface{}")
+		typeDef.WriteString("\ntype " + tgTypeName + " interface{")
+		if len(tgType.Subtypes) != 0 {
+			typeDef.WriteString("\n	" + tgTypeName + "Params(string, map[string]NamedReader) ([]byte, error)")
+			typeDef.WriteString("\n")
+		}
+		typeDef.WriteString("}")
+
 		return typeDef.String()
 	}
 
 	var genCustomMarshalFields []TypeFields
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, fields := range tgType.Fields {
-		goType := toGoTypes(fields.Types[0]) // TODO: NOT just default to first type
+		fieldType := fields.Types[0] // TODO: NOT just default to first type
 
-		// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
-		if isSubtypeOf(tgType.SubtypeOf, "InputMedia") && fields.Field == "type" {
-			continue
+		// InputMedia is a special one.
+		if isSubtypeOf(tgType, "InputMedia") {
+			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
+			if fields.Field == "type" {
+				continue
+			}
+			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
+			if fields.Field == "media" {
+				fieldType = "InputFile"
+			}
 		}
 
+		goType := toGoTypes(fieldType)
 		if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
 			goType = "*" + goType
 		}
 
-		if isTgArray(fields.Types[0]) { // TODO: NOT just default to first type
+		if isTgArray(fieldType) {
 			genCustomMarshalFields = append(genCustomMarshalFields, fields)
 		}
 
@@ -73,7 +91,35 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		typeDef.WriteString(genCustomMarshal(tgTypeName, genCustomMarshalFields))
 	}
 
+	for _, parentType := range tgType.SubtypeOf {
+		switch parentType {
+		case "InputMedia":
+			typeDef.WriteString("\n")
+			typeDef.WriteString("\nfunc (v " + tgTypeName + ") " + parentType + "Params(mediaName string, data map[string]NamedReader) ([]byte, error) {")
+
+			typeDef.WriteString(paramsReader)
+
+			typeDef.WriteString("\n	return json.Marshal(v)")
+			typeDef.WriteString("\n}")
+
+		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
+			// TODO: Verify these.
+			// Should be ok, but got to run more tests.
+		default:
+			fmt.Printf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
+		}
+	}
+
 	return typeDef.String()
+}
+
+func isSubtypeOf(tgType TypeDescription, parentType string) bool {
+	for _, pt := range tgType.SubtypeOf {
+		if parentType == pt {
+			return true
+		}
+	}
+	return false
 }
 
 func genCustomMarshal(name string, fields []TypeFields) string {
@@ -105,11 +151,16 @@ func genCustomMarshal(name string, fields []TypeFields) string {
 	return marshalDef.String()
 }
 
-func isSubtypeOf(types []string, parentType string) bool {
-	for _, t := range types {
-		if t == parentType {
-			return true
-		}
+const paramsReader = `
+if v.Media != nil {
+	if r, ok := v.Media.(io.Reader); ok {
+		v.Media = "attach://"+mediaName
+		data[mediaName] = NamedReader{File: r}
+	} else if nf, ok := v.Media.(NamedReader); ok {
+		v.Media = "attach://"+mediaName
+		data[mediaName] = nf
+	} else {
+		return nil, fmt.Errorf("unknown type for InputFile: %T", v.Media)
 	}
-	return false
 }
+`

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"sort"
 	"strings"
+	"text/template"
 )
 
 func generateMethods(d APIDescription) error {
@@ -104,37 +107,47 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 
 		// TODO: more than one type
 		converter := goTypeToString(toGoTypes(f.Types[0]))
-		if converter == "" {
-			if f.Types[0] == "InputFile" {
-				// TODO: support case where its just inputfile and not string
+		if converter != "" {
+			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
+			continue
+		}
 
-				hasData = true
-				bd.WriteString("\nif " + goParam + "!= nil {")
-				bd.WriteString("\n	if s, ok := " + goParam + ".(string); ok {")
-				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", s)")
-				bd.WriteString("\n	} else if r, ok := " + goParam + ".(io.Reader); ok {")
-				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")")
-				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = NamedReader{File: r}")
-				bd.WriteString("\n	} else if nf, ok := " + goParam + ".(NamedReader); ok {")
-				bd.WriteString("\n		v.Add(\"" + f.Parameter + "\", \"attach://" + f.Parameter + "\")")
-				bd.WriteString("\n		data[\"" + f.Parameter + "\"] = nf")
-				bd.WriteString("\n	} else {")
-				bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"unknown type for InputFile: %T\"," + goParam + ")")
-				bd.WriteString("\n	}")
-				bd.WriteString("\n}")
-			} else if strings.HasPrefix(f.Types[0], "Input") {
-				// TODO: Add InputMedia support; use interfaces
-				fmt.Println("Purposefully skipping unhandled file item to allow for later data logic", f.Types)
-				continue
+		if f.Types[0] == "InputFile" {
+			// TODO: support case where its just inputfile and not string
+
+			hasData = true
+			t, err := template.New("readers").Parse(readerBranches)
+			if err != nil {
+				panic("failed to parse template: " + err.Error())
 			}
+			buf := bytes.Buffer{}
+			w := bufio.NewWriter(&buf)
+			err = t.Execute(w, readerBranchesStruct{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Parameter:     f.Parameter,
+			})
+			if err != nil {
+				panic("failed to execute template: " + err.Error())
+			}
+			if err := w.Flush(); err != nil {
+				panic("failed to flush template: " + err.Error())
+			}
+			bd.WriteString(buf.String())
+			continue
+
+		} else if strings.Contains(f.Types[0], "InputMedia") {
+			offset := ""
+			if isTgArray(f.Types[0]) {
+				bd.WriteString("\nfor idx, im := range " + goParam + " {")
+				goParam = "im"
+				offset = " + strconv.Itoa(idx)"
+			}
+			hasData = true
 
 			// dont use goParam since that contains the `opts.` section
-			bytesVarName := snakeToCamel(f.Parameter) + "Bs"
-			if isTgArray(f.Types[0]) {
-				bd.WriteString("\nif " + goParam + " != nil {")
-			}
-
-			bd.WriteString("\n	" + bytesVarName + ", err := json.Marshal(" + goParam + ")")
+			bytesVarName := "inputMediaBs"
+			bd.WriteString("\n	" + bytesVarName + ", err := " + goParam + ".InputMediaParams(\"" + f.Parameter + "\"" + offset + " , data)")
 			bd.WriteString("\n	if err != nil {")
 			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + ": %w\", err)")
 			bd.WriteString("\n	}")
@@ -143,9 +156,27 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			if isTgArray(f.Types[0]) {
 				bd.WriteString("\n}")
 			}
-		} else {
-			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
+
+			continue
 		}
+
+		if isTgArray(f.Types[0]) {
+			bd.WriteString("\nif " + goParam + " != nil {")
+		}
+
+		// dont use goParam since that contains the `opts.` section
+		bytesVarName := snakeToCamel(f.Parameter) + "Bs"
+
+		bd.WriteString("\n	" + bytesVarName + ", err := json.Marshal(" + goParam + ")")
+		bd.WriteString("\n	if err != nil {")
+		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + ": %w\", err)")
+		bd.WriteString("\n	}")
+		bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
+
+		if isTgArray(f.Types[0]) {
+			bd.WriteString("\n}")
+		}
+
 	}
 
 	return bd.String(), hasData
@@ -193,3 +224,25 @@ func getArgs(name string, method MethodDescription) (string, string) {
 func isRequiredField(f MethodFields) bool {
 	return f.Required == "Yes"
 }
+
+type readerBranchesStruct struct {
+	GoParam       string
+	DefaultReturn string
+	Parameter     string
+}
+
+const readerBranches = `
+if {{.GoParam}} != nil {
+	if s, ok := {{.GoParam}}.(string); ok {
+		v.Add("{{.Parameter}}", s)
+	} else if r, ok := {{.GoParam}}.(io.Reader); ok {
+		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
+		data["{{.Parameter}}"] = NamedReader{File: r}
+	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
+		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
+		data["{{.Parameter}}"] = nf
+	} else {
+		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
+	}
+}
+`
