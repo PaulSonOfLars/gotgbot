@@ -58,11 +58,14 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method.WriteString("\n// " + tgMethod.Href)
 
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
-	method.WriteString("\n	v := urlLib.Values{}")
 
 	valueGen, hasData := methodArgsToValues(tgMethod, defaultRetVal)
-	method.WriteString(valueGen)
+	method.WriteString("\n	v := urlLib.Values{}")
+	if hasData {
+		method.WriteString("\n	data := map[string]NamedReader{}")
+	}
 
+	method.WriteString(valueGen)
 	method.WriteString("\n")
 
 	if hasData {
@@ -143,10 +146,6 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		} else {
 			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
 		}
-	}
-
-	if hasData {
-		return "\ndata := map[string]NamedReader{}" + bd.String(), hasData
 	}
 
 	return bd.String(), hasData

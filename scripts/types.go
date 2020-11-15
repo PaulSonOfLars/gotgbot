@@ -48,9 +48,13 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 	var genCustomMarshalFields []TypeFields
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, fields := range tgType.Fields {
-		typeDef.WriteString("\n// " + fields.Description)
-
 		goType := toGoTypes(fields.Types[0]) // TODO: NOT just default to first type
+
+		// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
+		if isSubtypeOf(tgType.SubtypeOf, "InputMedia") && fields.Field == "type" {
+			continue
+		}
+
 		if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
 			goType = "*" + goType
 		}
@@ -59,6 +63,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 			genCustomMarshalFields = append(genCustomMarshalFields, fields)
 		}
 
+		typeDef.WriteString("\n// " + fields.Description)
 		typeDef.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
 	}
 
@@ -77,7 +82,16 @@ func genCustomMarshal(name string, fields []TypeFields) string {
 	marshalDef.WriteString("\n")
 	marshalDef.WriteString("\nfunc (v " + name + ") MarshalJSON() ([]byte, error) {")
 	marshalDef.WriteString("\n	type alias " + name)
-	marshalDef.WriteString("\n	a := struct{alias}{")
+	marshalDef.WriteString("\n	a := struct{")
+	if strings.HasPrefix(name, "InputMedia") {
+		marshalDef.WriteString("\n		Type string `json:\"type\"`")
+	}
+	marshalDef.WriteString("\n		alias")
+	marshalDef.WriteString("\n	}{")
+
+	if strings.HasPrefix(name, "InputMedia") {
+		marshalDef.WriteString("\n		Type: \"" + strings.ToLower(strings.TrimPrefix(name, "InputMedia")) + "\",")
+	}
 	marshalDef.WriteString("\n		alias: (alias)(v),")
 	marshalDef.WriteString("\n	}")
 	for _, f := range fields {
@@ -89,4 +103,13 @@ func genCustomMarshal(name string, fields []TypeFields) string {
 	marshalDef.WriteString("\n}")
 
 	return marshalDef.String()
+}
+
+func isSubtypeOf(types []string, parentType string) bool {
+	for _, t := range types {
+		if t == parentType {
+			return true
+		}
+	}
+	return false
 }
