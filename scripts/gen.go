@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/format"
 	"os"
 	"strings"
@@ -99,7 +100,7 @@ func snakeToCamel(s string) string {
 	return strings.ToLower(title[:1]) + title[1:]
 }
 
-func toGoTypes(s string) string {
+func toGoType(s string) string {
 	pref := ""
 	for isTgArray(s) {
 		pref += "[]"
@@ -143,7 +144,7 @@ func getDefaultReturnVal(s string) string {
 	return s
 }
 
-func goTypeToString(t string) string {
+func goTypeStringer(t string) string {
 	switch t {
 	case "int64":
 		return "strconv.FormatInt(%s, 10)"
@@ -156,4 +157,42 @@ func goTypeToString(t string) string {
 	default:
 		return ""
 	}
+}
+
+func getPreferredType(f Field) string {
+	if len(f.Types) == 1 {
+		return f.Types[0]
+	}
+	if len(f.Types) == 2 {
+		if f.Types[0] == "InputFile" && f.Types[1] == "String" {
+			return f.Types[0]
+		} else if f.Types[0] == "Integer" && f.Types[1] == "String" {
+			return f.Types[0]
+		}
+	}
+	if f.Name == "media" {
+		var arrayType bool
+		// TODO: check against API description type
+		for _, t := range f.Types {
+			arrayType = arrayType || isTgArray(t)
+
+			if !strings.Contains(t, "InputMedia") {
+				fmt.Printf("%s: mediatype %s is not of kind InputMedia\n", f.Name, t)
+				return f.Types[0]
+			}
+		}
+		if arrayType {
+			return "Array of InputMedia"
+		}
+		return "InputMedia"
+	}
+
+	// skip reply_markup for now to avoid logspam
+	if f.Name == "reply_markup" {
+		// TODO: Handle reply_markup results
+		return f.Types[0]
+	}
+
+	fmt.Printf("%s: unable to choose one of %v\n", f.Name, f.Types)
+	return f.Types[0]
 }

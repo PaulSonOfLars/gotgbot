@@ -44,7 +44,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method := strings.Builder{}
 
 	// defaulting to [0] is ok because its either message or bool
-	retType := toGoTypes(tgMethod.Returns[0])
+	retType := toGoType(tgMethod.Returns[0])
 	if isTgType(d.Types, retType) {
 		retType = "*" + retType
 	}
@@ -105,14 +105,14 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			goParam = "opts." + snakeToTitle(f.Name)
 		}
 
-		// TODO: more than one type
-		converter := goTypeToString(toGoTypes(f.Types[0]))
-		if converter != "" {
-			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(converter, goParam) + ")")
+		fieldType := getPreferredType(f)
+		stringer := goTypeStringer(toGoType(fieldType))
+		if stringer != "" {
+			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")")
 			continue
 		}
 
-		if f.Types[0] == "InputFile" {
+		if fieldType == "InputFile" {
 			// TODO: support case where its just inputfile and not string
 
 			hasData = true
@@ -136,9 +136,9 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			bd.WriteString(buf.String())
 			continue
 
-		} else if strings.Contains(f.Types[0], "InputMedia") {
+		} else if strings.Contains(fieldType, "InputMedia") {
 			offset := ""
-			if isTgArray(f.Types[0]) {
+			if isTgArray(fieldType) {
 				bd.WriteString("\nfor idx, im := range " + goParam + " {")
 				goParam = "im"
 				offset = " + strconv.Itoa(idx)"
@@ -153,14 +153,14 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			bd.WriteString("\n	}")
 			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
 
-			if isTgArray(f.Types[0]) {
+			if isTgArray(fieldType) {
 				bd.WriteString("\n}")
 			}
 
 			continue
 		}
 
-		if isTgArray(f.Types[0]) {
+		if isTgArray(fieldType) {
 			bd.WriteString("\nif " + goParam + " != nil {")
 		}
 
@@ -173,7 +173,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		bd.WriteString("\n	}")
 		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
 
-		if isTgArray(f.Types[0]) {
+		if isTgArray(fieldType) {
 			bd.WriteString("\n}")
 		}
 
@@ -194,24 +194,26 @@ func getRetVarName(retType string) string {
 
 func getArgs(name string, method MethodDescription) (string, string) {
 	var requiredArgs []string
-	var optionalArgs []Field
+	optionals := strings.Builder{}
 	for _, f := range method.Fields {
+		fieldType := getPreferredType(f)
+		goType := toGoType(fieldType)
 		if f.Required {
-			// TODO: Not just assume first type
-			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), toGoTypes(f.Types[0])))
+			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), goType))
 			continue
 		}
-		optionalArgs = append(optionalArgs, f)
+
+		optionals.WriteString("\n// " + f.Description)
+		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), goType))
+
 	}
 	optionalsStruct := ""
-	if len(optionalArgs) > 0 {
+
+	if optionals.Len() > 0 {
 		optionalsName := snakeToTitle(name) + "Opts"
 		bd := strings.Builder{}
 		bd.WriteString("\ntype " + optionalsName + " struct {")
-		for _, opt := range optionalArgs {
-			bd.WriteString("\n// " + opt.Description)
-			bd.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(opt.Name), toGoTypes(opt.Types[0])))
-		}
+		bd.WriteString(optionals.String())
 		bd.WriteString("\n}")
 		optionalsStruct = bd.String()
 

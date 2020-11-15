@@ -57,32 +57,32 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 
 	var genCustomMarshalFields []Field
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
-	for _, field := range tgType.Fields {
-		fieldType := field.Types[0] // TODO: NOT just default to first type
+	for _, f := range tgType.Fields {
+		fieldType := getPreferredType(f)
 
 		// InputMedia is a special one.
 		if isSubtypeOf(tgType, "InputMedia") {
 			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
-			if field.Name == "type" {
+			if f.Name == "type" {
 				continue
 			}
 			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
-			if field.Name == "media" {
+			if f.Name == "media" {
 				fieldType = "InputFile"
 			}
 		}
 
-		goType := toGoTypes(fieldType)
-		if isTgType(d.Types, goType) && !field.Required {
+		goType := toGoType(fieldType)
+		if isTgType(d.Types, goType) && !f.Required {
 			goType = "*" + goType
 		}
 
 		if isTgArray(fieldType) {
-			genCustomMarshalFields = append(genCustomMarshalFields, field)
+			genCustomMarshalFields = append(genCustomMarshalFields, f)
 		}
 
-		typeDef.WriteString("\n// " + field.Description)
-		typeDef.WriteString("\n" + snakeToTitle(field.Name) + " " + goType + " `json:\"" + field.Name + "\"`")
+		typeDef.WriteString("\n// " + f.Description)
+		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + goType + " `json:\"" + f.Name + "\"`")
 	}
 
 	typeDef.WriteString("\n}")
@@ -141,8 +141,9 @@ func genCustomMarshal(name string, fields []Field) string {
 	marshalDef.WriteString("\n		alias: (alias)(v),")
 	marshalDef.WriteString("\n	}")
 	for _, f := range fields {
+		fieldType := getPreferredType(f)
 		marshalDef.WriteString("\n	if a." + snakeToTitle(f.Name) + " == nil {")
-		marshalDef.WriteString("\n		a." + snakeToTitle(f.Name) + " = make(" + toGoTypes(f.Types[0]) + ", 0)")
+		marshalDef.WriteString("\n		a." + snakeToTitle(f.Name) + " = make(" + toGoType(fieldType) + ", 0)")
 		marshalDef.WriteString("\n	}")
 	}
 	marshalDef.WriteString("\nreturn json.Marshal(a)")
