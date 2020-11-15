@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -112,7 +113,8 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			continue
 		}
 
-		if fieldType == "InputFile" {
+		switch fieldType {
+		case "InputFile":
 			// TODO: support case where its just inputfile and not string
 
 			hasData = true
@@ -134,49 +136,52 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 				panic("failed to flush template: " + err.Error())
 			}
 			bd.WriteString(buf.String())
-			continue
 
-		} else if strings.Contains(fieldType, "InputMedia") {
-			offset := ""
-			if isTgArray(fieldType) {
-				bd.WriteString("\nfor idx, im := range " + goParam + " {")
-				goParam = "im"
-				offset = " + strconv.Itoa(idx)"
-			}
+		case "InputMedia":
 			hasData = true
 
-			// dont use goParam since that contains the `opts.` section
-			bytesVarName := "inputMediaBs"
-			bd.WriteString("\n	" + bytesVarName + ", err := " + goParam + ".InputMediaParams(\"" + f.Name + "\"" + offset + " , data)")
-			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Name + ": %w\", err)")
+			bd.WriteString("\ninputMediaBs, err := " + goParam + ".InputMediaParams(\"" + f.Name + "\" , data)")
+			bd.WriteString("\nif err != nil {")
+			bd.WriteString("\n	return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+			bd.WriteString("\n}")
+			bd.WriteString("\nv.Add(\"" + f.Name + "\", string(inputMediaBs))")
+
+		case "Array of InputMedia":
+			hasData = true
+
+			var v []json.RawMessage
+			v = append(v, []byte{'a'})
+			bd.WriteString("\nif " + goParam + " != nil {")
+			bd.WriteString("\n	var rawList []json.RawMessage")
+			bd.WriteString("\n	for idx, im := range " + goParam + " {")
+			bd.WriteString("\n		inputMediaBs, err := im.InputMediaParams(\"" + f.Name + "\" + strconv.Itoa(idx), data)")
+			bd.WriteString("\n		if err != nil {")
+			bd.WriteString("\n			return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal InputMedia list item %d for field " + f.Name + ": %w\", idx, err)")
+			bd.WriteString("\n		}")
+			bd.WriteString("\n		rawList = append(rawList, inputMediaBs)")
 			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
+			bd.WriteString("\n	bytes, err := json.Marshal(rawList)")
+			bd.WriteString("\n	if err != nil {")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal raw json list of InputMedia for field: " + f.Name + " %w\", err)")
+			bd.WriteString("\n	}")
+			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+			bd.WriteString("\n}")
+
+		default:
+			if isTgArray(fieldType) {
+				bd.WriteString("\nif " + goParam + " != nil {")
+			}
+
+			bd.WriteString("\n	bytes, err := json.Marshal(" + goParam + ")")
+			bd.WriteString("\n	if err != nil {")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+			bd.WriteString("\n	}")
+			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
 
 			if isTgArray(fieldType) {
 				bd.WriteString("\n}")
 			}
-
-			continue
 		}
-
-		if isTgArray(fieldType) {
-			bd.WriteString("\nif " + goParam + " != nil {")
-		}
-
-		// dont use goParam since that contains the `opts.` section
-		bytesVarName := snakeToCamel(f.Name) + "Bs"
-
-		bd.WriteString("\n	" + bytesVarName + ", err := json.Marshal(" + goParam + ")")
-		bd.WriteString("\n	if err != nil {")
-		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Name + ": %w\", err)")
-		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
-
-		if isTgArray(fieldType) {
-			bd.WriteString("\n}")
-		}
-
 	}
 
 	return bd.String(), hasData
