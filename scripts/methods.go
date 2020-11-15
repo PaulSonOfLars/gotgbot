@@ -115,13 +115,14 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 
 		switch fieldType {
 		case "InputFile":
+			hasData = true
+
 			tmplString := stringOrReaderBranch
 			if len(f.Types) == 1 {
 				// This is actually just an inputfile, not "InputFile or String", so don't support string
 				tmplString = readerBranch
 			}
 
-			hasData = true
 			t, err := template.New("readers").Parse(tmplString)
 			if err != nil {
 				panic("failed to parse template: " + err.Error())
@@ -170,6 +171,13 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			bd.WriteString("\n	}")
 			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
 			bd.WriteString("\n}")
+
+		case "ReplyMarkup":
+			bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
+			bd.WriteString("\n	if err != nil {")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+			bd.WriteString("\n	}")
+			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
 
 		default:
 			if isTgArray(fieldType) {

@@ -187,10 +187,13 @@ func getPreferredType(f Field) string {
 		return "InputMedia"
 	}
 
-	// skip reply_markup for now to avoid logspam
-	if f.Name == "reply_markup" {
-		// TODO: Handle reply_markup results
-		return f.Types[0]
+	if f.Name == "reply_markup" && len(f.Types) == 4 {
+		// Custom type used to handle the fact that reply_markup can take one of:
+		// InlineKeyboardMarkup
+		// ReplyKeyboardMarkup
+		// ReplyKeyboardRemove
+		// ForceReply
+		return "ReplyMarkup"
 	}
 
 	fmt.Printf("%s: unable to choose one of %v\n", f.Name, f.Types)

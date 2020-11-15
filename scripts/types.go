@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+// TODO: dont hardcode; obtain these from reply_markup fields
+var replyMarkupTypes = []string{
+	"InlineKeyboardMarkup",
+	"ReplyKeyboardMarkup",
+	"ReplyKeyboardRemove",
+	"ForceReply",
+}
+
 func generateTypes(d APIDescription) error {
 	file := strings.Builder{}
 	file.WriteString(`
@@ -31,6 +39,10 @@ import (
 	for _, tgTypeName := range types {
 		file.WriteString(generateTypeDef(d, tgTypeName))
 	}
+
+	file.WriteString("\ntype ReplyMarkup interface{")
+	file.WriteString("\n	ReplyMarkup() ([]byte, error)")
+	file.WriteString("\n}")
 
 	return writeGenToFile(file, "gen/gen_types.go")
 }
@@ -101,6 +113,16 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 			// TODO: Verify these. They should be ok, but should run more tests.
 		default:
 			fmt.Printf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
+		}
+	}
+
+	for _, t := range replyMarkupTypes {
+		if tgTypeName == t {
+			typeDef.WriteString("\n")
+			typeDef.WriteString("\nfunc (v " + tgTypeName + ") ReplyMarkup() ([]byte, error) {")
+			typeDef.WriteString("\n	return json.Marshal(v)")
+			typeDef.WriteString("\n}")
+			break
 		}
 	}
 
