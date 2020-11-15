@@ -13,30 +13,24 @@ type APIDescription struct {
 }
 
 type TypeDescription struct {
-	Description []string     `json:"description"`
-	Fields      []TypeFields `json:"fields"`
-	Href        string       `json:"href"`
-	Subtypes    []string     `json:"subtypes"`
-	SubtypeOf   []string     `json:"subtype_of"`
-}
-
-type TypeFields struct {
-	Field       string   `json:"field"`
-	Types       []string `json:"types"`
-	Description string   `json:"description"`
+	Description []string `json:"description"`
+	Fields      []Field  `json:"fields"`
+	Href        string   `json:"href"`
+	Subtypes    []string `json:"subtypes"`
+	SubtypeOf   []string `json:"subtype_of"`
 }
 
 type MethodDescription struct {
-	Fields      []MethodFields `json:"fields"`
-	Returns     []string       `json:"returns"`
-	Description []string       `json:"description"`
-	Href        string         `json:"href"`
+	Fields      []Field  `json:"fields"`
+	Returns     []string `json:"returns"`
+	Description []string `json:"description"`
+	Href        string   `json:"href"`
 }
 
-type MethodFields struct {
-	Parameter   string   `json:"parameter"`
+type Field struct {
+	Name        string   `json:"name"`
 	Types       []string `json:"types"`
-	Required    string   `json:"required"`
+	Required    bool     `json:"required"`
 	Description string   `json:"description"`
 }
 

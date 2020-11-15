@@ -100,15 +100,15 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 	hasData := false
 	bd := strings.Builder{}
 	for _, f := range method.Fields {
-		goParam := snakeToCamel(f.Parameter)
-		if !isRequiredField(f) {
-			goParam = "opts." + snakeToTitle(f.Parameter)
+		goParam := snakeToCamel(f.Name)
+		if !f.Required {
+			goParam = "opts." + snakeToTitle(f.Name)
 		}
 
 		// TODO: more than one type
 		converter := goTypeToString(toGoTypes(f.Types[0]))
 		if converter != "" {
-			bd.WriteString("\nv.Add(\"" + f.Parameter + "\", " + fmt.Sprintf(converter, goParam) + ")")
+			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(converter, goParam) + ")")
 			continue
 		}
 
@@ -125,7 +125,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			err = t.Execute(w, readerBranchesStruct{
 				GoParam:       goParam,
 				DefaultReturn: defaultRetVal,
-				Parameter:     f.Parameter,
+				Parameter:     f.Name,
 			})
 			if err != nil {
 				panic("failed to execute template: " + err.Error())
@@ -147,11 +147,11 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 
 			// dont use goParam since that contains the `opts.` section
 			bytesVarName := "inputMediaBs"
-			bd.WriteString("\n	" + bytesVarName + ", err := " + goParam + ".InputMediaParams(\"" + f.Parameter + "\"" + offset + " , data)")
+			bd.WriteString("\n	" + bytesVarName + ", err := " + goParam + ".InputMediaParams(\"" + f.Name + "\"" + offset + " , data)")
 			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + ": %w\", err)")
+			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Name + ": %w\", err)")
 			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
+			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
 
 			if isTgArray(f.Types[0]) {
 				bd.WriteString("\n}")
@@ -165,13 +165,13 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		}
 
 		// dont use goParam since that contains the `opts.` section
-		bytesVarName := snakeToCamel(f.Parameter) + "Bs"
+		bytesVarName := snakeToCamel(f.Name) + "Bs"
 
 		bd.WriteString("\n	" + bytesVarName + ", err := json.Marshal(" + goParam + ")")
 		bd.WriteString("\n	if err != nil {")
-		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Parameter + ": %w\", err)")
+		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal " + f.Name + ": %w\", err)")
 		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Parameter + "\", string(" + bytesVarName + "))")
+		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(" + bytesVarName + "))")
 
 		if isTgArray(f.Types[0]) {
 			bd.WriteString("\n}")
@@ -194,11 +194,11 @@ func getRetVarName(retType string) string {
 
 func getArgs(name string, method MethodDescription) (string, string) {
 	var requiredArgs []string
-	var optionalArgs []MethodFields
+	var optionalArgs []Field
 	for _, f := range method.Fields {
-		if isRequiredField(f) {
+		if f.Required {
 			// TODO: Not just assume first type
-			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Parameter), toGoTypes(f.Types[0])))
+			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), toGoTypes(f.Types[0])))
 			continue
 		}
 		optionalArgs = append(optionalArgs, f)
@@ -210,7 +210,7 @@ func getArgs(name string, method MethodDescription) (string, string) {
 		bd.WriteString("\ntype " + optionalsName + " struct {")
 		for _, opt := range optionalArgs {
 			bd.WriteString("\n// " + opt.Description)
-			bd.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(opt.Parameter), toGoTypes(opt.Types[0])))
+			bd.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(opt.Name), toGoTypes(opt.Types[0])))
 		}
 		bd.WriteString("\n}")
 		optionalsStruct = bd.String()
@@ -219,10 +219,6 @@ func getArgs(name string, method MethodDescription) (string, string) {
 	}
 
 	return strings.Join(requiredArgs, ", "), optionalsStruct
-}
-
-func isRequiredField(f MethodFields) bool {
-	return f.Required == "Yes"
 }
 
 type readerBranchesStruct struct {

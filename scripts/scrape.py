@@ -81,21 +81,22 @@ def get_fields(curr_name: str, curr_type: str, x, items: dict):
     for tr in body.find_all("tr"):
         children = list(tr.find_all("td"))
         if curr_type == TYPES and len(children) == 3:
+            desc = clean_tg_description(children[2].get_text())
             fields.append(
                 {
-                    "field": children[0].get_text(),
+                    "name": children[0].get_text(),
                     "types": clean_tg_type(children[1].get_text()),
-                    "description": clean_tg_description(children[2].get_text()),
-
+                    "required": not desc.startswith("Optional. "),
+                    "description": desc,
                 }
             )
 
         elif curr_type == METHODS and len(children) == 4:
             fields.append(
                 {
-                    "parameter": children[0].get_text(),
+                    "name": children[0].get_text(),
                     "types": clean_tg_type(children[1].get_text()),
-                    "required": children[2].get_text(),
+                    "required": children[2].get_text() == "Yes",
                     "description": clean_tg_description(children[3].get_text()),
                 }
             )

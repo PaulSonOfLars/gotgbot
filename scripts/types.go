@@ -55,34 +55,34 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		return typeDef.String()
 	}
 
-	var genCustomMarshalFields []TypeFields
+	var genCustomMarshalFields []Field
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
-	for _, fields := range tgType.Fields {
-		fieldType := fields.Types[0] // TODO: NOT just default to first type
+	for _, field := range tgType.Fields {
+		fieldType := field.Types[0] // TODO: NOT just default to first type
 
 		// InputMedia is a special one.
 		if isSubtypeOf(tgType, "InputMedia") {
 			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
-			if fields.Field == "type" {
+			if field.Name == "type" {
 				continue
 			}
 			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
-			if fields.Field == "media" {
+			if field.Name == "media" {
 				fieldType = "InputFile"
 			}
 		}
 
 		goType := toGoTypes(fieldType)
-		if isTgType(d.Types, goType) && strings.HasPrefix(fields.Description, "Optional.") {
+		if isTgType(d.Types, goType) && !field.Required {
 			goType = "*" + goType
 		}
 
 		if isTgArray(fieldType) {
-			genCustomMarshalFields = append(genCustomMarshalFields, fields)
+			genCustomMarshalFields = append(genCustomMarshalFields, field)
 		}
 
-		typeDef.WriteString("\n// " + fields.Description)
-		typeDef.WriteString("\n" + snakeToTitle(fields.Field) + " " + goType + " `json:\"" + fields.Field + "\"`")
+		typeDef.WriteString("\n// " + field.Description)
+		typeDef.WriteString("\n" + snakeToTitle(field.Name) + " " + goType + " `json:\"" + field.Name + "\"`")
 	}
 
 	typeDef.WriteString("\n}")
@@ -122,7 +122,7 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 	return false
 }
 
-func genCustomMarshal(name string, fields []TypeFields) string {
+func genCustomMarshal(name string, fields []Field) string {
 	marshalDef := strings.Builder{}
 
 	marshalDef.WriteString("\n")
@@ -141,8 +141,8 @@ func genCustomMarshal(name string, fields []TypeFields) string {
 	marshalDef.WriteString("\n		alias: (alias)(v),")
 	marshalDef.WriteString("\n	}")
 	for _, f := range fields {
-		marshalDef.WriteString("\n	if a." + snakeToTitle(f.Field) + " == nil {")
-		marshalDef.WriteString("\n		a." + snakeToTitle(f.Field) + " = make(" + toGoTypes(f.Types[0]) + ", 0)")
+		marshalDef.WriteString("\n	if a." + snakeToTitle(f.Name) + " == nil {")
+		marshalDef.WriteString("\n		a." + snakeToTitle(f.Name) + " = make(" + toGoTypes(f.Types[0]) + ", 0)")
 		marshalDef.WriteString("\n	}")
 	}
 	marshalDef.WriteString("\nreturn json.Marshal(a)")
