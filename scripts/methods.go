@@ -115,10 +115,14 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 
 		switch fieldType {
 		case "InputFile":
-			// TODO: support case where its just inputfile and not string
+			tmplString := stringOrReaderBranch
+			if len(f.Types) == 1 {
+				// This is actually just an inputfile, not "InputFile or String", so don't support string
+				tmplString = readerBranch
+			}
 
 			hasData = true
-			t, err := template.New("readers").Parse(readerBranches)
+			t, err := template.New("readers").Parse(tmplString)
 			if err != nil {
 				panic("failed to parse template: " + err.Error())
 			}
@@ -234,7 +238,21 @@ type readerBranchesStruct struct {
 	Parameter     string
 }
 
-const readerBranches = `
+const readerBranch = `
+if {{.GoParam}} != nil {
+	if r, ok := {{.GoParam}}.(io.Reader); ok {
+		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
+		data["{{.Parameter}}"] = NamedReader{File: r}
+	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
+		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
+		data["{{.Parameter}}"] = nf
+	} else {
+		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
+	}
+}
+`
+
+const stringOrReaderBranch = `
 if {{.GoParam}} != nil {
 	if s, ok := {{.GoParam}}.(string); ok {
 		v.Add("{{.Parameter}}", s)

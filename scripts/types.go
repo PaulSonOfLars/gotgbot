@@ -44,7 +44,6 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
-		// todo: Generate interface methods for child functions
 		typeDef.WriteString("\ntype " + tgTypeName + " interface{")
 		if len(tgType.Subtypes) != 0 {
 			typeDef.WriteString("\n	" + tgTypeName + "Params(string, map[string]NamedReader) ([]byte, error)")
@@ -103,8 +102,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 			typeDef.WriteString("\n}")
 
 		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
-			// TODO: Verify these.
-			// Should be ok, but got to run more tests.
+			// TODO: Verify these. They should be ok, but should run more tests.
 		default:
 			fmt.Printf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
 		}
