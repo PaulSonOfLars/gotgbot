@@ -54,7 +54,6 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		return typeDef.String()
 	}
 
-	var genCustomMarshalFields []Field
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, f := range tgType.Fields {
 		fieldType := getPreferredType(f)
@@ -76,18 +75,15 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 			goType = "*" + goType
 		}
 
-		if isTgArray(fieldType) {
-			genCustomMarshalFields = append(genCustomMarshalFields, f)
-		}
-
 		typeDef.WriteString("\n// " + f.Description)
-		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + goType + " `json:\"" + f.Name + "\"`")
+		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + goType + " `json:\"" + f.Name + ",omitempty\"`")
 	}
 
 	typeDef.WriteString("\n}")
 
-	if len(genCustomMarshalFields) > 0 {
-		typeDef.WriteString(genCustomMarshal(tgTypeName, genCustomMarshalFields))
+	if strings.HasPrefix(tgTypeName, "InputMedia") {
+		typeDef.WriteString("\n")
+		typeDef.WriteString(genCustomMarshal(tgTypeName))
 	}
 
 	for _, parentType := range tgType.SubtypeOf {
@@ -120,30 +116,18 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 	return false
 }
 
-func genCustomMarshal(name string, fields []Field) string {
+func genCustomMarshal(name string) string {
 	marshalDef := strings.Builder{}
 
-	marshalDef.WriteString("\n")
 	marshalDef.WriteString("\nfunc (v " + name + ") MarshalJSON() ([]byte, error) {")
 	marshalDef.WriteString("\n	type alias " + name)
 	marshalDef.WriteString("\n	a := struct{")
-	if strings.HasPrefix(name, "InputMedia") {
-		marshalDef.WriteString("\n		Type string `json:\"type\"`")
-	}
+	marshalDef.WriteString("\n		Type string `json:\"type,omitempty\"`")
 	marshalDef.WriteString("\n		alias")
 	marshalDef.WriteString("\n	}{")
-
-	if strings.HasPrefix(name, "InputMedia") {
-		marshalDef.WriteString("\n		Type: \"" + strings.ToLower(strings.TrimPrefix(name, "InputMedia")) + "\",")
-	}
+	marshalDef.WriteString("\n		Type: \"" + strings.ToLower(strings.TrimPrefix(name, "InputMedia")) + "\",")
 	marshalDef.WriteString("\n		alias: (alias)(v),")
 	marshalDef.WriteString("\n	}")
-	for _, f := range fields {
-		fieldType := getPreferredType(f)
-		marshalDef.WriteString("\n	if a." + snakeToTitle(f.Name) + " == nil {")
-		marshalDef.WriteString("\n		a." + snakeToTitle(f.Name) + " = make(" + toGoType(fieldType) + ", 0)")
-		marshalDef.WriteString("\n	}")
-	}
 	marshalDef.WriteString("\nreturn json.Marshal(a)")
 	marshalDef.WriteString("\n}")
 
