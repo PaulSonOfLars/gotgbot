@@ -37,7 +37,11 @@ import (
 	sort.Strings(types)
 
 	for _, tgTypeName := range types {
-		file.WriteString(generateTypeDef(d, tgTypeName))
+		typeDef, err := generateTypeDef(d, tgTypeName)
+		if err != nil {
+			return fmt.Errorf("failed to generate type definition of %s: %w", tgTypeName, err)
+		}
+		file.WriteString(typeDef)
 	}
 
 	file.WriteString("\ntype ReplyMarkup interface{")
@@ -47,7 +51,7 @@ import (
 	return writeGenToFile(file, "gen/gen_types.go")
 }
 
-func generateTypeDef(d APIDescription, tgTypeName string) string {
+func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 	typeDef := strings.Builder{}
 	tgType := d.Types[tgTypeName]
 
@@ -63,12 +67,15 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		}
 		typeDef.WriteString("}")
 
-		return typeDef.String()
+		return typeDef.String(), nil
 	}
 
 	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
 	for _, f := range tgType.Fields {
-		fieldType := getPreferredType(f)
+		fieldType, err := getPreferredType(f)
+		if err != nil {
+			return "", fmt.Errorf("failed to get preferred type: %w", err)
+		}
 
 		// InputMedia is a special one.
 		if isSubtypeOf(tgType, "InputMedia") {
@@ -112,7 +119,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
 			// TODO: Verify these. They should be ok, but should run more tests.
 		default:
-			fmt.Printf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
+			return "", fmt.Errorf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
 		}
 	}
 
@@ -126,7 +133,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) string {
 		}
 	}
 
-	return typeDef.String()
+	return typeDef.String(), nil
 }
 
 func isSubtypeOf(tgType TypeDescription, parentType string) bool {

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -35,13 +33,17 @@ import (
 
 	for _, tgMethodName := range methods {
 		tgMethod := d.Methods[tgMethodName]
-		file.WriteString(generateMethodDef(d, tgMethod, tgMethodName))
+		method, err := generateMethodDef(d, tgMethod, tgMethodName)
+		if err != nil {
+			return fmt.Errorf("failed to generate method definition of %s: %w", tgMethodName, err)
+		}
+		file.WriteString(method)
 	}
 
 	return writeGenToFile(file, "gen/gen_methods.go")
 }
 
-func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodName string) string {
+func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodName string) (string, error) {
 	method := strings.Builder{}
 
 	// defaulting to [0] is ok because its either message or bool
@@ -51,7 +53,11 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	}
 	defaultRetVal := getDefaultReturnVal(retType)
 
-	args, optionalsStruct := getArgs(tgMethodName, tgMethod)
+	args, optionalsStruct, err := getArgs(tgMethodName, tgMethod)
+	if err != nil {
+		return "", fmt.Errorf("failed to get args for method %s: %w", tgMethodName, err)
+	}
+
 	if optionalsStruct != "" {
 		method.WriteString("\n" + optionalsStruct)
 	}
@@ -63,7 +69,11 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
 
-	valueGen, hasData := methodArgsToValues(tgMethod, defaultRetVal)
+	valueGen, hasData, err := methodArgsToValues(tgMethod, defaultRetVal)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethodName, err)
+	}
+
 	method.WriteString("\n	v := urlLib.Values{}")
 	if hasData {
 		method.WriteString("\n	data := map[string]NamedReader{}")
@@ -94,10 +104,10 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 	method.WriteString("\n}")
 
-	return method.String()
+	return method.String(), nil
 }
 
-func methodArgsToValues(method MethodDescription, defaultRetVal string) (string, bool) {
+func methodArgsToValues(method MethodDescription, defaultRetVal string) (string, bool, error) {
 	hasData := false
 	bd := strings.Builder{}
 	for _, f := range method.Fields {
@@ -106,7 +116,10 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 			goParam = "opts." + snakeToTitle(f.Name)
 		}
 
-		fieldType := getPreferredType(f)
+		fieldType, err := getPreferredType(f)
+		if err != nil {
+			return "", false, fmt.Errorf("failed to get preferred type: %w", err)
+		}
 		stringer := goTypeStringer(toGoType(fieldType))
 		if stringer != "" {
 			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")")
@@ -125,22 +138,17 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 
 			t, err := template.New("readers").Parse(tmplString)
 			if err != nil {
-				panic("failed to parse template: " + err.Error())
+				return "", false, fmt.Errorf("failed to parse template: %w", err)
 			}
-			buf := bytes.Buffer{}
-			w := bufio.NewWriter(&buf)
-			err = t.Execute(w, readerBranchesStruct{
+
+			err = t.Execute(&bd, readerBranchesStruct{
 				GoParam:       goParam,
 				DefaultReturn: defaultRetVal,
 				Parameter:     f.Name,
 			})
 			if err != nil {
-				panic("failed to execute template: " + err.Error())
+				return "", false, fmt.Errorf("failed to execute template: %w", err)
 			}
-			if err := w.Flush(); err != nil {
-				panic("failed to flush template: " + err.Error())
-			}
-			bd.WriteString(buf.String())
 
 		case "InputMedia":
 			hasData = true
@@ -196,7 +204,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		}
 	}
 
-	return bd.String(), hasData
+	return bd.String(), hasData, nil
 }
 
 func getRetVarName(retType string) string {
@@ -209,11 +217,14 @@ func getRetVarName(retType string) string {
 	return strings.ToLower(retType[:1])
 }
 
-func getArgs(name string, method MethodDescription) (string, string) {
+func getArgs(name string, method MethodDescription) (string, string, error) {
 	var requiredArgs []string
 	optionals := strings.Builder{}
 	for _, f := range method.Fields {
-		fieldType := getPreferredType(f)
+		fieldType, err := getPreferredType(f)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to get preferred type: %w", err)
+		}
 		goType := toGoType(fieldType)
 		if f.Required {
 			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), goType))
@@ -237,7 +248,7 @@ func getArgs(name string, method MethodDescription) (string, string) {
 		requiredArgs = append(requiredArgs, fmt.Sprintf("opts %s", optionalsName))
 	}
 
-	return strings.Join(requiredArgs, ", "), optionalsStruct
+	return strings.Join(requiredArgs, ", "), optionalsStruct, nil
 }
 
 type readerBranchesStruct struct {

@@ -159,15 +159,15 @@ func goTypeStringer(t string) string {
 	}
 }
 
-func getPreferredType(f Field) string {
+func getPreferredType(f Field) (string, error) {
 	if len(f.Types) == 1 {
-		return f.Types[0]
+		return f.Types[0], nil
 	}
 	if len(f.Types) == 2 {
 		if f.Types[0] == "InputFile" && f.Types[1] == "String" {
-			return f.Types[0]
+			return f.Types[0], nil
 		} else if f.Types[0] == "Integer" && f.Types[1] == "String" {
-			return f.Types[0]
+			return f.Types[0], nil
 		}
 	}
 	if f.Name == "media" {
@@ -177,14 +177,13 @@ func getPreferredType(f Field) string {
 			arrayType = arrayType || isTgArray(t)
 
 			if !strings.Contains(t, "InputMedia") {
-				fmt.Printf("%s: mediatype %s is not of kind InputMedia\n", f.Name, t)
-				return f.Types[0]
+				return "", fmt.Errorf("mediatype %s is not of kind InputMedia for field %s", t, f.Name)
 			}
 		}
 		if arrayType {
-			return "Array of InputMedia"
+			return "Array of InputMedia", nil
 		}
-		return "InputMedia"
+		return "InputMedia", nil
 	}
 
 	if f.Name == "reply_markup" && len(f.Types) == 4 {
@@ -193,9 +192,8 @@ func getPreferredType(f Field) string {
 		// ReplyKeyboardMarkup
 		// ReplyKeyboardRemove
 		// ForceReply
-		return "ReplyMarkup"
+		return "ReplyMarkup", nil
 	}
 
-	fmt.Printf("%s: unable to choose one of %v\n", f.Name, f.Types)
-	return f.Types[0]
+	return f.Types[0], fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
 }
