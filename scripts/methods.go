@@ -141,7 +141,7 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 				return "", false, fmt.Errorf("failed to parse template: %w", err)
 			}
 
-			err = t.Execute(&bd, readerBranchesStruct{
+			err = t.Execute(&bd, readerBranchesData{
 				GoParam:       goParam,
 				DefaultReturn: defaultRetVal,
 				Parameter:     f.Name,
@@ -251,7 +251,7 @@ func getArgs(name string, method MethodDescription) (string, string, error) {
 	return strings.Join(requiredArgs, ", "), optionalsStruct, nil
 }
 
-type readerBranchesStruct struct {
+type readerBranchesData struct {
 	GoParam       string
 	DefaultReturn string
 	Parameter     string

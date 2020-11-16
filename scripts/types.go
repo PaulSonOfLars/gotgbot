@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"sort"
 	"strings"
 )
@@ -13,6 +14,12 @@ var replyMarkupTypes = []string{
 	"ReplyKeyboardRemove",
 	"ForceReply",
 }
+
+var (
+	replyMarkupMethodTmpl   = template.Must(template.New("replyMarkupMethod").Parse(replyMarkupInterfaceMethod))
+	inputMediaInterfaceTmpl = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
+	customMarshalTmpl       = template.Must(template.New("customMarshal").Parse(customMarshal))
+)
 
 func generateTypes(d APIDescription) error {
 	file := strings.Builder{}
@@ -44,9 +51,11 @@ import (
 		file.WriteString(typeDef)
 	}
 
-	file.WriteString("\ntype ReplyMarkup interface{")
-	file.WriteString("\n	ReplyMarkup() ([]byte, error)")
-	file.WriteString("\n}")
+	// the reply_markup field is weird; this allows it to support multiple types.
+	file.WriteString(`
+type ReplyMarkup interface{
+	ReplyMarkup() ([]byte, error)
+}`)
 
 	return writeGenToFile(file, "gen/gen_types.go")
 }
@@ -60,13 +69,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
-		typeDef.WriteString("\ntype " + tgTypeName + " interface{")
-		if len(tgType.Subtypes) != 0 {
-			typeDef.WriteString("\n	" + tgTypeName + "Params(string, map[string]NamedReader) ([]byte, error)")
-			typeDef.WriteString("\n")
-		}
-		typeDef.WriteString("}")
-
+		typeDef.WriteString(generateInputMediaInterfaceType(tgTypeName, tgType))
 		return typeDef.String(), nil
 	}
 
@@ -100,21 +103,26 @@ func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 
 	typeDef.WriteString("\n}")
 
-	if strings.HasPrefix(tgTypeName, "InputMedia") {
-		typeDef.WriteString("\n")
-		typeDef.WriteString(genCustomMarshal(tgTypeName))
-	}
-
 	for _, parentType := range tgType.SubtypeOf {
 		switch parentType {
 		case "InputMedia":
-			typeDef.WriteString("\n")
-			typeDef.WriteString("\nfunc (v " + tgTypeName + ") " + parentType + "Params(mediaName string, data map[string]NamedReader) ([]byte, error) {")
+			// InputMedia items need a custom marshaller to handle the "type" field
+			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
+				Type:     tgTypeName,
+				TypeName: strings.ToLower(strings.TrimPrefix(tgTypeName, "InputMedia")),
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgTypeName, err)
+			}
 
-			typeDef.WriteString(paramsReader)
-
-			typeDef.WriteString("\n	return json.Marshal(v)")
-			typeDef.WriteString("\n}")
+			// We also need to setup the interface method
+			err = inputMediaInterfaceTmpl.Execute(&typeDef, inputMediaParamData{
+				Type:       tgTypeName,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgTypeName, err)
+			}
 
 		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
 			// TODO: Verify these. They should be ok, but should run more tests.
@@ -125,15 +133,28 @@ func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 
 	for _, t := range replyMarkupTypes {
 		if tgTypeName == t {
-			typeDef.WriteString("\n")
-			typeDef.WriteString("\nfunc (v " + tgTypeName + ") ReplyMarkup() ([]byte, error) {")
-			typeDef.WriteString("\n	return json.Marshal(v)")
-			typeDef.WriteString("\n}")
+			err := replyMarkupMethodTmpl.Execute(&typeDef, replyMarkupInterfaceData{
+				Type: tgTypeName,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgTypeName, err)
+			}
+
 			break
 		}
 	}
 
 	return typeDef.String(), nil
+}
+
+func generateInputMediaInterfaceType(name string, tgType TypeDescription) string {
+	if len(tgType.Subtypes) != 0 {
+		return fmt.Sprintf(`
+type %s interface{
+	%sParams(string, map[string]NamedReader) ([]byte, error)
+}`, name, name)
+	}
+	return "\ntype " + name + " interface{}"
 }
 
 func isSubtypeOf(tgType TypeDescription, parentType string) bool {
@@ -145,34 +166,54 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 	return false
 }
 
-func genCustomMarshal(name string) string {
-	marshalDef := strings.Builder{}
-
-	marshalDef.WriteString("\nfunc (v " + name + ") MarshalJSON() ([]byte, error) {")
-	marshalDef.WriteString("\n	type alias " + name)
-	marshalDef.WriteString("\n	a := struct{")
-	marshalDef.WriteString("\n		Type string `json:\"type,omitempty\"`")
-	marshalDef.WriteString("\n		alias")
-	marshalDef.WriteString("\n	}{")
-	marshalDef.WriteString("\n		Type: \"" + strings.ToLower(strings.TrimPrefix(name, "InputMedia")) + "\",")
-	marshalDef.WriteString("\n		alias: (alias)(v),")
-	marshalDef.WriteString("\n	}")
-	marshalDef.WriteString("\nreturn json.Marshal(a)")
-	marshalDef.WriteString("\n}")
-
-	return marshalDef.String()
+type customMarshalData struct {
+	Type     string
+	TypeName string
 }
 
-const paramsReader = `
-if v.Media != nil {
-	if r, ok := v.Media.(io.Reader); ok {
-		v.Media = "attach://"+mediaName
-		data[mediaName] = NamedReader{File: r}
-	} else if nf, ok := v.Media.(NamedReader); ok {
-		v.Media = "attach://"+mediaName
-		data[mediaName] = nf
-	} else {
-		return nil, fmt.Errorf("unknown type for InputFile: %T", v.Media)
+const customMarshal = `
+func (v {{.Type}}) MarshalJSON() ([]byte, error) {
+	type alias {{.Type}}
+	a := struct{
+		Type string
+		alias
+	}{
+		Type: "{{.TypeName}}",
+		alias: (alias)(v),
 	}
+	return json.Marshal(a)
+}
+`
+
+type inputMediaParamData struct {
+	Type       string
+	ParentType string
+}
+
+const inputMediaInterfaceMethod = `
+func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		if r, ok := v.Media.(io.Reader); ok {
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedReader{File: r}
+		} else if nf, ok := v.Media.(NamedReader); ok {
+			v.Media = "attach://" + mediaName
+			data[mediaName] = nf
+		} else {
+			return nil, fmt.Errorf("unknown type for InputFile: %T", v.Media)
+		}
+	}
+	
+	return json.Marshal(v)
+}
+`
+
+type replyMarkupInterfaceData struct {
+	Type string
+}
+
+const replyMarkupInterfaceMethod = `
+func (v {{.Type}}) ReplyMarkup() ([]byte, error) {
+	return json.Marshal(v)
 }
 `
