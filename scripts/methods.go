@@ -1,11 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 	"text/template"
+)
+
+var (
+	readerBranchTmpl                = template.Must(template.New("readerBranch").Parse(readerBranch))
+	stringOrReaderBranchTmpl        = template.Must(template.New("stringOrReaderBranch").Parse(stringOrReaderBranch))
+	inputMediaParamsBranchTmpl      = template.Must(template.New("inputMediaParamsBranch").Parse(inputMediaParamsBranch))
+	inputMediaArrayParamsBranchTmpl = template.Must(template.New("inputMediaArrayParamsBranch").Parse(inputMediaArrayParamsBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -130,55 +136,44 @@ func methodArgsToValues(method MethodDescription, defaultRetVal string) (string,
 		case "InputFile":
 			hasData = true
 
-			tmplString := stringOrReaderBranch
+			t := stringOrReaderBranchTmpl
 			if len(f.Types) == 1 {
 				// This is actually just an inputfile, not "InputFile or String", so don't support string
-				tmplString = readerBranch
-			}
-
-			t, err := template.New("readers").Parse(tmplString)
-			if err != nil {
-				return "", false, fmt.Errorf("failed to parse template: %w", err)
+				t = readerBranchTmpl
 			}
 
 			err = t.Execute(&bd, readerBranchesData{
 				GoParam:       goParam,
 				DefaultReturn: defaultRetVal,
-				Parameter:     f.Name,
+				Name:          f.Name,
 			})
 			if err != nil {
-				return "", false, fmt.Errorf("failed to execute template: %w", err)
+				return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
 			}
 
 		case "InputMedia":
 			hasData = true
 
-			bd.WriteString("\ninputMediaBs, err := " + goParam + ".InputMediaParams(\"" + f.Name + "\" , data)")
-			bd.WriteString("\nif err != nil {")
-			bd.WriteString("\n	return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-			bd.WriteString("\n}")
-			bd.WriteString("\nv.Add(\"" + f.Name + "\", string(inputMediaBs))")
+			err = inputMediaParamsBranchTmpl.Execute(&bd, readerBranchesData{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Name:          f.Name,
+			})
+			if err != nil {
+				return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
+			}
 
 		case "Array of InputMedia":
 			hasData = true
 
-			var v []json.RawMessage
-			v = append(v, []byte{'a'})
-			bd.WriteString("\nif " + goParam + " != nil {")
-			bd.WriteString("\n	var rawList []json.RawMessage")
-			bd.WriteString("\n	for idx, im := range " + goParam + " {")
-			bd.WriteString("\n		inputMediaBs, err := im.InputMediaParams(\"" + f.Name + "\" + strconv.Itoa(idx), data)")
-			bd.WriteString("\n		if err != nil {")
-			bd.WriteString("\n			return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal InputMedia list item %d for field " + f.Name + ": %w\", idx, err)")
-			bd.WriteString("\n		}")
-			bd.WriteString("\n		rawList = append(rawList, inputMediaBs)")
-			bd.WriteString("\n	}")
-			bd.WriteString("\n	bytes, err := json.Marshal(rawList)")
-			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal raw json list of InputMedia for field: " + f.Name + " %w\", err)")
-			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
-			bd.WriteString("\n}")
+			err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Name:          f.Name,
+			})
+			if err != nil {
+				return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
+			}
 
 		case "ReplyMarkup":
 			bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
@@ -254,17 +249,17 @@ func getArgs(name string, method MethodDescription) (string, string, error) {
 type readerBranchesData struct {
 	GoParam       string
 	DefaultReturn string
-	Parameter     string
+	Name          string
 }
 
 const readerBranch = `
 if {{.GoParam}} != nil {
 	if r, ok := {{.GoParam}}.(io.Reader); ok {
-		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
-		data["{{.Parameter}}"] = NamedReader{File: r}
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = NamedReader{File: r}
 	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
-		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
-		data["{{.Parameter}}"] = nf
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = nf
 	} else {
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
 	}
@@ -274,15 +269,41 @@ if {{.GoParam}} != nil {
 const stringOrReaderBranch = `
 if {{.GoParam}} != nil {
 	if s, ok := {{.GoParam}}.(string); ok {
-		v.Add("{{.Parameter}}", s)
+		v.Add("{{.Name}}", s)
 	} else if r, ok := {{.GoParam}}.(io.Reader); ok {
-		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
-		data["{{.Parameter}}"] = NamedReader{File: r}
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = NamedReader{File: r}
 	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
-		v.Add("{{.Parameter}}", "attach://{{.Parameter}}")
-		data["{{.Parameter}}"] = nf
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = nf
 	} else {
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
 	}
+}
+`
+
+const inputMediaParamsBranch = `
+inputMediaBs, err := {{.GoParam}}.InputMediaParams("{{.Name}}" , data)
+if err != nil {
+	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
+}
+v.Add("{{.Name}}", string(inputMediaBs))
+`
+
+const inputMediaArrayParamsBranch = `
+if {{.GoParam}} != nil {
+	var rawList []json.RawMessage
+	for idx, im := range {{.GoParam}} {
+		inputMediaBs, err := im.InputMediaParams("{{.Name}}" + strconv.Itoa(idx), data)
+		if err != nil {
+			return {{.DefaultReturn}}, fmt.Errorf("failed to marshal InputMedia list item %d for field {{.Name}}: %w", idx, err)
+		}
+		rawList = append(rawList, inputMediaBs)
+	}
+	bytes, err := json.Marshal(rawList)
+	if err != nil {
+		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list of InputMedia for field: {{.Name}} %w", err)
+	}
+	v.Add("{{.Name}}", string(bytes))
 }
 `
