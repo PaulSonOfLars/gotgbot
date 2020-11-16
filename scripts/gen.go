@@ -14,6 +14,7 @@ type APIDescription struct {
 }
 
 type TypeDescription struct {
+	Name        string   `json:"name"`
 	Description []string `json:"description"`
 	Fields      []Field  `json:"fields"`
 	Href        string   `json:"href"`
@@ -22,6 +23,7 @@ type TypeDescription struct {
 }
 
 type MethodDescription struct {
+	Name        string   `json:"name"`
 	Fields      []Field  `json:"fields"`
 	Returns     []string `json:"returns"`
 	Description []string `json:"description"`

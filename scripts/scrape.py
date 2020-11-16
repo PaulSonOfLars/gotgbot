@@ -128,7 +128,7 @@ def get_type_and_name(x, anchor, items):
     else:
         curr_type = METHODS
     curr_name = x.get_text()
-    items[curr_type][curr_name] = {}
+    items[curr_type][curr_name] = {"name": curr_name}
 
     href = anchor.get("href")
     if href:
