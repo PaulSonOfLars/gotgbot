@@ -16,7 +16,7 @@ var replyMarkupTypes = []string{
 }
 
 var (
-	replyMarkupMethodTmpl   = template.Must(template.New("replyMarkupMethod").Parse(replyMarkupInterfaceMethod))
+	genericInterfaceTmpl    = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
 	inputMediaInterfaceTmpl = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
 	customMarshalTmpl       = template.Must(template.New("customMarshal").Parse(customMarshal))
 )
@@ -53,10 +53,7 @@ import (
 	}
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	file.WriteString(`
-type ReplyMarkup interface{
-	ReplyMarkup() ([]byte, error)
-}`)
+	file.WriteString(generateGenericInterfaceType("ReplyMarkup", true))
 
 	return writeGenToFile(file, "gen/gen_types.go")
 }
@@ -69,7 +66,18 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
-		typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
+		switch tgType.Name {
+		case "InputMedia":
+			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
+		case "CallbackGame",
+			"InlineQueryResult",
+			"InputFile",
+			"InputMessageContent",
+			"PassportElementError":
+			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
+		default:
+			return "", fmt.Errorf("unknown interface type %s - please make sure this doesnt require implementation", tgType.Name)
+		}
 		return typeDef.String(), nil
 	}
 
@@ -116,7 +124,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			}
 
 			// We also need to setup the interface method
-			err = inputMediaInterfaceTmpl.Execute(&typeDef, inputMediaParamData{
+			err = inputMediaInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
 				Type:       tgType.Name,
 				ParentType: parentType,
 			})
@@ -125,7 +133,14 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			}
 
 		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
-			// TODO: Verify these. They should be ok, but should run more tests.
+			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgType.Name, err)
+			}
+
 		default:
 			return "", fmt.Errorf("Unable to handle parent type %s while generating for type %s\n", parentType, tgType.Name)
 		}
@@ -133,8 +148,9 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 	for _, t := range replyMarkupTypes {
 		if tgType.Name == t {
-			err := replyMarkupMethodTmpl.Execute(&typeDef, replyMarkupInterfaceData{
-				Type: tgType.Name,
+			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: "ReplyMarkup",
 			})
 			if err != nil {
 				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgType.Name, err)
@@ -155,6 +171,17 @@ type %s interface{
 }`, name, name)
 	}
 	return "\ntype " + name + " interface{}"
+}
+
+func generateGenericInterfaceType(name string, hasSubtypes bool) string {
+	if !hasSubtypes {
+		return "\ntype " + name + " interface{}"
+	}
+
+	return fmt.Sprintf(`
+type %s interface{
+	%s() ([]byte, error)
+}`, name, name)
 }
 
 func isSubtypeOf(tgType TypeDescription, parentType string) bool {
@@ -185,7 +212,7 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 }
 `
 
-type inputMediaParamData struct {
+type interfaceMethodData struct {
 	Type       string
 	ParentType string
 }
@@ -208,12 +235,8 @@ func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]Named
 }
 `
 
-type replyMarkupInterfaceData struct {
-	Type string
-}
-
-const replyMarkupInterfaceMethod = `
-func (v {{.Type}}) ReplyMarkup() ([]byte, error) {
+const genericInterfaceMethod = `
+func (v {{.Type}}) {{.ParentType}}() ([]byte, error) {
 	return json.Marshal(v)
 }
 `
