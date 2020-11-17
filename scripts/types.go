@@ -44,7 +44,8 @@ import (
 	sort.Strings(types)
 
 	for _, tgTypeName := range types {
-		typeDef, err := generateTypeDef(d, tgTypeName)
+		tgType := d.Types[tgTypeName]
+		typeDef, err := generateTypeDef(d, tgType)
 		if err != nil {
 			return fmt.Errorf("failed to generate type definition of %s: %w", tgTypeName, err)
 		}
@@ -60,22 +61,21 @@ type ReplyMarkup interface{
 	return writeGenToFile(file, "gen/gen_types.go")
 }
 
-func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
+func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	typeDef := strings.Builder{}
-	tgType := d.Types[tgTypeName]
 
 	for _, d := range tgType.Description {
 		typeDef.WriteString("\n// " + d)
 	}
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
-		typeDef.WriteString(generateInputMediaInterfaceType(tgTypeName, tgType))
+		typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
 		return typeDef.String(), nil
 	}
 
-	typeDef.WriteString("\ntype " + tgTypeName + " struct {")
+	typeDef.WriteString("\ntype " + tgType.Name + " struct {")
 	for _, f := range tgType.Fields {
-		fieldType, err := getPreferredType(f)
+		fieldType, err := f.getPreferredType()
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
@@ -93,7 +93,7 @@ func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 		}
 
 		goType := toGoType(fieldType)
-		if isTgType(d.Types, goType) && !f.Required {
+		if isTgType(d, goType) && !f.Required {
 			goType = "*" + goType
 		}
 
@@ -108,36 +108,36 @@ func generateTypeDef(d APIDescription, tgTypeName string) (string, error) {
 		case "InputMedia":
 			// InputMedia items need a custom marshaller to handle the "type" field
 			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
-				Type:     tgTypeName,
-				TypeName: strings.ToLower(strings.TrimPrefix(tgTypeName, "InputMedia")),
+				Type:     tgType.Name,
+				TypeName: strings.ToLower(strings.TrimPrefix(tgType.Name, "InputMedia")),
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgTypeName, err)
+				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
 			}
 
 			// We also need to setup the interface method
 			err = inputMediaInterfaceTmpl.Execute(&typeDef, inputMediaParamData{
-				Type:       tgTypeName,
+				Type:       tgType.Name,
 				ParentType: parentType,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgTypeName, err)
+				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgType.Name, err)
 			}
 
 		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
 			// TODO: Verify these. They should be ok, but should run more tests.
 		default:
-			return "", fmt.Errorf("Unable to handle parent type %s while generating for type %s\n", parentType, tgTypeName)
+			return "", fmt.Errorf("Unable to handle parent type %s while generating for type %s\n", parentType, tgType.Name)
 		}
 	}
 
 	for _, t := range replyMarkupTypes {
-		if tgTypeName == t {
+		if tgType.Name == t {
 			err := replyMarkupMethodTmpl.Execute(&typeDef, replyMarkupInterfaceData{
-				Type: tgTypeName,
+				Type: tgType.Name,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgTypeName, err)
+				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgType.Name, err)
 			}
 
 			break

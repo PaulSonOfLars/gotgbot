@@ -21,6 +21,7 @@ func generateMethods(d APIDescription) error {
 // Regen by running 'go generate' in the repo root.
 
 package gen
+
 import (
 	urlLib "net/url" // renamed to avoid clashes with url vars
 	"encoding/json"
@@ -39,7 +40,7 @@ import (
 
 	for _, tgMethodName := range methods {
 		tgMethod := d.Methods[tgMethodName]
-		method, err := generateMethodDef(d, tgMethod, tgMethodName)
+		method, err := generateMethodDef(d, tgMethod)
 		if err != nil {
 			return fmt.Errorf("failed to generate method definition of %s: %w", tgMethodName, err)
 		}
@@ -49,19 +50,18 @@ import (
 	return writeGenToFile(file, "gen/gen_methods.go")
 }
 
-func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodName string) (string, error) {
+func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, error) {
 	method := strings.Builder{}
 
-	// defaulting to [0] is ok because its either message or bool
-	retType := toGoType(tgMethod.Returns[0])
-	if isTgType(d.Types, retType) {
-		retType = "*" + retType
+	retType, err := tgMethod.GetReturnType(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
 	defaultRetVal := getDefaultReturnVal(retType)
 
-	args, optionalsStruct, err := getArgs(tgMethodName, tgMethod)
+	args, optionalsStruct, err := tgMethod.getArgs()
 	if err != nil {
-		return "", fmt.Errorf("failed to get args for method %s: %w", tgMethodName, err)
+		return "", fmt.Errorf("failed to get args for method %s: %w", tgMethod.Name, err)
 	}
 
 	if optionalsStruct != "" {
@@ -73,11 +73,11 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	}
 	method.WriteString("\n// " + tgMethod.Href)
 
-	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethodName) + "(" + args + ") (" + retType + ", error) {")
+	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
 
-	valueGen, hasData, err := methodArgsToValues(tgMethod, defaultRetVal)
+	valueGen, hasData, err := tgMethod.argsToValues(defaultRetVal)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethodName, err)
+		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
 
 	method.WriteString("\n	v := urlLib.Values{}")
@@ -89,9 +89,9 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	method.WriteString("\n")
 
 	if hasData {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethodName + "\", v, data)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data)")
 	} else {
-		method.WriteString("\nr, err := bot.Get(\"" + tgMethodName + "\", v)")
+		method.WriteString("\nr, err := bot.Get(\"" + tgMethod.Name + "\", v)")
 	}
 	method.WriteString("\n	if err != nil {")
 	method.WriteString("\n		return " + defaultRetVal + ", err")
@@ -113,16 +113,16 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription, tgMethodNam
 	return method.String(), nil
 }
 
-func methodArgsToValues(method MethodDescription, defaultRetVal string) (string, bool, error) {
+func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, error) {
 	hasData := false
 	bd := strings.Builder{}
-	for _, f := range method.Fields {
+	for _, f := range m.Fields {
 		goParam := snakeToCamel(f.Name)
 		if !f.Required {
 			goParam = "opts." + snakeToTitle(f.Name)
 		}
 
-		fieldType, err := getPreferredType(f)
+		fieldType, err := f.getPreferredType()
 		if err != nil {
 			return "", false, fmt.Errorf("failed to get preferred type: %w", err)
 		}
@@ -212,11 +212,11 @@ func getRetVarName(retType string) string {
 	return strings.ToLower(retType[:1])
 }
 
-func getArgs(name string, method MethodDescription) (string, string, error) {
+func (m MethodDescription) getArgs() (string, string, error) {
 	var requiredArgs []string
 	optionals := strings.Builder{}
-	for _, f := range method.Fields {
-		fieldType, err := getPreferredType(f)
+	for _, f := range m.Fields {
+		fieldType, err := f.getPreferredType()
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
@@ -233,7 +233,7 @@ func getArgs(name string, method MethodDescription) (string, string, error) {
 	optionalsStruct := ""
 
 	if optionals.Len() > 0 {
-		optionalsName := snakeToTitle(name) + "Opts"
+		optionalsName := m.optsName()
 		bd := strings.Builder{}
 		bd.WriteString("\ntype " + optionalsName + " struct {")
 		bd.WriteString(optionals.String())

@@ -84,8 +84,8 @@ func writeGenToFile(file strings.Builder, filename string) error {
 	return nil
 }
 
-func isTgType(tgTypes map[string]TypeDescription, goType string) bool {
-	_, ok := tgTypes[goType]
+func isTgType(d APIDescription, goType string) bool {
+	_, ok := d.Types[goType]
 	return ok
 }
 
@@ -161,7 +161,7 @@ func goTypeStringer(t string) string {
 	}
 }
 
-func getPreferredType(f Field) (string, error) {
+func (f Field) getPreferredType() (string, error) {
 	if len(f.Types) == 1 {
 		return f.Types[0], nil
 	}
@@ -198,4 +198,30 @@ func getPreferredType(f Field) (string, error) {
 	}
 
 	return f.Types[0], fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
+}
+
+func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
+	prefRetVal := ""
+	switch len(m.Returns) {
+	case 1:
+		prefRetVal = m.Returns[0]
+	case 2:
+		if m.Returns[0] == "Message" && m.Returns[1] == "Boolean" {
+			prefRetVal = m.Returns[0]
+		} else {
+			return "", fmt.Errorf("failed to determine return type for method from %v", m.Returns)
+		}
+	default:
+		return "", fmt.Errorf("failed to determine return type for method")
+	}
+
+	retType := toGoType(prefRetVal)
+	if isTgType(d, retType) {
+		retType = "*" + retType
+	}
+	return retType, nil
+}
+
+func (m MethodDescription) optsName() string {
+	return snakeToTitle(m.Name) + "Opts"
 }
