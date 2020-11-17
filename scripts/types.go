@@ -88,8 +88,12 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
-		// InputMedia is a special one.
-		if isSubtypeOf(tgType, "InputMedia") {
+		if isSubtypeOf(tgType, "InlineQueryResult") {
+			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
+			if f.Name == "type" {
+				continue
+			}
+		} else if isSubtypeOf(tgType, "InputMedia") {
 			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
 			if f.Name == "type" {
 				continue
@@ -115,9 +119,10 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		switch parentType {
 		case "InputMedia":
 			// InputMedia items need a custom marshaller to handle the "type" field
+			typeName := strings.TrimPrefix(tgType.Name, "InputMedia")
 			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
 				Type:     tgType.Name,
-				TypeName: strings.ToLower(strings.TrimPrefix(tgType.Name, "InputMedia")),
+				TypeName: titleToSnake(typeName),
 			})
 			if err != nil {
 				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -129,16 +134,35 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 				ParentType: parentType,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgType.Name, err)
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
 			}
 
-		case "InputMessageContent", "InlineQueryResult", "PassportElementError":
+		case "InlineQueryResult":
+			// InlineQueryResult items need a custom marshaller to handle the "type" field
+			typeName := strings.TrimPrefix(tgType.Name, "InlineQueryResult")
+			typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
+				Type:     tgType.Name,
+				TypeName: titleToSnake(typeName),
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+			}
+
+			err = genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+			}
+		case "InputMessageContent", "PassportElementError":
 			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
 				Type:       tgType.Name,
 				ParentType: parentType,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate inputmedia interface methods for %s: %w", tgType.Name, err)
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
 			}
 
 		default:
