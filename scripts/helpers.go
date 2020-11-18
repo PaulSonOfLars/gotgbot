@@ -21,7 +21,7 @@ package gen
 
 		helper, err := generateHelperDef(d, tgMethod)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to generate helpersfor %s: %w", tgMethodName, err)
 		}
 		if helper != "" {
 			helpers.WriteString(helper)
@@ -52,9 +52,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 		fields := map[string]string{}
 		for _, f := range tgMethod.Fields {
-			// main item ID
 			if f.Name == strings.ToLower(typeName)+"_id" || f.Name == "id" {
-				//fmt.Println(f.Name== strings.ToLower(typeName)+"_id", f.Name, f, tgType.Name)
 				idField := "id"
 				if typeName == "Message" {
 					idField = "message_id"
@@ -78,7 +76,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			for _, mf := range tgMethod.Fields {
 				prefType, err := f.getPreferredType()
 				if err != nil {
-					return "", err
+					return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 				}
 				if isTgType(d, toGoType(prefType)) && f.Name+"_id" == mf.Name {
 					repl = strings.ReplaceAll(repl, prefType, "")
@@ -95,26 +93,25 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		fmt.Println("--- Should gen", repl, "from", tgMethod.Name, "on", typeName, "using", fields)
 		ret, err := tgMethod.GetReturnType(d)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
 		}
 
 		optsContent := strings.Builder{}
-		//var optionalFields []string
 		var funcCallArgList []string
 		funcDefArgList := []string{"b Bot"}
 		hasOpts := false
-		for _, f := range tgMethod.Fields {
-			hasOpts = hasOpts || !f.Required
-			prefType, err := f.getPreferredType()
+		for _, mf := range tgMethod.Fields {
+			hasOpts = hasOpts || !mf.Required
+			prefType, err := mf.getPreferredType()
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 			}
 
-			if fName, ok := fields[f.Name]; ok {
-				if !f.Required {
+			if fName, ok := fields[mf.Name]; ok {
+				if !mf.Required {
 					def := getDefaultReturnVal(toGoType(prefType))
-					optsContent.WriteString("\n	if opts." + snakeToTitle(f.Name) + " == " + def + " {")
-					optsContent.WriteString("\n		opts." + snakeToTitle(f.Name) + " = v." + snakeToTitle(fName))
+					optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
+					optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = v." + snakeToTitle(fName))
 					optsContent.WriteString("\n	}")
 
 					continue
@@ -123,12 +120,12 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 				continue
 			}
 
-			if !f.Required {
+			if !mf.Required {
 				continue
 			}
 
-			funcDefArgList = append(funcDefArgList, snakeToCamel(f.Name)+" "+toGoType(prefType))
-			funcCallArgList = append(funcCallArgList, snakeToCamel(f.Name))
+			funcDefArgList = append(funcDefArgList, snakeToCamel(mf.Name)+" "+toGoType(prefType))
+			funcCallArgList = append(funcCallArgList, snakeToCamel(mf.Name))
 
 		}
 
@@ -150,13 +147,8 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			FuncCallArgs: funcCallArgs,
 		})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", repl, typeName, err)
 		}
-
-		//helperDef.WriteString("\n\nfunc (v " + typeName + ") " + repl + "(" + funcDefArgs + ") (" + ret + ", error) {")
-		//helperDef.WriteString(optsContent.String())
-		//helperDef.WriteString("\n	return b." + strings.Title(tgMethod.Name) + "(" + funcCallArgs + ")")
-		//helperDef.WriteString("\n}")
 	}
 
 	return helperDef.String(), nil
