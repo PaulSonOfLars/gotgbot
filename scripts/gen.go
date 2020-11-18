@@ -59,6 +59,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = generateHelpers(d)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func writeGenToFile(file strings.Builder, filename string) error {
