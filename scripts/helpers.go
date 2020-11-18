@@ -23,9 +23,10 @@ package gen
 		if err != nil {
 			return fmt.Errorf("failed to generate helpersfor %s: %w", tgMethodName, err)
 		}
-		if helper != "" {
-			helpers.WriteString(helper)
+		if helper == "" {
+			continue
 		}
+		helpers.WriteString(helper)
 	}
 
 	return writeGenToFile(helpers, "gen/gen_helpers.go")
@@ -52,14 +53,14 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 		fields := map[string]string{}
 		for _, f := range tgMethod.Fields {
-			if f.Name == strings.ToLower(typeName)+"_id" || f.Name == "id" {
+			if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
 				idField := "id"
 				if typeName == "Message" {
 					idField = "message_id"
 				} else if typeName == "File" {
 					idField = "file_id"
 				}
-				fields[strings.ToLower(typeName)+"_id"] = idField
+				fields[titleToSnake(typeName)+"_id"] = idField
 			}
 		}
 
@@ -90,7 +91,6 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		}
 
 		repl = strings.Title(repl)
-		fmt.Println("--- Should gen", repl, "from", tgMethod.Name, "on", typeName, "using", fields)
 		ret, err := tgMethod.GetReturnType(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
