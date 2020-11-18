@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"sort"
 	"strings"
 )
 
@@ -36,14 +35,7 @@ import (
 )
 `)
 
-	// TODO: Obtain ordered map to retain tg ordering
-	var types []string
-	for k := range d.Types {
-		types = append(types, k)
-	}
-	sort.Strings(types)
-
-	for _, tgTypeName := range types {
+	for _, tgTypeName := range orderedTgTypes(d) {
 		tgType := d.Types[tgTypeName]
 		typeDef, err := generateTypeDef(d, tgType)
 		if err != nil {

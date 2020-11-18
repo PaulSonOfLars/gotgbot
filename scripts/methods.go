@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"text/template"
 )
@@ -31,14 +30,7 @@ import (
 )
 `)
 
-	// TODO: Obtain ordered map to retain tg ordering
-	var methods []string
-	for k := range d.Methods {
-		methods = append(methods, k)
-	}
-	sort.Strings(methods)
-
-	for _, tgMethodName := range methods {
+	for _, tgMethodName := range orderedMethods(d) {
 		tgMethod := d.Methods[tgMethodName]
 		method, err := generateMethodDef(d, tgMethod)
 		if err != nil {
