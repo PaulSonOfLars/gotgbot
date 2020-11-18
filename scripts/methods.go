@@ -60,18 +60,18 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		method.WriteString("\n" + optionalsStruct)
 	}
 
-	for _, d := range tgMethod.Description {
-		method.WriteString("\n// " + d)
+	desc, err := tgMethod.description()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
-	method.WriteString("\n// " + tgMethod.Href)
-
-	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
 
 	valueGen, hasData, err := tgMethod.argsToValues(defaultRetVal)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
 
+	method.WriteString(desc)
+	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 	if hasData {
 		method.WriteString("\n	data := map[string]NamedReader{}")
@@ -103,6 +103,33 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString("\n}")
 
 	return method.String(), nil
+}
+
+func (m MethodDescription) description() (string, error) {
+	description := strings.Builder{}
+	for _, d := range m.Description {
+		description.WriteString("\n// " + d)
+	}
+
+	hasOptionals := false
+	for _, f := range m.Fields {
+		if !f.Required {
+			hasOptionals = true
+			continue
+		}
+
+		prefType, err := f.getPreferredType()
+		if err != nil {
+			return "", err
+		}
+		description.WriteString("\n// - " + f.Name + " (type " + toGoType(prefType) + "): " + f.Description)
+	}
+	if hasOptionals {
+		description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
+	}
+
+	description.WriteString("\n// " + m.Href)
+	return description.String(), nil
 }
 
 func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, error) {
