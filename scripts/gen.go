@@ -6,6 +6,7 @@ import (
 	"go/format"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -78,11 +79,34 @@ func writeGenToFile(file strings.Builder, filename string) error {
 		return err
 	}
 
+	err = write.Truncate(0)
+	if err != nil {
+		return err
+	}
+
 	_, err = write.WriteAt(fmted, 0)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func orderedTgTypes(d APIDescription) []string {
+	var types []string
+	for k := range d.Types {
+		types = append(types, k)
+	}
+	sort.Strings(types)
+	return types
+}
+
+func orderedMethods(d APIDescription) []string {
+	var methods []string
+	for k := range d.Methods {
+		methods = append(methods, k)
+	}
+	sort.Strings(methods)
+	return methods
 }
 
 func isTgType(d APIDescription, goType string) bool {
