@@ -73,7 +73,9 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
 		}
 
-		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(tgMethod, fields)
+		receiverName := tgType.receiverName()
+
+		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(tgMethod, receiverName, fields)
 		if err != nil {
 			return "", err
 		}
@@ -84,6 +86,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		helperDef.WriteString("\n// Helper method for Bot." + strings.Title(tgMethod.Name))
 
 		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
+			Receiver:     receiverName,
 			TypeName:     typeName,
 			HelperName:   newMethodName,
 			ReturnType:   ret,
@@ -100,7 +103,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 	return helperDef.String(), nil
 }
 
-func generateHelperArguments(tgMethod MethodDescription, fields map[string]string) ([]string, []string, string, error) {
+func generateHelperArguments(tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
 	var funcCallArgList []string
 	optsContent := strings.Builder{}
 	funcDefArgList := []string{"b Bot"}
@@ -118,12 +121,12 @@ func generateHelperArguments(tgMethod MethodDescription, fields map[string]strin
 			if !mf.Required {
 				def := getDefaultReturnVal(prefType)
 				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
-				optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = v." + snakeToTitle(fName))
+				optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = " + receiverName + "." + snakeToTitle(fName))
 				optsContent.WriteString("\n	}")
 				continue
 			}
 
-			funcCallArgList = append(funcCallArgList, "v."+snakeToTitle(fName))
+			funcCallArgList = append(funcCallArgList, receiverName+"."+snakeToTitle(fName))
 			continue
 		}
 
@@ -189,6 +192,7 @@ func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string, fie
 var helperFuncTmpl = template.Must(template.New("helperFunc").Parse(helperFunc))
 
 type helperFuncData struct {
+	Receiver     string
 	TypeName     string
 	HelperName   string
 	ReturnType   string
@@ -199,7 +203,7 @@ type helperFuncData struct {
 }
 
 const helperFunc = `
-func (v {{.TypeName}}) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnType}}, error) {
+func ({{.Receiver}} {{.TypeName}}) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnType}}, error) {
 	{{- .Contents}}
 	return b.{{.MethodName}}({{.FuncCallArgs}})
 }

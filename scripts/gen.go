@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode"
 )
 
 type APIDescription struct {
@@ -22,6 +23,17 @@ type TypeDescription struct {
 	Href        string   `json:"href"`
 	Subtypes    []string `json:"subtypes"`
 	SubtypeOf   []string `json:"subtype_of"`
+}
+
+func (d TypeDescription) receiverName() string {
+	var rs []rune
+	for _, r := range []rune(d.Name) {
+		if unicode.IsUpper(r) {
+			rs = append(rs, r)
+		}
+	}
+
+	return strings.ToLower(string(rs))
 }
 
 type MethodDescription struct {
