@@ -32,10 +32,12 @@ import (
 
 	for _, tgMethodName := range orderedMethods(d) {
 		tgMethod := d.Methods[tgMethodName]
+
 		method, err := generateMethodDef(d, tgMethod)
 		if err != nil {
 			return fmt.Errorf("failed to generate method definition of %s: %w", tgMethodName, err)
 		}
+
 		file.WriteString(method)
 	}
 
@@ -49,6 +51,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	if err != nil {
 		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
+
 	defaultRetVal := getDefaultReturnVal(retType)
 
 	args, optionalsStruct, err := tgMethod.getArgs()
@@ -73,6 +76,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString(desc)
 	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
+
 	if hasData {
 		method.WriteString("\n	data := map[string]NamedReader{}")
 	}
@@ -85,6 +89,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	} else {
 		method.WriteString("\nr, err := bot.Get(\"" + tgMethod.Name + "\", v)")
 	}
+
 	method.WriteString("\n	if err != nil {")
 	method.WriteString("\n		return " + defaultRetVal + ", err")
 	method.WriteString("\n	}")
@@ -98,6 +103,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		retVarType = strings.TrimLeft(retVarType, "*")
 		addr = "&"
 	}
+
 	method.WriteString("\nvar " + retVarName + " " + retVarType)
 	method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 	method.WriteString("\n}")
@@ -107,11 +113,12 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
+	hasOptionals := false
+
 	for _, d := range m.Description {
 		description.WriteString("\n// " + d)
 	}
 
-	hasOptionals := false
 	for _, f := range m.Fields {
 		if !f.Required {
 			hasOptionals = true
@@ -122,19 +129,23 @@ func (m MethodDescription) description() (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		description.WriteString("\n// - " + f.Name + " (type " + prefType + "): " + f.Description)
 	}
+
 	if hasOptionals {
 		description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
 	}
 
 	description.WriteString("\n// " + m.Href)
+
 	return description.String(), nil
 }
 
 func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, error) {
 	hasData := false
 	bd := strings.Builder{}
+
 	for _, f := range m.Fields {
 		goParam := snakeToCamel(f.Name)
 		if !f.Required {
@@ -145,6 +156,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 		if err != nil {
 			return "", false, fmt.Errorf("failed to get preferred type: %w", err)
 		}
+
 		stringer := goTypeStringer(fieldType)
 		if stringer != "" {
 			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")")
@@ -225,20 +237,24 @@ func getRetVarName(retType string) string {
 	for strings.HasPrefix(retType, "*") {
 		retType = strings.TrimPrefix(retType, "*")
 	}
+
 	for strings.HasPrefix(retType, "[]") {
 		retType = strings.TrimPrefix(retType, "[]")
 	}
+
 	return strings.ToLower(retType[:1])
 }
 
 func (m MethodDescription) getArgs() (string, string, error) {
 	var requiredArgs []string
 	optionals := strings.Builder{}
+
 	for _, f := range m.Fields {
 		fieldType, err := f.getPreferredType()
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
+
 		if f.Required {
 			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))
 			continue
@@ -246,8 +262,8 @@ func (m MethodDescription) getArgs() (string, string, error) {
 
 		optionals.WriteString("\n// " + f.Description)
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
-
 	}
+
 	optionalsStruct := ""
 
 	if optionals.Len() > 0 {

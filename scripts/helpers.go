@@ -23,9 +23,11 @@ package gen
 		if err != nil {
 			return fmt.Errorf("failed to generate helpersfor %s: %w", tgMethodName, err)
 		}
+
 		if helper == "" {
 			continue
 		}
+
 		helpers.WriteString(helper)
 	}
 
@@ -34,8 +36,8 @@ package gen
 
 func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, error) {
 	helperDef := strings.Builder{}
-
 	hasFromChat := false
+
 	for _, x := range tgMethod.Fields {
 		if x.Name == "from_chat_id" {
 			hasFromChat = true
@@ -52,14 +54,17 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		}
 
 		fields := map[string]string{}
+
 		for _, f := range tgMethod.Fields {
 			if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
 				idField := "id"
+
 				if typeName == tgTypeMessage {
 					idField = "message_id"
 				} else if typeName == tgTypeFile {
 					idField = "file_id"
 				}
+
 				fields[titleToSnake(typeName)+"_id"] = idField
 			}
 		}
@@ -79,8 +84,10 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 				if err != nil {
 					return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 				}
+
 				if isTgType(d, prefType) && f.Name+"_id" == mf.Name {
 					repl = strings.ReplaceAll(repl, prefType, "")
+
 					if hasFromChat && mf.Name == "chat_id" {
 						fields["from_chat_id"] = f.Name + ".Id"
 					} else {
@@ -91,17 +98,20 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		}
 
 		repl = strings.Title(repl)
+
 		ret, err := tgMethod.GetReturnType(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
 		}
 
-		optsContent := strings.Builder{}
 		var funcCallArgList []string
+		optsContent := strings.Builder{}
 		funcDefArgList := []string{"b Bot"}
 		hasOpts := false
+
 		for _, mf := range tgMethod.Fields {
 			hasOpts = hasOpts || !mf.Required
+
 			prefType, err := mf.getPreferredType()
 			if err != nil {
 				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
@@ -113,9 +123,9 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 					optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
 					optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = v." + snakeToTitle(fName))
 					optsContent.WriteString("\n	}")
-
 					continue
 				}
+
 				funcCallArgList = append(funcCallArgList, "v."+snakeToTitle(fName))
 				continue
 			}
@@ -126,7 +136,6 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 			funcDefArgList = append(funcDefArgList, snakeToCamel(mf.Name)+" "+prefType)
 			funcCallArgList = append(funcCallArgList, snakeToCamel(mf.Name))
-
 		}
 
 		if hasOpts {
@@ -138,6 +147,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		funcCallArgs := strings.Join(funcCallArgList, ", ")
 
 		helperDef.WriteString("\n// Helper method for Bot." + strings.Title(tgMethod.Name))
+
 		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
 			TypeName:     typeName,
 			HelperName:   repl,

@@ -74,10 +74,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	err = generateMethods(d)
 	if err != nil {
 		panic(err)
 	}
+
 	err = generateHelpers(d)
 	if err != nil {
 		panic(err)
@@ -87,66 +89,75 @@ func main() {
 func writeGenToFile(file strings.Builder, filename string) error {
 	write, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file %s: %w", filename, err)
 	}
 
 	bs := []byte(file.String())
 
 	_, err = write.WriteAt(bs, 0)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write unformatted file %s: %w", filename, err)
 	}
 
 	fmted, err := format.Source(bs)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to format file %s: %w", filename, err)
 	}
 
 	err = write.Truncate(0)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to truncate file %s: %w", filename, err)
 	}
 
 	_, err = write.WriteAt(fmted, 0)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write final file %s: %w", filename, err)
 	}
+
 	return nil
 }
 
 func orderedTgTypes(d APIDescription) []string {
-	var types []string
+	types := make([]string, 0, len(d.Types))
 	for k := range d.Types {
 		types = append(types, k)
 	}
+
 	sort.Strings(types)
+
 	return types
 }
 
 func orderedMethods(d APIDescription) []string {
-	var methods []string
+	methods := make([]string, 0, len(d.Methods))
 	for k := range d.Methods {
 		methods = append(methods, k)
 	}
+
 	sort.Strings(methods)
+
 	return methods
 }
 
 func isTgType(d APIDescription, goType string) bool {
 	_, ok := d.Types[goType]
+
 	return ok
 }
 
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
-	for _, s := range strings.Split(s, "_") {
-		bd.WriteString(strings.Title(s))
+
+	for _, split := range strings.Split(s, "_") {
+		bd.WriteString(strings.Title(split))
 	}
+
 	return bd.String()
 }
 
 func snakeToCamel(s string) string {
 	title := snakeToTitle(s)
+
 	return strings.ToLower(title[:1]) + title[1:]
 }
 
@@ -156,6 +167,7 @@ var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 func titleToSnake(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+
 	return strings.ToLower(snake)
 }
 
@@ -176,6 +188,7 @@ func toGoType(s string) string {
 	case tgTypeString:
 		return pref + "string"
 	}
+
 	return pref + s
 }
 
@@ -226,6 +239,7 @@ func (f Field) getPreferredType() (string, error) {
 	if len(f.Types) == 1 {
 		return toGoType(f.Types[0]), nil
 	}
+
 	if len(f.Types) == 2 {
 		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
 			return toGoType(f.Types[0]), nil
@@ -233,6 +247,7 @@ func (f Field) getPreferredType() (string, error) {
 			return toGoType(f.Types[0]), nil
 		}
 	}
+
 	if f.Name == "media" {
 		var arrayType bool
 		// TODO: check against API description type
@@ -243,9 +258,11 @@ func (f Field) getPreferredType() (string, error) {
 				return "", fmt.Errorf("mediatype %s is not of kind InputMedia for field %s", t, f.Name)
 			}
 		}
+
 		if arrayType {
 			return "[]" + tgTypeInputMedia, nil
 		}
+
 		return tgTypeInputMedia, nil
 	}
 
@@ -263,23 +280,19 @@ func (f Field) getPreferredType() (string, error) {
 
 func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
 	prefRetVal := ""
-	switch len(m.Returns) {
-	case 1:
+	if len(m.Returns) == 1 {
 		prefRetVal = m.Returns[0]
-	case 2:
-		if m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean {
-			prefRetVal = m.Returns[0]
-		} else {
-			return "", fmt.Errorf("failed to determine return type for method from %v", m.Returns)
-		}
-	default:
-		return "", fmt.Errorf("failed to determine return type for method")
+	} else if len(m.Returns) == 2 && m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean {
+		prefRetVal = m.Returns[0]
+	} else {
+		return "", fmt.Errorf("failed to determine return type for method %s", m.Name)
 	}
 
 	retType := toGoType(prefRetVal)
 	if isTgType(d, retType) {
 		retType = "*" + retType
 	}
+
 	return retType, nil
 }
 
