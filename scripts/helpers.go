@@ -55,9 +55,9 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		for _, f := range tgMethod.Fields {
 			if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
 				idField := "id"
-				if typeName == "Message" {
+				if typeName == tgTypeMessage {
 					idField = "message_id"
-				} else if typeName == "File" {
+				} else if typeName == tgTypeFile {
 					idField = "file_id"
 				}
 				fields[titleToSnake(typeName)+"_id"] = idField

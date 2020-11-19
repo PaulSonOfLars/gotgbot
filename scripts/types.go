@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// TODO: dont hardcode; obtain these from reply_markup fields
+// TODO: dont hardcode; obtain these from reply_markup fields.
 var replyMarkupTypes = []string{
 	"InlineKeyboardMarkup",
 	"ReplyKeyboardMarkup",
@@ -59,13 +59,13 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	typeDef.WriteString("\n// " + tgType.Href)
 	if len(tgType.Fields) == 0 {
 		switch tgType.Name {
-		case "InputMedia":
+		case tgTypeInputMedia:
 			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
-		case "CallbackGame",
-			"InlineQueryResult",
-			"InputFile",
-			"InputMessageContent",
-			"PassportElementError":
+		case tgTypeCallbackGame,
+			tgTypeInlineQueryResult,
+			tgTypeInputFile,
+			tgTypeInputMessageContent,
+			tgTypePassportElementError:
 			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
 		default:
 			return "", fmt.Errorf("unknown interface type %s - please make sure this doesnt require implementation", tgType.Name)
@@ -80,19 +80,19 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
-		if isSubtypeOf(tgType, "InlineQueryResult") {
+		if isSubtypeOf(tgType, tgTypeInlineQueryResult) {
 			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
 			if f.Name == "type" {
 				continue
 			}
-		} else if isSubtypeOf(tgType, "InputMedia") {
+		} else if isSubtypeOf(tgType, tgTypeInputMedia) {
 			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
 			if f.Name == "type" {
 				continue
 			}
 			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
 			if f.Name == "media" {
-				fieldType = "InputFile"
+				fieldType = tgTypeInputFile
 			}
 		}
 
@@ -108,9 +108,9 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 	for _, parentType := range tgType.SubtypeOf {
 		switch parentType {
-		case "InputMedia":
+		case tgTypeInputMedia:
 			// InputMedia items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, "InputMedia")
+			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
 			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
 				Type:     tgType.Name,
 				TypeName: titleToSnake(typeName),
@@ -128,9 +128,9 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
 			}
 
-		case "InlineQueryResult":
+		case tgTypeInlineQueryResult:
 			// InlineQueryResult items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, "InlineQueryResult")
+			typeName := strings.TrimPrefix(tgType.Name, tgTypeInlineQueryResult)
 			typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
 			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
 				Type:     tgType.Name,
@@ -147,7 +147,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			if err != nil {
 				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
 			}
-		case "InputMessageContent", "PassportElementError":
+		case tgTypeInputMessageContent, tgTypePassportElementError:
 			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
 				Type:       tgType.Name,
 				ParentType: parentType,

@@ -152,7 +152,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 		}
 
 		switch fieldType {
-		case "InputFile":
+		case tgTypeInputFile:
 			hasData = true
 
 			t := stringOrReaderBranchTmpl
@@ -170,7 +170,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 				return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
 			}
 
-		case "InputMedia":
+		case tgTypeInputMedia:
 			hasData = true
 
 			err = inputMediaParamsBranchTmpl.Execute(&bd, readerBranchesData{

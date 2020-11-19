@@ -39,6 +39,25 @@ type Field struct {
 	Description string   `json:"description"`
 }
 
+const (
+	// These are all base telegram types which make sense in other languages.
+	tgTypeString  = "String"
+	tgTypeBoolean = "Boolean"
+	tgTypeFloat   = "Float"
+	tgTypeInteger = "Integer"
+	// These are all custom telegram types.
+	tgTypeMessage              = "Message"
+	tgTypeFile                 = "File"
+	tgTypeInputFile            = "InputFile"
+	tgTypeInputMedia           = "InputMedia"
+	tgTypeInlineQueryResult    = "InlineQueryResult"
+	tgTypeInputMessageContent  = "InputMessageContent"
+	tgTypePassportElementError = "PassportElementError"
+	tgTypeCallbackGame         = "CallbackGame"
+	// This is actually a custom type.
+	tgTypeReplyMarkup = "ReplyMarkup"
+)
+
 func main() {
 	api, err := os.Open("api.json")
 	if err != nil {
@@ -148,13 +167,13 @@ func toGoType(s string) string {
 	}
 
 	switch s {
-	case "Integer":
+	case tgTypeInteger:
 		return pref + "int64"
-	case "Float":
+	case tgTypeFloat:
 		return pref + "float64"
-	case "Boolean":
+	case tgTypeBoolean:
 		return pref + "bool"
-	case "String":
+	case tgTypeString:
 		return pref + "string"
 	}
 	return pref + s
@@ -208,9 +227,9 @@ func (f Field) getPreferredType() (string, error) {
 		return toGoType(f.Types[0]), nil
 	}
 	if len(f.Types) == 2 {
-		if f.Types[0] == "InputFile" && f.Types[1] == "String" {
+		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
 			return toGoType(f.Types[0]), nil
-		} else if f.Types[0] == "Integer" && f.Types[1] == "String" {
+		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
 			return toGoType(f.Types[0]), nil
 		}
 	}
@@ -220,14 +239,14 @@ func (f Field) getPreferredType() (string, error) {
 		for _, t := range f.Types {
 			arrayType = arrayType || isTgArray(t)
 
-			if !strings.Contains(t, "InputMedia") {
+			if !strings.Contains(t, tgTypeInputMedia) {
 				return "", fmt.Errorf("mediatype %s is not of kind InputMedia for field %s", t, f.Name)
 			}
 		}
 		if arrayType {
-			return "[]InputMedia", nil
+			return "[]" + tgTypeInputMedia, nil
 		}
-		return "InputMedia", nil
+		return tgTypeInputMedia, nil
 	}
 
 	if f.Name == "reply_markup" && len(f.Types) == 4 {
@@ -236,7 +255,7 @@ func (f Field) getPreferredType() (string, error) {
 		// ReplyKeyboardMarkup
 		// ReplyKeyboardRemove
 		// ForceReply
-		return "ReplyMarkup", nil
+		return tgTypeReplyMarkup, nil
 	}
 
 	return "", fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
@@ -248,7 +267,7 @@ func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
 	case 1:
 		prefRetVal = m.Returns[0]
 	case 2:
-		if m.Returns[0] == "Message" && m.Returns[1] == "Boolean" {
+		if m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean {
 			prefRetVal = m.Returns[0]
 		} else {
 			return "", fmt.Errorf("failed to determine return type for method from %v", m.Returns)
