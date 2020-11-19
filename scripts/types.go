@@ -281,7 +281,7 @@ func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]Named
 
 		case io.Reader:
 			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{Reader: m}
+			data[mediaName] = NamedFile{File: m}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)

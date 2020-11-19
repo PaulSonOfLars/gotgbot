@@ -295,7 +295,7 @@ if {{.GoParam}} != nil {
 
 	case io.Reader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = NamedFile{Reader: m}
+		data["{{.Name}}"] = NamedFile{File: m}
 
 	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
@@ -315,7 +315,7 @@ if {{.GoParam}} != nil {
 
 	case io.Reader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = NamedFile{Reader: m}
+		data["{{.Name}}"] = NamedFile{File: m}
 
 	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
