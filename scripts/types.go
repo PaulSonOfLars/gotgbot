@@ -80,8 +80,104 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		return typeDef.String(), nil
 	}
 
-	typeDef.WriteString("\ntype " + tgType.Name + " struct {")
+	typeFields, err := generateTypeFields(d, tgType)
+	if err != nil {
+		return "", err
+	}
 
+	typeDef.WriteString("\ntype " + tgType.Name + " struct {")
+	typeDef.WriteString(typeFields)
+	typeDef.WriteString("\n}")
+
+	interfaces, err2 := generateParentTypeInterfaces(tgType)
+	if err2 != nil {
+		return "", err2
+	}
+
+	typeDef.WriteString(interfaces)
+
+	return typeDef.String(), nil
+}
+
+func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
+	typeInterfaces := strings.Builder{}
+	for _, parentType := range tgType.SubtypeOf {
+		switch parentType {
+		case tgTypeInputMedia:
+			// InputMedia items need a custom marshaller to handle the "type" field
+			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
+
+			err := customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
+				Type:     tgType.Name,
+				TypeName: titleToSnake(typeName),
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+			}
+
+			// We also need to setup the interface method
+			err = inputMediaInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+			}
+
+		case tgTypeInlineQueryResult:
+			// InlineQueryResult items need a custom marshaller to handle the "type" field
+			typeName := strings.TrimPrefix(tgType.Name, tgTypeInlineQueryResult)
+			typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+
+			err := customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
+				Type:     tgType.Name,
+				TypeName: titleToSnake(typeName),
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+			}
+
+			err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+			}
+
+		case tgTypeInputMessageContent, tgTypePassportElementError:
+			err := genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: parentType,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+			}
+
+		default:
+			return "", fmt.Errorf("unable to handle parent type %s while generating for type %s\n", parentType, tgType.Name)
+		}
+	}
+
+	for _, t := range replyMarkupTypes {
+		if tgType.Name == t {
+			err := genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+				Type:       tgType.Name,
+				ParentType: "ReplyMarkup",
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgType.Name, err)
+			}
+
+			break
+		}
+	}
+
+	return typeInterfaces.String(), nil
+}
+
+func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error) {
+	typeFields := strings.Builder{}
 	for _, f := range tgType.Fields {
 		fieldType, err := f.getPreferredType()
 		if err != nil {
@@ -109,85 +205,11 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			fieldType = "*" + fieldType
 		}
 
-		typeDef.WriteString("\n// " + f.Description)
-		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + fieldType + " `json:\"" + f.Name + ",omitempty\"`")
+		typeFields.WriteString("\n// " + f.Description)
+		typeFields.WriteString("\n" + snakeToTitle(f.Name) + " " + fieldType + " `json:\"" + f.Name + ",omitempty\"`")
 	}
 
-	typeDef.WriteString("\n}")
-
-	for _, parentType := range tgType.SubtypeOf {
-		switch parentType {
-		case tgTypeInputMedia:
-			// InputMedia items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
-
-			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
-				Type:     tgType.Name,
-				TypeName: titleToSnake(typeName),
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
-			}
-
-			// We also need to setup the interface method
-			err = inputMediaInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentType,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
-			}
-
-		case tgTypeInlineQueryResult:
-			// InlineQueryResult items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, tgTypeInlineQueryResult)
-			typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
-
-			err := customMarshalTmpl.Execute(&typeDef, customMarshalData{
-				Type:     tgType.Name,
-				TypeName: titleToSnake(typeName),
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
-			}
-
-			err = genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentType,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
-			}
-
-		case tgTypeInputMessageContent, tgTypePassportElementError:
-			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentType,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
-			}
-
-		default:
-			return "", fmt.Errorf("unable to handle parent type %s while generating for type %s\n", parentType, tgType.Name)
-		}
-	}
-
-	for _, t := range replyMarkupTypes {
-		if tgType.Name == t {
-			err := genericInterfaceTmpl.Execute(&typeDef, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: "ReplyMarkup",
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgType.Name, err)
-			}
-
-			break
-		}
-	}
-
-	return typeDef.String(), nil
+	return typeFields.String(), nil
 }
 
 func generateInputMediaInterfaceType(name string, tgType TypeDescription) string {
