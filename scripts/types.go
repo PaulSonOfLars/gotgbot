@@ -235,14 +235,20 @@ type interfaceMethodData struct {
 const inputMediaInterfaceMethod = `
 func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
-		if r, ok := v.Media.(io.Reader); ok {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
 			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedReader{File: r}
-		} else if nf, ok := v.Media.(NamedReader); ok {
+			data[mediaName] = m
+
+		case io.Reader:
 			v.Media = "attach://" + mediaName
-			data[mediaName] = nf
-		} else {
-			return nil, fmt.Errorf("unknown type for InputFile: %T", v.Media)
+			data[mediaName] = NamedFile{Reader: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
 		}
 	}
 	

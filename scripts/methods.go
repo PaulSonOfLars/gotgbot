@@ -272,13 +272,16 @@ type readerBranchesData struct {
 
 const readerBranch = `
 if {{.GoParam}} != nil {
-	if r, ok := {{.GoParam}}.(io.Reader); ok {
+	switch m := {{.GoParam}}.(type) {
+	case NamedReader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = NamedReader{File: r}
-	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
+		data["{{.Name}}"] = m
+
+	case io.Reader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = nf
-	} else {
+		data["{{.Name}}"] = NamedFile{Reader: m}
+
+	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
 	}
 }
@@ -286,15 +289,19 @@ if {{.GoParam}} != nil {
 
 const stringOrReaderBranch = `
 if {{.GoParam}} != nil {
-	if s, ok := {{.GoParam}}.(string); ok {
-		v.Add("{{.Name}}", s)
-	} else if r, ok := {{.GoParam}}.(io.Reader); ok {
+	switch m := {{.GoParam}}.(type) {
+	case string:
+		// ok, noop
+
+	case NamedReader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = NamedReader{File: r}
-	} else if nf, ok := {{.GoParam}}.(NamedReader); ok {
+		data["{{.Name}}"] = m
+
+	case io.Reader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
-		data["{{.Name}}"] = nf
-	} else {
+		data["{{.Name}}"] = NamedFile{Reader: m}
+
+	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
 	}
 }
