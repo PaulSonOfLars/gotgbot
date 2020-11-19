@@ -96,13 +96,12 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			}
 		}
 
-		goType := toGoType(fieldType)
-		if isTgType(d, goType) && !f.Required {
-			goType = "*" + goType
+		if isTgType(d, fieldType) && !f.Required {
+			fieldType = "*" + fieldType
 		}
 
 		typeDef.WriteString("\n// " + f.Description)
-		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + goType + " `json:\"" + f.Name + ",omitempty\"`")
+		typeDef.WriteString("\n" + snakeToTitle(f.Name) + " " + fieldType + " `json:\"" + f.Name + ",omitempty\"`")
 	}
 
 	typeDef.WriteString("\n}")

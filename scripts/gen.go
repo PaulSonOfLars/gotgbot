@@ -164,6 +164,10 @@ func isTgArray(s string) bool {
 	return strings.HasPrefix(s, "Array of ")
 }
 
+func isArray(s string) bool {
+	return strings.HasPrefix(s, "[]")
+}
+
 func getDefaultReturnVal(s string) string {
 	if strings.HasPrefix(s, "*") || strings.HasPrefix(s, "[]") {
 		return "nil"
@@ -201,13 +205,13 @@ func goTypeStringer(t string) string {
 
 func (f Field) getPreferredType() (string, error) {
 	if len(f.Types) == 1 {
-		return f.Types[0], nil
+		return toGoType(f.Types[0]), nil
 	}
 	if len(f.Types) == 2 {
 		if f.Types[0] == "InputFile" && f.Types[1] == "String" {
-			return f.Types[0], nil
+			return toGoType(f.Types[0]), nil
 		} else if f.Types[0] == "Integer" && f.Types[1] == "String" {
-			return f.Types[0], nil
+			return toGoType(f.Types[0]), nil
 		}
 	}
 	if f.Name == "media" {
@@ -221,7 +225,7 @@ func (f Field) getPreferredType() (string, error) {
 			}
 		}
 		if arrayType {
-			return "Array of InputMedia", nil
+			return "[]InputMedia", nil
 		}
 		return "InputMedia", nil
 	}
@@ -235,7 +239,7 @@ func (f Field) getPreferredType() (string, error) {
 		return "ReplyMarkup", nil
 	}
 
-	return f.Types[0], fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
+	return "", fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
 }
 
 func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {

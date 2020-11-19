@@ -122,7 +122,7 @@ func (m MethodDescription) description() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		description.WriteString("\n// - " + f.Name + " (type " + toGoType(prefType) + "): " + f.Description)
+		description.WriteString("\n// - " + f.Name + " (type " + prefType + "): " + f.Description)
 	}
 	if hasOptionals {
 		description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
@@ -145,7 +145,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 		if err != nil {
 			return "", false, fmt.Errorf("failed to get preferred type: %w", err)
 		}
-		stringer := goTypeStringer(toGoType(fieldType))
+		stringer := goTypeStringer(fieldType)
 		if stringer != "" {
 			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")")
 			continue
@@ -182,7 +182,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 				return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
 			}
 
-		case "Array of InputMedia":
+		case "[]InputMedia":
 			hasData = true
 
 			err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
@@ -202,7 +202,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
 
 		default:
-			if isTgArray(fieldType) {
+			if isArray(fieldType) {
 				bd.WriteString("\nif " + goParam + " != nil {")
 			}
 
@@ -212,7 +212,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 			bd.WriteString("\n	}")
 			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
 
-			if isTgArray(fieldType) {
+			if isArray(fieldType) {
 				bd.WriteString("\n}")
 			}
 		}
@@ -239,14 +239,13 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
-		goType := toGoType(fieldType)
 		if f.Required {
-			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), goType))
+			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))
 			continue
 		}
 
 		optionals.WriteString("\n// " + f.Description)
-		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), goType))
+		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 
 	}
 	optionalsStruct := ""

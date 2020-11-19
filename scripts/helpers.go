@@ -79,7 +79,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 				if err != nil {
 					return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 				}
-				if isTgType(d, toGoType(prefType)) && f.Name+"_id" == mf.Name {
+				if isTgType(d, prefType) && f.Name+"_id" == mf.Name {
 					repl = strings.ReplaceAll(repl, prefType, "")
 					if hasFromChat && mf.Name == "chat_id" {
 						fields["from_chat_id"] = f.Name + ".Id"
@@ -109,7 +109,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 			if fName, ok := fields[mf.Name]; ok {
 				if !mf.Required {
-					def := getDefaultReturnVal(toGoType(prefType))
+					def := getDefaultReturnVal(prefType)
 					optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
 					optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = v." + snakeToTitle(fName))
 					optsContent.WriteString("\n	}")
@@ -124,7 +124,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 				continue
 			}
 
-			funcDefArgList = append(funcDefArgList, snakeToCamel(mf.Name)+" "+toGoType(prefType))
+			funcDefArgList = append(funcDefArgList, snakeToCamel(mf.Name)+" "+prefType)
 			funcCallArgList = append(funcCallArgList, snakeToCamel(mf.Name))
 
 		}
