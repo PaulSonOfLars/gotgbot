@@ -271,6 +271,7 @@ func (m MethodDescription) getArgs() (string, string, error) {
 	if optionals.Len() > 0 {
 		optionalsName := m.optsName()
 		bd := strings.Builder{}
+		bd.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
 		bd.WriteString("\ntype " + optionalsName + " struct {")
 		bd.WriteString(optionals.String())
 		bd.WriteString("\n}")

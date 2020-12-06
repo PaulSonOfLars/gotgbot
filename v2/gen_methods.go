@@ -11,6 +11,7 @@ import (
 	"strconv"
 )
 
+// AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet
 type AddStickerToSetOpts struct {
 	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 	PngSticker InputFile
@@ -78,6 +79,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts A
 	return b, json.Unmarshal(r, &b)
 }
 
+// AnswerCallbackQueryOpts is the set of optional fields for Bot.AnswerCallbackQuery
 type AnswerCallbackQueryOpts struct {
 	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
 	Text string
@@ -110,6 +112,7 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts AnswerCallbackQ
 	return b, json.Unmarshal(r, &b)
 }
 
+// AnswerInlineQueryOpts is the set of optional fields for Bot.AnswerInlineQuery
 type AnswerInlineQueryOpts struct {
 	// The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300.
 	CacheTime int64
@@ -153,6 +156,7 @@ func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryRes
 	return b, json.Unmarshal(r, &b)
 }
 
+// AnswerPreCheckoutQueryOpts is the set of optional fields for Bot.AnswerPreCheckoutQuery
 type AnswerPreCheckoutQueryOpts struct {
 	// Required if ok is False. Error message in human readable form that explains the reason for failure to proceed with the checkout (e.g. "Sorry, somebody just bought the last of our amazing black T-shirts while you were busy filling out your payment details. Please choose a different color or garment!"). Telegram will display this message to the user.
 	ErrorMessage string
@@ -178,6 +182,7 @@ func (bot *Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts 
 	return b, json.Unmarshal(r, &b)
 }
 
+// AnswerShippingQueryOpts is the set of optional fields for Bot.AnswerShippingQuery
 type AnswerShippingQueryOpts struct {
 	// Required if ok is True. A JSON-serialized array of available shipping options.
 	ShippingOptions []ShippingOption
@@ -226,6 +231,7 @@ func (bot *Bot) Close() (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// CopyMessageOpts is the set of optional fields for Bot.CopyMessage
 type CopyMessageOpts struct {
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
 	Caption string
@@ -283,6 +289,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 	return &m, json.Unmarshal(r, &m)
 }
 
+// CreateNewStickerSetOpts is the set of optional fields for Bot.CreateNewStickerSet
 type CreateNewStickerSetOpts struct {
 	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 	PngSticker InputFile
@@ -421,6 +428,7 @@ func (bot *Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// DeleteWebhookOpts is the set of optional fields for Bot.DeleteWebhook
 type DeleteWebhookOpts struct {
 	// Pass True to drop all pending updates
 	DropPendingUpdates bool
@@ -442,6 +450,7 @@ func (bot *Bot) DeleteWebhook(opts DeleteWebhookOpts) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// EditMessageCaptionOpts is the set of optional fields for Bot.EditMessageCaption
 type EditMessageCaptionOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -491,6 +500,7 @@ func (bot *Bot) EditMessageCaption(opts EditMessageCaptionOpts) (*Message, error
 	return &m, json.Unmarshal(r, &m)
 }
 
+// EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation
 type EditMessageLiveLocationOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -538,6 +548,7 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 	return &m, json.Unmarshal(r, &m)
 }
 
+// EditMessageMediaOpts is the set of optional fields for Bot.EditMessageMedia
 type EditMessageMediaOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -579,6 +590,7 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts EditMessageMediaOpts) (*
 	return &m, json.Unmarshal(r, &m)
 }
 
+// EditMessageReplyMarkupOpts is the set of optional fields for Bot.EditMessageReplyMarkup
 type EditMessageReplyMarkupOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -613,6 +625,7 @@ func (bot *Bot) EditMessageReplyMarkup(opts EditMessageReplyMarkupOpts) (*Messag
 	return &m, json.Unmarshal(r, &m)
 }
 
+// EditMessageTextOpts is the set of optional fields for Bot.EditMessageText
 type EditMessageTextOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -680,6 +693,7 @@ func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
 	return s, json.Unmarshal(r, &s)
 }
 
+// ForwardMessageOpts is the set of optional fields for Bot.ForwardMessage
 type ForwardMessageOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -790,6 +804,7 @@ func (bot *Bot) GetFile(fileId string) (*File, error) {
 	return &f, json.Unmarshal(r, &f)
 }
 
+// GetGameHighScoresOpts is the set of optional fields for Bot.GetGameHighScores
 type GetGameHighScoresOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
@@ -864,6 +879,7 @@ func (bot *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	return &s, json.Unmarshal(r, &s)
 }
 
+// GetUpdatesOpts is the set of optional fields for Bot.GetUpdates
 type GetUpdatesOpts struct {
 	// Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will forgotten.
 	Offset int64
@@ -900,6 +916,7 @@ func (bot *Bot) GetUpdates(opts GetUpdatesOpts) ([]Update, error) {
 	return u, json.Unmarshal(r, &u)
 }
 
+// GetUserProfilePhotosOpts is the set of optional fields for Bot.GetUserProfilePhotos
 type GetUserProfilePhotosOpts struct {
 	// Sequential number of the first photo to be returned. By default, all photos are returned.
 	Offset int64
@@ -940,6 +957,7 @@ func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 	return &w, json.Unmarshal(r, &w)
 }
 
+// KickChatMemberOpts is the set of optional fields for Bot.KickChatMember
 type KickChatMemberOpts struct {
 	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever
 	UntilDate int64
@@ -995,6 +1013,7 @@ func (bot *Bot) LogOut() (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// PinChatMessageOpts is the set of optional fields for Bot.PinChatMessage
 type PinChatMessageOpts struct {
 	// Pass True, if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
 	DisableNotification bool
@@ -1020,6 +1039,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts PinChatMessag
 	return b, json.Unmarshal(r, &b)
 }
 
+// PromoteChatMemberOpts is the set of optional fields for Bot.PromoteChatMember
 type PromoteChatMemberOpts struct {
 	// Pass True, if the administrator's presence in the chat is hidden
 	IsAnonymous bool
@@ -1069,6 +1089,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts PromoteChatMe
 	return b, json.Unmarshal(r, &b)
 }
 
+// RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember
 type RestrictChatMemberOpts struct {
 	// Date when restrictions will be lifted for the user, unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 	UntilDate int64
@@ -1100,6 +1121,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 	return b, json.Unmarshal(r, &b)
 }
 
+// SendAnimationOpts is the set of optional fields for Bot.SendAnimation
 type SendAnimationOpts struct {
 	// Duration of sent animation in seconds
 	Duration int64
@@ -1200,6 +1222,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts SendAnimat
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendAudioOpts is the set of optional fields for Bot.SendAudio
 type SendAudioOpts struct {
 	// Audio caption, 0-1024 characters after entities parsing
 	Caption string
@@ -1320,6 +1343,7 @@ func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// SendContactOpts is the set of optional fields for Bot.SendContact
 type SendContactOpts struct {
 	// Contact's last name
 	LastName string
@@ -1368,6 +1392,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendDiceOpts is the set of optional fields for Bot.SendDice
 type SendDiceOpts struct {
 	// Emoji on which the dice throw animation is based. Currently, must be one of "", "", "", "", or "". Dice can have values 1-6 for "" and "", values 1-5 for "" and "", and values 1-64 for "". Defaults to ""
 	Emoji string
@@ -1409,6 +1434,7 @@ func (bot *Bot) SendDice(chatId int64, opts SendDiceOpts) (*Message, error) {
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendDocumentOpts is the set of optional fields for Bot.SendDocument
 type SendDocumentOpts struct {
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files »
 	Thumb InputFile
@@ -1503,6 +1529,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts SendDocument
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendGameOpts is the set of optional fields for Bot.SendGame
 type SendGameOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -1541,6 +1568,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts SendGameOpts) 
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendInvoiceOpts is the set of optional fields for Bot.SendInvoice
 type SendInvoiceOpts struct {
 	// A JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
 	ProviderData string
@@ -1633,6 +1661,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendLocationOpts is the set of optional fields for Bot.SendLocation
 type SendLocationOpts struct {
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
@@ -1687,6 +1716,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendMediaGroupOpts is the set of optional fields for Bot.SendMediaGroup
 type SendMediaGroupOpts struct {
 	// Sends messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -1733,6 +1763,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts SendMediaG
 	return m, json.Unmarshal(r, &m)
 }
 
+// SendMessageOpts is the set of optional fields for Bot.SendMessage
 type SendMessageOpts struct {
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
@@ -1798,6 +1829,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts SendMessageOpts) (*M
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendPhotoOpts is the set of optional fields for Bot.SendPhoto
 type SendPhotoOpts struct {
 	// Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
 	Caption string
@@ -1870,6 +1902,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts SendPhotoOpts) (*M
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendPollOpts is the set of optional fields for Bot.SendPoll
 type SendPollOpts struct {
 	// True, if the poll needs to be anonymous, defaults to True
 	IsAnonymous bool
@@ -1954,6 +1987,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts S
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendStickerOpts is the set of optional fields for Bot.SendSticker
 type SendStickerOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -2011,6 +2045,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts SendStickerOpt
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendVenueOpts is the set of optional fields for Bot.SendVenue
 type SendVenueOpts struct {
 	// Foursquare identifier of the venue
 	FoursquareId string
@@ -2069,6 +2104,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendVideoOpts is the set of optional fields for Bot.SendVideo
 type SendVideoOpts struct {
 	// Duration of sent video in seconds
 	Duration int64
@@ -2172,6 +2208,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts SendVideoOpts) (*M
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendVideoNoteOpts is the set of optional fields for Bot.SendVideoNote
 type SendVideoNoteOpts struct {
 	// Duration of sent video in seconds
 	Duration int64
@@ -2254,6 +2291,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts SendVideoN
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendVoiceOpts is the set of optional fields for Bot.SendVoice
 type SendVoiceOpts struct {
 	// Voice message caption, 0-1024 characters after entities parsing
 	Caption string
@@ -2349,6 +2387,7 @@ func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, cust
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetChatDescriptionOpts is the set of optional fields for Bot.SetChatDescription
 type SetChatDescriptionOpts struct {
 	// New chat description, 0-255 characters
 	Description string
@@ -2462,6 +2501,7 @@ func (bot *Bot) SetChatTitle(chatId int64, title string) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetGameScoreOpts is the set of optional fields for Bot.SetGameScore
 type SetGameScoreOpts struct {
 	// Pass True, if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters
 	Force bool
@@ -2564,6 +2604,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, e
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetStickerSetThumbOpts is the set of optional fields for Bot.SetStickerSetThumb
 type SetStickerSetThumbOpts struct {
 	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/animated_stickers#technical-requirements for animated sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files ». Animated sticker set thumbnail can't be uploaded via HTTP URL.
 	Thumb InputFile
@@ -2606,6 +2647,7 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts SetStickerSet
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetWebhookOpts is the set of optional fields for Bot.SetWebhook
 type SetWebhookOpts struct {
 	// Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
 	Certificate InputFile
@@ -2662,6 +2704,7 @@ func (bot *Bot) SetWebhook(url string, opts SetWebhookOpts) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// StopMessageLiveLocationOpts is the set of optional fields for Bot.StopMessageLiveLocation
 type StopMessageLiveLocationOpts struct {
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	ChatId int64
@@ -2696,6 +2739,7 @@ func (bot *Bot) StopMessageLiveLocation(opts StopMessageLiveLocationOpts) (*Mess
 	return &m, json.Unmarshal(r, &m)
 }
 
+// StopPollOpts is the set of optional fields for Bot.StopPoll
 type StopPollOpts struct {
 	// A JSON-serialized object for a new message inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
@@ -2725,6 +2769,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts StopPollOpts) (*Pol
 	return &p, json.Unmarshal(r, &p)
 }
 
+// UnbanChatMemberOpts is the set of optional fields for Bot.UnbanChatMember
 type UnbanChatMemberOpts struct {
 	// Do nothing if the user is not banned
 	OnlyIfBanned bool
@@ -2766,6 +2811,7 @@ func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// UnpinChatMessageOpts is the set of optional fields for Bot.UnpinChatMessage
 type UnpinChatMessageOpts struct {
 	// Identifier of a message to unpin. If not specified, the most recent pinned message (by sending date) will be unpinned.
 	MessageId int64
