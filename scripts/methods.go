@@ -146,92 +146,120 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 	hasData := false
 	bd := strings.Builder{}
 
+	var optionals []Field
 	for _, f := range m.Fields {
 		goParam := snakeToCamel(f.Name)
 		if !f.Required {
-			goParam = "opts." + snakeToTitle(f.Name)
-		}
-
-		fieldType, err := f.getPreferredType()
-		if err != nil {
-			return "", false, fmt.Errorf("failed to get preferred type: %w", err)
-		}
-
-		stringer := goTypeStringer(fieldType)
-		if stringer != "" {
-			bd.WriteString("\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")")
+			optionals = append(optionals, f)
 			continue
 		}
 
-		switch fieldType {
-		case tgTypeInputFile:
-			hasData = true
-
-			t := stringOrReaderBranchTmpl
-			if len(f.Types) == 1 {
-				// This is actually just an inputfile, not "InputFile or String", so don't support string
-				t = readerBranchTmpl
-			}
-
-			err = t.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
-			}
-
-		case tgTypeInputMedia:
-			hasData = true
-
-			err = inputMediaParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
-			}
-
-		case "[]InputMedia":
-			hasData = true
-
-			err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
-			}
-
-		case "ReplyMarkup":
-			bd.WriteString("\nif " + goParam + " != nil {")
-			bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
-			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
-			bd.WriteString("\n}")
-
-		default:
-			if isArray(fieldType) {
-				bd.WriteString("\nif " + goParam + " != nil {")
-			}
-
-			bd.WriteString("\n	bytes, err := json.Marshal(" + goParam + ")")
-			bd.WriteString("\n	if err != nil {")
-			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-			bd.WriteString("\n	}")
-			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
-
-			if isArray(fieldType) {
-				bd.WriteString("\n}")
-			}
+		contents, data, err := generateValue(f, goParam, defaultRetVal)
+		if err != nil {
+			return "", false, err
 		}
+		bd.WriteString(contents)
+		hasData = hasData || data
 	}
 
+	if len(optionals) > 0 {
+		bd.WriteString("\nif opts != nil {")
+		for _, f := range optionals {
+			goParam := "opts." + snakeToTitle(f.Name)
+			contents, data, err := generateValue(f, goParam, defaultRetVal)
+			if err != nil {
+				return "", false, err
+			}
+
+			bd.WriteString(contents)
+			hasData = hasData || data
+		}
+		bd.WriteString("\n}")
+	}
+
+	return bd.String(), hasData, nil
+}
+
+func generateValue(f Field, goParam string, defaultRetVal string) (string, bool, error) {
+	fieldType, err := f.getPreferredType()
+	if err != nil {
+		return "", false, fmt.Errorf("failed to get preferred type: %w", err)
+	}
+
+	stringer := goTypeStringer(fieldType)
+	if stringer != "" {
+		return "\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")", false, nil
+	}
+
+	bd := strings.Builder{}
+	hasData := false
+	switch fieldType {
+	case tgTypeInputFile:
+		hasData = true
+
+		t := stringOrReaderBranchTmpl
+		if len(f.Types) == 1 {
+			// This is actually just an inputfile, not "InputFile or String", so don't support string
+			t = readerBranchTmpl
+		}
+
+		err = t.Execute(&bd, readerBranchesData{
+			GoParam:       goParam,
+			DefaultReturn: defaultRetVal,
+			Name:          f.Name,
+		})
+		if err != nil {
+			return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
+		}
+
+	case tgTypeInputMedia:
+		hasData = true
+
+		err = inputMediaParamsBranchTmpl.Execute(&bd, readerBranchesData{
+			GoParam:       goParam,
+			DefaultReturn: defaultRetVal,
+			Name:          f.Name,
+		})
+		if err != nil {
+			return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
+		}
+
+	case "[]InputMedia":
+		hasData = true
+
+		err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
+			GoParam:       goParam,
+			DefaultReturn: defaultRetVal,
+			Name:          f.Name,
+		})
+		if err != nil {
+			return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
+		}
+
+	case "ReplyMarkup":
+		bd.WriteString("\nif " + goParam + " != nil {")
+		bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
+		bd.WriteString("\n	if err != nil {")
+		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+		bd.WriteString("\n	}")
+		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+		bd.WriteString("\n}")
+
+	default:
+		if isArray(fieldType) {
+			bd.WriteString("\nif " + goParam + " != nil {")
+		}
+
+		bd.WriteString("\n	bytes, err := json.Marshal(" + goParam + ")")
+		bd.WriteString("\n	if err != nil {")
+		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+		bd.WriteString("\n	}")
+		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+
+		if isArray(fieldType) {
+			bd.WriteString("\n}")
+		}
+	}
 	return bd.String(), hasData, nil
 }
 
@@ -277,7 +305,7 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		bd.WriteString("\n}")
 		optionalsStruct = bd.String()
 
-		requiredArgs = append(requiredArgs, fmt.Sprintf("opts %s", optionalsName))
+		requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
 	}
 
 	return strings.Join(requiredArgs, ", "), optionalsStruct, nil

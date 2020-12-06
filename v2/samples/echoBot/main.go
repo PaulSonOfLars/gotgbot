@@ -34,6 +34,6 @@ func main() {
 
 func echo(ctx *ext.Context) error {
 	// Reply to message with its own contents
-	ctx.EffectiveMessage.Reply(ctx.Bot, ctx.EffectiveMessage.Text, gotgbot.SendMessageOpts{})
+	ctx.EffectiveMessage.Reply(ctx.Bot, ctx.EffectiveMessage.Text, nil)
 	return nil
 }

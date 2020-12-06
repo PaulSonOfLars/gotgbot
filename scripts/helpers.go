@@ -92,6 +92,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			ReturnType:   ret,
 			FuncDefArgs:  funcDefArgs,
 			Contents:     optsContent,
+			OptsName:     tgMethod.optsName(),
 			MethodName:   strings.Title(tgMethod.Name),
 			FuncCallArgs: funcCallArgs,
 		})
@@ -139,7 +140,7 @@ func generateHelperArguments(tgMethod MethodDescription, receiverName string, fi
 	}
 
 	if hasOpts {
-		funcDefArgList = append(funcDefArgList, "opts "+tgMethod.optsName())
+		funcDefArgList = append(funcDefArgList, "opts *"+tgMethod.optsName())
 		funcCallArgList = append(funcCallArgList, "opts")
 	}
 
@@ -198,13 +199,20 @@ type helperFuncData struct {
 	ReturnType   string
 	FuncDefArgs  string
 	Contents     string
+	OptsName     string
 	MethodName   string
 	FuncCallArgs string
 }
 
 const helperFunc = `
 func ({{.Receiver}} {{.TypeName}}) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnType}}, error) {
-	{{- .Contents}}
+	{{- if .Contents}}
+		if opts == nil {
+			opts = &{{.OptsName}}{}
+		}
+		{{.Contents}}
+
+	{{end}}
 	return b.{{.MethodName}}({{.FuncCallArgs}})
 }
 `
