@@ -9,6 +9,10 @@ import (
 	"io"
 )
 
+type ReplyMarkup interface {
+	ReplyMarkup() ([]byte, error)
+}
+
 // This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
 // https://core.telegram.org/bots/api#animation
 type Animation struct {
@@ -2411,7 +2415,4 @@ type WebhookInfo struct {
 	MaxConnections int64 `json:"max_connections,omitempty"`
 	// Optional. A list of update types the bot is subscribed to. Defaults to all update types
 	AllowedUpdates []string `json:"allowed_updates,omitempty"`
-}
-type ReplyMarkup interface {
-	ReplyMarkup() ([]byte, error)
 }

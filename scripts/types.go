@@ -35,6 +35,9 @@ import (
 )
 `)
 
+	// the reply_markup field is weird; this allows it to support multiple types.
+	file.WriteString(generateGenericInterfaceType("ReplyMarkup", true))
+
 	for _, tgTypeName := range orderedTgTypes(d) {
 		tgType := d.Types[tgTypeName]
 
@@ -45,9 +48,6 @@ import (
 
 		file.WriteString(typeDef)
 	}
-
-	// the reply_markup field is weird; this allows it to support multiple types.
-	file.WriteString(generateGenericInterfaceType("ReplyMarkup", true))
 
 	return writeGenToFile(file, "v2/gen_types.go")
 }
