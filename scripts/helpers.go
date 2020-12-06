@@ -106,7 +106,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 func generateHelperArguments(tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
 	var funcCallArgList []string
 	optsContent := strings.Builder{}
-	funcDefArgList := []string{"b Bot"}
+	funcDefArgList := []string{"b *Bot"}
 	hasOpts := false
 
 	for _, mf := range tgMethod.Fields {

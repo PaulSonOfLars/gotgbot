@@ -58,7 +58,7 @@ func (nf NamedFile) Name() string {
 	return nf.FileName
 }
 
-func (bot Bot) Get(method string, params url.Values) (json.RawMessage, error) {
+func (bot *Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 	if bot.GetTimeout == 0 {
 		bot.GetTimeout = DefaultGetTimeout
 	}
@@ -69,7 +69,7 @@ func (bot Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 	return bot.GetWithContext(ctx, method, params)
 }
 
-func (bot Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
+func (bot *Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", bot.endpoint(method), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build GET request to %s: %w", method, err)
@@ -100,7 +100,7 @@ func (bot Bot) GetWithContext(ctx context.Context, method string, params url.Val
 	return r.Result, nil
 }
 
-func (bot Bot) Post(method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
+func (bot *Bot) Post(method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
 	if bot.PostTimeout == 0 {
 		bot.PostTimeout = DefaultPostTimeout
 	}
@@ -111,7 +111,7 @@ func (bot Bot) Post(method string, params url.Values, data map[string]NamedReade
 	return bot.PostWithContext(ctx, method, params, data)
 }
 
-func (bot Bot) PostWithContext(ctx context.Context, method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
+func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
 	b := bytes.Buffer{}
 	w := multipart.NewWriter(&b)
 	defer w.Close()
@@ -174,7 +174,7 @@ func (bot Bot) PostWithContext(ctx context.Context, method string, params url.Va
 	return r.Result, nil
 }
 
-func (bot Bot) endpoint(method string) string {
+func (bot *Bot) endpoint(method string) string {
 	if bot.APIURL == "" {
 		return DefaultAPIURL + bot.Token + "/" + method
 	}

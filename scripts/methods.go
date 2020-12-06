@@ -74,7 +74,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	method.WriteString(desc)
-	method.WriteString("\nfunc (bot Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
+	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 
 	if hasData {
@@ -207,11 +207,13 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 			}
 
 		case "ReplyMarkup":
+			bd.WriteString("\nif " + goParam + " != nil {")
 			bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
 			bd.WriteString("\n	if err != nil {")
 			bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
 			bd.WriteString("\n	}")
 			bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+			bd.WriteString("\n}")
 
 		default:
 			if isArray(fieldType) {

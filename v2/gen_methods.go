@@ -26,7 +26,7 @@ type AddStickerToSetOpts struct {
 // - emojis (type string): One or more emoji corresponding to the sticker
 // - opts (type AddStickerToSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#addstickertoset
-func (bot Bot) AddStickerToSet(userId int64, name string, emojis string, opts AddStickerToSetOpts) (bool, error) {
+func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts AddStickerToSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -93,7 +93,7 @@ type AnswerCallbackQueryOpts struct {
 // - callback_query_id (type string): Unique identifier for the query to be answered
 // - opts (type AnswerCallbackQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answercallbackquery
-func (bot Bot) AnswerCallbackQuery(callbackQueryId string, opts AnswerCallbackQueryOpts) (bool, error) {
+func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts AnswerCallbackQueryOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("callback_query_id", callbackQueryId)
 	v.Add("text", opts.Text)
@@ -128,7 +128,7 @@ type AnswerInlineQueryOpts struct {
 // - results (type []InlineQueryResult): A JSON-serialized array of results for the inline query
 // - opts (type AnswerInlineQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answerinlinequery
-func (bot Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryResult, opts AnswerInlineQueryOpts) (bool, error) {
+func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryResult, opts AnswerInlineQueryOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("inline_query_id", inlineQueryId)
 	if results != nil {
@@ -163,7 +163,7 @@ type AnswerPreCheckoutQueryOpts struct {
 // - ok (type bool): Specify True if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order. Use False if there are any problems.
 // - opts (type AnswerPreCheckoutQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answerprecheckoutquery
-func (bot Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts AnswerPreCheckoutQueryOpts) (bool, error) {
+func (bot *Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts AnswerPreCheckoutQueryOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("pre_checkout_query_id", preCheckoutQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
@@ -190,7 +190,7 @@ type AnswerShippingQueryOpts struct {
 // - ok (type bool): Specify True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
 // - opts (type AnswerShippingQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answershippingquery
-func (bot Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts AnswerShippingQueryOpts) (bool, error) {
+func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts AnswerShippingQueryOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("shipping_query_id", shippingQueryId)
 	v.Add("ok", strconv.FormatBool(ok))
@@ -214,7 +214,7 @@ func (bot Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts AnswerS
 
 // Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
 // https://core.telegram.org/bots/api#close
-func (bot Bot) Close() (bool, error) {
+func (bot *Bot) Close() (bool, error) {
 	v := urlLib.Values{}
 
 	r, err := bot.Get("close", v)
@@ -249,7 +249,7 @@ type CopyMessageOpts struct {
 // - message_id (type int64): Message identifier in the chat specified in from_chat_id
 // - opts (type CopyMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#copymessage
-func (bot Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts CopyMessageOpts) (*MessageId, error) {
+func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts CopyMessageOpts) (*MessageId, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
@@ -266,11 +266,13 @@ func (bot Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("copyMessage", v)
 	if err != nil {
@@ -299,7 +301,7 @@ type CreateNewStickerSetOpts struct {
 // - emojis (type string): One or more emoji corresponding to the sticker
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createnewstickerset
-func (bot Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts CreateNewStickerSetOpts) (bool, error) {
+func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts CreateNewStickerSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -356,7 +358,7 @@ func (bot Bot) CreateNewStickerSet(userId int64, name string, title string, emoj
 // Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#deletechatphoto
-func (bot Bot) DeleteChatPhoto(chatId int64) (bool, error) {
+func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -372,7 +374,7 @@ func (bot Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 // Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // https://core.telegram.org/bots/api#deletechatstickerset
-func (bot Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
+func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -389,7 +391,7 @@ func (bot Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of the message to delete
 // https://core.telegram.org/bots/api#deletemessage
-func (bot Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
+func (bot *Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("message_id", strconv.FormatInt(messageId, 10))
@@ -406,7 +408,7 @@ func (bot Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
 // Use this method to delete a sticker from a set created by the bot. Returns True on success.
 // - sticker (type string): File identifier of the sticker
 // https://core.telegram.org/bots/api#deletestickerfromset
-func (bot Bot) DeleteStickerFromSet(sticker string) (bool, error) {
+func (bot *Bot) DeleteStickerFromSet(sticker string) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("sticker", sticker)
 
@@ -427,7 +429,7 @@ type DeleteWebhookOpts struct {
 // Use this method to remove webhook integration if you decide to switch back to getUpdates. Returns True on success.
 // - opts (type DeleteWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletewebhook
-func (bot Bot) DeleteWebhook(opts DeleteWebhookOpts) (bool, error) {
+func (bot *Bot) DeleteWebhook(opts DeleteWebhookOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("drop_pending_updates", strconv.FormatBool(opts.DropPendingUpdates))
 
@@ -460,7 +462,7 @@ type EditMessageCaptionOpts struct {
 // Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type EditMessageCaptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagecaption
-func (bot Bot) EditMessageCaption(opts EditMessageCaptionOpts) (*Message, error) {
+func (bot *Bot) EditMessageCaption(opts EditMessageCaptionOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -511,7 +513,7 @@ type EditMessageLiveLocationOpts struct {
 // - longitude (type float64): Longitude of new location
 // - opts (type EditMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagelivelocation
-func (bot Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts EditMessageLiveLocationOpts) (*Message, error) {
+func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts EditMessageLiveLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -551,7 +553,7 @@ type EditMessageMediaOpts struct {
 // - media (type InputMedia): A JSON-serialized object for a new media content of the message
 // - opts (type EditMessageMediaOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagemedia
-func (bot Bot) EditMessageMedia(media InputMedia, opts EditMessageMediaOpts) (*Message, error) {
+func (bot *Bot) EditMessageMedia(media InputMedia, opts EditMessageMediaOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
@@ -591,7 +593,7 @@ type EditMessageReplyMarkupOpts struct {
 // Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type EditMessageReplyMarkupOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagereplymarkup
-func (bot Bot) EditMessageReplyMarkup(opts EditMessageReplyMarkupOpts) (*Message, error) {
+func (bot *Bot) EditMessageReplyMarkup(opts EditMessageReplyMarkupOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -632,7 +634,7 @@ type EditMessageTextOpts struct {
 // - text (type string): New text of the message, 1-4096 characters after entities parsing
 // - opts (type EditMessageTextOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagetext
-func (bot Bot) EditMessageText(text string, opts EditMessageTextOpts) (*Message, error) {
+func (bot *Bot) EditMessageText(text string, opts EditMessageTextOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -665,7 +667,7 @@ func (bot Bot) EditMessageText(text string, opts EditMessageTextOpts) (*Message,
 // Use this method to generate a new invite link for a chat; any previously generated link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the new invite link as String on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#exportchatinvitelink
-func (bot Bot) ExportChatInviteLink(chatId int64) (string, error) {
+func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -689,7 +691,7 @@ type ForwardMessageOpts struct {
 // - message_id (type int64): Message identifier in the chat specified in from_chat_id
 // - opts (type ForwardMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#forwardmessage
-func (bot Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts ForwardMessageOpts) (*Message, error) {
+func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts ForwardMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
@@ -708,7 +710,7 @@ func (bot Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, o
 // Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.). Returns a Chat object on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchat
-func (bot Bot) GetChat(chatId int64) (*Chat, error) {
+func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -724,7 +726,7 @@ func (bot Bot) GetChat(chatId int64) (*Chat, error) {
 // Use this method to get a list of administrators in a chat. On success, returns an Array of ChatMember objects that contains information about all chat administrators except other bots. If the chat is a group or a supergroup and no administrators were appointed, only the creator will be returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchatadministrators
-func (bot Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
+func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -741,7 +743,7 @@ func (bot Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#getchatmember
-func (bot Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
+func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -758,7 +760,7 @@ func (bot Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 // Use this method to get the number of members in a chat. Returns Int on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchatmemberscount
-func (bot Bot) GetChatMembersCount(chatId int64) (int64, error) {
+func (bot *Bot) GetChatMembersCount(chatId int64) (int64, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -775,7 +777,7 @@ func (bot Bot) GetChatMembersCount(chatId int64) (int64, error) {
 // Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
 // - file_id (type string): File identifier to get info about
 // https://core.telegram.org/bots/api#getfile
-func (bot Bot) GetFile(fileId string) (*File, error) {
+func (bot *Bot) GetFile(fileId string) (*File, error) {
 	v := urlLib.Values{}
 	v.Add("file_id", fileId)
 
@@ -801,7 +803,7 @@ type GetGameHighScoresOpts struct {
 // - user_id (type int64): Target user id
 // - opts (type GetGameHighScoresOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getgamehighscores
-func (bot Bot) GetGameHighScores(userId int64, opts GetGameHighScoresOpts) ([]GameHighScore, error) {
+func (bot *Bot) GetGameHighScores(userId int64, opts GetGameHighScoresOpts) ([]GameHighScore, error) {
 	v := urlLib.Values{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
@@ -819,7 +821,7 @@ func (bot Bot) GetGameHighScores(userId int64, opts GetGameHighScoresOpts) ([]Ga
 
 // A simple method for testing your bot's auth token. Requires no parameters. Returns basic information about the bot in form of a User object.
 // https://core.telegram.org/bots/api#getme
-func (bot Bot) GetMe() (*User, error) {
+func (bot *Bot) GetMe() (*User, error) {
 	v := urlLib.Values{}
 
 	r, err := bot.Get("getMe", v)
@@ -834,7 +836,7 @@ func (bot Bot) GetMe() (*User, error) {
 // Use this method to get the current list of the bot's commands. Requires no parameters. Returns Array of BotCommand on success.
 // Methods and objects used in the inline mode are described in the Inline mode section.
 // https://core.telegram.org/bots/api#getmycommands
-func (bot Bot) GetMyCommands() ([]BotCommand, error) {
+func (bot *Bot) GetMyCommands() ([]BotCommand, error) {
 	v := urlLib.Values{}
 
 	r, err := bot.Get("getMyCommands", v)
@@ -849,7 +851,7 @@ func (bot Bot) GetMyCommands() ([]BotCommand, error) {
 // Use this method to get a sticker set. On success, a StickerSet object is returned.
 // - name (type string): Name of the sticker set
 // https://core.telegram.org/bots/api#getstickerset
-func (bot Bot) GetStickerSet(name string) (*StickerSet, error) {
+func (bot *Bot) GetStickerSet(name string) (*StickerSet, error) {
 	v := urlLib.Values{}
 	v.Add("name", name)
 
@@ -876,7 +878,7 @@ type GetUpdatesOpts struct {
 // Use this method to receive incoming updates using long polling (wiki). An Array of Update objects is returned.
 // - opts (type GetUpdatesOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getupdates
-func (bot Bot) GetUpdates(opts GetUpdatesOpts) ([]Update, error) {
+func (bot *Bot) GetUpdates(opts GetUpdatesOpts) ([]Update, error) {
 	v := urlLib.Values{}
 	v.Add("offset", strconv.FormatInt(opts.Offset, 10))
 	v.Add("limit", strconv.FormatInt(opts.Limit, 10))
@@ -909,7 +911,7 @@ type GetUserProfilePhotosOpts struct {
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type GetUserProfilePhotosOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getuserprofilephotos
-func (bot Bot) GetUserProfilePhotos(userId int64, opts GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
+func (bot *Bot) GetUserProfilePhotos(userId int64, opts GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	v := urlLib.Values{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("offset", strconv.FormatInt(opts.Offset, 10))
@@ -926,7 +928,7 @@ func (bot Bot) GetUserProfilePhotos(userId int64, opts GetUserProfilePhotosOpts)
 
 // Use this method to get current webhook status. Requires no parameters. On success, returns a WebhookInfo object. If the bot is using getUpdates, will return an object with the url field empty.
 // https://core.telegram.org/bots/api#getwebhookinfo
-func (bot Bot) GetWebhookInfo() (*WebhookInfo, error) {
+func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 	v := urlLib.Values{}
 
 	r, err := bot.Get("getWebhookInfo", v)
@@ -948,7 +950,7 @@ type KickChatMemberOpts struct {
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type KickChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#kickchatmember
-func (bot Bot) KickChatMember(chatId int64, userId int64, opts KickChatMemberOpts) (bool, error) {
+func (bot *Bot) KickChatMember(chatId int64, userId int64, opts KickChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -966,7 +968,7 @@ func (bot Bot) KickChatMember(chatId int64, userId int64, opts KickChatMemberOpt
 // Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#leavechat
-func (bot Bot) LeaveChat(chatId int64) (bool, error) {
+func (bot *Bot) LeaveChat(chatId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -981,7 +983,7 @@ func (bot Bot) LeaveChat(chatId int64) (bool, error) {
 
 // Use this method to log out from the cloud Bot API server before launching the bot locally. You must log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns True on success. Requires no parameters.
 // https://core.telegram.org/bots/api#logout
-func (bot Bot) LogOut() (bool, error) {
+func (bot *Bot) LogOut() (bool, error) {
 	v := urlLib.Values{}
 
 	r, err := bot.Get("logOut", v)
@@ -1003,7 +1005,7 @@ type PinChatMessageOpts struct {
 // - message_id (type int64): Identifier of a message to pin
 // - opts (type PinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#pinchatmessage
-func (bot Bot) PinChatMessage(chatId int64, messageId int64, opts PinChatMessageOpts) (bool, error) {
+func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts PinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("message_id", strconv.FormatInt(messageId, 10))
@@ -1044,7 +1046,7 @@ type PromoteChatMemberOpts struct {
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type PromoteChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#promotechatmember
-func (bot Bot) PromoteChatMember(chatId int64, userId int64, opts PromoteChatMemberOpts) (bool, error) {
+func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts PromoteChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -1078,7 +1080,7 @@ type RestrictChatMemberOpts struct {
 // - permissions (type ChatPermissions): A JSON-serialized object for new user permissions
 // - opts (type RestrictChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#restrictchatmember
-func (bot Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts RestrictChatMemberOpts) (bool, error) {
+func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts RestrictChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -1128,7 +1130,7 @@ type SendAnimationOpts struct {
 // - animation (type InputFile): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More info on Sending Files »
 // - opts (type SendAnimationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendanimation
-func (bot Bot) SendAnimation(chatId int64, animation InputFile, opts SendAnimationOpts) (*Message, error) {
+func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts SendAnimationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1181,11 +1183,13 @@ func (bot Bot) SendAnimation(chatId int64, animation InputFile, opts SendAnimati
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendAnimation", v, data)
 	if err != nil {
@@ -1227,7 +1231,7 @@ type SendAudioOpts struct {
 // - audio (type InputFile): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 // - opts (type SendAudioOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendaudio
-func (bot Bot) SendAudio(chatId int64, audio InputFile, opts SendAudioOpts) (*Message, error) {
+func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts SendAudioOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1280,11 +1284,13 @@ func (bot Bot) SendAudio(chatId int64, audio InputFile, opts SendAudioOpts) (*Me
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendAudio", v, data)
 	if err != nil {
@@ -1298,9 +1304,9 @@ func (bot Bot) SendAudio(chatId int64, audio InputFile, opts SendAudioOpts) (*Me
 // Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_audio or upload_audio for audio files, upload_document for general files, find_location for location data, record_video_note or upload_video_note for video notes.
+// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, find_location for location data, record_video_note or upload_video_note for video notes.
 // https://core.telegram.org/bots/api#sendchataction
-func (bot Bot) SendChatAction(chatId int64, action string) (bool, error) {
+func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("action", action)
@@ -1335,7 +1341,7 @@ type SendContactOpts struct {
 // - first_name (type string): Contact's first name
 // - opts (type SendContactOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendcontact
-func (bot Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts SendContactOpts) (*Message, error) {
+func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts SendContactOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("phone_number", phoneNumber)
@@ -1345,11 +1351,13 @@ func (bot Bot) SendContact(chatId int64, phoneNumber string, firstName string, o
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendContact", v)
 	if err != nil {
@@ -1377,18 +1385,20 @@ type SendDiceOpts struct {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type SendDiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#senddice
-func (bot Bot) SendDice(chatId int64, opts SendDiceOpts) (*Message, error) {
+func (bot *Bot) SendDice(chatId int64, opts SendDiceOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("emoji", opts.Emoji)
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendDice", v)
 	if err != nil {
@@ -1425,7 +1435,7 @@ type SendDocumentOpts struct {
 // - document (type InputFile): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 // - opts (type SendDocumentOpts): All optional parameters.
 // https://core.telegram.org/bots/api#senddocument
-func (bot Bot) SendDocument(chatId int64, document InputFile, opts SendDocumentOpts) (*Message, error) {
+func (bot *Bot) SendDocument(chatId int64, document InputFile, opts SendDocumentOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1476,11 +1486,13 @@ func (bot Bot) SendDocument(chatId int64, document InputFile, opts SendDocumentO
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendDocument", v, data)
 	if err != nil {
@@ -1507,7 +1519,7 @@ type SendGameOpts struct {
 // - game_short_name (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via Botfather.
 // - opts (type SendGameOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendgame
-func (bot Bot) SendGame(chatId int64, gameShortName string, opts SendGameOpts) (*Message, error) {
+func (bot *Bot) SendGame(chatId int64, gameShortName string, opts SendGameOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("game_short_name", gameShortName)
@@ -1575,7 +1587,7 @@ type SendInvoiceOpts struct {
 // - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
 // - opts (type SendInvoiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendinvoice
-func (bot Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []LabeledPrice, opts SendInvoiceOpts) (*Message, error) {
+func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, startParameter string, currency string, prices []LabeledPrice, opts SendInvoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("title", title)
@@ -1646,7 +1658,7 @@ type SendLocationOpts struct {
 // - longitude (type float64): Longitude of the location
 // - opts (type SendLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendlocation
-func (bot Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts SendLocationOpts) (*Message, error) {
+func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts SendLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
@@ -1658,11 +1670,13 @@ func (bot Bot) SendLocation(chatId int64, latitude float64, longitude float64, o
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendLocation", v)
 	if err != nil {
@@ -1687,7 +1701,7 @@ type SendMediaGroupOpts struct {
 // - media (type []InputMedia): A JSON-serialized array describing messages to be sent, must include 2-10 items
 // - opts (type SendMediaGroupOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendmediagroup
-func (bot Bot) SendMediaGroup(chatId int64, media []InputMedia, opts SendMediaGroupOpts) ([]Message, error) {
+func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts SendMediaGroupOpts) ([]Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1751,7 +1765,7 @@ type SendMessageOpts struct {
 // - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
 // - opts (type SendMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendmessage
-func (bot Bot) SendMessage(chatId int64, text string, opts SendMessageOpts) (*Message, error) {
+func (bot *Bot) SendMessage(chatId int64, text string, opts SendMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("text", text)
@@ -1767,11 +1781,13 @@ func (bot Bot) SendMessage(chatId int64, text string, opts SendMessageOpts) (*Me
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendMessage", v)
 	if err != nil {
@@ -1804,7 +1820,7 @@ type SendPhotoOpts struct {
 // - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. More info on Sending Files »
 // - opts (type SendPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendphoto
-func (bot Bot) SendPhoto(chatId int64, photo InputFile, opts SendPhotoOpts) (*Message, error) {
+func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts SendPhotoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1837,11 +1853,13 @@ func (bot Bot) SendPhoto(chatId int64, photo InputFile, opts SendPhotoOpts) (*Me
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendPhoto", v, data)
 	if err != nil {
@@ -1889,7 +1907,7 @@ type SendPollOpts struct {
 // - options (type []string): A JSON-serialized list of answer options, 2-10 strings 1-100 characters each
 // - opts (type SendPollOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendpoll
-func (bot Bot) SendPoll(chatId int64, question string, options []string, opts SendPollOpts) (*Message, error) {
+func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts SendPollOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("question", question)
@@ -1919,11 +1937,13 @@ func (bot Bot) SendPoll(chatId int64, question string, options []string, opts Se
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendPoll", v)
 	if err != nil {
@@ -1950,7 +1970,7 @@ type SendStickerOpts struct {
 // - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 // - opts (type SendStickerOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendsticker
-func (bot Bot) SendSticker(chatId int64, sticker InputFile, opts SendStickerOpts) (*Message, error) {
+func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts SendStickerOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1974,11 +1994,13 @@ func (bot Bot) SendSticker(chatId int64, sticker InputFile, opts SendStickerOpts
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendSticker", v, data)
 	if err != nil {
@@ -2016,7 +2038,7 @@ type SendVenueOpts struct {
 // - address (type string): Address of the venue
 // - opts (type SendVenueOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvenue
-func (bot Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts SendVenueOpts) (*Message, error) {
+func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts SendVenueOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
@@ -2030,11 +2052,13 @@ func (bot Bot) SendVenue(chatId int64, latitude float64, longitude float64, titl
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Get("sendVenue", v)
 	if err != nil {
@@ -2077,7 +2101,7 @@ type SendVideoOpts struct {
 // - video (type InputFile): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More info on Sending Files »
 // - opts (type SendVideoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideo
-func (bot Bot) SendVideo(chatId int64, video InputFile, opts SendVideoOpts) (*Message, error) {
+func (bot *Bot) SendVideo(chatId int64, video InputFile, opts SendVideoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -2131,11 +2155,13 @@ func (bot Bot) SendVideo(chatId int64, video InputFile, opts SendVideoOpts) (*Me
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendVideo", v, data)
 	if err != nil {
@@ -2168,7 +2194,7 @@ type SendVideoNoteOpts struct {
 // - video_note (type InputFile): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More info on Sending Files ». Sending video notes by a URL is currently unsupported
 // - opts (type SendVideoNoteOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideonote
-func (bot Bot) SendVideoNote(chatId int64, videoNote InputFile, opts SendVideoNoteOpts) (*Message, error) {
+func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts SendVideoNoteOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -2211,11 +2237,13 @@ func (bot Bot) SendVideoNote(chatId int64, videoNote InputFile, opts SendVideoNo
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendVideoNote", v, data)
 	if err != nil {
@@ -2250,7 +2278,7 @@ type SendVoiceOpts struct {
 // - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files »
 // - opts (type SendVoiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvoice
-func (bot Bot) SendVoice(chatId int64, voice InputFile, opts SendVoiceOpts) (*Message, error) {
+func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts SendVoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -2284,11 +2312,13 @@ func (bot Bot) SendVoice(chatId int64, voice InputFile, opts SendVoiceOpts) (*Me
 	v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 	v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
-	bytes, err := opts.ReplyMarkup.ReplyMarkup()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+	if opts.ReplyMarkup != nil {
+		bytes, err := opts.ReplyMarkup.ReplyMarkup()
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v.Add("reply_markup", string(bytes))
 	}
-	v.Add("reply_markup", string(bytes))
 
 	r, err := bot.Post("sendVoice", v, data)
 	if err != nil {
@@ -2304,7 +2334,7 @@ func (bot Bot) SendVoice(chatId int64, voice InputFile, opts SendVoiceOpts) (*Me
 // - user_id (type int64): Unique identifier of the target user
 // - custom_title (type string): New custom title for the administrator; 0-16 characters, emoji are not allowed
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
-func (bot Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string) (bool, error) {
+func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -2328,7 +2358,7 @@ type SetChatDescriptionOpts struct {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type SetChatDescriptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatdescription
-func (bot Bot) SetChatDescription(chatId int64, opts SetChatDescriptionOpts) (bool, error) {
+func (bot *Bot) SetChatDescription(chatId int64, opts SetChatDescriptionOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("description", opts.Description)
@@ -2346,7 +2376,7 @@ func (bot Bot) SetChatDescription(chatId int64, opts SetChatDescriptionOpts) (bo
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - permissions (type ChatPermissions): New default chat permissions
 // https://core.telegram.org/bots/api#setchatpermissions
-func (bot Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
+func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	bytes, err := json.Marshal(permissions)
@@ -2368,7 +2398,7 @@ func (bot Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bo
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - photo (type InputFile): New chat photo, uploaded using multipart/form-data
 // https://core.telegram.org/bots/api#setchatphoto
-func (bot Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
+func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -2400,7 +2430,7 @@ func (bot Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - sticker_set_name (type string): Name of the sticker set to be set as the group sticker set
 // https://core.telegram.org/bots/api#setchatstickerset
-func (bot Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, error) {
+func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("sticker_set_name", stickerSetName)
@@ -2418,7 +2448,7 @@ func (bot Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, err
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - title (type string): New chat title, 1-255 characters
 // https://core.telegram.org/bots/api#setchattitle
-func (bot Bot) SetChatTitle(chatId int64, title string) (bool, error) {
+func (bot *Bot) SetChatTitle(chatId int64, title string) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("title", title)
@@ -2450,7 +2480,7 @@ type SetGameScoreOpts struct {
 // - score (type int64): New score, must be non-negative
 // - opts (type SetGameScoreOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setgamescore
-func (bot Bot) SetGameScore(userId int64, score int64, opts SetGameScoreOpts) (*Message, error) {
+func (bot *Bot) SetGameScore(userId int64, score int64, opts SetGameScoreOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("score", strconv.FormatInt(score, 10))
@@ -2472,7 +2502,7 @@ func (bot Bot) SetGameScore(userId int64, score int64, opts SetGameScoreOpts) (*
 // Use this method to change the list of the bot's commands. Returns True on success.
 // - commands (type []BotCommand): A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
 // https://core.telegram.org/bots/api#setmycommands
-func (bot Bot) SetMyCommands(commands []BotCommand) (bool, error) {
+func (bot *Bot) SetMyCommands(commands []BotCommand) (bool, error) {
 	v := urlLib.Values{}
 	if commands != nil {
 		bytes, err := json.Marshal(commands)
@@ -2496,7 +2526,7 @@ func (bot Bot) SetMyCommands(commands []BotCommand) (bool, error) {
 // - user_id (type int64): User identifier
 // - errors (type []PassportElementError): A JSON-serialized array describing the errors
 // https://core.telegram.org/bots/api#setpassportdataerrors
-func (bot Bot) SetPassportDataErrors(userId int64, errors []PassportElementError) (bool, error) {
+func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if errors != nil {
@@ -2520,7 +2550,7 @@ func (bot Bot) SetPassportDataErrors(userId int64, errors []PassportElementError
 // - sticker (type string): File identifier of the sticker
 // - position (type int64): New sticker position in the set, zero-based
 // https://core.telegram.org/bots/api#setstickerpositioninset
-func (bot Bot) SetStickerPositionInSet(sticker string, position int64) (bool, error) {
+func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("sticker", sticker)
 	v.Add("position", strconv.FormatInt(position, 10))
@@ -2544,7 +2574,7 @@ type SetStickerSetThumbOpts struct {
 // - user_id (type int64): User identifier of the sticker set owner
 // - opts (type SetStickerSetThumbOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setstickersetthumb
-func (bot Bot) SetStickerSetThumb(name string, userId int64, opts SetStickerSetThumbOpts) (bool, error) {
+func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts SetStickerSetThumbOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("name", name)
@@ -2594,7 +2624,7 @@ type SetWebhookOpts struct {
 // - url (type string): HTTPS url to send updates to. Use an empty string to remove webhook integration
 // - opts (type SetWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setwebhook
-func (bot Bot) SetWebhook(url string, opts SetWebhookOpts) (bool, error) {
+func (bot *Bot) SetWebhook(url string, opts SetWebhookOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("url", url)
@@ -2646,7 +2676,7 @@ type StopMessageLiveLocationOpts struct {
 // Use this method to stop updating a live location message before live_period expires. On success, if the message was sent by the bot, the sent Message is returned, otherwise True is returned.
 // - opts (type StopMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stopmessagelivelocation
-func (bot Bot) StopMessageLiveLocation(opts StopMessageLiveLocationOpts) (*Message, error) {
+func (bot *Bot) StopMessageLiveLocation(opts StopMessageLiveLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -2676,7 +2706,7 @@ type StopPollOpts struct {
 // - message_id (type int64): Identifier of the original message with the poll
 // - opts (type StopPollOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stoppoll
-func (bot Bot) StopPoll(chatId int64, messageId int64, opts StopPollOpts) (*Poll, error) {
+func (bot *Bot) StopPoll(chatId int64, messageId int64, opts StopPollOpts) (*Poll, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("message_id", strconv.FormatInt(messageId, 10))
@@ -2705,7 +2735,7 @@ type UnbanChatMemberOpts struct {
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type UnbanChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unbanchatmember
-func (bot Bot) UnbanChatMember(chatId int64, userId int64, opts UnbanChatMemberOpts) (bool, error) {
+func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts UnbanChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("user_id", strconv.FormatInt(userId, 10))
@@ -2723,7 +2753,7 @@ func (bot Bot) UnbanChatMember(chatId int64, userId int64, opts UnbanChatMemberO
 // Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#unpinallchatmessages
-func (bot Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
+func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
@@ -2745,7 +2775,7 @@ type UnpinChatMessageOpts struct {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type UnpinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinchatmessage
-func (bot Bot) UnpinChatMessage(chatId int64, opts UnpinChatMessageOpts) (bool, error) {
+func (bot *Bot) UnpinChatMessage(chatId int64, opts UnpinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -2763,7 +2793,7 @@ func (bot Bot) UnpinChatMessage(chatId int64, opts UnpinChatMessageOpts) (bool, 
 // - user_id (type int64): User identifier of sticker file owner
 // - png_sticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More info on Sending Files »
 // https://core.telegram.org/bots/api#uploadstickerfile
-func (bot Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, error) {
+func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))

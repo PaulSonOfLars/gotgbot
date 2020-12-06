@@ -13,3 +13,19 @@ type Bot struct {
 	GetTimeout  time.Duration
 	PostTimeout time.Duration
 }
+
+func NewBot(token string) (*Bot, error) {
+	b := Bot{
+		Token:  token,
+		User:   User{},
+		Client: http.Client{},
+	}
+
+	u, err := b.GetMe()
+	if err != nil {
+		return nil, err
+	}
+
+	b.User = *u
+	return &b, nil
+}
