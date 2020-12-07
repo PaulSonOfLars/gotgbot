@@ -5,18 +5,17 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 )
-
-type Filter func(msg *gotgbot.Message) bool
 
 type Message struct {
 	AllowEdited  bool
 	AllowChannel bool
-	Filter       Filter
-	Response     func(ctx *ext.Context) error
+	Filter       filters.Message
+	Response     Response
 }
 
-func NewMessage(f Filter, r func(ctx *ext.Context) error) Message {
+func NewMessage(f filters.Message, r Response) Message {
 	return Message{
 		AllowEdited:  false,
 		AllowChannel: false,
@@ -30,7 +29,7 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 		if u.Message.Text == "" && u.Message.Caption == "" {
 			return false
 		}
-		return m.Filter(u.Message)
+		return m.Filter == nil || m.Filter(u.Message)
 	}
 
 	// if no edits and message is edited
@@ -38,21 +37,21 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 		if u.EditedMessage.Text == "" && u.EditedMessage.Caption == "" {
 			return false
 		}
-		return m.Filter(u.EditedMessage)
+		return m.Filter == nil || m.Filter(u.EditedMessage)
 	}
 	// if no channel and message is channel message
 	if m.AllowChannel && u.ChannelPost != nil {
 		if u.ChannelPost.Text == "" && u.ChannelPost.Caption == "" {
 			return false
 		}
-		return m.Filter(u.ChannelPost)
+		return m.Filter == nil || m.Filter(u.ChannelPost)
 	}
 	// if no channel, no edits, and post is edited
 	if m.AllowChannel && m.AllowEdited && u.EditedChannelPost != nil {
 		if u.EditedChannelPost.Text == "" && u.EditedChannelPost.Caption == "" {
 			return false
 		}
-		return m.Filter(u.EditedChannelPost)
+		return m.Filter == nil || m.Filter(u.EditedChannelPost)
 	}
 
 	return false
@@ -63,5 +62,5 @@ func (m Message) HandleUpdate(ctx *ext.Context) error {
 }
 
 func (m Message) Name() string {
-	return fmt.Sprintf("message_%T", m.Response)
+	return fmt.Sprintf("message_%p", m.Response)
 }

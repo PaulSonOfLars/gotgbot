@@ -13,7 +13,7 @@ type Command struct {
 	AllowEdited  bool
 	AllowChannel bool
 	Command      string
-	Response     func(ctx *ext.Context) error
+	Response     Response
 }
 
 func NewCommand(c string, r func(ctx *ext.Context) error) Command {
