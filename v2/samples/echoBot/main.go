@@ -14,7 +14,7 @@ func main() {
 	// Create bot from environment value.
 	b, err := gotgbot.NewBot(os.Getenv("TOKEN"))
 	if err != nil {
-		panic(err)
+		panic("failed to create new bot: " + err.Error())
 	}
 
 	// Create updater and dispatcher.
@@ -25,7 +25,10 @@ func main() {
 	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
 
 	// Start receiving updates.
-	updater.StartCleanPolling(b)
+	err = updater.StartPolling(b, ext.PollingOpts{Clean: true})
+	if err != nil {
+		panic("failed to start polling: " + err.Error())
+	}
 	fmt.Printf("%s has been started...\n", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.

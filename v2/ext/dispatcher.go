@@ -3,9 +3,10 @@ package ext
 import (
 	"encoding/json"
 	"errors"
-	"os"
+	"log"
 	"runtime/debug"
 	"sort"
+	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
@@ -13,62 +14,86 @@ import (
 const DefaultMaxRoutines = 50
 
 type Dispatcher struct {
-	// Updates receives all incoming updates from the updater'
-	Updates chan json.RawMessage
-	// MaxRoutines limits the maximum number of goroutines available for update handling.
-	// If value is < 0, no limiting is applied.
-	MaxRoutines int
 	// Error handles any errors that occur during handler execution.
 	Error func(ctx *Context, err error)
 	// Panic handles any panics that occur during handler execution.
-	//If no panic is defined, the stack is printed to stderr.
+	// If no panic is defined, the stack is logged to stderr.
 	Panic func(ctx *Context, stack []byte)
 
 	// handlerGroups represents the list of available handler groups, numerically sorted.
-	handlerGroups []int // TODO: should be pointer?
+	handlerGroups []int
 	// handlers represents all available handles, split into groups (see handlerGroups).
 	handlers map[int][]Handler
+
+	// updatesChan is the channel that the dispatcher receives all new updates on.
+	updatesChan chan json.RawMessage
+	// limiter is how we limit the maximum number of goroutines for handling updates.
+	limiter chan struct{}
+	// waitGroup handles the number of running operations to allow for clean shutdowns.
+	waitGroup sync.WaitGroup
 }
 
+// NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
+// The maxRoutines argument is used to decide how to limit the number of goroutines spawned by the dispatcher.
+// If maxRoutines == 0, DefaultMaxRoutines is used instead.
+// If maxRoutines < 0, no limits are imposed.
 func NewDispatcher(updates chan json.RawMessage, maxRoutines int) *Dispatcher {
+	var limiter chan struct{}
+
+	if maxRoutines >= 0 {
+		if maxRoutines == 0 {
+			maxRoutines = DefaultMaxRoutines
+		}
+
+		limiter = make(chan struct{}, maxRoutines)
+	}
+
 	return &Dispatcher{
-		Updates:     updates,
-		MaxRoutines: maxRoutines,
+		updatesChan: updates,
 		handlers:    make(map[int][]Handler),
+		limiter:     limiter,
+		waitGroup:   sync.WaitGroup{},
 	}
 }
 
 // Start to handle incoming updates
 func (d *Dispatcher) Start(b *gotgbot.Bot) {
-	if d.MaxRoutines < 0 {
+	if d.limiter == nil {
 		d.limitlessDispatcher(b)
 		return
 	}
 
-	routines := d.MaxRoutines
-	if routines == 0 {
-		routines = DefaultMaxRoutines
-	}
-	d.limitedDispatcher(b, routines)
+	d.limitedDispatcher(b)
 }
 
-func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot, routines int) {
-	limiter := make(chan struct{}, routines)
-	for upd := range d.Updates {
+// Stop waits for all currently processing updates to finish, and then returns.
+func (d *Dispatcher) Stop() {
+	d.waitGroup.Wait()
+}
+
+func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot) {
+	for upd := range d.updatesChan {
+		d.waitGroup.Add(1)
+
 		// Send empty data to limiter.
-		// if limiter buffer is full, it block until it another update ends.
-		limiter <- struct{}{}
+		// if limiter buffer is full, it blocks until another update finishes processing.
+		d.limiter <- struct{}{}
 		go func(upd json.RawMessage) {
 			d.ProcessRawUpdate(b, upd)
-			<-limiter
+
+			<-d.limiter
+			d.waitGroup.Done()
 		}(upd)
 	}
 }
 
 func (d *Dispatcher) limitlessDispatcher(b *gotgbot.Bot) {
-	for upd := range d.Updates {
+	for upd := range d.updatesChan {
+		d.waitGroup.Add(1)
+
 		go func(upd json.RawMessage) {
 			d.ProcessRawUpdate(b, upd)
+			d.waitGroup.Done()
 		}(upd)
 	}
 }
@@ -95,8 +120,7 @@ var ContinueGroups = errors.New("group iteration continued")
 func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
-		// todo: improve logging
-		os.Stderr.WriteString(err.Error())
+		log.Println("failed to process raw update: " + err.Error())
 		return
 	}
 
@@ -113,14 +137,14 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 				return
 			}
 
-			debug.PrintStack()
+			log.Println(debug.Stack())
 		}
 	}()
 
 	for _, groupNum := range d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
 			if !handler.CheckUpdate(b, update) {
-				return
+				continue
 			}
 
 			if ctx == nil {
