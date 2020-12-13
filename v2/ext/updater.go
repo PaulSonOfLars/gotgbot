@@ -45,7 +45,7 @@ type PollingOpts struct {
 }
 
 // StartPolling Starts the polling logic
-func (u *Updater) StartPolling(b *gotgbot.Bot, opts PollingOpts) error {
+func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// TODO: De-duplicate this code.
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
@@ -54,19 +54,25 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts PollingOpts) error {
 	// - unnecessary unmarshalling of the (possibly multiple) full Update structs.
 	// Yes, this also makes me sad. :/
 	v := url.Values{}
-	v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
-	v.Add("limit", strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10))
-	v.Add("timeout", strconv.FormatInt(opts.GetUpdatesOpts.Timeout, 10))
-	if opts.GetUpdatesOpts.AllowedUpdates != nil {
-		bytes, err := json.Marshal(opts.GetUpdatesOpts.AllowedUpdates)
-		if err != nil {
-			return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
+	var clean bool
+
+	if opts != nil {
+		clean = opts.Clean
+
+		v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
+		v.Add("limit", strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10))
+		v.Add("timeout", strconv.FormatInt(opts.GetUpdatesOpts.Timeout, 10))
+		if opts.GetUpdatesOpts.AllowedUpdates != nil {
+			bytes, err := json.Marshal(opts.GetUpdatesOpts.AllowedUpdates)
+			if err != nil {
+				return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
+			}
+			v.Add("allowed_updates", string(bytes))
 		}
-		v.Add("allowed_updates", string(bytes))
 	}
 
 	go u.Dispatcher.Start(b)
-	go u.pollingLoop(opts.Clean, v)
+	go u.pollingLoop(clean, v)
 
 	return nil
 }

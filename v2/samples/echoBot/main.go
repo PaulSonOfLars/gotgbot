@@ -25,7 +25,7 @@ func main() {
 	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
 
 	// Start receiving updates.
-	err = updater.StartPolling(b, ext.PollingOpts{Clean: true})
+	err = updater.StartPolling(b, &ext.PollingOpts{Clean: true})
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
