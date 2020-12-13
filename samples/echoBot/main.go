@@ -18,7 +18,7 @@ func main() {
 	}
 
 	// Create updater and dispatcher.
-	updater := ext.NewUpdater(b)
+	updater := ext.NewUpdater(b, nil)
 	dispatcher := updater.Dispatcher
 
 	// Add echo handler to reply to all messages.

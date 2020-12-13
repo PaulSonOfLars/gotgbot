@@ -17,8 +17,10 @@ type Dispatcher struct {
 	// Error handles any errors that occur during handler execution.
 	Error func(ctx *Context, err error)
 	// Panic handles any panics that occur during handler execution.
-	// If no panic is defined, the stack is logged to stderr.
+	// If this field is nil, the stack is logged to stderr.
 	Panic func(ctx *Context, stack []byte)
+	// ErrorLog is the output to log to in the case of a library error.
+	ErrorLog *log.Logger
 
 	// handlerGroups represents the list of available handler groups, numerically sorted.
 	handlerGroups []int
@@ -33,12 +35,42 @@ type Dispatcher struct {
 	waitGroup sync.WaitGroup
 }
 
+type DispatcherOpts struct {
+	// Error handles any errors that occur during handler execution.
+	Error func(ctx *Context, err error)
+	// Panic handles any panics that occur during handler execution.
+	// If no panic is defined, the stack is logged to
+	Panic func(ctx *Context, stack []byte)
+
+	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
+	// If MaxRoutines == 0, DefaultMaxRoutines is used instead.
+	// If MaxRoutines < 0, no limits are imposed.
+	MaxRoutines int
+	ErrorLog    *log.Logger
+}
+
 // NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
-// The maxRoutines argument is used to decide how to limit the number of goroutines spawned by the dispatcher.
-// If maxRoutines == 0, DefaultMaxRoutines is used instead.
-// If maxRoutines < 0, no limits are imposed.
-func NewDispatcher(updates chan json.RawMessage, maxRoutines int) *Dispatcher {
+func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
 	var limiter chan struct{}
+
+	var errFunc func(ctx *Context, err error)
+	var panicFunc func(ctx *Context, stack []byte)
+
+	maxRoutines := DefaultMaxRoutines
+	errLog := errorLog
+
+	if opts != nil {
+		if opts.MaxRoutines != 0 {
+			maxRoutines = opts.MaxRoutines
+		}
+
+		if opts.ErrorLog != nil {
+			errLog = opts.ErrorLog
+		}
+
+		errFunc = opts.Error
+		panicFunc = opts.Panic
+	}
 
 	if maxRoutines >= 0 {
 		if maxRoutines == 0 {
@@ -49,6 +81,9 @@ func NewDispatcher(updates chan json.RawMessage, maxRoutines int) *Dispatcher {
 	}
 
 	return &Dispatcher{
+		Error:       errFunc,
+		Panic:       panicFunc,
+		ErrorLog:    errLog,
 		updatesChan: updates,
 		handlers:    make(map[int][]Handler),
 		limiter:     limiter,
@@ -120,7 +155,7 @@ var ContinueGroups = errors.New("group iteration continued")
 func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
-		log.Println("failed to process raw update: " + err.Error())
+		d.ErrorLog.Println("failed to process raw update: " + err.Error())
 		return
 	}
 
@@ -137,7 +172,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 				return
 			}
 
-			log.Println(debug.Stack())
+			d.ErrorLog.Println(debug.Stack())
 		}
 	}()
 

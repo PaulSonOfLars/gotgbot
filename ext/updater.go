@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -18,23 +19,50 @@ type Updater struct {
 	Bot        gotgbot.Bot
 	Dispatcher *Dispatcher
 	UpdateChan chan json.RawMessage
+	ErrorLog   *log.Logger
 
 	idle    bool
 	running bool
 	server  *http.Server
 }
 
+var errorLog = log.New(os.Stderr, "ERROR", log.LstdFlags)
+
+type UpdaterOpts struct {
+	PollingTimeout time.Duration
+	ErrorLog       *log.Logger
+
+	DispatcherOpts DispatcherOpts
+}
+
 // NewUpdater Creates a new Updater, as well as the necessary structures for
-func NewUpdater(bot *gotgbot.Bot) Updater {
+func NewUpdater(bot *gotgbot.Bot, opts *UpdaterOpts) Updater {
+	errLog := errorLog
+	pollTimeout := time.Second * 10
+	var dispatcherOpts DispatcherOpts
+
+	if opts != nil {
+		if opts.PollingTimeout != 0 {
+			pollTimeout = opts.PollingTimeout
+		}
+
+		if opts.ErrorLog != nil {
+			errLog = opts.ErrorLog
+		}
+
+		dispatcherOpts = opts.DispatcherOpts
+	}
+
 	updateChan := make(chan json.RawMessage)
 	return Updater{
 		Bot: gotgbot.Bot{
 			Token:      bot.Token,
 			APIURL:     bot.APIURL,
 			Client:     http.Client{},
-			GetTimeout: time.Second * 10,
+			GetTimeout: pollTimeout,
 		}, // create new bot client to allow for independent timeout changes
-		Dispatcher: NewDispatcher(updateChan, DefaultMaxRoutines),
+		ErrorLog:   errLog,
+		Dispatcher: NewDispatcher(updateChan, &dispatcherOpts),
 		UpdateChan: updateChan,
 	}
 }
@@ -90,7 +118,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 		// note: this bot instance uses a custom http.Client with longer timeouts
 		r, err := u.Bot.Get("getUpdates", v)
 		if err != nil {
-			log.Println("failed to get updates; sleeping 1s: " + err.Error())
+			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
 			continue
 
@@ -100,7 +128,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 
 		var rawUpdates []json.RawMessage
 		if err := json.Unmarshal(r, &rawUpdates); err != nil {
-			log.Println("failed to unmarshal updates: " + err.Error())
+			u.ErrorLog.Println("failed to unmarshal updates: " + err.Error())
 			continue
 		}
 
@@ -113,7 +141,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 		}
 
 		if err := json.Unmarshal(rawUpdates[len(rawUpdates)-1], &lastUpdate); err != nil {
-			log.Println("failed to unmarshal last update: " + err.Error())
+			u.ErrorLog.Println("failed to unmarshal last update: " + err.Error())
 			continue
 		}
 
