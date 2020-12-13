@@ -47,7 +47,7 @@ type PollingOpts struct {
 // StartPolling Starts the polling logic
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts PollingOpts) error {
 	// TODO: De-duplicate this code.
-	// This logic is currently duplicated over from the generated getUpdates code.
+	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
 	// - needing to re-allocate new url.values structs.
 	// - needing to convert the opt values to strings to pass to the values.
@@ -74,6 +74,11 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts PollingOpts) error {
 func (u *Updater) pollingLoop(clean bool, v url.Values) {
 	u.running = true
 
+	// if clean, force the offset to -1
+	if clean {
+		v.Set("offset", "-1")
+	}
+
 	var offset int64
 	for u.running {
 		// note: this bot instance uses a custom http.Client with longer timeouts
@@ -93,8 +98,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 			continue
 		}
 
-		if len(rawUpdates) == 0 { // TODO: check this is fine on high loads
-			clean = false
+		if len(rawUpdates) == 0 {
 			continue
 		}
 
@@ -110,6 +114,8 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 		offset = lastUpdate.UpdateId + 1
 		v.Set("offset", strconv.FormatInt(offset, 10))
 		if clean {
+			// Setting the offset to -1 gets just the last update; this should be skipped too.
+			clean = false
 			continue
 		}
 
