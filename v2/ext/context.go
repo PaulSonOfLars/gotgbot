@@ -70,25 +70,30 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update) *Context {
 	}
 }
 
+// Args gets the list of whitespace-separated arguments of the message text.
 func (c *Context) Args() []string {
+	var msg *gotgbot.Message
+
 	if c.Update.Message != nil {
+		msg = c.Update.Message
+	} else if c.Update.EditedMessage != nil {
+		msg = c.Update.EditedMessage
+	} else if c.Update.ChannelPost != nil {
+		msg = c.Update.ChannelPost
+	} else if c.Update.EditedChannelPost != nil {
+		msg = c.Update.EditedChannelPost
+	} else if c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil {
+		msg = c.Update.CallbackQuery.Message
+	}
+
+	if msg == nil {
+		return nil
+	}
+
+	if msg.Text != "" {
 		return strings.Fields(c.Update.Message.Text)
-	}
-
-	if c.Update.EditedMessage != nil {
-		return strings.Fields(c.Update.EditedMessage.Text)
-	}
-
-	if c.Update.ChannelPost != nil {
-		return strings.Fields(c.Update.ChannelPost.Text)
-	}
-
-	if c.Update.EditedChannelPost != nil {
-		return strings.Fields(c.Update.EditedChannelPost.Text)
-	}
-
-	if c.Update.CallbackQuery.Message != nil {
-		return strings.Fields(c.Update.CallbackQuery.Message.Text)
+	} else if msg.Caption != "" {
+		return strings.Fields(c.Update.Message.Caption)
 	}
 
 	return nil
