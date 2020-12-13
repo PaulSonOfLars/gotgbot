@@ -31,7 +31,7 @@ package gotgbot
 		helpers.WriteString(helper)
 	}
 
-	return writeGenToFile(helpers, "v2/gen_helpers.go")
+	return writeGenToFile(helpers, "gen_helpers.go")
 }
 
 func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, error) {

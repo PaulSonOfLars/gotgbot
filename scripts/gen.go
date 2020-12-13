@@ -73,7 +73,7 @@ const (
 func main() {
 	api, err := os.Open("api.json")
 	if err != nil {
-		panic(err)
+		panic("Failed to open telegram bot api spec at 'api.json' (see https://github.com/PaulSonOfLars/telegram-bot-api-spec): " + err.Error())
 	}
 
 	var d APIDescription

@@ -1,35 +1,38 @@
-# Go Telegram Bot
-
-**This library is WIP; it may not currently support all of the telegram api methods.**
-
-This library attempts to create a user-friendly wrapper around the telegram bot api.
+# Golang Telegram Bot library
 
 Heavily inspired by the [python-telegram-bot library](github.com/python-telegram-bot/python-telegram-bot),
-this aims to create a simple way to manage a concurrent and scalable bot. It has been in use by [Rose](https://t.me/MissRose_bot) since september 2018, so is heavily battle tested.
+this package is a code-generated wrapper for the telegram bot api. We also provide an extensions package which 
+defines an updater/dispatcher pattern to avoid having to rewrite update processing.
 
-If you have any questions, come ask in the [telegram support chat](https://t.me/GotgbotChat).
+All the telegram types and methods are present in the `gen_*.go` files. These are all generated from 
+[a bot api spec](https://github.com/PaulSonOfLars/telegram-bot-api-spec) and can be recreated by running `go generate` 
+in the repo root. This makes it extremely easy to update the library; simply download the latest spec, and regenerate.
+
+If you have any questions, come find us in our [telegram support chat](https://t.me/GotgbotChat)!
+
+## Features:
+- All telegram API types and methods are generated from the bot api docs, which makes this library:
+    - Guaranteed to match the docs
+    - Easy to update
+- Type safe; no weird interface{} logic.
+- No unnecessary third party libraries; only uses standard library.
+- Updates are each processed in their own go routine, keeping your bot responsive.
+- Code panics automatically recovered from and logged, avoiding unexpected downtime.
+
 
 ## Getting started
-Install it as you would install your usual go library: `go get github.com/PaulSonOfLars/gotgbot`
 
-A sample bot can be found in `sampleBot/`. This bot covers the basics of adding a command, a filter, and a regex handler.
+Download the library with the standard `go get` command:
 
+```bash
+go get github.com/PaulSonOfLars/gotgbot@v2
+```
 
-An interesting feature to take note of is that due to go's
-handling of exceptions, if you choose not to handle an exception, your bot
-will simply keep on going happily and ignore any issues.
+### Example bots
 
-All handlers are async; they're all executed in their own go routine,
-so can communicate accross channels if needed.
-The reason for the `error` return for the methods is to allow for passing `gotgbot.ContinueGroups{}`
-or `gotgbot.EndGroups{}`; which will determine whether or not to keep handling methods in that handler group,
-or stop handling further groups entirely.
+Sample bots can be found in the [samples directory](samples).
 
-## Message sending
+## Docs
 
-As seen in the example, message sending can be done in two ways; via each received message's
-ReplyText() function, or by building your own; and calling msg.Send(). This allows for
-ease of use by having the most commonly used shortcuts readily available, while
-retaining the flexibility of building each message yourself, which wouldnt be
-available otherwise.
+Docs can be found [here](https://pkg.go.dev/github.com/PaulSonOfLars/gotgbot).
 

@@ -49,7 +49,7 @@ import (
 		file.WriteString(typeDef)
 	}
 
-	return writeGenToFile(file, "v2/gen_types.go")
+	return writeGenToFile(file, "gen_types.go")
 }
 
 func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {

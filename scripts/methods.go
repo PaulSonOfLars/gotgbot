@@ -41,7 +41,7 @@ import (
 		file.WriteString(method)
 	}
 
-	return writeGenToFile(file, "v2/gen_methods.go")
+	return writeGenToFile(file, "gen_methods.go")
 }
 
 func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, error) {
