@@ -25,7 +25,7 @@ If you have any questions, come find us in our [telegram support chat](https://t
 Download the library with the standard `go get` command:
 
 ```bash
-go get github.com/PaulSonOfLars/gotgbot@v2
+go get github.com/PaulSonOfLars/gotgbot/v2
 ```
 
 ### Example bots
