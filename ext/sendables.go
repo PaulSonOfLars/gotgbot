@@ -291,7 +291,7 @@ func (b Bot) NewFileReader(name string, r io.Reader) InputFile {
 }
 
 type InputMedia interface {
-	toJson(idx int) (map[string]string, map[string]PostFile, error)
+	toJson(idx int) (map[string]interface{}, map[string]PostFile, error)
 }
 
 type InputMediaAnimation struct {
@@ -305,7 +305,7 @@ type InputMediaAnimation struct {
 	Duration        int
 }
 
-func (ima InputMediaAnimation) toJson(idx int) (map[string]string, map[string]PostFile, error) {
+func (ima InputMediaAnimation) toJson(idx int) (map[string]interface{}, map[string]PostFile, error) {
 	data := make(map[string]PostFile)
 	media := ima.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	var captionEntities []byte
@@ -317,15 +317,15 @@ func (ima InputMediaAnimation) toJson(idx int) (map[string]string, map[string]Po
 		}
 	}
 
-	m := map[string]string{
+	m := map[string]interface{}{
 		"type":             "animation",
 		"media":            media,
 		"caption":          ima.Caption,
 		"parse_mode":       ima.ParseMode,
 		"caption_entities": string(captionEntities),
-		"width":            strconv.Itoa(ima.Width),
-		"height":           strconv.Itoa(ima.Height),
-		"duration":         strconv.Itoa(ima.Duration),
+		"width":            ima.Width,
+		"height":           ima.Height,
+		"duration":         ima.Duration,
 	}
 	if ima.Thumb != nil {
 		m["thumb"] = ima.Thumb.GetMediaType("thumb"+strconv.Itoa(idx), data)
@@ -342,7 +342,7 @@ type InputMediaDocument struct {
 	DisableContentTypeDetection bool
 }
 
-func (imd InputMediaDocument) toJson(idx int) (map[string]string, map[string]PostFile, error) {
+func (imd InputMediaDocument) toJson(idx int) (map[string]interface{}, map[string]PostFile, error) {
 	data := make(map[string]PostFile)
 	media := imd.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	var captionEntities []byte
@@ -354,13 +354,13 @@ func (imd InputMediaDocument) toJson(idx int) (map[string]string, map[string]Pos
 		}
 	}
 
-	m := map[string]string{
+	m := map[string]interface{}{
 		"type":                           "document",
 		"media":                          media,
 		"caption":                        imd.Caption,
 		"parse_mode":                     imd.ParseMode,
 		"caption_entities":               string(captionEntities),
-		"disable_content_type_detection": strconv.FormatBool(imd.DisableContentTypeDetection),
+		"disable_content_type_detection": imd.DisableContentTypeDetection,
 	}
 	if imd.Thumb != nil {
 		m["thumb"] = imd.Thumb.GetMediaType("thumb"+strconv.Itoa(idx), data)
@@ -379,7 +379,7 @@ type InputMediaAudio struct {
 	Title           string
 }
 
-func (ima InputMediaAudio) toJson(idx int) (map[string]string, map[string]PostFile, error) {
+func (ima InputMediaAudio) toJson(idx int) (map[string]interface{}, map[string]PostFile, error) {
 	data := make(map[string]PostFile)
 	media := ima.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	var captionEntities []byte
@@ -391,13 +391,13 @@ func (ima InputMediaAudio) toJson(idx int) (map[string]string, map[string]PostFi
 		}
 	}
 
-	m := map[string]string{
+	m := map[string]interface{}{
 		"type":             "audio",
 		"media":            media,
 		"caption":          ima.Caption,
 		"parse_mode":       ima.ParseMode,
 		"caption_entities": string(captionEntities),
-		"duration":         strconv.Itoa(ima.Duration),
+		"duration":         ima.Duration,
 		"performer":        ima.Performer,
 		"title":            ima.Title,
 	}
@@ -414,7 +414,7 @@ type InputMediaPhoto struct {
 	CaptionEntities []MessageEntity
 }
 
-func (imp InputMediaPhoto) toJson(idx int) (map[string]string, map[string]PostFile, error) {
+func (imp InputMediaPhoto) toJson(idx int) (map[string]interface{}, map[string]PostFile, error) {
 	data := make(map[string]PostFile)
 	media := imp.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	var captionEntities []byte
@@ -426,7 +426,7 @@ func (imp InputMediaPhoto) toJson(idx int) (map[string]string, map[string]PostFi
 		}
 	}
 
-	return map[string]string{
+	return map[string]interface{}{
 		"type":             "photo",
 		"media":            media,
 		"caption":          imp.Caption,
@@ -447,7 +447,7 @@ type InputMediaVideo struct {
 	SupportStreaming bool
 }
 
-func (imv InputMediaVideo) toJson(idx int) (map[string]string, map[string]PostFile, error) {
+func (imv InputMediaVideo) toJson(idx int) (map[string]interface{}, map[string]PostFile, error) {
 	data := make(map[string]PostFile)
 	media := imv.Media.GetMediaType("media"+strconv.Itoa(idx), data)
 	var captionEntities []byte
@@ -459,16 +459,16 @@ func (imv InputMediaVideo) toJson(idx int) (map[string]string, map[string]PostFi
 		}
 	}
 
-	m := map[string]string{
+	m := map[string]interface{}{
 		"type":              "video",
 		"media":             media,
 		"caption":           imv.Caption,
 		"parse_mode":        imv.ParseMode,
 		"caption_entities":  string(captionEntities),
-		"width":             strconv.Itoa(imv.Width),
-		"height":            strconv.Itoa(imv.Height),
-		"duration":          strconv.Itoa(imv.Duration),
-		"support_streaming": strconv.FormatBool(imv.SupportStreaming),
+		"width":             imv.Width,
+		"height":            imv.Height,
+		"duration":          imv.Duration,
+		"support_streaming": imv.SupportStreaming,
 	}
 	if imv.Thumb != nil {
 		m["thumb"] = imv.Thumb.GetMediaType("thumb"+strconv.Itoa(idx), data)
