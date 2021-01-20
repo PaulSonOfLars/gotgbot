@@ -123,6 +123,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 			continue
 
 		} else if r == nil {
+			clean = false
 			continue
 		}
 
@@ -133,6 +134,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 		}
 
 		if len(rawUpdates) == 0 {
+			clean = false
 			continue
 		}
 
