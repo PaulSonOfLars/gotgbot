@@ -23,6 +23,7 @@ func main() {
 
 	// Add echo handler to reply to all messages.
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
+	dispatcher.AddHandler(handlers.NewCallback(filters.Equal("start_callback"), startCB))
 	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
 
 	// Start receiving updates.
@@ -38,7 +39,25 @@ func main() {
 
 // start introduces the bot
 func start(ctx *ext.Context) error {
-	ctx.EffectiveMessage.Reply(ctx.Bot, fmt.Sprintf("Hello, I'm %s. I repeat all your messages.", ctx.Bot.User.FirstName), nil)
+	_, err := ctx.EffectiveMessage.Reply(ctx.Bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", ctx.Bot.User.Username), &gotgbot.SendMessageOpts{
+		ParseMode: "html",
+		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
+			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
+				{Text: "Press me", CallbackData: "start_callback"},
+			}},
+		},
+	})
+	if err != nil {
+		fmt.Println("failed to send: " + err.Error())
+	}
+	return nil
+}
+
+// startCB edits the start message
+func startCB(ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+	cb.Answer(ctx.Bot, nil)
+	cb.Message.EditText(ctx.Bot, "You edited the start message.", nil)
 	return nil
 }
 

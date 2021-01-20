@@ -32,6 +32,18 @@ func Prefix(prefix string) CallbackQuery {
 	}
 }
 
+func Suffix(suffix string) CallbackQuery {
+	return func(cq *gotgbot.CallbackQuery) bool {
+		return strings.HasSuffix(cq.Data, suffix)
+	}
+}
+
+func Equal(match string) CallbackQuery {
+	return func(cq *gotgbot.CallbackQuery) bool {
+		return cq.Data == match
+	}
+}
+
 func CallbackUserID(id int64) CallbackQuery {
 	return func(cq *gotgbot.CallbackQuery) bool {
 		return cq.From.Id == id
