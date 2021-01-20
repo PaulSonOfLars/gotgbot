@@ -22,6 +22,7 @@ func main() {
 	dispatcher := updater.Dispatcher
 
 	// Add echo handler to reply to all messages.
+	dispatcher.AddHandler(handlers.NewCommand("start", start))
 	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
 
 	// Start receiving updates.
@@ -35,8 +36,14 @@ func main() {
 	updater.Idle()
 }
 
+// start introduces the bot
+func start(ctx *ext.Context) error {
+	ctx.EffectiveMessage.Reply(ctx.Bot, fmt.Sprintf("Hello, I'm %s. I repeat all your messages.", ctx.Bot.User.FirstName), nil)
+	return nil
+}
+
+// echo replies to a messages with its own contents
 func echo(ctx *ext.Context) error {
-	// Reply to message with its own contents
 	ctx.EffectiveMessage.Reply(ctx.Bot, ctx.EffectiveMessage.Text, nil)
 	return nil
 }
