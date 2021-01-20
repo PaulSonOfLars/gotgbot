@@ -16,9 +16,9 @@ const (
 	// Default telegram API URL.
 	DefaultAPIURL = "https://api.telegram.org/bot"
 	// Default timeout to be set for a GET request.
-	DefaultGetTimeout = time.Second
+	DefaultGetTimeout = time.Second * 3
 	// Default timeout to be set for a POST request.
-	DefaultPostTimeout = time.Second * 3
+	DefaultPostTimeout = time.Second * 10
 )
 
 type Response struct {
