@@ -5,7 +5,7 @@ func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, er
 		opts = &SendMessageOpts{}
 	}
 
-	if opts.ReplyToMessageId == 0 {
+	if opts.ReplyToMessageId == 0 && m.Chat.Type != "private" {
 		opts.ReplyToMessageId = m.MessageId
 	}
 
