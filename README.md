@@ -34,5 +34,5 @@ Sample bots can be found in the [samples directory](samples).
 
 ## Docs
 
-Docs can be found [here](https://pkg.go.dev/github.com/PaulSonOfLars/gotgbot).
+Docs can be found [here](https://pkg.go.dev/github.com/PaulSonOfLars/gotgbot/v2).
 
