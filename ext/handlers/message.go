@@ -26,9 +26,6 @@ func NewMessage(f filters.Message, r Response) Message {
 
 func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.Message != nil {
-		if u.Message.Text == "" && u.Message.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(u.Message)
 	}
 
