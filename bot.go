@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//go:generate go run github.com/PaulSonOfLars/gotgbot/v2/scripts/
+//go:generate go run ./scripts/generate
 
 type Bot struct {
 	Token       string
