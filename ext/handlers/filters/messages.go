@@ -2,6 +2,7 @@ package filters
 
 import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
+        "regexp"
 )
 
 type Message func(msg *gotgbot.Message) bool
@@ -30,6 +31,19 @@ func All(_ *gotgbot.Message) bool {
 
 func Text(msg *gotgbot.Message) bool {
 	return msg.Text != ""
+}
+
+func Regex(text string) Message {
+	return func(msg *gotgbot.Message) bool {
+		   if msg.Text == "" {
+				return false
+			}
+           res, err:= regexp.Match(text, []byte(msg.Text))
+	       if err != nil {
+		       return false
+	        }
+	       return res
+	}
 }
 
 func Caption(msg *gotgbot.Message) bool {
