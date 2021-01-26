@@ -51,6 +51,7 @@ func source(ctx *ext.Context) error {
 	})
 	if err != nil {
 		fmt.Println("failed to send source: " + err.Error())
+		return nil
 	}
 	return nil
 }

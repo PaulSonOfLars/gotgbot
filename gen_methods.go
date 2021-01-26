@@ -4,6 +4,7 @@
 package gotgbot
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,7 +38,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 		if opts.PngSticker != nil {
 			switch m := opts.PngSticker.(type) {
 			case string:
-				// ok, noop
+				v.Add("png_sticker", m)
 
 			case NamedReader:
 				v.Add("png_sticker", "attach://png_sticker")
@@ -46,6 +47,10 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 			case io.Reader:
 				v.Add("png_sticker", "attach://png_sticker")
 				data["png_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("png_sticker", "attach://png_sticker")
+				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
@@ -60,6 +65,10 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 			case io.Reader:
 				v.Add("tgs_sticker", "attach://tgs_sticker")
 				data["tgs_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("tgs_sticker", "attach://tgs_sticker")
+				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
@@ -331,7 +340,7 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 		if opts.PngSticker != nil {
 			switch m := opts.PngSticker.(type) {
 			case string:
-				// ok, noop
+				v.Add("png_sticker", m)
 
 			case NamedReader:
 				v.Add("png_sticker", "attach://png_sticker")
@@ -340,6 +349,10 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 			case io.Reader:
 				v.Add("png_sticker", "attach://png_sticker")
 				data["png_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("png_sticker", "attach://png_sticker")
+				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
@@ -354,6 +367,10 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 			case io.Reader:
 				v.Add("tgs_sticker", "attach://tgs_sticker")
 				data["tgs_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("tgs_sticker", "attach://tgs_sticker")
+				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
@@ -1201,7 +1218,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 	if animation != nil {
 		switch m := animation.(type) {
 		case string:
-			// ok, noop
+			v.Add("animation", m)
 
 		case NamedReader:
 			v.Add("animation", "attach://animation")
@@ -1210,6 +1227,10 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		case io.Reader:
 			v.Add("animation", "attach://animation")
 			data["animation"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("animation", "attach://animation")
+			data["animation"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", animation)
@@ -1222,7 +1243,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -1231,6 +1252,10 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -1305,7 +1330,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 	if audio != nil {
 		switch m := audio.(type) {
 		case string:
-			// ok, noop
+			v.Add("audio", m)
 
 		case NamedReader:
 			v.Add("audio", "attach://audio")
@@ -1314,6 +1339,10 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		case io.Reader:
 			v.Add("audio", "attach://audio")
 			data["audio"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("audio", "attach://audio")
+			data["audio"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", audio)
@@ -1335,7 +1364,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -1344,6 +1373,10 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -1518,7 +1551,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 	if document != nil {
 		switch m := document.(type) {
 		case string:
-			// ok, noop
+			v.Add("document", m)
 
 		case NamedReader:
 			v.Add("document", "attach://document")
@@ -1528,6 +1561,10 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 			v.Add("document", "attach://document")
 			data["document"] = NamedFile{File: m}
 
+		case []byte:
+			v.Add("document", "attach://document")
+			data["document"] = NamedFile{File: bytes.NewReader(m)}
+
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", document)
 		}
@@ -1536,7 +1573,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -1545,6 +1582,10 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -1921,7 +1962,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 	if photo != nil {
 		switch m := photo.(type) {
 		case string:
-			// ok, noop
+			v.Add("photo", m)
 
 		case NamedReader:
 			v.Add("photo", "attach://photo")
@@ -1930,6 +1971,10 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		case io.Reader:
 			v.Add("photo", "attach://photo")
 			data["photo"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("photo", "attach://photo")
+			data["photo"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", photo)
@@ -2077,7 +2122,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 	if sticker != nil {
 		switch m := sticker.(type) {
 		case string:
-			// ok, noop
+			v.Add("sticker", m)
 
 		case NamedReader:
 			v.Add("sticker", "attach://sticker")
@@ -2086,6 +2131,10 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		case io.Reader:
 			v.Add("sticker", "attach://sticker")
 			data["sticker"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("sticker", "attach://sticker")
+			data["sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", sticker)
@@ -2214,7 +2263,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 	if video != nil {
 		switch m := video.(type) {
 		case string:
-			// ok, noop
+			v.Add("video", m)
 
 		case NamedReader:
 			v.Add("video", "attach://video")
@@ -2223,6 +2272,10 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		case io.Reader:
 			v.Add("video", "attach://video")
 			data["video"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("video", "attach://video")
+			data["video"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", video)
@@ -2235,7 +2288,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -2244,6 +2297,10 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -2310,7 +2367,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 	if videoNote != nil {
 		switch m := videoNote.(type) {
 		case string:
-			// ok, noop
+			v.Add("video_note", m)
 
 		case NamedReader:
 			v.Add("video_note", "attach://video_note")
@@ -2319,6 +2376,10 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		case io.Reader:
 			v.Add("video_note", "attach://video_note")
 			data["video_note"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("video_note", "attach://video_note")
+			data["video_note"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", videoNote)
@@ -2330,7 +2391,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -2339,6 +2400,10 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -2397,7 +2462,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 	if voice != nil {
 		switch m := voice.(type) {
 		case string:
-			// ok, noop
+			v.Add("voice", m)
 
 		case NamedReader:
 			v.Add("voice", "attach://voice")
@@ -2406,6 +2471,10 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		case io.Reader:
 			v.Add("voice", "attach://voice")
 			data["voice"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("voice", "attach://voice")
+			data["voice"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", voice)
@@ -2528,6 +2597,10 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 		case io.Reader:
 			v.Add("photo", "attach://photo")
 			data["photo"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("photo", "attach://photo")
+			data["photo"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return false, fmt.Errorf("unknown type for InputFile: %T", photo)
@@ -2704,7 +2777,7 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				// ok, noop
+				v.Add("thumb", m)
 
 			case NamedReader:
 				v.Add("thumb", "attach://thumb")
@@ -2713,6 +2786,10 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 			case io.Reader:
 				v.Add("thumb", "attach://thumb")
 				data["thumb"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("thumb", "attach://thumb")
+				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
@@ -2762,6 +2839,10 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 			case io.Reader:
 				v.Add("certificate", "attach://certificate")
 				data["certificate"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("certificate", "attach://certificate")
+				data["certificate"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Certificate)
@@ -2944,6 +3025,10 @@ func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, er
 		case io.Reader:
 			v.Add("png_sticker", "attach://png_sticker")
 			data["png_sticker"] = NamedFile{File: m}
+
+		case []byte:
+			v.Add("png_sticker", "attach://png_sticker")
+			data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
 			return nil, fmt.Errorf("unknown type for InputFile: %T", pngSticker)

@@ -22,11 +22,12 @@ func generateMethods(d APIDescription) error {
 package gotgbot
 
 import (
-	urlLib "net/url" // renamed to avoid clashes with url vars
+	"bytes"
 	"encoding/json"
-	"strconv"
 	"fmt"
 	"io"
+	urlLib "net/url" // renamed to avoid clashes with url vars
+	"strconv"
 )
 `)
 
@@ -328,6 +329,10 @@ if {{.GoParam}} != nil {
 		v.Add("{{.Name}}", "attach://{{.Name}}")
 		data["{{.Name}}"] = NamedFile{File: m}
 
+	case []byte:
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
+
 	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
 	}
@@ -337,7 +342,7 @@ const stringOrReaderBranch = `
 if {{.GoParam}} != nil {
 	switch m := {{.GoParam}}.(type) {
 	case string:
-		// ok, noop
+		v.Add("{{.Name}}", m)
 
 	case NamedReader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
@@ -346,6 +351,10 @@ if {{.GoParam}} != nil {
 	case io.Reader:
 		v.Add("{{.Name}}", "attach://{{.Name}}")
 		data["{{.Name}}"] = NamedFile{File: m}
+
+	case []byte:
+		v.Add("{{.Name}}", "attach://{{.Name}}")
+		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
 
 	default:
 		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
