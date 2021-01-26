@@ -112,44 +112,24 @@ func (bot *Bot) Post(method string, params url.Values, data map[string]NamedRead
 }
 
 func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
-	b := bytes.Buffer{}
-	w := multipart.NewWriter(&b)
-	defer w.Close()
+	b := &bytes.Buffer{}
+	contentType := "application/json"
 
-	for field, file := range data {
-		fileName := file.Name()
-		if fileName == "" {
-			fileName = field
-		}
-
-		part, err := w.CreateFormFile(field, fileName)
+	if len(data) > 0 {
+		var err error
+		contentType, err = fillBuffer(b, data)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
-		}
-
-		_, err = io.Copy(part, file)
-		if err != nil {
-			return nil, fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
+			return nil, err
 		}
 	}
 
-	err := w.Close()
-	if err != nil {
-		return nil, fmt.Errorf("failed to close multipart form writer: %w", err)
-	}
-
-	API := bot.APIURL
-	if API == "" {
-		API = DefaultAPIURL
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", bot.endpoint(method), &b)
+	req, err := http.NewRequestWithContext(ctx, "POST", bot.endpoint(method), b)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
 
 	req.URL.RawQuery = params.Encode()
-	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.Header.Set("Content-Type", contentType)
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
@@ -172,6 +152,34 @@ func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.V
 	}
 
 	return r.Result, nil
+}
+
+func fillBuffer(b *bytes.Buffer, data map[string]NamedReader) (string, error) {
+	w := multipart.NewWriter(b)
+
+	for field, file := range data {
+		fileName := file.Name()
+		if fileName == "" {
+			fileName = field
+		}
+
+		part, err := w.CreateFormFile(field, fileName)
+		if err != nil {
+			return "", fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
+		}
+
+		_, err = io.Copy(part, file)
+		if err != nil {
+			return "", fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
+		}
+	}
+
+	err := w.Close()
+	if err != nil {
+		return "", fmt.Errorf("failed to close multipart form writer: %w", err)
+	}
+
+	return w.FormDataContentType(), nil
 }
 
 func (bot *Bot) endpoint(method string) string {
