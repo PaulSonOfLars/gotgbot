@@ -23,6 +23,7 @@ func main() {
 
 	// Add echo handler to reply to all messages.
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
+	dispatcher.AddHandler(handlers.NewCommand("source", source))
 	dispatcher.AddHandler(handlers.NewCallback(filters.Equal("start_callback"), startCB))
 	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
 
@@ -35,6 +36,23 @@ func main() {
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
+}
+
+func source(ctx *ext.Context) error {
+	f, err := os.Open("samples/echoBot/main.go")
+	if err != nil {
+		fmt.Println("failed to open source: " + err.Error())
+		return nil
+	}
+
+	_, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
+		Caption:          "Here is my source code.",
+		ReplyToMessageId: ctx.EffectiveMessage.MessageId,
+	})
+	if err != nil {
+		fmt.Println("failed to send source: " + err.Error())
+	}
+	return nil
 }
 
 // start introduces the bot
