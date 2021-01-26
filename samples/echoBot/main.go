@@ -53,6 +53,54 @@ func source(ctx *ext.Context) error {
 		fmt.Println("failed to send source: " + err.Error())
 		return nil
 	}
+
+	// Alternative file sending solutions:
+
+	// --- By file_id:
+	//_, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, "file_id", &gotgbot.SendDocumentOpts{
+	//	Caption:          "Here is my source code.",
+	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
+	//})
+	//if err != nil {
+	//	fmt.Println("failed to send source: " + err.Error())
+	//	return nil
+	//}
+
+	// --- By []byte:
+	//bs, err := ioutil.ReadFile("samples/echoBot/main.go")
+	//if err != nil {
+	//	fmt.Println("failed to open source: " + err.Error())
+	//	return nil
+	//}
+	//
+	//_, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, bs, &gotgbot.SendDocumentOpts{
+	//	Caption:          "Here is my source code.",
+	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
+	//})
+	//if err != nil {
+	//	fmt.Println("failed to send source: " + err.Error())
+	//	return nil
+	//}
+
+	// --- By custom name:
+	//f2, err := os.Open("samples/echoBot/main.go")
+	//if err != nil {
+	//	fmt.Println("failed to open source: " + err.Error())
+	//	return nil
+	//}
+	//
+	//_, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, gotgbot.NamedFile{
+	//	File:     f2,
+	//	FileName: "NewFileName",
+	//}, &gotgbot.SendDocumentOpts{
+	//	Caption:          "Here is my source code.",
+	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
+	//})
+	//if err != nil {
+	//	fmt.Println("failed to send source: " + err.Error())
+	//	return nil
+	//}
+
 	return nil
 }
 
