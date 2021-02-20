@@ -667,7 +667,7 @@ func (msg *sendableEditMessageReplyMarkup) Send() (*Message, error) {
 	v.Add("inline_message_id", msg.InlineMessageId)
 	v.Add("reply_markup", string(replyMarkup))
 
-	r, err := msg.bot.Get("editMessageCaption", v)
+	r, err := msg.bot.Get("editMessageReplyMarkup", v)
 	if err != nil {
 		return nil, err
 	}
