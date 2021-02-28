@@ -172,7 +172,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 				return
 			}
 
-			d.ErrorLog.Println(debug.Stack())
+			d.ErrorLog.Println(string(debug.Stack()))
 		}
 	}()
 
