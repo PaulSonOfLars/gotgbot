@@ -74,9 +74,19 @@ func (h ArgsCommand) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error
 }
 
 func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
-	if u.EffectiveMessage == nil || u.EffectiveMessage.Text == "" {
+	if u.EffectiveMessage == nil {
 		return false, nil
 	}
+
+	var text string
+	if u.EffectiveMessage.Text != "" {
+		text = u.EffectiveMessage.Text
+	} else if u.EffectiveMessage.Caption != "" {
+		text = u.EffectiveMessage.Caption
+	} else {
+		return false, nil
+	}
+
 	// if no edits and message is edited
 	if !h.AllowEdited && u.EditedMessage != nil {
 		return false, nil
@@ -90,17 +100,19 @@ func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
 		return false, nil
 	}
 
+	rText := []rune(text)
+	botName := strings.ToLower(u.EffectiveMessage.Bot.UserName)
 	var cmd string
 	for _, x := range h.Triggers {
-		if []rune(u.EffectiveMessage.Text)[0] != x {
+		if rText[0] != x {
 			continue
 		}
 
-		split := strings.Split(strings.ToLower(strings.Fields(u.EffectiveMessage.Text)[0]), "@")
-		if len(split) > 1 && split[1] != strings.ToLower(u.EffectiveMessage.Bot.UserName) {
+		split := strings.Split(strings.ToLower(strings.Fields(text)[0]), "@")
+		if len(split) > 1 && split[1] != botName {
 			return false, nil
 		}
-		cmd = strings.ToLower(split[0])[1:]
+		cmd = split[0][1:]
 		break
 	}
 	if cmd == "" {
