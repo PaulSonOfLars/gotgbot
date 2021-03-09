@@ -56,23 +56,46 @@ func NewUpdater(l *zap.Logger, token string) (*Updater, error) {
 }
 
 // StartPolling Starts the polling logic
-func (u Updater) StartPolling() error {
+func (u Updater) StartPolling(allowedUpdates ...string) error {
+	allowed, err := parseAllowedUpdates(allowedUpdates)
+	if err != nil {
+		return err
+	}
+
 	go u.Dispatcher.Start()
-	go u.startPolling(false)
+	go u.startPolling(false, allowed)
 	return nil
 }
 
 // StartCleanPolling Starts clean polling (ignoring stale updates)
-func (u Updater) StartCleanPolling() error {
+func (u Updater) StartCleanPolling(allowedUpdates ...string) error {
+	allowed, err := parseAllowedUpdates(allowedUpdates)
+	if err != nil {
+		return err
+	}
+
 	go u.Dispatcher.Start()
-	go u.startPolling(true)
+	go u.startPolling(true, allowed)
 	return nil
 }
 
-func (u Updater) startPolling(clean bool) {
+func parseAllowedUpdates(allowedUpdates []string) (string, error) {
+	if allowedUpdates == nil {
+		return "", nil
+	}
+
+	bs, err := json.Marshal(allowedUpdates)
+	if err != nil {
+		return "", errors.Wrapf(err, "could not marshal allowed updates")
+	}
+	return string(bs), nil
+}
+
+func (u Updater) startPolling(clean bool, allowedUpdates string) {
 	v := url.Values{}
 	v.Add("offset", strconv.Itoa(0))
 	v.Add("timeout", strconv.Itoa(0))
+	v.Add("allowed_updates", allowedUpdates)
 	offset := 0
 	for {
 		// Note: use updateGetter.Get instead of u.Bot.Get to use the updater timeout instead of bot command timeout
