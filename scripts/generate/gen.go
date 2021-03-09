@@ -66,6 +66,7 @@ const (
 	tgTypeInputMessageContent  = "InputMessageContent"
 	tgTypePassportElementError = "PassportElementError"
 	tgTypeCallbackGame         = "CallbackGame"
+	tgTypeVoiceChatStarted     = "VoiceChatStarted"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )

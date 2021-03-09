@@ -65,6 +65,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		switch tgType.Name {
 		case tgTypeInputMedia:
 			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
+			return typeDef.String(), nil
 
 		case tgTypeCallbackGame,
 			tgTypeInlineQueryResult,
@@ -72,22 +73,24 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			tgTypeInputMessageContent,
 			tgTypePassportElementError:
 			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
+			return typeDef.String(), nil
 
+		case tgTypeVoiceChatStarted:
+			// VoiceChatStarted is actually just empty, this is legitimate
+			typeDef.WriteString("\ntype " + tgType.Name + " struct{}")
 		default:
-			return "", fmt.Errorf("unknown interface type %s - please make sure this doesnt require implementation", tgType.Name)
+			return "", fmt.Errorf("unknown type %s has no fields - please check if this requires implementation", tgType.Name)
+		}
+	} else {
+		typeFields, err := generateTypeFields(d, tgType)
+		if err != nil {
+			return "", err
 		}
 
-		return typeDef.String(), nil
+		typeDef.WriteString("\ntype " + tgType.Name + " struct {")
+		typeDef.WriteString(typeFields)
+		typeDef.WriteString("\n}")
 	}
-
-	typeFields, err := generateTypeFields(d, tgType)
-	if err != nil {
-		return "", err
-	}
-
-	typeDef.WriteString("\ntype " + tgType.Name + " struct {")
-	typeDef.WriteString(typeFields)
-	typeDef.WriteString("\n}")
 
 	interfaces, err2 := generateParentTypeInterfaces(tgType)
 	if err2 != nil {
