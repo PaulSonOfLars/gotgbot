@@ -82,17 +82,17 @@ func initUpdate(data RawUpdate, bot ext.Bot) (*Update, error) {
 		upd.EffectiveUser = upd.PreCheckoutQuery.From
 
 	} else if upd.MyChatMember != nil {
-		upd.EffectiveUser = upd.MyChatMember.NewChatMember.User
+		upd.EffectiveUser = &upd.MyChatMember.From
 		upd.EffectiveChat = &upd.MyChatMember.Chat
 
-		upd.MyChatMember.From.Bot = bot
+		upd.MyChatMember.NewChatMember.User.Bot = bot
 		upd.MyChatMember.OldChatMember.User.Bot = bot
 
 	} else if upd.ChatMember != nil {
-		upd.EffectiveUser = upd.ChatMember.NewChatMember.User
+		upd.EffectiveUser = &upd.ChatMember.From
 		upd.EffectiveChat = &upd.ChatMember.Chat
 
-		upd.ChatMember.From.Bot = bot
+		upd.ChatMember.NewChatMember.User.Bot = bot
 		upd.ChatMember.OldChatMember.User.Bot = bot
 	}
 
