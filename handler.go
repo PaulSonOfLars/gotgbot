@@ -30,6 +30,8 @@ type Update struct {
 	PreCheckoutQuery   *ext.PreCheckoutQuery   `json:"pre_checkout_query"`
 	Poll               *ext.Poll               `json:"poll"`
 	PollAnswer         *ext.PollAnswer         `json:"poll_answer"`
+	MyChatMember       *ext.ChatMemberUpdated  `json:"my_chat_member"`
+	ChatMember         *ext.ChatMemberUpdated  `json:"chat_member"`
 
 	// Self added type
 	EffectiveMessage *ext.Message `json:"effective_message"`
@@ -78,6 +80,20 @@ func initUpdate(data RawUpdate, bot ext.Bot) (*Update, error) {
 
 	} else if upd.PreCheckoutQuery != nil {
 		upd.EffectiveUser = upd.PreCheckoutQuery.From
+
+	} else if upd.MyChatMember != nil {
+		upd.EffectiveUser = upd.MyChatMember.NewChatMember.User
+		upd.EffectiveChat = &upd.MyChatMember.Chat
+
+		upd.MyChatMember.From.Bot = bot
+		upd.MyChatMember.OldChatMember.User.Bot = bot
+
+	} else if upd.ChatMember != nil {
+		upd.EffectiveUser = upd.ChatMember.NewChatMember.User
+		upd.EffectiveChat = &upd.ChatMember.Chat
+
+		upd.ChatMember.From.Bot = bot
+		upd.ChatMember.OldChatMember.User.Bot = bot
 	}
 
 	if upd.EffectiveMessage != nil {

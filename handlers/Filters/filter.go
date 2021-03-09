@@ -79,6 +79,22 @@ func Game(message *ext.Message) bool {
 	return message.Game != nil
 }
 
+func MessageAutoDeleteTimerChanged(message *ext.Message) bool {
+	return message.MessageAutoDeleteTimerChanged != nil
+}
+
+func VoiceChatStarted(message *ext.Message) bool {
+	return message.VoiceChatStarted != nil
+}
+
+func VoiceChatEnded(message *ext.Message) bool {
+	return message.VoiceChatEnded != nil
+}
+
+func VoiceChatParticipantsInvited(message *ext.Message) bool {
+	return message.VoiceChatParticipantsInvited != nil
+}
+
 func Private(message *ext.Message) bool {
 	return message.Chat.Type == "private"
 }
@@ -106,6 +122,18 @@ func Dart(message *ext.Message) bool {
 
 func Basketball(message *ext.Message) bool {
 	return message.Dice != nil && message.Dice.Emoji == dice.Basketball
+}
+
+func Football(message *ext.Message) bool {
+	return message.Dice != nil && message.Dice.Emoji == dice.Football
+}
+
+func Bowling(message *ext.Message) bool {
+	return message.Dice != nil && message.Dice.Emoji == dice.Bowling
+}
+
+func SlotMachine(message *ext.Message) bool {
+	return message.Dice != nil && message.Dice.Emoji == dice.SlotMachine
 }
 
 func DiceValue(message *ext.Message, val int) bool {

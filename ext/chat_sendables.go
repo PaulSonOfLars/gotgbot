@@ -9,10 +9,11 @@ import (
 )
 
 type sendableKickChatMember struct {
-	bot       Bot
-	ChatId    int
-	UserId    int
-	UntilDate int64
+	bot            Bot
+	ChatId         int
+	UserId         int
+	UntilDate      int64
+	RevokeMessages bool
 }
 
 func (b Bot) NewSendableKickChatMember(chatId int, userId int) *sendableKickChatMember {
@@ -28,6 +29,7 @@ func (kcm *sendableKickChatMember) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(kcm.ChatId))
 	v.Add("user_id", strconv.Itoa(kcm.UserId))
 	v.Add("until_date", strconv.FormatInt(kcm.UntilDate, 10))
+	v.Add("revoke_messages", strconv.FormatBool(kcm.RevokeMessages))
 
 	r, err := kcm.bot.Get("kickChatMember", v)
 	if err != nil {
@@ -89,32 +91,35 @@ func (rcm *sendableRestrictChatMember) Send() (bool, error) {
 }
 
 type sendablePromoteChatMember struct {
-	bot                Bot
-	ChatId             int
-	UserId             int
-	IsAnonymous        bool
-	CanChangeInfo      bool
-	CanPostMessages    bool
-	CanEditMessages    bool
-	CanDeleteMessages  bool
-	CanInviteUsers     bool
-	CanRestrictMembers bool
-	CanPinMessages     bool
-	CanPromoteMembers  bool
+	bot                 Bot
+	ChatId              int
+	UserId              int
+	IsAnonymous         bool
+	CanManageChat       bool
+	CanChangeInfo       bool
+	CanPostMessages     bool
+	CanEditMessages     bool
+	CanDeleteMessages   bool
+	CanManageVoiceChats bool
+	CanInviteUsers      bool
+	CanRestrictMembers  bool
+	CanPinMessages      bool
+	CanPromoteMembers   bool
 }
 
 // note: set all as true for promotion by default
 func (b Bot) NewSendablePromoteChatMember(chatId int, userId int) *sendablePromoteChatMember {
 	return &sendablePromoteChatMember{
-		bot:                b,
-		ChatId:             chatId,
-		UserId:             userId,
-		CanChangeInfo:      true,
-		CanDeleteMessages:  true,
-		CanInviteUsers:     true,
-		CanRestrictMembers: true,
-		CanPinMessages:     true,
-		CanPromoteMembers:  true,
+		bot:                 b,
+		ChatId:              chatId,
+		UserId:              userId,
+		CanChangeInfo:       true,
+		CanDeleteMessages:   true,
+		CanManageVoiceChats: true,
+		CanInviteUsers:      true,
+		CanRestrictMembers:  true,
+		CanPinMessages:      true,
+		CanPromoteMembers:   true,
 	}
 }
 
@@ -123,10 +128,12 @@ func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	v.Add("chat_id", strconv.Itoa(pcm.ChatId))
 	v.Add("user_id", strconv.Itoa(pcm.UserId))
 	v.Add("is_anonymous", strconv.FormatBool(pcm.IsAnonymous))
+	v.Add("can_manage_chat", strconv.FormatBool(pcm.CanManageChat))
 	v.Add("can_change_info", strconv.FormatBool(pcm.CanChangeInfo))
 	v.Add("can_post_messages", strconv.FormatBool(pcm.CanPostMessages))
 	v.Add("can_edit_messages", strconv.FormatBool(pcm.CanEditMessages))
 	v.Add("can_delete_messages", strconv.FormatBool(pcm.CanDeleteMessages))
+	v.Add("can_manage_voice_chats", strconv.FormatBool(pcm.CanManageVoiceChats))
 	v.Add("can_invite_users", strconv.FormatBool(pcm.CanInviteUsers))
 	v.Add("can_restrict_members", strconv.FormatBool(pcm.CanRestrictMembers))
 	v.Add("can_pin_messages", strconv.FormatBool(pcm.CanPinMessages))

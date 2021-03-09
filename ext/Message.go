@@ -120,6 +120,21 @@ type ProximityAlertTriggered struct {
 	Distance int  `json:"distance"`
 }
 
+type MessageAutoDeleteTimerChanged struct {
+	MessageAutoDeleteTime int64 `json:"message_auto_delete_time"`
+}
+
+// Empty on purpose
+type VoiceChatStarted struct{}
+
+type VoiceChatEnded struct {
+	Duration int64 `json:"duration"`
+}
+
+type VoiceChatParticipantsInvited struct {
+	Users []User `json:"users"`
+}
+
 type PreCheckoutQuery struct {
 	Id               string    `json:"id"`
 	From             *User     `json:"from"`
@@ -166,58 +181,62 @@ type Dice struct {
 }
 
 type Message struct {
-	Bot                     Bot                      `json:"-"`
-	MessageId               int                      `json:"message_id"`
-	From                    *User                    `json:"from"`
-	SenderChat              *Chat                    `json:"sender_chat"`
-	Date                    int                      `json:"date"`
-	Chat                    *Chat                    `json:"chat"`
-	ForwardFrom             *User                    `json:"forward_from"`
-	ForwardFromChat         *Chat                    `json:"forward_from_chat"`
-	ForwardFromMessageId    int                      `json:"forward_from_message_id"`
-	ForwardSignature        string                   `json:"forward_signature"`
-	ForwardSenderName       string                   `json:"forward_sender_name"`
-	ForwardDate             int                      `json:"forward_date"`
-	ReplyToMessage          *Message                 `json:"reply_to_message"`
-	ViaBot                  *User                    `json:"via_bot"`
-	EditDate                int                      `json:"edit_date"`
-	MediaGroupId            string                   `json:"media_group_id"`
-	AuthorSignature         string                   `json:"author_signature"`
-	Text                    string                   `json:"text"`
-	Entities                []MessageEntity          `json:"entities"`
-	CaptionEntities         []MessageEntity          `json:"caption_entities"`
-	Audio                   *Audio                   `json:"audio"`
-	Document                *Document                `json:"document"`
-	Animation               *Animation               `json:"animation"`
-	Game                    *Game                    `json:"game"`
-	Photo                   []PhotoSize              `json:"photo"`
-	Sticker                 *Sticker                 `json:"sticker"`
-	Video                   *Video                   `json:"video"`
-	Voice                   *Voice                   `json:"voice"`
-	VideoNote               *VideoNote               `json:"video_note"`
-	Caption                 string                   `json:"caption"`
-	Contact                 *Contact                 `json:"contact"`
-	Location                *Location                `json:"location"`
-	Venue                   *Venue                   `json:"venue"`
-	Poll                    *Poll                    `json:"poll"`
-	Dice                    *Dice                    `json:"dice"`
-	NewChatMembers          []User                   `json:"new_chat_members"`
-	LeftChatMember          *User                    `json:"left_chat_member"`
-	NewChatTitle            string                   `json:"new_chat_title"`
-	NewChatPhoto            []PhotoSize              `json:"new_chat_photo"`
-	DeleteChatPhoto         bool                     `json:"delete_chat_photo"`
-	GroupChatCreated        bool                     `json:"group_chat_created"`
-	SupergroupChatCreated   bool                     `json:"supergroup_chat_created"`
-	ChannelChatCreated      bool                     `json:"channel_chat_created"`
-	MigrateToChatId         int                      `json:"migrate_to_chat_id"`
-	MigrateFromChatId       int                      `json:"migrate_from_chat_id"`
-	PinnedMessage           *Message                 `json:"pinned_message"`
-	Invoice                 *Invoice                 `json:"invoice"`
-	SuccessfulPayment       *SuccessfulPayment       `json:"successful_payment"`
-	ConnectedWebsite        string                   `json:"connected_website"`
-	PassportData            *PassportData            `json:"passport_data"`
-	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered"`
-	ReplyMarkup             *InlineKeyboardMarkup    `json:"reply_markup"`
+	Bot                           Bot                            `json:"-"`
+	MessageId                     int                            `json:"message_id"`
+	From                          *User                          `json:"from"`
+	SenderChat                    *Chat                          `json:"sender_chat"`
+	Date                          int                            `json:"date"`
+	Chat                          *Chat                          `json:"chat"`
+	ForwardFrom                   *User                          `json:"forward_from"`
+	ForwardFromChat               *Chat                          `json:"forward_from_chat"`
+	ForwardFromMessageId          int                            `json:"forward_from_message_id"`
+	ForwardSignature              string                         `json:"forward_signature"`
+	ForwardSenderName             string                         `json:"forward_sender_name"`
+	ForwardDate                   int                            `json:"forward_date"`
+	ReplyToMessage                *Message                       `json:"reply_to_message"`
+	ViaBot                        *User                          `json:"via_bot"`
+	EditDate                      int                            `json:"edit_date"`
+	MediaGroupId                  string                         `json:"media_group_id"`
+	AuthorSignature               string                         `json:"author_signature"`
+	Text                          string                         `json:"text"`
+	Entities                      []MessageEntity                `json:"entities"`
+	CaptionEntities               []MessageEntity                `json:"caption_entities"`
+	Audio                         *Audio                         `json:"audio"`
+	Document                      *Document                      `json:"document"`
+	Animation                     *Animation                     `json:"animation"`
+	Game                          *Game                          `json:"game"`
+	Photo                         []PhotoSize                    `json:"photo"`
+	Sticker                       *Sticker                       `json:"sticker"`
+	Video                         *Video                         `json:"video"`
+	Voice                         *Voice                         `json:"voice"`
+	VideoNote                     *VideoNote                     `json:"video_note"`
+	Caption                       string                         `json:"caption"`
+	Contact                       *Contact                       `json:"contact"`
+	Location                      *Location                      `json:"location"`
+	Venue                         *Venue                         `json:"venue"`
+	Poll                          *Poll                          `json:"poll"`
+	Dice                          *Dice                          `json:"dice"`
+	NewChatMembers                []User                         `json:"new_chat_members"`
+	LeftChatMember                *User                          `json:"left_chat_member"`
+	NewChatTitle                  string                         `json:"new_chat_title"`
+	NewChatPhoto                  []PhotoSize                    `json:"new_chat_photo"`
+	DeleteChatPhoto               bool                           `json:"delete_chat_photo"`
+	GroupChatCreated              bool                           `json:"group_chat_created"`
+	SupergroupChatCreated         bool                           `json:"supergroup_chat_created"`
+	ChannelChatCreated            bool                           `json:"channel_chat_created"`
+	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed"`
+	MigrateToChatId               int                            `json:"migrate_to_chat_id"`
+	MigrateFromChatId             int                            `json:"migrate_from_chat_id"`
+	PinnedMessage                 *Message                       `json:"pinned_message"`
+	Invoice                       *Invoice                       `json:"invoice"`
+	SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`
+	ConnectedWebsite              string                         `json:"connected_website"`
+	PassportData                  *PassportData                  `json:"passport_data"`
+	ProximityAlertTriggered       *ProximityAlertTriggered       `json:"proximity_alert_triggered"`
+	VoiceChatStarted              *VoiceChatEnded                `json:"voice_chat_started"`
+	VoiceChatEnded                *VoiceChatEnded                `json:"voice_chat_ended"`
+	VoiceChatParticipantsInvited  *VoiceChatParticipantsInvited  `json:"voice_chat_participants_invited"`
+	ReplyMarkup                   *InlineKeyboardMarkup          `json:"reply_markup"`
 
 	// internals
 	utf16Text           []uint16
@@ -232,7 +251,10 @@ type Message struct {
 
 func (b Bot) ParseMessage(message json.RawMessage) (mess *Message, err error) {
 	mess = &Message{Bot: b}
-	return mess, json.Unmarshal(message, mess)
+	if err := json.Unmarshal(message, mess); err != nil {
+		return nil, err
+	}
+	return mess, nil
 }
 
 func (m Message) ReplyText(text string) (*Message, error) {

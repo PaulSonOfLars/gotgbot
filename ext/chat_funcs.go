@@ -96,6 +96,55 @@ func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
 	return s, json.Unmarshal(r, &s)
 }
 
+func (b Bot) CreateChatInviteLink(chatId int, expireDate int64, memberLimit int) (*ChatInviteLink, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("expire_date", strconv.FormatInt(expireDate, 10))
+	v.Add("member_limit", strconv.Itoa(memberLimit))
+	r, err := b.Get("createChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.ParseChatInviteLink(r)
+}
+
+func (b Bot) EditChatInviteLink(chatId int, inviteLink string, expireDate int64, memberLimit int) (*ChatInviteLink, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("invite_link", inviteLink)
+	v.Add("expire_date", strconv.FormatInt(expireDate, 10))
+	v.Add("member_limit", strconv.Itoa(memberLimit))
+
+	r, err := b.Get("editChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.ParseChatInviteLink(r)
+}
+
+func (b Bot) RevokeChatInviteLink(chatId int, inviteLink string) (*ChatInviteLink, error) {
+	v := url.Values{}
+	v.Add("chat_id", strconv.Itoa(chatId))
+	v.Add("invite_link", inviteLink)
+
+	r, err := b.Get("revokeChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.ParseChatInviteLink(r)
+}
+
+func (b Bot) ParseChatInviteLink(invitelink json.RawMessage) (cil *ChatInviteLink, err error) {
+	cil = &ChatInviteLink{}
+	if err := json.Unmarshal(invitelink, cil); err != nil {
+		return nil, err
+	}
+	return cil, nil
+}
+
 func (b Bot) SetChatPhoto(chatId int, photo InputFile) (bool, error) {
 	setChatPhoto := b.NewSendableSetChatPhoto(chatId)
 	setChatPhoto.Photo = photo

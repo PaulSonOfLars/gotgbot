@@ -50,9 +50,11 @@ type ChatMember struct {
 	CustomTitle           string `json:"custom_title"`
 	IsAnonymous           bool   `json:"is_anonymous"`
 	CanBeEdited           bool   `json:"can_be_edited"`
+	CanManageChat         bool   `json:"can_manage_chat"`
 	CanPostMessages       bool   `json:"can_post_messages"`
 	CanEditMessages       bool   `json:"can_edit_messages"`
 	CanDeleteMessages     bool   `json:"can_delete_messages"`
+	CanManageVoiceChats   bool   `json:"can_manage_voice_chats"`
 	CanRestrictMembers    bool   `json:"can_restrict_members"`
 	CanPromoteMembers     bool   `json:"can_promote_members"`
 	CanChangeInfo         bool   `json:"can_change_info"`
@@ -65,6 +67,24 @@ type ChatMember struct {
 	CanSendOtherMessages  bool   `json:"can_send_other_messages"`
 	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"`
 	UntilDate             int64  `json:"until_date"`
+}
+
+type ChatMemberUpdated struct {
+	Chat          Chat            `json:"chat"`
+	From          User            `json:"from"`
+	Date          int64           `json:"date"`
+	OldChatMember ChatMember      `json:"old_chat_member"`
+	NewChatMember ChatMember      `json:"new_chat_member"`
+	InviteLink    *ChatInviteLink `json:"invite_link"`
+}
+
+type ChatInviteLink struct {
+	InviteLink  string `json:"invite_link"`
+	Creator     User   `json:"creator"`
+	IsPrimary   bool   `json:"is_primary"`
+	IsRevoked   bool   `json:"is_revoked"`
+	ExpireDate  int64  `json:"expire_date"`
+	MemberLimit int    `json:"member_limit"`
 }
 
 func (chat Chat) SendAction(action string) (bool, error) {
