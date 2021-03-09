@@ -58,6 +58,15 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update) *Context {
 
 	} else if update.PreCheckoutQuery != nil {
 		user = &update.PreCheckoutQuery.From
+
+	} else if update.MyChatMember != nil {
+		user = &update.MyChatMember.From
+		chat = &update.MyChatMember.Chat
+
+	} else if update.ChatMember != nil {
+		user = &update.ChatMember.From
+		chat = &update.ChatMember.Chat
+
 	}
 
 	return &Context{
