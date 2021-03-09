@@ -268,7 +268,7 @@ type CopyMessageOpts struct {
 	ReplyMarkup ReplyMarkup
 }
 
-// Use this method to copy messages of any kind. The method is analogous to the method forwardMessages, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+// Use this method to copy messages of any kind. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - from_chat_id (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
 // - message_id (type int64): Message identifier in the chat specified in from_chat_id
@@ -308,6 +308,35 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 
 	var m MessageId
 	return &m, json.Unmarshal(r, &m)
+}
+
+// CreateChatInviteLinkOpts is the set of optional fields for Bot.CreateChatInviteLink.
+type CreateChatInviteLinkOpts struct {
+	// Point in time (Unix timestamp) when the link will expire
+	ExpireDate int64
+	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
+	MemberLimit int64
+}
+
+// Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - opts (type CreateChatInviteLinkOpts): All optional parameters.
+// https://core.telegram.org/bots/api#createchatinvitelink
+func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
+	v := urlLib.Values{}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if opts != nil {
+		v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+		v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+	}
+
+	r, err := bot.Get("createChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatInviteLink
+	return &c, json.Unmarshal(r, &c)
 }
 
 // CreateNewStickerSetOpts is the set of optional fields for Bot.CreateNewStickerSet.
@@ -481,6 +510,37 @@ func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
 
 	var b bool
 	return b, json.Unmarshal(r, &b)
+}
+
+// EditChatInviteLinkOpts is the set of optional fields for Bot.EditChatInviteLink.
+type EditChatInviteLinkOpts struct {
+	// Point in time (Unix timestamp) when the link will expire
+	ExpireDate int64
+	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
+	MemberLimit int64
+}
+
+// Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the edited invite link as a ChatInviteLink object.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - invite_link (type string): The invite link to edit
+// - opts (type EditChatInviteLinkOpts): All optional parameters.
+// https://core.telegram.org/bots/api#editchatinvitelink
+func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
+	v := urlLib.Values{}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("invite_link", inviteLink)
+	if opts != nil {
+		v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+		v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+	}
+
+	r, err := bot.Get("editChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatInviteLink
+	return &c, json.Unmarshal(r, &c)
 }
 
 // EditMessageCaptionOpts is the set of optional fields for Bot.EditMessageCaption.
@@ -720,7 +780,7 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 	return &m, json.Unmarshal(r, &m)
 }
 
-// Use this method to generate a new invite link for a chat; any previously generated link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the new invite link as String on success.
+// Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the new invite link as String on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
@@ -934,7 +994,7 @@ type GetUpdatesOpts struct {
 	Limit int64
 	// Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling. Should be positive, short polling should be used for testing purposes only.
 	Timeout int64
-	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all updates regardless of type (default). If not specified, the previous setting will be used.Please note that this parameter doesn't affect updates created before the call to the getUpdates, so unwanted updates may be received for a short period of time.
+	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member (default). If not specified, the previous setting will be used.Please note that this parameter doesn't affect updates created before the call to the getUpdates, so unwanted updates may be received for a short period of time.
 	AllowedUpdates []string
 }
 
@@ -1010,11 +1070,13 @@ func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 
 // KickChatMemberOpts is the set of optional fields for Bot.KickChatMember.
 type KickChatMemberOpts struct {
-	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever
+	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
 	UntilDate int64
+	// Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
+	RevokeMessages bool
 }
 
-// Use this method to kick a user from a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the group on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// Use this method to kick a user from a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type KickChatMemberOpts): All optional parameters.
@@ -1025,6 +1087,7 @@ func (bot *Bot) KickChatMember(chatId int64, userId int64, opts *KickChatMemberO
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		v.Add("revoke_messages", strconv.FormatBool(opts.RevokeMessages))
 	}
 
 	r, err := bot.Get("kickChatMember", v)
@@ -1098,22 +1161,26 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 type PromoteChatMemberOpts struct {
 	// Pass True, if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True, if the administrator can change chat title, photo and other settings
-	CanChangeInfo bool
+	// Pass True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergoups and ignore slow mode. Implied by any other administrator privilege
+	CanManageChat bool
 	// Pass True, if the administrator can create channel posts, channels only
 	CanPostMessages bool
 	// Pass True, if the administrator can edit messages of other users and can pin messages, channels only
 	CanEditMessages bool
 	// Pass True, if the administrator can delete messages of other users
 	CanDeleteMessages bool
-	// Pass True, if the administrator can invite new users to the chat
-	CanInviteUsers bool
+	// Pass True, if the administrator can manage voice chats, supergroups only
+	CanManageVoiceChats bool
 	// Pass True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
-	// Pass True, if the administrator can pin messages, supergroups only
-	CanPinMessages bool
 	// Pass True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
+	// Pass True, if the administrator can change chat title, photo and other settings
+	CanChangeInfo bool
+	// Pass True, if the administrator can invite new users to the chat
+	CanInviteUsers bool
+	// Pass True, if the administrator can pin messages, supergroups only
+	CanPinMessages bool
 }
 
 // Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Pass False for all boolean parameters to demote a user. Returns True on success.
@@ -1127,14 +1194,16 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
-		v.Add("can_change_info", strconv.FormatBool(opts.CanChangeInfo))
+		v.Add("can_manage_chat", strconv.FormatBool(opts.CanManageChat))
 		v.Add("can_post_messages", strconv.FormatBool(opts.CanPostMessages))
 		v.Add("can_edit_messages", strconv.FormatBool(opts.CanEditMessages))
 		v.Add("can_delete_messages", strconv.FormatBool(opts.CanDeleteMessages))
-		v.Add("can_invite_users", strconv.FormatBool(opts.CanInviteUsers))
+		v.Add("can_manage_voice_chats", strconv.FormatBool(opts.CanManageVoiceChats))
 		v.Add("can_restrict_members", strconv.FormatBool(opts.CanRestrictMembers))
-		v.Add("can_pin_messages", strconv.FormatBool(opts.CanPinMessages))
 		v.Add("can_promote_members", strconv.FormatBool(opts.CanPromoteMembers))
+		v.Add("can_change_info", strconv.FormatBool(opts.CanChangeInfo))
+		v.Add("can_invite_users", strconv.FormatBool(opts.CanInviteUsers))
+		v.Add("can_pin_messages", strconv.FormatBool(opts.CanPinMessages))
 	}
 
 	r, err := bot.Get("promoteChatMember", v)
@@ -1178,6 +1247,24 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 
 	var b bool
 	return b, json.Unmarshal(r, &b)
+}
+
+// Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the revoked invite link as ChatInviteLink object.
+// - chat_id (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
+// - invite_link (type string): The invite link to revoke
+// https://core.telegram.org/bots/api#revokechatinvitelink
+func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string) (*ChatInviteLink, error) {
+	v := urlLib.Values{}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("invite_link", inviteLink)
+
+	r, err := bot.Get("revokeChatInviteLink", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatInviteLink
+	return &c, json.Unmarshal(r, &c)
 }
 
 // SendAnimationOpts is the set of optional fields for Bot.SendAnimation.
@@ -1475,7 +1562,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 
 // SendDiceOpts is the set of optional fields for Bot.SendDice.
 type SendDiceOpts struct {
-	// Emoji on which the dice throw animation is based. Currently, must be one of "", "", "", "", or "". Dice can have values 1-6 for "" and "", values 1-5 for "" and "", and values 1-64 for "". Defaults to ""
+	// Emoji on which the dice throw animation is based. Currently, must be one of "", "", "", "", "", or "". Dice can have values 1-6 for "", "" and "", values 1-5 for "" and "", and values 1-64 for "". Defaults to ""
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -1952,7 +2039,7 @@ type SendPhotoOpts struct {
 
 // Use this method to send photos. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. More info on Sending Files »
+// - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More info on Sending Files »
 // - opts (type SendPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendphoto
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
@@ -2814,7 +2901,7 @@ type SetWebhookOpts struct {
 	IpAddress string
 	// Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
 	MaxConnections int64
-	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all updates regardless of type (default). If not specified, the previous setting will be used.Please note that this parameter doesn't affect updates created before the call to the setWebhook, so unwanted updates may be received for a short period of time.
+	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member (default). If not specified, the previous setting will be used.Please note that this parameter doesn't affect updates created before the call to the setWebhook, so unwanted updates may be received for a short period of time.
 	AllowedUpdates []string
 	// Pass True to drop all pending updates
 	DropPendingUpdates bool

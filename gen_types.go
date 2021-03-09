@@ -94,7 +94,7 @@ type CallbackQuery struct {
 // This object represents a chat.
 // https://core.telegram.org/bots/api#chat
 type Chat struct {
-	// Unique identifier for this chat. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+	// Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	Id int64 `json:"id,omitempty"`
 	// Type of chat, can be either "private", "group", "supergroup" or "channel"
 	Type string `json:"type,omitempty"`
@@ -112,7 +112,7 @@ type Chat struct {
 	Bio string `json:"bio,omitempty"`
 	// Optional. Description, for groups, supergroups and channel chats. Returned only in getChat.
 	Description string `json:"description,omitempty"`
-	// Optional. Chat invite link, for groups, supergroups and channel chats. Each administrator in a chat generates their own invite links, so the bot must first generate the link using exportChatInviteLink. Returned only in getChat.
+	// Optional. Primary invite link, for groups, supergroups and channel chats. Returned only in getChat.
 	InviteLink string `json:"invite_link,omitempty"`
 	// Optional. The most recent pinned message (by sending date). Returned only in getChat.
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
@@ -120,6 +120,8 @@ type Chat struct {
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
 	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unpriviledged user. Returned only in getChat.
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
+	// Optional. The time after which all messages sent to the chat will be automatically deleted; in seconds. Returned only in getChat.
+	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
 	// Optional. For supergroups, name of group sticker set. Returned only in getChat.
 	StickerSetName string `json:"sticker_set_name,omitempty"`
 	// Optional. True, if the bot can change the group sticker set. Returned only in getChat.
@@ -128,6 +130,23 @@ type Chat struct {
 	LinkedChatId int64 `json:"linked_chat_id,omitempty"`
 	// Optional. For supergroups, the location to which the supergroup is connected. Returned only in getChat.
 	Location *ChatLocation `json:"location,omitempty"`
+}
+
+// Represents an invite link for a chat.
+// https://core.telegram.org/bots/api#chatinvitelink
+type ChatInviteLink struct {
+	// The invite link. If the link was created by another chat administrator, then the second part of the link will be replaced with "…".
+	InviteLink string `json:"invite_link,omitempty"`
+	// Creator of the link
+	Creator User `json:"creator,omitempty"`
+	// True, if the link is primary
+	IsPrimary bool `json:"is_primary,omitempty"`
+	// True, if the link is revoked
+	IsRevoked bool `json:"is_revoked,omitempty"`
+	// Optional. Point in time (Unix timestamp) when the link will expire or has been expired
+	ExpireDate int64 `json:"expire_date,omitempty"`
+	// Optional. Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
+	MemberLimit int64 `json:"member_limit,omitempty"`
 }
 
 // Represents a location to which a chat is connected.
@@ -152,12 +171,16 @@ type ChatMember struct {
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 	// Optional. Administrators only. True, if the bot is allowed to edit administrator privileges of that user
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
+	// Optional. Administrators only. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergoups and ignore slow mode. Implied by any other administrator privilege
+	CanManageChat bool `json:"can_manage_chat,omitempty"`
 	// Optional. Administrators only. True, if the administrator can post in the channel; channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
 	// Optional. Administrators only. True, if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. Administrators only. True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
+	// Optional. Administrators only. True, if the administrator can manage voice chats
+	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
 	// Optional. Administrators only. True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
 	// Optional. Administrators only. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
@@ -182,6 +205,23 @@ type ChatMember struct {
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
 	// Optional. Restricted and kicked only. Date when restrictions will be lifted for this user; unix time
 	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+// This object represents changes in the status of a chat member.
+// https://core.telegram.org/bots/api#chatmemberupdated
+type ChatMemberUpdated struct {
+	// Chat the user belongs to
+	Chat Chat `json:"chat,omitempty"`
+	// Performer of the action, which resulted in the change
+	From User `json:"from,omitempty"`
+	// Date the change was done in Unix time
+	Date int64 `json:"date,omitempty"`
+	// Previous information about the chat member
+	OldChatMember ChatMember `json:"old_chat_member,omitempty"`
+	// New information about the chat member
+	NewChatMember ChatMember `json:"new_chat_member,omitempty"`
+	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
+	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
 }
 
 // Describes actions that a non-administrator user is allowed to take in a chat.
@@ -243,7 +283,7 @@ type Contact struct {
 	FirstName string `json:"first_name,omitempty"`
 	// Optional. Contact's last name
 	LastName string `json:"last_name,omitempty"`
-	// Optional. Contact's user identifier in Telegram
+	// Optional. Contact's user identifier in Telegram. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
 	UserId int64 `json:"user_id,omitempty"`
 	// Optional. Additional data about the contact in the form of a vCard
 	Vcard string `json:"vcard,omitempty"`
@@ -254,7 +294,7 @@ type Contact struct {
 type Dice struct {
 	// Emoji on which the dice throw animation is based
 	Emoji string `json:"emoji,omitempty"`
-	// Value of the dice, 1-6 for "" and "" base emoji, 1-5 for "" and "" base emoji, 1-64 for "" base emoji
+	// Value of the dice, 1-6 for "", "" and "" base emoji, 1-5 for "" and "" base emoji, 1-64 for "" base emoji
 	Value int64 `json:"value,omitempty"`
 }
 
@@ -415,6 +455,7 @@ type InlineQuery struct {
 }
 
 // This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
+// Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 // https://core.telegram.org/bots/api#inlinequeryresult
 type InlineQueryResult interface {
 	InlineQueryResult() ([]byte, error)
@@ -1758,7 +1799,7 @@ type Message struct {
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 	// Optional. Message is a shared contact, information about the contact
 	Contact *Contact `json:"contact,omitempty"`
-	// Optional. Message is a dice with random value from 1 to 6
+	// Optional. Message is a dice with random value
 	Dice *Dice `json:"dice,omitempty"`
 	// Optional. Message is a game, information about the game. More about games »
 	Game *Game `json:"game,omitempty"`
@@ -1784,9 +1825,11 @@ type Message struct {
 	SupergroupChatCreated bool `json:"supergroup_chat_created,omitempty"`
 	// Optional. Service message: the channel has been created. This field can't be received in a message coming through updates, because bot can't be a member of a channel when it is created. It can only be found in reply_to_message if someone replies to a very first message in a channel.
 	ChannelChatCreated bool `json:"channel_chat_created,omitempty"`
-	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+	// Optional. Service message: auto-delete timer settings changed in the chat
+	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
+	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	MigrateToChatId int64 `json:"migrate_to_chat_id,omitempty"`
-	// Optional. The supergroup has been migrated from a group with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+	// Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	MigrateFromChatId int64 `json:"migrate_from_chat_id,omitempty"`
 	// Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it is itself a reply.
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
@@ -1800,8 +1843,21 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	// Optional. Service message: voice chat started
+	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
+	// Optional. Service message: voice chat ended
+	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
+	// Optional. Service message: new participants invited to a voice chat
+	VoiceChatParticipantsInvited *VoiceChatParticipantsInvited `json:"voice_chat_participants_invited,omitempty"`
 	// Optional. Inline keyboard attached to the message. login_url buttons are represented as ordinary url buttons.
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+// This object represents a service message about a change in auto-delete timer settings.
+// https://core.telegram.org/bots/api#messageautodeletetimerchanged
+type MessageAutoDeleteTimerChanged struct {
+	// New auto-delete time for messages in the chat
+	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
 }
 
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
@@ -2044,7 +2100,7 @@ type PhotoSize struct {
 type Poll struct {
 	// Unique poll identifier
 	Id string `json:"id,omitempty"`
-	// Poll question, 1-255 characters
+	// Poll question, 1-300 characters
 	Question string `json:"question,omitempty"`
 	// List of poll options
 	Options []PollOption `json:"options,omitempty"`
@@ -2153,7 +2209,7 @@ func (v ReplyKeyboardRemove) ReplyMarkup() ([]byte, error) {
 // Contains information about why a request was unsuccessful.
 // https://core.telegram.org/bots/api#responseparameters
 type ResponseParameters struct {
-	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	MigrateToChatId int64 `json:"migrate_to_chat_id,omitempty"`
 	// Optional. In case of exceeding flood control, the number of seconds left to wait before the request can be repeated
 	RetryAfter int64 `json:"retry_after,omitempty"`
@@ -2288,12 +2344,16 @@ type Update struct {
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
 	PollAnswer *PollAnswer `json:"poll_answer,omitempty"`
+	// Optional. The bot's chat member status was updated in a chat. For private chats, this update is received only when the bot is blocked or unblocked by the user.
+	MyChatMember *ChatMemberUpdated `json:"my_chat_member,omitempty"`
+	// Optional. A chat member's status was updated in a chat. The bot must be an administrator in the chat and must explicitly specify "chat_member" in the list of allowed_updates to receive these updates.
+	ChatMember *ChatMemberUpdated `json:"chat_member,omitempty"`
 }
 
 // This object represents a Telegram user or bot.
 // https://core.telegram.org/bots/api#user
 type User struct {
-	// Unique identifier for this user or bot
+	// Unique identifier for this user or bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
 	Id int64 `json:"id,omitempty"`
 	// True, if this user is a bot
 	IsBot bool `json:"is_bot,omitempty"`
@@ -2396,6 +2456,24 @@ type Voice struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
+// This object represents a service message about a voice chat ended in the chat.
+// https://core.telegram.org/bots/api#voicechatended
+type VoiceChatEnded struct {
+	// Voice chat duration; in seconds
+	Duration int64 `json:"duration,omitempty"`
+}
+
+// This object represents a service message about new members invited to a voice chat.
+// https://core.telegram.org/bots/api#voicechatparticipantsinvited
+type VoiceChatParticipantsInvited struct {
+	// Optional. New members that were invited to the voice chat
+	Users []User `json:"users,omitempty"`
+}
+
+// This object represents a service message about a voice chat started in the chat. Currently holds no information.
+// https://core.telegram.org/bots/api#voicechatstarted
+type VoiceChatStarted struct{}
+
 // Contains information about the current status of a webhook.
 // https://core.telegram.org/bots/api#webhookinfo
 type WebhookInfo struct {
@@ -2413,6 +2491,6 @@ type WebhookInfo struct {
 	LastErrorMessage string `json:"last_error_message,omitempty"`
 	// Optional. Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
 	MaxConnections int64 `json:"max_connections,omitempty"`
-	// Optional. A list of update types the bot is subscribed to. Defaults to all update types
+	// Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member
 	AllowedUpdates []string `json:"allowed_updates,omitempty"`
 }

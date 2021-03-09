@@ -28,6 +28,11 @@ func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, 
 	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
 }
 
+// Helper method for Bot.CreateChatInviteLink
+func (c Chat) CreateInviteLink(b *Bot, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
+	return b.CreateChatInviteLink(c.Id, opts)
+}
+
 // Helper method for Bot.DeleteChatPhoto
 func (c Chat) DeletePhoto(b *Bot) (bool, error) {
 	return b.DeleteChatPhoto(c.Id)
@@ -41,6 +46,11 @@ func (c Chat) DeleteStickerSet(b *Bot) (bool, error) {
 // Helper method for Bot.DeleteMessage
 func (m Message) Delete(b *Bot) (bool, error) {
 	return b.DeleteMessage(m.Chat.Id, m.MessageId)
+}
+
+// Helper method for Bot.EditChatInviteLink
+func (c Chat) EditInviteLink(b *Bot, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
+	return b.EditChatInviteLink(c.Id, inviteLink, opts)
 }
 
 // Helper method for Bot.EditMessageCaption
@@ -191,6 +201,11 @@ func (c Chat) PromoteMember(b *Bot, userId int64, opts *PromoteChatMemberOpts) (
 // Helper method for Bot.RestrictChatMember
 func (c Chat) RestrictMember(b *Bot, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	return b.RestrictChatMember(c.Id, userId, permissions, opts)
+}
+
+// Helper method for Bot.RevokeChatInviteLink
+func (c Chat) RevokeInviteLink(b *Bot, inviteLink string) (*ChatInviteLink, error) {
+	return b.RevokeChatInviteLink(c.Id, inviteLink)
 }
 
 // Helper method for Bot.SendChatAction
