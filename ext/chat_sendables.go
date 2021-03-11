@@ -123,6 +123,15 @@ func (b Bot) NewSendablePromoteChatMember(chatId int, userId int) *sendablePromo
 	}
 }
 
+// note: set all as true for promotion by default
+func (b Bot) NewSendableDemoteChatMember(chatId int, userId int) *sendablePromoteChatMember {
+	return &sendablePromoteChatMember{
+		bot:    b,
+		ChatId: chatId,
+		UserId: userId,
+	}
+}
+
 func (pcm *sendablePromoteChatMember) Send() (bool, error) {
 	v := url.Values{}
 	v.Add("chat_id", strconv.Itoa(pcm.ChatId))

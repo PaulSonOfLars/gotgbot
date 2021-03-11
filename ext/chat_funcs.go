@@ -7,8 +7,7 @@ import (
 )
 
 func (b Bot) KickChatMember(chatId int, userId int) (bool, error) {
-	kick := b.NewSendableKickChatMember(chatId, userId)
-	return kick.Send()
+	return b.NewSendableKickChatMember(chatId, userId).Send()
 }
 
 func (b Bot) KickChatMemberUntil(chatId int, userId int, untilDate int64) (bool, error) {
@@ -37,8 +36,7 @@ func (b Bot) UnbanChatMemberOnlyIfBanned(chatId int, userId int, onlyIfBanned bo
 }
 
 func (b Bot) RestrictChatMember(chatId int, userId int) (bool, error) {
-	restrict := b.NewSendableRestrictChatMember(chatId, userId)
-	return restrict.Send()
+	return b.NewSendableRestrictChatMember(chatId, userId).Send()
 }
 
 func (b Bot) UnRestrictChatMember(chatId int, userId int) (bool, error) {
@@ -56,31 +54,19 @@ func (b Bot) UnRestrictChatMember(chatId int, userId int) (bool, error) {
 }
 
 func (b Bot) PromoteChatMember(chatId int, userId int) (bool, error) {
-	promote := b.NewSendablePromoteChatMember(chatId, userId)
-	return promote.Send()
-}
-
-func (b Bot) SetChatAdministratorCustomTitle(chatId int, userId int, customTitle string) (bool, error) {
-	setTitle := b.NewSendableSetChatAdministratorCustomTitle(chatId, userId, customTitle)
-	return setTitle.Send()
+	return b.NewSendablePromoteChatMember(chatId, userId).Send()
 }
 
 func (b Bot) DemoteChatMember(chatId int, userId int) (bool, error) {
-	demote := b.NewSendablePromoteChatMember(chatId, userId)
-	demote.CanChangeInfo = false
-	demote.CanPostMessages = false
-	demote.CanEditMessages = false
-	demote.CanDeleteMessages = false
-	demote.CanInviteUsers = false
-	demote.CanRestrictMembers = false
-	demote.CanPinMessages = false
-	demote.CanPromoteMembers = false
-	return demote.Send()
+	return b.NewSendableDemoteChatMember(chatId, userId).Send()
+}
+
+func (b Bot) SetChatAdministratorCustomTitle(chatId int, userId int, customTitle string) (bool, error) {
+	return b.NewSendableSetChatAdministratorCustomTitle(chatId, userId, customTitle).Send()
 }
 
 func (b Bot) SetChatPermissions(chatId int, perms ChatPermissions) (bool, error) {
-	setChatPerms := b.NewSendableSetChatPermissions(chatId, perms)
-	return setChatPerms.Send()
+	return b.NewSendableSetChatPermissions(chatId, perms).Send()
 }
 
 func (b Bot) ExportChatInviteLink(chatId int) (string, error) {
@@ -193,8 +179,7 @@ func (b Bot) SetChatDescription(chatId int, description string) (bool, error) {
 }
 
 func (b Bot) PinChatMessage(chatId int, messageId int) (bool, error) {
-	pin := b.NewSendablePinChatMessage(chatId, messageId)
-	return pin.Send()
+	return b.NewSendablePinChatMessage(chatId, messageId).Send()
 }
 
 func (b Bot) PinChatMessageQuiet(chatId int, messageId int) (bool, error) {
