@@ -70,7 +70,11 @@ func (h Command) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
 }
 
 func (h ArgsCommand) HandleUpdate(u *gotgbot.Update, d gotgbot.Dispatcher) error {
-	return h.Response(*d.Bot, u, strings.Fields(u.EffectiveMessage.Text)[1:])
+	text := u.EffectiveMessage.Text
+	if text == "" {
+		text = u.EffectiveMessage.Caption
+	}
+	return h.Response(*d.Bot, u, strings.Fields(text)[1:])
 }
 
 func (h baseCommand) CheckUpdate(u *gotgbot.Update) (bool, error) {
