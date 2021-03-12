@@ -16,7 +16,6 @@ import (
 )
 
 type Updater struct {
-	Bot        gotgbot.Bot
 	Dispatcher *Dispatcher
 	UpdateChan chan json.RawMessage
 	ErrorLog   *log.Logger
@@ -29,23 +28,17 @@ type Updater struct {
 var errorLog = log.New(os.Stderr, "ERROR", log.LstdFlags)
 
 type UpdaterOpts struct {
-	PollingTimeout time.Duration
-	ErrorLog       *log.Logger
+	ErrorLog *log.Logger
 
 	DispatcherOpts DispatcherOpts
 }
 
 // NewUpdater Creates a new Updater, as well as the necessary structures for
-func NewUpdater(bot *gotgbot.Bot, opts *UpdaterOpts) Updater {
+func NewUpdater(opts *UpdaterOpts) Updater {
 	errLog := errorLog
-	pollTimeout := time.Second * 10
 	var dispatcherOpts DispatcherOpts
 
 	if opts != nil {
-		if opts.PollingTimeout != 0 {
-			pollTimeout = opts.PollingTimeout
-		}
-
 		if opts.ErrorLog != nil {
 			errLog = opts.ErrorLog
 		}
@@ -55,12 +48,6 @@ func NewUpdater(bot *gotgbot.Bot, opts *UpdaterOpts) Updater {
 
 	updateChan := make(chan json.RawMessage)
 	return Updater{
-		Bot: gotgbot.Bot{
-			Token:      bot.Token,
-			APIURL:     bot.APIURL,
-			Client:     http.Client{},
-			GetTimeout: pollTimeout,
-		}, // create new bot client to allow for independent timeout changes
 		ErrorLog:   errLog,
 		Dispatcher: NewDispatcher(updateChan, &dispatcherOpts),
 		UpdateChan: updateChan,
@@ -69,6 +56,7 @@ func NewUpdater(bot *gotgbot.Bot, opts *UpdaterOpts) Updater {
 
 type PollingOpts struct {
 	Clean          bool
+	Timeout        time.Duration
 	GetUpdatesOpts gotgbot.GetUpdatesOpts
 }
 
@@ -82,10 +70,12 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// - unnecessary unmarshalling of the (possibly multiple) full Update structs.
 	// Yes, this also makes me sad. :/
 	v := url.Values{}
-	var clean bool
+	clean := false
+	pollTimeout := time.Second * 10
 
 	if opts != nil {
 		clean = opts.Clean
+		pollTimeout = opts.Timeout
 
 		v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
 		v.Add("limit", strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10))
@@ -99,13 +89,17 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 		}
 	}
 
+	// Copy bot, such that we can edit values for polling
+	pollingBot := *b
+	pollingBot.GetTimeout = pollTimeout
+
 	go u.Dispatcher.Start(b)
-	go u.pollingLoop(clean, v)
+	go u.pollingLoop(pollingBot, clean, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(clean bool, v url.Values) {
+func (u *Updater) pollingLoop(b gotgbot.Bot, clean bool, v url.Values) {
 	u.running = true
 
 	// if clean, force the offset to -1
@@ -116,7 +110,7 @@ func (u *Updater) pollingLoop(clean bool, v url.Values) {
 	var offset int64
 	for u.running {
 		// note: this bot instance uses a custom http.Client with longer timeouts
-		r, err := u.Bot.Get("getUpdates", v)
+		r, err := b.Get("getUpdates", v)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
