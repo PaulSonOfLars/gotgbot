@@ -55,9 +55,9 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 }
 
 type PollingOpts struct {
-	Clean          bool
-	Timeout        time.Duration
-	GetUpdatesOpts gotgbot.GetUpdatesOpts
+	DropPendingUpdates bool
+	Timeout            time.Duration
+	GetUpdatesOpts     gotgbot.GetUpdatesOpts
 }
 
 // StartPolling Starts the polling logic
@@ -70,11 +70,11 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// - unnecessary unmarshalling of the (possibly multiple) full Update structs.
 	// Yes, this also makes me sad. :/
 	v := url.Values{}
-	clean := false
+	dropPendingUpdates := false
 	pollTimeout := time.Second * 10
 
 	if opts != nil {
-		clean = opts.Clean
+		dropPendingUpdates = opts.DropPendingUpdates
 		pollTimeout = opts.Timeout
 
 		v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
@@ -94,16 +94,16 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	pollingBot.GetTimeout = pollTimeout
 
 	go u.Dispatcher.Start(b)
-	go u.pollingLoop(pollingBot, clean, v)
+	go u.pollingLoop(pollingBot, dropPendingUpdates, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(b gotgbot.Bot, clean bool, v url.Values) {
+func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v url.Values) {
 	u.running = true
 
-	// if clean, force the offset to -1
-	if clean {
+	// if dropPendingUpdates, force the offset to -1
+	if dropPendingUpdates {
 		v.Set("offset", "-1")
 	}
 
@@ -117,7 +117,7 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, clean bool, v url.Values) {
 			continue
 
 		} else if r == nil {
-			clean = false
+			dropPendingUpdates = false
 			continue
 		}
 
@@ -128,7 +128,7 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, clean bool, v url.Values) {
 		}
 
 		if len(rawUpdates) == 0 {
-			clean = false
+			dropPendingUpdates = false
 			continue
 		}
 
@@ -143,9 +143,9 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, clean bool, v url.Values) {
 
 		offset = lastUpdate.UpdateId + 1
 		v.Set("offset", strconv.FormatInt(offset, 10))
-		if clean {
+		if dropPendingUpdates {
 			// Setting the offset to -1 gets just the last update; this should be skipped too.
-			clean = false
+			dropPendingUpdates = false
 			continue
 		}
 
