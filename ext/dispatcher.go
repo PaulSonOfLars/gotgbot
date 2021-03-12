@@ -186,7 +186,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 				ctx = NewContext(b, update)
 			}
 
-			err := handler.HandleUpdate(ctx)
+			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
 				switch err {
 				case EndGroups:

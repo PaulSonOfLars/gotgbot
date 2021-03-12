@@ -38,14 +38,14 @@ func main() {
 	updater.Idle()
 }
 
-func source(ctx *ext.Context) error {
+func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	f, err := os.Open("samples/echoBot/main.go")
 	if err != nil {
 		fmt.Println("failed to open source: " + err.Error())
 		return nil
 	}
 
-	_, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
+	_, err = b.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
 		Caption:          "Here is my source code.",
 		ReplyToMessageId: ctx.EffectiveMessage.MessageId,
 	})
@@ -105,8 +105,8 @@ func source(ctx *ext.Context) error {
 }
 
 // start introduces the bot
-func start(ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(ctx.Bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", ctx.Bot.User.Username), &gotgbot.SendMessageOpts{
+func start(b *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
@@ -121,15 +121,15 @@ func start(ctx *ext.Context) error {
 }
 
 // startCB edits the start message
-func startCB(ctx *ext.Context) error {
+func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
-	cb.Answer(ctx.Bot, nil)
-	cb.Message.EditText(ctx.Bot, "You edited the start message.", nil)
+	cb.Answer(b, nil)
+	cb.Message.EditText(b, "You edited the start message.", nil)
 	return nil
 }
 
 // echo replies to a messages with its own contents
-func echo(ctx *ext.Context) error {
-	ctx.EffectiveMessage.Reply(ctx.Bot, ctx.EffectiveMessage.Text, nil)
+func echo(b *gotgbot.Bot, ctx *ext.Context) error {
+	ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
 	return nil
 }

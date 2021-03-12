@@ -8,9 +8,8 @@ import (
 
 // TODO: extend to be used as a generic cancel context
 type Context struct {
-	Bot    *gotgbot.Bot
-	Update *gotgbot.Update
-	Data   map[string]string
+	*gotgbot.Update
+	Data map[string]interface{}
 
 	EffectiveMessage *gotgbot.Message
 	EffectiveChat    *gotgbot.Chat
@@ -70,9 +69,8 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update) *Context {
 	}
 
 	return &Context{
-		Bot:              b,
 		Update:           update,
-		Data:             make(map[string]string),
+		Data:             make(map[string]interface{}),
 		EffectiveMessage: msg,
 		EffectiveChat:    chat,
 		EffectiveUser:    user,

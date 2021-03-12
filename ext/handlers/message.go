@@ -54,8 +54,8 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	return false
 }
 
-func (m Message) HandleUpdate(ctx *ext.Context) error {
-	return m.Response(ctx)
+func (m Message) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	return m.Response(b, ctx)
 }
 
 func (m Message) Name() string {

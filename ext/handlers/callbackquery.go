@@ -14,15 +14,15 @@ type CallbackQuery struct {
 	Response     Response
 }
 
-func NewCallback(filter filters.CallbackQuery, response Response) CallbackQuery {
+func NewCallback(filter filters.CallbackQuery, r Response) CallbackQuery {
 	return CallbackQuery{
 		Filter:   filter,
-		Response: response,
+		Response: r,
 	}
 }
 
-func (cb CallbackQuery) HandleUpdate(ctx *ext.Context) error {
-	return cb.Response(ctx)
+func (cb CallbackQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	return cb.Response(b, ctx)
 }
 
 func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {

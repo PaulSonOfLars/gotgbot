@@ -16,7 +16,7 @@ type Command struct {
 	Response     Response
 }
 
-func NewCommand(c string, r func(ctx *ext.Context) error) Command {
+func NewCommand(c string, r Response) Command {
 	return Command{
 		Triggers:     []rune{'/'},
 		AllowEdited:  false,
@@ -60,8 +60,8 @@ func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 
 }
 
-func (c Command) HandleUpdate(ctx *ext.Context) error {
-	return c.Response(ctx)
+func (c Command) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	return c.Response(b, ctx)
 }
 
 func (c Command) Name() string {

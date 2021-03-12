@@ -13,15 +13,15 @@ type InlineQuery struct {
 	Response Response
 }
 
-func NewInlineQuery(filter filters.InlineQuery, response Response) InlineQuery {
+func NewInlineQuery(filter filters.InlineQuery, r Response) InlineQuery {
 	return InlineQuery{
 		Filter:   filter,
-		Response: response,
+		Response: r,
 	}
 }
 
-func (i InlineQuery) HandleUpdate(ctx *ext.Context) error {
-	return i.Response(ctx)
+func (i InlineQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	return i.Response(b, ctx)
 }
 
 func (i InlineQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
