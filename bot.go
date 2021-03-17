@@ -16,11 +16,28 @@ type Bot struct {
 	PostTimeout time.Duration
 }
 
-func NewBot(token string) (*Bot, error) {
+// BotOpts Declares all optional parameters for the NewBot function.
+type BotOpts struct {
+	APIURL      string
+	Client      http.Client
+	GetTimeout  time.Duration
+	PostTimeout time.Duration
+}
+
+func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	b := Bot{
-		Token:  token,
-		User:   User{},
-		Client: http.Client{},
+		Token:      token,
+		GetTimeout: time.Second * 10,// 10 seconds timeout for initial GetMe request, which can be slow.
+	}
+
+	getTimeout := DefaultGetTimeout
+	postTimeout := DefaultPostTimeout
+	if opts != nil {
+		b.Client = opts.Client
+		b.APIURL = opts.APIURL
+
+		getTimeout = opts.GetTimeout
+		postTimeout = opts.PostTimeout
 	}
 
 	u, err := b.GetMe()
@@ -29,5 +46,7 @@ func NewBot(token string) (*Bot, error) {
 	}
 
 	b.User = *u
+	b.GetTimeout = getTimeout
+	b.PostTimeout = postTimeout
 	return &b, nil
 }

@@ -75,7 +75,9 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 
 	if opts != nil {
 		dropPendingUpdates = opts.DropPendingUpdates
-		pollTimeout = opts.Timeout
+		if opts.Timeout != 0 {
+			pollTimeout = opts.Timeout
+		}
 
 		v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
 		v.Add("limit", strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10))
