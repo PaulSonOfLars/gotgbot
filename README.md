@@ -1,6 +1,6 @@
 # Golang Telegram Bot library
 
-Heavily inspired by the [python-telegram-bot library](github.com/python-telegram-bot/python-telegram-bot),
+Heavily inspired by the [python-telegram-bot library](https://github.com/python-telegram-bot/python-telegram-bot),
 this package is a code-generated wrapper for the telegram bot api. We also provide an extensions package which 
 defines an updater/dispatcher pattern to avoid having to rewrite update processing.
 
