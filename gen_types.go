@@ -171,7 +171,7 @@ type ChatMember struct {
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 	// Optional. Administrators only. True, if the bot is allowed to edit administrator privileges of that user
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Optional. Administrators only. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergoups and ignore slow mode. Implied by any other administrator privilege
+	// Optional. Administrators only. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
 	// Optional. Administrators only. True, if the administrator can post in the channel; channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`

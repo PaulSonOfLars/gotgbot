@@ -1161,7 +1161,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 type PromoteChatMemberOpts struct {
 	// Pass True, if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergoups and ignore slow mode. Implied by any other administrator privilege
+	// Pass True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool
 	// Pass True, if the administrator can create channel posts, channels only
 	CanPostMessages bool
@@ -1169,7 +1169,7 @@ type PromoteChatMemberOpts struct {
 	CanEditMessages bool
 	// Pass True, if the administrator can delete messages of other users
 	CanDeleteMessages bool
-	// Pass True, if the administrator can manage voice chats, supergroups only
+	// Pass True, if the administrator can manage voice chats
 	CanManageVoiceChats bool
 	// Pass True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
