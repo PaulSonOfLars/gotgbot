@@ -14,11 +14,11 @@ If you have any questions, come find us in our [telegram support chat](https://t
 - All telegram API types and methods are generated from the bot api docs, which makes this library:
     - Guaranteed to match the docs
     - Easy to update
+    - Self-documenting (Can simply reuse pre-existing telegram docs)
 - Type safe; no weird interface{} logic.
-- No unnecessary third party libraries; only uses standard library.
-- Updates are each processed in their own go routine, keeping your bot responsive.
+- No third party library bloat; only uses standard library.
+- Updates are each processed in their own go routine, encouraging concurrent processing, and keeping your bot responsive.
 - Code panics automatically recovered from and logged, avoiding unexpected downtime.
-
 
 ## Getting started
 
