@@ -16,13 +16,23 @@ const DefaultMaxRoutines = 50
 type DispatcherAction int64
 
 const (
+	// DispatcherActionNoop stops iteration of current group and moves to the next one.
+	// This is the default action, and the same as would happen if the handler had completed successfully.
 	DispatcherActionNoop DispatcherAction = iota
+	// DispatcherActionContinueGroups continues iterating over current group as if the current handler did not match.
+	// Functionally the same as returning ContinueGroups.
 	DispatcherActionContinueGroups
+	// DispatcherActionEndGroups ends all group iteration.
+	// Functionally the same as returning EndGroups.
 	DispatcherActionEndGroups
 )
 
+var EndGroups = errors.New("group iteration ended")
+var ContinueGroups = errors.New("group iteration continued")
+
 type Dispatcher struct {
-	// Error handles any errors that occur during handler execution.
+	// Error handles any errors that occur during handler execution. The return type determines how to handle the
+	// current group iteration. Default is DispatcherActionNoop; move to next group.
 	Error func(ctx *Context, err error) DispatcherAction
 	// Panic handles any panics that occur during handler execution.
 	// If this field is nil, the stack is logged to stderr.
@@ -156,9 +166,6 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	}
 	d.handlers[group] = append(currHandlers, handler)
 }
-
-var EndGroups = errors.New("group iteration ended")
-var ContinueGroups = errors.New("group iteration continued")
 
 func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 	var upd gotgbot.Update
