@@ -13,9 +13,27 @@ import (
 
 const DefaultMaxRoutines = 50
 
+type DispatcherAction int64
+
+const (
+	// DispatcherActionNoop stops iteration of current group and moves to the next one.
+	// This is the default action, and the same as would happen if the handler had completed successfully.
+	DispatcherActionNoop DispatcherAction = iota
+	// DispatcherActionContinueGroups continues iterating over current group as if the current handler did not match.
+	// Functionally the same as returning ContinueGroups.
+	DispatcherActionContinueGroups
+	// DispatcherActionEndGroups ends all group iteration.
+	// Functionally the same as returning EndGroups.
+	DispatcherActionEndGroups
+)
+
+var EndGroups = errors.New("group iteration ended")
+var ContinueGroups = errors.New("group iteration continued")
+
 type Dispatcher struct {
-	// Error handles any errors that occur during handler execution.
-	Error func(ctx *Context, err error)
+	// Error handles any errors that occur during handler execution. The return type determines how to handle the
+	// current group iteration. Default is DispatcherActionNoop; move to next group.
+	Error func(ctx *Context, err error) DispatcherAction
 	// Panic handles any panics that occur during handler execution.
 	// If this field is nil, the stack is logged to stderr.
 	Panic func(ctx *Context, stack []byte)
@@ -37,7 +55,7 @@ type Dispatcher struct {
 
 type DispatcherOpts struct {
 	// Error handles any errors that occur during handler execution.
-	Error func(ctx *Context, err error)
+	Error func(ctx *Context, err error) DispatcherAction
 	// Panic handles any panics that occur during handler execution.
 	// If no panic is defined, the stack is logged to
 	Panic func(ctx *Context, stack []byte)
@@ -53,7 +71,7 @@ type DispatcherOpts struct {
 func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
 	var limiter chan struct{}
 
-	var errFunc func(ctx *Context, err error)
+	var errFunc func(ctx *Context, err error) DispatcherAction
 	var panicFunc func(ctx *Context, stack []byte)
 
 	maxRoutines := DefaultMaxRoutines
@@ -149,9 +167,6 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
-var EndGroups = errors.New("group iteration ended")
-var ContinueGroups = errors.New("group iteration continued")
-
 func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
@@ -189,16 +204,37 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
 				switch err {
-				case EndGroups:
-					return
 				case ContinueGroups:
+					// Continue handling current group.
 					continue
+
+				case EndGroups:
+					// Stop all group handling.
+					return
+
 				default:
+					action := DispatcherActionNoop
 					if d.Error != nil {
-						d.Error(ctx, err)
+						action = d.Error(ctx, err)
+					}
+
+					switch action {
+					case DispatcherActionNoop:
+						// Move on to next group; same action as if group had been successful.
+					case DispatcherActionContinueGroups:
+						// Continue handling current group.
+						continue
+					case DispatcherActionEndGroups:
+						// Stop all group handling.
+						return
+					default:
+						d.ErrorLog.Printf("unknown action %d, ending groups here", action)
+						return
 					}
 				}
+
 			}
+
 			break // move to next group
 		}
 	}
