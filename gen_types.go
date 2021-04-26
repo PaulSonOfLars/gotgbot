@@ -446,12 +446,14 @@ type InlineQuery struct {
 	Id string `json:"id,omitempty"`
 	// Sender
 	From User `json:"from,omitempty"`
-	// Optional. Sender location, only for bots that request user location
-	Location *Location `json:"location,omitempty"`
 	// Text of the query (up to 256 characters)
 	Query string `json:"query,omitempty"`
 	// Offset of the results to be returned, can be controlled by the bot
 	Offset string `json:"offset,omitempty"`
+	// Optional. Type of the chat, from which the inline query was sent. Can be either "sender" for a private chat with the inline query sender, "private", "group", "supergroup", or "channel". The chat type should be always known for requests sent from official clients and most third-party clients, unless the request was sent from a secret chat
+	ChatType string `json:"chat_type,omitempty"`
+	// Optional. Sender location, only for bots that request user location
+	Location *Location `json:"location,omitempty"`
 }
 
 // This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
@@ -1309,6 +1311,55 @@ func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
 // https://core.telegram.org/bots/api#inputfile
 type InputFile interface{}
 
+// Represents the content of an invoice message to be sent as the result of an inline query.
+// https://core.telegram.org/bots/api#inputinvoicemessagecontent
+type InputInvoiceMessageContent struct {
+	// Product name, 1-32 characters
+	Title string `json:"title,omitempty"`
+	// Product description, 1-255 characters
+	Description string `json:"description,omitempty"`
+	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+	Payload string `json:"payload,omitempty"`
+	// Payment provider token, obtained via Botfather
+	ProviderToken string `json:"provider_token,omitempty"`
+	// Three-letter ISO 4217 currency code, see more on currencies
+	Currency string `json:"currency,omitempty"`
+	// Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+	Prices []LabeledPrice `json:"prices,omitempty"`
+	// Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
+	MaxTipAmount int64 `json:"max_tip_amount,omitempty"`
+	// Optional. A JSON-serialized array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
+	SuggestedTipAmounts []int64 `json:"suggested_tip_amounts,omitempty"`
+	// Optional. A JSON-serialized object for data about the invoice, which will be shared with the payment provider. A detailed description of the required fields should be provided by the payment provider.
+	ProviderData string `json:"provider_data,omitempty"`
+	// Optional. URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// Optional. Photo size
+	PhotoSize int64 `json:"photo_size,omitempty"`
+	// Optional. Photo width
+	PhotoWidth int64 `json:"photo_width,omitempty"`
+	// Optional. Photo height
+	PhotoHeight int64 `json:"photo_height,omitempty"`
+	// Optional. Pass True, if you require the user's full name to complete the order
+	NeedName bool `json:"need_name,omitempty"`
+	// Optional. Pass True, if you require the user's phone number to complete the order
+	NeedPhoneNumber bool `json:"need_phone_number,omitempty"`
+	// Optional. Pass True, if you require the user's email address to complete the order
+	NeedEmail bool `json:"need_email,omitempty"`
+	// Optional. Pass True, if you require the user's shipping address to complete the order
+	NeedShippingAddress bool `json:"need_shipping_address,omitempty"`
+	// Optional. Pass True, if user's phone number should be sent to provider
+	SendPhoneNumberToProvider bool `json:"send_phone_number_to_provider,omitempty"`
+	// Optional. Pass True, if user's email address should be sent to provider
+	SendEmailToProvider bool `json:"send_email_to_provider,omitempty"`
+	// Optional. Pass True, if the final price depends on the shipping method
+	IsFlexible bool `json:"is_flexible,omitempty"`
+}
+
+func (v InputInvoiceMessageContent) InputMessageContent() ([]byte, error) {
+	return json.Marshal(v)
+}
+
 // Represents the content of a location message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputlocationmessagecontent
 type InputLocationMessageContent struct {
@@ -1601,7 +1652,7 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
-// This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 4 types:
+// This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
 	InputMessageContent() ([]byte, error)
@@ -1843,6 +1894,8 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	// Optional. Service message: voice chat scheduled
+	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
 	// Optional. Service message: voice chat started
 	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
 	// Optional. Service message: voice chat ended
@@ -2468,6 +2521,13 @@ type VoiceChatEnded struct {
 type VoiceChatParticipantsInvited struct {
 	// Optional. New members that were invited to the voice chat
 	Users []User `json:"users,omitempty"`
+}
+
+// This object represents a service message about a voice chat scheduled in the chat.
+// https://core.telegram.org/bots/api#voicechatscheduled
+type VoiceChatScheduled struct {
+	// Point in time (Unix timestamp) when the voice chat is supposed to be started by a chat administrator
+	StartDate int64 `json:"start_date,omitempty"`
 }
 
 // This object represents a service message about a voice chat started in the chat. Currently holds no information.
