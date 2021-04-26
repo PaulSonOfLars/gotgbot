@@ -83,7 +83,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		funcDefArgs := strings.Join(funcDefArgList, ", ")
 		funcCallArgs := strings.Join(funcCallArgList, ", ")
 
-		helperDef.WriteString("\n// Helper method for Bot." + strings.Title(tgMethod.Name))
+		helperDef.WriteString("\n// " + newMethodName + " Helper method for Bot." + strings.Title(tgMethod.Name))
 
 		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
 			Receiver:     receiverName,

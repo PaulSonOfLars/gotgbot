@@ -3,57 +3,57 @@
 
 package gotgbot
 
-// Helper method for Bot.AnswerCallbackQuery
+// Answer Helper method for Bot.AnswerCallbackQuery
 func (cq CallbackQuery) Answer(b *Bot, opts *AnswerCallbackQueryOpts) (bool, error) {
 	return b.AnswerCallbackQuery(cq.Id, opts)
 }
 
-// Helper method for Bot.AnswerInlineQuery
+// Answer Helper method for Bot.AnswerInlineQuery
 func (iq InlineQuery) Answer(b *Bot, results []InlineQueryResult, opts *AnswerInlineQueryOpts) (bool, error) {
 	return b.AnswerInlineQuery(iq.Id, results, opts)
 }
 
-// Helper method for Bot.AnswerPreCheckoutQuery
+// Answer Helper method for Bot.AnswerPreCheckoutQuery
 func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
 	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
 }
 
-// Helper method for Bot.AnswerShippingQuery
+// Answer Helper method for Bot.AnswerShippingQuery
 func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
 }
 
-// Helper method for Bot.CopyMessage
+// Copy Helper method for Bot.CopyMessage
 func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
 }
 
-// Helper method for Bot.CreateChatInviteLink
+// CreateInviteLink Helper method for Bot.CreateChatInviteLink
 func (c Chat) CreateInviteLink(b *Bot, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	return b.CreateChatInviteLink(c.Id, opts)
 }
 
-// Helper method for Bot.DeleteChatPhoto
+// DeletePhoto Helper method for Bot.DeleteChatPhoto
 func (c Chat) DeletePhoto(b *Bot) (bool, error) {
 	return b.DeleteChatPhoto(c.Id)
 }
 
-// Helper method for Bot.DeleteChatStickerSet
+// DeleteStickerSet Helper method for Bot.DeleteChatStickerSet
 func (c Chat) DeleteStickerSet(b *Bot) (bool, error) {
 	return b.DeleteChatStickerSet(c.Id)
 }
 
-// Helper method for Bot.DeleteMessage
+// Delete Helper method for Bot.DeleteMessage
 func (m Message) Delete(b *Bot) (bool, error) {
 	return b.DeleteMessage(m.Chat.Id, m.MessageId)
 }
 
-// Helper method for Bot.EditChatInviteLink
+// EditInviteLink Helper method for Bot.EditChatInviteLink
 func (c Chat) EditInviteLink(b *Bot, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	return b.EditChatInviteLink(c.Id, inviteLink, opts)
 }
 
-// Helper method for Bot.EditMessageCaption
+// EditCaption Helper method for Bot.EditMessageCaption
 func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, error) {
 	if opts == nil {
 		opts = &EditMessageCaptionOpts{}
@@ -69,7 +69,7 @@ func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, er
 	return b.EditMessageCaption(opts)
 }
 
-// Helper method for Bot.EditMessageLiveLocation
+// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
 func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, error) {
 	if opts == nil {
 		opts = &EditMessageLiveLocationOpts{}
@@ -85,7 +85,7 @@ func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, o
 	return b.EditMessageLiveLocation(latitude, longitude, opts)
 }
 
-// Helper method for Bot.EditMessageMedia
+// EditMedia Helper method for Bot.EditMessageMedia
 func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, error) {
 	if opts == nil {
 		opts = &EditMessageMediaOpts{}
@@ -101,7 +101,7 @@ func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts)
 	return b.EditMessageMedia(media, opts)
 }
 
-// Helper method for Bot.EditMessageReplyMarkup
+// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
 func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, error) {
 	if opts == nil {
 		opts = &EditMessageReplyMarkupOpts{}
@@ -117,7 +117,7 @@ func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Mes
 	return b.EditMessageReplyMarkup(opts)
 }
 
-// Helper method for Bot.EditMessageText
+// EditText Helper method for Bot.EditMessageText
 func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, error) {
 	if opts == nil {
 		opts = &EditMessageTextOpts{}
@@ -133,117 +133,117 @@ func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Mess
 	return b.EditMessageText(text, opts)
 }
 
-// Helper method for Bot.ExportChatInviteLink
+// ExportInviteLink Helper method for Bot.ExportChatInviteLink
 func (c Chat) ExportInviteLink(b *Bot) (string, error) {
 	return b.ExportChatInviteLink(c.Id)
 }
 
-// Helper method for Bot.ForwardMessage
+// Forward Helper method for Bot.ForwardMessage
 func (m Message) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
 	return b.ForwardMessage(chatId, m.Chat.Id, m.MessageId, opts)
 }
 
-// Helper method for Bot.GetChat
+// Get Helper method for Bot.GetChat
 func (c Chat) Get(b *Bot) (*Chat, error) {
 	return b.GetChat(c.Id)
 }
 
-// Helper method for Bot.GetChatAdministrators
+// GetAdministrators Helper method for Bot.GetChatAdministrators
 func (c Chat) GetAdministrators(b *Bot) ([]ChatMember, error) {
 	return b.GetChatAdministrators(c.Id)
 }
 
-// Helper method for Bot.GetChatMember
+// GetMember Helper method for Bot.GetChatMember
 func (c Chat) GetMember(b *Bot, userId int64) (*ChatMember, error) {
 	return b.GetChatMember(c.Id, userId)
 }
 
-// Helper method for Bot.GetChatMembersCount
+// GetMembersCount Helper method for Bot.GetChatMembersCount
 func (c Chat) GetMembersCount(b *Bot) (int64, error) {
 	return b.GetChatMembersCount(c.Id)
 }
 
-// Helper method for Bot.GetFile
+// Get Helper method for Bot.GetFile
 func (f File) Get(b *Bot) (*File, error) {
 	return b.GetFile(f.FileId)
 }
 
-// Helper method for Bot.GetUserProfilePhotos
+// GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
 }
 
-// Helper method for Bot.KickChatMember
+// KickMember Helper method for Bot.KickChatMember
 func (c Chat) KickMember(b *Bot, userId int64, opts *KickChatMemberOpts) (bool, error) {
 	return b.KickChatMember(c.Id, userId, opts)
 }
 
-// Helper method for Bot.LeaveChat
+// Leave Helper method for Bot.LeaveChat
 func (c Chat) Leave(b *Bot) (bool, error) {
 	return b.LeaveChat(c.Id)
 }
 
-// Helper method for Bot.PinChatMessage
+// PinMessage Helper method for Bot.PinChatMessage
 func (c Chat) PinMessage(b *Bot, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	return b.PinChatMessage(c.Id, messageId, opts)
 }
 
-// Helper method for Bot.PinChatMessage
+// Pin Helper method for Bot.PinChatMessage
 func (m Message) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
 	return b.PinChatMessage(m.Chat.Id, m.MessageId, opts)
 }
 
-// Helper method for Bot.PromoteChatMember
+// PromoteMember Helper method for Bot.PromoteChatMember
 func (c Chat) PromoteMember(b *Bot, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	return b.PromoteChatMember(c.Id, userId, opts)
 }
 
-// Helper method for Bot.RestrictChatMember
+// RestrictMember Helper method for Bot.RestrictChatMember
 func (c Chat) RestrictMember(b *Bot, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	return b.RestrictChatMember(c.Id, userId, permissions, opts)
 }
 
-// Helper method for Bot.RevokeChatInviteLink
+// RevokeInviteLink Helper method for Bot.RevokeChatInviteLink
 func (c Chat) RevokeInviteLink(b *Bot, inviteLink string) (*ChatInviteLink, error) {
 	return b.RevokeChatInviteLink(c.Id, inviteLink)
 }
 
-// Helper method for Bot.SendChatAction
+// SendAction Helper method for Bot.SendChatAction
 func (c Chat) SendAction(b *Bot, action string) (bool, error) {
 	return b.SendChatAction(c.Id, action)
 }
 
-// Helper method for Bot.SetChatAdministratorCustomTitle
+// SetAdministratorCustomTitle Helper method for Bot.SetChatAdministratorCustomTitle
 func (c Chat) SetAdministratorCustomTitle(b *Bot, userId int64, customTitle string) (bool, error) {
 	return b.SetChatAdministratorCustomTitle(c.Id, userId, customTitle)
 }
 
-// Helper method for Bot.SetChatDescription
+// SetDescription Helper method for Bot.SetChatDescription
 func (c Chat) SetDescription(b *Bot, opts *SetChatDescriptionOpts) (bool, error) {
 	return b.SetChatDescription(c.Id, opts)
 }
 
-// Helper method for Bot.SetChatPermissions
+// SetPermissions Helper method for Bot.SetChatPermissions
 func (c Chat) SetPermissions(b *Bot, permissions ChatPermissions) (bool, error) {
 	return b.SetChatPermissions(c.Id, permissions)
 }
 
-// Helper method for Bot.SetChatPhoto
+// SetPhoto Helper method for Bot.SetChatPhoto
 func (c Chat) SetPhoto(b *Bot, photo InputFile) (bool, error) {
 	return b.SetChatPhoto(c.Id, photo)
 }
 
-// Helper method for Bot.SetChatStickerSet
+// SetStickerSet Helper method for Bot.SetChatStickerSet
 func (c Chat) SetStickerSet(b *Bot, stickerSetName string) (bool, error) {
 	return b.SetChatStickerSet(c.Id, stickerSetName)
 }
 
-// Helper method for Bot.SetChatTitle
+// SetTitle Helper method for Bot.SetChatTitle
 func (c Chat) SetTitle(b *Bot, title string) (bool, error) {
 	return b.SetChatTitle(c.Id, title)
 }
 
-// Helper method for Bot.StopMessageLiveLocation
+// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
 func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, error) {
 	if opts == nil {
 		opts = &StopMessageLiveLocationOpts{}
@@ -259,22 +259,22 @@ func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*M
 	return b.StopMessageLiveLocation(opts)
 }
 
-// Helper method for Bot.UnbanChatMember
+// UnbanMember Helper method for Bot.UnbanChatMember
 func (c Chat) UnbanMember(b *Bot, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	return b.UnbanChatMember(c.Id, userId, opts)
 }
 
-// Helper method for Bot.UnpinAllChatMessages
+// UnpinAllMessages Helper method for Bot.UnpinAllChatMessages
 func (c Chat) UnpinAllMessages(b *Bot) (bool, error) {
 	return b.UnpinAllChatMessages(c.Id)
 }
 
-// Helper method for Bot.UnpinChatMessage
+// UnpinMessage Helper method for Bot.UnpinChatMessage
 func (c Chat) UnpinMessage(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	return b.UnpinChatMessage(c.Id, opts)
 }
 
-// Helper method for Bot.UnpinChatMessage
+// Unpin Helper method for Bot.UnpinChatMessage
 func (m Message) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	if opts == nil {
 		opts = &UnpinChatMessageOpts{}

@@ -13,7 +13,7 @@ type ReplyMarkup interface {
 	ReplyMarkup() ([]byte, error)
 }
 
-// This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
+// Animation This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
 // https://core.telegram.org/bots/api#animation
 type Animation struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -36,7 +36,7 @@ type Animation struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object represents an audio file to be treated as music by the Telegram clients.
+// Audio This object represents an audio file to be treated as music by the Telegram clients.
 // https://core.telegram.org/bots/api#audio
 type Audio struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -59,7 +59,7 @@ type Audio struct {
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 }
 
-// This object represents a bot command.
+// BotCommand This object represents a bot command.
 // https://core.telegram.org/bots/api#botcommand
 type BotCommand struct {
 	// Text of the command, 1-32 characters. Can contain only lowercase English letters, digits and underscores.
@@ -68,11 +68,11 @@ type BotCommand struct {
 	Description string `json:"description,omitempty"`
 }
 
-// A placeholder, currently holds no information. Use BotFather to set up your game.
+// CallbackGame A placeholder, currently holds no information. Use BotFather to set up your game.
 // https://core.telegram.org/bots/api#callbackgame
 type CallbackGame interface{}
 
-// This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
+// CallbackQuery This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
 // https://core.telegram.org/bots/api#callbackquery
 type CallbackQuery struct {
 	// Unique identifier for this query
@@ -91,7 +91,7 @@ type CallbackQuery struct {
 	GameShortName string `json:"game_short_name,omitempty"`
 }
 
-// This object represents a chat.
+// Chat This object represents a chat.
 // https://core.telegram.org/bots/api#chat
 type Chat struct {
 	// Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
@@ -132,7 +132,7 @@ type Chat struct {
 	Location *ChatLocation `json:"location,omitempty"`
 }
 
-// Represents an invite link for a chat.
+// ChatInviteLink Represents an invite link for a chat.
 // https://core.telegram.org/bots/api#chatinvitelink
 type ChatInviteLink struct {
 	// The invite link. If the link was created by another chat administrator, then the second part of the link will be replaced with "…".
@@ -149,7 +149,7 @@ type ChatInviteLink struct {
 	MemberLimit int64 `json:"member_limit,omitempty"`
 }
 
-// Represents a location to which a chat is connected.
+// ChatLocation Represents a location to which a chat is connected.
 // https://core.telegram.org/bots/api#chatlocation
 type ChatLocation struct {
 	// The location to which the supergroup is connected. Can't be a live location.
@@ -158,7 +158,7 @@ type ChatLocation struct {
 	Address string `json:"address,omitempty"`
 }
 
-// This object contains information about one member of a chat.
+// ChatMember This object contains information about one member of a chat.
 // https://core.telegram.org/bots/api#chatmember
 type ChatMember struct {
 	// Information about the user
@@ -207,7 +207,7 @@ type ChatMember struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
-// This object represents changes in the status of a chat member.
+// ChatMemberUpdated This object represents changes in the status of a chat member.
 // https://core.telegram.org/bots/api#chatmemberupdated
 type ChatMemberUpdated struct {
 	// Chat the user belongs to
@@ -224,7 +224,7 @@ type ChatMemberUpdated struct {
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
 }
 
-// Describes actions that a non-administrator user is allowed to take in a chat.
+// ChatPermissions Describes actions that a non-administrator user is allowed to take in a chat.
 // https://core.telegram.org/bots/api#chatpermissions
 type ChatPermissions struct {
 	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues
@@ -245,7 +245,7 @@ type ChatPermissions struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 }
 
-// This object represents a chat photo.
+// ChatPhoto This object represents a chat photo.
 // https://core.telegram.org/bots/api#chatphoto
 type ChatPhoto struct {
 	// File identifier of small (160x160) chat photo. This file_id can be used only for photo download and only for as long as the photo is not changed.
@@ -258,7 +258,7 @@ type ChatPhoto struct {
 	BigFileUniqueId string `json:"big_file_unique_id,omitempty"`
 }
 
-// Represents a result of an inline query that was chosen by the user and sent to their chat partner.
+// ChosenInlineResult Represents a result of an inline query that was chosen by the user and sent to their chat partner.
 // Note: It is necessary to enable inline feedback via @Botfather in order to receive these objects in updates.
 // https://core.telegram.org/bots/api#choseninlineresult
 type ChosenInlineResult struct {
@@ -274,7 +274,7 @@ type ChosenInlineResult struct {
 	Query string `json:"query,omitempty"`
 }
 
-// This object represents a phone contact.
+// Contact This object represents a phone contact.
 // https://core.telegram.org/bots/api#contact
 type Contact struct {
 	// Contact's phone number
@@ -289,7 +289,7 @@ type Contact struct {
 	Vcard string `json:"vcard,omitempty"`
 }
 
-// This object represents an animated emoji that displays a random value.
+// Dice This object represents an animated emoji that displays a random value.
 // https://core.telegram.org/bots/api#dice
 type Dice struct {
 	// Emoji on which the dice throw animation is based
@@ -298,7 +298,7 @@ type Dice struct {
 	Value int64 `json:"value,omitempty"`
 }
 
-// This object represents a general file (as opposed to photos, voice messages and audio files).
+// Document This object represents a general file (as opposed to photos, voice messages and audio files).
 // https://core.telegram.org/bots/api#document
 type Document struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -315,7 +315,7 @@ type Document struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// Contains data required for decrypting and authenticating EncryptedPassportElement. See the Telegram Passport Documentation for a complete description of the data decryption and authentication processes.
+// EncryptedCredentials Contains data required for decrypting and authenticating EncryptedPassportElement. See the Telegram Passport Documentation for a complete description of the data decryption and authentication processes.
 // https://core.telegram.org/bots/api#encryptedcredentials
 type EncryptedCredentials struct {
 	// Base64-encoded encrypted JSON-serialized data with unique user's payload, data hashes and secrets required for EncryptedPassportElement decryption and authentication
@@ -326,7 +326,7 @@ type EncryptedCredentials struct {
 	Secret string `json:"secret,omitempty"`
 }
 
-// Contains information about documents or other Telegram Passport elements shared with the bot by the user.
+// EncryptedPassportElement Contains information about documents or other Telegram Passport elements shared with the bot by the user.
 // https://core.telegram.org/bots/api#encryptedpassportelement
 type EncryptedPassportElement struct {
 	// Element type. One of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration", "phone_number", "email".
@@ -351,7 +351,7 @@ type EncryptedPassportElement struct {
 	Hash string `json:"hash,omitempty"`
 }
 
-// This object represents a file ready to be downloaded. The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile.
+// File This object represents a file ready to be downloaded. The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile.
 // https://core.telegram.org/bots/api#file
 type File struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -364,7 +364,7 @@ type File struct {
 	FilePath string `json:"file_path,omitempty"`
 }
 
-// Upon receiving a message with this object, Telegram clients will display a reply interface to the user (act as if the user has selected the bot's message and tapped 'Reply'). This can be extremely useful if you want to create user-friendly step-by-step interfaces without having to sacrifice privacy mode.
+// ForceReply Upon receiving a message with this object, Telegram clients will display a reply interface to the user (act as if the user has selected the bot's message and tapped 'Reply'). This can be extremely useful if you want to create user-friendly step-by-step interfaces without having to sacrifice privacy mode.
 // https://core.telegram.org/bots/api#forcereply
 type ForceReply struct {
 	// Shows reply interface to the user, as if they manually selected the bot's message and tapped 'Reply'
@@ -377,7 +377,7 @@ func (v ForceReply) ReplyMarkup() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
+// Game This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
 // https://core.telegram.org/bots/api#game
 type Game struct {
 	// Title of the game
@@ -394,7 +394,7 @@ type Game struct {
 	Animation *Animation `json:"animation,omitempty"`
 }
 
-// This object represents one row of the high scores table for a game.
+// GameHighScore This object represents one row of the high scores table for a game.
 // And that's about all we've got for now.If you've got any questions, please check out our Bot FAQ »
 // https://core.telegram.org/bots/api#gamehighscore
 type GameHighScore struct {
@@ -406,7 +406,7 @@ type GameHighScore struct {
 	Score int64 `json:"score,omitempty"`
 }
 
-// This object represents one button of an inline keyboard. You must use exactly one of the optional fields.
+// InlineKeyboardButton This object represents one button of an inline keyboard. You must use exactly one of the optional fields.
 // https://core.telegram.org/bots/api#inlinekeyboardbutton
 type InlineKeyboardButton struct {
 	// Label text on the button
@@ -427,7 +427,7 @@ type InlineKeyboardButton struct {
 	Pay bool `json:"pay,omitempty"`
 }
 
-// This object represents an inline keyboard that appears right next to the message it belongs to.
+// InlineKeyboardMarkup This object represents an inline keyboard that appears right next to the message it belongs to.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
 // https://core.telegram.org/bots/api#inlinekeyboardmarkup
 type InlineKeyboardMarkup struct {
@@ -439,7 +439,7 @@ func (v InlineKeyboardMarkup) ReplyMarkup() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// This object represents an incoming inline query. When the user sends an empty query, your bot could return some default or trending results.
+// InlineQuery This object represents an incoming inline query. When the user sends an empty query, your bot could return some default or trending results.
 // https://core.telegram.org/bots/api#inlinequery
 type InlineQuery struct {
 	// Unique identifier for this query
@@ -456,14 +456,14 @@ type InlineQuery struct {
 	Location *Location `json:"location,omitempty"`
 }
 
-// This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
+// InlineQueryResult This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
 // Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 // https://core.telegram.org/bots/api#inlinequeryresult
 type InlineQueryResult interface {
 	InlineQueryResult() ([]byte, error)
 }
 
-// Represents a link to an article or web page.
+// InlineQueryResultArticle Represents a link to an article or web page.
 // https://core.telegram.org/bots/api#inlinequeryresultarticle
 type InlineQueryResultArticle struct {
 	// Unique identifier for this result, 1-64 Bytes
@@ -504,7 +504,7 @@ func (v InlineQueryResultArticle) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
+// InlineQueryResultAudio Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultaudio
 type InlineQueryResultAudio struct {
@@ -546,7 +546,7 @@ func (v InlineQueryResultAudio) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
+// InlineQueryResultCachedAudio Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedaudio
 type InlineQueryResultCachedAudio struct {
@@ -582,7 +582,7 @@ func (v InlineQueryResultCachedAudio) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
+// InlineQueryResultCachedDocument Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultcacheddocument
 type InlineQueryResultCachedDocument struct {
@@ -622,7 +622,7 @@ func (v InlineQueryResultCachedDocument) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to an animated GIF file stored on the Telegram servers. By default, this animated GIF file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with specified content instead of the animation.
+// InlineQueryResultCachedGif Represents a link to an animated GIF file stored on the Telegram servers. By default, this animated GIF file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedgif
 type InlineQueryResultCachedGif struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -659,7 +659,7 @@ func (v InlineQueryResultCachedGif) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a video animation (H.264/MPEG-4 AVC video without sound) stored on the Telegram servers. By default, this animated MPEG-4 file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
+// InlineQueryResultCachedMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound) stored on the Telegram servers. By default, this animated MPEG-4 file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedmpeg4gif
 type InlineQueryResultCachedMpeg4Gif struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -696,7 +696,7 @@ func (v InlineQueryResultCachedMpeg4Gif) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a photo stored on the Telegram servers. By default, this photo will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
+// InlineQueryResultCachedPhoto Represents a link to a photo stored on the Telegram servers. By default, this photo will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedphoto
 type InlineQueryResultCachedPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -735,7 +735,7 @@ func (v InlineQueryResultCachedPhoto) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
+// InlineQueryResultCachedSticker Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
 // Note: This will only work in Telegram versions released after 9 April, 2016 for static stickers and after 06 July, 2019 for animated stickers. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedsticker
 type InlineQueryResultCachedSticker struct {
@@ -765,7 +765,7 @@ func (v InlineQueryResultCachedSticker) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a video file stored on the Telegram servers. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
+// InlineQueryResultCachedVideo Represents a link to a video file stored on the Telegram servers. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedvideo
 type InlineQueryResultCachedVideo struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -804,7 +804,7 @@ func (v InlineQueryResultCachedVideo) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
+// InlineQueryResultCachedVoice Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedvoice
 type InlineQueryResultCachedVoice struct {
@@ -842,7 +842,7 @@ func (v InlineQueryResultCachedVoice) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
+// InlineQueryResultContact Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultcontact
 type InlineQueryResultContact struct {
@@ -884,7 +884,7 @@ func (v InlineQueryResultContact) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
+// InlineQueryResultDocument Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultdocument
 type InlineQueryResultDocument struct {
@@ -932,7 +932,7 @@ func (v InlineQueryResultDocument) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a Game.
+// InlineQueryResultGame Represents a Game.
 // Note: This will only work in Telegram versions released after October 1, 2016. Older clients will not display any inline results if a game result is among them.
 // https://core.telegram.org/bots/api#inlinequeryresultgame
 type InlineQueryResultGame struct {
@@ -960,7 +960,7 @@ func (v InlineQueryResultGame) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to an animated GIF file. By default, this animated GIF file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
+// InlineQueryResultGif Represents a link to an animated GIF file. By default, this animated GIF file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultgif
 type InlineQueryResultGif struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -1007,7 +1007,7 @@ func (v InlineQueryResultGif) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
+// InlineQueryResultLocation Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultlocation
 type InlineQueryResultLocation struct {
@@ -1055,7 +1055,7 @@ func (v InlineQueryResultLocation) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a video animation (H.264/MPEG-4 AVC video without sound). By default, this animated MPEG-4 file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
+// InlineQueryResultMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound). By default, this animated MPEG-4 file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
 type InlineQueryResultMpeg4Gif struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -1102,7 +1102,7 @@ func (v InlineQueryResultMpeg4Gif) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a photo. By default, this photo will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
+// InlineQueryResultPhoto Represents a link to a photo. By default, this photo will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultphoto
 type InlineQueryResultPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -1147,7 +1147,7 @@ func (v InlineQueryResultPhoto) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
+// InlineQueryResultVenue Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultvenue
 type InlineQueryResultVenue struct {
@@ -1197,7 +1197,7 @@ func (v InlineQueryResultVenue) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
+// InlineQueryResultVideo Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultvideo
 type InlineQueryResultVideo struct {
 	// Unique identifier for this result, 1-64 bytes
@@ -1246,7 +1246,7 @@ func (v InlineQueryResultVideo) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
+// InlineQueryResultVoice Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 // https://core.telegram.org/bots/api#inlinequeryresultvoice
 type InlineQueryResultVoice struct {
@@ -1286,7 +1286,7 @@ func (v InlineQueryResultVoice) InlineQueryResult() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents the content of a contact message to be sent as the result of an inline query.
+// InputContactMessageContent Represents the content of a contact message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputcontactmessagecontent
 type InputContactMessageContent struct {
 	// Contact's phone number
@@ -1303,7 +1303,7 @@ func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
+// InputFile This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
 // There are three ways to send files (photos, stickers, audio, media, etc.):
 // Sending by file_id
 // Sending by URL
@@ -1311,7 +1311,7 @@ func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
 // https://core.telegram.org/bots/api#inputfile
 type InputFile interface{}
 
-// Represents the content of an invoice message to be sent as the result of an inline query.
+// InputInvoiceMessageContent Represents the content of an invoice message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputinvoicemessagecontent
 type InputInvoiceMessageContent struct {
 	// Product name, 1-32 characters
@@ -1360,7 +1360,7 @@ func (v InputInvoiceMessageContent) InputMessageContent() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents the content of a location message to be sent as the result of an inline query.
+// InputLocationMessageContent Represents the content of a location message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputlocationmessagecontent
 type InputLocationMessageContent struct {
 	// Latitude of the location in degrees
@@ -1381,13 +1381,13 @@ func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// This object represents the content of a media message to be sent. It should be one of
+// InputMedia This object represents the content of a media message to be sent. It should be one of
 // https://core.telegram.org/bots/api#inputmedia
 type InputMedia interface {
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
 }
 
-// Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
+// InputMediaAnimation Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
 // https://core.telegram.org/bots/api#inputmediaanimation
 type InputMediaAnimation struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
@@ -1442,7 +1442,7 @@ func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]
 	return json.Marshal(v)
 }
 
-// Represents an audio file to be treated as music to be sent.
+// InputMediaAudio Represents an audio file to be treated as music to be sent.
 // https://core.telegram.org/bots/api#inputmediaaudio
 type InputMediaAudio struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
@@ -1497,7 +1497,7 @@ func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
-// Represents a general file to be sent.
+// InputMediaDocument Represents a general file to be sent.
 // https://core.telegram.org/bots/api#inputmediadocument
 type InputMediaDocument struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
@@ -1548,7 +1548,7 @@ func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]N
 	return json.Marshal(v)
 }
 
-// Represents a photo to be sent.
+// InputMediaPhoto Represents a photo to be sent.
 // https://core.telegram.org/bots/api#inputmediaphoto
 type InputMediaPhoto struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
@@ -1595,7 +1595,7 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
-// Represents a video to be sent.
+// InputMediaVideo Represents a video to be sent.
 // https://core.telegram.org/bots/api#inputmediavideo
 type InputMediaVideo struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
@@ -1652,13 +1652,13 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
-// This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
+// InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
 	InputMessageContent() ([]byte, error)
 }
 
-// Represents the content of a text message to be sent as the result of an inline query.
+// InputTextMessageContent Represents the content of a text message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputtextmessagecontent
 type InputTextMessageContent struct {
 	// Text of the message to be sent, 1-4096 characters
@@ -1675,7 +1675,7 @@ func (v InputTextMessageContent) InputMessageContent() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents the content of a venue message to be sent as the result of an inline query.
+// InputVenueMessageContent Represents the content of a venue message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputvenuemessagecontent
 type InputVenueMessageContent struct {
 	// Latitude of the venue in degrees
@@ -1700,7 +1700,7 @@ func (v InputVenueMessageContent) InputMessageContent() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// This object contains basic information about an invoice.
+// Invoice This object contains basic information about an invoice.
 // https://core.telegram.org/bots/api#invoice
 type Invoice struct {
 	// Product name
@@ -1715,7 +1715,7 @@ type Invoice struct {
 	TotalAmount int64 `json:"total_amount,omitempty"`
 }
 
-// This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields request_contact, request_location, and request_poll are mutually exclusive.
+// KeyboardButton This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields request_contact, request_location, and request_poll are mutually exclusive.
 // Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
 // https://core.telegram.org/bots/api#keyboardbutton
 type KeyboardButton struct {
@@ -1729,14 +1729,14 @@ type KeyboardButton struct {
 	RequestPoll *KeyboardButtonPollType `json:"request_poll,omitempty"`
 }
 
-// This object represents type of a poll, which is allowed to be created and sent when the corresponding button is pressed.
+// KeyboardButtonPollType This object represents type of a poll, which is allowed to be created and sent when the corresponding button is pressed.
 // https://core.telegram.org/bots/api#keyboardbuttonpolltype
 type KeyboardButtonPollType struct {
 	// Optional. If quiz is passed, the user will be allowed to create only polls in the quiz mode. If regular is passed, only regular polls will be allowed. Otherwise, the user will be allowed to create a poll of any type.
 	Type string `json:"type,omitempty"`
 }
 
-// This object represents a portion of the price for goods or services.
+// LabeledPrice This object represents a portion of the price for goods or services.
 // https://core.telegram.org/bots/api#labeledprice
 type LabeledPrice struct {
 	// Portion label
@@ -1745,7 +1745,7 @@ type LabeledPrice struct {
 	Amount int64 `json:"amount,omitempty"`
 }
 
-// This object represents a point on the map.
+// Location This object represents a point on the map.
 // https://core.telegram.org/bots/api#location
 type Location struct {
 	// Longitude as defined by sender
@@ -1762,7 +1762,7 @@ type Location struct {
 	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
 }
 
-// This object represents a parameter of the inline keyboard button used to automatically authorize a user. Serves as a great replacement for the Telegram Login Widget when the user is coming from Telegram. All the user needs to do is tap/click a button and confirm that they want to log in:
+// LoginUrl This object represents a parameter of the inline keyboard button used to automatically authorize a user. Serves as a great replacement for the Telegram Login Widget when the user is coming from Telegram. All the user needs to do is tap/click a button and confirm that they want to log in:
 // Telegram apps support these buttons as of version 5.7.
 // https://core.telegram.org/bots/api#loginurl
 type LoginUrl struct {
@@ -1776,7 +1776,7 @@ type LoginUrl struct {
 	RequestWriteAccess bool `json:"request_write_access,omitempty"`
 }
 
-// This object describes the position on faces where a mask should be placed by default.
+// MaskPosition This object describes the position on faces where a mask should be placed by default.
 // https://core.telegram.org/bots/api#maskposition
 type MaskPosition struct {
 	// The part of the face relative to which the mask should be placed. One of "forehead", "eyes", "mouth", or "chin".
@@ -1789,7 +1789,7 @@ type MaskPosition struct {
 	Scale float64 `json:"scale,omitempty"`
 }
 
-// This object represents a message.
+// Message This object represents a message.
 // https://core.telegram.org/bots/api#message
 type Message struct {
 	// Unique message identifier inside this chat
@@ -1906,14 +1906,14 @@ type Message struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
-// This object represents a service message about a change in auto-delete timer settings.
+// MessageAutoDeleteTimerChanged This object represents a service message about a change in auto-delete timer settings.
 // https://core.telegram.org/bots/api#messageautodeletetimerchanged
 type MessageAutoDeleteTimerChanged struct {
 	// New auto-delete time for messages in the chat
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
 }
 
-// This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
+// MessageEntity This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 // https://core.telegram.org/bots/api#messageentity
 type MessageEntity struct {
 	// Type of the entity. Can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames)
@@ -1930,14 +1930,14 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 }
 
-// This object represents a unique message identifier.
+// MessageId This object represents a unique message identifier.
 // https://core.telegram.org/bots/api#messageid
 type MessageId struct {
 	// Unique message identifier
 	MessageId int64 `json:"message_id,omitempty"`
 }
 
-// This object represents information about an order.
+// OrderInfo This object represents information about an order.
 // https://core.telegram.org/bots/api#orderinfo
 type OrderInfo struct {
 	// Optional. User name
@@ -1950,7 +1950,7 @@ type OrderInfo struct {
 	ShippingAddress *ShippingAddress `json:"shipping_address,omitempty"`
 }
 
-// Contains information about Telegram Passport data shared with the bot by the user.
+// PassportData Contains information about Telegram Passport data shared with the bot by the user.
 // https://core.telegram.org/bots/api#passportdata
 type PassportData struct {
 	// Array with information about documents and other Telegram Passport elements that was shared with the bot
@@ -1959,13 +1959,13 @@ type PassportData struct {
 	Credentials EncryptedCredentials `json:"credentials,omitempty"`
 }
 
-// This object represents an error in the Telegram Passport element which was submitted that should be resolved by the user. It should be one of:
+// PassportElementError This object represents an error in the Telegram Passport element which was submitted that should be resolved by the user. It should be one of:
 // https://core.telegram.org/bots/api#passportelementerror
 type PassportElementError interface {
 	PassportElementError() ([]byte, error)
 }
 
-// Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
+// PassportElementErrorDataField Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
 // https://core.telegram.org/bots/api#passportelementerrordatafield
 type PassportElementErrorDataField struct {
 	// Error source, must be data
@@ -1984,7 +1984,7 @@ func (v PassportElementErrorDataField) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents an issue with a document scan. The error is considered resolved when the file with the document scan changes.
+// PassportElementErrorFile Represents an issue with a document scan. The error is considered resolved when the file with the document scan changes.
 // https://core.telegram.org/bots/api#passportelementerrorfile
 type PassportElementErrorFile struct {
 	// Error source, must be file
@@ -2001,7 +2001,7 @@ func (v PassportElementErrorFile) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents an issue with a list of scans. The error is considered resolved when the list of files containing the scans changes.
+// PassportElementErrorFiles Represents an issue with a list of scans. The error is considered resolved when the list of files containing the scans changes.
 // https://core.telegram.org/bots/api#passportelementerrorfiles
 type PassportElementErrorFiles struct {
 	// Error source, must be files
@@ -2018,7 +2018,7 @@ func (v PassportElementErrorFiles) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents an issue with the front side of a document. The error is considered resolved when the file with the front side of the document changes.
+// PassportElementErrorFrontSide Represents an issue with the front side of a document. The error is considered resolved when the file with the front side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorfrontside
 type PassportElementErrorFrontSide struct {
 	// Error source, must be front_side
@@ -2035,7 +2035,7 @@ func (v PassportElementErrorFrontSide) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents an issue with the reverse side of a document. The error is considered resolved when the file with reverse side of the document changes.
+// PassportElementErrorReverseSide Represents an issue with the reverse side of a document. The error is considered resolved when the file with reverse side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorreverseside
 type PassportElementErrorReverseSide struct {
 	// Error source, must be reverse_side
@@ -2052,7 +2052,7 @@ func (v PassportElementErrorReverseSide) PassportElementError() ([]byte, error) 
 	return json.Marshal(v)
 }
 
-// Represents an issue with the selfie with a document. The error is considered resolved when the file with the selfie changes.
+// PassportElementErrorSelfie Represents an issue with the selfie with a document. The error is considered resolved when the file with the selfie changes.
 // https://core.telegram.org/bots/api#passportelementerrorselfie
 type PassportElementErrorSelfie struct {
 	// Error source, must be selfie
@@ -2069,7 +2069,7 @@ func (v PassportElementErrorSelfie) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Represents an issue with one of the files that constitute the translation of a document. The error is considered resolved when the file changes.
+// PassportElementErrorTranslationFile Represents an issue with one of the files that constitute the translation of a document. The error is considered resolved when the file changes.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfile
 type PassportElementErrorTranslationFile struct {
 	// Error source, must be translation_file
@@ -2086,7 +2086,7 @@ func (v PassportElementErrorTranslationFile) PassportElementError() ([]byte, err
 	return json.Marshal(v)
 }
 
-// Represents an issue with the translated version of a document. The error is considered resolved when a file with the document translation change.
+// PassportElementErrorTranslationFiles Represents an issue with the translated version of a document. The error is considered resolved when a file with the document translation change.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfiles
 type PassportElementErrorTranslationFiles struct {
 	// Error source, must be translation_files
@@ -2103,7 +2103,7 @@ func (v PassportElementErrorTranslationFiles) PassportElementError() ([]byte, er
 	return json.Marshal(v)
 }
 
-// Represents an issue in an unspecified place. The error is considered resolved when new data is added.
+// PassportElementErrorUnspecified Represents an issue in an unspecified place. The error is considered resolved when new data is added.
 // https://core.telegram.org/bots/api#passportelementerrorunspecified
 type PassportElementErrorUnspecified struct {
 	// Error source, must be unspecified
@@ -2120,7 +2120,7 @@ func (v PassportElementErrorUnspecified) PassportElementError() ([]byte, error) 
 	return json.Marshal(v)
 }
 
-// This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
+// PassportFile This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
 // https://core.telegram.org/bots/api#passportfile
 type PassportFile struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2133,7 +2133,7 @@ type PassportFile struct {
 	FileDate int64 `json:"file_date,omitempty"`
 }
 
-// This object represents one size of a photo or a file / sticker thumbnail.
+// PhotoSize This object represents one size of a photo or a file / sticker thumbnail.
 // https://core.telegram.org/bots/api#photosize
 type PhotoSize struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2148,7 +2148,7 @@ type PhotoSize struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object contains information about a poll.
+// Poll This object contains information about a poll.
 // https://core.telegram.org/bots/api#poll
 type Poll struct {
 	// Unique poll identifier
@@ -2179,7 +2179,7 @@ type Poll struct {
 	CloseDate int64 `json:"close_date,omitempty"`
 }
 
-// This object represents an answer of a user in a non-anonymous poll.
+// PollAnswer This object represents an answer of a user in a non-anonymous poll.
 // https://core.telegram.org/bots/api#pollanswer
 type PollAnswer struct {
 	// Unique poll identifier
@@ -2190,7 +2190,7 @@ type PollAnswer struct {
 	OptionIds []int64 `json:"option_ids,omitempty"`
 }
 
-// This object contains information about one answer option in a poll.
+// PollOption This object contains information about one answer option in a poll.
 // https://core.telegram.org/bots/api#polloption
 type PollOption struct {
 	// Option text, 1-100 characters
@@ -2199,7 +2199,7 @@ type PollOption struct {
 	VoterCount int64 `json:"voter_count,omitempty"`
 }
 
-// This object contains information about an incoming pre-checkout query.
+// PreCheckoutQuery This object contains information about an incoming pre-checkout query.
 // https://core.telegram.org/bots/api#precheckoutquery
 type PreCheckoutQuery struct {
 	// Unique query identifier
@@ -2218,7 +2218,7 @@ type PreCheckoutQuery struct {
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
 }
 
-// This object represents the content of a service message, sent whenever a user in the chat triggers a proximity alert set by another user.
+// ProximityAlertTriggered This object represents the content of a service message, sent whenever a user in the chat triggers a proximity alert set by another user.
 // https://core.telegram.org/bots/api#proximityalerttriggered
 type ProximityAlertTriggered struct {
 	// User that triggered the alert
@@ -2229,7 +2229,7 @@ type ProximityAlertTriggered struct {
 	Distance int64 `json:"distance,omitempty"`
 }
 
-// This object represents a custom keyboard with reply options (see Introduction to bots for details and examples).
+// ReplyKeyboardMarkup This object represents a custom keyboard with reply options (see Introduction to bots for details and examples).
 // https://core.telegram.org/bots/api#replykeyboardmarkup
 type ReplyKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of KeyboardButton objects
@@ -2246,7 +2246,7 @@ func (v ReplyKeyboardMarkup) ReplyMarkup() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Upon receiving a message with this object, Telegram clients will remove the current custom keyboard and display the default letter-keyboard. By default, custom keyboards are displayed until a new keyboard is sent by a bot. An exception is made for one-time keyboards that are hidden immediately after the user presses a button (see ReplyKeyboardMarkup).
+// ReplyKeyboardRemove Upon receiving a message with this object, Telegram clients will remove the current custom keyboard and display the default letter-keyboard. By default, custom keyboards are displayed until a new keyboard is sent by a bot. An exception is made for one-time keyboards that are hidden immediately after the user presses a button (see ReplyKeyboardMarkup).
 // https://core.telegram.org/bots/api#replykeyboardremove
 type ReplyKeyboardRemove struct {
 	// Requests clients to remove the custom keyboard (user will not be able to summon this keyboard; if you want to hide the keyboard from sight but keep it accessible, use one_time_keyboard in ReplyKeyboardMarkup)
@@ -2259,7 +2259,7 @@ func (v ReplyKeyboardRemove) ReplyMarkup() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Contains information about why a request was unsuccessful.
+// ResponseParameters Contains information about why a request was unsuccessful.
 // https://core.telegram.org/bots/api#responseparameters
 type ResponseParameters struct {
 	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
@@ -2268,7 +2268,7 @@ type ResponseParameters struct {
 	RetryAfter int64 `json:"retry_after,omitempty"`
 }
 
-// This object represents a shipping address.
+// ShippingAddress This object represents a shipping address.
 // https://core.telegram.org/bots/api#shippingaddress
 type ShippingAddress struct {
 	// ISO 3166-1 alpha-2 country code
@@ -2285,7 +2285,7 @@ type ShippingAddress struct {
 	PostCode string `json:"post_code,omitempty"`
 }
 
-// This object represents one shipping option.
+// ShippingOption This object represents one shipping option.
 // https://core.telegram.org/bots/api#shippingoption
 type ShippingOption struct {
 	// Shipping option identifier
@@ -2296,7 +2296,7 @@ type ShippingOption struct {
 	Prices []LabeledPrice `json:"prices,omitempty"`
 }
 
-// This object contains information about an incoming shipping query.
+// ShippingQuery This object contains information about an incoming shipping query.
 // https://core.telegram.org/bots/api#shippingquery
 type ShippingQuery struct {
 	// Unique query identifier
@@ -2309,7 +2309,7 @@ type ShippingQuery struct {
 	ShippingAddress ShippingAddress `json:"shipping_address,omitempty"`
 }
 
-// This object represents a sticker.
+// Sticker This object represents a sticker.
 // https://core.telegram.org/bots/api#sticker
 type Sticker struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2334,7 +2334,7 @@ type Sticker struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object represents a sticker set.
+// StickerSet This object represents a sticker set.
 // https://core.telegram.org/bots/api#stickerset
 type StickerSet struct {
 	// Sticker set name
@@ -2351,7 +2351,7 @@ type StickerSet struct {
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 }
 
-// This object contains basic information about a successful payment.
+// SuccessfulPayment This object contains basic information about a successful payment.
 // https://core.telegram.org/bots/api#successfulpayment
 type SuccessfulPayment struct {
 	// Three-letter ISO 4217 currency code
@@ -2370,7 +2370,7 @@ type SuccessfulPayment struct {
 	ProviderPaymentChargeId string `json:"provider_payment_charge_id,omitempty"`
 }
 
-// This object represents an incoming update.At most one of the optional parameters can be present in any given update.
+// Update This object represents an incoming update.At most one of the optional parameters can be present in any given update.
 // https://core.telegram.org/bots/api#update
 type Update struct {
 	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using Webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
@@ -2403,7 +2403,7 @@ type Update struct {
 	ChatMember *ChatMemberUpdated `json:"chat_member,omitempty"`
 }
 
-// This object represents a Telegram user or bot.
+// User This object represents a Telegram user or bot.
 // https://core.telegram.org/bots/api#user
 type User struct {
 	// Unique identifier for this user or bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
@@ -2426,7 +2426,7 @@ type User struct {
 	SupportsInlineQueries bool `json:"supports_inline_queries,omitempty"`
 }
 
-// This object represent a user's profile pictures.
+// UserProfilePhotos This object represent a user's profile pictures.
 // https://core.telegram.org/bots/api#userprofilephotos
 type UserProfilePhotos struct {
 	// Total number of profile pictures the target user has
@@ -2435,7 +2435,7 @@ type UserProfilePhotos struct {
 	Photos [][]PhotoSize `json:"photos,omitempty"`
 }
 
-// This object represents a venue.
+// Venue This object represents a venue.
 // https://core.telegram.org/bots/api#venue
 type Venue struct {
 	// Venue location. Can't be a live location
@@ -2454,7 +2454,7 @@ type Venue struct {
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
-// This object represents a video file.
+// Video This object represents a video file.
 // https://core.telegram.org/bots/api#video
 type Video struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2477,7 +2477,7 @@ type Video struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object represents a video message (available in Telegram apps as of v.4.0).
+// VideoNote This object represents a video message (available in Telegram apps as of v.4.0).
 // https://core.telegram.org/bots/api#videonote
 type VideoNote struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2494,7 +2494,7 @@ type VideoNote struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object represents a voice note.
+// Voice This object represents a voice note.
 // https://core.telegram.org/bots/api#voice
 type Voice struct {
 	// Identifier for this file, which can be used to download or reuse the file
@@ -2509,32 +2509,32 @@ type Voice struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// This object represents a service message about a voice chat ended in the chat.
+// VoiceChatEnded This object represents a service message about a voice chat ended in the chat.
 // https://core.telegram.org/bots/api#voicechatended
 type VoiceChatEnded struct {
 	// Voice chat duration; in seconds
 	Duration int64 `json:"duration,omitempty"`
 }
 
-// This object represents a service message about new members invited to a voice chat.
+// VoiceChatParticipantsInvited This object represents a service message about new members invited to a voice chat.
 // https://core.telegram.org/bots/api#voicechatparticipantsinvited
 type VoiceChatParticipantsInvited struct {
 	// Optional. New members that were invited to the voice chat
 	Users []User `json:"users,omitempty"`
 }
 
-// This object represents a service message about a voice chat scheduled in the chat.
+// VoiceChatScheduled This object represents a service message about a voice chat scheduled in the chat.
 // https://core.telegram.org/bots/api#voicechatscheduled
 type VoiceChatScheduled struct {
 	// Point in time (Unix timestamp) when the voice chat is supposed to be started by a chat administrator
 	StartDate int64 `json:"start_date,omitempty"`
 }
 
-// This object represents a service message about a voice chat started in the chat. Currently holds no information.
+// VoiceChatStarted This object represents a service message about a voice chat started in the chat. Currently holds no information.
 // https://core.telegram.org/bots/api#voicechatstarted
 type VoiceChatStarted struct{}
 
-// Contains information about the current status of a webhook.
+// WebhookInfo Contains information about the current status of a webhook.
 // https://core.telegram.org/bots/api#webhookinfo
 type WebhookInfo struct {
 	// Webhook URL, may be empty if webhook is not set up

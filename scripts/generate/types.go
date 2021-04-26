@@ -55,8 +55,13 @@ import (
 func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	typeDef := strings.Builder{}
 
-	for _, d := range tgType.Description {
-		typeDef.WriteString("\n// " + d)
+	for idx, d := range tgType.Description {
+		text := d
+		if idx == 0 {
+			text = tgType.Name + " " + d
+		}
+
+		typeDef.WriteString("\n// " + text)
 	}
 
 	typeDef.WriteString("\n// " + tgType.Href)

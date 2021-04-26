@@ -116,8 +116,13 @@ func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
 	hasOptionals := false
 
-	for _, d := range m.Description {
-		description.WriteString("\n// " + d)
+	for idx, d := range m.Description {
+		text := d
+		if idx == 0 {
+			text = strings.Title(m.Name) + " " + d
+		}
+
+		description.WriteString("\n// " + text)
 	}
 
 	for _, f := range m.Fields {
@@ -239,11 +244,11 @@ func generateValue(f Field, goParam string, defaultRetVal string) (string, bool,
 
 	case "ReplyMarkup":
 		bd.WriteString("\nif " + goParam + " != nil {")
-		bd.WriteString("\n	bytes, err := " + goParam + ".ReplyMarkup()")
+		bd.WriteString("\n	bs, err := " + goParam + ".ReplyMarkup()")
 		bd.WriteString("\n	if err != nil {")
 		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
 		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
 		bd.WriteString("\n}")
 
 	default:
@@ -251,11 +256,11 @@ func generateValue(f Field, goParam string, defaultRetVal string) (string, bool,
 			bd.WriteString("\nif " + goParam + " != nil {")
 		}
 
-		bd.WriteString("\n	bytes, err := json.Marshal(" + goParam + ")")
+		bd.WriteString("\n	bs, err := json.Marshal(" + goParam + ")")
 		bd.WriteString("\n	if err != nil {")
 		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
 		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bytes))")
+		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
 
 		if isArray(fieldType) {
 			bd.WriteString("\n}")
@@ -378,9 +383,9 @@ if {{.GoParam}} != nil {
 		}
 		rawList = append(rawList, inputMediaBs)
 	}
-	bytes, err := json.Marshal(rawList)
+	bs, err := json.Marshal(rawList)
 	if err != nil {
 		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list of InputMedia for field: {{.Name}} %w", err)
 	}
-	v.Add("{{.Name}}", string(bytes))
+	v.Add("{{.Name}}", string(bs))
 }`
