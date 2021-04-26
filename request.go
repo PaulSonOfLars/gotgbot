@@ -13,20 +13,26 @@ import (
 )
 
 const (
-	// Default telegram API URL.
+	// DefaultAPIURL is the default telegram API URL.
 	DefaultAPIURL = "https://api.telegram.org/bot"
-	// Default timeout to be set for a GET request.
+	// DefaultGetTimeout is the default timeout to be set for a GET request.
 	DefaultGetTimeout = time.Second * 3
-	// Default timeout to be set for a POST request.
+	// DefaultPostTimeout is the default timeout to be set for a POST request.
 	DefaultPostTimeout = time.Second * 10
 )
 
 type Response struct {
-	Ok          bool               `json:"ok"`
-	Result      json.RawMessage    `json:"result"`
-	ErrorCode   int                `json:"error_code"`
-	Description string             `json:"description"`
-	Parameters  ResponseParameters `json:"parameters"`
+	// Ok: if true, request was successful, and result can be found in the Result field.
+	// If false, error can be explained in the Description.
+	Ok bool `json:"ok"`
+	// Result: result of requests (if Ok)
+	Result json.RawMessage `json:"result"`
+	// ErrorCode: Integer error code of request. Subject to change in the future.
+	ErrorCode int `json:"error_code"`
+	// Description: contains a human readable description of the error result.
+	Description string `json:"description"`
+	// Parameters: Optional extra data which can help automatically handle the error.
+	Parameters *ResponseParameters `json:"parameters"`
 }
 
 type TelegramError struct {
@@ -69,6 +75,7 @@ func (bot *Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 	return bot.GetWithContext(ctx, method, params)
 }
 
+// GetWithContext allows sending a Get request with an existing context.
 func (bot *Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", bot.endpoint(method), nil)
 	if err != nil {
@@ -111,6 +118,7 @@ func (bot *Bot) Post(method string, params url.Values, data map[string]NamedRead
 	return bot.PostWithContext(ctx, method, params, data)
 }
 
+// PostWithContext allows sending a Post request with an existing context.
 func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 	contentType := "application/json"

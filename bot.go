@@ -7,6 +7,7 @@ import (
 
 //go:generate go run ./scripts/generate
 
+// Bot is the core Bot object used to send and receive messages.
 type Bot struct {
 	Token       string
 	User        User
@@ -16,7 +17,7 @@ type Bot struct {
 	PostTimeout time.Duration
 }
 
-// BotOpts Declares all optional parameters for the NewBot function.
+// BotOpts declares all optional parameters for the NewBot function.
 type BotOpts struct {
 	APIURL      string
 	Client      http.Client
@@ -24,10 +25,11 @@ type BotOpts struct {
 	PostTimeout time.Duration
 }
 
+// NewBot returns a new Bot struct populated with the necessary defaults.
 func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	b := Bot{
 		Token:      token,
-		GetTimeout: time.Second * 10,// 10 seconds timeout for initial GetMe request, which can be slow.
+		GetTimeout: time.Second * 10, // 10 seconds timeout for initial GetMe request, which can be slow.
 	}
 
 	getTimeout := DefaultGetTimeout

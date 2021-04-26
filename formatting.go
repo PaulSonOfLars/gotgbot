@@ -32,26 +32,32 @@ var htmlMap = map[string]string{
 	"strikethrough": "s",
 }
 
+// OriginalMD gets the original markdown formatting of a message text.
 func (m Message) OriginalMD() string {
 	return getOrigMsgMD(utf16.Encode([]rune(m.Text)), m.Entities)
 }
 
+// OriginalMDV2 gets the original markdownV2 formatting of a message. text
 func (m Message) OriginalMDV2() string {
 	return getOrigMsgMDV2(utf16.Encode([]rune(m.Text)), m.Entities)
 }
 
+// OriginalHTML gets the original HTML formatting of a message text.
 func (m Message) OriginalHTML() string {
 	return getOrigMsgHTML(utf16.Encode([]rune(m.Text)), m.Entities)
 }
 
+// OriginalCaptionMD gets the original markdown formatting of a message caption.
 func (m Message) OriginalCaptionMD() string {
 	return getOrigMsgMD(utf16.Encode([]rune(m.Caption)), m.CaptionEntities)
 }
 
+// OriginalCaptionMDV2 gets the original markdownV2 formatting of a message caption.
 func (m Message) OriginalCaptionMDV2() string {
 	return getOrigMsgMDV2(utf16.Encode([]rune(m.Caption)), m.CaptionEntities)
 }
 
+// OriginalCaptionHTML gets the original HTML formatting of a message caption.
 func (m Message) OriginalCaptionHTML() string {
 	return getOrigMsgHTML(utf16.Encode([]rune(m.Caption)), m.CaptionEntities)
 }
