@@ -15,6 +15,11 @@ const DefaultMaxRoutines = 50
 
 type DispatcherAction int64
 
+type (
+	DispatcherErrorHandler func(b *gotgbot.Bot, ctx *Context, err error) DispatcherAction
+	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, stack []byte)
+)
+
 const (
 	// DispatcherActionNoop stops iteration of current group and moves to the next one.
 	// This is the default action, and the same as would happen if the handler had completed successfully.
@@ -33,11 +38,11 @@ var ContinueGroups = errors.New("group iteration continued")
 type Dispatcher struct {
 	// Error handles any errors that occur during handler execution. The return type determines how to handle the
 	// current group iteration. Default is DispatcherActionNoop; move to next group.
-	Error func(ctx *Context, err error) DispatcherAction
+	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
-	// If this field is nil, the stack is logged to stderr.
-	Panic func(ctx *Context, stack []byte)
-	// ErrorLog is the output to log to in the case of a library error.
+	// If this field is nil, the stack is logged to ErrorLog.
+	Panic DispatcherPanicHandler
+	// ErrorLog is the output to log to when handling a library error, or recovering from a panic from user code.
 	ErrorLog *log.Logger
 
 	// handlerGroups represents the list of available handler groups, numerically sorted.
@@ -55,24 +60,26 @@ type Dispatcher struct {
 
 type DispatcherOpts struct {
 	// Error handles any errors that occur during handler execution.
-	Error func(ctx *Context, err error) DispatcherAction
+	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
-	// If no panic is defined, the stack is logged to
-	Panic func(ctx *Context, stack []byte)
+	// If no panic handlers are defined, the stack is logged to ErrorLog.
+	Panic DispatcherPanicHandler
+	// ErrorLog is the output to log to when handling a library error, or recovering from a panic from user code.
+	ErrorLog *log.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
 	// If MaxRoutines == 0, DefaultMaxRoutines is used instead.
 	// If MaxRoutines < 0, no limits are imposed.
+	// If MaxRoutines > 0, that value is used.
 	MaxRoutines int
-	ErrorLog    *log.Logger
 }
 
 // NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
 func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
 	var limiter chan struct{}
 
-	var errFunc func(ctx *Context, err error) DispatcherAction
-	var panicFunc func(ctx *Context, stack []byte)
+	var errFunc DispatcherErrorHandler
+	var panicFunc DispatcherPanicHandler
 
 	maxRoutines := DefaultMaxRoutines
 	errLog := errorLog
@@ -183,7 +190,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 	defer func() {
 		if r := recover(); r != nil {
 			if d.Panic != nil {
-				d.Panic(ctx, debug.Stack())
+				d.Panic(b, ctx, debug.Stack())
 				return
 			}
 
@@ -215,7 +222,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 				default:
 					action := DispatcherActionNoop
 					if d.Error != nil {
-						action = d.Error(ctx, err)
+						action = d.Error(b, ctx, err)
 					}
 
 					switch action {
