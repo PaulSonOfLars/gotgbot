@@ -27,6 +27,9 @@ func NewCommand(c string, r Response) Command {
 }
 
 func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+	if u.Message == nil {
+		return false
+	}
 	if u.Message != nil {
 		if u.Message.Text == "" && u.Message.Caption == "" {
 			return false
