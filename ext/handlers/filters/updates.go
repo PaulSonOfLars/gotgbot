@@ -30,7 +30,7 @@ func ChatMemberUserId(id int64) ChatMember {
 	}
 }
 
-func PerformerUserId(id int64) ChatMember {
+func ChatMemberFromUserId(id int64) ChatMember {
 	return func(cm *gotgbot.ChatMemberUpdated) bool {
 		return cm.From.Id == id
 	}
