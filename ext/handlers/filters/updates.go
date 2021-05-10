@@ -59,3 +59,9 @@ func ChatMemberSupergroup() ChatMember {
 		return cm.Chat.Type == "supergroup"
 	}
 }
+
+func ChatMemberChannel() ChatMember {
+	return func(cm *gotgbot.ChatMemberUpdated) bool {
+		return cm.Chat.Type == "channel"
+	}
+}
