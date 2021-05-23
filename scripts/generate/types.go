@@ -261,7 +261,7 @@ const customMarshal = `
 func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 	type alias {{.Type}}
 	a := struct{
-		Type string
+		Type string ` + "`json:\"type\"`" + `
 		alias
 	}{
 		Type: "{{.TypeName}}",
