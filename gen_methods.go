@@ -31,7 +31,9 @@ type AddStickerToSetOpts struct {
 func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *AddStickerToSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	v.Add("name", name)
 	v.Add("emojis", emojis)
 	if opts != nil {
@@ -113,7 +115,9 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 		v.Add("text", opts.Text)
 		v.Add("show_alert", strconv.FormatBool(opts.ShowAlert))
 		v.Add("url", opts.Url)
-		v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+		if opts.CacheTime != 0 {
+			v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+		}
 	}
 
 	r, err := bot.Get("answerCallbackQuery", v)
@@ -155,7 +159,9 @@ func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryRes
 		v.Add("results", string(bs))
 	}
 	if opts != nil {
-		v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+		if opts.CacheTime != 0 {
+			v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+		}
 		v.Add("is_personal", strconv.FormatBool(opts.IsPersonal))
 		v.Add("next_offset", opts.NextOffset)
 		v.Add("switch_pm_text", opts.SwitchPmText)
@@ -276,9 +282,15 @@ type CopyMessageOpts struct {
 // https://core.telegram.org/bots/api#copymessage
 func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if fromChatId != 0 {
+		v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
+	}
+	if messageId != 0 {
+		v.Add("message_id", strconv.FormatInt(messageId, 10))
+	}
 	if opts != nil {
 		v.Add("caption", opts.Caption)
 		v.Add("parse_mode", opts.ParseMode)
@@ -290,7 +302,9 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -324,10 +338,16 @@ type CreateChatInviteLinkOpts struct {
 // https://core.telegram.org/bots/api#createchatinvitelink
 func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if opts != nil {
-		v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
-		v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+		if opts.ExpireDate != 0 {
+			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+		}
+		if opts.MemberLimit != 0 {
+			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+		}
 	}
 
 	r, err := bot.Get("createChatInviteLink", v)
@@ -361,7 +381,9 @@ type CreateNewStickerSetOpts struct {
 func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	v.Add("name", name)
 	v.Add("title", title)
 	v.Add("emojis", emojis)
@@ -427,7 +449,9 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("deleteChatPhoto", v)
 	if err != nil {
@@ -443,7 +467,9 @@ func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("deleteChatStickerSet", v)
 	if err != nil {
@@ -460,8 +486,12 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 // https://core.telegram.org/bots/api#deletemessage
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if messageId != 0 {
+		v.Add("message_id", strconv.FormatInt(messageId, 10))
+	}
 
 	r, err := bot.Get("deleteMessage", v)
 	if err != nil {
@@ -527,11 +557,17 @@ type EditChatInviteLinkOpts struct {
 // https://core.telegram.org/bots/api#editchatinvitelink
 func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("invite_link", inviteLink)
 	if opts != nil {
-		v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
-		v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+		if opts.ExpireDate != 0 {
+			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+		}
+		if opts.MemberLimit != 0 {
+			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+		}
 	}
 
 	r, err := bot.Get("editChatInviteLink", v)
@@ -567,8 +603,12 @@ type EditMessageCaptionOpts struct {
 func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, error) {
 	v := urlLib.Values{}
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 		v.Add("caption", opts.Caption)
 		v.Add("parse_mode", opts.ParseMode)
@@ -620,15 +660,29 @@ type EditMessageLiveLocationOpts struct {
 // https://core.telegram.org/bots/api#editmessagelivelocation
 func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	if latitude != 0.0 {
+		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	}
+	if longitude != 0.0 {
+		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	}
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
-		v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
-		v.Add("heading", strconv.FormatInt(opts.Heading, 10))
-		v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+		if opts.HorizontalAccuracy != 0.0 {
+			v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
+		}
+		if opts.Heading != 0 {
+			v.Add("heading", strconv.FormatInt(opts.Heading, 10))
+		}
+		if opts.ProximityAlertRadius != 0 {
+			v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+		}
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
@@ -670,8 +724,12 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 	}
 	v.Add("media", string(inputMediaBs))
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -707,8 +765,12 @@ type EditMessageReplyMarkupOpts struct {
 func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, error) {
 	v := urlLib.Values{}
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -752,8 +814,12 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 	v := urlLib.Values{}
 	v.Add("text", text)
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 		v.Add("parse_mode", opts.ParseMode)
 		if opts.Entities != nil {
@@ -785,7 +851,9 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("exportChatInviteLink", v)
 	if err != nil {
@@ -810,9 +878,15 @@ type ForwardMessageOpts struct {
 // https://core.telegram.org/bots/api#forwardmessage
 func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if fromChatId != 0 {
+		v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
+	}
+	if messageId != 0 {
+		v.Add("message_id", strconv.FormatInt(messageId, 10))
+	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	}
@@ -831,7 +905,9 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 // https://core.telegram.org/bots/api#getchat
 func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("getChat", v)
 	if err != nil {
@@ -847,7 +923,9 @@ func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("getChatAdministrators", v)
 	if err != nil {
@@ -864,8 +942,12 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // https://core.telegram.org/bots/api#getchatmember
 func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 
 	r, err := bot.Get("getChatMember", v)
 	if err != nil {
@@ -881,7 +963,9 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 // https://core.telegram.org/bots/api#getchatmemberscount
 func (bot *Bot) GetChatMembersCount(chatId int64) (int64, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("getChatMembersCount", v)
 	if err != nil {
@@ -925,10 +1009,16 @@ type GetGameHighScoresOpts struct {
 // https://core.telegram.org/bots/api#getgamehighscores
 func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]GameHighScore, error) {
 	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 	}
 
@@ -1004,9 +1094,15 @@ type GetUpdatesOpts struct {
 func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
 	v := urlLib.Values{}
 	if opts != nil {
-		v.Add("offset", strconv.FormatInt(opts.Offset, 10))
-		v.Add("limit", strconv.FormatInt(opts.Limit, 10))
-		v.Add("timeout", strconv.FormatInt(opts.Timeout, 10))
+		if opts.Offset != 0 {
+			v.Add("offset", strconv.FormatInt(opts.Offset, 10))
+		}
+		if opts.Limit != 0 {
+			v.Add("limit", strconv.FormatInt(opts.Limit, 10))
+		}
+		if opts.Timeout != 0 {
+			v.Add("timeout", strconv.FormatInt(opts.Timeout, 10))
+		}
 		if opts.AllowedUpdates != nil {
 			bs, err := json.Marshal(opts.AllowedUpdates)
 			if err != nil {
@@ -1039,10 +1135,16 @@ type GetUserProfilePhotosOpts struct {
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
-		v.Add("offset", strconv.FormatInt(opts.Offset, 10))
-		v.Add("limit", strconv.FormatInt(opts.Limit, 10))
+		if opts.Offset != 0 {
+			v.Add("offset", strconv.FormatInt(opts.Offset, 10))
+		}
+		if opts.Limit != 0 {
+			v.Add("limit", strconv.FormatInt(opts.Limit, 10))
+		}
 	}
 
 	r, err := bot.Get("getUserProfilePhotos", v)
@@ -1083,10 +1185,16 @@ type KickChatMemberOpts struct {
 // https://core.telegram.org/bots/api#kickchatmember
 func (bot *Bot) KickChatMember(chatId int64, userId int64, opts *KickChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
-		v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		if opts.UntilDate != 0 {
+			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		}
 		v.Add("revoke_messages", strconv.FormatBool(opts.RevokeMessages))
 	}
 
@@ -1104,7 +1212,9 @@ func (bot *Bot) KickChatMember(chatId int64, userId int64, opts *KickChatMemberO
 // https://core.telegram.org/bots/api#leavechat
 func (bot *Bot) LeaveChat(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("leaveChat", v)
 	if err != nil {
@@ -1142,8 +1252,12 @@ type PinChatMessageOpts struct {
 // https://core.telegram.org/bots/api#pinchatmessage
 func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if messageId != 0 {
+		v.Add("message_id", strconv.FormatInt(messageId, 10))
+	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	}
@@ -1190,8 +1304,12 @@ type PromoteChatMemberOpts struct {
 // https://core.telegram.org/bots/api#promotechatmember
 func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
 		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
 		v.Add("can_manage_chat", strconv.FormatBool(opts.CanManageChat))
@@ -1229,15 +1347,21 @@ type RestrictChatMemberOpts struct {
 // https://core.telegram.org/bots/api#restrictchatmember
 func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
 	}
 	v.Add("permissions", string(bs))
 	if opts != nil {
-		v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		if opts.UntilDate != 0 {
+			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		}
 	}
 
 	r, err := bot.Get("restrictChatMember", v)
@@ -1255,7 +1379,9 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("invite_link", inviteLink)
 
 	r, err := bot.Get("revokeChatInviteLink", v)
@@ -1301,7 +1427,9 @@ type SendAnimationOpts struct {
 func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if animation != nil {
 		switch m := animation.(type) {
 		case string:
@@ -1324,9 +1452,15 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		}
 	}
 	if opts != nil {
-		v.Add("duration", strconv.FormatInt(opts.Duration, 10))
-		v.Add("width", strconv.FormatInt(opts.Width, 10))
-		v.Add("height", strconv.FormatInt(opts.Height, 10))
+		if opts.Duration != 0 {
+			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		}
+		if opts.Width != 0 {
+			v.Add("width", strconv.FormatInt(opts.Width, 10))
+		}
+		if opts.Height != 0 {
+			v.Add("height", strconv.FormatInt(opts.Height, 10))
+		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
@@ -1358,7 +1492,9 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1413,7 +1549,9 @@ type SendAudioOpts struct {
 func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if audio != nil {
 		switch m := audio.(type) {
 		case string:
@@ -1445,7 +1583,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 			}
 			v.Add("caption_entities", string(bs))
 		}
-		v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		if opts.Duration != 0 {
+			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		}
 		v.Add("performer", opts.Performer)
 		v.Add("title", opts.Title)
 		if opts.Thumb != nil {
@@ -1470,7 +1610,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 			}
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1497,7 +1639,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("action", action)
 
 	r, err := bot.Get("sendChatAction", v)
@@ -1533,14 +1677,18 @@ type SendContactOpts struct {
 // https://core.telegram.org/bots/api#sendcontact
 func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("phone_number", phoneNumber)
 	v.Add("first_name", firstName)
 	if opts != nil {
 		v.Add("last_name", opts.LastName)
 		v.Add("vcard", opts.Vcard)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1580,11 +1728,15 @@ type SendDiceOpts struct {
 // https://core.telegram.org/bots/api#senddice
 func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if opts != nil {
 		v.Add("emoji", opts.Emoji)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1634,7 +1786,9 @@ type SendDocumentOpts struct {
 func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumentOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if document != nil {
 		switch m := document.(type) {
 		case string:
@@ -1689,7 +1843,9 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		}
 		v.Add("disable_content_type_detection", strconv.FormatBool(opts.DisableContentTypeDetection))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1728,11 +1884,15 @@ type SendGameOpts struct {
 // https://core.telegram.org/bots/api#sendgame
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("game_short_name", gameShortName)
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -1804,7 +1964,9 @@ type SendInvoiceOpts struct {
 // https://core.telegram.org/bots/api#sendinvoice
 func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("title", title)
 	v.Add("description", description)
 	v.Add("payload", payload)
@@ -1818,7 +1980,9 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v.Add("prices", string(bs))
 	}
 	if opts != nil {
-		v.Add("max_tip_amount", strconv.FormatInt(opts.MaxTipAmount, 10))
+		if opts.MaxTipAmount != 0 {
+			v.Add("max_tip_amount", strconv.FormatInt(opts.MaxTipAmount, 10))
+		}
 		if opts.SuggestedTipAmounts != nil {
 			bs, err := json.Marshal(opts.SuggestedTipAmounts)
 			if err != nil {
@@ -1829,9 +1993,15 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v.Add("start_parameter", opts.StartParameter)
 		v.Add("provider_data", opts.ProviderData)
 		v.Add("photo_url", opts.PhotoUrl)
-		v.Add("photo_size", strconv.FormatInt(opts.PhotoSize, 10))
-		v.Add("photo_width", strconv.FormatInt(opts.PhotoWidth, 10))
-		v.Add("photo_height", strconv.FormatInt(opts.PhotoHeight, 10))
+		if opts.PhotoSize != 0 {
+			v.Add("photo_size", strconv.FormatInt(opts.PhotoSize, 10))
+		}
+		if opts.PhotoWidth != 0 {
+			v.Add("photo_width", strconv.FormatInt(opts.PhotoWidth, 10))
+		}
+		if opts.PhotoHeight != 0 {
+			v.Add("photo_height", strconv.FormatInt(opts.PhotoHeight, 10))
+		}
 		v.Add("need_name", strconv.FormatBool(opts.NeedName))
 		v.Add("need_phone_number", strconv.FormatBool(opts.NeedPhoneNumber))
 		v.Add("need_email", strconv.FormatBool(opts.NeedEmail))
@@ -1840,7 +2010,9 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v.Add("send_email_to_provider", strconv.FormatBool(opts.SendEmailToProvider))
 		v.Add("is_flexible", strconv.FormatBool(opts.IsFlexible))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -1886,16 +2058,32 @@ type SendLocationOpts struct {
 // https://core.telegram.org/bots/api#sendlocation
 func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if latitude != 0.0 {
+		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	}
+	if longitude != 0.0 {
+		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	}
 	if opts != nil {
-		v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
-		v.Add("live_period", strconv.FormatInt(opts.LivePeriod, 10))
-		v.Add("heading", strconv.FormatInt(opts.Heading, 10))
-		v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+		if opts.HorizontalAccuracy != 0.0 {
+			v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
+		}
+		if opts.LivePeriod != 0 {
+			v.Add("live_period", strconv.FormatInt(opts.LivePeriod, 10))
+		}
+		if opts.Heading != 0 {
+			v.Add("heading", strconv.FormatInt(opts.Heading, 10))
+		}
+		if opts.ProximityAlertRadius != 0 {
+			v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -1933,7 +2121,9 @@ type SendMediaGroupOpts struct {
 func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
@@ -1951,7 +2141,9 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 	}
 
@@ -1999,7 +2191,9 @@ type SendMessageOpts struct {
 // https://core.telegram.org/bots/api#sendmessage
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("text", text)
 	if opts != nil {
 		v.Add("parse_mode", opts.ParseMode)
@@ -2012,7 +2206,9 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		}
 		v.Add("disable_web_page_preview", strconv.FormatBool(opts.DisableWebPagePreview))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2058,7 +2254,9 @@ type SendPhotoOpts struct {
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if photo != nil {
 		switch m := photo.(type) {
 		case string:
@@ -2091,7 +2289,9 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2151,7 +2351,9 @@ type SendPollOpts struct {
 // https://core.telegram.org/bots/api#sendpoll
 func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *SendPollOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("question", question)
 	if options != nil {
 		bs, err := json.Marshal(options)
@@ -2164,7 +2366,9 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
 		v.Add("type", opts.Type)
 		v.Add("allows_multiple_answers", strconv.FormatBool(opts.AllowsMultipleAnswers))
-		v.Add("correct_option_id", strconv.FormatInt(opts.CorrectOptionId, 10))
+		if opts.CorrectOptionId != 0 {
+			v.Add("correct_option_id", strconv.FormatInt(opts.CorrectOptionId, 10))
+		}
 		v.Add("explanation", opts.Explanation)
 		v.Add("explanation_parse_mode", opts.ExplanationParseMode)
 		if opts.ExplanationEntities != nil {
@@ -2174,11 +2378,17 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 			}
 			v.Add("explanation_entities", string(bs))
 		}
-		v.Add("open_period", strconv.FormatInt(opts.OpenPeriod, 10))
-		v.Add("close_date", strconv.FormatInt(opts.CloseDate, 10))
+		if opts.OpenPeriod != 0 {
+			v.Add("open_period", strconv.FormatInt(opts.OpenPeriod, 10))
+		}
+		if opts.CloseDate != 0 {
+			v.Add("close_date", strconv.FormatInt(opts.CloseDate, 10))
+		}
 		v.Add("is_closed", strconv.FormatBool(opts.IsClosed))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2218,7 +2428,9 @@ type SendStickerOpts struct {
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if sticker != nil {
 		switch m := sticker.(type) {
 		case string:
@@ -2242,7 +2454,9 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2292,9 +2506,15 @@ type SendVenueOpts struct {
 // https://core.telegram.org/bots/api#sendvenue
 func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if latitude != 0.0 {
+		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	}
+	if longitude != 0.0 {
+		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	}
 	v.Add("title", title)
 	v.Add("address", address)
 	if opts != nil {
@@ -2303,7 +2523,9 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		v.Add("google_place_id", opts.GooglePlaceId)
 		v.Add("google_place_type", opts.GooglePlaceType)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2359,7 +2581,9 @@ type SendVideoOpts struct {
 func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if video != nil {
 		switch m := video.(type) {
 		case string:
@@ -2382,9 +2606,15 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 	}
 	if opts != nil {
-		v.Add("duration", strconv.FormatInt(opts.Duration, 10))
-		v.Add("width", strconv.FormatInt(opts.Width, 10))
-		v.Add("height", strconv.FormatInt(opts.Height, 10))
+		if opts.Duration != 0 {
+			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		}
+		if opts.Width != 0 {
+			v.Add("width", strconv.FormatInt(opts.Width, 10))
+		}
+		if opts.Height != 0 {
+			v.Add("height", strconv.FormatInt(opts.Height, 10))
+		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
@@ -2417,7 +2647,9 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 		v.Add("supports_streaming", strconv.FormatBool(opts.SupportsStreaming))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2463,7 +2695,9 @@ type SendVideoNoteOpts struct {
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if videoNote != nil {
 		switch m := videoNote.(type) {
 		case string:
@@ -2486,8 +2720,12 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		}
 	}
 	if opts != nil {
-		v.Add("duration", strconv.FormatInt(opts.Duration, 10))
-		v.Add("length", strconv.FormatInt(opts.Length, 10))
+		if opts.Duration != 0 {
+			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		}
+		if opts.Length != 0 {
+			v.Add("length", strconv.FormatInt(opts.Length, 10))
+		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
@@ -2510,7 +2748,9 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 			}
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2558,7 +2798,9 @@ type SendVoiceOpts struct {
 func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if voice != nil {
 		switch m := voice.(type) {
 		case string:
@@ -2590,9 +2832,13 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 			}
 			v.Add("caption_entities", string(bs))
 		}
-		v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		if opts.Duration != 0 {
+			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		if opts.ReplyToMessageId != 0 {
+			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
 			bs, err := opts.ReplyMarkup.ReplyMarkup()
@@ -2619,8 +2865,12 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	v.Add("custom_title", customTitle)
 
 	r, err := bot.Get("setChatAdministratorCustomTitle", v)
@@ -2644,7 +2894,9 @@ type SetChatDescriptionOpts struct {
 // https://core.telegram.org/bots/api#setchatdescription
 func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if opts != nil {
 		v.Add("description", opts.Description)
 	}
@@ -2664,7 +2916,9 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
@@ -2687,7 +2941,9 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (b
 func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if photo != nil {
 		switch m := photo.(type) {
 		case NamedReader:
@@ -2722,7 +2978,9 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 // https://core.telegram.org/bots/api#setchatstickerset
 func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("sticker_set_name", stickerSetName)
 
 	r, err := bot.Get("setChatStickerSet", v)
@@ -2740,7 +2998,9 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, er
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	v.Add("title", title)
 
 	r, err := bot.Get("setChatTitle", v)
@@ -2773,13 +3033,21 @@ type SetGameScoreOpts struct {
 // https://core.telegram.org/bots/api#setgamescore
 func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, error) {
 	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
-	v.Add("score", strconv.FormatInt(score, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
+	if score != 0 {
+		v.Add("score", strconv.FormatInt(score, 10))
+	}
 	if opts != nil {
 		v.Add("force", strconv.FormatBool(opts.Force))
 		v.Add("disable_edit_message", strconv.FormatBool(opts.DisableEditMessage))
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 	}
 
@@ -2821,7 +3089,9 @@ func (bot *Bot) SetMyCommands(commands []BotCommand) (bool, error) {
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if errors != nil {
 		bs, err := json.Marshal(errors)
 		if err != nil {
@@ -2846,7 +3116,9 @@ func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementErro
 func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("sticker", sticker)
-	v.Add("position", strconv.FormatInt(position, 10))
+	if position != 0 {
+		v.Add("position", strconv.FormatInt(position, 10))
+	}
 
 	r, err := bot.Get("setStickerPositionInSet", v)
 	if err != nil {
@@ -2872,7 +3144,9 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("name", name)
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
@@ -2949,7 +3223,9 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 			}
 		}
 		v.Add("ip_address", opts.IpAddress)
-		v.Add("max_connections", strconv.FormatInt(opts.MaxConnections, 10))
+		if opts.MaxConnections != 0 {
+			v.Add("max_connections", strconv.FormatInt(opts.MaxConnections, 10))
+		}
 		if opts.AllowedUpdates != nil {
 			bs, err := json.Marshal(opts.AllowedUpdates)
 			if err != nil {
@@ -2987,8 +3263,12 @@ type StopMessageLiveLocationOpts struct {
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	if opts != nil {
-		v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -3019,8 +3299,12 @@ type StopPollOpts struct {
 // https://core.telegram.org/bots/api#stoppoll
 func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if messageId != 0 {
+		v.Add("message_id", strconv.FormatInt(messageId, 10))
+	}
 	if opts != nil {
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -3051,8 +3335,12 @@ type UnbanChatMemberOpts struct {
 // https://core.telegram.org/bots/api#unbanchatmember
 func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if opts != nil {
 		v.Add("only_if_banned", strconv.FormatBool(opts.OnlyIfBanned))
 	}
@@ -3071,7 +3359,9 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 
 	r, err := bot.Get("unpinAllChatMessages", v)
 	if err != nil {
@@ -3094,9 +3384,13 @@ type UnpinChatMessageOpts struct {
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
 	if opts != nil {
-		v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		if opts.MessageId != 0 {
+			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+		}
 	}
 
 	r, err := bot.Get("unpinChatMessage", v)
@@ -3115,7 +3409,9 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
 	if pngSticker != nil {
 		switch m := pngSticker.(type) {
 		case NamedReader:
