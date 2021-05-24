@@ -491,7 +491,7 @@ type InlineQueryResultArticle struct {
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultArticle
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "article",
@@ -533,7 +533,7 @@ type InlineQueryResultAudio struct {
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultAudio
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "audio",
@@ -569,7 +569,7 @@ type InlineQueryResultCachedAudio struct {
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedAudio
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "audio",
@@ -609,7 +609,7 @@ type InlineQueryResultCachedDocument struct {
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedDocument
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "document",
@@ -646,7 +646,7 @@ type InlineQueryResultCachedGif struct {
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedGif
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "gif",
@@ -683,7 +683,7 @@ type InlineQueryResultCachedMpeg4Gif struct {
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedMpeg4Gif
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "mpeg4_gif",
@@ -722,7 +722,7 @@ type InlineQueryResultCachedPhoto struct {
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedPhoto
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "photo",
@@ -752,7 +752,7 @@ type InlineQueryResultCachedSticker struct {
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedSticker
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "sticker",
@@ -791,7 +791,7 @@ type InlineQueryResultCachedVideo struct {
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVideo
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "video",
@@ -829,7 +829,7 @@ type InlineQueryResultCachedVoice struct {
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVoice
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "voice",
@@ -871,7 +871,7 @@ type InlineQueryResultContact struct {
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultContact
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "contact",
@@ -919,7 +919,7 @@ type InlineQueryResultDocument struct {
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultDocument
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "document",
@@ -947,7 +947,7 @@ type InlineQueryResultGame struct {
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGame
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "game",
@@ -994,7 +994,7 @@ type InlineQueryResultGif struct {
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGif
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "gif",
@@ -1042,7 +1042,7 @@ type InlineQueryResultLocation struct {
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultLocation
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "location",
@@ -1089,7 +1089,7 @@ type InlineQueryResultMpeg4Gif struct {
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultMpeg4Gif
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "mpeg4_gif",
@@ -1134,7 +1134,7 @@ type InlineQueryResultPhoto struct {
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultPhoto
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "photo",
@@ -1184,7 +1184,7 @@ type InlineQueryResultVenue struct {
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVenue
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "venue",
@@ -1233,7 +1233,7 @@ type InlineQueryResultVideo struct {
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVideo
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "video",
@@ -1273,7 +1273,7 @@ type InlineQueryResultVoice struct {
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVoice
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "voice",
@@ -1411,7 +1411,7 @@ type InputMediaAnimation struct {
 func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 	type alias InputMediaAnimation
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "animation",
@@ -1466,7 +1466,7 @@ type InputMediaAudio struct {
 func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 	type alias InputMediaAudio
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "audio",
@@ -1517,7 +1517,7 @@ type InputMediaDocument struct {
 func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 	type alias InputMediaDocument
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "document",
@@ -1564,7 +1564,7 @@ type InputMediaPhoto struct {
 func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 	type alias InputMediaPhoto
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "photo",
@@ -1621,7 +1621,7 @@ type InputMediaVideo struct {
 func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 	type alias InputMediaVideo
 	a := struct {
-		Type string
+		Type string `json:"type"`
 		alias
 	}{
 		Type:  "video",

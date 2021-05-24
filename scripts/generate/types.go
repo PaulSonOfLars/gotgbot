@@ -257,11 +257,12 @@ type customMarshalData struct {
 	TypeName string
 }
 
+// The alias type is required to avoid infinite MarshalJSON loops.
 const customMarshal = `
 func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 	type alias {{.Type}}
 	a := struct{
-		Type string
+		Type string ` + "`json:\"type\"`" + `
 		alias
 	}{
 		Type: "{{.TypeName}}",
