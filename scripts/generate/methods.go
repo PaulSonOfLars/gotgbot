@@ -194,7 +194,15 @@ func generateValue(f Field, goParam string, defaultRetVal string) (string, bool,
 
 	stringer := goTypeStringer(fieldType)
 	if stringer != "" {
-		return "\nv.Add(\"" + f.Name + "\", " + fmt.Sprintf(stringer, goParam) + ")", false, nil
+		addParam := fmt.Sprintf(`v.Add("%s", %s)`, f.Name, fmt.Sprintf(stringer, goParam))
+		if fieldType == "bool" || fieldType == "string" {
+			return "\n" + addParam, false, nil
+		}
+
+		return fmt.Sprintf(`
+if %s != %s {
+	%s
+}`, goParam, getDefaultReturnVal(fieldType), addParam), false, nil
 	}
 
 	bd := strings.Builder{}
