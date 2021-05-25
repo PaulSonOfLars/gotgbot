@@ -6,24 +6,6 @@ import (
 
 type Message func(msg *gotgbot.Message) bool
 
-func (f Message) And(f2 Message) Message {
-	return func(msg *gotgbot.Message) bool {
-		return f(msg) && f2(msg)
-	}
-}
-
-func (f Message) Or(f2 Message) Message {
-	return func(msg *gotgbot.Message) bool {
-		return f(msg) || f2(msg)
-	}
-}
-
-func (f Message) Not() Message {
-	return func(msg *gotgbot.Message) bool {
-		return !f(msg)
-	}
-}
-
 func All(_ *gotgbot.Message) bool {
 	return true
 }
