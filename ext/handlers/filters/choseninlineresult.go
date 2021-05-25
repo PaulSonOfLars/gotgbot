@@ -38,13 +38,13 @@ func ChosenResultQuery(q string) ChosenInlineResult {
 	}
 }
 
-func ChosenResultPrefix(prefix string) ChosenInlineResult {
+func ChosenResultQueryPrefix(prefix string) ChosenInlineResult {
 	return func(cir *gotgbot.ChosenInlineResult) bool {
 		return strings.HasPrefix(cir.Query, prefix)
 	}
 }
 
-func ChosenResultSuffix(suffix string) ChosenInlineResult {
+func ChosenResultQuerySuffix(suffix string) ChosenInlineResult {
 	return func(cir *gotgbot.ChosenInlineResult) bool {
 		return strings.HasSuffix(cir.Query, suffix)
 	}
