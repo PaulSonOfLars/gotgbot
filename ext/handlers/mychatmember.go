@@ -21,7 +21,10 @@ func NewMyChatMember(f filters.ChatMember, r Response) MyChatMember {
 }
 
 func (m MyChatMember) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
-	return u.MyChatMember != nil && m.Filter != nil && m.Filter(u.MyChatMember)
+	if u.MyChatMember == nil {
+		return false
+	}
+	return m.Filter == nil || m.Filter(u.MyChatMember)
 }
 
 func (m MyChatMember) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
