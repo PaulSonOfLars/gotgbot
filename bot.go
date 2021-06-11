@@ -9,8 +9,8 @@ import (
 
 // Bot is the core Bot object used to send and receive messages.
 type Bot struct {
+	User
 	Token       string
-	User        User
 	APIURL      string
 	Client      http.Client
 	GetTimeout  time.Duration

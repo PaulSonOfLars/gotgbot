@@ -6,7 +6,7 @@ import (
 
 type Message func(msg *gotgbot.Message) bool
 
-func All(_ *gotgbot.Message) bool {
+func MessageAll(_ *gotgbot.Message) bool {
 	return true
 }
 
