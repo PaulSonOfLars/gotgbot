@@ -13,9 +13,9 @@ type InlineQuery struct {
 	Response Response
 }
 
-func NewInlineQuery(filter filters.InlineQuery, r Response) InlineQuery {
+func NewInlineQuery(f filters.InlineQuery, r Response) InlineQuery {
 	return InlineQuery{
-		Filter:   filter,
+		Filter:   f,
 		Response: r,
 	}
 }

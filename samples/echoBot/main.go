@@ -8,7 +8,8 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
 func main() {
@@ -29,8 +30,8 @@ func main() {
 	// Add echo handler to reply to all messages.
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
-	dispatcher.AddHandler(handlers.NewCallback(filters.Equal("start_callback"), startCB))
-	dispatcher.AddHandler(handlers.NewMessage(filters.All, echo))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
+	dispatcher.AddHandler(handlers.NewMessage(message.All, echo))
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{DropPendingUpdates: true})
