@@ -1,6 +1,8 @@
 package message
 
 import (
+	"strings"
+
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 )
@@ -77,6 +79,18 @@ func Forwarded(msg *gotgbot.Message) bool {
 
 func Text(msg *gotgbot.Message) bool {
 	return msg.Text != ""
+}
+
+func HasPrefix(prefix string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return strings.HasPrefix(msg.Text, prefix)
+	}
+}
+
+func HasSuffix(suffix string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return strings.HasSuffix(msg.Text, suffix)
+	}
 }
 
 func Caption(msg *gotgbot.Message) bool {
