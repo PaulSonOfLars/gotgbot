@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 func generateHelpers(d APIDescription) error {

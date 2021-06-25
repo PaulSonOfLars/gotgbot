@@ -1,9 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 // TODO: dont hardcode; obtain these from reply_markup fields.
@@ -15,10 +16,13 @@ var replyMarkupTypes = []string{
 }
 
 var (
-	genericInterfaceTmpl       = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
-	inputMediaInterfaceTmpl    = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
-	customMarshalTmpl          = template.Must(template.New("customMarshal").Parse(customMarshal))
-	customConstStringFieldTmpl = template.Must(template.New("customConstStringField").Parse(customConstStringField))
+	genericInterfaceTmpl          = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
+	inputMediaInterfaceTmpl       = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
+	customMarshalTmpl             = template.Must(template.New("customMarshal").Parse(customMarshal))
+	customConstStringFieldTmpl    = template.Must(template.New("customConstStringField").Parse(customConstStringField))
+	customUnmarshalTmpl           = template.Must(template.New("customUnmarshal").Parse(customUnmarshal))
+	customStructUnmarshalTmpl     = template.Must(template.New("customStructUnmarshal").Parse(customStructUnmarshal))
+	customStructUnmarshalCaseTmpl = template.Must(template.New("customStructUnmarshalCase").Parse(customStructUnmarshalCase))
 )
 
 func generateTypes(d APIDescription) error {
@@ -33,6 +37,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"errors"
 )
 `)
 
@@ -71,15 +76,12 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		switch tgType.Name {
 		case tgTypeInputMedia:
 			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
-			return typeDef.String(), nil
 
 		case tgTypeBotCommandScope:
 			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "type"))
-			return typeDef.String(), nil
 
 		case tgTypeChatMember:
 			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "status"))
-			return typeDef.String(), nil
 
 		case tgTypeCallbackGame,
 			tgTypeInlineQueryResult,
@@ -87,7 +89,6 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			tgTypeInputMessageContent,
 			tgTypePassportElementError:
 			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
-			return typeDef.String(), nil
 
 		case tgTypeVoiceChatStarted:
 			// VoiceChatStarted is actually just empty, this is legitimate
@@ -96,6 +97,21 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		default:
 			return "", fmt.Errorf("unknown type %s has no fields - please check if this requires implementation", tgType.Name)
 		}
+
+		// Interface types need to be unmarshalled in a specific way to be received by the API.
+		// To do this, we need to define a custom UnmarshalJSON method unmarshal the right bits.
+		if len(tgType.Subtypes) > 0 && tgType.sentByAPI(d) {
+			unmarshalFunc, err := interfaceUnmarshalFunc(d, tgType)
+			if err != nil {
+				return "", fmt.Errorf("unable to generate interface unmarshal function")
+			}
+			if unmarshalFunc != "" {
+				typeDef.WriteString("\n\n" + unmarshalFunc)
+			}
+		}
+
+		return typeDef.String(), nil
+
 	} else {
 		typeFields, err := generateTypeFields(d, tgType)
 		if err != nil {
@@ -109,9 +125,15 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			typeDef.WriteString(typeFields)
 			typeDef.WriteString("\n}")
 		}
+
+		s, err := setupCustomUnmarshal(d, tgType)
+		if err != nil {
+			return "", err
+		}
+		typeDef.WriteString(s)
 	}
 
-	interfaces, err2 := generateParentTypeInterfaces(tgType)
+	interfaces, err2 := generateParentTypeInterfaces(d, tgType)
 	if err2 != nil {
 		return "", err2
 	}
@@ -121,7 +143,53 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	return typeDef.String(), nil
 }
 
-func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
+// Incoming types which marshal into interfaces need special handling to make sure the interfaces are
+// populated correctly.
+func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, error) {
+	var fields []customUnmarshalFieldData
+	generateCustomMarshal := false
+	for idx, f := range tgType.Fields {
+		prefType, err := f.getPreferredType()
+		if err != nil {
+			return "", err
+		}
+
+		if HasSubtypes(d, prefType) && d.Types[prefType].getConstantField(d) != "" {
+			generateCustomMarshal = true
+		}
+
+		if idx == 0 && len(tgType.SubtypeOf) > 0 && (f.Name == "type" || f.Name == "status") {
+			continue
+		}
+
+		if isTgType(d, prefType) && !f.Required {
+			prefType = "*" + prefType
+		}
+
+		fields = append(fields, customUnmarshalFieldData{
+			Name:    snakeToTitle(f.Name),
+			Custom:  len(d.Types[prefType].Subtypes) > 0,
+			Type:    prefType,
+			JSONTag: fmt.Sprintf("`json:\"%s\"`", f.Name),
+		})
+	}
+
+	if !generateCustomMarshal {
+		return "", nil
+	}
+
+	bd := strings.Builder{}
+	err := customUnmarshalTmpl.Execute(&bd, customUnmarshalData{
+		Type:   tgType.Name,
+		Fields: fields,
+	})
+	if err != nil {
+		return "", err
+	}
+	return bd.String(), nil
+}
+
+func generateParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
 	typeInterfaces := strings.Builder{}
 	for _, parentType := range tgType.SubtypeOf {
 		switch parentType {
@@ -160,7 +228,7 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 			}
 
 		case tgTypeInlineQueryResult, tgTypeBotCommandScope, tgTypeChatMember:
-			err := constantFieldGenerator(tgType, &typeInterfaces, parentType)
+			err := constantFieldGenerator(d, tgType, &typeInterfaces, parentType)
 			if err != nil {
 				return "", err
 			}
@@ -196,12 +264,48 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 	return typeInterfaces.String(), nil
 }
 
-func constantFieldGenerator(tgType TypeDescription, typeInterfaces *strings.Builder, parentType string) error {
-	// Some items need a custom marshaller to handle the "type" field
-	typeName := strings.TrimPrefix(tgType.Name, parentType)
-	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, error) {
+	constantField := strings.Title(tgType.getConstantField(d))
+	if constantField == "" {
+		// If we dont have a constant field, we can't setup the unmarshaller.
+		return "", errors.New("cant generate custom unmarshal func without a common field")
+	}
 
-	constantField := tgType.Fields[0].Name
+	var cases []string
+	caseBd := strings.Builder{}
+	for _, subTypeName := range tgType.Subtypes {
+		shortName := d.Types[subTypeName].getTypeNameFromParent(tgType.Name)
+		err := customStructUnmarshalCaseTmpl.Execute(&caseBd, customStructUnmarshalCaseData{
+			ConstantFieldName: titleToSnake(shortName),
+			TypeName:          subTypeName,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		cases = append(cases, caseBd.String())
+		caseBd.Reset()
+	}
+
+	bd := strings.Builder{}
+	err := customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
+		UnmarshalFuncName: "unmarshal" + tgType.Name,
+		ParentType:        tgType.Name,
+		ConstantFieldName: constantField,
+		CaseStatements:    cases,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return bd.String(), nil
+}
+
+func constantFieldGenerator(d APIDescription, tgType TypeDescription, typeInterfaces *strings.Builder, parentType string) error {
+	// Some items need a custom marshaller to handle the "type" field
+	typeName := tgType.getTypeNameFromParent(parentType)
+
+	constantField := tgType.getConstantField(d)
 
 	err := customConstStringFieldTmpl.Execute(typeInterfaces, customConstStringData{
 		Type:              tgType.Name,
@@ -297,6 +401,7 @@ type %s interface{
 	%s() ([]byte, error)
 }`, name, strings.Title(constField), name)
 }
+
 func generateGenericInterfaceType(name string, hasSubtypes bool) string {
 	if !hasSubtypes {
 		return "\ntype " + name + " interface{}"
@@ -328,6 +433,89 @@ const customConstStringField = `
 func (v {{.Type}}) {{.ConstantFieldName}}() string {
 	return "{{.ConstantValueName}}"
 }
+`
+
+type customUnmarshalFieldData struct {
+	Name    string
+	Custom  bool
+	Type    string
+	JSONTag string
+}
+
+type customUnmarshalData struct {
+	Type   string
+	Fields []customUnmarshalFieldData
+}
+
+const customUnmarshal = `
+func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
+	// All fields in {{.Type}}, with interface fields as json.RawMessage
+	type tmp struct {
+        {{ range $f := .Fields }}
+		{{ $f.Name }} {{ if $f.Custom }} json.RawMessage {{ else }} {{ $f.Type }} {{ end }} {{ $f.JSONTag -}}
+		{{- end }}
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+	{{ range $f := .Fields }}
+		{{- if $f.Custom}}
+			v.{{ $f.Name }}, err = unmarshal{{ $f.Type }}(t.{{$f.Name}})
+			if err != nil {
+				return err
+			}
+			{{- else }}
+			v.{{ $f.Name }} = t.{{ $f.Name }}
+		{{- end }}
+	{{- end }}
+
+	return nil
+}
+`
+
+type customStructUnmarshalData struct {
+	UnmarshalFuncName string
+	ParentType        string
+	ConstantFieldName string
+	CaseStatements    []string
+}
+
+// The alias type is required to avoid infinite MarshalJSON loops.
+const customStructUnmarshal = `func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
+		if len(d) == 0 {
+			return nil, nil
+		}
+
+		t := struct {
+			{{.ConstantFieldName}} string
+		}{}
+		err := json.Unmarshal(d, &t)
+		if err != nil {
+			return nil, err
+		}
+
+		switch t.{{.ConstantFieldName}} {
+		{{ range $val := .CaseStatements }} {{ $val }}
+		{{end}}
+		}
+		return nil, errors.New("failed to unmarshal: unknown interface with {{.ConstantFieldName}} " +t.{{.ConstantFieldName}} )
+}`
+
+type customStructUnmarshalCaseData struct {
+	ConstantFieldName string
+	TypeName          string
+}
+
+// The alias type is required to avoid infinite MarshalJSON loops.
+const customStructUnmarshalCase = `case "{{.ConstantFieldName}}":
+	s := {{.TypeName}}{}
+	err := json.Unmarshal(d, &s)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 `
 
 type customMarshalData struct {

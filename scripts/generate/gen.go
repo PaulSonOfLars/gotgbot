@@ -25,15 +25,48 @@ type TypeDescription struct {
 	SubtypeOf   []string `json:"subtype_of"`
 }
 
-func (d TypeDescription) receiverName() string {
+func (td TypeDescription) receiverName() string {
 	var rs []rune
-	for _, r := range []rune(d.Name) {
+	for _, r := range []rune(td.Name) {
 		if unicode.IsUpper(r) {
 			rs = append(rs, r)
 		}
 	}
 
 	return strings.ToLower(string(rs))
+}
+
+func (td TypeDescription) sentByAPI(d APIDescription) bool {
+	for _, m := range d.Methods {
+		for _, r := range m.Returns {
+			if r == td.Name {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (td TypeDescription) getTypeNameFromParent(parentType string) string {
+	typeName := strings.TrimPrefix(td.Name, parentType)
+	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+	return typeName
+}
+
+func (td TypeDescription) getConstantField(d APIDescription) string {
+	if len(td.Subtypes) != 0 {
+		var constantField string
+		for _, s := range td.Subtypes {
+			newField := d.Types[s].getConstantField(d)
+			if constantField != newField && constantField != "" {
+				return ""
+			}
+			constantField = newField
+		}
+		return constantField
+	}
+
+	return td.Fields[0].Name
 }
 
 type MethodDescription struct {
@@ -149,8 +182,12 @@ func orderedMethods(d APIDescription) []string {
 
 func isTgType(d APIDescription, goType string) bool {
 	_, ok := d.Types[goType]
-
 	return ok
+}
+
+func HasSubtypes(d APIDescription, typeName string) bool {
+	t, ok := d.Types[typeName]
+	return ok && len(t.Subtypes) > 0
 }
 
 func (f Field) getPreferredType() (string, error) {
