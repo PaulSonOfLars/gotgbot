@@ -15,9 +15,10 @@ var replyMarkupTypes = []string{
 }
 
 var (
-	genericInterfaceTmpl    = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
-	inputMediaInterfaceTmpl = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
-	customMarshalTmpl       = template.Must(template.New("customMarshal").Parse(customMarshal))
+	genericInterfaceTmpl       = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
+	inputMediaInterfaceTmpl    = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
+	customMarshalTmpl          = template.Must(template.New("customMarshal").Parse(customMarshal))
+	customConstStringFieldTmpl = template.Must(template.New("customConstStringField").Parse(customConstStringField))
 )
 
 func generateTypes(d APIDescription) error {
@@ -72,13 +73,19 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
 			return typeDef.String(), nil
 
+		case tgTypeBotCommandScope:
+			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "type"))
+			return typeDef.String(), nil
+
+		case tgTypeChatMember:
+			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "status"))
+			return typeDef.String(), nil
+
 		case tgTypeCallbackGame,
 			tgTypeInlineQueryResult,
 			tgTypeInputFile,
 			tgTypeInputMessageContent,
-			tgTypePassportElementError,
-			tgTypeBotCommandScope,
-			tgTypeChatMember:
+			tgTypePassportElementError:
 			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
 			return typeDef.String(), nil
 
@@ -95,9 +102,13 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			return "", err
 		}
 
-		typeDef.WriteString("\ntype " + tgType.Name + " struct {")
-		typeDef.WriteString(typeFields)
-		typeDef.WriteString("\n}")
+		if typeFields == "" {
+			typeDef.WriteString("\ntype " + tgType.Name + " struct{}")
+		} else {
+			typeDef.WriteString("\ntype " + tgType.Name + " struct {")
+			typeDef.WriteString(typeFields)
+			typeDef.WriteString("\n}")
+		}
 	}
 
 	interfaces, err2 := generateParentTypeInterfaces(tgType)
@@ -119,7 +130,17 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
 
 			constantField := tgType.Fields[0].Name
-			err := customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
+
+			err := customConstStringFieldTmpl.Execute(&typeInterfaces, customConstStringData{
+				Type:              tgType.Name,
+				ConstantFieldName: strings.Title(constantField),
+				ConstantValueName: titleToSnake(typeName),
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+			}
+
+			err = customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
 				Type:                  tgType.Name,
 				ConstantFieldName:     strings.Title(constantField),
 				ConstantJSONFieldName: constantField,
@@ -181,7 +202,17 @@ func constantFieldGenerator(tgType TypeDescription, typeInterfaces *strings.Buil
 	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
 
 	constantField := tgType.Fields[0].Name
-	err := customMarshalTmpl.Execute(typeInterfaces, customMarshalData{
+
+	err := customConstStringFieldTmpl.Execute(typeInterfaces, customConstStringData{
+		Type:              tgType.Name,
+		ConstantFieldName: strings.Title(constantField),
+		ConstantValueName: titleToSnake(typeName),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+	}
+
+	err = customMarshalTmpl.Execute(typeInterfaces, customMarshalData{
 		Type:                  tgType.Name,
 		ConstantFieldName:     strings.Title(constantField),
 		ConstantJSONFieldName: constantField,
@@ -210,12 +241,12 @@ func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error
 		}
 
 		if isSubtypeOf(tgType, tgTypeInlineQueryResult) {
-			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
+			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
 			if f.Name == "type" {
 				continue
 			}
 		} else if isSubtypeOf(tgType, tgTypeInputMedia) {
-			// we don't write the type field since it isnt something that should be customised. This is set in the custom marshaller.
+			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
 			if f.Name == "type" {
 				continue
 			}
@@ -223,6 +254,16 @@ func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error
 			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
 			if f.Name == "media" {
 				fieldType = tgTypeInputFile
+			}
+		} else if isSubtypeOf(tgType, tgTypeChatMember) {
+			// we don't write the status field since it isn't something that should be customised. This is set in the custom marshaller.
+			if f.Name == "status" {
+				continue
+			}
+		} else if isSubtypeOf(tgType, tgTypeBotCommandScope) {
+			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
+			if f.Name == "type" {
+				continue
 			}
 		}
 
@@ -241,6 +282,7 @@ func generateInputMediaInterfaceType(name string, tgType TypeDescription) string
 	if len(tgType.Subtypes) != 0 {
 		return fmt.Sprintf(`
 type %s interface{
+	Type() string
 	%sParams(string, map[string]NamedReader) ([]byte, error)
 }`, name, name)
 	}
@@ -248,6 +290,13 @@ type %s interface{
 	return "\ntype " + name + " interface{}"
 }
 
+func generateConstFieldInterfaceType(name string, constField string) string {
+	return fmt.Sprintf(`
+type %s interface{
+    %s() string
+	%s() ([]byte, error)
+}`, name, strings.Title(constField), name)
+}
 func generateGenericInterfaceType(name string, hasSubtypes bool) string {
 	if !hasSubtypes {
 		return "\ntype " + name + " interface{}"
@@ -268,6 +317,18 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 
 	return false
 }
+
+type customConstStringData struct {
+	Type              string
+	ConstantFieldName string
+	ConstantValueName string
+}
+
+const customConstStringField = `
+func (v {{.Type}}) {{.ConstantFieldName}}() string {
+	return "{{.ConstantValueName}}"
+}
+`
 
 type customMarshalData struct {
 	Type                  string

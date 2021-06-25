@@ -78,14 +78,16 @@ type BotCommand struct {
 // - BotCommandScopeChatMember
 // https://core.telegram.org/bots/api#botcommandscope
 type BotCommandScope interface {
+	Type() string
 	BotCommandScope() ([]byte, error)
 }
 
 // BotCommandScopeAllChatAdministrators Represents the scope of bot commands, covering all group and supergroup chat administrators.
 // https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
-type BotCommandScopeAllChatAdministrators struct {
-	// Scope type, must be all_chat_administrators
-	Type string `json:"type,omitempty"`
+type BotCommandScopeAllChatAdministrators struct{}
+
+func (v BotCommandScopeAllChatAdministrators) Type() string {
+	return "all_chat_administrators"
 }
 
 func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
@@ -106,9 +108,10 @@ func (v BotCommandScopeAllChatAdministrators) BotCommandScope() ([]byte, error) 
 
 // BotCommandScopeAllGroupChats Represents the scope of bot commands, covering all group and supergroup chats.
 // https://core.telegram.org/bots/api#botcommandscopeallgroupchats
-type BotCommandScopeAllGroupChats struct {
-	// Scope type, must be all_group_chats
-	Type string `json:"type,omitempty"`
+type BotCommandScopeAllGroupChats struct{}
+
+func (v BotCommandScopeAllGroupChats) Type() string {
+	return "all_group_chats"
 }
 
 func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
@@ -129,9 +132,10 @@ func (v BotCommandScopeAllGroupChats) BotCommandScope() ([]byte, error) {
 
 // BotCommandScopeAllPrivateChats Represents the scope of bot commands, covering all private chats.
 // https://core.telegram.org/bots/api#botcommandscopeallprivatechats
-type BotCommandScopeAllPrivateChats struct {
-	// Scope type, must be all_private_chats
-	Type string `json:"type,omitempty"`
+type BotCommandScopeAllPrivateChats struct{}
+
+func (v BotCommandScopeAllPrivateChats) Type() string {
+	return "all_private_chats"
 }
 
 func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
@@ -153,10 +157,12 @@ func (v BotCommandScopeAllPrivateChats) BotCommandScope() ([]byte, error) {
 // BotCommandScopeChat Represents the scope of bot commands, covering a specific chat.
 // https://core.telegram.org/bots/api#botcommandscopechat
 type BotCommandScopeChat struct {
-	// Scope type, must be chat
-	Type string `json:"type,omitempty"`
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+func (v BotCommandScopeChat) Type() string {
+	return "chat"
 }
 
 func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
@@ -178,10 +184,12 @@ func (v BotCommandScopeChat) BotCommandScope() ([]byte, error) {
 // BotCommandScopeChatAdministrators Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
 // https://core.telegram.org/bots/api#botcommandscopechatadministrators
 type BotCommandScopeChatAdministrators struct {
-	// Scope type, must be chat_administrators
-	Type string `json:"type,omitempty"`
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+func (v BotCommandScopeChatAdministrators) Type() string {
+	return "chat_administrators"
 }
 
 func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
@@ -203,12 +211,14 @@ func (v BotCommandScopeChatAdministrators) BotCommandScope() ([]byte, error) {
 // BotCommandScopeChatMember Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
 // https://core.telegram.org/bots/api#botcommandscopechatmember
 type BotCommandScopeChatMember struct {
-	// Scope type, must be chat_member
-	Type string `json:"type,omitempty"`
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Unique identifier of the target user
 	UserId int64 `json:"user_id,omitempty"`
+}
+
+func (v BotCommandScopeChatMember) Type() string {
+	return "chat_member"
 }
 
 func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
@@ -229,9 +239,10 @@ func (v BotCommandScopeChatMember) BotCommandScope() ([]byte, error) {
 
 // BotCommandScopeDefault Represents the default scope of bot commands. Default commands are used if no commands with a narrower scope are specified for the user.
 // https://core.telegram.org/bots/api#botcommandscopedefault
-type BotCommandScopeDefault struct {
-	// Scope type, must be default
-	Type string `json:"type,omitempty"`
+type BotCommandScopeDefault struct{}
+
+func (v BotCommandScopeDefault) Type() string {
+	return "default"
 }
 
 func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
@@ -349,14 +360,13 @@ type ChatLocation struct {
 // - ChatMemberBanned
 // https://core.telegram.org/bots/api#chatmember
 type ChatMember interface {
+	Status() string
 	ChatMember() ([]byte, error)
 }
 
 // ChatMemberAdministrator Represents a chat member that has some additional privileges.
 // https://core.telegram.org/bots/api#chatmemberadministrator
 type ChatMemberAdministrator struct {
-	// The member's status in the chat, always "administrator"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
 	// True, if the bot is allowed to edit administrator privileges of that user
@@ -387,6 +397,10 @@ type ChatMemberAdministrator struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 }
 
+func (v ChatMemberAdministrator) Status() string {
+	return "administrator"
+}
+
 func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberAdministrator
 	a := struct {
@@ -406,12 +420,14 @@ func (v ChatMemberAdministrator) ChatMember() ([]byte, error) {
 // ChatMemberBanned Represents a chat member that was banned in the chat and can't return to the chat or view chat messages.
 // https://core.telegram.org/bots/api#chatmemberbanned
 type ChatMemberBanned struct {
-	// The member's status in the chat, always "kicked"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
 	// Date when restrictions will be lifted for this user; unix time
 	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+func (v ChatMemberBanned) Status() string {
+	return "banned"
 }
 
 func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
@@ -433,10 +449,12 @@ func (v ChatMemberBanned) ChatMember() ([]byte, error) {
 // ChatMemberLeft Represents a chat member that isn't currently a member of the chat, but may join it themselves.
 // https://core.telegram.org/bots/api#chatmemberleft
 type ChatMemberLeft struct {
-	// The member's status in the chat, always "left"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
+}
+
+func (v ChatMemberLeft) Status() string {
+	return "left"
 }
 
 func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
@@ -458,10 +476,12 @@ func (v ChatMemberLeft) ChatMember() ([]byte, error) {
 // ChatMemberMember Represents a chat member that has no additional privileges or restrictions.
 // https://core.telegram.org/bots/api#chatmembermember
 type ChatMemberMember struct {
-	// The member's status in the chat, always "member"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
+}
+
+func (v ChatMemberMember) Status() string {
+	return "member"
 }
 
 func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
@@ -483,14 +503,16 @@ func (v ChatMemberMember) ChatMember() ([]byte, error) {
 // ChatMemberOwner Represents a chat member that owns the chat and has all administrator privileges.
 // https://core.telegram.org/bots/api#chatmemberowner
 type ChatMemberOwner struct {
-	// The member's status in the chat, always "creator"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
 	// Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
+}
+
+func (v ChatMemberOwner) Status() string {
+	return "owner"
 }
 
 func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
@@ -512,8 +534,6 @@ func (v ChatMemberOwner) ChatMember() ([]byte, error) {
 // ChatMemberRestricted Represents a chat member that is under certain restrictions in the chat. Supergroups only.
 // https://core.telegram.org/bots/api#chatmemberrestricted
 type ChatMemberRestricted struct {
-	// The member's status in the chat, always "restricted"
-	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
 	// True, if the user is a member of the chat at the moment of the request
@@ -536,6 +556,10 @@ type ChatMemberRestricted struct {
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
 	// Date when restrictions will be lifted for this user; unix time
 	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+func (v ChatMemberRestricted) Status() string {
+	return "restricted"
 }
 
 func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
@@ -857,6 +881,10 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+func (v InlineQueryResultArticle) Type() string {
+	return "article"
+}
+
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultArticle
 	a := struct {
@@ -899,6 +927,10 @@ type InlineQueryResultAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultAudio) Type() string {
+	return "audio"
+}
+
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultAudio
 	a := struct {
@@ -933,6 +965,10 @@ type InlineQueryResultCachedAudio struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the audio
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultCachedAudio) Type() string {
+	return "audio"
 }
 
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
@@ -975,6 +1011,10 @@ type InlineQueryResultCachedDocument struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultCachedDocument) Type() string {
+	return "document"
+}
+
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedDocument
 	a := struct {
@@ -1012,6 +1052,10 @@ type InlineQueryResultCachedGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultCachedGif) Type() string {
+	return "gif"
+}
+
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedGif
 	a := struct {
@@ -1047,6 +1091,10 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video animation
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultCachedMpeg4Gif) Type() string {
+	return "mpeg4_gif"
 }
 
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
@@ -1088,6 +1136,10 @@ type InlineQueryResultCachedPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultCachedPhoto) Type() string {
+	return "photo"
+}
+
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedPhoto
 	a := struct {
@@ -1116,6 +1168,10 @@ type InlineQueryResultCachedSticker struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the sticker
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultCachedSticker) Type() string {
+	return "sticker"
 }
 
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
@@ -1157,6 +1213,10 @@ type InlineQueryResultCachedVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultCachedVideo) Type() string {
+	return "video"
+}
+
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVideo
 	a := struct {
@@ -1193,6 +1253,10 @@ type InlineQueryResultCachedVoice struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the voice message
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultCachedVoice) Type() string {
+	return "voice"
 }
 
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
@@ -1235,6 +1299,10 @@ type InlineQueryResultContact struct {
 	ThumbWidth int64 `json:"thumb_width,omitempty"`
 	// Optional. Thumbnail height
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
+}
+
+func (v InlineQueryResultContact) Type() string {
+	return "contact"
 }
 
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
@@ -1285,6 +1353,10 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+func (v InlineQueryResultDocument) Type() string {
+	return "document"
+}
+
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultDocument
 	a := struct {
@@ -1311,6 +1383,10 @@ type InlineQueryResultGame struct {
 	GameShortName string `json:"game_short_name,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+func (v InlineQueryResultGame) Type() string {
+	return "game"
 }
 
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
@@ -1358,6 +1434,10 @@ type InlineQueryResultGif struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the GIF animation
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultGif) Type() string {
+	return "gif"
 }
 
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
@@ -1408,6 +1488,10 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+func (v InlineQueryResultLocation) Type() string {
+	return "location"
+}
+
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultLocation
 	a := struct {
@@ -1455,6 +1539,10 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultMpeg4Gif) Type() string {
+	return "mpeg4_gif"
+}
+
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultMpeg4Gif
 	a := struct {
@@ -1498,6 +1586,10 @@ type InlineQueryResultPhoto struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the photo
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultPhoto) Type() string {
+	return "photo"
 }
 
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
@@ -1550,6 +1642,10 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+func (v InlineQueryResultVenue) Type() string {
+	return "venue"
+}
+
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVenue
 	a := struct {
@@ -1599,6 +1695,10 @@ type InlineQueryResultVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+func (v InlineQueryResultVideo) Type() string {
+	return "video"
+}
+
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVideo
 	a := struct {
@@ -1637,6 +1737,10 @@ type InlineQueryResultVoice struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the voice recording
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+}
+
+func (v InlineQueryResultVoice) Type() string {
+	return "voice"
 }
 
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
@@ -1754,6 +1858,7 @@ func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
 // - InputMediaVideo
 // https://core.telegram.org/bots/api#inputmedia
 type InputMedia interface {
+	Type() string
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
 }
 
@@ -1776,6 +1881,10 @@ type InputMediaAnimation struct {
 	Height int64 `json:"height,omitempty"`
 	// Optional. Animation duration
 	Duration int64 `json:"duration,omitempty"`
+}
+
+func (v InputMediaAnimation) Type() string {
+	return "animation"
 }
 
 func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
@@ -1833,6 +1942,10 @@ type InputMediaAudio struct {
 	Title string `json:"title,omitempty"`
 }
 
+func (v InputMediaAudio) Type() string {
+	return "audio"
+}
+
 func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 	type alias InputMediaAudio
 	a := struct {
@@ -1884,6 +1997,10 @@ type InputMediaDocument struct {
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
 }
 
+func (v InputMediaDocument) Type() string {
+	return "document"
+}
+
 func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 	type alias InputMediaDocument
 	a := struct {
@@ -1929,6 +2046,10 @@ type InputMediaPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+}
+
+func (v InputMediaPhoto) Type() string {
+	return "photo"
 }
 
 func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
@@ -1986,6 +2107,10 @@ type InputMediaVideo struct {
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Pass True, if the uploaded video is suitable for streaming
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
+}
+
+func (v InputMediaVideo) Type() string {
+	return "video"
 }
 
 func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
