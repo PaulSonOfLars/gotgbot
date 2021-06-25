@@ -68,6 +68,188 @@ type BotCommand struct {
 	Description string `json:"description,omitempty"`
 }
 
+// BotCommandScope This object represents the scope to which bot commands are applied. Currently, the following 7 scopes are supported:
+// - BotCommandScopeDefault
+// - BotCommandScopeAllPrivateChats
+// - BotCommandScopeAllGroupChats
+// - BotCommandScopeAllChatAdministrators
+// - BotCommandScopeChat
+// - BotCommandScopeChatAdministrators
+// - BotCommandScopeChatMember
+// https://core.telegram.org/bots/api#botcommandscope
+type BotCommandScope interface {
+	BotCommandScope() ([]byte, error)
+}
+
+// BotCommandScopeAllChatAdministrators Represents the scope of bot commands, covering all group and supergroup chat administrators.
+// https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
+type BotCommandScopeAllChatAdministrators struct {
+	// Scope type, must be all_chat_administrators
+	Type string `json:"type,omitempty"`
+}
+
+func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllChatAdministrators
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_chat_administrators",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeAllChatAdministrators) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeAllGroupChats Represents the scope of bot commands, covering all group and supergroup chats.
+// https://core.telegram.org/bots/api#botcommandscopeallgroupchats
+type BotCommandScopeAllGroupChats struct {
+	// Scope type, must be all_group_chats
+	Type string `json:"type,omitempty"`
+}
+
+func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllGroupChats
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_group_chats",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeAllGroupChats) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeAllPrivateChats Represents the scope of bot commands, covering all private chats.
+// https://core.telegram.org/bots/api#botcommandscopeallprivatechats
+type BotCommandScopeAllPrivateChats struct {
+	// Scope type, must be all_private_chats
+	Type string `json:"type,omitempty"`
+}
+
+func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllPrivateChats
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_private_chats",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeAllPrivateChats) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeChat Represents the scope of bot commands, covering a specific chat.
+// https://core.telegram.org/bots/api#botcommandscopechat
+type BotCommandScopeChat struct {
+	// Scope type, must be chat
+	Type string `json:"type,omitempty"`
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChat
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeChat) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeChatAdministrators Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
+// https://core.telegram.org/bots/api#botcommandscopechatadministrators
+type BotCommandScopeChatAdministrators struct {
+	// Scope type, must be chat_administrators
+	Type string `json:"type,omitempty"`
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChatAdministrators
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat_administrators",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeChatAdministrators) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeChatMember Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
+// https://core.telegram.org/bots/api#botcommandscopechatmember
+type BotCommandScopeChatMember struct {
+	// Scope type, must be chat_member
+	Type string `json:"type,omitempty"`
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+	// Unique identifier of the target user
+	UserId int64 `json:"user_id,omitempty"`
+}
+
+func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChatMember
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat_member",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeChatMember) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// BotCommandScopeDefault Represents the default scope of bot commands. Default commands are used if no commands with a narrower scope are specified for the user.
+// https://core.telegram.org/bots/api#botcommandscopedefault
+type BotCommandScopeDefault struct {
+	// Scope type, must be default
+	Type string `json:"type,omitempty"`
+}
+
+func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeDefault
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "default",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v BotCommandScopeDefault) BotCommandScope() ([]byte, error) {
+	return json.Marshal(v)
+}
+
 // CallbackGame A placeholder, currently holds no information. Use BotFather to set up your game.
 // https://core.telegram.org/bots/api#callbackgame
 type CallbackGame interface{}
@@ -158,53 +340,218 @@ type ChatLocation struct {
 	Address string `json:"address,omitempty"`
 }
 
-// ChatMember This object contains information about one member of a chat.
+// ChatMember This object contains information about one member of a chat. Currently, the following 6 types of chat members are supported:
+// - ChatMemberOwner
+// - ChatMemberAdministrator
+// - ChatMemberMember
+// - ChatMemberRestricted
+// - ChatMemberLeft
+// - ChatMemberBanned
 // https://core.telegram.org/bots/api#chatmember
-type ChatMember struct {
+type ChatMember interface {
+	ChatMember() ([]byte, error)
+}
+
+// ChatMemberAdministrator Represents a chat member that has some additional privileges.
+// https://core.telegram.org/bots/api#chatmemberadministrator
+type ChatMemberAdministrator struct {
+	// The member's status in the chat, always "administrator"
+	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// The member's status in the chat. Can be "creator", "administrator", "member", "restricted", "left" or "kicked"
-	Status string `json:"status,omitempty"`
-	// Optional. Owner and administrators only. Custom title for this user
-	CustomTitle string `json:"custom_title,omitempty"`
-	// Optional. Owner and administrators only. True, if the user's presence in the chat is hidden
-	IsAnonymous bool `json:"is_anonymous,omitempty"`
-	// Optional. Administrators only. True, if the bot is allowed to edit administrator privileges of that user
+	// True, if the bot is allowed to edit administrator privileges of that user
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Optional. Administrators only. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
+	// True, if the user's presence in the chat is hidden
+	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
-	// Optional. Administrators only. True, if the administrator can post in the channel; channels only
+	// True, if the administrator can post in the channel; channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can edit messages of other users and can pin messages; channels only
+	// True, if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can delete messages of other users
+	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can manage voice chats
+	// True, if the administrator can manage voice chats
 	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
-	// Optional. Administrators only. True, if the administrator can restrict, ban or unban chat members
+	// True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
-	// Optional. Administrators only. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
 	CanPromoteMembers bool `json:"can_promote_members,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to change the chat title, photo and other settings
+	// True, if the user is allowed to change the chat title, photo and other settings
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to invite new users to the chat
+	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to pin messages; groups and supergroups only
+	// True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is a member of the chat at the moment of the request
-	IsMember bool `json:"is_member,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send text messages, contacts, locations and venues
-	CanSendMessages bool `json:"can_send_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
-	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send polls
-	CanSendPolls bool `json:"can_send_polls,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send animations, games, stickers and use inline bots
-	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to add web page previews to their messages
-	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Restricted and kicked only. Date when restrictions will be lifted for this user; unix time
+}
+
+func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberAdministrator
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "administrator",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberAdministrator) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// ChatMemberBanned Represents a chat member that was banned in the chat and can't return to the chat or view chat messages.
+// https://core.telegram.org/bots/api#chatmemberbanned
+type ChatMemberBanned struct {
+	// The member's status in the chat, always "kicked"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// Date when restrictions will be lifted for this user; unix time
 	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberBanned
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "banned",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberBanned) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// ChatMemberLeft Represents a chat member that isn't currently a member of the chat, but may join it themselves.
+// https://core.telegram.org/bots/api#chatmemberleft
+type ChatMemberLeft struct {
+	// The member's status in the chat, always "left"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+}
+
+func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberLeft
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "left",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberLeft) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// ChatMemberMember Represents a chat member that has no additional privileges or restrictions.
+// https://core.telegram.org/bots/api#chatmembermember
+type ChatMemberMember struct {
+	// The member's status in the chat, always "member"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+}
+
+func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberMember
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "member",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberMember) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// ChatMemberOwner Represents a chat member that owns the chat and has all administrator privileges.
+// https://core.telegram.org/bots/api#chatmemberowner
+type ChatMemberOwner struct {
+	// The member's status in the chat, always "creator"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
+	// True, if the user's presence in the chat is hidden
+	IsAnonymous bool `json:"is_anonymous,omitempty"`
+}
+
+func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberOwner
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "owner",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberOwner) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// ChatMemberRestricted Represents a chat member that is under certain restrictions in the chat. Supergroups only.
+// https://core.telegram.org/bots/api#chatmemberrestricted
+type ChatMemberRestricted struct {
+	// The member's status in the chat, always "restricted"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// True, if the user is a member of the chat at the moment of the request
+	IsMember bool `json:"is_member,omitempty"`
+	// True, if the user is allowed to change the chat title, photo and other settings
+	CanChangeInfo bool `json:"can_change_info,omitempty"`
+	// True, if the user is allowed to invite new users to the chat
+	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// True, if the user is allowed to pin messages; groups and supergroups only
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// True, if the user is allowed to send text messages, contacts, locations and venues
+	CanSendMessages bool `json:"can_send_messages,omitempty"`
+	// True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
+	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
+	// True, if the user is allowed to send polls
+	CanSendPolls bool `json:"can_send_polls,omitempty"`
+	// True, if the user is allowed to send animations, games, stickers and use inline bots
+	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
+	// True, if the user is allowed to add web page previews to their messages
+	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
+	// Date when restrictions will be lifted for this user; unix time
+	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberRestricted
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "restricted",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v ChatMemberRestricted) ChatMember() ([]byte, error) {
+	return json.Marshal(v)
 }
 
 // ChatMemberUpdated This object represents changes in the status of a chat member.
@@ -369,6 +716,8 @@ type File struct {
 type ForceReply struct {
 	// Shows reply interface to the user, as if they manually selected the bot's message and tapped 'Reply'
 	ForceReply bool `json:"force_reply,omitempty"`
+	// Optional. The placeholder to be shown in the input field when the reply is active; 1-64 characters
+	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
 	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
 	Selective bool `json:"selective,omitempty"`
 }
@@ -457,6 +806,26 @@ type InlineQuery struct {
 }
 
 // InlineQueryResult This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
+// - InlineQueryResultCachedAudio
+// - InlineQueryResultCachedDocument
+// - InlineQueryResultCachedGif
+// - InlineQueryResultCachedMpeg4Gif
+// - InlineQueryResultCachedPhoto
+// - InlineQueryResultCachedSticker
+// - InlineQueryResultCachedVideo
+// - InlineQueryResultCachedVoice
+// - InlineQueryResultArticle
+// - InlineQueryResultAudio
+// - InlineQueryResultContact
+// - InlineQueryResultGame
+// - InlineQueryResultDocument
+// - InlineQueryResultGif
+// - InlineQueryResultLocation
+// - InlineQueryResultMpeg4Gif
+// - InlineQueryResultPhoto
+// - InlineQueryResultVenue
+// - InlineQueryResultVideo
+// - InlineQueryResultVoice
 // Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 // https://core.telegram.org/bots/api#inlinequeryresult
 type InlineQueryResult interface {
@@ -1304,10 +1673,6 @@ func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
 }
 
 // InputFile This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
-// There are three ways to send files (photos, stickers, audio, media, etc.):
-// Sending by file_id
-// Sending by URL
-// Objects and methods used in the inline mode are described in the Inline mode section.
 // https://core.telegram.org/bots/api#inputfile
 type InputFile interface{}
 
@@ -1382,6 +1747,11 @@ func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
 }
 
 // InputMedia This object represents the content of a media message to be sent. It should be one of
+// - InputMediaAnimation
+// - InputMediaDocument
+// - InputMediaAudio
+// - InputMediaPhoto
+// - InputMediaVideo
 // https://core.telegram.org/bots/api#inputmedia
 type InputMedia interface {
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
@@ -1653,6 +2023,11 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 }
 
 // InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
+// - InputTextMessageContent
+// - InputLocationMessageContent
+// - InputVenueMessageContent
+// - InputContactMessageContent
+// - InputInvoiceMessageContent
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
 	InputMessageContent() ([]byte, error)
@@ -1960,6 +2335,15 @@ type PassportData struct {
 }
 
 // PassportElementError This object represents an error in the Telegram Passport element which was submitted that should be resolved by the user. It should be one of:
+// - PassportElementErrorDataField
+// - PassportElementErrorFrontSide
+// - PassportElementErrorReverseSide
+// - PassportElementErrorSelfie
+// - PassportElementErrorFile
+// - PassportElementErrorFiles
+// - PassportElementErrorTranslationFile
+// - PassportElementErrorTranslationFiles
+// - PassportElementErrorUnspecified
 // https://core.telegram.org/bots/api#passportelementerror
 type PassportElementError interface {
 	PassportElementError() ([]byte, error)
@@ -2238,6 +2622,8 @@ type ReplyKeyboardMarkup struct {
 	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
 	// Optional. Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat – the user can press a special button in the input field to see the custom keyboard again. Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
+	// Optional. The placeholder to be shown in the input field when the keyboard is active; 1-64 characters
+	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
 	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
 	Selective bool `json:"selective,omitempty"`
 }
