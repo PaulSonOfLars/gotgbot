@@ -5,6 +5,7 @@ package gotgbot
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -364,6 +365,72 @@ type ChatMember interface {
 	ChatMember() ([]byte, error)
 }
 
+func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Status string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.Status {
+	case "owner":
+		s := ChatMemberOwner{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "administrator":
+		s := ChatMemberAdministrator{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "member":
+		s := ChatMemberMember{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "restricted":
+		s := ChatMemberRestricted{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "left":
+		s := ChatMemberLeft{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "banned":
+		s := ChatMemberBanned{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	}
+	return nil, errors.New("failed to unmarshal: unknown interface with Status " + t.Status)
+}
+
 // ChatMemberAdministrator Represents a chat member that has some additional privileges.
 // https://core.telegram.org/bots/api#chatmemberadministrator
 type ChatMemberAdministrator struct {
@@ -593,6 +660,38 @@ type ChatMemberUpdated struct {
 	NewChatMember ChatMember `json:"new_chat_member,omitempty"`
 	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
+}
+
+func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
+	// All fields in ChatMemberUpdated, with interface fields as json.RawMessage
+	type tmp struct {
+		Chat          Chat            `json:"chat"`
+		From          User            `json:"from"`
+		Date          int64           `json:"date"`
+		OldChatMember json.RawMessage `json:"old_chat_member"`
+		NewChatMember json.RawMessage `json:"new_chat_member"`
+		InviteLink    *ChatInviteLink `json:"invite_link"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	v.Chat = t.Chat
+	v.From = t.From
+	v.Date = t.Date
+	v.OldChatMember, err = unmarshalChatMember(t.OldChatMember)
+	if err != nil {
+		return err
+	}
+	v.NewChatMember, err = unmarshalChatMember(t.NewChatMember)
+	if err != nil {
+		return err
+	}
+	v.InviteLink = t.InviteLink
+
+	return nil
 }
 
 // ChatPermissions Describes actions that a non-administrator user is allowed to take in a chat.
