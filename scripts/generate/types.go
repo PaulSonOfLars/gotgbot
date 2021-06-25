@@ -76,13 +76,16 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			tgTypeInlineQueryResult,
 			tgTypeInputFile,
 			tgTypeInputMessageContent,
-			tgTypePassportElementError:
+			tgTypePassportElementError,
+			tgTypeBotCommandScope,
+			tgTypeChatMember:
 			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
 			return typeDef.String(), nil
 
 		case tgTypeVoiceChatStarted:
 			// VoiceChatStarted is actually just empty, this is legitimate
 			typeDef.WriteString("\ntype " + tgType.Name + " struct{}")
+
 		default:
 			return "", fmt.Errorf("unknown type %s has no fields - please check if this requires implementation", tgType.Name)
 		}
@@ -132,25 +135,10 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
 			}
 
-		case tgTypeInlineQueryResult:
-			// InlineQueryResult items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, tgTypeInlineQueryResult)
-			typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
-
-			err := customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
-				Type:     tgType.Name,
-				TypeName: titleToSnake(typeName),
-			})
+		case tgTypeInlineQueryResult, tgTypeBotCommandScope, tgTypeChatMember:
+			err := constantFieldGenerator(tgType, &typeInterfaces, parentType)
 			if err != nil {
-				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
-			}
-
-			err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentType,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+				return "", err
 			}
 
 		case tgTypeInputMessageContent, tgTypePassportElementError:
@@ -182,6 +170,29 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 	}
 
 	return typeInterfaces.String(), nil
+}
+
+func constantFieldGenerator(tgType TypeDescription, typeInterfaces *strings.Builder, parentType string) error {
+	// Some items need a custom marshaller to handle the "type" field
+	typeName := strings.TrimPrefix(tgType.Name, parentType)
+	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+
+	err := customMarshalTmpl.Execute(typeInterfaces, customMarshalData{
+		Type:     tgType.Name,
+		TypeName: titleToSnake(typeName),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+	}
+
+	err = genericInterfaceTmpl.Execute(typeInterfaces, interfaceMethodData{
+		Type:       tgType.Name,
+		ParentType: parentType,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+	}
+	return nil
 }
 
 func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error) {

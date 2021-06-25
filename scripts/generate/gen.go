@@ -67,6 +67,8 @@ const (
 	tgTypePassportElementError = "PassportElementError"
 	tgTypeCallbackGame         = "CallbackGame"
 	tgTypeVoiceChatStarted     = "VoiceChatStarted"
+	tgTypeBotCommandScope      = "BotCommandScope"
+	tgTypeChatMember           = "ChatMember"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )
