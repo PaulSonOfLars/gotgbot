@@ -390,11 +390,11 @@ type ChatMemberAdministrator struct {
 func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberAdministrator
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "administrator",
-		alias: (alias)(v),
+		Status: "administrator",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }
@@ -417,11 +417,11 @@ type ChatMemberBanned struct {
 func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberBanned
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "banned",
-		alias: (alias)(v),
+		Status: "banned",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }
@@ -442,11 +442,11 @@ type ChatMemberLeft struct {
 func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberLeft
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "left",
-		alias: (alias)(v),
+		Status: "left",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }
@@ -467,11 +467,11 @@ type ChatMemberMember struct {
 func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberMember
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "member",
-		alias: (alias)(v),
+		Status: "member",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }
@@ -496,11 +496,11 @@ type ChatMemberOwner struct {
 func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberOwner
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "owner",
-		alias: (alias)(v),
+		Status: "owner",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }
@@ -541,11 +541,11 @@ type ChatMemberRestricted struct {
 func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberRestricted
 	a := struct {
-		Type string `json:"type"`
+		Status string `json:"status"`
 		alias
 	}{
-		Type:  "restricted",
-		alias: (alias)(v),
+		Status: "restricted",
+		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
 }

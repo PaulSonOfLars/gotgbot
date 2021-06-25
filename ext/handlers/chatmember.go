@@ -24,7 +24,7 @@ func (c ChatMember) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.ChatMember == nil {
 		return false
 	}
-	
+
 	return c.Filter == nil || c.Filter(u.ChatMember)
 }
 

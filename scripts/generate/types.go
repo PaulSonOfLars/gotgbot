@@ -118,9 +118,12 @@ func generateParentTypeInterfaces(tgType TypeDescription) (string, error) {
 			// InputMedia items need a custom marshaller to handle the "type" field
 			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
 
+			constantField := tgType.Fields[0].Name
 			err := customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
-				Type:     tgType.Name,
-				TypeName: titleToSnake(typeName),
+				Type:                  tgType.Name,
+				ConstantFieldName:     strings.Title(constantField),
+				ConstantJSONFieldName: constantField,
+				ConstantValueName:     titleToSnake(typeName),
 			})
 			if err != nil {
 				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -177,9 +180,12 @@ func constantFieldGenerator(tgType TypeDescription, typeInterfaces *strings.Buil
 	typeName := strings.TrimPrefix(tgType.Name, parentType)
 	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
 
+	constantField := tgType.Fields[0].Name
 	err := customMarshalTmpl.Execute(typeInterfaces, customMarshalData{
-		Type:     tgType.Name,
-		TypeName: titleToSnake(typeName),
+		Type:                  tgType.Name,
+		ConstantFieldName:     strings.Title(constantField),
+		ConstantJSONFieldName: constantField,
+		ConstantValueName:     titleToSnake(typeName),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -264,8 +270,10 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 }
 
 type customMarshalData struct {
-	Type     string
-	TypeName string
+	Type                  string
+	ConstantFieldName     string
+	ConstantJSONFieldName string
+	ConstantValueName     string
 }
 
 // The alias type is required to avoid infinite MarshalJSON loops.
@@ -273,10 +281,10 @@ const customMarshal = `
 func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 	type alias {{.Type}}
 	a := struct{
-		Type string ` + "`json:\"type\"`" + `
+		{{.ConstantFieldName}} string ` + "`json:\"{{.ConstantJSONFieldName}}\"`" + `
 		alias
 	}{
-		Type: "{{.TypeName}}",
+		{{.ConstantFieldName}}: "{{.ConstantValueName}}",
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
