@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -93,4 +95,81 @@ func goTypeStringer(t string) string {
 	default:
 		return ""
 	}
+}
+
+func getCommonFields(types []TypeDescription) []Field {
+	if len(types) == 0 {
+		return nil
+	}
+
+	count := map[string]int{}
+
+	for _, t := range types {
+		for _, f := range t.Fields {
+			if !f.Required {
+				continue
+			}
+
+			count[f.Name]++
+		}
+	}
+
+	var fields []Field
+
+	// only need to iterate on first, since guaranteed overlap
+	for _, f := range types[0].Fields {
+		if count[f.Name] == len(types) {
+			fields = append(fields, f)
+		}
+	}
+
+	return fields
+}
+
+func getReplyMarkupTypes(d APIDescription) []TypeDescription {
+	typesMap := map[string]struct{}{}
+	for _, m := range d.Methods {
+		for _, f := range m.Fields {
+			if f.Name == "reply_markup" {
+				for _, t := range f.Types {
+					typesMap[t] = struct{}{}
+				}
+			}
+		}
+	}
+
+	var typeNames []string
+	for t := range typesMap {
+		typeNames = append(typeNames, t)
+	}
+	sort.Strings(typeNames)
+
+	var types []TypeDescription
+	for _, t := range typeNames {
+		types = append(types, d.Types[t])
+	}
+
+	return types
+}
+
+func getTypeByName(d APIDescription, typeName string) (TypeDescription, error) {
+	t, ok := d.Types[typeName]
+	if !ok {
+		return t, fmt.Errorf("unknown typename %s", typeName)
+	}
+	return t, nil
+}
+
+func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+	var types []TypeDescription
+
+	for _, typeName := range typeNames {
+		t, err := getTypeByName(d, typeName)
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, t)
+	}
+
+	return types, nil
 }

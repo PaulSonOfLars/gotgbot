@@ -53,20 +53,17 @@ func (td TypeDescription) getTypeNameFromParent(parentType string) string {
 	return typeName
 }
 
-func (td TypeDescription) getConstantField(d APIDescription) string {
-	if len(td.Subtypes) != 0 {
-		var constantField string
-		for _, s := range td.Subtypes {
-			newField := d.Types[s].getConstantField(d)
-			if constantField != newField && constantField != "" {
-				return ""
-			}
-			constantField = newField
-		}
-		return constantField
+func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, error) {
+	subTypes, err := getTypesByName(d, td.Subtypes)
+	if err != nil {
+		return "", fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
 	}
 
-	return td.Fields[0].Name
+	common := getCommonFields(subTypes)
+	if len(common) == 0 {
+		return "", fmt.Errorf("no common fields for parenttype %s", td.Name)
+	}
+	return common[0].Name, nil
 }
 
 type MethodDescription struct {
@@ -191,19 +188,10 @@ func HasSubtypes(d APIDescription, typeName string) bool {
 }
 
 func (f Field) getPreferredType() (string, error) {
-	if len(f.Types) == 1 {
-		return toGoType(f.Types[0]), nil
-	}
-
-	if len(f.Types) == 2 {
-		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
-			return toGoType(f.Types[0]), nil
-		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
-			return toGoType(f.Types[0]), nil
-		}
-	}
-
 	if f.Name == "media" {
+		if len(f.Types) == 1 && f.Types[0] == "String" {
+			return tgTypeInputFile, nil
+		}
 		var arrayType bool
 		// TODO: check against API description type
 		for _, t := range f.Types {
@@ -228,6 +216,18 @@ func (f Field) getPreferredType() (string, error) {
 		// ReplyKeyboardRemove
 		// ForceReply
 		return tgTypeReplyMarkup, nil
+	}
+
+	if len(f.Types) == 1 {
+		return toGoType(f.Types[0]), nil
+	}
+
+	if len(f.Types) == 2 {
+		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
+			return toGoType(f.Types[0]), nil
+		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
+			return toGoType(f.Types[0]), nil
+		}
 	}
 
 	return "", fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)

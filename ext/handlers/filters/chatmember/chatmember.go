@@ -9,12 +9,11 @@ func All(_ *gotgbot.ChatMemberUpdated) bool {
 	return true
 }
 
-// TODO: Reenable
-//func UserId(id int64) filters.ChatMember {
-//	return func(cm *gotgbot.ChatMemberUpdated) bool {
-//		return cm.NewChatMember.User.Id == id
-//	}
-//}
+func UserId(id int64) filters.ChatMember {
+	return func(cm *gotgbot.ChatMemberUpdated) bool {
+		return cm.NewChatMember.GetUser().Id == id
+	}
+}
 
 func FromUserId(id int64) filters.ChatMember {
 	return func(cm *gotgbot.ChatMemberUpdated) bool {
@@ -48,15 +47,14 @@ func InviteLink(cm *gotgbot.ChatMemberUpdated) bool {
 	return cm.InviteLink != nil
 }
 
-// TODO: Reenable
-//func NewStatus(status string) filters.ChatMember {
-//	return func(cm *gotgbot.ChatMemberUpdated) bool {
-//		return cm.NewChatMember.Status == status
-//	}
-//}
-//
-//func OldStatus(status string) filters.ChatMember {
-//	return func(cm *gotgbot.ChatMemberUpdated) bool {
-//		return cm.OldChatMember.Status == status
-//	}
-//}
+func NewStatus(status string) filters.ChatMember {
+	return func(cm *gotgbot.ChatMemberUpdated) bool {
+		return cm.NewChatMember.GetStatus() == status
+	}
+}
+
+func OldStatus(status string) filters.ChatMember {
+	return func(cm *gotgbot.ChatMemberUpdated) bool {
+		return cm.OldChatMember.GetStatus() == status
+	}
+}

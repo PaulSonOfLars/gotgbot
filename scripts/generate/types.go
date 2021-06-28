@@ -1,25 +1,17 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"text/template"
 )
-
-// TODO: dont hardcode; obtain these from reply_markup fields.
-var replyMarkupTypes = []string{
-	"InlineKeyboardMarkup",
-	"ReplyKeyboardMarkup",
-	"ReplyKeyboardRemove",
-	"ForceReply",
-}
 
 var (
 	genericInterfaceTmpl          = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
 	inputMediaInterfaceTmpl       = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
 	customMarshalTmpl             = template.Must(template.New("customMarshal").Parse(customMarshal))
-	customConstStringFieldTmpl    = template.Must(template.New("customConstStringField").Parse(customConstStringField))
+	customCommonFieldTmpl         = template.Must(template.New("customCommonField").Parse(customCommonField))
 	customUnmarshalTmpl           = template.Must(template.New("customUnmarshal").Parse(customUnmarshal))
 	customStructUnmarshalTmpl     = template.Must(template.New("customStructUnmarshal").Parse(customStructUnmarshal))
 	customStructUnmarshalCaseTmpl = template.Must(template.New("customStructUnmarshalCase").Parse(customStructUnmarshalCase))
@@ -42,7 +34,12 @@ import (
 `)
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	file.WriteString(generateGenericInterfaceType("ReplyMarkup", true))
+	replyMarkupInterface, err := generateGenericInterfaceType("ReplyMarkup", getReplyMarkupTypes(d))
+	if err != nil {
+		return fmt.Errorf("failed to generate reply_markup interface: %w", err)
+	}
+
+	file.WriteString(replyMarkupInterface)
 
 	for _, tgTypeName := range orderedTgTypes(d) {
 		tgType := d.Types[tgTypeName]
@@ -77,18 +74,24 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		case tgTypeInputMedia:
 			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
 
-		case tgTypeBotCommandScope:
-			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "type"))
-
-		case tgTypeChatMember:
-			typeDef.WriteString(generateConstFieldInterfaceType(tgType.Name, "status"))
-
 		case tgTypeCallbackGame,
 			tgTypeInlineQueryResult,
 			tgTypeInputFile,
 			tgTypeInputMessageContent,
-			tgTypePassportElementError:
-			typeDef.WriteString(generateGenericInterfaceType(tgType.Name, len(tgType.Subtypes) != 0))
+			tgTypePassportElementError,
+			tgTypeChatMember,
+			tgTypeBotCommandScope:
+			subTypes, err := getTypesByName(d, tgType.Subtypes)
+			if err != nil {
+				return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
+			}
+
+			interfaceDefinition, err := generateGenericInterfaceType(tgType.Name, subTypes)
+			if err != nil {
+				return "", fmt.Errorf("failed to generate generic interface type for %s: %w", tgType.Name, err)
+			}
+
+			typeDef.WriteString(interfaceDefinition)
 
 		case tgTypeVoiceChatStarted:
 			// VoiceChatStarted is actually just empty, this is legitimate
@@ -115,7 +118,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	} else {
 		typeFields, err := generateTypeFields(d, tgType)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to generate type fields for %s: %w", tgType.Name, err)
 		}
 
 		if typeFields == "" {
@@ -128,14 +131,14 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 		s, err := setupCustomUnmarshal(d, tgType)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to setup custom unmarshal for %s: %w", tgType.Name, err)
 		}
 		typeDef.WriteString(s)
 	}
 
-	interfaces, err2 := generateParentTypeInterfaces(d, tgType)
-	if err2 != nil {
-		return "", err2
+	interfaces, err := generateParentTypeInterfaces(d, tgType)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate parent type interfaces %s: %w", tgType.Name, err)
 	}
 
 	typeDef.WriteString(interfaces)
@@ -154,8 +157,21 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			return "", err
 		}
 
-		if HasSubtypes(d, prefType) && d.Types[prefType].getConstantField(d) != "" {
-			generateCustomMarshal = true
+		if isTgType(d, prefType) {
+			fieldType, err := getTypeByName(d, prefType)
+			if err != nil {
+				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", prefType, tgType.Name, err)
+			}
+
+			if len(fieldType.Subtypes) > 0 {
+				subtypes, err := getTypesByName(d, fieldType.Subtypes)
+				if err != nil {
+					return "", fmt.Errorf("failed to get subtypes from %s: %w", fieldType.Name, err)
+				}
+				if len(getCommonFields(subtypes)) > 0 {
+					generateCustomMarshal = true
+				}
+			}
 		}
 
 		if idx == 0 && len(tgType.SubtypeOf) > 0 && (f.Name == "type" || f.Name == "status") {
@@ -191,64 +207,40 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 
 func generateParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
 	typeInterfaces := strings.Builder{}
-	for _, parentType := range tgType.SubtypeOf {
-		switch parentType {
-		case tgTypeInputMedia:
-			// InputMedia items need a custom marshaller to handle the "type" field
-			typeName := strings.TrimPrefix(tgType.Name, tgTypeInputMedia)
+	for _, parentTypeName := range tgType.SubtypeOf {
+		parentType, err := getTypeByName(d, parentTypeName)
+		if err != nil {
+			return "", fmt.Errorf("failed to get parent type %s of %s: %w", parentTypeName, tgType.Name, err)
+		}
+		commonFields, err := commonFieldGenerator(d, tgType, parentType)
+		if err != nil {
+			return "", err
+		}
 
-			constantField := tgType.Fields[0].Name
+		typeInterfaces.WriteString(commonFields)
 
-			err := customConstStringFieldTmpl.Execute(&typeInterfaces, customConstStringData{
-				Type:              tgType.Name,
-				ConstantFieldName: strings.Title(constantField),
-				ConstantValueName: titleToSnake(typeName),
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
-			}
-
-			err = customMarshalTmpl.Execute(&typeInterfaces, customMarshalData{
-				Type:                  tgType.Name,
-				ConstantFieldName:     strings.Title(constantField),
-				ConstantJSONFieldName: constantField,
-				ConstantValueName:     titleToSnake(typeName),
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
-			}
-
+		if parentTypeName == tgTypeInputMedia {
 			// We also need to setup the interface method
 			err = inputMediaInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
 				Type:       tgType.Name,
-				ParentType: parentType,
+				ParentType: parentTypeName,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
 			}
-
-		case tgTypeInlineQueryResult, tgTypeBotCommandScope, tgTypeChatMember:
-			err := constantFieldGenerator(d, tgType, &typeInterfaces, parentType)
-			if err != nil {
-				return "", err
-			}
-
-		case tgTypeInputMessageContent, tgTypePassportElementError:
-			err := genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+		} else {
+			err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
 				Type:       tgType.Name,
-				ParentType: parentType,
+				ParentType: parentTypeName,
 			})
 			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
+				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
 			}
-
-		default:
-			return "", fmt.Errorf("unable to handle parent type %s while generating for type %s\n", parentType, tgType.Name)
 		}
 	}
 
-	for _, t := range replyMarkupTypes {
-		if tgType.Name == t {
+	for _, t := range getReplyMarkupTypes(d) {
+		if tgType.Name == t.Name {
 			err := genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
 				Type:       tgType.Name,
 				ParentType: "ReplyMarkup",
@@ -265,10 +257,9 @@ func generateParentTypeInterfaces(d APIDescription, tgType TypeDescription) (str
 }
 
 func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, error) {
-	constantField := strings.Title(tgType.getConstantField(d))
-	if constantField == "" {
-		// If we dont have a constant field, we can't setup the unmarshaller.
-		return "", errors.New("cant generate custom unmarshal func without a common field")
+	constantField, err := tgType.getConstantFieldFromParent(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate custom unmarshaller for %s: %w", tgType.Name, err)
 	}
 
 	var cases []string
@@ -288,10 +279,10 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	}
 
 	bd := strings.Builder{}
-	err := customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
+	err = customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
 		UnmarshalFuncName: "unmarshal" + tgType.Name,
 		ParentType:        tgType.Name,
-		ConstantFieldName: constantField,
+		ConstantFieldName: strings.Title(constantField),
 		CaseStatements:    cases,
 	})
 	if err != nil {
@@ -301,39 +292,59 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	return bd.String(), nil
 }
 
-func constantFieldGenerator(d APIDescription, tgType TypeDescription, typeInterfaces *strings.Builder, parentType string) error {
+func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType TypeDescription) (string, error) {
 	// Some items need a custom marshaller to handle the "type" field
-	typeName := tgType.getTypeNameFromParent(parentType)
+	typeName := tgType.getTypeNameFromParent(parentType.Name)
 
-	constantField := tgType.getConstantField(d)
-
-	err := customConstStringFieldTmpl.Execute(typeInterfaces, customConstStringData{
-		Type:              tgType.Name,
-		ConstantFieldName: strings.Title(constantField),
-		ConstantValueName: titleToSnake(typeName),
-	})
+	subTypes, err := getTypesByName(d, parentType.Subtypes)
 	if err != nil {
-		return fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+		return "", fmt.Errorf("failed to get subtypes of parent type %s of %s: %w", parentType.Name, tgType.Name, err)
 	}
 
-	err = customMarshalTmpl.Execute(typeInterfaces, customMarshalData{
+	commonFields := getCommonFields(subTypes)
+	if len(commonFields) == 0 {
+		return "", nil
+	}
+
+	constantField, err := parentType.getConstantFieldFromParent(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get constant field from %s: %w", parentType.Name, err)
+	}
+
+	bd := strings.Builder{}
+	for _, commonField := range commonFields {
+		commonValueName := "v." + snakeToTitle(commonField.Name)
+		if commonField.Name == constantField {
+			commonValueName = strconv.Quote(titleToSnake(typeName))
+		}
+
+		prefType, err := commonField.getPreferredType()
+		if err != nil {
+			return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", commonField.Name, tgType.Name, err)
+		}
+
+		err = customCommonFieldTmpl.Execute(&bd, customCommonFieldData{
+			Type:            tgType.Name,
+			CommonFieldName: snakeToTitle(commonField.Name),
+			TypeName:        prefType,
+			CommonValueName: commonValueName,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+		}
+	}
+
+	err = customMarshalTmpl.Execute(&bd, customMarshalData{
 		Type:                  tgType.Name,
 		ConstantFieldName:     strings.Title(constantField),
 		ConstantJSONFieldName: constantField,
 		ConstantValueName:     titleToSnake(typeName),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+		return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
 	}
 
-	err = genericInterfaceTmpl.Execute(typeInterfaces, interfaceMethodData{
-		Type:       tgType.Name,
-		ParentType: parentType,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType, tgType.Name, err)
-	}
-	return nil
+	return bd.String(), nil
 }
 
 func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error) {
@@ -394,23 +405,26 @@ type %s interface{
 	return "\ntype " + name + " interface{}"
 }
 
-func generateConstFieldInterfaceType(name string, constField string) string {
-	return fmt.Sprintf(`
-type %s interface{
-    %s() string
-	%s() ([]byte, error)
-}`, name, strings.Title(constField), name)
-}
-
-func generateGenericInterfaceType(name string, hasSubtypes bool) string {
-	if !hasSubtypes {
-		return "\ntype " + name + " interface{}"
+func generateGenericInterfaceType(name string, subtypes []TypeDescription) (string, error) {
+	if len(subtypes) == 0 {
+		return "\ntype " + name + " interface{}", nil
 	}
 
-	return fmt.Sprintf(`
-type %s interface{
-	%s() ([]byte, error)
-}`, name, name)
+	commonFields := getCommonFields(subtypes)
+
+	bd := strings.Builder{}
+	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
+	for _, f := range commonFields {
+		prefType, err := f.getPreferredType()
+		if err != nil {
+			return "", err
+		}
+		bd.WriteString(fmt.Sprintf("\nGet%s() %s", snakeToTitle(f.Name), prefType))
+	}
+
+	bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
+	bd.WriteString("\n}")
+	return bd.String(), nil
 }
 
 func isSubtypeOf(tgType TypeDescription, parentType string) bool {
@@ -423,15 +437,16 @@ func isSubtypeOf(tgType TypeDescription, parentType string) bool {
 	return false
 }
 
-type customConstStringData struct {
-	Type              string
-	ConstantFieldName string
-	ConstantValueName string
+type customCommonFieldData struct {
+	Type            string
+	CommonFieldName string
+	TypeName        string
+	CommonValueName string
 }
 
-const customConstStringField = `
-func (v {{.Type}}) {{.ConstantFieldName}}() string {
-	return "{{.ConstantValueName}}"
+const customCommonField = `
+func (v {{.Type}}) Get{{.CommonFieldName}}() {{.TypeName}} {
+	return {{.CommonValueName}}
 }
 `
 

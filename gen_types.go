@@ -79,7 +79,7 @@ type BotCommand struct {
 // - BotCommandScopeChatMember
 // https://core.telegram.org/bots/api#botcommandscope
 type BotCommandScope interface {
-	Type() string
+	GetType() string
 	BotCommandScope() ([]byte, error)
 }
 
@@ -87,7 +87,7 @@ type BotCommandScope interface {
 // https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
 type BotCommandScopeAllChatAdministrators struct{}
 
-func (v BotCommandScopeAllChatAdministrators) Type() string {
+func (v BotCommandScopeAllChatAdministrators) GetType() string {
 	return "all_chat_administrators"
 }
 
@@ -111,7 +111,7 @@ func (v BotCommandScopeAllChatAdministrators) BotCommandScope() ([]byte, error) 
 // https://core.telegram.org/bots/api#botcommandscopeallgroupchats
 type BotCommandScopeAllGroupChats struct{}
 
-func (v BotCommandScopeAllGroupChats) Type() string {
+func (v BotCommandScopeAllGroupChats) GetType() string {
 	return "all_group_chats"
 }
 
@@ -135,7 +135,7 @@ func (v BotCommandScopeAllGroupChats) BotCommandScope() ([]byte, error) {
 // https://core.telegram.org/bots/api#botcommandscopeallprivatechats
 type BotCommandScopeAllPrivateChats struct{}
 
-func (v BotCommandScopeAllPrivateChats) Type() string {
+func (v BotCommandScopeAllPrivateChats) GetType() string {
 	return "all_private_chats"
 }
 
@@ -162,7 +162,7 @@ type BotCommandScopeChat struct {
 	ChatId int64 `json:"chat_id,omitempty"`
 }
 
-func (v BotCommandScopeChat) Type() string {
+func (v BotCommandScopeChat) GetType() string {
 	return "chat"
 }
 
@@ -189,7 +189,7 @@ type BotCommandScopeChatAdministrators struct {
 	ChatId int64 `json:"chat_id,omitempty"`
 }
 
-func (v BotCommandScopeChatAdministrators) Type() string {
+func (v BotCommandScopeChatAdministrators) GetType() string {
 	return "chat_administrators"
 }
 
@@ -218,7 +218,7 @@ type BotCommandScopeChatMember struct {
 	UserId int64 `json:"user_id,omitempty"`
 }
 
-func (v BotCommandScopeChatMember) Type() string {
+func (v BotCommandScopeChatMember) GetType() string {
 	return "chat_member"
 }
 
@@ -242,7 +242,7 @@ func (v BotCommandScopeChatMember) BotCommandScope() ([]byte, error) {
 // https://core.telegram.org/bots/api#botcommandscopedefault
 type BotCommandScopeDefault struct{}
 
-func (v BotCommandScopeDefault) Type() string {
+func (v BotCommandScopeDefault) GetType() string {
 	return "default"
 }
 
@@ -361,7 +361,8 @@ type ChatLocation struct {
 // - ChatMemberBanned
 // https://core.telegram.org/bots/api#chatmember
 type ChatMember interface {
-	Status() string
+	GetStatus() string
+	GetUser() User
 	ChatMember() ([]byte, error)
 }
 
@@ -463,8 +464,12 @@ type ChatMemberAdministrator struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 }
 
-func (v ChatMemberAdministrator) Status() string {
+func (v ChatMemberAdministrator) GetStatus() string {
 	return "administrator"
+}
+
+func (v ChatMemberAdministrator) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
@@ -492,8 +497,12 @@ type ChatMemberBanned struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
-func (v ChatMemberBanned) Status() string {
+func (v ChatMemberBanned) GetStatus() string {
 	return "banned"
+}
+
+func (v ChatMemberBanned) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
@@ -519,8 +528,12 @@ type ChatMemberLeft struct {
 	User User `json:"user,omitempty"`
 }
 
-func (v ChatMemberLeft) Status() string {
+func (v ChatMemberLeft) GetStatus() string {
 	return "left"
+}
+
+func (v ChatMemberLeft) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
@@ -546,8 +559,12 @@ type ChatMemberMember struct {
 	User User `json:"user,omitempty"`
 }
 
-func (v ChatMemberMember) Status() string {
+func (v ChatMemberMember) GetStatus() string {
 	return "member"
+}
+
+func (v ChatMemberMember) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
@@ -577,8 +594,12 @@ type ChatMemberOwner struct {
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 }
 
-func (v ChatMemberOwner) Status() string {
+func (v ChatMemberOwner) GetStatus() string {
 	return "owner"
+}
+
+func (v ChatMemberOwner) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
@@ -624,8 +645,12 @@ type ChatMemberRestricted struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
-func (v ChatMemberRestricted) Status() string {
+func (v ChatMemberRestricted) GetStatus() string {
 	return "restricted"
+}
+
+func (v ChatMemberRestricted) GetUser() User {
+	return v.User
 }
 
 func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
@@ -951,6 +976,8 @@ type InlineQuery struct {
 // Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 // https://core.telegram.org/bots/api#inlinequeryresult
 type InlineQueryResult interface {
+	GetType() string
+	GetId() string
 	InlineQueryResult() ([]byte, error)
 }
 
@@ -979,8 +1006,12 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
-func (v InlineQueryResultArticle) Type() string {
+func (v InlineQueryResultArticle) GetType() string {
 	return "article"
+}
+
+func (v InlineQueryResultArticle) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
@@ -1025,8 +1056,12 @@ type InlineQueryResultAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultAudio) Type() string {
+func (v InlineQueryResultAudio) GetType() string {
 	return "audio"
+}
+
+func (v InlineQueryResultAudio) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
@@ -1065,8 +1100,12 @@ type InlineQueryResultCachedAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedAudio) Type() string {
+func (v InlineQueryResultCachedAudio) GetType() string {
 	return "audio"
+}
+
+func (v InlineQueryResultCachedAudio) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
@@ -1109,8 +1148,12 @@ type InlineQueryResultCachedDocument struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedDocument) Type() string {
+func (v InlineQueryResultCachedDocument) GetType() string {
 	return "document"
+}
+
+func (v InlineQueryResultCachedDocument) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
@@ -1150,8 +1193,12 @@ type InlineQueryResultCachedGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedGif) Type() string {
+func (v InlineQueryResultCachedGif) GetType() string {
 	return "gif"
+}
+
+func (v InlineQueryResultCachedGif) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
@@ -1191,8 +1238,12 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedMpeg4Gif) Type() string {
+func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
+}
+
+func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
@@ -1234,8 +1285,12 @@ type InlineQueryResultCachedPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedPhoto) Type() string {
+func (v InlineQueryResultCachedPhoto) GetType() string {
 	return "photo"
+}
+
+func (v InlineQueryResultCachedPhoto) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
@@ -1268,8 +1323,12 @@ type InlineQueryResultCachedSticker struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedSticker) Type() string {
+func (v InlineQueryResultCachedSticker) GetType() string {
 	return "sticker"
+}
+
+func (v InlineQueryResultCachedSticker) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
@@ -1311,8 +1370,12 @@ type InlineQueryResultCachedVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedVideo) Type() string {
+func (v InlineQueryResultCachedVideo) GetType() string {
 	return "video"
+}
+
+func (v InlineQueryResultCachedVideo) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
@@ -1353,8 +1416,12 @@ type InlineQueryResultCachedVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultCachedVoice) Type() string {
+func (v InlineQueryResultCachedVoice) GetType() string {
 	return "voice"
+}
+
+func (v InlineQueryResultCachedVoice) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
@@ -1399,8 +1466,12 @@ type InlineQueryResultContact struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
-func (v InlineQueryResultContact) Type() string {
+func (v InlineQueryResultContact) GetType() string {
 	return "contact"
+}
+
+func (v InlineQueryResultContact) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
@@ -1451,8 +1522,12 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
-func (v InlineQueryResultDocument) Type() string {
+func (v InlineQueryResultDocument) GetType() string {
 	return "document"
+}
+
+func (v InlineQueryResultDocument) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
@@ -1483,8 +1558,12 @@ type InlineQueryResultGame struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
-func (v InlineQueryResultGame) Type() string {
+func (v InlineQueryResultGame) GetType() string {
 	return "game"
+}
+
+func (v InlineQueryResultGame) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
@@ -1534,8 +1613,12 @@ type InlineQueryResultGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultGif) Type() string {
+func (v InlineQueryResultGif) GetType() string {
 	return "gif"
+}
+
+func (v InlineQueryResultGif) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
@@ -1586,8 +1669,12 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
-func (v InlineQueryResultLocation) Type() string {
+func (v InlineQueryResultLocation) GetType() string {
 	return "location"
+}
+
+func (v InlineQueryResultLocation) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
@@ -1637,8 +1724,12 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultMpeg4Gif) Type() string {
+func (v InlineQueryResultMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
+}
+
+func (v InlineQueryResultMpeg4Gif) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
@@ -1686,8 +1777,12 @@ type InlineQueryResultPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultPhoto) Type() string {
+func (v InlineQueryResultPhoto) GetType() string {
 	return "photo"
+}
+
+func (v InlineQueryResultPhoto) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
@@ -1740,8 +1835,12 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
-func (v InlineQueryResultVenue) Type() string {
+func (v InlineQueryResultVenue) GetType() string {
 	return "venue"
+}
+
+func (v InlineQueryResultVenue) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
@@ -1793,8 +1892,12 @@ type InlineQueryResultVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultVideo) Type() string {
+func (v InlineQueryResultVideo) GetType() string {
 	return "video"
+}
+
+func (v InlineQueryResultVideo) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
@@ -1837,8 +1940,12 @@ type InlineQueryResultVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
-func (v InlineQueryResultVoice) Type() string {
+func (v InlineQueryResultVoice) GetType() string {
 	return "voice"
+}
+
+func (v InlineQueryResultVoice) GetId() string {
+	return v.Id
 }
 
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
@@ -1981,8 +2088,12 @@ type InputMediaAnimation struct {
 	Duration int64 `json:"duration,omitempty"`
 }
 
-func (v InputMediaAnimation) Type() string {
+func (v InputMediaAnimation) GetType() string {
 	return "animation"
+}
+
+func (v InputMediaAnimation) GetMedia() InputFile {
+	return v.Media
 }
 
 func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
@@ -2040,8 +2151,12 @@ type InputMediaAudio struct {
 	Title string `json:"title,omitempty"`
 }
 
-func (v InputMediaAudio) Type() string {
+func (v InputMediaAudio) GetType() string {
 	return "audio"
+}
+
+func (v InputMediaAudio) GetMedia() InputFile {
+	return v.Media
 }
 
 func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
@@ -2095,8 +2210,12 @@ type InputMediaDocument struct {
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
 }
 
-func (v InputMediaDocument) Type() string {
+func (v InputMediaDocument) GetType() string {
 	return "document"
+}
+
+func (v InputMediaDocument) GetMedia() InputFile {
+	return v.Media
 }
 
 func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
@@ -2146,8 +2265,12 @@ type InputMediaPhoto struct {
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 }
 
-func (v InputMediaPhoto) Type() string {
+func (v InputMediaPhoto) GetType() string {
 	return "photo"
+}
+
+func (v InputMediaPhoto) GetMedia() InputFile {
+	return v.Media
 }
 
 func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
@@ -2207,8 +2330,12 @@ type InputMediaVideo struct {
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 }
 
-func (v InputMediaVideo) Type() string {
+func (v InputMediaVideo) GetType() string {
 	return "video"
+}
+
+func (v InputMediaVideo) GetMedia() InputFile {
+	return v.Media
 }
 
 func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
@@ -2569,6 +2696,9 @@ type PassportData struct {
 // - PassportElementErrorUnspecified
 // https://core.telegram.org/bots/api#passportelementerror
 type PassportElementError interface {
+	GetSource() string
+	GetType() string
+	GetMessage() string
 	PassportElementError() ([]byte, error)
 }
 
@@ -2585,6 +2715,30 @@ type PassportElementErrorDataField struct {
 	DataHash string `json:"data_hash,omitempty"`
 	// Error message
 	Message string `json:"message,omitempty"`
+}
+
+func (v PassportElementErrorDataField) GetSource() string {
+	return "data_field"
+}
+
+func (v PassportElementErrorDataField) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorDataField) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorDataField
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "data_field",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
 }
 
 func (v PassportElementErrorDataField) PassportElementError() ([]byte, error) {
@@ -2604,6 +2758,30 @@ type PassportElementErrorFile struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (v PassportElementErrorFile) GetSource() string {
+	return "file"
+}
+
+func (v PassportElementErrorFile) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorFile) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFile
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "file",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
 func (v PassportElementErrorFile) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
@@ -2619,6 +2797,30 @@ type PassportElementErrorFiles struct {
 	FileHashes []string `json:"file_hashes,omitempty"`
 	// Error message
 	Message string `json:"message,omitempty"`
+}
+
+func (v PassportElementErrorFiles) GetSource() string {
+	return "files"
+}
+
+func (v PassportElementErrorFiles) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorFiles) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFiles
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "files",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
 }
 
 func (v PassportElementErrorFiles) PassportElementError() ([]byte, error) {
@@ -2638,6 +2840,30 @@ type PassportElementErrorFrontSide struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (v PassportElementErrorFrontSide) GetSource() string {
+	return "front_side"
+}
+
+func (v PassportElementErrorFrontSide) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorFrontSide) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFrontSide
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "front_side",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
 func (v PassportElementErrorFrontSide) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
@@ -2653,6 +2879,30 @@ type PassportElementErrorReverseSide struct {
 	FileHash string `json:"file_hash,omitempty"`
 	// Error message
 	Message string `json:"message,omitempty"`
+}
+
+func (v PassportElementErrorReverseSide) GetSource() string {
+	return "reverse_side"
+}
+
+func (v PassportElementErrorReverseSide) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorReverseSide) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorReverseSide
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "reverse_side",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
 }
 
 func (v PassportElementErrorReverseSide) PassportElementError() ([]byte, error) {
@@ -2672,6 +2922,30 @@ type PassportElementErrorSelfie struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (v PassportElementErrorSelfie) GetSource() string {
+	return "selfie"
+}
+
+func (v PassportElementErrorSelfie) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorSelfie) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorSelfie
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "selfie",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
 func (v PassportElementErrorSelfie) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
@@ -2687,6 +2961,30 @@ type PassportElementErrorTranslationFile struct {
 	FileHash string `json:"file_hash,omitempty"`
 	// Error message
 	Message string `json:"message,omitempty"`
+}
+
+func (v PassportElementErrorTranslationFile) GetSource() string {
+	return "translation_file"
+}
+
+func (v PassportElementErrorTranslationFile) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorTranslationFile) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorTranslationFile
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "translation_file",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
 }
 
 func (v PassportElementErrorTranslationFile) PassportElementError() ([]byte, error) {
@@ -2706,6 +3004,30 @@ type PassportElementErrorTranslationFiles struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (v PassportElementErrorTranslationFiles) GetSource() string {
+	return "translation_files"
+}
+
+func (v PassportElementErrorTranslationFiles) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorTranslationFiles) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorTranslationFiles
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "translation_files",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
 func (v PassportElementErrorTranslationFiles) PassportElementError() ([]byte, error) {
 	return json.Marshal(v)
 }
@@ -2721,6 +3043,30 @@ type PassportElementErrorUnspecified struct {
 	ElementHash string `json:"element_hash,omitempty"`
 	// Error message
 	Message string `json:"message,omitempty"`
+}
+
+func (v PassportElementErrorUnspecified) GetSource() string {
+	return "unspecified"
+}
+
+func (v PassportElementErrorUnspecified) GetType() string {
+	return v.Type
+}
+
+func (v PassportElementErrorUnspecified) GetMessage() string {
+	return v.Message
+}
+
+func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorUnspecified
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "unspecified",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
 }
 
 func (v PassportElementErrorUnspecified) PassportElementError() ([]byte, error) {
