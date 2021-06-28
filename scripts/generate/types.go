@@ -348,6 +348,20 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 }
 
 func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error) {
+	parents, err := getTypesByName(d, tgType.SubtypeOf)
+	if err != nil {
+		return "", fmt.Errorf("failed to get parents of %s: %w", tgType.Name, err)
+	}
+	var constantFields []string
+	for _, p := range parents {
+		constantField, err := p.getConstantFieldFromParent(d)
+		if err != nil {
+			// if no fields, skip
+			continue
+		}
+		constantFields = append(constantFields, constantField)
+	}
+
 	typeFields := strings.Builder{}
 	for _, f := range tgType.Fields {
 		fieldType, err := f.getPreferredType()
@@ -355,30 +369,21 @@ func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
-		if isSubtypeOf(tgType, tgTypeInlineQueryResult) {
-			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
-			if f.Name == "type" {
-				continue
+		skip := false
+		for _, constantField := range constantFields {
+			if f.Name == constantField {
+				skip = true
+				break
 			}
-		} else if isSubtypeOf(tgType, tgTypeInputMedia) {
-			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
-			if f.Name == "type" {
-				continue
-			}
+		}
+		if skip {
+			continue
+		}
 
+		if isSubtypeOf(tgType, tgTypeInputMedia) {
 			// We manually override the media field to have InputFile type on all inputmedia to allow reuse of fileuploads logic.
 			if f.Name == "media" {
 				fieldType = tgTypeInputFile
-			}
-		} else if isSubtypeOf(tgType, tgTypeChatMember) {
-			// we don't write the status field since it isn't something that should be customised. This is set in the custom marshaller.
-			if f.Name == "status" {
-				continue
-			}
-		} else if isSubtypeOf(tgType, tgTypeBotCommandScope) {
-			// we don't write the type field since it isn't something that should be customised. This is set in the custom marshaller.
-			if f.Name == "type" {
-				continue
 			}
 		}
 
