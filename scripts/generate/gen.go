@@ -55,6 +55,10 @@ func (td TypeDescription) getTypeNameFromParent(parentType string) string {
 }
 
 func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, error) {
+	if len(td.Subtypes) == 0 {
+		return "", fmt.Errorf("expected %s to be a parent", td.Name)
+	}
+
 	subTypes, err := getTypesByName(d, td.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
