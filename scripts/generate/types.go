@@ -483,7 +483,8 @@ type customStructUnmarshalData struct {
 }
 
 // The alias type is required to avoid infinite MarshalJSON loops.
-const customStructUnmarshal = `func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
+const customStructUnmarshal = `
+func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		if len(d) == 0 {
 			return nil, nil
 		}
@@ -497,8 +498,9 @@ const customStructUnmarshal = `func {{.UnmarshalFuncName}}(d json.RawMessage) ({
 		}
 
 		switch t.{{.ConstantFieldName}} {
-		{{ range $val := .CaseStatements }} {{ $val }}
-		{{end}}
+		{{-  range $val := .CaseStatements -}}
+			{{ $val }}
+		{{- end -}}
 		}
 		return nil, errors.New("failed to unmarshal: unknown interface with {{.ConstantFieldName}} " +t.{{.ConstantFieldName}} )
 }`
@@ -509,7 +511,8 @@ type customStructUnmarshalCaseData struct {
 }
 
 // The alias type is required to avoid infinite MarshalJSON loops.
-const customStructUnmarshalCase = `case "{{.ConstantFieldName}}":
+const customStructUnmarshalCase = `
+case "{{.ConstantFieldName}}":
 	s := {{.TypeName}}{}
 	err := json.Unmarshal(d, &s)
 	if err != nil {

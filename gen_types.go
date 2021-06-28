@@ -426,7 +426,6 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 			return nil, err
 		}
 		return s, nil
-
 	}
 	return nil, errors.New("failed to unmarshal: unknown interface with Status " + t.Status)
 }
