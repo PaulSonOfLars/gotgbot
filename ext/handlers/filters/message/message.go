@@ -2,6 +2,7 @@ package message
 
 import (
 	"strings"
+	"regexp"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
@@ -45,6 +46,16 @@ func ForwardFromChatID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
 		return m.ForwardFromChat.Id == id
 	}
+}
+
+func Regex(p string) (filters.Message, error) {
+	r, err := regexp.Compile(p)
+	if err != nil {
+		return nil, err
+	}
+	return func(m *gotgbot.Message) bool {
+		return r.MatchString(m.Text)
+	}, nil
 }
 
 func Reply(msg *gotgbot.Message) bool {
