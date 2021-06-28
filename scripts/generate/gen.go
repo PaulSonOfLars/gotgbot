@@ -50,6 +50,7 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 func (td TypeDescription) getTypeNameFromParent(parentType string) string {
 	typeName := strings.TrimPrefix(td.Name, parentType)
 	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+	typeName = strings.TrimSuffix(typeName, "Field")  // some of them are "Field"
 	return typeName
 }
 

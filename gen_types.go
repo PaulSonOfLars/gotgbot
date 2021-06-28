@@ -2716,7 +2716,7 @@ type PassportElementErrorDataField struct {
 }
 
 func (v PassportElementErrorDataField) GetSource() string {
-	return "data_field"
+	return "data"
 }
 
 func (v PassportElementErrorDataField) GetType() string {
@@ -2733,7 +2733,7 @@ func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "data_field",
+		Source: "data",
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
