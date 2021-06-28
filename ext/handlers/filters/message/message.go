@@ -47,6 +47,16 @@ func ForwardFromChatID(id int64) filters.Message {
 	}
 }
 
+func Regex(pattern string) filters.Message {
+	return func(m *gotgbot.Message) bool {
+		matched, err := regexp.MatchString(pattern, m.Text)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+}
+
 func Reply(msg *gotgbot.Message) bool {
 	return msg.ReplyToMessage != nil
 }
