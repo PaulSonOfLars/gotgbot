@@ -54,8 +54,7 @@ func Regex(p string) (filters.Message, error) {
 		return nil, err
 	}
 	return func(m *gotgbot.Message) bool {
-		matched := r.MatchString(m.Text)
-		return matched
+		return r.MatchString(m.Text)
 	}, nil
 }
 
