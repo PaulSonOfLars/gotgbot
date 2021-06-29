@@ -29,7 +29,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"errors"
 )
 `)
 
@@ -522,7 +521,7 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 			{{ $val }}
 		{{- end -}}
 		}
-		return nil, errors.New("failed to unmarshal: unknown interface with {{.ConstantFieldName}} " +t.{{.ConstantFieldName}} )
+		return nil, fmt.Errorf("unknown interface with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
 }`
 
 type customStructUnmarshalCaseData struct {

@@ -5,7 +5,6 @@ package gotgbot
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 )
@@ -428,7 +427,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		}
 		return s, nil
 	}
-	return nil, errors.New("failed to unmarshal: unknown interface with Status " + t.Status)
+	return nil, fmt.Errorf("unknown interface with Status %v", t.Status)
 }
 
 // ChatMemberAdministrator Represents a chat member that has some additional privileges.
