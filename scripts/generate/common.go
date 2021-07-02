@@ -97,6 +97,36 @@ func goTypeStringer(t string) string {
 	}
 }
 
+func getAllFields(types []TypeDescription, parentType string) []Field {
+	if len(types) == 0 {
+		return nil
+	}
+
+	var fields []Field
+	isOK := map[string][]string{}
+
+	for _, t := range types {
+		for _, f := range t.Fields {
+			isOK[f.Name] = append(isOK[f.Name], t.getTypeNameFromParent(parentType))
+
+			if len(isOK[f.Name]) == 1 {
+				fields = append(fields, f)
+			}
+		}
+	}
+
+	for idx, f := range fields {
+		typesUsingField := isOK[f.Name]
+		if len(typesUsingField) == len(types) {
+			continue
+		}
+
+		fields[idx].Description = fmt.Sprintf("%s (Only for %s)", f.Description, strings.Join(typesUsingField, ", "))
+	}
+
+	return fields
+}
+
 func getCommonFields(types []TypeDescription) []Field {
 	if len(types) == 0 {
 		return nil

@@ -12,6 +12,7 @@ var (
 	inputMediaInterfaceTmpl       = template.Must(template.New("inputMediaInterface").Parse(inputMediaInterfaceMethod))
 	customMarshalTmpl             = template.Must(template.New("customMarshal").Parse(customMarshal))
 	customCommonFieldTmpl         = template.Must(template.New("customCommonField").Parse(customCommonField))
+	mergeFuncTmpl                 = template.Must(template.New("mergeFunc").Parse(mergeFunc))
 	customUnmarshalTmpl           = template.Must(template.New("customUnmarshal").Parse(customUnmarshal))
 	customStructUnmarshalTmpl     = template.Must(template.New("customStructUnmarshal").Parse(customStructUnmarshal))
 	customStructUnmarshalCaseTmpl = template.Must(template.New("customStructUnmarshalCase").Parse(customStructUnmarshalCase))
@@ -33,7 +34,7 @@ import (
 `)
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	replyMarkupInterface, err := generateGenericInterfaceType("ReplyMarkup", getReplyMarkupTypes(d))
+	replyMarkupInterface, err := generateGenericInterfaceType(d, "ReplyMarkup", getReplyMarkupTypes(d))
 	if err != nil {
 		return fmt.Errorf("failed to generate reply_markup interface: %w", err)
 	}
@@ -70,10 +71,8 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 	if len(tgType.Fields) == 0 {
 		switch tgType.Name {
-		case tgTypeInputMedia:
-			typeDef.WriteString(generateInputMediaInterfaceType(tgType.Name, tgType))
-
-		case tgTypeCallbackGame,
+		case tgTypeInputMedia,
+			tgTypeCallbackGame,
 			tgTypeInlineQueryResult,
 			tgTypeInputFile,
 			tgTypeInputMessageContent,
@@ -85,7 +84,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 				return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
 			}
 
-			interfaceDefinition, err := generateGenericInterfaceType(tgType.Name, subTypes)
+			interfaceDefinition, err := generateGenericInterfaceType(d, tgType.Name, subTypes)
 			if err != nil {
 				return "", fmt.Errorf("failed to generate generic interface type for %s: %w", tgType.Name, err)
 			}
@@ -211,12 +210,6 @@ func generateParentTypeInterfaces(d APIDescription, tgType TypeDescription) (str
 		if err != nil {
 			return "", fmt.Errorf("failed to get parent type %s of %s: %w", parentTypeName, tgType.Name, err)
 		}
-		commonFields, err := commonFieldGenerator(d, tgType, parentType)
-		if err != nil {
-			return "", err
-		}
-
-		typeInterfaces.WriteString(commonFields)
 
 		if parentTypeName == tgTypeInputMedia {
 			// We also need to setup the interface method
@@ -227,14 +220,21 @@ func generateParentTypeInterfaces(d APIDescription, tgType TypeDescription) (str
 			if err != nil {
 				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
 			}
-		} else {
-			err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentTypeName,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
-			}
+		}
+
+		commonFields, err := commonFieldGenerator(d, tgType, parentType)
+		if err != nil {
+			return "", err
+		}
+
+		typeInterfaces.WriteString(commonFields)
+
+		err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
+			Type:       tgType.Name,
+			ParentType: parentTypeName,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
 		}
 	}
 
@@ -266,7 +266,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	for _, subTypeName := range tgType.Subtypes {
 		shortName := d.Types[subTypeName].getTypeNameFromParent(tgType.Name)
 		err := customStructUnmarshalCaseTmpl.Execute(&caseBd, customStructUnmarshalCaseData{
-			ConstantFieldName: titleToSnake(shortName),
+			ConstantFieldName: shortName,
 			TypeName:          subTypeName,
 		})
 		if err != nil {
@@ -311,33 +311,48 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	}
 
 	bd := strings.Builder{}
-	for _, commonField := range commonFields {
-		commonValueName := "v." + snakeToTitle(commonField.Name)
-		if commonField.Name == constantField {
-			commonValueName = strconv.Quote(titleToSnake(typeName))
+	if len(commonFields) > 0 {
+		for _, commonField := range commonFields {
+			commonValueName := "v." + snakeToTitle(commonField.Name)
+			if commonField.Name == constantField {
+				commonValueName = strconv.Quote(typeName)
+			}
+
+			prefType, err := commonField.getPreferredType()
+			if err != nil {
+				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", commonField.Name, tgType.Name, err)
+			}
+
+			err = customCommonFieldTmpl.Execute(&bd, customCommonFieldData{
+				Type:            tgType.Name,
+				CommonFieldName: snakeToTitle(commonField.Name),
+				TypeName:        prefType,
+				CommonValueName: commonValueName,
+			})
+			if err != nil {
+				return "", fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+			}
 		}
 
-		prefType, err := commonField.getPreferredType()
-		if err != nil {
-			return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", commonField.Name, tgType.Name, err)
-		}
-
-		err = customCommonFieldTmpl.Execute(&bd, customCommonFieldData{
-			Type:            tgType.Name,
-			CommonFieldName: snakeToTitle(commonField.Name),
-			TypeName:        prefType,
-			CommonValueName: commonValueName,
+		err := mergeFuncTmpl.Execute(&bd, mergeFuncData{
+			Type:         tgType.Name,
+			TypeName:     tgType.getTypeNameFromParent(parentType.Name),
+			ConstantName: constantField,
+			ParentType:   parentType.Name,
+			Fields:       tgType.Fields,
+			TitleFunc:    snakeToTitle,
 		})
 		if err != nil {
-			return "", fmt.Errorf("failed to generate custom const field function for %s: %w", tgType.Name, err)
+			return "", err
 		}
+
 	}
 
 	err = customMarshalTmpl.Execute(&bd, customMarshalData{
 		Type:                  tgType.Name,
 		ConstantFieldName:     strings.Title(constantField),
 		ConstantJSONFieldName: constantField,
-		ConstantValueName:     titleToSnake(typeName),
+		ConstantValueName:     typeName,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -397,19 +412,7 @@ func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error
 	return typeFields.String(), nil
 }
 
-func generateInputMediaInterfaceType(name string, tgType TypeDescription) string {
-	if len(tgType.Subtypes) != 0 {
-		return fmt.Sprintf(`
-type %s interface{
-	Type() string
-	%sParams(string, map[string]NamedReader) ([]byte, error)
-}`, name, name)
-	}
-
-	return "\ntype " + name + " interface{}"
-}
-
-func generateGenericInterfaceType(name string, subtypes []TypeDescription) (string, error) {
+func generateGenericInterfaceType(d APIDescription, name string, subtypes []TypeDescription) (string, error) {
 	if len(subtypes) == 0 {
 		return "\ntype " + name + " interface{}", nil
 	}
@@ -427,7 +430,32 @@ func generateGenericInterfaceType(name string, subtypes []TypeDescription) (stri
 	}
 
 	bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
+
+	if name == tgTypeInputMedia {
+		bd.WriteString(fmt.Sprintf("\n%sParams(string, map[string]NamedReader) ([]byte, error)", name))
+	}
+
+	if len(commonFields) > 0 {
+		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
+		bd.WriteString("\n}")
+
+		bd.WriteString(fmt.Sprintf("\n\ntype Merged%s struct{", name))
+		for _, f := range getAllFields(subtypes, name) {
+			fieldType, err := f.getPreferredType()
+			if err != nil {
+				return "", err
+			}
+			if isTgType(d, fieldType) && !f.Required {
+				fieldType = "*" + fieldType
+			}
+
+			bd.WriteString("\n// " + f.Description)
+			bd.WriteString(fmt.Sprintf("\n%s %s", snakeToTitle(f.Name), fieldType))
+		}
+	}
+
 	bd.WriteString("\n}")
+
 	return bd.String(), nil
 }
 
@@ -451,6 +479,29 @@ type customCommonFieldData struct {
 const customCommonField = `
 func (v {{.Type}}) Get{{.CommonFieldName}}() {{.TypeName}} {
 	return {{.CommonValueName}}
+}
+`
+
+type mergeFuncData struct {
+	Type         string
+	TypeName     string
+	ConstantName string
+	ParentType   string
+	Fields       []Field
+	TitleFunc    func(string) string
+}
+
+const mergeFunc = `
+func (v {{.Type}}) Merge{{.ParentType}}() Merged{{.ParentType}} {
+	return Merged{{.ParentType}}{
+        {{- range $f := .Fields }}
+		{{- if eq $f.Name $.ConstantName }}
+			{{ call $.TitleFunc $f.Name }}: "{{ $.TypeName }}",
+		{{- else }}
+			{{ call $.TitleFunc $f.Name }}: v.{{ call $.TitleFunc $f.Name }},
+		{{- end }}
+		{{- end }}
+	}
 }
 `
 
