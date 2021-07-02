@@ -414,10 +414,12 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
 
 	if name == tgTypeInputMedia {
+		bd.WriteString(fmt.Sprintf("\n// %sParams allows for uploading %s files with attachments.", name, name))
 		bd.WriteString(fmt.Sprintf("\n%sParams(string, map[string]NamedReader) ([]byte, error)", name))
 	}
 
 	if len(commonFields) > 0 {
+		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 		bd.WriteString("\n}")
 
@@ -468,6 +470,7 @@ func generateMergeFunc(d APIDescription, tgType TypeDescription, parentType stri
 
 	bd := strings.Builder{}
 
+	bd.WriteString(fmt.Sprintf("\n// %s.Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", tgType.Name, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", tgType.Name, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
 	for _, f := range tgType.Fields {
