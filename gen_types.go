@@ -10,7 +10,7 @@ import (
 )
 
 type ReplyMarkup interface {
-	ReplyMarkup() ([]byte, error)
+	replyMarkup()
 }
 
 // Animation This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
@@ -79,7 +79,7 @@ type BotCommand struct {
 // https://core.telegram.org/bots/api#botcommandscope
 type BotCommandScope interface {
 	GetType() string
-	BotCommandScope() ([]byte, error)
+	botCommandScope()
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
 }
@@ -91,6 +91,17 @@ type MergedBotCommandScope struct {
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Unique identifier of the target user (Only for chat_member)
 	UserId int64 `json:"user_id,omitempty"`
+}
+
+func (v MergedBotCommandScope) GetType() string {
+	return v.Type
+}
+
+// MergedBotCommandScope.botCommandScope is a dummy method to avoid interface implementation.
+func (v MergedBotCommandScope) botCommandScope() {}
+
+func (v MergedBotCommandScope) MergeBotCommandScope() MergedBotCommandScope {
+	return v
 }
 
 // BotCommandScopeAllChatAdministrators Represents the scope of bot commands, covering all group and supergroup chat administrators.
@@ -120,9 +131,8 @@ func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeAllChatAdministrators) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeAllChatAdministrators.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllChatAdministrators) botCommandScope() {}
 
 // BotCommandScopeAllGroupChats Represents the scope of bot commands, covering all group and supergroup chats.
 // https://core.telegram.org/bots/api#botcommandscopeallgroupchats
@@ -151,9 +161,8 @@ func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeAllGroupChats) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeAllGroupChats.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllGroupChats) botCommandScope() {}
 
 // BotCommandScopeAllPrivateChats Represents the scope of bot commands, covering all private chats.
 // https://core.telegram.org/bots/api#botcommandscopeallprivatechats
@@ -182,9 +191,8 @@ func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeAllPrivateChats) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeAllPrivateChats.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
 
 // BotCommandScopeChat Represents the scope of bot commands, covering a specific chat.
 // https://core.telegram.org/bots/api#botcommandscopechat
@@ -217,9 +225,8 @@ func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeChat) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeChat.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChat) botCommandScope() {}
 
 // BotCommandScopeChatAdministrators Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
 // https://core.telegram.org/bots/api#botcommandscopechatadministrators
@@ -252,9 +259,8 @@ func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeChatAdministrators) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeChatAdministrators.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChatAdministrators) botCommandScope() {}
 
 // BotCommandScopeChatMember Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
 // https://core.telegram.org/bots/api#botcommandscopechatmember
@@ -290,9 +296,8 @@ func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeChatMember) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeChatMember.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChatMember) botCommandScope() {}
 
 // BotCommandScopeDefault Represents the default scope of bot commands. Default commands are used if no commands with a narrower scope are specified for the user.
 // https://core.telegram.org/bots/api#botcommandscopedefault
@@ -321,13 +326,12 @@ func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v BotCommandScopeDefault) BotCommandScope() ([]byte, error) {
-	return json.Marshal(v)
-}
+// BotCommandScopeDefault.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeDefault) botCommandScope() {}
 
 // CallbackGame A placeholder, currently holds no information. Use BotFather to set up your game.
 // https://core.telegram.org/bots/api#callbackgame
-type CallbackGame interface{}
+type CallbackGame struct{}
 
 // CallbackQuery This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
 // https://core.telegram.org/bots/api#callbackquery
@@ -426,7 +430,7 @@ type ChatLocation struct {
 type ChatMember interface {
 	GetStatus() string
 	GetUser() User
-	ChatMember() ([]byte, error)
+	chatMember()
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
 }
@@ -476,6 +480,21 @@ type MergedChatMember struct {
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
 	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, banned)
 	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+func (v MergedChatMember) GetStatus() string {
+	return v.Status
+}
+
+func (v MergedChatMember) GetUser() User {
+	return v.User
+}
+
+// MergedChatMember.chatMember is a dummy method to avoid interface implementation.
+func (v MergedChatMember) chatMember() {}
+
+func (v MergedChatMember) MergeChatMember() MergedChatMember {
+	return v
 }
 
 func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
@@ -618,9 +637,8 @@ func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberAdministrator) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberAdministrator.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberAdministrator) chatMember() {}
 
 // ChatMemberBanned Represents a chat member that was banned in the chat and can't return to the chat or view chat messages.
 // https://core.telegram.org/bots/api#chatmemberbanned
@@ -660,9 +678,8 @@ func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberBanned) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberBanned.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberBanned) chatMember() {}
 
 // ChatMemberLeft Represents a chat member that isn't currently a member of the chat, but may join it themselves.
 // https://core.telegram.org/bots/api#chatmemberleft
@@ -699,9 +716,8 @@ func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberLeft) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberLeft.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberLeft) chatMember() {}
 
 // ChatMemberMember Represents a chat member that has no additional privileges or restrictions.
 // https://core.telegram.org/bots/api#chatmembermember
@@ -738,9 +754,8 @@ func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberMember) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberMember.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberMember) chatMember() {}
 
 // ChatMemberOwner Represents a chat member that owns the chat and has all administrator privileges.
 // https://core.telegram.org/bots/api#chatmemberowner
@@ -783,9 +798,8 @@ func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberOwner) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberOwner.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberOwner) chatMember() {}
 
 // ChatMemberRestricted Represents a chat member that is under certain restrictions in the chat. Supergroups only.
 // https://core.telegram.org/bots/api#chatmemberrestricted
@@ -852,9 +866,8 @@ func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v ChatMemberRestricted) ChatMember() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ChatMemberRestricted.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberRestricted) chatMember() {}
 
 // ChatMemberUpdated This object represents changes in the status of a chat member.
 // https://core.telegram.org/bots/api#chatmemberupdated
@@ -1056,9 +1069,8 @@ type ForceReply struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ForceReply) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ForceReply.replyMarkup is a dummy method to avoid interface implementation.
+func (v ForceReply) replyMarkup() {}
 
 // Game This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
 // https://core.telegram.org/bots/api#game
@@ -1118,9 +1130,8 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
 }
 
-func (v InlineKeyboardMarkup) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineKeyboardMarkup.replyMarkup is a dummy method to avoid interface implementation.
+func (v InlineKeyboardMarkup) replyMarkup() {}
 
 // InlineQuery This object represents an incoming inline query. When the user sends an empty query, your bot could return some default or trending results.
 // https://core.telegram.org/bots/api#inlinequery
@@ -1165,7 +1176,7 @@ type InlineQuery struct {
 type InlineQueryResult interface {
 	GetType() string
 	GetId() string
-	InlineQueryResult() ([]byte, error)
+	inlineQueryResult()
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
 }
@@ -1295,6 +1306,21 @@ type MergedInlineQueryResult struct {
 	VoiceDuration int64 `json:"voice_duration,omitempty"`
 }
 
+func (v MergedInlineQueryResult) GetType() string {
+	return v.Type
+}
+
+func (v MergedInlineQueryResult) GetId() string {
+	return v.Id
+}
+
+// MergedInlineQueryResult.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v MergedInlineQueryResult) inlineQueryResult() {}
+
+func (v MergedInlineQueryResult) MergeInlineQueryResult() MergedInlineQueryResult {
+	return v
+}
+
 // InlineQueryResultArticle Represents a link to an article or web page.
 // https://core.telegram.org/bots/api#inlinequeryresultarticle
 type InlineQueryResultArticle struct {
@@ -1357,9 +1383,8 @@ func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultArticle) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultArticle.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultArticle) inlineQueryResult() {}
 
 // InlineQueryResultAudio Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1424,9 +1449,8 @@ func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultAudio) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultAudio.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultAudio) inlineQueryResult() {}
 
 // InlineQueryResultCachedAudio Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1482,9 +1506,8 @@ func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedAudio) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedAudio.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 
 // InlineQueryResultCachedDocument Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1546,9 +1569,8 @@ func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedDocument) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedDocument.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedDocument) inlineQueryResult() {}
 
 // InlineQueryResultCachedGif Represents a link to an animated GIF file stored on the Telegram servers. By default, this animated GIF file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedgif
@@ -1606,9 +1628,8 @@ func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedGif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedGif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedGif) inlineQueryResult() {}
 
 // InlineQueryResultCachedMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound) stored on the Telegram servers. By default, this animated MPEG-4 file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedmpeg4gif
@@ -1666,9 +1687,8 @@ func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedMpeg4Gif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedMpeg4Gif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedMpeg4Gif) inlineQueryResult() {}
 
 // InlineQueryResultCachedPhoto Represents a link to a photo stored on the Telegram servers. By default, this photo will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedphoto
@@ -1729,9 +1749,8 @@ func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedPhoto) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedPhoto.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 
 // InlineQueryResultCachedSticker Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
 // Note: This will only work in Telegram versions released after 9 April, 2016 for static stickers and after 06 July, 2019 for animated stickers. Older clients will ignore them.
@@ -1778,9 +1797,8 @@ func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedSticker) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedSticker.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedSticker) inlineQueryResult() {}
 
 // InlineQueryResultCachedVideo Represents a link to a video file stored on the Telegram servers. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedvideo
@@ -1841,9 +1859,8 @@ func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedVideo) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedVideo.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 
 // InlineQueryResultCachedVoice Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1902,9 +1919,8 @@ func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedVoice) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedVoice.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 
 // InlineQueryResultContact Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1969,9 +1985,8 @@ func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultContact) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultContact.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultContact) inlineQueryResult() {}
 
 // InlineQueryResultDocument Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -2045,9 +2060,8 @@ func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultDocument) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultDocument.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultDocument) inlineQueryResult() {}
 
 // InlineQueryResultGame Represents a Game.
 // Note: This will only work in Telegram versions released after October 1, 2016. Older clients will not display any inline results if a game result is among them.
@@ -2091,9 +2105,8 @@ func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultGame) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultGame.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultGame) inlineQueryResult() {}
 
 // InlineQueryResultGif Represents a link to an animated GIF file. By default, this animated GIF file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultgif
@@ -2166,9 +2179,8 @@ func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultGif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultGif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultGif) inlineQueryResult() {}
 
 // InlineQueryResultLocation Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -2242,9 +2254,8 @@ func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultLocation) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultLocation.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultLocation) inlineQueryResult() {}
 
 // InlineQueryResultMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound). By default, this animated MPEG-4 file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
@@ -2317,9 +2328,8 @@ func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultMpeg4Gif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultMpeg4Gif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultMpeg4Gif) inlineQueryResult() {}
 
 // InlineQueryResultPhoto Represents a link to a photo. By default, this photo will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultphoto
@@ -2389,9 +2399,8 @@ func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultPhoto) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultPhoto.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultPhoto) inlineQueryResult() {}
 
 // InlineQueryResultVenue Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -2468,9 +2477,8 @@ func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVenue) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVenue.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVenue) inlineQueryResult() {}
 
 // InlineQueryResultVideo Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultvideo
@@ -2546,9 +2554,8 @@ func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVideo) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVideo.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVideo) inlineQueryResult() {}
 
 // InlineQueryResultVoice Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -2610,9 +2617,8 @@ func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVoice) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVoice.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVoice) inlineQueryResult() {}
 
 // InputContactMessageContent Represents the content of a contact message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputcontactmessagecontent
@@ -2627,9 +2633,8 @@ type InputContactMessageContent struct {
 	Vcard string `json:"vcard,omitempty"`
 }
 
-func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputContactMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputContactMessageContent) inputMessageContent() {}
 
 // InputFile This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
 // https://core.telegram.org/bots/api#inputfile
@@ -2680,9 +2685,8 @@ type InputInvoiceMessageContent struct {
 	IsFlexible bool `json:"is_flexible,omitempty"`
 }
 
-func (v InputInvoiceMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputInvoiceMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputInvoiceMessageContent) inputMessageContent() {}
 
 // InputLocationMessageContent Represents the content of a location message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputlocationmessagecontent
@@ -2701,9 +2705,8 @@ type InputLocationMessageContent struct {
 	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
 }
 
-func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputLocationMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputLocationMessageContent) inputMessageContent() {}
 
 // InputMedia This object represents the content of a media message to be sent. It should be one of
 // - InputMediaAnimation
@@ -2715,7 +2718,7 @@ func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFile
-	InputMedia() ([]byte, error)
+	inputMedia()
 	// InputMediaParams allows for uploading InputMedia files with attachments.
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
@@ -2749,6 +2752,21 @@ type MergedInputMedia struct {
 	Title string `json:"title,omitempty"`
 	// Optional. Pass True, if the uploaded video is suitable for streaming (Only for video)
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
+}
+
+func (v MergedInputMedia) GetType() string {
+	return v.Type
+}
+
+func (v MergedInputMedia) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergedInputMedia.inputMedia is a dummy method to avoid interface implementation.
+func (v MergedInputMedia) inputMedia() {}
+
+func (v MergedInputMedia) MergeInputMedia() MergedInputMedia {
+	return v
 }
 
 // InputMediaAnimation Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
@@ -2829,9 +2847,8 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InputMediaAnimation) InputMedia() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaAnimation) inputMedia() {}
 
 // InputMediaAudio Represents an audio file to be treated as music to be sent.
 // https://core.telegram.org/bots/api#inputmediaaudio
@@ -2911,9 +2928,8 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InputMediaAudio) InputMedia() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaAudio) inputMedia() {}
 
 // InputMediaDocument Represents a general file to be sent.
 // https://core.telegram.org/bots/api#inputmediadocument
@@ -2987,9 +3003,8 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InputMediaDocument) InputMedia() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaDocument) inputMedia() {}
 
 // InputMediaPhoto Represents a photo to be sent.
 // https://core.telegram.org/bots/api#inputmediaphoto
@@ -3057,9 +3072,8 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InputMediaPhoto) InputMedia() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaPhoto) inputMedia() {}
 
 // InputMediaVideo Represents a video to be sent.
 // https://core.telegram.org/bots/api#inputmediavideo
@@ -3142,9 +3156,8 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InputMediaVideo) InputMedia() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaVideo) inputMedia() {}
 
 // InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
 // - InputTextMessageContent
@@ -3154,7 +3167,7 @@ func (v InputMediaVideo) InputMedia() ([]byte, error) {
 // - InputInvoiceMessageContent
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
-	InputMessageContent() ([]byte, error)
+	inputMessageContent()
 }
 
 // InputTextMessageContent Represents the content of a text message to be sent as the result of an inline query.
@@ -3170,9 +3183,8 @@ type InputTextMessageContent struct {
 	DisableWebPagePreview bool `json:"disable_web_page_preview,omitempty"`
 }
 
-func (v InputTextMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputTextMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputTextMessageContent) inputMessageContent() {}
 
 // InputVenueMessageContent Represents the content of a venue message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputvenuemessagecontent
@@ -3195,9 +3207,8 @@ type InputVenueMessageContent struct {
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
-func (v InputVenueMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputVenueMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputVenueMessageContent) inputMessageContent() {}
 
 // Invoice This object contains basic information about an invoice.
 // https://core.telegram.org/bots/api#invoice
@@ -3473,7 +3484,7 @@ type PassportElementError interface {
 	GetSource() string
 	GetType() string
 	GetMessage() string
-	PassportElementError() ([]byte, error)
+	passportElementError()
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError
 }
@@ -3495,6 +3506,25 @@ type MergedPassportElementError struct {
 	FileHashes []string `json:"file_hashes,omitempty"`
 	// Optional. Base64-encoded element hash (Only for unspecified)
 	ElementHash string `json:"element_hash,omitempty"`
+}
+
+func (v MergedPassportElementError) GetSource() string {
+	return v.Source
+}
+
+func (v MergedPassportElementError) GetType() string {
+	return v.Type
+}
+
+func (v MergedPassportElementError) GetMessage() string {
+	return v.Message
+}
+
+// MergedPassportElementError.passportElementError is a dummy method to avoid interface implementation.
+func (v MergedPassportElementError) passportElementError() {}
+
+func (v MergedPassportElementError) MergePassportElementError() MergedPassportElementError {
+	return v
 }
 
 // PassportElementErrorDataField Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
@@ -3545,9 +3575,8 @@ func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorDataField) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorDataField.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorDataField) passportElementError() {}
 
 // PassportElementErrorFile Represents an issue with a document scan. The error is considered resolved when the file with the document scan changes.
 // https://core.telegram.org/bots/api#passportelementerrorfile
@@ -3594,9 +3623,8 @@ func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorFile) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorFile.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFile) passportElementError() {}
 
 // PassportElementErrorFiles Represents an issue with a list of scans. The error is considered resolved when the list of files containing the scans changes.
 // https://core.telegram.org/bots/api#passportelementerrorfiles
@@ -3643,9 +3671,8 @@ func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorFiles) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorFiles.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFiles) passportElementError() {}
 
 // PassportElementErrorFrontSide Represents an issue with the front side of a document. The error is considered resolved when the file with the front side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorfrontside
@@ -3692,9 +3719,8 @@ func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorFrontSide) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorFrontSide.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFrontSide) passportElementError() {}
 
 // PassportElementErrorReverseSide Represents an issue with the reverse side of a document. The error is considered resolved when the file with reverse side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorreverseside
@@ -3741,9 +3767,8 @@ func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorReverseSide) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorReverseSide.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorReverseSide) passportElementError() {}
 
 // PassportElementErrorSelfie Represents an issue with the selfie with a document. The error is considered resolved when the file with the selfie changes.
 // https://core.telegram.org/bots/api#passportelementerrorselfie
@@ -3790,9 +3815,8 @@ func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorSelfie) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorSelfie.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorSelfie) passportElementError() {}
 
 // PassportElementErrorTranslationFile Represents an issue with one of the files that constitute the translation of a document. The error is considered resolved when the file changes.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfile
@@ -3839,9 +3863,8 @@ func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorTranslationFile) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorTranslationFile.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorTranslationFile) passportElementError() {}
 
 // PassportElementErrorTranslationFiles Represents an issue with the translated version of a document. The error is considered resolved when a file with the document translation change.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfiles
@@ -3888,9 +3911,8 @@ func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorTranslationFiles) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorTranslationFiles.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorTranslationFiles) passportElementError() {}
 
 // PassportElementErrorUnspecified Represents an issue in an unspecified place. The error is considered resolved when new data is added.
 // https://core.telegram.org/bots/api#passportelementerrorunspecified
@@ -3937,9 +3959,8 @@ func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v PassportElementErrorUnspecified) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
-}
+// PassportElementErrorUnspecified.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorUnspecified) passportElementError() {}
 
 // PassportFile This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
 // https://core.telegram.org/bots/api#passportfile
@@ -4065,9 +4086,8 @@ type ReplyKeyboardMarkup struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ReplyKeyboardMarkup) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ReplyKeyboardMarkup.replyMarkup is a dummy method to avoid interface implementation.
+func (v ReplyKeyboardMarkup) replyMarkup() {}
 
 // ReplyKeyboardRemove Upon receiving a message with this object, Telegram clients will remove the current custom keyboard and display the default letter-keyboard. By default, custom keyboards are displayed until a new keyboard is sent by a bot. An exception is made for one-time keyboards that are hidden immediately after the user presses a button (see ReplyKeyboardMarkup).
 // https://core.telegram.org/bots/api#replykeyboardremove
@@ -4078,9 +4098,8 @@ type ReplyKeyboardRemove struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ReplyKeyboardRemove) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ReplyKeyboardRemove.replyMarkup is a dummy method to avoid interface implementation.
+func (v ReplyKeyboardRemove) replyMarkup() {}
 
 // ResponseParameters Contains information about why a request was unsuccessful.
 // https://core.telegram.org/bots/api#responseparameters

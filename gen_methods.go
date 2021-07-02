@@ -344,7 +344,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1544,7 +1544,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1662,7 +1662,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1738,7 +1738,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1786,7 +1786,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1895,7 +1895,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2133,7 +2133,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2248,7 +2248,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2331,7 +2331,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2428,7 +2428,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2496,7 +2496,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2565,7 +2565,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2689,7 +2689,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2790,7 +2790,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2878,7 +2878,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
