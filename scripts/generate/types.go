@@ -472,7 +472,7 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 
 	bd := strings.Builder{}
 
-	bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with types in a non-generic world.", parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
 	for _, f := range fields {
