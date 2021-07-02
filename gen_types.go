@@ -93,6 +93,7 @@ type MergedBotCommandScope struct {
 	UserId int64 `json:"user_id,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v MergedBotCommandScope) GetType() string {
 	return v.Type
 }
@@ -108,11 +109,12 @@ func (v MergedBotCommandScope) MergeBotCommandScope() MergedBotCommandScope {
 // https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
 type BotCommandScopeAllChatAdministrators struct{}
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllChatAdministrators) GetType() string {
 	return "all_chat_administrators"
 }
 
-// BotCommandScopeAllChatAdministrators.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeAllChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_chat_administrators",
@@ -138,11 +140,12 @@ func (v BotCommandScopeAllChatAdministrators) botCommandScope() {}
 // https://core.telegram.org/bots/api#botcommandscopeallgroupchats
 type BotCommandScopeAllGroupChats struct{}
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllGroupChats) GetType() string {
 	return "all_group_chats"
 }
 
-// BotCommandScopeAllGroupChats.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeAllGroupChats) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_group_chats",
@@ -168,11 +171,12 @@ func (v BotCommandScopeAllGroupChats) botCommandScope() {}
 // https://core.telegram.org/bots/api#botcommandscopeallprivatechats
 type BotCommandScopeAllPrivateChats struct{}
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllPrivateChats) GetType() string {
 	return "all_private_chats"
 }
 
-// BotCommandScopeAllPrivateChats.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeAllPrivateChats) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_private_chats",
@@ -201,11 +205,12 @@ type BotCommandScopeChat struct {
 	ChatId int64 `json:"chat_id,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChat) GetType() string {
 	return "chat"
 }
 
-// BotCommandScopeChat.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat",
@@ -235,11 +240,12 @@ type BotCommandScopeChatAdministrators struct {
 	ChatId int64 `json:"chat_id,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChatAdministrators) GetType() string {
 	return "chat_administrators"
 }
 
-// BotCommandScopeChatAdministrators.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_administrators",
@@ -271,11 +277,12 @@ type BotCommandScopeChatMember struct {
 	UserId int64 `json:"user_id,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChatMember) GetType() string {
 	return "chat_member"
 }
 
-// BotCommandScopeChatMember.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_member",
@@ -303,11 +310,12 @@ func (v BotCommandScopeChatMember) botCommandScope() {}
 // https://core.telegram.org/bots/api#botcommandscopedefault
 type BotCommandScopeDefault struct{}
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeDefault) GetType() string {
 	return "default"
 }
 
-// BotCommandScopeDefault.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
 func (v BotCommandScopeDefault) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "default",
@@ -482,10 +490,12 @@ type MergedChatMember struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v MergedChatMember) GetStatus() string {
 	return v.Status
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v MergedChatMember) GetUser() User {
 	return v.User
 }
@@ -596,15 +606,17 @@ type ChatMemberAdministrator struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberAdministrator) GetStatus() string {
 	return "administrator"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberAdministrator) GetUser() User {
 	return v.User
 }
 
-// ChatMemberAdministrator.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:              "administrator",
@@ -649,15 +661,17 @@ type ChatMemberBanned struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberBanned) GetStatus() string {
 	return "banned"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberBanned) GetUser() User {
 	return v.User
 }
 
-// ChatMemberBanned.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:    "banned",
@@ -688,15 +702,17 @@ type ChatMemberLeft struct {
 	User User `json:"user,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberLeft) GetStatus() string {
 	return "left"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberLeft) GetUser() User {
 	return v.User
 }
 
-// ChatMemberLeft.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberLeft) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status: "left",
@@ -726,15 +742,17 @@ type ChatMemberMember struct {
 	User User `json:"user,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberMember) GetStatus() string {
 	return "member"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberMember) GetUser() User {
 	return v.User
 }
 
-// ChatMemberMember.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status: "member",
@@ -768,15 +786,17 @@ type ChatMemberOwner struct {
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberOwner) GetStatus() string {
 	return "owner"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberOwner) GetUser() User {
 	return v.User
 }
 
-// ChatMemberOwner.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:      "owner",
@@ -828,15 +848,17 @@ type ChatMemberRestricted struct {
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
+// GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberRestricted) GetStatus() string {
 	return "restricted"
 }
 
+// GetUser is a helper method to easily access the common fields of an interface.
 func (v ChatMemberRestricted) GetUser() User {
 	return v.User
 }
 
-// ChatMemberRestricted.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
 func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:                "restricted",
@@ -1306,10 +1328,12 @@ type MergedInlineQueryResult struct {
 	VoiceDuration int64 `json:"voice_duration,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v MergedInlineQueryResult) GetType() string {
 	return v.Type
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v MergedInlineQueryResult) GetId() string {
 	return v.Id
 }
@@ -1346,15 +1370,17 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultArticle) GetType() string {
 	return "article"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultArticle) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultArticle.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "article",
@@ -1412,15 +1438,17 @@ type InlineQueryResultAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultAudio) GetType() string {
 	return "audio"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultAudio) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultAudio.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
@@ -1472,15 +1500,17 @@ type InlineQueryResultCachedAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedAudio) GetType() string {
 	return "audio"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedAudio) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedAudio.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
@@ -1533,15 +1563,17 @@ type InlineQueryResultCachedDocument struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedDocument) GetType() string {
 	return "document"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedDocument) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedDocument.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
@@ -1593,15 +1625,17 @@ type InlineQueryResultCachedGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedGif) GetType() string {
 	return "gif"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedGif) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedGif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
@@ -1652,15 +1686,17 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedMpeg4Gif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
@@ -1713,15 +1749,17 @@ type InlineQueryResultCachedPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedPhoto) GetType() string {
 	return "photo"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedPhoto) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedPhoto.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
@@ -1766,15 +1804,17 @@ type InlineQueryResultCachedSticker struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedSticker) GetType() string {
 	return "sticker"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedSticker) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedSticker.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "sticker",
@@ -1823,15 +1863,17 @@ type InlineQueryResultCachedVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVideo) GetType() string {
 	return "video"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVideo) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedVideo.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
@@ -1884,15 +1926,17 @@ type InlineQueryResultCachedVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVoice) GetType() string {
 	return "voice"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVoice) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultCachedVoice.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
@@ -1948,15 +1992,17 @@ type InlineQueryResultContact struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultContact) GetType() string {
 	return "contact"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultContact) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultContact.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "contact",
@@ -2020,15 +2066,17 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultDocument) GetType() string {
 	return "document"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultDocument) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultDocument.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
@@ -2075,15 +2123,17 @@ type InlineQueryResultGame struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGame) GetType() string {
 	return "game"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGame) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultGame.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:          "game",
@@ -2139,15 +2189,17 @@ type InlineQueryResultGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGif) GetType() string {
 	return "gif"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGif) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultGif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
@@ -2214,15 +2266,17 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultLocation) GetType() string {
 	return "location"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultLocation) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultLocation.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                 "location",
@@ -2288,15 +2342,17 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultMpeg4Gif) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultMpeg4Gif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
@@ -2360,15 +2416,17 @@ type InlineQueryResultPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultPhoto) GetType() string {
 	return "photo"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultPhoto) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultPhoto.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
@@ -2436,15 +2494,17 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVenue) GetType() string {
 	return "venue"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVenue) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultVenue.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "venue",
@@ -2513,15 +2573,17 @@ type InlineQueryResultVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVideo) GetType() string {
 	return "video"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVideo) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultVideo.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
@@ -2581,15 +2643,17 @@ type InlineQueryResultVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVoice) GetType() string {
 	return "voice"
 }
 
+// GetId is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVoice) GetId() string {
 	return v.Id
 }
 
-// InlineQueryResultVoice.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
 func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
@@ -2754,10 +2818,12 @@ type MergedInputMedia struct {
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v MergedInputMedia) GetType() string {
 	return v.Type
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v MergedInputMedia) GetMedia() InputFile {
 	return v.Media
 }
@@ -2812,15 +2878,17 @@ func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaAnimation) GetType() string {
 	return "animation"
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v InputMediaAnimation) GetMedia() InputFile {
 	return v.Media
 }
 
-// InputMediaAnimation.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
 func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "animation",
@@ -2893,15 +2961,17 @@ func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaAudio) GetType() string {
 	return "audio"
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v InputMediaAudio) GetMedia() InputFile {
 	return v.Media
 }
 
-// InputMediaAudio.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
 func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "audio",
@@ -2970,15 +3040,17 @@ func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]N
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaDocument) GetType() string {
 	return "document"
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v InputMediaDocument) GetMedia() InputFile {
 	return v.Media
 }
 
-// InputMediaDocument.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
 func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:                        "document",
@@ -3041,15 +3113,17 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaPhoto) GetType() string {
 	return "photo"
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v InputMediaPhoto) GetMedia() InputFile {
 	return v.Media
 }
 
-// InputMediaPhoto.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
 func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "photo",
@@ -3120,15 +3194,17 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaVideo) GetType() string {
 	return "video"
 }
 
+// GetMedia is a helper method to easily access the common fields of an interface.
 func (v InputMediaVideo) GetMedia() InputFile {
 	return v.Media
 }
 
-// InputMediaVideo.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
 func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:              "video",
@@ -3508,14 +3584,17 @@ type MergedPassportElementError struct {
 	ElementHash string `json:"element_hash,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v MergedPassportElementError) GetSource() string {
 	return v.Source
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v MergedPassportElementError) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v MergedPassportElementError) GetMessage() string {
 	return v.Message
 }
@@ -3540,19 +3619,22 @@ type PassportElementErrorDataField struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorDataField) GetSource() string {
 	return "data"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorDataField) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorDataField) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorDataField.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorDataField) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:    "data",
@@ -3589,19 +3671,22 @@ type PassportElementErrorFile struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFile) GetSource() string {
 	return "file"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFile) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFile) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorFile.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorFile) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "file",
@@ -3637,19 +3722,22 @@ type PassportElementErrorFiles struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFiles) GetSource() string {
 	return "files"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFiles) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFiles) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorFiles.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorFiles) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:     "files",
@@ -3685,19 +3773,22 @@ type PassportElementErrorFrontSide struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFrontSide) GetSource() string {
 	return "front_side"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFrontSide) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFrontSide) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorFrontSide.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorFrontSide) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "front_side",
@@ -3733,19 +3824,22 @@ type PassportElementErrorReverseSide struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorReverseSide) GetSource() string {
 	return "reverse_side"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorReverseSide) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorReverseSide) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorReverseSide.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorReverseSide) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "reverse_side",
@@ -3781,19 +3875,22 @@ type PassportElementErrorSelfie struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorSelfie) GetSource() string {
 	return "selfie"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorSelfie) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorSelfie) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorSelfie.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorSelfie) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "selfie",
@@ -3829,19 +3926,22 @@ type PassportElementErrorTranslationFile struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFile) GetSource() string {
 	return "translation_file"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFile) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFile) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorTranslationFile.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorTranslationFile) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "translation_file",
@@ -3877,19 +3977,22 @@ type PassportElementErrorTranslationFiles struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFiles) GetSource() string {
 	return "translation_files"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFiles) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFiles) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorTranslationFiles.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorTranslationFiles) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:     "translation_files",
@@ -3925,19 +4028,22 @@ type PassportElementErrorUnspecified struct {
 	Message string `json:"message,omitempty"`
 }
 
+// GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorUnspecified) GetSource() string {
 	return "unspecified"
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorUnspecified) GetType() string {
 	return v.Type
 }
 
+// GetMessage is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorUnspecified) GetMessage() string {
 	return v.Message
 }
 
-// PassportElementErrorUnspecified.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
 func (v PassportElementErrorUnspecified) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:      "unspecified",

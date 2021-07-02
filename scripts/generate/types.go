@@ -455,10 +455,11 @@ type Merged%s struct {
 
 func generateCommonGetMethod(t string, commonName string, commonType string, commonValue string) string {
 	return fmt.Sprintf(`
+// Get%s is a helper method to easily access the common fields of an interface.
 func (v %s) Get%s() %s {
 	return %s
 }
-`, t, commonName, commonType, commonValue)
+`, commonName, t, commonName, commonType, commonValue)
 }
 
 func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField string) (string, error) {
@@ -471,7 +472,7 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 
 	bd := strings.Builder{}
 
-	bd.WriteString(fmt.Sprintf("\n// %s.Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", typeName, parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
 	for _, f := range fields {
