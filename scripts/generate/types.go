@@ -295,13 +295,14 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
+
 		commonGetMethods, err := generateAllCommonGetMethods(tgType.Name, commonFields, constantField, shortName)
 		if err != nil {
 			return "", err
 		}
 		bd.WriteString(commonGetMethods)
 
-		mergeFunc, err := generateMergeFunc(d, tgType, parentType.Name, constantField)
+		mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
 		if err != nil {
 			return "", err
 		}
@@ -407,7 +408,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(fmt.Sprintf("\nGet%s() %s", snakeToTitle(f.Name), prefType))
 	}
 
-	bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
+	//bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
 
 	if name == tgTypeInputMedia {
 		bd.WriteString(fmt.Sprintf("\n// %sParams allows for uploading %s files with attachments.", name, name))
@@ -428,13 +429,16 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 		bd.WriteString("\n" + mergedStruct)
 
-		getMethods, err := generateAllCommonGetMethods("Merged"+name, commonFields, "", "")
+		commonGetMethods, err := generateAllCommonGetMethods("Merged"+name, commonFields, "", "")
 		if err != nil {
 			return "", err
 		}
 
-		bd.WriteString(getMethods)
-
+		bd.WriteString(commonGetMethods)
+		bd.WriteString(fmt.Sprintf(`
+func (v Merged%s) Merge%s() Merged%s {
+	return v
+}`, name, name, name))
 	}
 
 	return bd.String(), nil
@@ -461,22 +465,22 @@ func (v %s) Get%s() %s {
 `, t, commonName, commonType, commonValue)
 }
 
-func generateMergeFunc(d APIDescription, tgType TypeDescription, parentType string, constantField string) (string, error) {
+func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField string) (string, error) {
 	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
 	if err != nil {
-		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
+		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", typeName, err)
 	}
 
 	allParentFields := getAllFields(subTypes, parentType)
 
 	bd := strings.Builder{}
 
-	bd.WriteString(fmt.Sprintf("\n// %s.Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", tgType.Name, parentType, parentType))
-	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", tgType.Name, parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\n// %s.Merge%s returns a Merged%s struct to simply working with types in a non-generic world.", typeName, parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
-	for _, f := range tgType.Fields {
+	for _, f := range fields {
 		if f.Name == constantField {
-			bd.WriteString(fmt.Sprintf("\n\t%s: \"%s\",", snakeToTitle(f.Name), tgType.getTypeNameFromParent(parentType)))
+			bd.WriteString(fmt.Sprintf("\n\t%s: \"%s\",", snakeToTitle(f.Name), shortname))
 			continue
 		}
 

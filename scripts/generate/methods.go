@@ -253,17 +253,8 @@ if %s != %s {
 			return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
 		}
 
-	case "ReplyMarkup":
-		bd.WriteString("\nif " + goParam + " != nil {")
-		bd.WriteString("\n	bs, err := " + goParam + ".ReplyMarkup()")
-		bd.WriteString("\n	if err != nil {")
-		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
-		bd.WriteString("\n}")
-
 	default:
-		if isArray(fieldType) {
+		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\nif " + goParam + " != nil {")
 		}
 
@@ -273,7 +264,7 @@ if %s != %s {
 		bd.WriteString("\n	}")
 		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
 
-		if isArray(fieldType) {
+		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\n}")
 		}
 	}
