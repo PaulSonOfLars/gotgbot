@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	genericInterfaceTmpl      = template.Must(template.New("genericInterface").Parse(genericInterfaceMethod))
 	inputMediaParamsTmpl      = template.Must(template.New("inputMediaParamsMethod").Parse(inputMediaParamsMethod))
 	customMarshalTmpl         = template.Must(template.New("customMarshal").Parse(customMarshal))
 	customUnmarshalTmpl       = template.Must(template.New("customUnmarshal").Parse(customUnmarshal))
@@ -31,7 +30,7 @@ import (
 `)
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	replyMarkupInterface, err := generateGenericInterfaceType(d, "ReplyMarkup", getReplyMarkupTypes(d))
+	replyMarkupInterface, err := generateGenericInterfaceType(d, tgTypeReplyMarkup, getReplyMarkupTypes(d))
 	if err != nil {
 		return fmt.Errorf("failed to generate reply_markup interface: %w", err)
 	}
@@ -219,30 +218,25 @@ func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (strin
 
 		typeInterfaces.WriteString(commonFields)
 
-		err = genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
-			Type:       tgType.Name,
-			ParentType: parentTypeName,
-		})
-		if err != nil {
-			return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
-		}
+		typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, parentTypeName))
 	}
 
 	for _, t := range getReplyMarkupTypes(d) {
 		if tgType.Name == t.Name {
-			err := genericInterfaceTmpl.Execute(&typeInterfaces, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: "ReplyMarkup",
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate replymarkup interface methods for %s: %w", tgType.Name, err)
-			}
-
+			typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, tgTypeReplyMarkup))
 			break
 		}
 	}
 
 	return typeInterfaces.String(), nil
+}
+
+func generateGenericInterfaceMethod(typeName string, parentType string) string {
+	methodName := titleToCamelCase(parentType)
+	return fmt.Sprintf(`
+// %s.%s is a dummy method to avoid interface implementation.
+func (v %s) %s() {}
+`, typeName, methodName, typeName, methodName)
 }
 
 func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, error) {
@@ -408,7 +402,8 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(fmt.Sprintf("\nGet%s() %s", snakeToTitle(f.Name), prefType))
 	}
 
-	//bd.WriteString(fmt.Sprintf("\n%s() ([]byte, error)", name))
+	// create a dummy func to avoid external types implementing this interface
+	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
 
 	if name == tgTypeInputMedia {
 		bd.WriteString(fmt.Sprintf("\n// %sParams allows for uploading %s files with attachments.", name, name))
@@ -435,6 +430,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		}
 
 		bd.WriteString(commonGetMethods)
+		bd.WriteString(generateGenericInterfaceMethod("Merged"+name, name))
 		bd.WriteString(fmt.Sprintf(`
 func (v Merged%s) Merge%s() Merged%s {
 	return v
@@ -638,12 +634,6 @@ func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]Named
 		}
 	}
 	
-	return json.Marshal(v)
-}
-`
-
-const genericInterfaceMethod = `
-func (v {{.Type}}) {{.ParentType}}() ([]byte, error) {
 	return json.Marshal(v)
 }
 `

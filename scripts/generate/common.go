@@ -42,6 +42,10 @@ func titleToSnake(str string) string {
 	return strings.ToLower(snake)
 }
 
+func titleToCamelCase(str string) string {
+	return strings.ToLower(str[0:1]) + str[1:]
+}
+
 func toGoType(s string) string {
 	pref := ""
 	for isTgArray(s) {
