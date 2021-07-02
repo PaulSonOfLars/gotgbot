@@ -121,6 +121,12 @@ func getAllFields(types []TypeDescription, parentType string) []Field {
 			continue
 		}
 
+		// If not all subtypes use it, then its optional; update description.
+		if f.Required {
+			f.Description = "Optional. " + f.Description
+		}
+
+		fields[idx].Required = false
 		fields[idx].Description = fmt.Sprintf("%s (Only for %s)", f.Description, strings.Join(typesUsingField, ", "))
 	}
 
