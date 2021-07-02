@@ -80,6 +80,17 @@ type BotCommand struct {
 type BotCommandScope interface {
 	GetType() string
 	BotCommandScope() ([]byte, error)
+	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
+	MergeBotCommandScope() MergedBotCommandScope
+}
+
+type MergedBotCommandScope struct {
+	// Scope type, must be default
+	Type string `json:"type,omitempty"`
+	// Optional. Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername) (Only for chat, chat_administrators, chat_member)
+	ChatId int64 `json:"chat_id,omitempty"`
+	// Optional. Unique identifier of the target user (Only for chat_member)
+	UserId int64 `json:"user_id,omitempty"`
 }
 
 // BotCommandScopeAllChatAdministrators Represents the scope of bot commands, covering all group and supergroup chat administrators.
@@ -88,6 +99,13 @@ type BotCommandScopeAllChatAdministrators struct{}
 
 func (v BotCommandScopeAllChatAdministrators) GetType() string {
 	return "all_chat_administrators"
+}
+
+// BotCommandScopeAllChatAdministrators.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeAllChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_chat_administrators",
+	}
 }
 
 func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
@@ -114,6 +132,13 @@ func (v BotCommandScopeAllGroupChats) GetType() string {
 	return "all_group_chats"
 }
 
+// BotCommandScopeAllGroupChats.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeAllGroupChats) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_group_chats",
+	}
+}
+
 func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeAllGroupChats
 	a := struct {
@@ -136,6 +161,13 @@ type BotCommandScopeAllPrivateChats struct{}
 
 func (v BotCommandScopeAllPrivateChats) GetType() string {
 	return "all_private_chats"
+}
+
+// BotCommandScopeAllPrivateChats.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeAllPrivateChats) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_private_chats",
+	}
 }
 
 func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
@@ -165,6 +197,14 @@ func (v BotCommandScopeChat) GetType() string {
 	return "chat"
 }
 
+// BotCommandScopeChat.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat",
+		ChatId: v.ChatId,
+	}
+}
+
 func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeChat
 	a := struct {
@@ -190,6 +230,14 @@ type BotCommandScopeChatAdministrators struct {
 
 func (v BotCommandScopeChatAdministrators) GetType() string {
 	return "chat_administrators"
+}
+
+// BotCommandScopeChatAdministrators.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat_administrators",
+		ChatId: v.ChatId,
+	}
 }
 
 func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
@@ -221,6 +269,15 @@ func (v BotCommandScopeChatMember) GetType() string {
 	return "chat_member"
 }
 
+// BotCommandScopeChatMember.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat_member",
+		ChatId: v.ChatId,
+		UserId: v.UserId,
+	}
+}
+
 func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeChatMember
 	a := struct {
@@ -243,6 +300,13 @@ type BotCommandScopeDefault struct{}
 
 func (v BotCommandScopeDefault) GetType() string {
 	return "default"
+}
+
+// BotCommandScopeDefault.MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+func (v BotCommandScopeDefault) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "default",
+	}
 }
 
 func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
@@ -363,6 +427,55 @@ type ChatMember interface {
 	GetStatus() string
 	GetUser() User
 	ChatMember() ([]byte, error)
+	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
+	MergeChatMember() MergedChatMember
+}
+
+type MergedChatMember struct {
+	// The member's status in the chat, always "creator"
+	Status string `json:"status,omitempty"`
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// Optional. Custom title for this user (Only for owner, administrator)
+	CustomTitle string `json:"custom_title,omitempty"`
+	// Optional. True, if the user's presence in the chat is hidden (Only for owner, administrator)
+	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
+	CanBeEdited bool `json:"can_be_edited,omitempty"`
+	// Optional. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege (Only for administrator)
+	CanManageChat bool `json:"can_manage_chat,omitempty"`
+	// Optional. True, if the administrator can post in the channel; channels only (Only for administrator)
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
+	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
+	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
+	// Optional. True, if the administrator can manage voice chats (Only for administrator)
+	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
+	// Optional. True, if the administrator can restrict, ban or unban chat members (Only for administrator)
+	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
+	// Optional. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user) (Only for administrator)
+	CanPromoteMembers bool `json:"can_promote_members,omitempty"`
+	// Optional. True, if the user is allowed to change the chat title, photo and other settings (Only for administrator, restricted)
+	CanChangeInfo bool `json:"can_change_info,omitempty"`
+	// Optional. True, if the user is allowed to invite new users to the chat (Only for administrator, restricted)
+	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
+	IsMember bool `json:"is_member,omitempty"`
+	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues (Only for restricted)
+	CanSendMessages bool `json:"can_send_messages,omitempty"`
+	// Optional. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes (Only for restricted)
+	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
+	// Optional. True, if the user is allowed to send polls (Only for restricted)
+	CanSendPolls bool `json:"can_send_polls,omitempty"`
+	// Optional. True, if the user is allowed to send animations, games, stickers and use inline bots (Only for restricted)
+	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
+	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
+	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
+	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, banned)
+	UntilDate int64 `json:"until_date,omitempty"`
 }
 
 func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
@@ -426,6 +539,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 			return nil, err
 		}
 		return s, nil
+
 	}
 	return nil, fmt.Errorf("unknown interface with Status %v", t.Status)
 }
@@ -471,6 +585,27 @@ func (v ChatMemberAdministrator) GetUser() User {
 	return v.User
 }
 
+// ChatMemberAdministrator.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:              "administrator",
+		User:                v.User,
+		CanBeEdited:         v.CanBeEdited,
+		CustomTitle:         v.CustomTitle,
+		IsAnonymous:         v.IsAnonymous,
+		CanManageChat:       v.CanManageChat,
+		CanPostMessages:     v.CanPostMessages,
+		CanEditMessages:     v.CanEditMessages,
+		CanDeleteMessages:   v.CanDeleteMessages,
+		CanManageVoiceChats: v.CanManageVoiceChats,
+		CanRestrictMembers:  v.CanRestrictMembers,
+		CanPromoteMembers:   v.CanPromoteMembers,
+		CanChangeInfo:       v.CanChangeInfo,
+		CanInviteUsers:      v.CanInviteUsers,
+		CanPinMessages:      v.CanPinMessages,
+	}
+}
+
 func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberAdministrator
 	a := struct {
@@ -504,6 +639,15 @@ func (v ChatMemberBanned) GetUser() User {
 	return v.User
 }
 
+// ChatMemberBanned.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:    "banned",
+		User:      v.User,
+		UntilDate: v.UntilDate,
+	}
+}
+
 func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberBanned
 	a := struct {
@@ -535,6 +679,14 @@ func (v ChatMemberLeft) GetUser() User {
 	return v.User
 }
 
+// ChatMemberLeft.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberLeft) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status: "left",
+		User:   v.User,
+	}
+}
+
 func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberLeft
 	a := struct {
@@ -564,6 +716,14 @@ func (v ChatMemberMember) GetStatus() string {
 
 func (v ChatMemberMember) GetUser() User {
 	return v.User
+}
+
+// ChatMemberMember.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberMember) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status: "member",
+		User:   v.User,
+	}
 }
 
 func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
@@ -599,6 +759,16 @@ func (v ChatMemberOwner) GetStatus() string {
 
 func (v ChatMemberOwner) GetUser() User {
 	return v.User
+}
+
+// ChatMemberOwner.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:      "owner",
+		User:        v.User,
+		CustomTitle: v.CustomTitle,
+		IsAnonymous: v.IsAnonymous,
+	}
 }
 
 func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
@@ -650,6 +820,24 @@ func (v ChatMemberRestricted) GetStatus() string {
 
 func (v ChatMemberRestricted) GetUser() User {
 	return v.User
+}
+
+// ChatMemberRestricted.MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:                "restricted",
+		User:                  v.User,
+		IsMember:              v.IsMember,
+		CanChangeInfo:         v.CanChangeInfo,
+		CanInviteUsers:        v.CanInviteUsers,
+		CanPinMessages:        v.CanPinMessages,
+		CanSendMessages:       v.CanSendMessages,
+		CanSendMediaMessages:  v.CanSendMediaMessages,
+		CanSendPolls:          v.CanSendPolls,
+		CanSendOtherMessages:  v.CanSendOtherMessages,
+		CanAddWebPagePreviews: v.CanAddWebPagePreviews,
+		UntilDate:             v.UntilDate,
+	}
 }
 
 func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
@@ -978,6 +1166,133 @@ type InlineQueryResult interface {
 	GetType() string
 	GetId() string
 	InlineQueryResult() ([]byte, error)
+	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
+	MergeInlineQueryResult() MergedInlineQueryResult
+}
+
+type MergedInlineQueryResult struct {
+	// Type of the result, must be audio
+	Type string `json:"type,omitempty"`
+	// Unique identifier for this result, 1-64 bytes
+	Id string `json:"id,omitempty"`
+	// Optional. A valid file identifier for the audio file (Only for audio)
+	AudioFileId string `json:"audio_file_id,omitempty"`
+	// Optional. Caption, 0-1024 characters after entities parsing (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details. (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Inline keyboard attached to the message
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+	// Optional. Content of the message to be sent instead of the audio (Only for audio, document, gif, mpeg4_gif, photo, sticker, video, voice, article, audio, contact, document, gif, location, mpeg4_gif, photo, venue, video, voice)
+	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	// Optional. Title for the result (Only for document, gif, mpeg4_gif, photo, video, voice, article, audio, document, gif, location, mpeg4_gif, photo, venue, video, voice)
+	Title string `json:"title,omitempty"`
+	// Optional. A valid file identifier for the file (Only for document)
+	DocumentFileId string `json:"document_file_id,omitempty"`
+	// Optional. Short description of the result (Only for document, photo, video, article, document, photo, video)
+	Description string `json:"description,omitempty"`
+	// Optional. A valid file identifier for the GIF file (Only for gif)
+	GifFileId string `json:"gif_file_id,omitempty"`
+	// Optional. A valid file identifier for the MP4 file (Only for mpeg4_gif)
+	Mpeg4FileId string `json:"mpeg4_file_id,omitempty"`
+	// Optional. A valid file identifier of the photo (Only for photo)
+	PhotoFileId string `json:"photo_file_id,omitempty"`
+	// Optional. A valid file identifier of the sticker (Only for sticker)
+	StickerFileId string `json:"sticker_file_id,omitempty"`
+	// Optional. A valid file identifier for the video file (Only for video)
+	VideoFileId string `json:"video_file_id,omitempty"`
+	// Optional. A valid file identifier for the voice message (Only for voice)
+	VoiceFileId string `json:"voice_file_id,omitempty"`
+	// Optional. URL of the result (Only for article)
+	Url string `json:"url,omitempty"`
+	// Optional. Pass True, if you don't want the URL to be shown in the message (Only for article)
+	HideUrl bool `json:"hide_url,omitempty"`
+	// Optional. Url of the thumbnail for the result (Only for article, contact, document, gif, location, mpeg4_gif, photo, venue, video)
+	ThumbUrl string `json:"thumb_url,omitempty"`
+	// Optional. Thumbnail width (Only for article, contact, document, location, venue)
+	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	// Optional. Thumbnail height (Only for article, contact, document, location, venue)
+	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	// Optional. A valid URL for the audio file (Only for audio)
+	AudioUrl string `json:"audio_url,omitempty"`
+	// Optional. Performer (Only for audio)
+	Performer string `json:"performer,omitempty"`
+	// Optional. Audio duration in seconds (Only for audio)
+	AudioDuration int64 `json:"audio_duration,omitempty"`
+	// Optional. Contact's phone number (Only for contact)
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// Optional. Contact's first name (Only for contact)
+	FirstName string `json:"first_name,omitempty"`
+	// Optional. Contact's last name (Only for contact)
+	LastName string `json:"last_name,omitempty"`
+	// Optional. Additional data about the contact in the form of a vCard, 0-2048 bytes (Only for contact)
+	Vcard string `json:"vcard,omitempty"`
+	// Optional. Short name of the game (Only for game)
+	GameShortName string `json:"game_short_name,omitempty"`
+	// Optional. A valid URL for the file (Only for document)
+	DocumentUrl string `json:"document_url,omitempty"`
+	// Optional. Mime type of the content of the file, either "application/pdf" or "application/zip" (Only for document, video)
+	MimeType string `json:"mime_type,omitempty"`
+	// Optional. A valid URL for the GIF file. File size must not exceed 1MB (Only for gif)
+	GifUrl string `json:"gif_url,omitempty"`
+	// Optional. Width of the GIF (Only for gif)
+	GifWidth int64 `json:"gif_width,omitempty"`
+	// Optional. Height of the GIF (Only for gif)
+	GifHeight int64 `json:"gif_height,omitempty"`
+	// Optional. Duration of the GIF (Only for gif)
+	GifDuration int64 `json:"gif_duration,omitempty"`
+	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg" (Only for gif, mpeg4_gif)
+	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
+	// Optional. Location latitude in degrees (Only for location, venue)
+	Latitude float64 `json:"latitude,omitempty"`
+	// Optional. Location longitude in degrees (Only for location, venue)
+	Longitude float64 `json:"longitude,omitempty"`
+	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500 (Only for location)
+	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
+	// Optional. Period in seconds for which the location can be updated, should be between 60 and 86400. (Only for location)
+	LivePeriod int64 `json:"live_period,omitempty"`
+	// Optional. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified. (Only for location)
+	Heading int64 `json:"heading,omitempty"`
+	// Optional. For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified. (Only for location)
+	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
+	// Optional. A valid URL for the MP4 file. File size must not exceed 1MB (Only for mpeg4_gif)
+	Mpeg4Url string `json:"mpeg4_url,omitempty"`
+	// Optional. Video width (Only for mpeg4_gif)
+	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
+	// Optional. Video height (Only for mpeg4_gif)
+	Mpeg4Height int64 `json:"mpeg4_height,omitempty"`
+	// Optional. Video duration (Only for mpeg4_gif)
+	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
+	// Optional. A valid URL of the photo. Photo must be in jpeg format. Photo size must not exceed 5MB (Only for photo)
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// Optional. Width of the photo (Only for photo)
+	PhotoWidth int64 `json:"photo_width,omitempty"`
+	// Optional. Height of the photo (Only for photo)
+	PhotoHeight int64 `json:"photo_height,omitempty"`
+	// Optional. Address of the venue (Only for venue)
+	Address string `json:"address,omitempty"`
+	// Optional. Foursquare identifier of the venue if known (Only for venue)
+	FoursquareId string `json:"foursquare_id,omitempty"`
+	// Optional. Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".) (Only for venue)
+	FoursquareType string `json:"foursquare_type,omitempty"`
+	// Optional. Google Places identifier of the venue (Only for venue)
+	GooglePlaceId string `json:"google_place_id,omitempty"`
+	// Optional. Google Places type of the venue. (See supported types.) (Only for venue)
+	GooglePlaceType string `json:"google_place_type,omitempty"`
+	// Optional. A valid URL for the embedded video player or video file (Only for video)
+	VideoUrl string `json:"video_url,omitempty"`
+	// Optional. Video width (Only for video)
+	VideoWidth int64 `json:"video_width,omitempty"`
+	// Optional. Video height (Only for video)
+	VideoHeight int64 `json:"video_height,omitempty"`
+	// Optional. Video duration in seconds (Only for video)
+	VideoDuration int64 `json:"video_duration,omitempty"`
+	// Optional. A valid URL for the voice recording (Only for voice)
+	VoiceUrl string `json:"voice_url,omitempty"`
+	// Optional. Recording duration in seconds (Only for voice)
+	VoiceDuration int64 `json:"voice_duration,omitempty"`
 }
 
 // InlineQueryResultArticle Represents a link to an article or web page.
@@ -1011,6 +1326,23 @@ func (v InlineQueryResultArticle) GetType() string {
 
 func (v InlineQueryResultArticle) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultArticle.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "article",
+		Id:                  v.Id,
+		Title:               v.Title,
+		InputMessageContent: &v.InputMessageContent,
+		ReplyMarkup:         v.ReplyMarkup,
+		Url:                 v.Url,
+		HideUrl:             v.HideUrl,
+		Description:         v.Description,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
 }
 
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
@@ -1063,6 +1395,23 @@ func (v InlineQueryResultAudio) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultAudio.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "audio",
+		Id:                  v.Id,
+		AudioUrl:            v.AudioUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		Performer:           v.Performer,
+		AudioDuration:       v.AudioDuration,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultAudio
 	a := struct {
@@ -1105,6 +1454,20 @@ func (v InlineQueryResultCachedAudio) GetType() string {
 
 func (v InlineQueryResultCachedAudio) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultCachedAudio.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "audio",
+		Id:                  v.Id,
+		AudioFileId:         v.AudioFileId,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
@@ -1155,6 +1518,22 @@ func (v InlineQueryResultCachedDocument) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultCachedDocument.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "document",
+		Id:                  v.Id,
+		Title:               v.Title,
+		DocumentFileId:      v.DocumentFileId,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedDocument
 	a := struct {
@@ -1200,6 +1579,21 @@ func (v InlineQueryResultCachedGif) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultCachedGif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "gif",
+		Id:                  v.Id,
+		GifFileId:           v.GifFileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedGif
 	a := struct {
@@ -1243,6 +1637,21 @@ func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
 
 func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultCachedMpeg4Gif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "mpeg4_gif",
+		Id:                  v.Id,
+		Mpeg4FileId:         v.Mpeg4FileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
@@ -1292,6 +1701,22 @@ func (v InlineQueryResultCachedPhoto) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultCachedPhoto.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "photo",
+		Id:                  v.Id,
+		PhotoFileId:         v.PhotoFileId,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedPhoto
 	a := struct {
@@ -1328,6 +1753,17 @@ func (v InlineQueryResultCachedSticker) GetType() string {
 
 func (v InlineQueryResultCachedSticker) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultCachedSticker.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "sticker",
+		Id:                  v.Id,
+		StickerFileId:       v.StickerFileId,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
@@ -1377,6 +1813,22 @@ func (v InlineQueryResultCachedVideo) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultCachedVideo.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "video",
+		Id:                  v.Id,
+		VideoFileId:         v.VideoFileId,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVideo
 	a := struct {
@@ -1421,6 +1873,21 @@ func (v InlineQueryResultCachedVoice) GetType() string {
 
 func (v InlineQueryResultCachedVoice) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultCachedVoice.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "voice",
+		Id:                  v.Id,
+		VoiceFileId:         v.VoiceFileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
@@ -1471,6 +1938,23 @@ func (v InlineQueryResultContact) GetType() string {
 
 func (v InlineQueryResultContact) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultContact.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "contact",
+		Id:                  v.Id,
+		PhoneNumber:         v.PhoneNumber,
+		FirstName:           v.FirstName,
+		LastName:            v.LastName,
+		Vcard:               v.Vcard,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
 }
 
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
@@ -1529,6 +2013,26 @@ func (v InlineQueryResultDocument) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultDocument.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "document",
+		Id:                  v.Id,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		DocumentUrl:         v.DocumentUrl,
+		MimeType:            v.MimeType,
+		Description:         v.Description,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultDocument
 	a := struct {
@@ -1563,6 +2067,16 @@ func (v InlineQueryResultGame) GetType() string {
 
 func (v InlineQueryResultGame) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultGame.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:          "game",
+		Id:            v.Id,
+		GameShortName: v.GameShortName,
+		ReplyMarkup:   v.ReplyMarkup,
+	}
 }
 
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
@@ -1618,6 +2132,26 @@ func (v InlineQueryResultGif) GetType() string {
 
 func (v InlineQueryResultGif) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultGif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "gif",
+		Id:                  v.Id,
+		GifUrl:              v.GifUrl,
+		GifWidth:            v.GifWidth,
+		GifHeight:           v.GifHeight,
+		GifDuration:         v.GifDuration,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbMimeType:       v.ThumbMimeType,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
@@ -1676,6 +2210,26 @@ func (v InlineQueryResultLocation) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultLocation.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                 "location",
+		Id:                   v.Id,
+		Latitude:             v.Latitude,
+		Longitude:            v.Longitude,
+		Title:                v.Title,
+		HorizontalAccuracy:   v.HorizontalAccuracy,
+		LivePeriod:           v.LivePeriod,
+		Heading:              v.Heading,
+		ProximityAlertRadius: v.ProximityAlertRadius,
+		ReplyMarkup:          v.ReplyMarkup,
+		InputMessageContent:  v.InputMessageContent,
+		ThumbUrl:             v.ThumbUrl,
+		ThumbWidth:           v.ThumbWidth,
+		ThumbHeight:          v.ThumbHeight,
+	}
+}
+
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultLocation
 	a := struct {
@@ -1731,6 +2285,26 @@ func (v InlineQueryResultMpeg4Gif) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultMpeg4Gif.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "mpeg4_gif",
+		Id:                  v.Id,
+		Mpeg4Url:            v.Mpeg4Url,
+		Mpeg4Width:          v.Mpeg4Width,
+		Mpeg4Height:         v.Mpeg4Height,
+		Mpeg4Duration:       v.Mpeg4Duration,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbMimeType:       v.ThumbMimeType,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultMpeg4Gif
 	a := struct {
@@ -1782,6 +2356,25 @@ func (v InlineQueryResultPhoto) GetType() string {
 
 func (v InlineQueryResultPhoto) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultPhoto.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "photo",
+		Id:                  v.Id,
+		PhotoUrl:            v.PhotoUrl,
+		ThumbUrl:            v.ThumbUrl,
+		PhotoWidth:          v.PhotoWidth,
+		PhotoHeight:         v.PhotoHeight,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
@@ -1842,6 +2435,27 @@ func (v InlineQueryResultVenue) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultVenue.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "venue",
+		Id:                  v.Id,
+		Latitude:            v.Latitude,
+		Longitude:           v.Longitude,
+		Title:               v.Title,
+		Address:             v.Address,
+		FoursquareId:        v.FoursquareId,
+		FoursquareType:      v.FoursquareType,
+		GooglePlaceId:       v.GooglePlaceId,
+		GooglePlaceType:     v.GooglePlaceType,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVenue
 	a := struct {
@@ -1899,6 +2513,27 @@ func (v InlineQueryResultVideo) GetId() string {
 	return v.Id
 }
 
+// InlineQueryResultVideo.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "video",
+		Id:                  v.Id,
+		VideoUrl:            v.VideoUrl,
+		MimeType:            v.MimeType,
+		ThumbUrl:            v.ThumbUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		VideoWidth:          v.VideoWidth,
+		VideoHeight:         v.VideoHeight,
+		VideoDuration:       v.VideoDuration,
+		Description:         v.Description,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVideo
 	a := struct {
@@ -1945,6 +2580,22 @@ func (v InlineQueryResultVoice) GetType() string {
 
 func (v InlineQueryResultVoice) GetId() string {
 	return v.Id
+}
+
+// InlineQueryResultVoice.MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "voice",
+		Id:                  v.Id,
+		VoiceUrl:            v.VoiceUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		VoiceDuration:       v.VoiceDuration,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
 }
 
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
@@ -2062,8 +2713,42 @@ func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
 // - InputMediaVideo
 // https://core.telegram.org/bots/api#inputmedia
 type InputMedia interface {
-	Type() string
+	GetType() string
+	GetMedia() InputFile
+	InputMedia() ([]byte, error)
+	// InputMediaParams allows for uploading InputMedia files with attachments.
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
+	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
+	MergeInputMedia() MergedInputMedia
+}
+
+type MergedInputMedia struct {
+	// Type of the result, must be animation
+	Type string `json:"type,omitempty"`
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
+	Media InputFile `json:"media,omitempty"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files » (Only for animation, document, audio, video)
+	Thumb *InputFile `json:"thumb,omitempty"`
+	// Optional. Caption of the animation to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the animation caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Animation width (Only for animation, video)
+	Width int64 `json:"width,omitempty"`
+	// Optional. Animation height (Only for animation, video)
+	Height int64 `json:"height,omitempty"`
+	// Optional. Animation duration (Only for animation, audio, video)
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album. (Only for document)
+	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
+	// Optional. Performer of the audio (Only for audio)
+	Performer string `json:"performer,omitempty"`
+	// Optional. Title of the audio (Only for audio)
+	Title string `json:"title,omitempty"`
+	// Optional. Pass True, if the uploaded video is suitable for streaming (Only for video)
+	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 }
 
 // InputMediaAnimation Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
@@ -2085,26 +2770,6 @@ type InputMediaAnimation struct {
 	Height int64 `json:"height,omitempty"`
 	// Optional. Animation duration
 	Duration int64 `json:"duration,omitempty"`
-}
-
-func (v InputMediaAnimation) GetType() string {
-	return "animation"
-}
-
-func (v InputMediaAnimation) GetMedia() InputFile {
-	return v.Media
-}
-
-func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
-	type alias InputMediaAnimation
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "animation",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -2129,6 +2794,45 @@ func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]
 	return json.Marshal(v)
 }
 
+func (v InputMediaAnimation) GetType() string {
+	return "animation"
+}
+
+func (v InputMediaAnimation) GetMedia() InputFile {
+	return v.Media
+}
+
+// InputMediaAnimation.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "animation",
+		Media:           v.Media,
+		Thumb:           v.Thumb,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+		Width:           v.Width,
+		Height:          v.Height,
+		Duration:        v.Duration,
+	}
+}
+
+func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
+	type alias InputMediaAnimation
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "animation",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputMediaAnimation) InputMedia() ([]byte, error) {
+	return json.Marshal(v)
+}
+
 // InputMediaAudio Represents an audio file to be treated as music to be sent.
 // https://core.telegram.org/bots/api#inputmediaaudio
 type InputMediaAudio struct {
@@ -2148,26 +2852,6 @@ type InputMediaAudio struct {
 	Performer string `json:"performer,omitempty"`
 	// Optional. Title of the audio
 	Title string `json:"title,omitempty"`
-}
-
-func (v InputMediaAudio) GetType() string {
-	return "audio"
-}
-
-func (v InputMediaAudio) GetMedia() InputFile {
-	return v.Media
-}
-
-func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
-	type alias InputMediaAudio
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "audio",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -2192,6 +2876,45 @@ func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+func (v InputMediaAudio) GetType() string {
+	return "audio"
+}
+
+func (v InputMediaAudio) GetMedia() InputFile {
+	return v.Media
+}
+
+// InputMediaAudio.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "audio",
+		Media:           v.Media,
+		Thumb:           v.Thumb,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+		Duration:        v.Duration,
+		Performer:       v.Performer,
+		Title:           v.Title,
+	}
+}
+
+func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
+	type alias InputMediaAudio
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "audio",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputMediaAudio) InputMedia() ([]byte, error) {
+	return json.Marshal(v)
+}
+
 // InputMediaDocument Represents a general file to be sent.
 // https://core.telegram.org/bots/api#inputmediadocument
 type InputMediaDocument struct {
@@ -2207,26 +2930,6 @@ type InputMediaDocument struct {
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album.
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
-}
-
-func (v InputMediaDocument) GetType() string {
-	return "document"
-}
-
-func (v InputMediaDocument) GetMedia() InputFile {
-	return v.Media
-}
-
-func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
-	type alias InputMediaDocument
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "document",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -2251,6 +2954,43 @@ func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]N
 	return json.Marshal(v)
 }
 
+func (v InputMediaDocument) GetType() string {
+	return "document"
+}
+
+func (v InputMediaDocument) GetMedia() InputFile {
+	return v.Media
+}
+
+// InputMediaDocument.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:                        "document",
+		Media:                       v.Media,
+		Thumb:                       v.Thumb,
+		Caption:                     v.Caption,
+		ParseMode:                   v.ParseMode,
+		CaptionEntities:             v.CaptionEntities,
+		DisableContentTypeDetection: v.DisableContentTypeDetection,
+	}
+}
+
+func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
+	type alias InputMediaDocument
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "document",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputMediaDocument) InputMedia() ([]byte, error) {
+	return json.Marshal(v)
+}
+
 // InputMediaPhoto Represents a photo to be sent.
 // https://core.telegram.org/bots/api#inputmediaphoto
 type InputMediaPhoto struct {
@@ -2262,26 +3002,6 @@ type InputMediaPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-}
-
-func (v InputMediaPhoto) GetType() string {
-	return "photo"
-}
-
-func (v InputMediaPhoto) GetMedia() InputFile {
-	return v.Media
-}
-
-func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
-	type alias InputMediaPhoto
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "photo",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -2303,6 +3023,41 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 		}
 	}
 
+	return json.Marshal(v)
+}
+
+func (v InputMediaPhoto) GetType() string {
+	return "photo"
+}
+
+func (v InputMediaPhoto) GetMedia() InputFile {
+	return v.Media
+}
+
+// InputMediaPhoto.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "photo",
+		Media:           v.Media,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+	}
+}
+
+func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
+	type alias InputMediaPhoto
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "photo",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputMediaPhoto) InputMedia() ([]byte, error) {
 	return json.Marshal(v)
 }
 
@@ -2329,26 +3084,6 @@ type InputMediaVideo struct {
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 }
 
-func (v InputMediaVideo) GetType() string {
-	return "video"
-}
-
-func (v InputMediaVideo) GetMedia() InputFile {
-	return v.Media
-}
-
-func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
-	type alias InputMediaVideo
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "video",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
-}
-
 func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
 		switch m := v.Media.(type) {
@@ -2368,6 +3103,46 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 		}
 	}
 
+	return json.Marshal(v)
+}
+
+func (v InputMediaVideo) GetType() string {
+	return "video"
+}
+
+func (v InputMediaVideo) GetMedia() InputFile {
+	return v.Media
+}
+
+// InputMediaVideo.MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:              "video",
+		Media:             v.Media,
+		Thumb:             v.Thumb,
+		Caption:           v.Caption,
+		ParseMode:         v.ParseMode,
+		CaptionEntities:   v.CaptionEntities,
+		Width:             v.Width,
+		Height:            v.Height,
+		Duration:          v.Duration,
+		SupportsStreaming: v.SupportsStreaming,
+	}
+}
+
+func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
+	type alias InputMediaVideo
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "video",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputMediaVideo) InputMedia() ([]byte, error) {
 	return json.Marshal(v)
 }
 
@@ -2699,6 +3474,27 @@ type PassportElementError interface {
 	GetType() string
 	GetMessage() string
 	PassportElementError() ([]byte, error)
+	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
+	MergePassportElementError() MergedPassportElementError
+}
+
+type MergedPassportElementError struct {
+	// Error source, must be data
+	Source string `json:"source,omitempty"`
+	// The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
+	Type string `json:"type,omitempty"`
+	// Optional. Name of the data field which has the error (Only for data)
+	FieldName string `json:"field_name,omitempty"`
+	// Optional. Base64-encoded data hash (Only for data)
+	DataHash string `json:"data_hash,omitempty"`
+	// Error message
+	Message string `json:"message,omitempty"`
+	// Optional. Base64-encoded hash of the file with the front side of the document (Only for front_side, reverse_side, selfie, file, translation_file)
+	FileHash string `json:"file_hash,omitempty"`
+	// Optional. List of base64-encoded file hashes (Only for files, translation_files)
+	FileHashes []string `json:"file_hashes,omitempty"`
+	// Optional. Base64-encoded element hash (Only for unspecified)
+	ElementHash string `json:"element_hash,omitempty"`
 }
 
 // PassportElementErrorDataField Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
@@ -2724,6 +3520,17 @@ func (v PassportElementErrorDataField) GetType() string {
 
 func (v PassportElementErrorDataField) GetMessage() string {
 	return v.Message
+}
+
+// PassportElementErrorDataField.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorDataField) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:    "data",
+		Type:      v.Type,
+		FieldName: v.FieldName,
+		DataHash:  v.DataHash,
+		Message:   v.Message,
+	}
 }
 
 func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
@@ -2765,6 +3572,16 @@ func (v PassportElementErrorFile) GetMessage() string {
 	return v.Message
 }
 
+// PassportElementErrorFile.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorFile) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "file",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
 func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorFile
 	a := struct {
@@ -2802,6 +3619,16 @@ func (v PassportElementErrorFiles) GetType() string {
 
 func (v PassportElementErrorFiles) GetMessage() string {
 	return v.Message
+}
+
+// PassportElementErrorFiles.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorFiles) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:     "files",
+		Type:       v.Type,
+		FileHashes: v.FileHashes,
+		Message:    v.Message,
+	}
 }
 
 func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
@@ -2843,6 +3670,16 @@ func (v PassportElementErrorFrontSide) GetMessage() string {
 	return v.Message
 }
 
+// PassportElementErrorFrontSide.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorFrontSide) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "front_side",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
 func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorFrontSide
 	a := struct {
@@ -2880,6 +3717,16 @@ func (v PassportElementErrorReverseSide) GetType() string {
 
 func (v PassportElementErrorReverseSide) GetMessage() string {
 	return v.Message
+}
+
+// PassportElementErrorReverseSide.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorReverseSide) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "reverse_side",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
 }
 
 func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
@@ -2921,6 +3768,16 @@ func (v PassportElementErrorSelfie) GetMessage() string {
 	return v.Message
 }
 
+// PassportElementErrorSelfie.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorSelfie) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "selfie",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
 func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorSelfie
 	a := struct {
@@ -2958,6 +3815,16 @@ func (v PassportElementErrorTranslationFile) GetType() string {
 
 func (v PassportElementErrorTranslationFile) GetMessage() string {
 	return v.Message
+}
+
+// PassportElementErrorTranslationFile.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorTranslationFile) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "translation_file",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
 }
 
 func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
@@ -2999,6 +3866,16 @@ func (v PassportElementErrorTranslationFiles) GetMessage() string {
 	return v.Message
 }
 
+// PassportElementErrorTranslationFiles.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorTranslationFiles) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:     "translation_files",
+		Type:       v.Type,
+		FileHashes: v.FileHashes,
+		Message:    v.Message,
+	}
+}
+
 func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorTranslationFiles
 	a := struct {
@@ -3036,6 +3913,16 @@ func (v PassportElementErrorUnspecified) GetType() string {
 
 func (v PassportElementErrorUnspecified) GetMessage() string {
 	return v.Message
+}
+
+// PassportElementErrorUnspecified.MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+func (v PassportElementErrorUnspecified) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:      "unspecified",
+		Type:        v.Type,
+		ElementHash: v.ElementHash,
+		Message:     v.Message,
+	}
 }
 
 func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
