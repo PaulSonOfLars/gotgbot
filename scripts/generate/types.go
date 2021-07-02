@@ -432,9 +432,10 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(commonGetMethods)
 		bd.WriteString(generateGenericInterfaceMethod("Merged"+name, name))
 		bd.WriteString(fmt.Sprintf(`
+// Merge%s returns a Merged%s struct to simplify working with types in a non-generic world.
 func (v Merged%s) Merge%s() Merged%s {
 	return v
-}`, name, name, name))
+}`, name, name, name, name, name))
 	}
 
 	return bd.String(), nil
@@ -447,10 +448,11 @@ func generateMergedStruct(d APIDescription, name string, subtypes []TypeDescript
 	}
 
 	return fmt.Sprintf(`
+// Merged%s is a helper type to simplify interactions with the various %s subtypes.
 type Merged%s struct {
 	%s
 }
-`, name, strings.TrimSpace(fields)), nil
+`, name, name, name, strings.TrimSpace(fields)), nil
 }
 
 func generateCommonGetMethod(t string, commonName string, commonType string, commonValue string) string {
@@ -521,6 +523,7 @@ type customUnmarshalData struct {
 }
 
 const customUnmarshal = `
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
 func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 	// All fields in {{.Type}}, with interface fields as json.RawMessage
 	type tmp struct {
@@ -561,6 +564,8 @@ type customStructUnmarshalCaseData struct {
 }
 
 const customStructUnmarshal = `
+// {{.UnmarshalFuncName}} is a JSON unmarshal helper to marshal the right structs into a {{.ParentType}} interface
+// based on the {{.ConstantFieldName}} field.
 func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		if len(d) == 0 {
 			return nil, nil
@@ -597,6 +602,7 @@ type customMarshalData struct {
 
 // The alias type is required to avoid infinite MarshalJSON loops.
 const customMarshal = `
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the {{.ConstantFieldName}} value.
 func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 	type alias {{.Type}}
 	a := struct{

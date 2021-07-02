@@ -84,6 +84,7 @@ type BotCommandScope interface {
 	MergeBotCommandScope() MergedBotCommandScope
 }
 
+// MergedBotCommandScope is a helper type to simplify interactions with the various BotCommandScope subtypes.
 type MergedBotCommandScope struct {
 	// Scope type, must be default
 	Type string `json:"type,omitempty"`
@@ -101,6 +102,7 @@ func (v MergedBotCommandScope) GetType() string {
 // MergedBotCommandScope.botCommandScope is a dummy method to avoid interface implementation.
 func (v MergedBotCommandScope) botCommandScope() {}
 
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v MergedBotCommandScope) MergeBotCommandScope() MergedBotCommandScope {
 	return v
 }
@@ -114,13 +116,14 @@ func (v BotCommandScopeAllChatAdministrators) GetType() string {
 	return "all_chat_administrators"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeAllChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_chat_administrators",
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeAllChatAdministrators
 	a := struct {
@@ -145,13 +148,14 @@ func (v BotCommandScopeAllGroupChats) GetType() string {
 	return "all_group_chats"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeAllGroupChats) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_group_chats",
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeAllGroupChats
 	a := struct {
@@ -176,13 +180,14 @@ func (v BotCommandScopeAllPrivateChats) GetType() string {
 	return "all_private_chats"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeAllPrivateChats) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "all_private_chats",
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeAllPrivateChats
 	a := struct {
@@ -210,7 +215,7 @@ func (v BotCommandScopeChat) GetType() string {
 	return "chat"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat",
@@ -218,6 +223,7 @@ func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeChat
 	a := struct {
@@ -245,7 +251,7 @@ func (v BotCommandScopeChatAdministrators) GetType() string {
 	return "chat_administrators"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_administrators",
@@ -253,6 +259,7 @@ func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotComma
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeChatAdministrators
 	a := struct {
@@ -282,7 +289,7 @@ func (v BotCommandScopeChatMember) GetType() string {
 	return "chat_member"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_member",
@@ -291,6 +298,7 @@ func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope 
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeChatMember
 	a := struct {
@@ -315,13 +323,14 @@ func (v BotCommandScopeDefault) GetType() string {
 	return "default"
 }
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simply working with types in a non-generic world.
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
 func (v BotCommandScopeDefault) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type: "default",
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
 	type alias BotCommandScopeDefault
 	a := struct {
@@ -443,6 +452,7 @@ type ChatMember interface {
 	MergeChatMember() MergedChatMember
 }
 
+// MergedChatMember is a helper type to simplify interactions with the various ChatMember subtypes.
 type MergedChatMember struct {
 	// The member's status in the chat, always "creator"
 	Status string `json:"status,omitempty"`
@@ -503,10 +513,13 @@ func (v MergedChatMember) GetUser() User {
 // MergedChatMember.chatMember is a dummy method to avoid interface implementation.
 func (v MergedChatMember) chatMember() {}
 
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v MergedChatMember) MergeChatMember() MergedChatMember {
 	return v
 }
 
+// unmarshalChatMember is a JSON unmarshal helper to marshal the right structs into a ChatMember interface
+// based on the Status field.
 func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 	if len(d) == 0 {
 		return nil, nil
@@ -616,7 +629,7 @@ func (v ChatMemberAdministrator) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:              "administrator",
@@ -637,6 +650,7 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberAdministrator
 	a := struct {
@@ -671,7 +685,7 @@ func (v ChatMemberBanned) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:    "banned",
@@ -680,6 +694,7 @@ func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberBanned
 	a := struct {
@@ -712,7 +727,7 @@ func (v ChatMemberLeft) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberLeft) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status: "left",
@@ -720,6 +735,7 @@ func (v ChatMemberLeft) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberLeft
 	a := struct {
@@ -752,7 +768,7 @@ func (v ChatMemberMember) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status: "member",
@@ -760,6 +776,7 @@ func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberMember
 	a := struct {
@@ -796,7 +813,7 @@ func (v ChatMemberOwner) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:      "owner",
@@ -806,6 +823,7 @@ func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberOwner
 	a := struct {
@@ -858,7 +876,7 @@ func (v ChatMemberRestricted) GetUser() User {
 	return v.User
 }
 
-// MergeChatMember returns a MergedChatMember struct to simply working with types in a non-generic world.
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:                "restricted",
@@ -876,6 +894,7 @@ func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
 	type alias ChatMemberRestricted
 	a := struct {
@@ -908,6 +927,7 @@ type ChatMemberUpdated struct {
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
 }
 
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
 func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 	// All fields in ChatMemberUpdated, with interface fields as json.RawMessage
 	type tmp struct {
@@ -1203,6 +1223,7 @@ type InlineQueryResult interface {
 	MergeInlineQueryResult() MergedInlineQueryResult
 }
 
+// MergedInlineQueryResult is a helper type to simplify interactions with the various InlineQueryResult subtypes.
 type MergedInlineQueryResult struct {
 	// Type of the result, must be audio
 	Type string `json:"type,omitempty"`
@@ -1341,6 +1362,7 @@ func (v MergedInlineQueryResult) GetId() string {
 // MergedInlineQueryResult.inlineQueryResult is a dummy method to avoid interface implementation.
 func (v MergedInlineQueryResult) inlineQueryResult() {}
 
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v MergedInlineQueryResult) MergeInlineQueryResult() MergedInlineQueryResult {
 	return v
 }
@@ -1380,7 +1402,7 @@ func (v InlineQueryResultArticle) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "article",
@@ -1397,6 +1419,7 @@ func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResu
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultArticle
 	a := struct {
@@ -1448,7 +1471,7 @@ func (v InlineQueryResultAudio) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
@@ -1465,6 +1488,7 @@ func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultAudio
 	a := struct {
@@ -1510,7 +1534,7 @@ func (v InlineQueryResultCachedAudio) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
@@ -1524,6 +1548,7 @@ func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQuery
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedAudio
 	a := struct {
@@ -1573,7 +1598,7 @@ func (v InlineQueryResultCachedDocument) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
@@ -1589,6 +1614,7 @@ func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQu
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedDocument
 	a := struct {
@@ -1635,7 +1661,7 @@ func (v InlineQueryResultCachedGif) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
@@ -1650,6 +1676,7 @@ func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryRe
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedGif
 	a := struct {
@@ -1696,7 +1723,7 @@ func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
@@ -1711,6 +1738,7 @@ func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQu
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedMpeg4Gif
 	a := struct {
@@ -1759,7 +1787,7 @@ func (v InlineQueryResultCachedPhoto) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
@@ -1775,6 +1803,7 @@ func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQuery
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedPhoto
 	a := struct {
@@ -1814,7 +1843,7 @@ func (v InlineQueryResultCachedSticker) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "sticker",
@@ -1825,6 +1854,7 @@ func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQue
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedSticker
 	a := struct {
@@ -1873,7 +1903,7 @@ func (v InlineQueryResultCachedVideo) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
@@ -1889,6 +1919,7 @@ func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQuery
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVideo
 	a := struct {
@@ -1936,7 +1967,7 @@ func (v InlineQueryResultCachedVoice) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
@@ -1951,6 +1982,7 @@ func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQuery
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVoice
 	a := struct {
@@ -2002,7 +2034,7 @@ func (v InlineQueryResultContact) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "contact",
@@ -2019,6 +2051,7 @@ func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResu
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultContact
 	a := struct {
@@ -2076,7 +2109,7 @@ func (v InlineQueryResultDocument) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
@@ -2096,6 +2129,7 @@ func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryRes
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultDocument
 	a := struct {
@@ -2133,7 +2167,7 @@ func (v InlineQueryResultGame) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:          "game",
@@ -2143,6 +2177,7 @@ func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult 
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGame
 	a := struct {
@@ -2199,7 +2234,7 @@ func (v InlineQueryResultGif) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
@@ -2219,6 +2254,7 @@ func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGif
 	a := struct {
@@ -2276,7 +2312,7 @@ func (v InlineQueryResultLocation) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                 "location",
@@ -2296,6 +2332,7 @@ func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryRes
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultLocation
 	a := struct {
@@ -2352,7 +2389,7 @@ func (v InlineQueryResultMpeg4Gif) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
@@ -2372,6 +2409,7 @@ func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryRes
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultMpeg4Gif
 	a := struct {
@@ -2426,7 +2464,7 @@ func (v InlineQueryResultPhoto) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
@@ -2445,6 +2483,7 @@ func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultPhoto
 	a := struct {
@@ -2504,7 +2543,7 @@ func (v InlineQueryResultVenue) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "venue",
@@ -2525,6 +2564,7 @@ func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVenue
 	a := struct {
@@ -2583,7 +2623,7 @@ func (v InlineQueryResultVideo) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
@@ -2604,6 +2644,7 @@ func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVideo
 	a := struct {
@@ -2653,7 +2694,7 @@ func (v InlineQueryResultVoice) GetId() string {
 	return v.Id
 }
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simply working with types in a non-generic world.
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
@@ -2669,6 +2710,7 @@ func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVoice
 	a := struct {
@@ -2789,6 +2831,7 @@ type InputMedia interface {
 	MergeInputMedia() MergedInputMedia
 }
 
+// MergedInputMedia is a helper type to simplify interactions with the various InputMedia subtypes.
 type MergedInputMedia struct {
 	// Type of the result, must be animation
 	Type string `json:"type,omitempty"`
@@ -2831,6 +2874,7 @@ func (v MergedInputMedia) GetMedia() InputFile {
 // MergedInputMedia.inputMedia is a dummy method to avoid interface implementation.
 func (v MergedInputMedia) inputMedia() {}
 
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v MergedInputMedia) MergeInputMedia() MergedInputMedia {
 	return v
 }
@@ -2888,7 +2932,7 @@ func (v InputMediaAnimation) GetMedia() InputFile {
 	return v.Media
 }
 
-// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "animation",
@@ -2903,6 +2947,7 @@ func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 	type alias InputMediaAnimation
 	a := struct {
@@ -2971,7 +3016,7 @@ func (v InputMediaAudio) GetMedia() InputFile {
 	return v.Media
 }
 
-// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "audio",
@@ -2986,6 +3031,7 @@ func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 	type alias InputMediaAudio
 	a := struct {
@@ -3050,7 +3096,7 @@ func (v InputMediaDocument) GetMedia() InputFile {
 	return v.Media
 }
 
-// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:                        "document",
@@ -3063,6 +3109,7 @@ func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 	type alias InputMediaDocument
 	a := struct {
@@ -3123,7 +3170,7 @@ func (v InputMediaPhoto) GetMedia() InputFile {
 	return v.Media
 }
 
-// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "photo",
@@ -3134,6 +3181,7 @@ func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 	type alias InputMediaPhoto
 	a := struct {
@@ -3204,7 +3252,7 @@ func (v InputMediaVideo) GetMedia() InputFile {
 	return v.Media
 }
 
-// MergeInputMedia returns a MergedInputMedia struct to simply working with types in a non-generic world.
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:              "video",
@@ -3220,6 +3268,7 @@ func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 	type alias InputMediaVideo
 	a := struct {
@@ -3565,6 +3614,7 @@ type PassportElementError interface {
 	MergePassportElementError() MergedPassportElementError
 }
 
+// MergedPassportElementError is a helper type to simplify interactions with the various PassportElementError subtypes.
 type MergedPassportElementError struct {
 	// Error source, must be data
 	Source string `json:"source,omitempty"`
@@ -3602,6 +3652,7 @@ func (v MergedPassportElementError) GetMessage() string {
 // MergedPassportElementError.passportElementError is a dummy method to avoid interface implementation.
 func (v MergedPassportElementError) passportElementError() {}
 
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v MergedPassportElementError) MergePassportElementError() MergedPassportElementError {
 	return v
 }
@@ -3634,7 +3685,7 @@ func (v PassportElementErrorDataField) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorDataField) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:    "data",
@@ -3645,6 +3696,7 @@ func (v PassportElementErrorDataField) MergePassportElementError() MergedPasspor
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorDataField
 	a := struct {
@@ -3686,7 +3738,7 @@ func (v PassportElementErrorFile) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorFile) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "file",
@@ -3696,6 +3748,7 @@ func (v PassportElementErrorFile) MergePassportElementError() MergedPassportElem
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorFile
 	a := struct {
@@ -3737,7 +3790,7 @@ func (v PassportElementErrorFiles) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorFiles) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:     "files",
@@ -3747,6 +3800,7 @@ func (v PassportElementErrorFiles) MergePassportElementError() MergedPassportEle
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorFiles
 	a := struct {
@@ -3788,7 +3842,7 @@ func (v PassportElementErrorFrontSide) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorFrontSide) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "front_side",
@@ -3798,6 +3852,7 @@ func (v PassportElementErrorFrontSide) MergePassportElementError() MergedPasspor
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorFrontSide
 	a := struct {
@@ -3839,7 +3894,7 @@ func (v PassportElementErrorReverseSide) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorReverseSide) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "reverse_side",
@@ -3849,6 +3904,7 @@ func (v PassportElementErrorReverseSide) MergePassportElementError() MergedPassp
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorReverseSide
 	a := struct {
@@ -3890,7 +3946,7 @@ func (v PassportElementErrorSelfie) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorSelfie) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "selfie",
@@ -3900,6 +3956,7 @@ func (v PassportElementErrorSelfie) MergePassportElementError() MergedPassportEl
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorSelfie
 	a := struct {
@@ -3941,7 +3998,7 @@ func (v PassportElementErrorTranslationFile) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorTranslationFile) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:   "translation_file",
@@ -3951,6 +4008,7 @@ func (v PassportElementErrorTranslationFile) MergePassportElementError() MergedP
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorTranslationFile
 	a := struct {
@@ -3992,7 +4050,7 @@ func (v PassportElementErrorTranslationFiles) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorTranslationFiles) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:     "translation_files",
@@ -4002,6 +4060,7 @@ func (v PassportElementErrorTranslationFiles) MergePassportElementError() Merged
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorTranslationFiles
 	a := struct {
@@ -4043,7 +4102,7 @@ func (v PassportElementErrorUnspecified) GetMessage() string {
 	return v.Message
 }
 
-// MergePassportElementError returns a MergedPassportElementError struct to simply working with types in a non-generic world.
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
 func (v PassportElementErrorUnspecified) MergePassportElementError() MergedPassportElementError {
 	return MergedPassportElementError{
 		Source:      "unspecified",
@@ -4053,6 +4112,7 @@ func (v PassportElementErrorUnspecified) MergePassportElementError() MergedPassp
 	}
 }
 
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
 	type alias PassportElementErrorUnspecified
 	a := struct {
