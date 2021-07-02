@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+func contains(s string, ss []string) bool {
+	for _, str := range ss {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
 

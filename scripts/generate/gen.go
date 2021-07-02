@@ -37,10 +37,43 @@ func (td TypeDescription) receiverName() string {
 }
 
 func (td TypeDescription) sentByAPI(d APIDescription) bool {
+	checked := map[string]bool{}
+
 	for _, m := range d.Methods {
 		for _, r := range m.Returns {
 			if r == td.Name {
 				return true
+			}
+
+			child, ok := d.Types[r]
+			if !ok || checked[r] {
+				continue
+			}
+
+			if CheckChildTypes(d, child, td.Name, []string{td.Name}) {
+				return true
+			}
+			checked[r] = true
+		}
+	}
+	return false
+}
+
+func CheckChildTypes(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
+	for _, f := range tgType.Fields {
+		for _, t := range f.Types {
+			if t == typeName {
+				return true
+			}
+
+			if contains(t, skip) {
+				continue
+			}
+
+			if child, ok := d.Types[t]; ok && t != tgType.Name {
+				if CheckChildTypes(d, child, typeName, append(skip, tgType.Name)) {
+					return true
+				}
 			}
 		}
 	}
