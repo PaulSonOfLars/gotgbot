@@ -105,8 +105,12 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		addr = "&"
 	}
 
-	method.WriteString("\nvar " + retVarName + " " + retVarType)
-	method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+	if len(d.Types[retType].Subtypes) != 0 {
+		method.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
+	} else {
+		method.WriteString("\nvar " + retVarName + " " + retVarType)
+		method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+	}
 	method.WriteString("\n}")
 
 	return method.String(), nil

@@ -1022,8 +1022,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 		return nil, err
 	}
 
-	var c ChatMember
-	return c, json.Unmarshal(r, &c)
+	return unmarshalChatMember(r)
 }
 
 // GetChatMemberCount Use this method to get the number of members in a chat. Returns Int on success.
