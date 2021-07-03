@@ -458,9 +458,9 @@ type MergedChatMember struct {
 	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// Optional. Custom title for this user (Only for owner, administrator)
+	// Optional. Custom title for this user (Only for creator, administrator)
 	CustomTitle string `json:"custom_title,omitempty"`
-	// Optional. True, if the user's presence in the chat is hidden (Only for owner, administrator)
+	// Optional. True, if the user's presence in the chat is hidden (Only for creator, administrator)
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
@@ -534,7 +534,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 	}
 
 	switch t.Status {
-	case "owner":
+	case "creator":
 		s := ChatMemberOwner{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
@@ -805,7 +805,7 @@ type ChatMemberOwner struct {
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberOwner) GetStatus() string {
-	return "owner"
+	return "creator"
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -816,7 +816,7 @@ func (v ChatMemberOwner) GetUser() User {
 // MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
-		Status:      "owner",
+		Status:      "creator",
 		User:        v.User,
 		CustomTitle: v.CustomTitle,
 		IsAnonymous: v.IsAnonymous,
@@ -830,7 +830,7 @@ func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "owner",
+		Status: "creator",
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)

@@ -81,6 +81,11 @@ func CheckChildTypes(d APIDescription, tgType TypeDescription, typeName string, 
 }
 
 func (td TypeDescription) getTypeNameFromParent(parentType string) string {
+	// Telegram inconsistencies
+	if td.Name == "ChatMemberOwner" {
+		return "creator"
+	}
+
 	typeName := strings.TrimPrefix(td.Name, parentType)
 	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
 	typeName = strings.TrimSuffix(typeName, "Field")  // some of them are "Field"
