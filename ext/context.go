@@ -11,12 +11,19 @@ type Context struct {
 	*gotgbot.Update
 	Data map[string]interface{}
 
+	// EffectiveMessage is the message which triggered the update, if possible
 	EffectiveMessage *gotgbot.Message
-	EffectiveChat    *gotgbot.Chat
-	EffectiveUser    *gotgbot.User
+	// EffectiveChat is the chat the update was triggered in, if possible
+	EffectiveChat *gotgbot.Chat
+	// EffectiveUser is the user who triggered the update, if possible.
+	// Note: when adding a user, the user who ADDED should be the EffectiveUser;
+	// they caused the update. If a user joins naturally, then they are the EffectiveUser.
+	EffectiveUser *gotgbot.User
 }
 
-func NewContext(b *gotgbot.Bot, update *gotgbot.Update) *Context {
+// NewContext populates a context with the relevant fields from the current update.
+// It takes a data field in the case where custom data needs to be passed.
+func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	var msg *gotgbot.Message
 	var chat *gotgbot.Chat
 	var user *gotgbot.User
@@ -68,9 +75,13 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update) *Context {
 
 	}
 
+	if data == nil {
+		data = make(map[string]interface{})
+	}
+
 	return &Context{
 		Update:           update,
-		Data:             make(map[string]interface{}),
+		Data:             data,
 		EffectiveMessage: msg,
 		EffectiveChat:    chat,
 		EffectiveUser:    user,

@@ -181,10 +181,11 @@ func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 		return
 	}
 
-	d.ProcessUpdate(b, &upd)
+	d.ProcessUpdate(b, &upd, nil)
 }
 
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
+// ProcessUpdate iterates over the list of groups to execute the matching handlers.
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) {
 	var ctx *Context
 
 	defer func() {
@@ -205,7 +206,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update) {
 			}
 
 			if ctx == nil {
-				ctx = NewContext(b, update)
+				ctx = NewContext(update, data)
 			}
 
 			err := handler.HandleUpdate(b, ctx)
