@@ -1008,7 +1008,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#getchatmember
-func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
+func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 	v := urlLib.Values{}
 	if chatId != 0 {
 		v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -1023,7 +1023,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 	}
 
 	var c ChatMember
-	return &c, json.Unmarshal(r, &c)
+	return c, json.Unmarshal(r, &c)
 }
 
 // GetChatMemberCount Use this method to get the number of members in a chat. Returns Int on success.

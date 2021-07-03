@@ -75,7 +75,7 @@ func isArray(s string) bool {
 	return strings.HasPrefix(s, "[]")
 }
 
-func getDefaultReturnVal(s string) string {
+func getDefaultReturnVal(d APIDescription, s string) string {
 	if strings.HasPrefix(s, "*") || strings.HasPrefix(s, "[]") {
 		return "nil"
 	}
@@ -89,10 +89,14 @@ func getDefaultReturnVal(s string) string {
 		return "false"
 	case "string":
 		return "\"\""
-	}
+	default:
+		if _, ok := d.Types[s]; ok {
+			return "nil"
+		}
 
-	// this isnt great
-	return s
+		// this isnt great
+		return s
+	}
 }
 
 func goTypeStringer(t string) string {

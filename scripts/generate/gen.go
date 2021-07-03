@@ -310,7 +310,7 @@ func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
 	}
 
 	retType := toGoType(prefRetVal)
-	if isTgType(d, retType) {
+	if isTgType(d, retType) && len(d.Types[prefRetVal].Subtypes) == 0 {
 		retType = "*" + retType
 	}
 

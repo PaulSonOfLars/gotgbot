@@ -159,7 +159,7 @@ func (c Chat) GetAdministrators(b *Bot) ([]ChatMember, error) {
 }
 
 // GetMember Helper method for Bot.GetChatMember
-func (c Chat) GetMember(b *Bot, userId int64) (*ChatMember, error) {
+func (c Chat) GetMember(b *Bot, userId int64) (ChatMember, error) {
 	return b.GetChatMember(c.Id, userId)
 }
 
