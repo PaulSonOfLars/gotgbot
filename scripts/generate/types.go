@@ -118,21 +118,6 @@ func generateParentType(d APIDescription, tgType TypeDescription) (string, error
 	return typeDef.String(), nil
 }
 
-func (td TypeDescription) docs() string {
-	docs := strings.Builder{}
-	for idx, desc := range td.Description {
-		text := desc
-		if idx == 0 {
-			text = td.Name + " " + desc
-		}
-
-		docs.WriteString("\n// " + text)
-	}
-
-	docs.WriteString("\n// " + td.Href)
-	return docs.String()
-}
-
 // Incoming types which marshal into interfaces need special handling to make sure the interfaces are
 // populated correctly.
 func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, error) {
@@ -161,7 +146,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			}
 		}
 
-		if idx == 0 && len(tgType.SubtypeOf) > 0 && (f.Name == "type" || f.Name == "status") {
+		if idx == 0 && len(tgType.SubtypeOf) > 0 && f.isConstantField(d, tgType) {
 			continue
 		}
 

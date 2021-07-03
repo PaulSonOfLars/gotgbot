@@ -104,6 +104,21 @@ func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, 
 	return common[0].Name, nil
 }
 
+func (td TypeDescription) docs() string {
+	docs := strings.Builder{}
+	for idx, desc := range td.Description {
+		text := desc
+		if idx == 0 {
+			text = td.Name + " " + desc
+		}
+
+		docs.WriteString("\n// " + text)
+	}
+
+	docs.WriteString("\n// " + td.Href)
+	return docs.String()
+}
+
 type MethodDescription struct {
 	Name        string   `json:"name"`
 	Fields      []Field  `json:"fields"`
@@ -117,6 +132,19 @@ type Field struct {
 	Types       []string `json:"types"`
 	Required    bool     `json:"required"`
 	Description string   `json:"description"`
+}
+
+func (f Field) isConstantField(d APIDescription, tgType TypeDescription) bool {
+	for _, parent := range tgType.SubtypeOf {
+		constantField, err := d.Types[parent].getConstantFieldFromParent(d)
+		if err != nil {
+			continue
+		}
+		if constantField == f.Name {
+			return true
+		}
+	}
+	return false
 }
 
 const (
