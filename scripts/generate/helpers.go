@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 func generateHelpers(d APIDescription) error {
@@ -75,7 +75,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 		receiverName := tgType.receiverName()
 
-		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(tgMethod, receiverName, fields)
+		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(d, tgMethod, receiverName, fields)
 		if err != nil {
 			return "", err
 		}
@@ -104,7 +104,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 	return helperDef.String(), nil
 }
 
-func generateHelperArguments(tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
+func generateHelperArguments(d APIDescription, tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
 	var funcCallArgList []string
 	optsContent := strings.Builder{}
 	funcDefArgList := []string{"b *Bot"}
@@ -120,7 +120,7 @@ func generateHelperArguments(tgMethod MethodDescription, receiverName string, fi
 
 		if fName, ok := fields[mf.Name]; ok {
 			if !mf.Required {
-				def := getDefaultReturnVal(prefType)
+				def := getDefaultReturnVal(d, prefType)
 				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
 				optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = " + receiverName + "." + snakeToTitle(fName))
 				optsContent.WriteString("\n	}")

@@ -1,9 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
+
+func contains(s string, ss []string) bool {
+	for _, str := range ss {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
 
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
@@ -29,6 +40,10 @@ func titleToSnake(str string) string {
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 
 	return strings.ToLower(snake)
+}
+
+func titleToCamelCase(str string) string {
+	return strings.ToLower(str[0:1]) + str[1:]
 }
 
 func toGoType(s string) string {
@@ -60,7 +75,7 @@ func isArray(s string) bool {
 	return strings.HasPrefix(s, "[]")
 }
 
-func getDefaultReturnVal(s string) string {
+func getDefaultReturnVal(d APIDescription, s string) string {
 	if strings.HasPrefix(s, "*") || strings.HasPrefix(s, "[]") {
 		return "nil"
 	}
@@ -74,10 +89,14 @@ func getDefaultReturnVal(s string) string {
 		return "false"
 	case "string":
 		return "\"\""
-	}
+	default:
+		if _, ok := d.Types[s]; ok {
+			return "nil"
+		}
 
-	// this isnt great
-	return s
+		// this isnt great
+		return s
+	}
 }
 
 func goTypeStringer(t string) string {
@@ -93,4 +112,117 @@ func goTypeStringer(t string) string {
 	default:
 		return ""
 	}
+}
+
+func getAllFields(types []TypeDescription, parentType string) []Field {
+	if len(types) == 0 {
+		return nil
+	}
+
+	var fields []Field
+	isOK := map[string][]string{}
+
+	for _, t := range types {
+		for _, f := range t.Fields {
+			isOK[f.Name] = append(isOK[f.Name], t.getTypeNameFromParent(parentType))
+
+			if len(isOK[f.Name]) == 1 {
+				fields = append(fields, f)
+			}
+		}
+	}
+
+	for idx, f := range fields {
+		typesUsingField := isOK[f.Name]
+		if len(typesUsingField) == len(types) {
+			continue
+		}
+
+		// If not all subtypes use it, then its optional; update description.
+		if f.Required {
+			f.Description = "Optional. " + f.Description
+		}
+
+		fields[idx].Required = false
+		fields[idx].Description = fmt.Sprintf("%s (Only for %s)", f.Description, strings.Join(typesUsingField, ", "))
+	}
+
+	return fields
+}
+
+func getCommonFields(types []TypeDescription) []Field {
+	if len(types) == 0 {
+		return nil
+	}
+
+	count := map[string]int{}
+
+	for _, t := range types {
+		for _, f := range t.Fields {
+			if !f.Required {
+				continue
+			}
+
+			count[f.Name]++
+		}
+	}
+
+	var fields []Field
+
+	// only need to iterate on first, since guaranteed overlap
+	for _, f := range types[0].Fields {
+		if count[f.Name] == len(types) {
+			fields = append(fields, f)
+		}
+	}
+
+	return fields
+}
+
+func getReplyMarkupTypes(d APIDescription) []TypeDescription {
+	typesMap := map[string]struct{}{}
+	for _, m := range d.Methods {
+		for _, f := range m.Fields {
+			if f.Name == "reply_markup" {
+				for _, t := range f.Types {
+					typesMap[t] = struct{}{}
+				}
+			}
+		}
+	}
+
+	var typeNames []string
+	for t := range typesMap {
+		typeNames = append(typeNames, t)
+	}
+	sort.Strings(typeNames)
+
+	var types []TypeDescription
+	for _, t := range typeNames {
+		types = append(types, d.Types[t])
+	}
+
+	return types
+}
+
+func getTypeByName(d APIDescription, typeName string) (TypeDescription, error) {
+	t, ok := d.Types[typeName]
+	if !ok {
+		return t, fmt.Errorf("unknown typename %s", typeName)
+	}
+	return t, nil
+}
+
+func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+	var types []TypeDescription
+
+	for _, typeName := range typeNames {
+		t, err := getTypeByName(d, typeName)
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, t)
+	}
+
+	return types, nil
 }

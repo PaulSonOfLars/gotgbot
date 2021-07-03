@@ -53,7 +53,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
 
-	defaultRetVal := getDefaultReturnVal(retType)
+	defaultRetVal := getDefaultReturnVal(d, retType)
 
 	args, optionalsStruct, err := tgMethod.getArgs()
 	if err != nil {
@@ -69,7 +69,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
-	valueGen, hasData, err := tgMethod.argsToValues(defaultRetVal)
+	valueGen, hasData, err := tgMethod.argsToValues(d, defaultRetVal)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
@@ -105,8 +105,12 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		addr = "&"
 	}
 
-	method.WriteString("\nvar " + retVarName + " " + retVarType)
-	method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+	if len(d.Types[retType].Subtypes) != 0 {
+		method.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
+	} else {
+		method.WriteString("\nvar " + retVarName + " " + retVarType)
+		method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+	}
 	method.WriteString("\n}")
 
 	return method.String(), nil
@@ -148,7 +152,7 @@ func (m MethodDescription) description() (string, error) {
 	return description.String(), nil
 }
 
-func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, error) {
+func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) (string, bool, error) {
 	hasData := false
 	bd := strings.Builder{}
 
@@ -160,7 +164,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 			continue
 		}
 
-		contents, data, err := generateValue(f, goParam, defaultRetVal)
+		contents, data, err := generateValue(d, f, goParam, defaultRetVal)
 		if err != nil {
 			return "", false, err
 		}
@@ -172,7 +176,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 		bd.WriteString("\nif opts != nil {")
 		for _, f := range optionals {
 			goParam := "opts." + snakeToTitle(f.Name)
-			contents, data, err := generateValue(f, goParam, defaultRetVal)
+			contents, data, err := generateValue(d, f, goParam, defaultRetVal)
 			if err != nil {
 				return "", false, err
 			}
@@ -186,7 +190,7 @@ func (m MethodDescription) argsToValues(defaultRetVal string) (string, bool, err
 	return bd.String(), hasData, nil
 }
 
-func generateValue(f Field, goParam string, defaultRetVal string) (string, bool, error) {
+func generateValue(d APIDescription, f Field, goParam string, defaultRetVal string) (string, bool, error) {
 	fieldType, err := f.getPreferredType()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to get preferred type: %w", err)
@@ -202,7 +206,7 @@ func generateValue(f Field, goParam string, defaultRetVal string) (string, bool,
 			return fmt.Sprintf(`
 if %s != %s {
 	%s
-}`, goParam, getDefaultReturnVal(fieldType), addParam), false, nil
+}`, goParam, getDefaultReturnVal(d, fieldType), addParam), false, nil
 		}
 
 		return "\n" + addParam, false, nil
@@ -253,17 +257,8 @@ if %s != %s {
 			return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
 		}
 
-	case "ReplyMarkup":
-		bd.WriteString("\nif " + goParam + " != nil {")
-		bd.WriteString("\n	bs, err := " + goParam + ".ReplyMarkup()")
-		bd.WriteString("\n	if err != nil {")
-		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
-		bd.WriteString("\n}")
-
 	default:
-		if isArray(fieldType) {
+		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\nif " + goParam + " != nil {")
 		}
 
@@ -273,7 +268,7 @@ if %s != %s {
 		bd.WriteString("\n	}")
 		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
 
-		if isArray(fieldType) {
+		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\n}")
 		}
 	}

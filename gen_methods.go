@@ -242,6 +242,43 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 	return b, json.Unmarshal(r, &b)
 }
 
+// BanChatMemberOpts is the set of optional fields for Bot.BanChatMember.
+type BanChatMemberOpts struct {
+	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
+	UntilDate int64
+	// Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
+	RevokeMessages bool
+}
+
+// BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
+// - user_id (type int64): Unique identifier of the target user
+// - opts (type BanChatMemberOpts): All optional parameters.
+// https://core.telegram.org/bots/api#banchatmember
+func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
+	v := urlLib.Values{}
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
+	if opts != nil {
+		if opts.UntilDate != 0 {
+			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+		}
+		v.Add("revoke_messages", strconv.FormatBool(opts.RevokeMessages))
+	}
+
+	r, err := bot.Get("banChatMember", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // Close Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
 // https://core.telegram.org/bots/api#close
 func (bot *Bot) Close() (bool, error) {
@@ -307,7 +344,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -494,6 +531,37 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
 	}
 
 	r, err := bot.Get("deleteMessage", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteMyCommandsOpts is the set of optional fields for Bot.DeleteMyCommands.
+type DeleteMyCommandsOpts struct {
+	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
+	Scope BotCommandScope
+	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	LanguageCode string
+}
+
+// DeleteMyCommands Use this method to delete the list of the bot's commands for the given scope and user language. After deletion, higher level commands will be shown to affected users. Returns True on success.
+// - opts (type DeleteMyCommandsOpts): All optional parameters.
+// https://core.telegram.org/bots/api#deletemycommands
+func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
+	v := urlLib.Values{}
+	if opts != nil {
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field scope: %w", err)
+		}
+		v.Add("scope", string(bs))
+		v.Add("language_code", opts.LanguageCode)
+	}
+
+	r, err := bot.Get("deleteMyCommands", v)
 	if err != nil {
 		return false, err
 	}
@@ -940,7 +1008,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#getchatmember
-func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
+func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 	v := urlLib.Values{}
 	if chatId != 0 {
 		v.Add("chat_id", strconv.FormatInt(chatId, 10))
@@ -954,20 +1022,19 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (*ChatMember, error) {
 		return nil, err
 	}
 
-	var c ChatMember
-	return &c, json.Unmarshal(r, &c)
+	return unmarshalChatMember(r)
 }
 
-// GetChatMembersCount Use this method to get the number of members in a chat. Returns Int on success.
+// GetChatMemberCount Use this method to get the number of members in a chat. Returns Int on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// https://core.telegram.org/bots/api#getchatmemberscount
-func (bot *Bot) GetChatMembersCount(chatId int64) (int64, error) {
+// https://core.telegram.org/bots/api#getchatmembercount
+func (bot *Bot) GetChatMemberCount(chatId int64) (int64, error) {
 	v := urlLib.Values{}
 	if chatId != 0 {
 		v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	}
 
-	r, err := bot.Get("getChatMembersCount", v)
+	r, err := bot.Get("getChatMemberCount", v)
 	if err != nil {
 		return 0, err
 	}
@@ -1045,11 +1112,27 @@ func (bot *Bot) GetMe() (*User, error) {
 	return &u, json.Unmarshal(r, &u)
 }
 
-// GetMyCommands Use this method to get the current list of the bot's commands. Requires no parameters. Returns Array of BotCommand on success.
-// Methods and objects used in the inline mode are described in the Inline mode section.
+// GetMyCommandsOpts is the set of optional fields for Bot.GetMyCommands.
+type GetMyCommandsOpts struct {
+	// A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
+	Scope BotCommandScope
+	// A two-letter ISO 639-1 language code or an empty string
+	LanguageCode string
+}
+
+// GetMyCommands Use this method to get the current list of the bot's commands for the given scope and user language. Returns Array of BotCommand on success. If commands aren't set, an empty list is returned.
+// - opts (type GetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getmycommands
-func (bot *Bot) GetMyCommands() ([]BotCommand, error) {
+func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 	v := urlLib.Values{}
+	if opts != nil {
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field scope: %w", err)
+		}
+		v.Add("scope", string(bs))
+		v.Add("language_code", opts.LanguageCode)
+	}
 
 	r, err := bot.Get("getMyCommands", v)
 	if err != nil {
@@ -1168,43 +1251,6 @@ func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 
 	var w WebhookInfo
 	return &w, json.Unmarshal(r, &w)
-}
-
-// KickChatMemberOpts is the set of optional fields for Bot.KickChatMember.
-type KickChatMemberOpts struct {
-	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
-	UntilDate int64
-	// Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
-	RevokeMessages bool
-}
-
-// KickChatMember Use this method to kick a user from a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
-// - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
-// - user_id (type int64): Unique identifier of the target user
-// - opts (type KickChatMemberOpts): All optional parameters.
-// https://core.telegram.org/bots/api#kickchatmember
-func (bot *Bot) KickChatMember(chatId int64, userId int64, opts *KickChatMemberOpts) (bool, error) {
-	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
-	if opts != nil {
-		if opts.UntilDate != 0 {
-			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
-		}
-		v.Add("revoke_messages", strconv.FormatBool(opts.RevokeMessages))
-	}
-
-	r, err := bot.Get("kickChatMember", v)
-	if err != nil {
-		return false, err
-	}
-
-	var b bool
-	return b, json.Unmarshal(r, &b)
 }
 
 // LeaveChat Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
@@ -1497,7 +1543,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1615,7 +1661,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1691,7 +1737,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1739,7 +1785,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -1848,7 +1894,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2086,7 +2132,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2175,16 +2221,6 @@ type SendMessageOpts struct {
 }
 
 // SendMessage Use this method to send text messages. On success, the sent Message is returned.
-// The Bot API supports basic formatting for messages. You can use bold, italic, underlined and strikethrough text, as well as inline links and pre-formatted code in your bots' messages. Telegram clients will render them accordingly. You can use either markdown-style or HTML-style formatting.
-// Note that Telegram clients will display an alert to the user before opening an inline link ('Open this link?' together with the full URL).
-// Message entities can be nested, providing following restrictions are met:- If two entities has common characters then one of them is fully contained inside another.- bold, italic, underline and strikethrough entities can contain and to be contained in any other entities, except pre and code.- All other entities can't contain each other.
-// Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username. Please note:
-// To use this mode, pass MarkdownV2 in the parse_mode field. Use the following syntax in your message:
-// Please note:
-// To use this mode, pass HTML in the parse_mode field. The following tags are currently supported:
-// Please note:
-// This is a legacy mode, retained for backward compatibility. To use this mode, pass Markdown in the parse_mode field. Use the following syntax in your message:
-// Please note:
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
 // - opts (type SendMessageOpts): All optional parameters.
@@ -2211,7 +2247,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2294,7 +2330,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2391,7 +2427,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2459,7 +2495,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2528,7 +2564,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2652,7 +2688,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2753,7 +2789,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -2841,7 +2877,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		}
 		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
 		if opts.ReplyMarkup != nil {
-			bs, err := opts.ReplyMarkup.ReplyMarkup()
+			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
@@ -3060,10 +3096,19 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 	return &m, json.Unmarshal(r, &m)
 }
 
-// SetMyCommands Use this method to change the list of the bot's commands. Returns True on success.
+// SetMyCommandsOpts is the set of optional fields for Bot.SetMyCommands.
+type SetMyCommandsOpts struct {
+	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
+	Scope BotCommandScope
+	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	LanguageCode string
+}
+
+// SetMyCommands Use this method to change the list of the bot's commands. See https://core.telegram.org/bots#commands for more details about bot commands. Returns True on success.
 // - commands (type []BotCommand): A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
+// - opts (type SetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setmycommands
-func (bot *Bot) SetMyCommands(commands []BotCommand) (bool, error) {
+func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (bool, error) {
 	v := urlLib.Values{}
 	if commands != nil {
 		bs, err := json.Marshal(commands)
@@ -3071,6 +3116,14 @@ func (bot *Bot) SetMyCommands(commands []BotCommand) (bool, error) {
 			return false, fmt.Errorf("failed to marshal field commands: %w", err)
 		}
 		v.Add("commands", string(bs))
+	}
+	if opts != nil {
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field scope: %w", err)
+		}
+		v.Add("scope", string(bs))
+		v.Add("language_code", opts.LanguageCode)
 	}
 
 	r, err := bot.Get("setMyCommands", v)
@@ -3328,7 +3381,7 @@ type UnbanChatMemberOpts struct {
 	OnlyIfBanned bool
 }
 
-// UnbanChatMember Use this method to unban a previously kicked user in a supergroup or channel. The user will not return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be removed from the chat. If you don't want this, use the parameter only_if_banned. Returns True on success.
+// UnbanChatMember Use this method to unban a previously banned user in a supergroup or channel. The user will not return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be removed from the chat. If you don't want this, use the parameter only_if_banned. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @username)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type UnbanChatMemberOpts): All optional parameters.

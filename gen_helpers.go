@@ -23,6 +23,11 @@ func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
 }
 
+// BanMember Helper method for Bot.BanChatMember
+func (c Chat) BanMember(b *Bot, userId int64, opts *BanChatMemberOpts) (bool, error) {
+	return b.BanChatMember(c.Id, userId, opts)
+}
+
 // Copy Helper method for Bot.CopyMessage
 func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
@@ -154,13 +159,13 @@ func (c Chat) GetAdministrators(b *Bot) ([]ChatMember, error) {
 }
 
 // GetMember Helper method for Bot.GetChatMember
-func (c Chat) GetMember(b *Bot, userId int64) (*ChatMember, error) {
+func (c Chat) GetMember(b *Bot, userId int64) (ChatMember, error) {
 	return b.GetChatMember(c.Id, userId)
 }
 
-// GetMembersCount Helper method for Bot.GetChatMembersCount
-func (c Chat) GetMembersCount(b *Bot) (int64, error) {
-	return b.GetChatMembersCount(c.Id)
+// GetMemberCount Helper method for Bot.GetChatMemberCount
+func (c Chat) GetMemberCount(b *Bot) (int64, error) {
+	return b.GetChatMemberCount(c.Id)
 }
 
 // Get Helper method for Bot.GetFile
@@ -171,11 +176,6 @@ func (f File) Get(b *Bot) (*File, error) {
 // GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
-}
-
-// KickMember Helper method for Bot.KickChatMember
-func (c Chat) KickMember(b *Bot, userId int64, opts *KickChatMemberOpts) (bool, error) {
-	return b.KickChatMember(c.Id, userId, opts)
 }
 
 // Leave Helper method for Bot.LeaveChat

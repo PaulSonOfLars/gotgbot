@@ -25,15 +25,105 @@ type TypeDescription struct {
 	SubtypeOf   []string `json:"subtype_of"`
 }
 
-func (d TypeDescription) receiverName() string {
+func (td TypeDescription) receiverName() string {
 	var rs []rune
-	for _, r := range []rune(d.Name) {
+	for _, r := range []rune(td.Name) {
 		if unicode.IsUpper(r) {
 			rs = append(rs, r)
 		}
 	}
 
 	return strings.ToLower(string(rs))
+}
+
+func (td TypeDescription) sentByAPI(d APIDescription) bool {
+	checked := map[string]bool{}
+
+	for _, m := range d.Methods {
+		for _, r := range m.Returns {
+			if r == td.Name {
+				return true
+			}
+
+			child, ok := d.Types[r]
+			if !ok || checked[r] {
+				continue
+			}
+
+			if CheckChildTypes(d, child, td.Name, []string{td.Name}) {
+				return true
+			}
+			checked[r] = true
+		}
+	}
+	return false
+}
+
+func CheckChildTypes(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
+	for _, f := range tgType.Fields {
+		for _, t := range f.Types {
+			if t == typeName {
+				return true
+			}
+
+			if contains(t, skip) {
+				continue
+			}
+
+			if child, ok := d.Types[t]; ok && t != tgType.Name {
+				if CheckChildTypes(d, child, typeName, append(skip, tgType.Name)) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (td TypeDescription) getTypeNameFromParent(parentType string) string {
+	// Telegram inconsistencies
+	if td.Name == "ChatMemberOwner" {
+		return "creator"
+	} else if td.Name == "ChatMemberBanned" {
+		return "kicked"
+	}
+
+	typeName := strings.TrimPrefix(td.Name, parentType)
+	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
+	typeName = strings.TrimSuffix(typeName, "Field")  // some of them are "Field"
+	return titleToSnake(typeName)
+}
+
+func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, error) {
+	if len(td.Subtypes) == 0 {
+		return "", fmt.Errorf("expected %s to be a parent", td.Name)
+	}
+
+	subTypes, err := getTypesByName(d, td.Subtypes)
+	if err != nil {
+		return "", fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
+	}
+
+	common := getCommonFields(subTypes)
+	if len(common) == 0 {
+		return "", fmt.Errorf("no common fields for parenttype %s", td.Name)
+	}
+	return common[0].Name, nil
+}
+
+func (td TypeDescription) docs() string {
+	docs := strings.Builder{}
+	for idx, desc := range td.Description {
+		text := desc
+		if idx == 0 {
+			text = td.Name + " " + desc
+		}
+
+		docs.WriteString("\n// " + text)
+	}
+
+	docs.WriteString("\n// " + td.Href)
+	return docs.String()
 }
 
 type MethodDescription struct {
@@ -49,6 +139,19 @@ type Field struct {
 	Types       []string `json:"types"`
 	Required    bool     `json:"required"`
 	Description string   `json:"description"`
+}
+
+func (f Field) isConstantField(d APIDescription, tgType TypeDescription) bool {
+	for _, parent := range tgType.SubtypeOf {
+		constantField, err := d.Types[parent].getConstantFieldFromParent(d)
+		if err != nil {
+			continue
+		}
+		if constantField == f.Name {
+			return true
+		}
+	}
+	return false
 }
 
 const (
@@ -67,6 +170,8 @@ const (
 	tgTypePassportElementError = "PassportElementError"
 	tgTypeCallbackGame         = "CallbackGame"
 	tgTypeVoiceChatStarted     = "VoiceChatStarted"
+	tgTypeBotCommandScope      = "BotCommandScope"
+	tgTypeChatMember           = "ChatMember"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )
@@ -147,24 +252,19 @@ func orderedMethods(d APIDescription) []string {
 
 func isTgType(d APIDescription, goType string) bool {
 	_, ok := d.Types[goType]
-
 	return ok
 }
 
+func HasSubtypes(d APIDescription, typeName string) bool {
+	t, ok := d.Types[typeName]
+	return ok && len(t.Subtypes) > 0
+}
+
 func (f Field) getPreferredType() (string, error) {
-	if len(f.Types) == 1 {
-		return toGoType(f.Types[0]), nil
-	}
-
-	if len(f.Types) == 2 {
-		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
-			return toGoType(f.Types[0]), nil
-		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
-			return toGoType(f.Types[0]), nil
-		}
-	}
-
 	if f.Name == "media" {
+		if len(f.Types) == 1 && f.Types[0] == "String" {
+			return tgTypeInputFile, nil
+		}
 		var arrayType bool
 		// TODO: check against API description type
 		for _, t := range f.Types {
@@ -191,6 +291,18 @@ func (f Field) getPreferredType() (string, error) {
 		return tgTypeReplyMarkup, nil
 	}
 
+	if len(f.Types) == 1 {
+		return toGoType(f.Types[0]), nil
+	}
+
+	if len(f.Types) == 2 {
+		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
+			return toGoType(f.Types[0]), nil
+		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
+			return toGoType(f.Types[0]), nil
+		}
+	}
+
 	return "", fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
 }
 
@@ -205,7 +317,7 @@ func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
 	}
 
 	retType := toGoType(prefRetVal)
-	if isTgType(d, retType) {
+	if isTgType(d, retType) && len(d.Types[prefRetVal].Subtypes) == 0 {
 		retType = "*" + retType
 	}
 

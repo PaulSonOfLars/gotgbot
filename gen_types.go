@@ -10,7 +10,7 @@ import (
 )
 
 type ReplyMarkup interface {
-	ReplyMarkup() ([]byte, error)
+	replyMarkup()
 }
 
 // Animation This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
@@ -68,9 +68,287 @@ type BotCommand struct {
 	Description string `json:"description,omitempty"`
 }
 
+// BotCommandScope This object represents the scope to which bot commands are applied. Currently, the following 7 scopes are supported:
+// - BotCommandScopeDefault
+// - BotCommandScopeAllPrivateChats
+// - BotCommandScopeAllGroupChats
+// - BotCommandScopeAllChatAdministrators
+// - BotCommandScopeChat
+// - BotCommandScopeChatAdministrators
+// - BotCommandScopeChatMember
+// https://core.telegram.org/bots/api#botcommandscope
+type BotCommandScope interface {
+	GetType() string
+	botCommandScope()
+	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
+	MergeBotCommandScope() MergedBotCommandScope
+}
+
+// MergedBotCommandScope is a helper type to simplify interactions with the various BotCommandScope subtypes.
+type MergedBotCommandScope struct {
+	// Scope type, must be default
+	Type string `json:"type,omitempty"`
+	// Optional. Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername) (Only for chat, chat_administrators, chat_member)
+	ChatId int64 `json:"chat_id,omitempty"`
+	// Optional. Unique identifier of the target user (Only for chat_member)
+	UserId int64 `json:"user_id,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedBotCommandScope) GetType() string {
+	return v.Type
+}
+
+// MergedBotCommandScope.botCommandScope is a dummy method to avoid interface implementation.
+func (v MergedBotCommandScope) botCommandScope() {}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v MergedBotCommandScope) MergeBotCommandScope() MergedBotCommandScope {
+	return v
+}
+
+// BotCommandScopeAllChatAdministrators Represents the scope of bot commands, covering all group and supergroup chat administrators.
+// https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
+type BotCommandScopeAllChatAdministrators struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeAllChatAdministrators) GetType() string {
+	return "all_chat_administrators"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeAllChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_chat_administrators",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllChatAdministrators
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_chat_administrators",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeAllChatAdministrators.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllChatAdministrators) botCommandScope() {}
+
+// BotCommandScopeAllGroupChats Represents the scope of bot commands, covering all group and supergroup chats.
+// https://core.telegram.org/bots/api#botcommandscopeallgroupchats
+type BotCommandScopeAllGroupChats struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeAllGroupChats) GetType() string {
+	return "all_group_chats"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeAllGroupChats) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_group_chats",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllGroupChats
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_group_chats",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeAllGroupChats.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllGroupChats) botCommandScope() {}
+
+// BotCommandScopeAllPrivateChats Represents the scope of bot commands, covering all private chats.
+// https://core.telegram.org/bots/api#botcommandscopeallprivatechats
+type BotCommandScopeAllPrivateChats struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeAllPrivateChats) GetType() string {
+	return "all_private_chats"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeAllPrivateChats) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "all_private_chats",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeAllPrivateChats
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "all_private_chats",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeAllPrivateChats.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
+
+// BotCommandScopeChat Represents the scope of bot commands, covering a specific chat.
+// https://core.telegram.org/bots/api#botcommandscopechat
+type BotCommandScopeChat struct {
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeChat) GetType() string {
+	return "chat"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat",
+		ChatId: v.ChatId,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChat
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeChat.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChat) botCommandScope() {}
+
+// BotCommandScopeChatAdministrators Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
+// https://core.telegram.org/bots/api#botcommandscopechatadministrators
+type BotCommandScopeChatAdministrators struct {
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeChatAdministrators) GetType() string {
+	return "chat_administrators"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat_administrators",
+		ChatId: v.ChatId,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChatAdministrators
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat_administrators",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeChatAdministrators.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChatAdministrators) botCommandScope() {}
+
+// BotCommandScopeChatMember Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
+// https://core.telegram.org/bots/api#botcommandscopechatmember
+type BotCommandScopeChatMember struct {
+	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	ChatId int64 `json:"chat_id,omitempty"`
+	// Unique identifier of the target user
+	UserId int64 `json:"user_id,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeChatMember) GetType() string {
+	return "chat_member"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type:   "chat_member",
+		ChatId: v.ChatId,
+		UserId: v.UserId,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeChatMember
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat_member",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeChatMember.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeChatMember) botCommandScope() {}
+
+// BotCommandScopeDefault Represents the default scope of bot commands. Default commands are used if no commands with a narrower scope are specified for the user.
+// https://core.telegram.org/bots/api#botcommandscopedefault
+type BotCommandScopeDefault struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BotCommandScopeDefault) GetType() string {
+	return "default"
+}
+
+// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+func (v BotCommandScopeDefault) MergeBotCommandScope() MergedBotCommandScope {
+	return MergedBotCommandScope{
+		Type: "default",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
+	type alias BotCommandScopeDefault
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "default",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BotCommandScopeDefault.botCommandScope is a dummy method to avoid interface implementation.
+func (v BotCommandScopeDefault) botCommandScope() {}
+
 // CallbackGame A placeholder, currently holds no information. Use BotFather to set up your game.
 // https://core.telegram.org/bots/api#callbackgame
-type CallbackGame interface{}
+type CallbackGame struct{}
 
 // CallbackQuery This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
 // https://core.telegram.org/bots/api#callbackquery
@@ -158,54 +436,479 @@ type ChatLocation struct {
 	Address string `json:"address,omitempty"`
 }
 
-// ChatMember This object contains information about one member of a chat.
+// ChatMember This object contains information about one member of a chat. Currently, the following 6 types of chat members are supported:
+// - ChatMemberOwner
+// - ChatMemberAdministrator
+// - ChatMemberMember
+// - ChatMemberRestricted
+// - ChatMemberLeft
+// - ChatMemberBanned
 // https://core.telegram.org/bots/api#chatmember
-type ChatMember struct {
+type ChatMember interface {
+	GetStatus() string
+	GetUser() User
+	chatMember()
+	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
+	MergeChatMember() MergedChatMember
+}
+
+// MergedChatMember is a helper type to simplify interactions with the various ChatMember subtypes.
+type MergedChatMember struct {
+	// The member's status in the chat, always "creator"
+	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// The member's status in the chat. Can be "creator", "administrator", "member", "restricted", "left" or "kicked"
-	Status string `json:"status,omitempty"`
-	// Optional. Owner and administrators only. Custom title for this user
+	// Optional. Custom title for this user (Only for creator, administrator)
 	CustomTitle string `json:"custom_title,omitempty"`
-	// Optional. Owner and administrators only. True, if the user's presence in the chat is hidden
+	// Optional. True, if the user's presence in the chat is hidden (Only for creator, administrator)
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
-	// Optional. Administrators only. True, if the bot is allowed to edit administrator privileges of that user
+	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Optional. Administrators only. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Optional. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege (Only for administrator)
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
-	// Optional. Administrators only. True, if the administrator can post in the channel; channels only
+	// Optional. True, if the administrator can post in the channel; channels only (Only for administrator)
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can edit messages of other users and can pin messages; channels only
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can delete messages of other users
+	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
-	// Optional. Administrators only. True, if the administrator can manage voice chats
+	// Optional. True, if the administrator can manage voice chats (Only for administrator)
 	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
-	// Optional. Administrators only. True, if the administrator can restrict, ban or unban chat members
+	// Optional. True, if the administrator can restrict, ban or unban chat members (Only for administrator)
 	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
-	// Optional. Administrators only. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	// Optional. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user) (Only for administrator)
 	CanPromoteMembers bool `json:"can_promote_members,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to change the chat title, photo and other settings
+	// Optional. True, if the user is allowed to change the chat title, photo and other settings (Only for administrator, restricted)
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to invite new users to the chat
+	// Optional. True, if the user is allowed to invite new users to the chat (Only for administrator, restricted)
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// Optional. Administrators and restricted only. True, if the user is allowed to pin messages; groups and supergroups only
+	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is a member of the chat at the moment of the request
+	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send text messages, contacts, locations and venues
+	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues (Only for restricted)
 	CanSendMessages bool `json:"can_send_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
+	// Optional. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes (Only for restricted)
 	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send polls
+	// Optional. True, if the user is allowed to send polls (Only for restricted)
 	CanSendPolls bool `json:"can_send_polls,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to send animations, games, stickers and use inline bots
+	// Optional. True, if the user is allowed to send animations, games, stickers and use inline bots (Only for restricted)
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
-	// Optional. Restricted only. True, if the user is allowed to add web page previews to their messages
+	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Restricted and kicked only. Date when restrictions will be lifted for this user; unix time
+	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, banned)
 	UntilDate int64 `json:"until_date,omitempty"`
 }
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v MergedChatMember) GetStatus() string {
+	return v.Status
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v MergedChatMember) GetUser() User {
+	return v.User
+}
+
+// MergedChatMember.chatMember is a dummy method to avoid interface implementation.
+func (v MergedChatMember) chatMember() {}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v MergedChatMember) MergeChatMember() MergedChatMember {
+	return v
+}
+
+// unmarshalChatMember is a JSON unmarshal helper to marshal the right structs into a ChatMember interface
+// based on the Status field.
+func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Status string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.Status {
+	case "creator":
+		s := ChatMemberOwner{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "administrator":
+		s := ChatMemberAdministrator{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "member":
+		s := ChatMemberMember{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "restricted":
+		s := ChatMemberRestricted{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "left":
+		s := ChatMemberLeft{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "banned":
+		s := ChatMemberBanned{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface with Status %v", t.Status)
+}
+
+// ChatMemberAdministrator Represents a chat member that has some additional privileges.
+// https://core.telegram.org/bots/api#chatmemberadministrator
+type ChatMemberAdministrator struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// True, if the bot is allowed to edit administrator privileges of that user
+	CanBeEdited bool `json:"can_be_edited,omitempty"`
+	// Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
+	// True, if the user's presence in the chat is hidden
+	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	CanManageChat bool `json:"can_manage_chat,omitempty"`
+	// True, if the administrator can post in the channel; channels only
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// True, if the administrator can edit messages of other users and can pin messages; channels only
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
+	// True, if the administrator can delete messages of other users
+	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
+	// True, if the administrator can manage voice chats
+	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
+	// True, if the administrator can restrict, ban or unban chat members
+	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
+	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	CanPromoteMembers bool `json:"can_promote_members,omitempty"`
+	// True, if the user is allowed to change the chat title, photo and other settings
+	CanChangeInfo bool `json:"can_change_info,omitempty"`
+	// True, if the user is allowed to invite new users to the chat
+	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// True, if the user is allowed to pin messages; groups and supergroups only
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberAdministrator) GetStatus() string {
+	return "administrator"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberAdministrator) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:              "administrator",
+		User:                v.User,
+		CanBeEdited:         v.CanBeEdited,
+		CustomTitle:         v.CustomTitle,
+		IsAnonymous:         v.IsAnonymous,
+		CanManageChat:       v.CanManageChat,
+		CanPostMessages:     v.CanPostMessages,
+		CanEditMessages:     v.CanEditMessages,
+		CanDeleteMessages:   v.CanDeleteMessages,
+		CanManageVoiceChats: v.CanManageVoiceChats,
+		CanRestrictMembers:  v.CanRestrictMembers,
+		CanPromoteMembers:   v.CanPromoteMembers,
+		CanChangeInfo:       v.CanChangeInfo,
+		CanInviteUsers:      v.CanInviteUsers,
+		CanPinMessages:      v.CanPinMessages,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberAdministrator
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "administrator",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberAdministrator.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberAdministrator) chatMember() {}
+
+// ChatMemberBanned Represents a chat member that was banned in the chat and can't return to the chat or view chat messages.
+// https://core.telegram.org/bots/api#chatmemberbanned
+type ChatMemberBanned struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// Date when restrictions will be lifted for this user; unix time
+	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberBanned) GetStatus() string {
+	return "banned"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberBanned) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:    "banned",
+		User:      v.User,
+		UntilDate: v.UntilDate,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberBanned
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "banned",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberBanned.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberBanned) chatMember() {}
+
+// ChatMemberLeft Represents a chat member that isn't currently a member of the chat, but may join it themselves.
+// https://core.telegram.org/bots/api#chatmemberleft
+type ChatMemberLeft struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberLeft) GetStatus() string {
+	return "left"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberLeft) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberLeft) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status: "left",
+		User:   v.User,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberLeft
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "left",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberLeft.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberLeft) chatMember() {}
+
+// ChatMemberMember Represents a chat member that has no additional privileges or restrictions.
+// https://core.telegram.org/bots/api#chatmembermember
+type ChatMemberMember struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberMember) GetStatus() string {
+	return "member"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberMember) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberMember) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status: "member",
+		User:   v.User,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberMember
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "member",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberMember.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberMember) chatMember() {}
+
+// ChatMemberOwner Represents a chat member that owns the chat and has all administrator privileges.
+// https://core.telegram.org/bots/api#chatmemberowner
+type ChatMemberOwner struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
+	// True, if the user's presence in the chat is hidden
+	IsAnonymous bool `json:"is_anonymous,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberOwner) GetStatus() string {
+	return "creator"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberOwner) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:      "creator",
+		User:        v.User,
+		CustomTitle: v.CustomTitle,
+		IsAnonymous: v.IsAnonymous,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberOwner
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "creator",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberOwner.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberOwner) chatMember() {}
+
+// ChatMemberRestricted Represents a chat member that is under certain restrictions in the chat. Supergroups only.
+// https://core.telegram.org/bots/api#chatmemberrestricted
+type ChatMemberRestricted struct {
+	// Information about the user
+	User User `json:"user,omitempty"`
+	// True, if the user is a member of the chat at the moment of the request
+	IsMember bool `json:"is_member,omitempty"`
+	// True, if the user is allowed to change the chat title, photo and other settings
+	CanChangeInfo bool `json:"can_change_info,omitempty"`
+	// True, if the user is allowed to invite new users to the chat
+	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// True, if the user is allowed to pin messages; groups and supergroups only
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// True, if the user is allowed to send text messages, contacts, locations and venues
+	CanSendMessages bool `json:"can_send_messages,omitempty"`
+	// True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
+	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
+	// True, if the user is allowed to send polls
+	CanSendPolls bool `json:"can_send_polls,omitempty"`
+	// True, if the user is allowed to send animations, games, stickers and use inline bots
+	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
+	// True, if the user is allowed to add web page previews to their messages
+	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
+	// Date when restrictions will be lifted for this user; unix time
+	UntilDate int64 `json:"until_date,omitempty"`
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberRestricted) GetStatus() string {
+	return "restricted"
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberRestricted) GetUser() User {
+	return v.User
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
+	return MergedChatMember{
+		Status:                "restricted",
+		User:                  v.User,
+		IsMember:              v.IsMember,
+		CanChangeInfo:         v.CanChangeInfo,
+		CanInviteUsers:        v.CanInviteUsers,
+		CanPinMessages:        v.CanPinMessages,
+		CanSendMessages:       v.CanSendMessages,
+		CanSendMediaMessages:  v.CanSendMediaMessages,
+		CanSendPolls:          v.CanSendPolls,
+		CanSendOtherMessages:  v.CanSendOtherMessages,
+		CanAddWebPagePreviews: v.CanAddWebPagePreviews,
+		UntilDate:             v.UntilDate,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberRestricted
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: "restricted",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberRestricted.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberRestricted) chatMember() {}
 
 // ChatMemberUpdated This object represents changes in the status of a chat member.
 // https://core.telegram.org/bots/api#chatmemberupdated
@@ -222,6 +925,39 @@ type ChatMemberUpdated struct {
 	NewChatMember ChatMember `json:"new_chat_member,omitempty"`
 	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
+	// All fields in ChatMemberUpdated, with interface fields as json.RawMessage
+	type tmp struct {
+		Chat          Chat            `json:"chat"`
+		From          User            `json:"from"`
+		Date          int64           `json:"date"`
+		OldChatMember json.RawMessage `json:"old_chat_member"`
+		NewChatMember json.RawMessage `json:"new_chat_member"`
+		InviteLink    *ChatInviteLink `json:"invite_link"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	v.Chat = t.Chat
+	v.From = t.From
+	v.Date = t.Date
+	v.OldChatMember, err = unmarshalChatMember(t.OldChatMember)
+	if err != nil {
+		return err
+	}
+	v.NewChatMember, err = unmarshalChatMember(t.NewChatMember)
+	if err != nil {
+		return err
+	}
+	v.InviteLink = t.InviteLink
+
+	return nil
 }
 
 // ChatPermissions Describes actions that a non-administrator user is allowed to take in a chat.
@@ -369,13 +1105,14 @@ type File struct {
 type ForceReply struct {
 	// Shows reply interface to the user, as if they manually selected the bot's message and tapped 'Reply'
 	ForceReply bool `json:"force_reply,omitempty"`
+	// Optional. The placeholder to be shown in the input field when the reply is active; 1-64 characters
+	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
 	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ForceReply) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ForceReply.replyMarkup is a dummy method to avoid interface implementation.
+func (v ForceReply) replyMarkup() {}
 
 // Game This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
 // https://core.telegram.org/bots/api#game
@@ -435,9 +1172,8 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
 }
 
-func (v InlineKeyboardMarkup) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineKeyboardMarkup.replyMarkup is a dummy method to avoid interface implementation.
+func (v InlineKeyboardMarkup) replyMarkup() {}
 
 // InlineQuery This object represents an incoming inline query. When the user sends an empty query, your bot could return some default or trending results.
 // https://core.telegram.org/bots/api#inlinequery
@@ -457,10 +1193,178 @@ type InlineQuery struct {
 }
 
 // InlineQueryResult This object represents one result of an inline query. Telegram clients currently support results of the following 20 types:
+// - InlineQueryResultCachedAudio
+// - InlineQueryResultCachedDocument
+// - InlineQueryResultCachedGif
+// - InlineQueryResultCachedMpeg4Gif
+// - InlineQueryResultCachedPhoto
+// - InlineQueryResultCachedSticker
+// - InlineQueryResultCachedVideo
+// - InlineQueryResultCachedVoice
+// - InlineQueryResultArticle
+// - InlineQueryResultAudio
+// - InlineQueryResultContact
+// - InlineQueryResultGame
+// - InlineQueryResultDocument
+// - InlineQueryResultGif
+// - InlineQueryResultLocation
+// - InlineQueryResultMpeg4Gif
+// - InlineQueryResultPhoto
+// - InlineQueryResultVenue
+// - InlineQueryResultVideo
+// - InlineQueryResultVoice
 // Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 // https://core.telegram.org/bots/api#inlinequeryresult
 type InlineQueryResult interface {
-	InlineQueryResult() ([]byte, error)
+	GetType() string
+	GetId() string
+	inlineQueryResult()
+	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
+	MergeInlineQueryResult() MergedInlineQueryResult
+}
+
+// MergedInlineQueryResult is a helper type to simplify interactions with the various InlineQueryResult subtypes.
+type MergedInlineQueryResult struct {
+	// Type of the result, must be audio
+	Type string `json:"type,omitempty"`
+	// Unique identifier for this result, 1-64 bytes
+	Id string `json:"id,omitempty"`
+	// Optional. A valid file identifier for the audio file (Only for audio)
+	AudioFileId string `json:"audio_file_id,omitempty"`
+	// Optional. Caption, 0-1024 characters after entities parsing (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details. (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Inline keyboard attached to the message
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+	// Optional. Content of the message to be sent instead of the audio (Only for audio, document, gif, mpeg4_gif, photo, sticker, video, voice, article, audio, contact, document, gif, location, mpeg4_gif, photo, venue, video, voice)
+	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	// Optional. Title for the result (Only for document, gif, mpeg4_gif, photo, video, voice, article, audio, document, gif, location, mpeg4_gif, photo, venue, video, voice)
+	Title string `json:"title,omitempty"`
+	// Optional. A valid file identifier for the file (Only for document)
+	DocumentFileId string `json:"document_file_id,omitempty"`
+	// Optional. Short description of the result (Only for document, photo, video, article, document, photo, video)
+	Description string `json:"description,omitempty"`
+	// Optional. A valid file identifier for the GIF file (Only for gif)
+	GifFileId string `json:"gif_file_id,omitempty"`
+	// Optional. A valid file identifier for the MP4 file (Only for mpeg4_gif)
+	Mpeg4FileId string `json:"mpeg4_file_id,omitempty"`
+	// Optional. A valid file identifier of the photo (Only for photo)
+	PhotoFileId string `json:"photo_file_id,omitempty"`
+	// Optional. A valid file identifier of the sticker (Only for sticker)
+	StickerFileId string `json:"sticker_file_id,omitempty"`
+	// Optional. A valid file identifier for the video file (Only for video)
+	VideoFileId string `json:"video_file_id,omitempty"`
+	// Optional. A valid file identifier for the voice message (Only for voice)
+	VoiceFileId string `json:"voice_file_id,omitempty"`
+	// Optional. URL of the result (Only for article)
+	Url string `json:"url,omitempty"`
+	// Optional. Pass True, if you don't want the URL to be shown in the message (Only for article)
+	HideUrl bool `json:"hide_url,omitempty"`
+	// Optional. Url of the thumbnail for the result (Only for article, contact, document, gif, location, mpeg4_gif, photo, venue, video)
+	ThumbUrl string `json:"thumb_url,omitempty"`
+	// Optional. Thumbnail width (Only for article, contact, document, location, venue)
+	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	// Optional. Thumbnail height (Only for article, contact, document, location, venue)
+	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	// Optional. A valid URL for the audio file (Only for audio)
+	AudioUrl string `json:"audio_url,omitempty"`
+	// Optional. Performer (Only for audio)
+	Performer string `json:"performer,omitempty"`
+	// Optional. Audio duration in seconds (Only for audio)
+	AudioDuration int64 `json:"audio_duration,omitempty"`
+	// Optional. Contact's phone number (Only for contact)
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// Optional. Contact's first name (Only for contact)
+	FirstName string `json:"first_name,omitempty"`
+	// Optional. Contact's last name (Only for contact)
+	LastName string `json:"last_name,omitempty"`
+	// Optional. Additional data about the contact in the form of a vCard, 0-2048 bytes (Only for contact)
+	Vcard string `json:"vcard,omitempty"`
+	// Optional. Short name of the game (Only for game)
+	GameShortName string `json:"game_short_name,omitempty"`
+	// Optional. A valid URL for the file (Only for document)
+	DocumentUrl string `json:"document_url,omitempty"`
+	// Optional. Mime type of the content of the file, either "application/pdf" or "application/zip" (Only for document, video)
+	MimeType string `json:"mime_type,omitempty"`
+	// Optional. A valid URL for the GIF file. File size must not exceed 1MB (Only for gif)
+	GifUrl string `json:"gif_url,omitempty"`
+	// Optional. Width of the GIF (Only for gif)
+	GifWidth int64 `json:"gif_width,omitempty"`
+	// Optional. Height of the GIF (Only for gif)
+	GifHeight int64 `json:"gif_height,omitempty"`
+	// Optional. Duration of the GIF (Only for gif)
+	GifDuration int64 `json:"gif_duration,omitempty"`
+	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg" (Only for gif, mpeg4_gif)
+	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
+	// Optional. Location latitude in degrees (Only for location, venue)
+	Latitude float64 `json:"latitude,omitempty"`
+	// Optional. Location longitude in degrees (Only for location, venue)
+	Longitude float64 `json:"longitude,omitempty"`
+	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500 (Only for location)
+	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
+	// Optional. Period in seconds for which the location can be updated, should be between 60 and 86400. (Only for location)
+	LivePeriod int64 `json:"live_period,omitempty"`
+	// Optional. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified. (Only for location)
+	Heading int64 `json:"heading,omitempty"`
+	// Optional. For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified. (Only for location)
+	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
+	// Optional. A valid URL for the MP4 file. File size must not exceed 1MB (Only for mpeg4_gif)
+	Mpeg4Url string `json:"mpeg4_url,omitempty"`
+	// Optional. Video width (Only for mpeg4_gif)
+	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
+	// Optional. Video height (Only for mpeg4_gif)
+	Mpeg4Height int64 `json:"mpeg4_height,omitempty"`
+	// Optional. Video duration (Only for mpeg4_gif)
+	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
+	// Optional. A valid URL of the photo. Photo must be in jpeg format. Photo size must not exceed 5MB (Only for photo)
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// Optional. Width of the photo (Only for photo)
+	PhotoWidth int64 `json:"photo_width,omitempty"`
+	// Optional. Height of the photo (Only for photo)
+	PhotoHeight int64 `json:"photo_height,omitempty"`
+	// Optional. Address of the venue (Only for venue)
+	Address string `json:"address,omitempty"`
+	// Optional. Foursquare identifier of the venue if known (Only for venue)
+	FoursquareId string `json:"foursquare_id,omitempty"`
+	// Optional. Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".) (Only for venue)
+	FoursquareType string `json:"foursquare_type,omitempty"`
+	// Optional. Google Places identifier of the venue (Only for venue)
+	GooglePlaceId string `json:"google_place_id,omitempty"`
+	// Optional. Google Places type of the venue. (See supported types.) (Only for venue)
+	GooglePlaceType string `json:"google_place_type,omitempty"`
+	// Optional. A valid URL for the embedded video player or video file (Only for video)
+	VideoUrl string `json:"video_url,omitempty"`
+	// Optional. Video width (Only for video)
+	VideoWidth int64 `json:"video_width,omitempty"`
+	// Optional. Video height (Only for video)
+	VideoHeight int64 `json:"video_height,omitempty"`
+	// Optional. Video duration in seconds (Only for video)
+	VideoDuration int64 `json:"video_duration,omitempty"`
+	// Optional. A valid URL for the voice recording (Only for voice)
+	VoiceUrl string `json:"voice_url,omitempty"`
+	// Optional. Recording duration in seconds (Only for voice)
+	VoiceDuration int64 `json:"voice_duration,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedInlineQueryResult) GetType() string {
+	return v.Type
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v MergedInlineQueryResult) GetId() string {
+	return v.Id
+}
+
+// MergedInlineQueryResult.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v MergedInlineQueryResult) inlineQueryResult() {}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v MergedInlineQueryResult) MergeInlineQueryResult() MergedInlineQueryResult {
+	return v
 }
 
 // InlineQueryResultArticle Represents a link to an article or web page.
@@ -488,6 +1392,34 @@ type InlineQueryResultArticle struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultArticle) GetType() string {
+	return "article"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultArticle) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "article",
+		Id:                  v.Id,
+		Title:               v.Title,
+		InputMessageContent: &v.InputMessageContent,
+		ReplyMarkup:         v.ReplyMarkup,
+		Url:                 v.Url,
+		HideUrl:             v.HideUrl,
+		Description:         v.Description,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultArticle
 	a := struct {
@@ -500,9 +1432,8 @@ func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultArticle) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultArticle.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultArticle) inlineQueryResult() {}
 
 // InlineQueryResultAudio Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -530,6 +1461,34 @@ type InlineQueryResultAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultAudio) GetType() string {
+	return "audio"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultAudio) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "audio",
+		Id:                  v.Id,
+		AudioUrl:            v.AudioUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		Performer:           v.Performer,
+		AudioDuration:       v.AudioDuration,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultAudio
 	a := struct {
@@ -542,9 +1501,8 @@ func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultAudio) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultAudio.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultAudio) inlineQueryResult() {}
 
 // InlineQueryResultCachedAudio Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -566,6 +1524,31 @@ type InlineQueryResultCachedAudio struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedAudio) GetType() string {
+	return "audio"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedAudio) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "audio",
+		Id:                  v.Id,
+		AudioFileId:         v.AudioFileId,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedAudio
 	a := struct {
@@ -578,9 +1561,8 @@ func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedAudio) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedAudio.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 
 // InlineQueryResultCachedDocument Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -606,6 +1588,33 @@ type InlineQueryResultCachedDocument struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedDocument) GetType() string {
+	return "document"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedDocument) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "document",
+		Id:                  v.Id,
+		Title:               v.Title,
+		DocumentFileId:      v.DocumentFileId,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedDocument
 	a := struct {
@@ -618,9 +1627,8 @@ func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedDocument) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedDocument.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedDocument) inlineQueryResult() {}
 
 // InlineQueryResultCachedGif Represents a link to an animated GIF file stored on the Telegram servers. By default, this animated GIF file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedgif
@@ -643,6 +1651,32 @@ type InlineQueryResultCachedGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedGif) GetType() string {
+	return "gif"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedGif) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "gif",
+		Id:                  v.Id,
+		GifFileId:           v.GifFileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedGif
 	a := struct {
@@ -655,9 +1689,8 @@ func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedGif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedGif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedGif) inlineQueryResult() {}
 
 // InlineQueryResultCachedMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound) stored on the Telegram servers. By default, this animated MPEG-4 file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedmpeg4gif
@@ -680,6 +1713,32 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
+	return "mpeg4_gif"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "mpeg4_gif",
+		Id:                  v.Id,
+		Mpeg4FileId:         v.Mpeg4FileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedMpeg4Gif
 	a := struct {
@@ -692,9 +1751,8 @@ func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedMpeg4Gif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedMpeg4Gif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedMpeg4Gif) inlineQueryResult() {}
 
 // InlineQueryResultCachedPhoto Represents a link to a photo stored on the Telegram servers. By default, this photo will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedphoto
@@ -719,6 +1777,33 @@ type InlineQueryResultCachedPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedPhoto) GetType() string {
+	return "photo"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedPhoto) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "photo",
+		Id:                  v.Id,
+		PhotoFileId:         v.PhotoFileId,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedPhoto
 	a := struct {
@@ -731,9 +1816,8 @@ func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedPhoto) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedPhoto.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 
 // InlineQueryResultCachedSticker Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
 // Note: This will only work in Telegram versions released after 9 April, 2016 for static stickers and after 06 July, 2019 for animated stickers. Older clients will ignore them.
@@ -749,6 +1833,28 @@ type InlineQueryResultCachedSticker struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedSticker) GetType() string {
+	return "sticker"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedSticker) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "sticker",
+		Id:                  v.Id,
+		StickerFileId:       v.StickerFileId,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedSticker
 	a := struct {
@@ -761,9 +1867,8 @@ func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedSticker) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedSticker.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedSticker) inlineQueryResult() {}
 
 // InlineQueryResultCachedVideo Represents a link to a video file stored on the Telegram servers. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultcachedvideo
@@ -788,6 +1893,33 @@ type InlineQueryResultCachedVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVideo) GetType() string {
+	return "video"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVideo) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "video",
+		Id:                  v.Id,
+		VideoFileId:         v.VideoFileId,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVideo
 	a := struct {
@@ -800,9 +1932,8 @@ func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedVideo) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedVideo.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 
 // InlineQueryResultCachedVoice Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -826,6 +1957,32 @@ type InlineQueryResultCachedVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVoice) GetType() string {
+	return "voice"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVoice) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "voice",
+		Id:                  v.Id,
+		VoiceFileId:         v.VoiceFileId,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultCachedVoice
 	a := struct {
@@ -838,9 +1995,8 @@ func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultCachedVoice) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultCachedVoice.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 
 // InlineQueryResultContact Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -868,6 +2024,34 @@ type InlineQueryResultContact struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultContact) GetType() string {
+	return "contact"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultContact) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "contact",
+		Id:                  v.Id,
+		PhoneNumber:         v.PhoneNumber,
+		FirstName:           v.FirstName,
+		LastName:            v.LastName,
+		Vcard:               v.Vcard,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultContact
 	a := struct {
@@ -880,9 +2064,8 @@ func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultContact) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultContact.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultContact) inlineQueryResult() {}
 
 // InlineQueryResultDocument Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -916,6 +2099,37 @@ type InlineQueryResultDocument struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultDocument) GetType() string {
+	return "document"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultDocument) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "document",
+		Id:                  v.Id,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		DocumentUrl:         v.DocumentUrl,
+		MimeType:            v.MimeType,
+		Description:         v.Description,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultDocument
 	a := struct {
@@ -928,9 +2142,8 @@ func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultDocument) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultDocument.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultDocument) inlineQueryResult() {}
 
 // InlineQueryResultGame Represents a Game.
 // Note: This will only work in Telegram versions released after October 1, 2016. Older clients will not display any inline results if a game result is among them.
@@ -944,6 +2157,27 @@ type InlineQueryResultGame struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGame) GetType() string {
+	return "game"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGame) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:          "game",
+		Id:            v.Id,
+		GameShortName: v.GameShortName,
+		ReplyMarkup:   v.ReplyMarkup,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGame
 	a := struct {
@@ -956,9 +2190,8 @@ func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultGame) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultGame.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultGame) inlineQueryResult() {}
 
 // InlineQueryResultGif Represents a link to an animated GIF file. By default, this animated GIF file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultgif
@@ -991,6 +2224,37 @@ type InlineQueryResultGif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGif) GetType() string {
+	return "gif"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGif) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "gif",
+		Id:                  v.Id,
+		GifUrl:              v.GifUrl,
+		GifWidth:            v.GifWidth,
+		GifHeight:           v.GifHeight,
+		GifDuration:         v.GifDuration,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbMimeType:       v.ThumbMimeType,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultGif
 	a := struct {
@@ -1003,9 +2267,8 @@ func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultGif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultGif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultGif) inlineQueryResult() {}
 
 // InlineQueryResultLocation Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1039,6 +2302,37 @@ type InlineQueryResultLocation struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultLocation) GetType() string {
+	return "location"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultLocation) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                 "location",
+		Id:                   v.Id,
+		Latitude:             v.Latitude,
+		Longitude:            v.Longitude,
+		Title:                v.Title,
+		HorizontalAccuracy:   v.HorizontalAccuracy,
+		LivePeriod:           v.LivePeriod,
+		Heading:              v.Heading,
+		ProximityAlertRadius: v.ProximityAlertRadius,
+		ReplyMarkup:          v.ReplyMarkup,
+		InputMessageContent:  v.InputMessageContent,
+		ThumbUrl:             v.ThumbUrl,
+		ThumbWidth:           v.ThumbWidth,
+		ThumbHeight:          v.ThumbHeight,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultLocation
 	a := struct {
@@ -1051,9 +2345,8 @@ func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultLocation) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultLocation.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultLocation) inlineQueryResult() {}
 
 // InlineQueryResultMpeg4Gif Represents a link to a video animation (H.264/MPEG-4 AVC video without sound). By default, this animated MPEG-4 file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 // https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif
@@ -1086,6 +2379,37 @@ type InlineQueryResultMpeg4Gif struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultMpeg4Gif) GetType() string {
+	return "mpeg4_gif"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultMpeg4Gif) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "mpeg4_gif",
+		Id:                  v.Id,
+		Mpeg4Url:            v.Mpeg4Url,
+		Mpeg4Width:          v.Mpeg4Width,
+		Mpeg4Height:         v.Mpeg4Height,
+		Mpeg4Duration:       v.Mpeg4Duration,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbMimeType:       v.ThumbMimeType,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultMpeg4Gif
 	a := struct {
@@ -1098,9 +2422,8 @@ func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultMpeg4Gif) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultMpeg4Gif.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultMpeg4Gif) inlineQueryResult() {}
 
 // InlineQueryResultPhoto Represents a link to a photo. By default, this photo will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 // https://core.telegram.org/bots/api#inlinequeryresultphoto
@@ -1131,6 +2454,36 @@ type InlineQueryResultPhoto struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultPhoto) GetType() string {
+	return "photo"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultPhoto) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "photo",
+		Id:                  v.Id,
+		PhotoUrl:            v.PhotoUrl,
+		ThumbUrl:            v.ThumbUrl,
+		PhotoWidth:          v.PhotoWidth,
+		PhotoHeight:         v.PhotoHeight,
+		Title:               v.Title,
+		Description:         v.Description,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultPhoto
 	a := struct {
@@ -1143,9 +2496,8 @@ func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultPhoto) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultPhoto.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultPhoto) inlineQueryResult() {}
 
 // InlineQueryResultVenue Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1181,6 +2533,38 @@ type InlineQueryResultVenue struct {
 	ThumbHeight int64 `json:"thumb_height,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVenue) GetType() string {
+	return "venue"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVenue) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "venue",
+		Id:                  v.Id,
+		Latitude:            v.Latitude,
+		Longitude:           v.Longitude,
+		Title:               v.Title,
+		Address:             v.Address,
+		FoursquareId:        v.FoursquareId,
+		FoursquareType:      v.FoursquareType,
+		GooglePlaceId:       v.GooglePlaceId,
+		GooglePlaceType:     v.GooglePlaceType,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+		ThumbUrl:            v.ThumbUrl,
+		ThumbWidth:          v.ThumbWidth,
+		ThumbHeight:         v.ThumbHeight,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVenue
 	a := struct {
@@ -1193,9 +2577,8 @@ func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVenue) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVenue.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVenue) inlineQueryResult() {}
 
 // InlineQueryResultVideo Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 // https://core.telegram.org/bots/api#inlinequeryresultvideo
@@ -1230,6 +2613,38 @@ type InlineQueryResultVideo struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVideo) GetType() string {
+	return "video"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVideo) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "video",
+		Id:                  v.Id,
+		VideoUrl:            v.VideoUrl,
+		MimeType:            v.MimeType,
+		ThumbUrl:            v.ThumbUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		VideoWidth:          v.VideoWidth,
+		VideoHeight:         v.VideoHeight,
+		VideoDuration:       v.VideoDuration,
+		Description:         v.Description,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVideo
 	a := struct {
@@ -1242,9 +2657,8 @@ func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVideo) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVideo.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVideo) inlineQueryResult() {}
 
 // InlineQueryResultVoice Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
 // Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
@@ -1270,6 +2684,33 @@ type InlineQueryResultVoice struct {
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVoice) GetType() string {
+	return "voice"
+}
+
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVoice) GetId() string {
+	return v.Id
+}
+
+// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult {
+	return MergedInlineQueryResult{
+		Type:                "voice",
+		Id:                  v.Id,
+		VoiceUrl:            v.VoiceUrl,
+		Title:               v.Title,
+		Caption:             v.Caption,
+		ParseMode:           v.ParseMode,
+		CaptionEntities:     v.CaptionEntities,
+		VoiceDuration:       v.VoiceDuration,
+		ReplyMarkup:         v.ReplyMarkup,
+		InputMessageContent: v.InputMessageContent,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 	type alias InlineQueryResultVoice
 	a := struct {
@@ -1282,9 +2723,8 @@ func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (v InlineQueryResultVoice) InlineQueryResult() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InlineQueryResultVoice.inlineQueryResult is a dummy method to avoid interface implementation.
+func (v InlineQueryResultVoice) inlineQueryResult() {}
 
 // InputContactMessageContent Represents the content of a contact message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputcontactmessagecontent
@@ -1299,15 +2739,10 @@ type InputContactMessageContent struct {
 	Vcard string `json:"vcard,omitempty"`
 }
 
-func (v InputContactMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputContactMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputContactMessageContent) inputMessageContent() {}
 
 // InputFile This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
-// There are three ways to send files (photos, stickers, audio, media, etc.):
-// Sending by file_id
-// Sending by URL
-// Objects and methods used in the inline mode are described in the Inline mode section.
 // https://core.telegram.org/bots/api#inputfile
 type InputFile interface{}
 
@@ -1356,9 +2791,8 @@ type InputInvoiceMessageContent struct {
 	IsFlexible bool `json:"is_flexible,omitempty"`
 }
 
-func (v InputInvoiceMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputInvoiceMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputInvoiceMessageContent) inputMessageContent() {}
 
 // InputLocationMessageContent Represents the content of a location message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputlocationmessagecontent
@@ -1377,14 +2811,72 @@ type InputLocationMessageContent struct {
 	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
 }
 
-func (v InputLocationMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputLocationMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputLocationMessageContent) inputMessageContent() {}
 
 // InputMedia This object represents the content of a media message to be sent. It should be one of
+// - InputMediaAnimation
+// - InputMediaDocument
+// - InputMediaAudio
+// - InputMediaPhoto
+// - InputMediaVideo
 // https://core.telegram.org/bots/api#inputmedia
 type InputMedia interface {
+	GetType() string
+	GetMedia() InputFile
+	inputMedia()
+	// InputMediaParams allows for uploading InputMedia files with attachments.
 	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
+	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
+	MergeInputMedia() MergedInputMedia
+}
+
+// MergedInputMedia is a helper type to simplify interactions with the various InputMedia subtypes.
+type MergedInputMedia struct {
+	// Type of the result, must be animation
+	Type string `json:"type,omitempty"`
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More info on Sending Files »
+	Media InputFile `json:"media,omitempty"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files » (Only for animation, document, audio, video)
+	Thumb *InputFile `json:"thumb,omitempty"`
+	// Optional. Caption of the animation to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the animation caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Animation width (Only for animation, video)
+	Width int64 `json:"width,omitempty"`
+	// Optional. Animation height (Only for animation, video)
+	Height int64 `json:"height,omitempty"`
+	// Optional. Animation duration (Only for animation, audio, video)
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album. (Only for document)
+	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
+	// Optional. Performer of the audio (Only for audio)
+	Performer string `json:"performer,omitempty"`
+	// Optional. Title of the audio (Only for audio)
+	Title string `json:"title,omitempty"`
+	// Optional. Pass True, if the uploaded video is suitable for streaming (Only for video)
+	SupportsStreaming bool `json:"supports_streaming,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedInputMedia) GetType() string {
+	return v.Type
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v MergedInputMedia) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergedInputMedia.inputMedia is a dummy method to avoid interface implementation.
+func (v MergedInputMedia) inputMedia() {}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v MergedInputMedia) MergeInputMedia() MergedInputMedia {
+	return v
 }
 
 // InputMediaAnimation Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
@@ -1406,18 +2898,6 @@ type InputMediaAnimation struct {
 	Height int64 `json:"height,omitempty"`
 	// Optional. Animation duration
 	Duration int64 `json:"duration,omitempty"`
-}
-
-func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
-	type alias InputMediaAnimation
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "animation",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -1442,6 +2922,47 @@ func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputMediaAnimation) GetType() string {
+	return "animation"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputMediaAnimation) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "animation",
+		Media:           v.Media,
+		Thumb:           v.Thumb,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+		Width:           v.Width,
+		Height:          v.Height,
+		Duration:        v.Duration,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
+	type alias InputMediaAnimation
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "animation",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaAnimation) inputMedia() {}
+
 // InputMediaAudio Represents an audio file to be treated as music to be sent.
 // https://core.telegram.org/bots/api#inputmediaaudio
 type InputMediaAudio struct {
@@ -1461,18 +2982,6 @@ type InputMediaAudio struct {
 	Performer string `json:"performer,omitempty"`
 	// Optional. Title of the audio
 	Title string `json:"title,omitempty"`
-}
-
-func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
-	type alias InputMediaAudio
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "audio",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -1497,6 +3006,47 @@ func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputMediaAudio) GetType() string {
+	return "audio"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputMediaAudio) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "audio",
+		Media:           v.Media,
+		Thumb:           v.Thumb,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+		Duration:        v.Duration,
+		Performer:       v.Performer,
+		Title:           v.Title,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
+	type alias InputMediaAudio
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "audio",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaAudio) inputMedia() {}
+
 // InputMediaDocument Represents a general file to be sent.
 // https://core.telegram.org/bots/api#inputmediadocument
 type InputMediaDocument struct {
@@ -1512,18 +3062,6 @@ type InputMediaDocument struct {
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album.
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
-}
-
-func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
-	type alias InputMediaDocument
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "document",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -1548,6 +3086,45 @@ func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]N
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputMediaDocument) GetType() string {
+	return "document"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputMediaDocument) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:                        "document",
+		Media:                       v.Media,
+		Thumb:                       v.Thumb,
+		Caption:                     v.Caption,
+		ParseMode:                   v.ParseMode,
+		CaptionEntities:             v.CaptionEntities,
+		DisableContentTypeDetection: v.DisableContentTypeDetection,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
+	type alias InputMediaDocument
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "document",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaDocument) inputMedia() {}
+
 // InputMediaPhoto Represents a photo to be sent.
 // https://core.telegram.org/bots/api#inputmediaphoto
 type InputMediaPhoto struct {
@@ -1559,18 +3136,6 @@ type InputMediaPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-}
-
-func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
-	type alias InputMediaPhoto
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "photo",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -1595,6 +3160,43 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputMediaPhoto) GetType() string {
+	return "photo"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputMediaPhoto) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:            "photo",
+		Media:           v.Media,
+		Caption:         v.Caption,
+		ParseMode:       v.ParseMode,
+		CaptionEntities: v.CaptionEntities,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
+	type alias InputMediaPhoto
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "photo",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaPhoto) inputMedia() {}
+
 // InputMediaVideo Represents a video to be sent.
 // https://core.telegram.org/bots/api#inputmediavideo
 type InputMediaVideo struct {
@@ -1616,18 +3218,6 @@ type InputMediaVideo struct {
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Pass True, if the uploaded video is suitable for streaming
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
-}
-
-func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
-	type alias InputMediaVideo
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  "video",
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
@@ -1652,10 +3242,57 @@ func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]Name
 	return json.Marshal(v)
 }
 
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputMediaVideo) GetType() string {
+	return "video"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputMediaVideo) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
+func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
+	return MergedInputMedia{
+		Type:              "video",
+		Media:             v.Media,
+		Thumb:             v.Thumb,
+		Caption:           v.Caption,
+		ParseMode:         v.ParseMode,
+		CaptionEntities:   v.CaptionEntities,
+		Width:             v.Width,
+		Height:            v.Height,
+		Duration:          v.Duration,
+		SupportsStreaming: v.SupportsStreaming,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
+	type alias InputMediaVideo
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "video",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
+func (v InputMediaVideo) inputMedia() {}
+
 // InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
+// - InputTextMessageContent
+// - InputLocationMessageContent
+// - InputVenueMessageContent
+// - InputContactMessageContent
+// - InputInvoiceMessageContent
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
-	InputMessageContent() ([]byte, error)
+	inputMessageContent()
 }
 
 // InputTextMessageContent Represents the content of a text message to be sent as the result of an inline query.
@@ -1671,9 +3308,8 @@ type InputTextMessageContent struct {
 	DisableWebPagePreview bool `json:"disable_web_page_preview,omitempty"`
 }
 
-func (v InputTextMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputTextMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputTextMessageContent) inputMessageContent() {}
 
 // InputVenueMessageContent Represents the content of a venue message to be sent as the result of an inline query.
 // https://core.telegram.org/bots/api#inputvenuemessagecontent
@@ -1696,9 +3332,8 @@ type InputVenueMessageContent struct {
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
 
-func (v InputVenueMessageContent) InputMessageContent() ([]byte, error) {
-	return json.Marshal(v)
-}
+// InputVenueMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
+func (v InputVenueMessageContent) inputMessageContent() {}
 
 // Invoice This object contains basic information about an invoice.
 // https://core.telegram.org/bots/api#invoice
@@ -1960,16 +3595,71 @@ type PassportData struct {
 }
 
 // PassportElementError This object represents an error in the Telegram Passport element which was submitted that should be resolved by the user. It should be one of:
+// - PassportElementErrorDataField
+// - PassportElementErrorFrontSide
+// - PassportElementErrorReverseSide
+// - PassportElementErrorSelfie
+// - PassportElementErrorFile
+// - PassportElementErrorFiles
+// - PassportElementErrorTranslationFile
+// - PassportElementErrorTranslationFiles
+// - PassportElementErrorUnspecified
 // https://core.telegram.org/bots/api#passportelementerror
 type PassportElementError interface {
-	PassportElementError() ([]byte, error)
+	GetSource() string
+	GetType() string
+	GetMessage() string
+	passportElementError()
+	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
+	MergePassportElementError() MergedPassportElementError
+}
+
+// MergedPassportElementError is a helper type to simplify interactions with the various PassportElementError subtypes.
+type MergedPassportElementError struct {
+	// Error source, must be data
+	Source string `json:"source,omitempty"`
+	// The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
+	Type string `json:"type,omitempty"`
+	// Optional. Name of the data field which has the error (Only for data)
+	FieldName string `json:"field_name,omitempty"`
+	// Optional. Base64-encoded data hash (Only for data)
+	DataHash string `json:"data_hash,omitempty"`
+	// Error message
+	Message string `json:"message,omitempty"`
+	// Optional. Base64-encoded hash of the file with the front side of the document (Only for front_side, reverse_side, selfie, file, translation_file)
+	FileHash string `json:"file_hash,omitempty"`
+	// Optional. List of base64-encoded file hashes (Only for files, translation_files)
+	FileHashes []string `json:"file_hashes,omitempty"`
+	// Optional. Base64-encoded element hash (Only for unspecified)
+	ElementHash string `json:"element_hash,omitempty"`
+}
+
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v MergedPassportElementError) GetSource() string {
+	return v.Source
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedPassportElementError) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v MergedPassportElementError) GetMessage() string {
+	return v.Message
+}
+
+// MergedPassportElementError.passportElementError is a dummy method to avoid interface implementation.
+func (v MergedPassportElementError) passportElementError() {}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v MergedPassportElementError) MergePassportElementError() MergedPassportElementError {
+	return v
 }
 
 // PassportElementErrorDataField Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
 // https://core.telegram.org/bots/api#passportelementerrordatafield
 type PassportElementErrorDataField struct {
-	// Error source, must be data
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
 	Type string `json:"type,omitempty"`
 	// Name of the data field which has the error
@@ -1980,15 +3670,51 @@ type PassportElementErrorDataField struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorDataField) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorDataField) GetSource() string {
+	return "data"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorDataField) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorDataField) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorDataField) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:    "data",
+		Type:      v.Type,
+		FieldName: v.FieldName,
+		DataHash:  v.DataHash,
+		Message:   v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorDataField
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "data",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorDataField.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorDataField) passportElementError() {}
 
 // PassportElementErrorFile Represents an issue with a document scan. The error is considered resolved when the file with the document scan changes.
 // https://core.telegram.org/bots/api#passportelementerrorfile
 type PassportElementErrorFile struct {
-	// Error source, must be file
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the issue, one of "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type,omitempty"`
 	// Base64-encoded file hash
@@ -1997,15 +3723,50 @@ type PassportElementErrorFile struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorFile) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFile) GetSource() string {
+	return "file"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFile) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFile) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorFile) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "file",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFile
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "file",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorFile.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFile) passportElementError() {}
 
 // PassportElementErrorFiles Represents an issue with a list of scans. The error is considered resolved when the list of files containing the scans changes.
 // https://core.telegram.org/bots/api#passportelementerrorfiles
 type PassportElementErrorFiles struct {
-	// Error source, must be files
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the issue, one of "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type,omitempty"`
 	// List of base64-encoded file hashes
@@ -2014,15 +3775,50 @@ type PassportElementErrorFiles struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorFiles) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFiles) GetSource() string {
+	return "files"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFiles) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFiles) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorFiles) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:     "files",
+		Type:       v.Type,
+		FileHashes: v.FileHashes,
+		Message:    v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFiles
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "files",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorFiles.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFiles) passportElementError() {}
 
 // PassportElementErrorFrontSide Represents an issue with the front side of a document. The error is considered resolved when the file with the front side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorfrontside
 type PassportElementErrorFrontSide struct {
-	// Error source, must be front_side
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport"
 	Type string `json:"type,omitempty"`
 	// Base64-encoded hash of the file with the front side of the document
@@ -2031,15 +3827,50 @@ type PassportElementErrorFrontSide struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorFrontSide) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFrontSide) GetSource() string {
+	return "front_side"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFrontSide) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorFrontSide) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorFrontSide) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "front_side",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorFrontSide
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "front_side",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorFrontSide.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorFrontSide) passportElementError() {}
 
 // PassportElementErrorReverseSide Represents an issue with the reverse side of a document. The error is considered resolved when the file with reverse side of the document changes.
 // https://core.telegram.org/bots/api#passportelementerrorreverseside
 type PassportElementErrorReverseSide struct {
-	// Error source, must be reverse_side
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the issue, one of "driver_license", "identity_card"
 	Type string `json:"type,omitempty"`
 	// Base64-encoded hash of the file with the reverse side of the document
@@ -2048,15 +3879,50 @@ type PassportElementErrorReverseSide struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorReverseSide) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorReverseSide) GetSource() string {
+	return "reverse_side"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorReverseSide) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorReverseSide) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorReverseSide) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "reverse_side",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorReverseSide
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "reverse_side",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorReverseSide.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorReverseSide) passportElementError() {}
 
 // PassportElementErrorSelfie Represents an issue with the selfie with a document. The error is considered resolved when the file with the selfie changes.
 // https://core.telegram.org/bots/api#passportelementerrorselfie
 type PassportElementErrorSelfie struct {
-	// Error source, must be selfie
-	Source string `json:"source,omitempty"`
 	// The section of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport"
 	Type string `json:"type,omitempty"`
 	// Base64-encoded hash of the file with the selfie
@@ -2065,15 +3931,50 @@ type PassportElementErrorSelfie struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorSelfie) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorSelfie) GetSource() string {
+	return "selfie"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorSelfie) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorSelfie) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorSelfie) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "selfie",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorSelfie
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "selfie",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorSelfie.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorSelfie) passportElementError() {}
 
 // PassportElementErrorTranslationFile Represents an issue with one of the files that constitute the translation of a document. The error is considered resolved when the file changes.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfile
 type PassportElementErrorTranslationFile struct {
-	// Error source, must be translation_file
-	Source string `json:"source,omitempty"`
 	// Type of element of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type,omitempty"`
 	// Base64-encoded file hash
@@ -2082,15 +3983,50 @@ type PassportElementErrorTranslationFile struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorTranslationFile) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFile) GetSource() string {
+	return "translation_file"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFile) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFile) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorTranslationFile) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:   "translation_file",
+		Type:     v.Type,
+		FileHash: v.FileHash,
+		Message:  v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorTranslationFile
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "translation_file",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorTranslationFile.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorTranslationFile) passportElementError() {}
 
 // PassportElementErrorTranslationFiles Represents an issue with the translated version of a document. The error is considered resolved when a file with the document translation change.
 // https://core.telegram.org/bots/api#passportelementerrortranslationfiles
 type PassportElementErrorTranslationFiles struct {
-	// Error source, must be translation_files
-	Source string `json:"source,omitempty"`
 	// Type of element of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type,omitempty"`
 	// List of base64-encoded file hashes
@@ -2099,15 +4035,50 @@ type PassportElementErrorTranslationFiles struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorTranslationFiles) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFiles) GetSource() string {
+	return "translation_files"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFiles) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorTranslationFiles) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorTranslationFiles) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:     "translation_files",
+		Type:       v.Type,
+		FileHashes: v.FileHashes,
+		Message:    v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorTranslationFiles
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "translation_files",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorTranslationFiles.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorTranslationFiles) passportElementError() {}
 
 // PassportElementErrorUnspecified Represents an issue in an unspecified place. The error is considered resolved when new data is added.
 // https://core.telegram.org/bots/api#passportelementerrorunspecified
 type PassportElementErrorUnspecified struct {
-	// Error source, must be unspecified
-	Source string `json:"source,omitempty"`
 	// Type of element of the user's Telegram Passport which has the issue
 	Type string `json:"type,omitempty"`
 	// Base64-encoded element hash
@@ -2116,9 +4087,46 @@ type PassportElementErrorUnspecified struct {
 	Message string `json:"message,omitempty"`
 }
 
-func (v PassportElementErrorUnspecified) PassportElementError() ([]byte, error) {
-	return json.Marshal(v)
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorUnspecified) GetSource() string {
+	return "unspecified"
 }
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorUnspecified) GetType() string {
+	return v.Type
+}
+
+// GetMessage is a helper method to easily access the common fields of an interface.
+func (v PassportElementErrorUnspecified) GetMessage() string {
+	return v.Message
+}
+
+// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+func (v PassportElementErrorUnspecified) MergePassportElementError() MergedPassportElementError {
+	return MergedPassportElementError{
+		Source:      "unspecified",
+		Type:        v.Type,
+		ElementHash: v.ElementHash,
+		Message:     v.Message,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
+	type alias PassportElementErrorUnspecified
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: "unspecified",
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PassportElementErrorUnspecified.passportElementError is a dummy method to avoid interface implementation.
+func (v PassportElementErrorUnspecified) passportElementError() {}
 
 // PassportFile This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
 // https://core.telegram.org/bots/api#passportfile
@@ -2238,13 +4246,14 @@ type ReplyKeyboardMarkup struct {
 	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
 	// Optional. Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat – the user can press a special button in the input field to see the custom keyboard again. Defaults to false.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
+	// Optional. The placeholder to be shown in the input field when the keyboard is active; 1-64 characters
+	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
 	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ReplyKeyboardMarkup) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ReplyKeyboardMarkup.replyMarkup is a dummy method to avoid interface implementation.
+func (v ReplyKeyboardMarkup) replyMarkup() {}
 
 // ReplyKeyboardRemove Upon receiving a message with this object, Telegram clients will remove the current custom keyboard and display the default letter-keyboard. By default, custom keyboards are displayed until a new keyboard is sent by a bot. An exception is made for one-time keyboards that are hidden immediately after the user presses a button (see ReplyKeyboardMarkup).
 // https://core.telegram.org/bots/api#replykeyboardremove
@@ -2255,9 +4264,8 @@ type ReplyKeyboardRemove struct {
 	Selective bool `json:"selective,omitempty"`
 }
 
-func (v ReplyKeyboardRemove) ReplyMarkup() ([]byte, error) {
-	return json.Marshal(v)
-}
+// ReplyKeyboardRemove.replyMarkup is a dummy method to avoid interface implementation.
+func (v ReplyKeyboardRemove) replyMarkup() {}
 
 // ResponseParameters Contains information about why a request was unsuccessful.
 // https://core.telegram.org/bots/api#responseparameters
