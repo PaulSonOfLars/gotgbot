@@ -84,6 +84,8 @@ func (td TypeDescription) getTypeNameFromParent(parentType string) string {
 	// Telegram inconsistencies
 	if td.Name == "ChatMemberOwner" {
 		return "creator"
+	} else if td.Name == "ChatMemberBanned" {
+		return "kicked"
 	}
 
 	typeName := strings.TrimPrefix(td.Name, parentType)
