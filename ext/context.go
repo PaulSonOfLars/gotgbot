@@ -109,9 +109,9 @@ func (c *Context) Args() []string {
 	}
 
 	if msg.Text != "" {
-		return strings.Fields(c.Update.Message.Text)
+		return strings.Fields(msg.Text)
 	} else if msg.Caption != "" {
-		return strings.Fields(c.Update.Message.Caption)
+		return strings.Fields(msg.Caption)
 	}
 
 	return nil
