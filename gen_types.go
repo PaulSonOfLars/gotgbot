@@ -496,7 +496,7 @@ type MergedChatMember struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, banned)
+	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, kicked)
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
@@ -574,7 +574,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		}
 		return s, nil
 
-	case "banned":
+	case "kicked":
 		s := ChatMemberBanned{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
@@ -677,7 +677,7 @@ type ChatMemberBanned struct {
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberBanned) GetStatus() string {
-	return "banned"
+	return "kicked"
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -688,7 +688,7 @@ func (v ChatMemberBanned) GetUser() User {
 // MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberBanned) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
-		Status:    "banned",
+		Status:    "kicked",
 		User:      v.User,
 		UntilDate: v.UntilDate,
 	}
@@ -701,7 +701,7 @@ func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "banned",
+		Status: "kicked",
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
