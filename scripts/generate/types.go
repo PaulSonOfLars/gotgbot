@@ -549,6 +549,27 @@ type customStructUnmarshalCaseData struct {
 }
 
 const customStructUnmarshal = `
+// {{.UnmarshalFuncName}}Array is a JSON unmarshalling helper which allows unmarshalling an array of interfaces 
+// using {{.UnmarshalFuncName}}.
+func {{.UnmarshalFuncName}}Array(d json.RawMessage) ([]{{.ParentType}}, error) {
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	var vs []{{.ParentType}}
+	for _, d := range ds {
+		v, err := {{.UnmarshalFuncName}}(d)
+		if err != nil {
+			return nil, err
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
 // {{.UnmarshalFuncName}} is a JSON unmarshal helper to marshal the right structs into a {{.ParentType}} interface
 // based on the {{.ConstantFieldName}} field.
 func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {

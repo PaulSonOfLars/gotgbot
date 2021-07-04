@@ -105,7 +105,11 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		addr = "&"
 	}
 
-	if len(d.Types[retType].Subtypes) != 0 {
+	if rawType := strings.TrimPrefix(retType, "[]"); isArray(retType) && len(d.Types[rawType].Subtypes) != 0 {
+		// Handle interface array returns such as []ChatMember from GetChatAdministrators
+		method.WriteString(fmt.Sprintf("\nreturn unmarshal%sArray(r)", rawType))
+	} else if len(d.Types[retType].Subtypes) != 0 {
+		// Handle interface returns such as ChatMember from GetChatMember
 		method.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
 	} else {
 		method.WriteString("\nvar " + retVarName + " " + retVarType)

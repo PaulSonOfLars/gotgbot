@@ -1000,8 +1000,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 		return nil, err
 	}
 
-	var c []ChatMember
-	return c, json.Unmarshal(r, &c)
+	return unmarshalChatMemberArray(r)
 }
 
 // GetChatMember Use this method to get information about a member of a chat. Returns a ChatMember object on success.

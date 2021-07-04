@@ -518,6 +518,26 @@ func (v MergedChatMember) MergeChatMember() MergedChatMember {
 	return v
 }
 
+// unmarshalChatMemberArray allows unmarshalling a list of interfaces, similar to unmarshalChatMember
+func unmarshalChatMemberArray(d json.RawMessage) ([]ChatMember, error) {
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	var vs []ChatMember
+	for _, d := range ds {
+		v, err := unmarshalChatMember(d)
+		if err != nil {
+			return nil, err
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
 // unmarshalChatMember is a JSON unmarshal helper to marshal the right structs into a ChatMember interface
 // based on the Status field.
 func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
