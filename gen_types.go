@@ -458,18 +458,14 @@ type MergedChatMember struct {
 	Status string `json:"status,omitempty"`
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// Optional. Custom title for this user (Only for creator, administrator)
-	CustomTitle string `json:"custom_title,omitempty"`
 	// Optional. True, if the user's presence in the chat is hidden (Only for creator, administrator)
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// Optional. Custom title for this user (Only for creator, administrator)
+	CustomTitle string `json:"custom_title,omitempty"`
 	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
 	// Optional. True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege (Only for administrator)
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
-	// Optional. True, if the administrator can post in the channel; channels only (Only for administrator)
-	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
-	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
 	// Optional. True, if the administrator can manage voice chats (Only for administrator)
@@ -482,6 +478,10 @@ type MergedChatMember struct {
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat (Only for administrator, restricted)
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// Optional. True, if the administrator can post in the channel; channels only (Only for administrator)
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
@@ -518,7 +518,8 @@ func (v MergedChatMember) MergeChatMember() MergedChatMember {
 	return v
 }
 
-// unmarshalChatMemberArray allows unmarshalling a list of interfaces, similar to unmarshalChatMember
+// unmarshalChatMemberArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalChatMember.
 func unmarshalChatMemberArray(d json.RawMessage) ([]ChatMember, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
@@ -613,16 +614,10 @@ type ChatMemberAdministrator struct {
 	User User `json:"user,omitempty"`
 	// True, if the bot is allowed to edit administrator privileges of that user
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Custom title for this user
-	CustomTitle string `json:"custom_title,omitempty"`
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
 	// True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
-	// True, if the administrator can post in the channel; channels only
-	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// True, if the administrator can edit messages of other users and can pin messages; channels only
-	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
 	// True, if the administrator can manage voice chats
@@ -635,8 +630,14 @@ type ChatMemberAdministrator struct {
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// True, if the user is allowed to pin messages; groups and supergroups only
+	// Optional. True, if the administrator can post in the channel; channels only
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
+	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -655,18 +656,18 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		Status:              "administrator",
 		User:                v.User,
 		CanBeEdited:         v.CanBeEdited,
-		CustomTitle:         v.CustomTitle,
 		IsAnonymous:         v.IsAnonymous,
 		CanManageChat:       v.CanManageChat,
-		CanPostMessages:     v.CanPostMessages,
-		CanEditMessages:     v.CanEditMessages,
 		CanDeleteMessages:   v.CanDeleteMessages,
 		CanManageVoiceChats: v.CanManageVoiceChats,
 		CanRestrictMembers:  v.CanRestrictMembers,
 		CanPromoteMembers:   v.CanPromoteMembers,
 		CanChangeInfo:       v.CanChangeInfo,
 		CanInviteUsers:      v.CanInviteUsers,
+		CanPostMessages:     v.CanPostMessages,
+		CanEditMessages:     v.CanEditMessages,
 		CanPinMessages:      v.CanPinMessages,
+		CustomTitle:         v.CustomTitle,
 	}
 }
 
@@ -817,10 +818,10 @@ func (v ChatMemberMember) chatMember() {}
 type ChatMemberOwner struct {
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// Custom title for this user
-	CustomTitle string `json:"custom_title,omitempty"`
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// Optional. Custom title for this user
+	CustomTitle string `json:"custom_title,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -838,8 +839,8 @@ func (v ChatMemberOwner) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:      "creator",
 		User:        v.User,
-		CustomTitle: v.CustomTitle,
 		IsAnonymous: v.IsAnonymous,
+		CustomTitle: v.CustomTitle,
 	}
 }
 
