@@ -496,7 +496,7 @@ type MergedChatMember struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Date when restrictions will be lifted for this user; unix time (Only for restricted, kicked)
+	// Optional. Date when restrictions will be lifted for this user; unix time. If 0, then the user is restricted forever (Only for restricted, kicked)
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
@@ -692,7 +692,7 @@ func (v ChatMemberAdministrator) chatMember() {}
 type ChatMemberBanned struct {
 	// Information about the user
 	User User `json:"user,omitempty"`
-	// Date when restrictions will be lifted for this user; unix time
+	// Date when restrictions will be lifted for this user; unix time. If 0, then the user is banned forever
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
@@ -871,7 +871,7 @@ type ChatMemberRestricted struct {
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// True, if the user is allowed to pin messages; groups and supergroups only
+	// True, if the user is allowed to pin messages
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// True, if the user is allowed to send text messages, contacts, locations and venues
 	CanSendMessages bool `json:"can_send_messages,omitempty"`
@@ -883,7 +883,7 @@ type ChatMemberRestricted struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Date when restrictions will be lifted for this user; unix time
+	// Date when restrictions will be lifted for this user; unix time. If 0, then the user is restricted forever
 	UntilDate int64 `json:"until_date,omitempty"`
 }
 
