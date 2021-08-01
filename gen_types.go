@@ -3562,6 +3562,20 @@ type Message struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
+// GetLink is a helper method to easily get the message link excluding group and private chat types.
+func (m *Message) GetLink() string {
+	if m.Chat.Type != "private" && m.Chat.Type != "group" {
+		var to_link string
+		if m.Chat.Username != "" {
+			to_link = m.Chat.Username
+		} else {
+			to_link = fmt.Sprintf("c/%v", m.Chat.Id)
+		}
+		return fmt.Sprintf("https://t.me/%s/%v", to_link, m.MessageId)
+	}
+	return ""
+}
+
 // MessageAutoDeleteTimerChanged This object represents a service message about a change in auto-delete timer settings.
 // https://core.telegram.org/bots/api#messageautodeletetimerchanged
 type MessageAutoDeleteTimerChanged struct {
