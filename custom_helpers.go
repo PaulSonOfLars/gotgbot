@@ -1,5 +1,22 @@
 package gotgbot
 
+import (
+	"fmt"
+	"strings"
+)
+
+/* GetLink is a helper method to easily get the message link excluding group and private chat types.
+(It will return en empty string in case of private or group chat type)*/
+func (m Message) GetLink() string {
+	if m.Chat.Type == "private" || m.Chat.Type == "group" {
+		return ""
+	}
+	if m.Chat.Username != "" {
+		return fmt.Sprintf("https://t.me/%s/%d", m.Chat.Username, m.MessageId)
+	}
+	return strings.Replace(fmt.Sprintf("https://t.me/c/%d/%d", m.Chat.Id, m.MessageId), "-100", "", 1)
+}
+
 // Reply is a helper function to easily call Bot.SendMessage as a reply to an existing message.
 func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	if opts == nil {
