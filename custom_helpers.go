@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-/* GetLink is a helper method to easily get the message link excluding group and private chat types.
-(It will return en empty string in case of private or group chat type)*/
+// GetLink is a helper method to easily get the message link (It will return an empty string in case of private or group chat type).
 func (m Message) GetLink() string {
 	if m.Chat.Type == "private" || m.Chat.Type == "group" {
 		return ""
