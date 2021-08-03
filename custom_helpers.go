@@ -14,7 +14,9 @@ func (m Message) GetLink() string {
 	if m.Chat.Username != "" {
 		return fmt.Sprintf("https://t.me/%s/%d", m.Chat.Username, m.MessageId)
 	}
-	return strings.Replace(fmt.Sprintf("https://t.me/c/%d/%d", m.Chat.Id, m.MessageId), "-100", "", 1)
+	// Message links use raw chatIds without the -100 prefix; this trims that prefix.
+	rawChatId := strings.TrimPrefix(strconv.FormatInt(m.Chat.Id, 10), "-100")
+	return fmt.Sprintf("https://t.me/c/%s/%d", rawChatId, m.MessageId)
 }
 
 // Reply is a helper function to easily call Bot.SendMessage as a reply to an existing message.
