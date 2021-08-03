@@ -291,6 +291,12 @@ func (f Field) getPreferredType() (string, error) {
 		return tgTypeReplyMarkup, nil
 	}
 
+	// Some fields are marked as "can be empty", in which case we do want to pass the empty values.
+	// These should be handled as pointers, so we can differentiate the empty case.
+	if strings.Contains(f.Description, "Can be empty") {
+		return "*" + toGoType(f.Types[0]), nil
+	}
+
 	if len(f.Types) == 1 {
 		return toGoType(f.Types[0]), nil
 	}
