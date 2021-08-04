@@ -2,6 +2,7 @@ package gotgbot
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
