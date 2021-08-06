@@ -26,7 +26,6 @@ func main() {
 	updater := ext.NewUpdater(nil)
 	dispatcher := updater.Dispatcher
 
-	// Add echo handler to reply to all messages.
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
 	dispatcher.AddHandler(handlers.NewInlineQuery(inlinequery.Query("gotgbot"), startIQ))
 
