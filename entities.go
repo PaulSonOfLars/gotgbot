@@ -55,7 +55,10 @@ func parseEntity(entity MessageEntity, utf16Text []uint16) ParsedMessageEntity {
 	if entity.Type == "url" {
 		entity.Url = text
 	}
+
 	entity.Offset = int64(len(string(utf16.Decode(utf16Text[:entity.Offset]))))
+	entity.Length = int64(len(text))
+
 	return ParsedMessageEntity{
 		MessageEntity: entity,
 		Text:          text,
