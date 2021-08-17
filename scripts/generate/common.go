@@ -32,8 +32,10 @@ func snakeToCamel(s string) string {
 	return strings.ToLower(title[:1]) + title[1:]
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+var (
+	matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	matchAllCap   = regexp.MustCompile("([a-z0-9])([A-Z])")
+)
 
 func titleToSnake(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")

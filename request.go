@@ -183,8 +183,7 @@ func fillBuffer(b *bytes.Buffer, data map[string]NamedReader) (string, error) {
 		}
 	}
 
-	err := w.Close()
-	if err != nil {
+	if err := w.Close(); err != nil {
 		return "", fmt.Errorf("failed to close multipart form writer: %w", err)
 	}
 

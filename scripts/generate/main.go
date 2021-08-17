@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -9,9 +10,14 @@ const schemaURL = "https://raw.githubusercontent.com/PaulSonOfLars/telegram-bot-
 
 func main() {
 	// Get the latest bot API spec from github
-	resp, err := http.Get(schemaURL)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", schemaURL, nil)
 	if err != nil {
-		panic(fmt.Errorf("failed to download telegram bot api spec at '%s': %w", schemaURL, err))
+		panic(fmt.Errorf("failed to create request for telegram bot api spec: %w", err))
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(fmt.Errorf("failed to download telegram bot api spec: %w", err))
 	}
 	defer resp.Body.Close()
 

@@ -6,7 +6,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
-// TODO: extend to be used as a generic cancel context
+// TODO: extend to be used as a generic cancel context?
 type Context struct {
 	*gotgbot.Update
 	Data map[string]interface{}
@@ -28,27 +28,29 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	var chat *gotgbot.Chat
 	var user *gotgbot.User
 
-	if update.Message != nil {
+	switch {
+	case update.Message != nil:
 		msg = update.Message
 		chat = &update.Message.Chat
 		user = update.Message.From
 
-	} else if update.EditedMessage != nil {
+	case update.EditedMessage != nil:
 		msg = update.EditedMessage
 		chat = &update.EditedMessage.Chat
 		user = update.EditedMessage.From
 
-	} else if update.ChannelPost != nil {
+	case update.ChannelPost != nil:
 		msg = update.ChannelPost
 		chat = &update.ChannelPost.Chat
 
-	} else if update.EditedChannelPost != nil {
+	case update.EditedChannelPost != nil:
 		msg = update.EditedChannelPost
 		chat = &update.EditedChannelPost.Chat
 
-	} else if update.InlineQuery != nil {
+	case update.InlineQuery != nil:
 		user = &update.InlineQuery.From
-	} else if update.CallbackQuery != nil {
+
+	case update.CallbackQuery != nil:
 		user = &update.CallbackQuery.From
 
 		if update.CallbackQuery.Message != nil {
@@ -56,23 +58,22 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 			chat = &update.CallbackQuery.Message.Chat
 		}
 
-	} else if update.ChosenInlineResult != nil {
+	case update.ChosenInlineResult != nil:
 		user = &update.ChosenInlineResult.From
 
-	} else if update.ShippingQuery != nil {
+	case update.ShippingQuery != nil:
 		user = &update.ShippingQuery.From
 
-	} else if update.PreCheckoutQuery != nil {
+	case update.PreCheckoutQuery != nil:
 		user = &update.PreCheckoutQuery.From
 
-	} else if update.MyChatMember != nil {
+	case update.MyChatMember != nil:
 		user = &update.MyChatMember.From
 		chat = &update.MyChatMember.Chat
 
-	} else if update.ChatMember != nil {
+	case update.ChatMember != nil:
 		user = &update.ChatMember.From
 		chat = &update.ChatMember.Chat
-
 	}
 
 	if data == nil {
@@ -92,15 +93,20 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 func (c *Context) Args() []string {
 	var msg *gotgbot.Message
 
-	if c.Update.Message != nil {
+	switch {
+	case c.Update.Message != nil:
 		msg = c.Update.Message
-	} else if c.Update.EditedMessage != nil {
+
+	case c.Update.EditedMessage != nil:
 		msg = c.Update.EditedMessage
-	} else if c.Update.ChannelPost != nil {
+
+	case c.Update.ChannelPost != nil:
 		msg = c.Update.ChannelPost
-	} else if c.Update.EditedChannelPost != nil {
+
+	case c.Update.EditedChannelPost != nil:
 		msg = c.Update.EditedChannelPost
-	} else if c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil {
+
+	case c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil:
 		msg = c.Update.CallbackQuery.Message
 	}
 
