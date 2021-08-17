@@ -27,7 +27,7 @@ type TypeDescription struct {
 
 func (td TypeDescription) receiverName() string {
 	var rs []rune
-	for _, r := range []rune(td.Name) {
+	for _, r := range td.Name {
 		if unicode.IsUpper(r) {
 			rs = append(rs, r)
 		}
@@ -161,25 +161,18 @@ const (
 	tgTypeFloat   = "Float"
 	tgTypeInteger = "Integer"
 	// These are all custom telegram types.
-	tgTypeMessage              = "Message"
-	tgTypeFile                 = "File"
-	tgTypeInputFile            = "InputFile"
-	tgTypeInputMedia           = "InputMedia"
-	tgTypeInlineQueryResult    = "InlineQueryResult"
-	tgTypeInputMessageContent  = "InputMessageContent"
-	tgTypePassportElementError = "PassportElementError"
-	tgTypeCallbackGame         = "CallbackGame"
-	tgTypeVoiceChatStarted     = "VoiceChatStarted"
-	tgTypeBotCommandScope      = "BotCommandScope"
-	tgTypeChatMember           = "ChatMember"
+	tgTypeMessage    = "Message"
+	tgTypeFile       = "File"
+	tgTypeInputFile  = "InputFile"
+	tgTypeInputMedia = "InputMedia"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )
 
-func generate(api io.ReadCloser) error {
+func generate(api io.Reader) error {
 	var d APIDescription
 	if err := json.NewDecoder(api).Decode(&d); err != nil {
-		return err
+		return fmt.Errorf("failed to decode API JSON: %w", err)
 	}
 
 	// TODO: Use golang templates instead of string builders
@@ -255,11 +248,6 @@ func isTgType(d APIDescription, goType string) bool {
 	return ok
 }
 
-func HasSubtypes(d APIDescription, typeName string) bool {
-	t, ok := d.Types[typeName]
-	return ok && len(t.Subtypes) > 0
-}
-
 func (f Field) getPreferredType() (string, error) {
 	if f.Name == "media" {
 		if len(f.Types) == 1 && f.Types[0] == "String" {
@@ -313,7 +301,8 @@ func (f Field) getPreferredType() (string, error) {
 }
 
 func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
-	prefRetVal := ""
+	var prefRetVal string
+
 	if len(m.Returns) == 1 {
 		prefRetVal = m.Returns[0]
 	} else if len(m.Returns) == 2 && m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean {

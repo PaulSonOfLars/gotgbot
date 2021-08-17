@@ -37,7 +37,7 @@ func (m Message) OriginalMD() string {
 	return getOrigMsgMD(utf16.Encode([]rune(m.Text)), m.Entities)
 }
 
-// OriginalMDV2 gets the original markdownV2 formatting of a message. text
+// OriginalMDV2 gets the original markdownV2 formatting of a message text.
 func (m Message) OriginalMDV2() string {
 	return getOrigMsgMDV2(utf16.Encode([]rune(m.Text)), m.Entities)
 }
@@ -217,7 +217,7 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 
 func getUpperEntities(ents []MessageEntity) []MessageEntity {
 	prev := int64(0)
-	var uppers []MessageEntity
+	uppers := make([]MessageEntity, 0, len(ents))
 	for _, e := range ents {
 		if e.Offset < prev {
 			continue
@@ -230,7 +230,7 @@ func getUpperEntities(ents []MessageEntity) []MessageEntity {
 
 func getChildEntities(ent MessageEntity, ents []MessageEntity) []MessageEntity {
 	end := ent.Offset + ent.Length
-	var children []MessageEntity
+	children := make([]MessageEntity, 0, len(ents))
 	for _, e := range ents {
 		if e.Offset < ent.Offset || e == ent {
 			continue

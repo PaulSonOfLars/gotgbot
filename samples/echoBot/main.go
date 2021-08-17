@@ -24,7 +24,18 @@ func main() {
 	}
 
 	// Create updater and dispatcher.
-	updater := ext.NewUpdater(nil)
+	updater := ext.NewUpdater(&ext.UpdaterOpts{
+		ErrorLog: nil,
+		DispatcherOpts: ext.DispatcherOpts{
+			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+				fmt.Println("an error occurred while handling update:", err.Error())
+				return ext.DispatcherActionNoop
+			},
+			Panic:       nil,
+			ErrorLog:    nil,
+			MaxRoutines: 0,
+		},
+	})
 	dispatcher := updater.Dispatcher
 
 	// Add echo handler to reply to all messages.
@@ -47,8 +58,7 @@ func main() {
 func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	f, err := os.Open("samples/echoBot/main.go")
 	if err != nil {
-		fmt.Println("failed to open source: " + err.Error())
-		return nil
+		return fmt.Errorf("failed to open source: %w", err)
 	}
 
 	_, err = b.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
@@ -56,8 +66,7 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 		ReplyToMessageId: ctx.EffectiveMessage.MessageId,
 	})
 	if err != nil {
-		fmt.Println("failed to send source: " + err.Error())
-		return nil
+		return fmt.Errorf("failed to send source: %w", err)
 	}
 
 	// Alternative file sending solutions:
@@ -68,15 +77,13 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
 	// })
 	// if err != nil {
-	//	fmt.Println("failed to send source: " + err.Error())
-	//	return nil
+	//	return fmt.Errorf("failed to send source: %w", err)
 	// }
 
 	// --- By []byte:
 	// bs, err := ioutil.ReadFile("samples/echoBot/main.go")
 	// if err != nil {
-	//	fmt.Println("failed to open source: " + err.Error())
-	//	return nil
+	//	return fmt.Errorf("failed to open source: %w", err)
 	// }
 	//
 	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, bs, &gotgbot.SendDocumentOpts{
@@ -84,15 +91,14 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
 	// })
 	// if err != nil {
-	//	fmt.Println("failed to send source: " + err.Error())
-	//	return nil
+	//	return fmt.Errorf("failed to send source: %w", err)
 	// }
 
 	// --- By custom name:
 	// f2, err := os.Open("samples/echoBot/main.go")
 	// if err != nil {
-	//	fmt.Println("failed to open source: " + err.Error())
-	//	return nil
+	//	return fmt.Errorf("failed to open source: %w", err)
+	//	return err
 	// }
 	//
 	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, gotgbot.NamedFile{
@@ -103,14 +109,14 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
 	// })
 	// if err != nil {
-	//	fmt.Println("failed to send source: " + err.Error())
-	//	return nil
+	//	return fmt.Errorf("failed to send source: %w", err)
+	//	return err
 	// }
 
 	return nil
 }
 
-// start introduces the bot
+// start introduces the bot.
 func start(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
@@ -121,21 +127,32 @@ func start(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	})
 	if err != nil {
-		fmt.Println("failed to send: " + err.Error())
+		return fmt.Errorf("failed to send start message: %w", err)
 	}
 	return nil
 }
 
-// startCB edits the start message
+// startCB edits the start message.
 func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
-	cb.Answer(b, nil)
-	cb.Message.EditText(b, "You edited the start message.", nil)
+
+	_, err := cb.Answer(b, nil)
+	if err != nil {
+		return fmt.Errorf("failed to answer start callback query: %w", err)
+	}
+
+	_, err = cb.Message.EditText(b, "You edited the start message.", nil)
+	if err != nil {
+		return fmt.Errorf("failed to edit start message text: %w", err)
+	}
 	return nil
 }
 
-// echo replies to a messages with its own contents
+// echo replies to a messages with its own contents.
 func echo(b *gotgbot.Bot, ctx *ext.Context) error {
-	ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
+	_, err := ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
+	if err != nil {
+		return fmt.Errorf("failed to echo message: %w", err)
+	}
 	return nil
 }

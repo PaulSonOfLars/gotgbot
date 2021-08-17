@@ -3,6 +3,7 @@ package ext
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
+
+var ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
 
 type Updater struct {
 	Dispatcher *Dispatcher
@@ -33,7 +36,7 @@ type UpdaterOpts struct {
 	DispatcherOpts DispatcherOpts
 }
 
-// NewUpdater Creates a new Updater, as well as the necessary structures for
+// NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
 func NewUpdater(opts *UpdaterOpts) Updater {
 	errLog := errorLog
 	var dispatcherOpts DispatcherOpts
@@ -60,7 +63,7 @@ type PollingOpts struct {
 	GetUpdatesOpts     gotgbot.GetUpdatesOpts
 }
 
-// StartPolling Starts the polling logic
+// StartPolling Starts the polling logic.
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// TODO: De-duplicate this code.
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
@@ -189,7 +192,7 @@ func (u *Updater) Stop() error {
 	return nil
 }
 
-// StartWebhook Starts the webhook server with the relevant settings (ie, TLS or not)
+// StartWebhook Starts the webhook server. The opts parameter allows for specifying TLS settings.
 func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	var tls bool
 	if opts.CertFile == "" && opts.KeyFile == "" {
@@ -197,7 +200,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	} else if opts.CertFile != "" && opts.KeyFile != "" {
 		tls = true
 	} else {
-		return fmt.Errorf("missing certfile or keyfile")
+		return ErrMissingCertOrKeyFile
 	}
 
 	go u.Dispatcher.Start(b)
@@ -220,7 +223,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 		} else {
 			err = u.server.ListenAndServe()
 		}
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && errors.Is(err, http.ErrServerClosed) {
 			panic("http server failed: " + err.Error())
 		}
 	}()

@@ -108,7 +108,7 @@ func generateParentType(d APIDescription, tgType TypeDescription) (string, error
 	if len(tgType.Subtypes) > 0 && tgType.sentByAPI(d) {
 		unmarshalFunc, err := interfaceUnmarshalFunc(d, tgType)
 		if err != nil {
-			return "", fmt.Errorf("unable to generate interface unmarshal function")
+			return "", fmt.Errorf("unable to generate interface unmarshal function: %w", err)
 		}
 		if unmarshalFunc != "" {
 			typeDef.WriteString("\n\n" + unmarshalFunc)
@@ -172,7 +172,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 		Fields: fields,
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate custom unmarshal: %w", err)
 	}
 	return bd.String(), nil
 }
@@ -247,7 +247,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 		CaseStatements:    cases,
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate interface unmarshaller: %w", err)
 	}
 
 	return bd.String(), nil
@@ -274,7 +274,6 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
-
 		commonGetMethods, err := generateAllCommonGetMethods(tgType.Name, commonFields, constantField, shortName)
 		if err != nil {
 			return "", err
@@ -487,8 +486,8 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 		} else {
 			bd.WriteString(fmt.Sprintf("\n\t%s: v.%s,", snakeToTitle(f.Name), snakeToTitle(f.Name)))
 		}
-
 	}
+
 	bd.WriteString("\n\t}")
 	bd.WriteString("\n}")
 	bd.WriteString("\n")
