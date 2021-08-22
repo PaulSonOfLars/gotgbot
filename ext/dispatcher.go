@@ -13,12 +13,12 @@ import (
 
 const DefaultMaxRoutines = 50
 
-type DispatcherAction int64
-
 type (
 	DispatcherErrorHandler func(b *gotgbot.Bot, ctx *Context, err error) DispatcherAction
 	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, stack []byte)
 )
+
+type DispatcherAction int64
 
 const (
 	// DispatcherActionNoop stops iteration of current group and moves to the next one.
@@ -32,8 +32,10 @@ const (
 	DispatcherActionEndGroups
 )
 
-var EndGroups = errors.New("group iteration ended")
-var ContinueGroups = errors.New("group iteration continued")
+var (
+	EndGroups      = errors.New("group iteration ended")
+	ContinueGroups = errors.New("group iteration continued")
+)
 
 type Dispatcher struct {
 	// Error handles any errors that occur during handler execution. The return type determines how to handle the
@@ -116,7 +118,7 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 	}
 }
 
-// Start to handle incoming updates
+// Start to handle incoming updates.
 func (d *Dispatcher) Start(b *gotgbot.Bot) {
 	if d.limiter == nil {
 		d.limitlessDispatcher(b)
@@ -211,16 +213,13 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 
 			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
-				switch err {
-				case ContinueGroups:
+				if errors.Is(err, ContinueGroups) {
 					// Continue handling current group.
 					continue
-
-				case EndGroups:
+				} else if errors.Is(err, EndGroups) {
 					// Stop all group handling.
 					return
-
-				default:
+				} else {
 					action := DispatcherActionNoop
 					if d.Error != nil {
 						action = d.Error(b, ctx, err)
@@ -240,12 +239,9 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 						return
 					}
 				}
-
 			}
 
 			break // move to next group
 		}
 	}
-
-	return
 }

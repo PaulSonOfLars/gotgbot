@@ -57,7 +57,6 @@ func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	}
 
 	return false
-
 }
 
 func (c Command) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {

@@ -9,12 +9,13 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
 const (
 	// DefaultAPIURL is the default telegram API URL.
-	DefaultAPIURL = "https://api.telegram.org/bot"
+	DefaultAPIURL = "https://api.telegram.org"
 	// DefaultGetTimeout is the default timeout to be set for a GET request.
 	DefaultGetTimeout = time.Second * 3
 	// DefaultPostTimeout is the default timeout to be set for a POST request.
@@ -77,7 +78,7 @@ func (bot *Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 
 // GetWithContext allows sending a Get request with an existing context.
 func (bot *Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", bot.endpoint(method), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", bot.methodEnpoint(method), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build GET request to %s: %w", method, err)
 	}
@@ -131,7 +132,7 @@ func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.V
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", bot.endpoint(method), b)
+	req, err := http.NewRequestWithContext(ctx, "POST", bot.methodEnpoint(method), b)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
@@ -182,17 +183,22 @@ func fillBuffer(b *bytes.Buffer, data map[string]NamedReader) (string, error) {
 		}
 	}
 
-	err := w.Close()
-	if err != nil {
+	if err := w.Close(); err != nil {
 		return "", fmt.Errorf("failed to close multipart form writer: %w", err)
 	}
 
 	return w.FormDataContentType(), nil
 }
 
-func (bot *Bot) endpoint(method string) string {
+// GetAPIURL returns the currently used API endpoint.
+func (bot *Bot) GetAPIURL() string {
 	if bot.APIURL == "" {
-		return DefaultAPIURL + bot.Token + "/" + method
+		return DefaultAPIURL
 	}
-	return bot.APIURL + bot.Token + "/" + method
+	// Trim suffix to ensure consistent output
+	return strings.TrimSuffix(bot.APIURL, "/")
+}
+
+func (bot *Bot) methodEnpoint(method string) string {
+	return fmt.Sprintf("%s/bot%s/%s", bot.GetAPIURL(), bot.Token, method)
 }
