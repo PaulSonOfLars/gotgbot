@@ -71,7 +71,8 @@ type PollingOpts struct {
 	//    - Using a non-0 "GetUpdatesOpts.Timeout" value. This is how "long" telegram will hold the long-polling call
 	//    while waiting for new messages. A value of 0 causes telegram to reply immediately, which will then cause
 	//    your bot to immediately ask for more updates. While this can seem fine, it will eventually causing
-	//    telegram to delay your requests when left running over longer periods.
+	//    telegram to delay your requests when left running over longer periods. If you are seeing lots
+	//    of "context deadline exceeded" errors on GetUpdates, this is likely the cause.
 	//    Keep in mind that a timeout of 10 does not mean you only get updates every 10s; by the nature of
 	//    long-polling, Telegram responds to your request as soon as new messages are available.
 	//    When setting this, it is recommended you set your PollingOpts.Timeout value to be slightly bigger (eg, +1).
