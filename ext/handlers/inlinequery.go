@@ -34,5 +34,4 @@ func (i InlineQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 
 func (i InlineQuery) Name() string {
 	return fmt.Sprintf("inlinequery_%p", i.Response)
-
 }
