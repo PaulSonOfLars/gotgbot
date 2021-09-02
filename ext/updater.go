@@ -57,13 +57,30 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 	}
 }
 
+// PollingOpts represents the optional values to start long polling.
 type PollingOpts struct {
+	// DropPendingUpdates decides whether or not to drop "pending" updates; these are updates which were sent before
+	// the bot was started.
 	DropPendingUpdates bool
-	Timeout            time.Duration
-	GetUpdatesOpts     gotgbot.GetUpdatesOpts
+	// Timeout is the local HTTP client timeout to be used. It is recommended to set this to GetUpdateOpts.Timeout+1.
+	Timeout time.Duration
+	// GetUpdatesOpts represents the opts passed to GetUpdates.
+	// Note: It is recommended you edit the values here when running in production environments.
+	// Changes might include:
+	//    - Changing the "GetUpdatesOpts.AllowedUpates" to only refer to relevant updates
+	//    - Using a non-0 "GetUpdatesOpts.Timeout" value. This is how "long" telegram will hold the long-polling call
+	//    while waiting for new messages. A value of 0 causes telegram to reply immediately, which will then cause
+	//    your bot to immediately ask for more updates. While this can seem fine, it will eventually causing
+	//    telegram to delay your requests when left running over longer periods. If you are seeing lots
+	//    of "context deadline exceeded" errors on GetUpdates, this is likely the cause.
+	//    Keep in mind that a timeout of 10 does not mean you only get updates every 10s; by the nature of
+	//    long-polling, Telegram responds to your request as soon as new messages are available.
+	//    When setting this, it is recommended you set your PollingOpts.Timeout value to be slightly bigger (eg, +1).
+	GetUpdatesOpts gotgbot.GetUpdatesOpts
 }
 
-// StartPolling Starts the polling logic.
+// StartPolling starts polling updates from telegram using the getUdpates long-polling method.
+// See the PollingOpts for optional values to set in production environments.
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// TODO: De-duplicate this code.
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
