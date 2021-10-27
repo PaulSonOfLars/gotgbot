@@ -32,7 +32,7 @@ type Animation struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -53,7 +53,7 @@ type Audio struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. Thumbnail of the album cover to which the music file belongs
 	Thumb *PhotoSize `json:"thumb,omitempty"`
@@ -1068,7 +1068,7 @@ type Document struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -1115,7 +1115,7 @@ type File struct {
 	FileId string `json:"file_id,omitempty"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id,omitempty"`
-	// Optional. File size, if known
+	// Optional. File size in bytes, if known
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
 	FilePath string `json:"file_path,omitempty"`
@@ -1315,7 +1315,7 @@ type MergedInlineQueryResult struct {
 	GifWidth int64 `json:"gif_width,omitempty"`
 	// Optional. Height of the GIF (Only for gif)
 	GifHeight int64 `json:"gif_height,omitempty"`
-	// Optional. Duration of the GIF (Only for gif)
+	// Optional. Duration of the GIF in seconds (Only for gif)
 	GifDuration int64 `json:"gif_duration,omitempty"`
 	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg" (Only for gif, mpeg4_gif)
 	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
@@ -1337,9 +1337,9 @@ type MergedInlineQueryResult struct {
 	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
 	// Optional. Video height (Only for mpeg4_gif)
 	Mpeg4Height int64 `json:"mpeg4_height,omitempty"`
-	// Optional. Video duration (Only for mpeg4_gif)
+	// Optional. Video duration in seconds (Only for mpeg4_gif)
 	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
-	// Optional. A valid URL of the photo. Photo must be in jpeg format. Photo size must not exceed 5MB (Only for photo)
+	// Optional. A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB (Only for photo)
 	PhotoUrl string `json:"photo_url,omitempty"`
 	// Optional. Width of the photo (Only for photo)
 	PhotoWidth int64 `json:"photo_width,omitempty"`
@@ -2111,7 +2111,7 @@ type InlineQueryResultDocument struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the file
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
-	// Optional. URL of the thumbnail (jpeg only) for the file
+	// Optional. URL of the thumbnail (JPEG only) for the file
 	ThumbUrl string `json:"thumb_url,omitempty"`
 	// Optional. Thumbnail width
 	ThumbWidth int64 `json:"thumb_width,omitempty"`
@@ -2224,7 +2224,7 @@ type InlineQueryResultGif struct {
 	GifWidth int64 `json:"gif_width,omitempty"`
 	// Optional. Height of the GIF
 	GifHeight int64 `json:"gif_height,omitempty"`
-	// Optional. Duration of the GIF
+	// Optional. Duration of the GIF in seconds
 	GifDuration int64 `json:"gif_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbUrl string `json:"thumb_url,omitempty"`
@@ -2379,7 +2379,7 @@ type InlineQueryResultMpeg4Gif struct {
 	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
 	// Optional. Video height
 	Mpeg4Height int64 `json:"mpeg4_height,omitempty"`
-	// Optional. Video duration
+	// Optional. Video duration in seconds
 	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbUrl string `json:"thumb_url,omitempty"`
@@ -2450,7 +2450,7 @@ func (v InlineQueryResultMpeg4Gif) inlineQueryResult() {}
 type InlineQueryResultPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id,omitempty"`
-	// A valid URL of the photo. Photo must be in jpeg format. Photo size must not exceed 5MB
+	// A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
 	PhotoUrl string `json:"photo_url,omitempty"`
 	// URL of the thumbnail for the photo
 	ThumbUrl string `json:"thumb_url,omitempty"`
@@ -2609,7 +2609,7 @@ type InlineQueryResultVideo struct {
 	VideoUrl string `json:"video_url,omitempty"`
 	// Mime type of the content of video url, "text/html" or "video/mp4"
 	MimeType string `json:"mime_type,omitempty"`
-	// URL of the thumbnail (jpeg only) for the video
+	// URL of the thumbnail (JPEG only) for the video
 	ThumbUrl string `json:"thumb_url,omitempty"`
 	// Title for the result
 	Title string `json:"title,omitempty"`
@@ -2869,7 +2869,7 @@ type MergedInputMedia struct {
 	Width int64 `json:"width,omitempty"`
 	// Optional. Animation height (Only for animation, video)
 	Height int64 `json:"height,omitempty"`
-	// Optional. Animation duration (Only for animation, audio, video)
+	// Optional. Animation duration in seconds (Only for animation, audio, video)
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album. (Only for document)
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
@@ -2916,7 +2916,7 @@ type InputMediaAnimation struct {
 	Width int64 `json:"width,omitempty"`
 	// Optional. Animation height
 	Height int64 `json:"height,omitempty"`
-	// Optional. Animation duration
+	// Optional. Animation duration in seconds
 	Duration int64 `json:"duration,omitempty"`
 }
 
@@ -3234,7 +3234,7 @@ type InputMediaVideo struct {
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height
 	Height int64 `json:"height,omitempty"`
-	// Optional. Video duration
+	// Optional. Video duration in seconds
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Pass True, if the uploaded video is suitable for streaming
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
@@ -4155,7 +4155,7 @@ type PassportFile struct {
 	FileId string `json:"file_id,omitempty"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id,omitempty"`
-	// File size
+	// File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 	// Unix time when the file was uploaded
 	FileDate int64 `json:"file_date,omitempty"`
@@ -4172,7 +4172,7 @@ type PhotoSize struct {
 	Width int64 `json:"width,omitempty"`
 	// Photo height
 	Height int64 `json:"height,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -4358,7 +4358,7 @@ type Sticker struct {
 	SetName string `json:"set_name,omitempty"`
 	// Optional. For mask stickers, the position where the mask should be placed
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -4501,7 +4501,7 @@ type Video struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. Mime type of a file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -4518,7 +4518,7 @@ type VideoNote struct {
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Video thumbnail
 	Thumb *PhotoSize `json:"thumb,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -4533,14 +4533,14 @@ type Voice struct {
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size
+	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
 // VoiceChatEnded This object represents a service message about a voice chat ended in the chat.
 // https://core.telegram.org/bots/api#voicechatended
 type VoiceChatEnded struct {
-	// Voice chat duration; in seconds
+	// Voice chat duration in seconds
 	Duration int64 `json:"duration,omitempty"`
 }
 

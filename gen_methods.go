@@ -139,7 +139,7 @@ type AnswerInlineQueryOpts struct {
 	NextOffset string
 	// If passed, clients will display a button with specified text that switches the user to a private chat with the bot and sends the bot a start message with the parameter switch_pm_parameter
 	SwitchPmText string
-	// Deep-linking parameter for the /start message sent to the bot when user presses the switch button. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed. Example: An inline bot that sends YouTube videos can ask the user to connect the bot to their YouTube account to adapt search results accordingly. To do this, it displays a 'Connect your YouTube account' button above the results, or even before showing any. The user presses the button, switches to a private chat with the bot and, in doing so, passes a start parameter that instructs the bot to return an oauth link. Once done, the bot can offer a switch_inline button so that the user can easily return to the chat where they wanted to use the bot's inline capabilities.
+	// Deep-linking parameter for the /start message sent to the bot when user presses the switch button. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed. Example: An inline bot that sends YouTube videos can ask the user to connect the bot to their YouTube account to adapt search results accordingly. To do this, it displays a 'Connect your YouTube account' button above the results, or even before showing any. The user presses the button, switches to a private chat with the bot and, in doing so, passes a start parameter that instructs the bot to return an OAuth link. Once done, the bot can offer a switch_inline button so that the user can easily return to the chat where they wanted to use the bot's inline capabilities.
 	SwitchPmParameter string
 }
 
@@ -299,7 +299,7 @@ type CopyMessageOpts struct {
 	Caption string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the new caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -659,7 +659,7 @@ type EditMessageCaptionOpts struct {
 	Caption string
 	// Mode for parsing entities in the message caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// A JSON-serialized object for an inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
@@ -779,7 +779,7 @@ type EditMessageMediaOpts struct {
 	ReplyMarkup InlineKeyboardMarkup
 }
 
-// EditMessageMedia Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded. Use a previously uploaded file via its file_id or specify a URL. On success, if the edited message was sent by the bot, the edited Message is returned, otherwise True is returned.
+// EditMessageMedia Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - media (type InputMedia): A JSON-serialized object for a new media content of the message
 // - opts (type EditMessageMediaOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagemedia
@@ -866,7 +866,7 @@ type EditMessageTextOpts struct {
 	InlineMessageId string
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in message text, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
 	Entities []MessageEntity
 	// Disables link previews for links in this message
 	DisableWebPagePreview bool
@@ -1097,7 +1097,7 @@ func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]
 	return g, json.Unmarshal(r, &g)
 }
 
-// GetMe A simple method for testing your bot's auth token. Requires no parameters. Returns basic information about the bot in form of a User object.
+// GetMe A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
 // https://core.telegram.org/bots/api#getme
 func (bot *Bot) GetMe() (*User, error) {
 	v := urlLib.Values{}
@@ -1452,7 +1452,7 @@ type SendAnimationOpts struct {
 	Caption string
 	// Mode for parsing entities in the animation caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -1565,7 +1565,7 @@ type SendAudioOpts struct {
 	Caption string
 	// Mode for parsing entities in the audio caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Duration of the audio in seconds
 	Duration int64
@@ -1809,7 +1809,7 @@ type SendDocumentOpts struct {
 	Caption string
 	// Mode for parsing entities in the document caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Disables automatic server-side content type detection for files uploaded using multipart/form-data
 	DisableContentTypeDetection bool
@@ -2205,7 +2205,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 type SendMessageOpts struct {
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in message text, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
 	Entities []MessageEntity
 	// Disables link previews for links in this message
 	DisableWebPagePreview bool
@@ -2269,7 +2269,7 @@ type SendPhotoOpts struct {
 	Caption string
 	// Mode for parsing entities in the photo caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -2360,7 +2360,7 @@ type SendPollOpts struct {
 	Explanation string
 	// Mode for parsing entities in the explanation. See formatting options for more details.
 	ExplanationParseMode string
-	// List of special entities that appear in the poll explanation, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the poll explanation, which can be specified instead of parse_mode
 	ExplanationEntities []MessageEntity
 	// Amount of time in seconds the poll will be active after creation, 5-600. Can't be used together with close_date.
 	OpenPeriod int64
@@ -2594,7 +2594,7 @@ type SendVideoOpts struct {
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Pass True, if the uploaded video is suitable for streaming
 	SupportsStreaming bool
@@ -2811,7 +2811,7 @@ type SendVoiceOpts struct {
 	Caption string
 	// Mode for parsing entities in the voice message caption. See formatting options for more details.
 	ParseMode string
-	// List of special entities that appear in the caption, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
 	// Duration of the voice message in seconds
 	Duration int64
@@ -2947,7 +2947,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 
 // SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members admin rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - permissions (type ChatPermissions): New default chat permissions
+// - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
 	v := urlLib.Values{}
@@ -3061,7 +3061,7 @@ type SetGameScoreOpts struct {
 	InlineMessageId string
 }
 
-// SetGameScore Use this method to set the score of the specified user in a game. On success, if the message was sent by the bot, returns the edited Message, otherwise returns True. Returns an error, if the new score is not greater than the user's current score in the chat and force is False.
+// SetGameScore Use this method to set the score of the specified user in a game message. On success, if the message is not an inline message, the Message is returned, otherwise True is returned. Returns an error, if the new score is not greater than the user's current score in the chat and force is False.
 // - user_id (type int64): User identifier
 // - score (type int64): New score, must be non-negative
 // - opts (type SetGameScoreOpts): All optional parameters.
@@ -3309,7 +3309,7 @@ type StopMessageLiveLocationOpts struct {
 	ReplyMarkup InlineKeyboardMarkup
 }
 
-// StopMessageLiveLocation Use this method to stop updating a live location message before live_period expires. On success, if the message was sent by the bot, the sent Message is returned, otherwise True is returned.
+// StopMessageLiveLocation Use this method to stop updating a live location message before live_period expires. On success, if the message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type StopMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stopmessagelivelocation
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, error) {
@@ -3344,7 +3344,7 @@ type StopPollOpts struct {
 	ReplyMarkup InlineKeyboardMarkup
 }
 
-// StopPoll Use this method to stop a poll which was sent by the bot. On success, the stopped Poll with the final results is returned.
+// StopPoll Use this method to stop a poll which was sent by the bot. On success, the stopped Poll is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of the original message with the poll
 // - opts (type StopPollOpts): All optional parameters.
