@@ -96,7 +96,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 type AnswerCallbackQueryOpts struct {
 	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
 	Text string
-	// If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
+	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
 	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @Botfather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
 	Url string
@@ -242,6 +242,28 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 	return b, json.Unmarshal(r, &b)
 }
 
+// ApproveChatJoinRequest Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - user_id (type int64): Unique identifier of the target user
+// https://core.telegram.org/bots/api#approvechatjoinrequest
+func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64) (bool, error) {
+	v := urlLib.Values{}
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
+
+	r, err := bot.Get("approveChatJoinRequest", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // BanChatMemberOpts is the set of optional fields for Bot.BanChatMember.
 type BanChatMemberOpts struct {
 	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
@@ -250,7 +272,7 @@ type BanChatMemberOpts struct {
 	RevokeMessages bool
 }
 
-// BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type BanChatMemberOpts): All optional parameters.
@@ -363,13 +385,17 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 
 // CreateChatInviteLinkOpts is the set of optional fields for Bot.CreateChatInviteLink.
 type CreateChatInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
 	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	CreatesJoinRequest bool
 }
 
-// CreateChatInviteLink Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
+// CreateChatInviteLink Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type CreateChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createchatinvitelink
@@ -379,12 +405,14 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 		v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	}
 	if opts != nil {
+		v.Add("name", opts.Name)
 		if opts.ExpireDate != 0 {
 			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
 		}
 		if opts.MemberLimit != 0 {
 			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
 		}
+		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
 	}
 
 	r, err := bot.Get("createChatInviteLink", v)
@@ -481,7 +509,29 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 	return b, json.Unmarshal(r, &b)
 }
 
-// DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// DeclineChatJoinRequest Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - user_id (type int64): Unique identifier of the target user
+// https://core.telegram.org/bots/api#declinechatjoinrequest
+func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64) (bool, error) {
+	v := urlLib.Values{}
+	if chatId != 0 {
+		v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	}
+	if userId != 0 {
+		v.Add("user_id", strconv.FormatInt(userId, 10))
+	}
+
+	r, err := bot.Get("declineChatJoinRequest", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
@@ -499,7 +549,7 @@ func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
-// DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
+// DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
@@ -612,13 +662,17 @@ func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
 
 // EditChatInviteLinkOpts is the set of optional fields for Bot.EditChatInviteLink.
 type EditChatInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
 	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	CreatesJoinRequest bool
 }
 
-// EditChatInviteLink Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the edited invite link as a ChatInviteLink object.
+// EditChatInviteLink Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the edited invite link as a ChatInviteLink object.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - invite_link (type string): The invite link to edit
 // - opts (type EditChatInviteLinkOpts): All optional parameters.
@@ -630,12 +684,14 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 	}
 	v.Add("invite_link", inviteLink)
 	if opts != nil {
+		v.Add("name", opts.Name)
 		if opts.ExpireDate != 0 {
 			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
 		}
 		if opts.MemberLimit != 0 {
 			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
 		}
+		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
 	}
 
 	r, err := bot.Get("editChatInviteLink", v)
@@ -914,7 +970,7 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 	return &m, json.Unmarshal(r, &m)
 }
 
-// ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the new invite link as String on success.
+// ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
@@ -1290,7 +1346,7 @@ type PinChatMessageOpts struct {
 	DisableNotification bool
 }
 
-// PinChatMessage Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// PinChatMessage Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of a message to pin
 // - opts (type PinChatMessageOpts): All optional parameters.
@@ -1342,7 +1398,7 @@ type PromoteChatMemberOpts struct {
 	CanPinMessages bool
 }
 
-// PromoteChatMember Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Pass False for all boolean parameters to demote a user. Returns True on success.
+// PromoteChatMember Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Pass False for all boolean parameters to demote a user. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type PromoteChatMemberOpts): All optional parameters.
@@ -1384,7 +1440,7 @@ type RestrictChatMemberOpts struct {
 	UntilDate int64
 }
 
-// RestrictChatMember Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate admin rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
+// RestrictChatMember Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate administrator rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - user_id (type int64): Unique identifier of the target user
 // - permissions (type ChatPermissions): A JSON-serialized object for new user permissions
@@ -1418,7 +1474,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 	return b, json.Unmarshal(r, &b)
 }
 
-// RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the revoked invite link as ChatInviteLink object.
+// RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as ChatInviteLink object.
 // - chat_id (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
 // - invite_link (type string): The invite link to revoke
 // https://core.telegram.org/bots/api#revokechatinvitelink
@@ -1680,7 +1736,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 // SendChatAction Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, find_location for location data, record_video_note or upload_video_note for video notes.
+// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
 	v := urlLib.Values{}
@@ -2923,7 +2979,7 @@ type SetChatDescriptionOpts struct {
 	Description string
 }
 
-// SetChatDescription Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatDescription Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type SetChatDescriptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatdescription
@@ -2945,7 +3001,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members admin rights. Returns True on success.
+// SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
 // https://core.telegram.org/bots/api#setchatpermissions
@@ -2969,7 +3025,7 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (b
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - photo (type InputFile): New chat photo, uploaded using multipart/form-data
 // https://core.telegram.org/bots/api#setchatphoto
@@ -3007,7 +3063,7 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
+// SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - sticker_set_name (type string): Name of the sticker set to be set as the group sticker set
 // https://core.telegram.org/bots/api#setchatstickerset
@@ -3027,7 +3083,7 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, er
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - title (type string): New chat title, 1-255 characters
 // https://core.telegram.org/bots/api#setchattitle
@@ -3406,7 +3462,7 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 	return b, json.Unmarshal(r, &b)
 }
 
-// UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
@@ -3430,7 +3486,7 @@ type UnpinChatMessageOpts struct {
 	MessageId int64
 }
 
-// UnpinChatMessage Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// UnpinChatMessage Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type UnpinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinchatmessage

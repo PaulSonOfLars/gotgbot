@@ -23,6 +23,11 @@ func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
 }
 
+// ApproveJoinRequest Helper method for Bot.ApproveChatJoinRequest
+func (c Chat) ApproveJoinRequest(b *Bot, userId int64) (bool, error) {
+	return b.ApproveChatJoinRequest(c.Id, userId)
+}
+
 // BanMember Helper method for Bot.BanChatMember
 func (c Chat) BanMember(b *Bot, userId int64, opts *BanChatMemberOpts) (bool, error) {
 	return b.BanChatMember(c.Id, userId, opts)
@@ -36,6 +41,11 @@ func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, 
 // CreateInviteLink Helper method for Bot.CreateChatInviteLink
 func (c Chat) CreateInviteLink(b *Bot, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	return b.CreateChatInviteLink(c.Id, opts)
+}
+
+// DeclineJoinRequest Helper method for Bot.DeclineChatJoinRequest
+func (c Chat) DeclineJoinRequest(b *Bot, userId int64) (bool, error) {
+	return b.DeclineChatJoinRequest(c.Id, userId)
 }
 
 // DeletePhoto Helper method for Bot.DeleteChatPhoto
