@@ -203,7 +203,7 @@ func generateValue(d APIDescription, f Field, goParam string, defaultRetVal stri
 	stringer := goTypeStringer(fieldType)
 	if stringer != "" {
 		addParam := fmt.Sprintf(`v.Add("%s", %s)`, f.Name, fmt.Sprintf(stringer, goParam))
-		if fieldType == "int64" || fieldType == "float64" {
+		if !f.Required && (fieldType == "int64" || fieldType == "float64") {
 			// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
 			// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
 			// To avoid this, we want to make sure not to add default integers or floats to requests.
