@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"go/format"
-	"io"
 	"os"
 	"sort"
 	"strings"
@@ -169,12 +167,7 @@ const (
 	tgTypeReplyMarkup = "ReplyMarkup"
 )
 
-func generate(api io.Reader) error {
-	var d APIDescription
-	if err := json.NewDecoder(api).Decode(&d); err != nil {
-		return fmt.Errorf("failed to decode API JSON: %w", err)
-	}
-
+func generate(d APIDescription) error {
 	// TODO: Use golang templates instead of string builders
 	if err := generateTypes(d); err != nil {
 		return fmt.Errorf("failed to generate types: %w", err)

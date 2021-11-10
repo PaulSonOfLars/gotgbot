@@ -1,23 +1,29 @@
 # Golang Telegram Bot library
 
-Heavily inspired by the [python-telegram-bot library](https://github.com/python-telegram-bot/python-telegram-bot),
-this package is a code-generated wrapper for the telegram bot api. We also provide an extensions package which 
-defines an updater/dispatcher pattern to avoid having to rewrite update processing.
+Heavily inspired by the [python-telegram-bot library](https://github.com/python-telegram-bot/python-telegram-bot), this
+package is a code-generated wrapper for the telegram bot api. We also provide an extensions package which defines an
+updater/dispatcher pattern to avoid having to rewrite update processing.
 
-All the telegram types and methods are present in the `gen_*.go` files. These are all generated from 
-[a bot api spec](https://github.com/PaulSonOfLars/telegram-bot-api-spec) and can be recreated by running `go generate` 
-in the repo root. This makes it extremely easy to update the library; simply download the latest spec, and regenerate.
+All the telegram types and methods are generated from
+[a bot api spec](https://github.com/PaulSonOfLars/telegram-bot-api-spec). These are generated in the `gen_*.go` files.
+You can generate these by running `go generate`.
+
+To allow for reproducible CI builds, we pin the latest spec commit in the `spec_commit` file. This is used by default
+when running `go generate`. To update the `spec_commit`, run `GOTGBOT_UPGRADE=true go generate` - this will fetch the
+latest commit sha and regenerate the library against that.
 
 If you have any questions, come find us in our [telegram support chat](https://t.me/GotgbotChat)!
 
 ## Features:
+
 - All telegram API types and methods are generated from the bot api docs, which makes this library:
     - Guaranteed to match the docs
     - Easy to update
-    - Self-documenting (Can simply reuse pre-existing telegram docs)
-- Type safe; no weird interface{} logic.
+    - Self-documenting (Re-uses pre-existing telegram docs)
+- Type safe; no weird interface{} logic, all types match the bot API docs.
 - No third party library bloat; only uses standard library.
-- Updates are each processed in their own go routine, encouraging concurrent processing, and keeping your bot responsive.
+- Updates are each processed in their own go routine, encouraging concurrent processing, and keeping your bot
+  responsive.
 - Code panics automatically recovered from and logged, avoiding unexpected downtime.
 
 ## Getting started
