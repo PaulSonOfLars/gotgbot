@@ -22,7 +22,7 @@ jobs:
           skip-build-cache: true
           skip-pkg-cache: true
   generate_code:
-    name: lint
+    name: Check generated code diff
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
