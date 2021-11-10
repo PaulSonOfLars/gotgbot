@@ -31,9 +31,7 @@ type AddStickerToSetOpts struct {
 func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *AddStickerToSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("name", name)
 	v.Add("emojis", emojis)
 	if opts != nil {
@@ -96,7 +94,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 type AnswerCallbackQueryOpts struct {
 	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
 	Text string
-	// If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
+	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
 	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @Botfather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
 	Url string
@@ -242,6 +240,24 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 	return b, json.Unmarshal(r, &b)
 }
 
+// ApproveChatJoinRequest Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - user_id (type int64): Unique identifier of the target user
+// https://core.telegram.org/bots/api#approvechatjoinrequest
+func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64) (bool, error) {
+	v := urlLib.Values{}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
+
+	r, err := bot.Get("approveChatJoinRequest", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // BanChatMemberOpts is the set of optional fields for Bot.BanChatMember.
 type BanChatMemberOpts struct {
 	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
@@ -250,19 +266,15 @@ type BanChatMemberOpts struct {
 	RevokeMessages bool
 }
 
-// BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type BanChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#banchatmember
 func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		if opts.UntilDate != 0 {
 			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
@@ -319,15 +331,9 @@ type CopyMessageOpts struct {
 // https://core.telegram.org/bots/api#copymessage
 func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if fromChatId != 0 {
-		v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	}
-	if messageId != 0 {
-		v.Add("message_id", strconv.FormatInt(messageId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
+	v.Add("message_id", strconv.FormatInt(messageId, 10))
 	if opts != nil {
 		v.Add("caption", opts.Caption)
 		v.Add("parse_mode", opts.ParseMode)
@@ -363,28 +369,32 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 
 // CreateChatInviteLinkOpts is the set of optional fields for Bot.CreateChatInviteLink.
 type CreateChatInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
 	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	CreatesJoinRequest bool
 }
 
-// CreateChatInviteLink Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
+// CreateChatInviteLink Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type CreateChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createchatinvitelink
 func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if opts != nil {
+		v.Add("name", opts.Name)
 		if opts.ExpireDate != 0 {
 			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
 		}
 		if opts.MemberLimit != 0 {
 			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
 		}
+		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
 	}
 
 	r, err := bot.Get("createChatInviteLink", v)
@@ -418,9 +428,7 @@ type CreateNewStickerSetOpts struct {
 func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("name", name)
 	v.Add("title", title)
 	v.Add("emojis", emojis)
@@ -481,14 +489,30 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 	return b, json.Unmarshal(r, &b)
 }
 
-// DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// DeclineChatJoinRequest Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
+// - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - user_id (type int64): Unique identifier of the target user
+// https://core.telegram.org/bots/api#declinechatjoinrequest
+func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64) (bool, error) {
+	v := urlLib.Values{}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
+
+	r, err := bot.Get("declineChatJoinRequest", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("deleteChatPhoto", v)
 	if err != nil {
@@ -499,14 +523,12 @@ func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
-// DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
+// DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("deleteChatStickerSet", v)
 	if err != nil {
@@ -523,12 +545,8 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 // https://core.telegram.org/bots/api#deletemessage
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if messageId != 0 {
-		v.Add("message_id", strconv.FormatInt(messageId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("message_id", strconv.FormatInt(messageId, 10))
 
 	r, err := bot.Get("deleteMessage", v)
 	if err != nil {
@@ -612,30 +630,34 @@ func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
 
 // EditChatInviteLinkOpts is the set of optional fields for Bot.EditChatInviteLink.
 type EditChatInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
 	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	CreatesJoinRequest bool
 }
 
-// EditChatInviteLink Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the edited invite link as a ChatInviteLink object.
+// EditChatInviteLink Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the edited invite link as a ChatInviteLink object.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - invite_link (type string): The invite link to edit
 // - opts (type EditChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editchatinvitelink
 func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("invite_link", inviteLink)
 	if opts != nil {
+		v.Add("name", opts.Name)
 		if opts.ExpireDate != 0 {
 			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
 		}
 		if opts.MemberLimit != 0 {
 			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
 		}
+		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
 	}
 
 	r, err := bot.Get("editChatInviteLink", v)
@@ -728,12 +750,8 @@ type EditMessageLiveLocationOpts struct {
 // https://core.telegram.org/bots/api#editmessagelivelocation
 func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if latitude != 0.0 {
-		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	}
-	if longitude != 0.0 {
-		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	}
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
 	if opts != nil {
 		if opts.ChatId != 0 {
 			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
@@ -914,14 +932,12 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 	return &m, json.Unmarshal(r, &m)
 }
 
-// ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the new invite link as String on success.
+// ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("exportChatInviteLink", v)
 	if err != nil {
@@ -946,15 +962,9 @@ type ForwardMessageOpts struct {
 // https://core.telegram.org/bots/api#forwardmessage
 func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if fromChatId != 0 {
-		v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	}
-	if messageId != 0 {
-		v.Add("message_id", strconv.FormatInt(messageId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
+	v.Add("message_id", strconv.FormatInt(messageId, 10))
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	}
@@ -973,9 +983,7 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 // https://core.telegram.org/bots/api#getchat
 func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("getChat", v)
 	if err != nil {
@@ -991,9 +999,7 @@ func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("getChatAdministrators", v)
 	if err != nil {
@@ -1009,12 +1015,8 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // https://core.telegram.org/bots/api#getchatmember
 func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 
 	r, err := bot.Get("getChatMember", v)
 	if err != nil {
@@ -1029,9 +1031,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 // https://core.telegram.org/bots/api#getchatmembercount
 func (bot *Bot) GetChatMemberCount(chatId int64) (int64, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("getChatMemberCount", v)
 	if err != nil {
@@ -1075,9 +1075,7 @@ type GetGameHighScoresOpts struct {
 // https://core.telegram.org/bots/api#getgamehighscores
 func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]GameHighScore, error) {
 	v := urlLib.Values{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		if opts.ChatId != 0 {
 			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
@@ -1217,9 +1215,7 @@ type GetUserProfilePhotosOpts struct {
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	v := urlLib.Values{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		if opts.Offset != 0 {
 			v.Add("offset", strconv.FormatInt(opts.Offset, 10))
@@ -1257,9 +1253,7 @@ func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 // https://core.telegram.org/bots/api#leavechat
 func (bot *Bot) LeaveChat(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("leaveChat", v)
 	if err != nil {
@@ -1290,19 +1284,15 @@ type PinChatMessageOpts struct {
 	DisableNotification bool
 }
 
-// PinChatMessage Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// PinChatMessage Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of a message to pin
 // - opts (type PinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#pinchatmessage
 func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if messageId != 0 {
-		v.Add("message_id", strconv.FormatInt(messageId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("message_id", strconv.FormatInt(messageId, 10))
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
 	}
@@ -1342,19 +1332,15 @@ type PromoteChatMemberOpts struct {
 	CanPinMessages bool
 }
 
-// PromoteChatMember Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Pass False for all boolean parameters to demote a user. Returns True on success.
+// PromoteChatMember Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Pass False for all boolean parameters to demote a user. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type PromoteChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#promotechatmember
 func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
 		v.Add("can_manage_chat", strconv.FormatBool(opts.CanManageChat))
@@ -1384,7 +1370,7 @@ type RestrictChatMemberOpts struct {
 	UntilDate int64
 }
 
-// RestrictChatMember Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate admin rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
+// RestrictChatMember Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate administrator rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - user_id (type int64): Unique identifier of the target user
 // - permissions (type ChatPermissions): A JSON-serialized object for new user permissions
@@ -1392,12 +1378,8 @@ type RestrictChatMemberOpts struct {
 // https://core.telegram.org/bots/api#restrictchatmember
 func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
@@ -1418,15 +1400,13 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 	return b, json.Unmarshal(r, &b)
 }
 
-// RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns the revoked invite link as ChatInviteLink object.
+// RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as ChatInviteLink object.
 // - chat_id (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
 // - invite_link (type string): The invite link to revoke
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string) (*ChatInviteLink, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("invite_link", inviteLink)
 
 	r, err := bot.Get("revokeChatInviteLink", v)
@@ -1472,9 +1452,7 @@ type SendAnimationOpts struct {
 func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if animation != nil {
 		switch m := animation.(type) {
 		case string:
@@ -1594,9 +1572,7 @@ type SendAudioOpts struct {
 func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if audio != nil {
 		switch m := audio.(type) {
 		case string:
@@ -1680,13 +1656,11 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 // SendChatAction Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, find_location for location data, record_video_note or upload_video_note for video notes.
+// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("action", action)
 
 	r, err := bot.Get("sendChatAction", v)
@@ -1722,9 +1696,7 @@ type SendContactOpts struct {
 // https://core.telegram.org/bots/api#sendcontact
 func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("phone_number", phoneNumber)
 	v.Add("first_name", firstName)
 	if opts != nil {
@@ -1773,9 +1745,7 @@ type SendDiceOpts struct {
 // https://core.telegram.org/bots/api#senddice
 func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if opts != nil {
 		v.Add("emoji", opts.Emoji)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
@@ -1831,9 +1801,7 @@ type SendDocumentOpts struct {
 func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumentOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if document != nil {
 		switch m := document.(type) {
 		case string:
@@ -1929,9 +1897,7 @@ type SendGameOpts struct {
 // https://core.telegram.org/bots/api#sendgame
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("game_short_name", gameShortName)
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
@@ -2009,9 +1975,7 @@ type SendInvoiceOpts struct {
 // https://core.telegram.org/bots/api#sendinvoice
 func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("title", title)
 	v.Add("description", description)
 	v.Add("payload", payload)
@@ -2103,15 +2067,9 @@ type SendLocationOpts struct {
 // https://core.telegram.org/bots/api#sendlocation
 func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if latitude != 0.0 {
-		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	}
-	if longitude != 0.0 {
-		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
 	if opts != nil {
 		if opts.HorizontalAccuracy != 0.0 {
 			v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
@@ -2166,9 +2124,7 @@ type SendMediaGroupOpts struct {
 func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
@@ -2226,9 +2182,7 @@ type SendMessageOpts struct {
 // https://core.telegram.org/bots/api#sendmessage
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("text", text)
 	if opts != nil {
 		v.Add("parse_mode", opts.ParseMode)
@@ -2289,9 +2243,7 @@ type SendPhotoOpts struct {
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if photo != nil {
 		switch m := photo.(type) {
 		case string:
@@ -2386,9 +2338,7 @@ type SendPollOpts struct {
 // https://core.telegram.org/bots/api#sendpoll
 func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *SendPollOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("question", question)
 	if options != nil {
 		bs, err := json.Marshal(options)
@@ -2463,9 +2413,7 @@ type SendStickerOpts struct {
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if sticker != nil {
 		switch m := sticker.(type) {
 		case string:
@@ -2541,15 +2489,9 @@ type SendVenueOpts struct {
 // https://core.telegram.org/bots/api#sendvenue
 func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if latitude != 0.0 {
-		v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	}
-	if longitude != 0.0 {
-		v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
+	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
 	v.Add("title", title)
 	v.Add("address", address)
 	if opts != nil {
@@ -2616,9 +2558,7 @@ type SendVideoOpts struct {
 func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if video != nil {
 		switch m := video.(type) {
 		case string:
@@ -2730,9 +2670,7 @@ type SendVideoNoteOpts struct {
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if videoNote != nil {
 		switch m := videoNote.(type) {
 		case string:
@@ -2833,9 +2771,7 @@ type SendVoiceOpts struct {
 func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if voice != nil {
 		switch m := voice.(type) {
 		case string:
@@ -2900,12 +2836,8 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("custom_title", customTitle)
 
 	r, err := bot.Get("setChatAdministratorCustomTitle", v)
@@ -2923,15 +2855,13 @@ type SetChatDescriptionOpts struct {
 	Description string
 }
 
-// SetChatDescription Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatDescription Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type SetChatDescriptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatdescription
 func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if opts != nil {
 		v.Add("description", opts.Description)
 	}
@@ -2945,15 +2875,13 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members admin rights. Returns True on success.
+// SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
@@ -2969,16 +2897,14 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (b
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - photo (type InputFile): New chat photo, uploaded using multipart/form-data
 // https://core.telegram.org/bots/api#setchatphoto
 func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if photo != nil {
 		switch m := photo.(type) {
 		case NamedReader:
@@ -3007,15 +2933,13 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
+// SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - sticker_set_name (type string): Name of the sticker set to be set as the group sticker set
 // https://core.telegram.org/bots/api#setchatstickerset
 func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("sticker_set_name", stickerSetName)
 
 	r, err := bot.Get("setChatStickerSet", v)
@@ -3027,15 +2951,13 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, er
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate admin rights. Returns True on success.
+// SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - title (type string): New chat title, 1-255 characters
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("title", title)
 
 	r, err := bot.Get("setChatTitle", v)
@@ -3068,12 +2990,8 @@ type SetGameScoreOpts struct {
 // https://core.telegram.org/bots/api#setgamescore
 func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, error) {
 	v := urlLib.Values{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
-	if score != 0 {
-		v.Add("score", strconv.FormatInt(score, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v.Add("score", strconv.FormatInt(score, 10))
 	if opts != nil {
 		v.Add("force", strconv.FormatBool(opts.Force))
 		v.Add("disable_edit_message", strconv.FormatBool(opts.DisableEditMessage))
@@ -3141,9 +3059,7 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError) (bool, error) {
 	v := urlLib.Values{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if errors != nil {
 		bs, err := json.Marshal(errors)
 		if err != nil {
@@ -3168,9 +3084,7 @@ func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementErro
 func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("sticker", sticker)
-	if position != 0 {
-		v.Add("position", strconv.FormatInt(position, 10))
-	}
+	v.Add("position", strconv.FormatInt(position, 10))
 
 	r, err := bot.Get("setStickerPositionInSet", v)
 	if err != nil {
@@ -3196,9 +3110,7 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	v.Add("name", name)
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
@@ -3351,12 +3263,8 @@ type StopPollOpts struct {
 // https://core.telegram.org/bots/api#stoppoll
 func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if messageId != 0 {
-		v.Add("message_id", strconv.FormatInt(messageId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("message_id", strconv.FormatInt(messageId, 10))
 	if opts != nil {
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
@@ -3387,12 +3295,8 @@ type UnbanChatMemberOpts struct {
 // https://core.telegram.org/bots/api#unbanchatmember
 func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if opts != nil {
 		v.Add("only_if_banned", strconv.FormatBool(opts.OnlyIfBanned))
 	}
@@ -3406,14 +3310,12 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 	return b, json.Unmarshal(r, &b)
 }
 
-// UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 
 	r, err := bot.Get("unpinAllChatMessages", v)
 	if err != nil {
@@ -3430,15 +3332,13 @@ type UnpinChatMessageOpts struct {
 	MessageId int64
 }
 
-// UnpinChatMessage Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' admin right in a supergroup or 'can_edit_messages' admin right in a channel. Returns True on success.
+// UnpinChatMessage Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - opts (type UnpinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
 	v := urlLib.Values{}
-	if chatId != 0 {
-		v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	}
+	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	if opts != nil {
 		if opts.MessageId != 0 {
 			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
@@ -3461,9 +3361,7 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
-	if userId != 0 {
-		v.Add("user_id", strconv.FormatInt(userId, 10))
-	}
+	v.Add("user_id", strconv.FormatInt(userId, 10))
 	if pngSticker != nil {
 		switch m := pngSticker.(type) {
 		case NamedReader:

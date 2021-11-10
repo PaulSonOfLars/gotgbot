@@ -396,7 +396,7 @@ type Chat struct {
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
 	// Optional. Default chat member permissions, for groups and supergroups. Returned only in getChat.
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
-	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unpriviledged user. Returned only in getChat.
+	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unpriviledged user; in seconds. Returned only in getChat.
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
 	// Optional. The time after which all messages sent to the chat will be automatically deleted; in seconds. Returned only in getChat.
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
@@ -417,14 +417,35 @@ type ChatInviteLink struct {
 	InviteLink string `json:"invite_link"`
 	// Creator of the link
 	Creator User `json:"creator"`
+	// True, if users joining the chat via the link need to be approved by chat administrators
+	CreatesJoinRequest bool `json:"creates_join_request"`
 	// True, if the link is primary
 	IsPrimary bool `json:"is_primary"`
 	// True, if the link is revoked
 	IsRevoked bool `json:"is_revoked"`
+	// Optional. Invite link name
+	Name string `json:"name,omitempty"`
 	// Optional. Point in time (Unix timestamp) when the link will expire or has been expired
 	ExpireDate int64 `json:"expire_date,omitempty"`
 	// Optional. Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64 `json:"member_limit,omitempty"`
+	// Optional. Number of pending join requests created using this link
+	PendingJoinRequestCount int64 `json:"pending_join_request_count,omitempty"`
+}
+
+// ChatJoinRequest Represents a join request sent to a chat.
+// https://core.telegram.org/bots/api#chatjoinrequest
+type ChatJoinRequest struct {
+	// Chat to which the request was sent
+	Chat Chat `json:"chat"`
+	// User that sent the join request
+	From User `json:"from"`
+	// Date the request was sent in Unix time
+	Date int64 `json:"date"`
+	// Optional. Bio of the user.
+	Bio string `json:"bio,omitempty"`
+	// Optional. Chat invite link that was used by the user to send the join request
+	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
 }
 
 // ChatLocation Represents a location to which a chat is connected.
@@ -2871,7 +2892,7 @@ type MergedInputMedia struct {
 	Height int64 `json:"height,omitempty"`
 	// Optional. Animation duration in seconds (Only for animation, audio, video)
 	Duration int64 `json:"duration,omitempty"`
-	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album. (Only for document)
+	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album. (Only for document)
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
 	// Optional. Performer of the audio (Only for audio)
 	Performer string `json:"performer,omitempty"`
@@ -3080,7 +3101,7 @@ type InputMediaDocument struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always true, if the document is sent as part of an album.
+	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album.
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
 }
 
@@ -3409,7 +3430,7 @@ type Location struct {
 	Latitude float64 `json:"latitude"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
-	// Optional. Time relative to the message sending date, during which the location can be updated, in seconds. For active live locations only.
+	// Optional. Time relative to the message sending date, during which the location can be updated; in seconds. For active live locations only.
 	LivePeriod int64 `json:"live_period,omitempty"`
 	// Optional. The direction in which user is moving, in degrees; 1-360. For active live locations only.
 	Heading int64 `json:"heading,omitempty"`
@@ -3564,7 +3585,7 @@ type Message struct {
 // MessageAutoDeleteTimerChanged This object represents a service message about a change in auto-delete timer settings.
 // https://core.telegram.org/bots/api#messageautodeletetimerchanged
 type MessageAutoDeleteTimerChanged struct {
-	// New auto-delete time for messages in the chat
+	// New auto-delete time for messages in the chat; in seconds
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time"`
 }
 
@@ -4429,6 +4450,8 @@ type Update struct {
 	MyChatMember *ChatMemberUpdated `json:"my_chat_member,omitempty"`
 	// Optional. A chat member's status was updated in a chat. The bot must be an administrator in the chat and must explicitly specify "chat_member" in the list of allowed_updates to receive these updates.
 	ChatMember *ChatMemberUpdated `json:"chat_member,omitempty"`
+	// Optional. A request to join the chat has been sent. The bot must have the can_invite_users administrator right in the chat to receive these updates.
+	ChatJoinRequest *ChatJoinRequest `json:"chat_join_request,omitempty"`
 }
 
 // User This object represents a Telegram user or bot.
