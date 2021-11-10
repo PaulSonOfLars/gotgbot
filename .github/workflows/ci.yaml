@@ -21,3 +21,15 @@ jobs:
           # skip cache to avoid flakes (and avoid using gh-action storage)
           skip-build-cache: true
           skip-pkg-cache: true
+  generate_code:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          version: latest
+      - name: Check if regenerating causes a diff
+        run: scripts/ci/generate.sh
