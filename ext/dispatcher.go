@@ -14,8 +14,11 @@ import (
 const DefaultMaxRoutines = 50
 
 type (
+	// DispatcherErrorHandler allows for handling the returned errors from matched handlers.
+	// It takes the non-nil error returned by the handler.
 	DispatcherErrorHandler func(b *gotgbot.Bot, ctx *Context, err error) DispatcherAction
-	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, stack []byte)
+	// DispatcherPanicHandler allows for handling goroutine panics, where the 'r' value contains the reason for the panic.
+	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, r interface{})
 )
 
 type DispatcherAction int64
@@ -193,10 +196,11 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 	defer func() {
 		if r := recover(); r != nil {
 			if d.Panic != nil {
-				d.Panic(b, ctx, debug.Stack())
+				d.Panic(b, ctx, r)
 				return
 			}
-
+			// Print reason for panic + stack for some sort of helpful log output
+			d.ErrorLog.Println(r)
 			d.ErrorLog.Println(string(debug.Stack()))
 		}
 	}()
