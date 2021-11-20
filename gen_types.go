@@ -1164,7 +1164,7 @@ type Game struct {
 	// Description of the game
 	Description string `json:"description"`
 	// Photo that will be displayed in the game message in chats.
-	Photo []PhotoSize `json:"photo"`
+	Photo []PhotoSize `json:"photo,omitempty"`
 	// Optional. Brief description of the game or high scores included in the game message. Can be automatically edited to include current high scores for the game when the bot calls setGameScore, or manually edited using editMessageText. 0-4096 characters.
 	Text string `json:"text,omitempty"`
 	// Optional. Special entities that appear in text, such as usernames, URLs, bot commands, etc.
@@ -1210,7 +1210,7 @@ type InlineKeyboardButton struct {
 // https://core.telegram.org/bots/api#inlinekeyboardmarkup
 type InlineKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of InlineKeyboardButton objects
-	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
 }
 
 // InlineKeyboardMarkup.replyMarkup is a dummy method to avoid interface implementation.
@@ -2801,7 +2801,7 @@ type InputInvoiceMessageContent struct {
 	// Three-letter ISO 4217 currency code, see more on currencies
 	Currency string `json:"currency"`
 	// Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
-	Prices []LabeledPrice `json:"prices"`
+	Prices []LabeledPrice `json:"prices,omitempty"`
 	// Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
 	MaxTipAmount int64 `json:"max_tip_amount,omitempty"`
 	// Optional. A JSON-serialized array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
@@ -3630,7 +3630,7 @@ type OrderInfo struct {
 // https://core.telegram.org/bots/api#passportdata
 type PassportData struct {
 	// Array with information about documents and other Telegram Passport elements that was shared with the bot
-	Data []EncryptedPassportElement `json:"data"`
+	Data []EncryptedPassportElement `json:"data,omitempty"`
 	// Encrypted credentials required to decrypt the data
 	Credentials EncryptedCredentials `json:"credentials"`
 }
@@ -3811,7 +3811,7 @@ type PassportElementErrorFiles struct {
 	// The section of the user's Telegram Passport which has the issue, one of "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type"`
 	// List of base64-encoded file hashes
-	FileHashes []string `json:"file_hashes"`
+	FileHashes []string `json:"file_hashes,omitempty"`
 	// Error message
 	Message string `json:"message"`
 }
@@ -4071,7 +4071,7 @@ type PassportElementErrorTranslationFiles struct {
 	// Type of element of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
 	Type string `json:"type"`
 	// List of base64-encoded file hashes
-	FileHashes []string `json:"file_hashes"`
+	FileHashes []string `json:"file_hashes,omitempty"`
 	// Error message
 	Message string `json:"message"`
 }
@@ -4205,7 +4205,7 @@ type Poll struct {
 	// Poll question, 1-300 characters
 	Question string `json:"question"`
 	// List of poll options
-	Options []PollOption `json:"options"`
+	Options []PollOption `json:"options,omitempty"`
 	// Total number of users that voted in the poll
 	TotalVoterCount int64 `json:"total_voter_count"`
 	// True, if the poll is closed
@@ -4236,7 +4236,7 @@ type PollAnswer struct {
 	// The user, who changed the answer to the poll
 	User User `json:"user"`
 	// 0-based identifiers of answer options, chosen by the user. May be empty if the user retracted their vote.
-	OptionIds []int64 `json:"option_ids"`
+	OptionIds []int64 `json:"option_ids,omitempty"`
 }
 
 // PollOption This object contains information about one answer option in a poll.
@@ -4282,7 +4282,7 @@ type ProximityAlertTriggered struct {
 // https://core.telegram.org/bots/api#replykeyboardmarkup
 type ReplyKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of KeyboardButton objects
-	Keyboard [][]KeyboardButton `json:"keyboard"`
+	Keyboard [][]KeyboardButton `json:"keyboard,omitempty"`
 	// Optional. Requests clients to resize the keyboard vertically for optimal fit (e.g., make the keyboard smaller if there are just two rows of buttons). Defaults to false, in which case the custom keyboard is always of the same height as the app's standard keyboard.
 	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
 	// Optional. Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat - the user can press a special button in the input field to see the custom keyboard again. Defaults to false.
@@ -4342,7 +4342,7 @@ type ShippingOption struct {
 	// Option title
 	Title string `json:"title"`
 	// List of price portions
-	Prices []LabeledPrice `json:"prices"`
+	Prices []LabeledPrice `json:"prices,omitempty"`
 }
 
 // ShippingQuery This object contains information about an incoming shipping query.
@@ -4395,7 +4395,7 @@ type StickerSet struct {
 	// True, if the sticker set contains masks
 	ContainsMasks bool `json:"contains_masks"`
 	// List of all set stickers
-	Stickers []Sticker `json:"stickers"`
+	Stickers []Sticker `json:"stickers,omitempty"`
 	// Optional. Sticker set thumbnail in the .WEBP or .TGS format
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 }
@@ -4483,7 +4483,7 @@ type UserProfilePhotos struct {
 	// Total number of profile pictures the target user has
 	TotalCount int64 `json:"total_count"`
 	// Requested profile pictures (in up to 4 sizes each)
-	Photos [][]PhotoSize `json:"photos"`
+	Photos [][]PhotoSize `json:"photos,omitempty"`
 }
 
 // Venue This object represents a venue.
