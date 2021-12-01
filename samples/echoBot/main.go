@@ -136,7 +136,9 @@ func start(b *gotgbot.Bot, ctx *ext.Context) error {
 func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	_, err := cb.Answer(b, nil)
+	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+		Text:      "You pressed a button!",
+	})
 	if err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
