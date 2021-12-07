@@ -388,6 +388,8 @@ type Chat struct {
 	Photo *ChatPhoto `json:"photo,omitempty"`
 	// Optional. Bio of the other party in a private chat. Returned only in getChat.
 	Bio string `json:"bio,omitempty"`
+	// Optional. True, if privacy settings of the other party in the private chat allows to use tg://user?id=<user_id> links only in chats with the user. Returned only in getChat.
+	HasPrivateForwards bool `json:"has_private_forwards,omitempty"`
 	// Optional. Description, for groups, supergroups and channel chats. Returned only in getChat.
 	Description string `json:"description,omitempty"`
 	// Optional. Primary invite link, for groups, supergroups and channel chats. Returned only in getChat.
@@ -400,6 +402,8 @@ type Chat struct {
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
 	// Optional. The time after which all messages sent to the chat will be automatically deleted; in seconds. Returned only in getChat.
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
+	// Optional. True, if messages from the chat can't be forwarded to other chats. Returned only in getChat.
+	HasProtectedContent bool `json:"has_protected_content,omitempty"`
 	// Optional. For supergroups, name of group sticker set. Returned only in getChat.
 	StickerSetName string `json:"sticker_set_name,omitempty"`
 	// Optional. True, if the bot can change the group sticker set. Returned only in getChat.
@@ -1189,7 +1193,7 @@ type GameHighScore struct {
 type InlineKeyboardButton struct {
 	// Label text on the button
 	Text string `json:"text"`
-	// Optional. HTTP or tg:// url to be opened when button is pressed
+	// Optional. HTTP or tg:// url to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
 	// Optional. An HTTP URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
 	LoginUrl *LoginUrl `json:"login_url,omitempty"`
@@ -1201,7 +1205,7 @@ type InlineKeyboardButton struct {
 	SwitchInlineQueryCurrentChat *string `json:"switch_inline_query_current_chat,omitempty"`
 	// Optional. Description of the game that will be launched when the user presses the button. NOTE: This type of button must always be the first button in the first row.
 	CallbackGame *CallbackGame `json:"callback_game,omitempty"`
-	// Optional. Specify True, to send a Pay button. NOTE: This type of button must always be the first button in the first row.
+	// Optional. Specify True, to send a Pay button. NOTE: This type of button must always be the first button in the first row and can only be used in invoice messages.
 	Pay bool `json:"pay,omitempty"`
 }
 
@@ -3490,12 +3494,16 @@ type Message struct {
 	ForwardSenderName string `json:"forward_sender_name,omitempty"`
 	// Optional. For forwarded messages, date the original message was sent in Unix time
 	ForwardDate int64 `json:"forward_date,omitempty"`
+	// Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
+	IsAutomaticForward bool `json:"is_automatic_forward,omitempty"`
 	// Optional. For replies, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
 	ReplyToMessage *Message `json:"reply_to_message,omitempty"`
 	// Optional. Bot through which the message was sent
 	ViaBot *User `json:"via_bot,omitempty"`
 	// Optional. Date the message was last edited in Unix time
 	EditDate int64 `json:"edit_date,omitempty"`
+	// Optional. True, if the message can't be forwarded
+	HasProtectedContent bool `json:"has_protected_content,omitempty"`
 	// Optional. The unique identifier of a media message group this message belongs to
 	MediaGroupId string `json:"media_group_id,omitempty"`
 	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator

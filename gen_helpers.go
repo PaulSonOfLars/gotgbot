@@ -33,6 +33,11 @@ func (c Chat) BanMember(b *Bot, userId int64, opts *BanChatMemberOpts) (bool, er
 	return b.BanChatMember(c.Id, userId, opts)
 }
 
+// BanSenderChat Helper method for Bot.BanChatSenderChat
+func (c Chat) BanSenderChat(b *Bot, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
+	return b.BanChatSenderChat(c.Id, senderChatId, opts)
+}
+
 // Copy Helper method for Bot.CopyMessage
 func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
@@ -272,6 +277,11 @@ func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*M
 // UnbanMember Helper method for Bot.UnbanChatMember
 func (c Chat) UnbanMember(b *Bot, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	return b.UnbanChatMember(c.Id, userId, opts)
+}
+
+// UnbanSenderChat Helper method for Bot.UnbanChatSenderChat
+func (c Chat) UnbanSenderChat(b *Bot, senderChatId int64) (bool, error) {
+	return b.UnbanChatSenderChat(c.Id, senderChatId)
 }
 
 // UnpinAllMessages Helper method for Bot.UnpinAllChatMessages

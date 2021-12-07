@@ -48,7 +48,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 	for _, typeName := range orderedTgTypes(d) {
 		tgType := d.Types[typeName]
 
-		newMethodName := strings.ReplaceAll(tgMethod.Name, typeName, "")
+		newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
 		if newMethodName == tgMethod.Name {
 			continue
 		}
