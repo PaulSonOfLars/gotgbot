@@ -97,7 +97,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 
 	if sender == nil {
 		if msg != nil {
-			sender = gotgbot.GetSender(msg)
+			sender = msg.GetSender()
 		} else if user != nil {
 			sender = &gotgbot.Sender{User: user}
 		}
