@@ -15,7 +15,7 @@ type ChatJoinRequest struct {
 
 func NewChatJoinRequest(f filters.ChatJoinRequest, r Response) ChatJoinRequest {
 	return ChatJoinRequest{
-		Filter 	  f,
+		Filter:   f,
 		Response: r,
 	}
 }
