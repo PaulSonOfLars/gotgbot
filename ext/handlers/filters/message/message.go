@@ -237,3 +237,7 @@ func ReplyMarkup(msg *gotgbot.Message) bool {
 func MediaGroup(msg *gotgbot.Message) bool {
 	return msg.MediaGroupId != ""
 }
+
+func IsAutomaticForward(msg *gotgbot.Message) bool {
+	return msg.IsAutomaticForward
+}
