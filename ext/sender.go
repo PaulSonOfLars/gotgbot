@@ -7,9 +7,8 @@ import (
 // Sender is a merge of the User and SenderChat fields of a message, to provide easier interaction with
 // message senders from the telegram API.
 type Sender struct {
-	User *gotgbot.User
-	Chat *gotgbot.Chat
-
+	User               *gotgbot.User
+	Chat               *gotgbot.Chat
 	IsAutomaticForward bool
 	ChatId             int64
 }
