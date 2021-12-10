@@ -1,25 +1,21 @@
-package ext
-
-import (
-	"github.com/PaulSonOfLars/gotgbot/v2"
-)
+package gotgbot
 
 // Sender is a merge of the User and SenderChat fields of a message, to provide easier interaction with
 // message senders from the telegram API.
 type Sender struct {
-	User               *gotgbot.User
-	Chat               *gotgbot.Chat
+	User               *User
+	Chat               *Chat
 	IsAutomaticForward bool
 	ChatId             int64
 }
 
 // GetSender populates the relevant fields of a Sender struct given a message.
-func GetSender(msg *gotgbot.Message) *Sender {
+func (m Message) GetSender() *Sender {
 	return &Sender{
-		User:               msg.From,
-		Chat:               msg.SenderChat,
-		IsAutomaticForward: msg.IsAutomaticForward,
-		ChatId:             msg.Chat.Id,
+		User:               m.From,
+		Chat:               m.SenderChat,
+		IsAutomaticForward: m.IsAutomaticForward,
+		ChatId:             m.Chat.Id,
 	}
 }
 

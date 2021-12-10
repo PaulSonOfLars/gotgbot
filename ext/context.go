@@ -23,7 +23,7 @@ type Context struct {
 	// in the case of linked channels, anonymous admins, or anonymous channels.
 	EffectiveUser *gotgbot.User
 	// EffectiveSender is the sender of the update. This can be either a user, or a channel.
-	EffectiveSender *Sender
+	EffectiveSender *gotgbot.Sender
 }
 
 // NewContext populates a context with the relevant fields from the current update.
@@ -32,7 +32,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	var msg *gotgbot.Message
 	var chat *gotgbot.Chat
 	var user *gotgbot.User
-	var sender *Sender
+	var sender *gotgbot.Sender
 
 	switch {
 	case update.Message != nil:
@@ -62,7 +62,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		if update.CallbackQuery.Message != nil {
 			msg = update.CallbackQuery.Message
 			chat = &update.CallbackQuery.Message.Chat
-			sender = &Sender{User: user}
+			sender = &gotgbot.Sender{User: user}
 		}
 
 	case update.ChosenInlineResult != nil:
@@ -93,9 +93,9 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 
 	if sender == nil {
 		if msg != nil {
-			sender = GetSender(msg)
+			sender = gotgbot.GetSender(msg)
 		} else if user != nil {
-			sender = &Sender{User: user}
+			sender = &gotgbot.Sender{User: user}
 		}
 	}
 
