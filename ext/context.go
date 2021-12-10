@@ -18,7 +18,12 @@ type Context struct {
 	// EffectiveUser is the user who triggered the update, if possible.
 	// Note: when adding a user, the user who ADDED should be the EffectiveUser;
 	// they caused the update. If a user joins naturally, then they are the EffectiveUser.
+	//
+	// WARNING: It may be better to rely on EffectiveSender instead, which allows for easier use
+	// in the case of linked channels, anonymous admins, or anonymous channels.
 	EffectiveUser *gotgbot.User
+	// EffectiveSender is the sender of the update. This can be either a user, or a channel.
+	EffectiveSender *Sender
 }
 
 // NewContext populates a context with the relevant fields from the current update.
@@ -27,6 +32,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	var msg *gotgbot.Message
 	var chat *gotgbot.Chat
 	var user *gotgbot.User
+	var sender *Sender
 
 	switch {
 	case update.Message != nil:
@@ -56,6 +62,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		if update.CallbackQuery.Message != nil {
 			msg = update.CallbackQuery.Message
 			chat = &update.CallbackQuery.Message.Chat
+			sender = &Sender{User: user}
 		}
 
 	case update.ChosenInlineResult != nil:
@@ -84,12 +91,21 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		data = make(map[string]interface{})
 	}
 
+	if sender == nil {
+		if msg != nil {
+			sender = GetSender(msg)
+		} else if user != nil {
+			sender = &Sender{User: user}
+		}
+	}
+
 	return &Context{
 		Update:           update,
 		Data:             data,
 		EffectiveMessage: msg,
 		EffectiveChat:    chat,
 		EffectiveUser:    user,
+		EffectiveSender:  sender,
 	}
 }
 
