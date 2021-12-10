@@ -291,26 +291,14 @@ func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpt
 	return b, json.Unmarshal(r, &b)
 }
 
-// BanChatSenderChatOpts is the set of optional fields for Bot.BanChatSenderChat.
-type BanChatSenderChatOpts struct {
-	// Date when the sender chat will be unbanned, unix time. If the chat is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever.
-	UntilDate int64
-}
-
-// BanChatSenderChat Use this method to ban a channel chat in a supergroup or a channel. The owner of the chat will not be able to send messages and join live streams on behalf of the chat, unless it is unbanned first. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
+// BanChatSenderChat Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - sender_chat_id (type int64): Unique identifier of the target sender chat
-// - opts (type BanChatSenderChatOpts): All optional parameters.
 // https://core.telegram.org/bots/api#banchatsenderchat
-func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
+func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64) (bool, error) {
 	v := urlLib.Values{}
 	v.Add("chat_id", strconv.FormatInt(chatId, 10))
 	v.Add("sender_chat_id", strconv.FormatInt(senderChatId, 10))
-	if opts != nil {
-		if opts.UntilDate != 0 {
-			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
-		}
-	}
 
 	r, err := bot.Get("banChatSenderChat", v)
 	if err != nil {

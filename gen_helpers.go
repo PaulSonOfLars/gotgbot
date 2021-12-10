@@ -34,8 +34,8 @@ func (c Chat) BanMember(b *Bot, userId int64, opts *BanChatMemberOpts) (bool, er
 }
 
 // BanSenderChat Helper method for Bot.BanChatSenderChat
-func (c Chat) BanSenderChat(b *Bot, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
-	return b.BanChatSenderChat(c.Id, senderChatId, opts)
+func (c Chat) BanSenderChat(b *Bot, senderChatId int64) (bool, error) {
+	return b.BanChatSenderChat(c.Id, senderChatId)
 }
 
 // Copy Helper method for Bot.CopyMessage
