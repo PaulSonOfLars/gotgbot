@@ -75,6 +75,10 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		user = &update.ChatMember.From
 		chat = &update.ChatMember.Chat
 	}
+	
+	case update.ChatJoinRequest != nil:
+		user = &update.ChatJoinRequest.From
+		chat = &update.ChatJoinRequest.Chat
 
 	if data == nil {
 		data = make(map[string]interface{})
