@@ -48,12 +48,12 @@ import (
 func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, error) {
 	method := strings.Builder{}
 
-	retType, err := tgMethod.GetReturnType(d)
+	retTypes, err := tgMethod.GetReturnTypes(d)
 	if err != nil {
 		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
 
-	defaultRetVal := getDefaultReturnVal(d, retType)
+	defaultRetVals := getDefaultReturnVals(d, retTypes)
 
 	args, optionalsStruct, err := tgMethod.getArgs()
 	if err != nil {
@@ -69,13 +69,13 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
-	valueGen, hasData, err := tgMethod.argsToValues(d, defaultRetVal)
+	valueGen, hasData, err := tgMethod.argsToValues(d, strings.Join(defaultRetVals, ","))
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
 
 	method.WriteString(desc)
-	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + retType + ", error) {")
+	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + strings.Join(retTypes, ", ") + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
 
 	if hasData {
@@ -92,32 +92,64 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	method.WriteString("\n	if err != nil {")
-	method.WriteString("\n		return " + defaultRetVal + ", err")
+	method.WriteString("\n		return " + strings.Join(defaultRetVals, ", ") + ", err")
 	method.WriteString("\n	}")
 	method.WriteString("\n")
 
+	retValues, err := returnValues(d, retTypes)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate return values: %w", err)
+	}
+	method.WriteString(retValues)
+	method.WriteString("\n}")
+
+	return method.String(), nil
+}
+
+func returnValues(d APIDescription, retTypes []string) (string, error) {
+	if len(retTypes) == 2 && retTypes[0] == "*Message" && retTypes[1] == "bool" {
+		// Manual bit of code injected for dual returns of msg+bool.
+		// If the unmarshal into msg is a success, we return msg + true. This populates an expected bool value.
+		// if msg unmarshal fails, we see if it unmarshals to bool; if success, return nil + bool
+		// if bool unmarshal fails, this is an unknown type; fail completely.
+		return `
+var m Message
+if err := json.Unmarshal(r, &m); err != nil {
+	var b bool
+	if err := json.Unmarshal(r, &b); err != nil {
+		return nil, false, err
+	}
+	return nil, b, nil
+}
+return &m, true, nil
+`, nil
+	} else if len(retTypes) >= 2 {
+		return "", fmt.Errorf("no existing support for multiple return types of %v", retTypes)
+	}
+
+	returnString := strings.Builder{}
+
+	retType := retTypes[0]
 	retVarType := retType
 	retVarName := getRetVarName(retVarType)
-	isPointer := strings.HasPrefix(retVarType, "*")
 	addr := ""
-	if isPointer {
+	if isPointer(retVarType) {
 		retVarType = strings.TrimLeft(retVarType, "*")
 		addr = "&"
 	}
 
 	if rawType := strings.TrimPrefix(retType, "[]"); isArray(retType) && len(d.Types[rawType].Subtypes) != 0 {
 		// Handle interface array returns such as []ChatMember from GetChatAdministrators
-		method.WriteString(fmt.Sprintf("\nreturn unmarshal%sArray(r)", rawType))
+		returnString.WriteString(fmt.Sprintf("\nreturn unmarshal%sArray(r)", rawType))
 	} else if len(d.Types[retType].Subtypes) != 0 {
 		// Handle interface returns such as ChatMember from GetChatMember
-		method.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
+		returnString.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
 	} else {
-		method.WriteString("\nvar " + retVarName + " " + retVarType)
-		method.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+		returnString.WriteString("\nvar " + retVarName + " " + retVarType)
+		returnString.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 	}
-	method.WriteString("\n}")
 
-	return method.String(), nil
+	return returnString.String(), nil
 }
 
 func (m MethodDescription) description() (string, error) {
@@ -207,10 +239,11 @@ func generateValue(d APIDescription, f Field, goParam string, defaultRetVal stri
 			// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
 			// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
 			// To avoid this, we want to make sure not to add default integers or floats to requests.
+			// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
 			return fmt.Sprintf(`
 if %s != %s {
 	%s
-}`, goParam, getDefaultReturnVal(d, fieldType), addParam), false, nil
+}`, goParam, getDefaultTypeVal(d, fieldType), addParam), false, nil
 		}
 
 		return "\n" + addParam, false, nil
@@ -249,7 +282,7 @@ if %s != %s {
 			return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
 		}
 
-	case "[]InputMedia":
+	case "[]" + tgTypeInputMedia:
 		hasData = true
 
 		err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
@@ -280,11 +313,11 @@ if %s != %s {
 }
 
 func getRetVarName(retType string) string {
-	for strings.HasPrefix(retType, "*") {
+	for isPointer(retType) {
 		retType = strings.TrimPrefix(retType, "*")
 	}
 
-	for strings.HasPrefix(retType, "[]") {
+	for isArray(retType) {
 		retType = strings.TrimPrefix(retType, "[]")
 	}
 

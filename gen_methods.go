@@ -708,7 +708,7 @@ type EditMessageCaptionOpts struct {
 // EditMessageCaption Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type EditMessageCaptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagecaption
-func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, error) {
+func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	if opts != nil {
 		if opts.ChatId != 0 {
@@ -723,24 +723,32 @@ func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, erro
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+				return nil, false, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
 			v.Add("caption_entities", string(bs))
 		}
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Get("editMessageCaption", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation.
@@ -766,7 +774,7 @@ type EditMessageLiveLocationOpts struct {
 // - longitude (type float64): Longitude of new location
 // - opts (type EditMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagelivelocation
-func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, error) {
+func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
 	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
@@ -789,18 +797,26 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 		}
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Get("editMessageLiveLocation", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // EditMessageMediaOpts is the set of optional fields for Bot.EditMessageMedia.
@@ -819,12 +835,12 @@ type EditMessageMediaOpts struct {
 // - media (type InputMedia): A JSON-serialized object for a new media content of the message
 // - opts (type EditMessageMediaOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagemedia
-func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, error) {
+func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	data := map[string]NamedReader{}
 	inputMediaBs, err := media.InputMediaParams("media", data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal field media: %w", err)
+		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
 	}
 	v.Add("media", string(inputMediaBs))
 	if opts != nil {
@@ -837,18 +853,26 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Post("editMessageMedia", v, data)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // EditMessageReplyMarkupOpts is the set of optional fields for Bot.EditMessageReplyMarkup.
@@ -866,7 +890,7 @@ type EditMessageReplyMarkupOpts struct {
 // EditMessageReplyMarkup Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type EditMessageReplyMarkupOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagereplymarkup
-func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, error) {
+func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	if opts != nil {
 		if opts.ChatId != 0 {
@@ -878,18 +902,26 @@ func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Messa
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Get("editMessageReplyMarkup", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // EditMessageTextOpts is the set of optional fields for Bot.EditMessageText.
@@ -914,7 +946,7 @@ type EditMessageTextOpts struct {
 // - text (type string): New text of the message, 1-4096 characters after entities parsing
 // - opts (type EditMessageTextOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagetext
-func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, error) {
+func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	v.Add("text", text)
 	if opts != nil {
@@ -929,25 +961,33 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 		if opts.Entities != nil {
 			bs, err := json.Marshal(opts.Entities)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal field entities: %w", err)
+				return nil, false, fmt.Errorf("failed to marshal field entities: %w", err)
 			}
 			v.Add("entities", string(bs))
 		}
 		v.Add("disable_web_page_preview", strconv.FormatBool(opts.DisableWebPagePreview))
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Get("editMessageText", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
@@ -3006,7 +3046,7 @@ type SetGameScoreOpts struct {
 // - score (type int64): New score, must be non-negative
 // - opts (type SetGameScoreOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setgamescore
-func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, error) {
+func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	v.Add("user_id", strconv.FormatInt(userId, 10))
 	v.Add("score", strconv.FormatInt(score, 10))
@@ -3024,11 +3064,19 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 
 	r, err := bot.Get("setGameScore", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // SetMyCommandsOpts is the set of optional fields for Bot.SetMyCommands.
@@ -3242,7 +3290,7 @@ type StopMessageLiveLocationOpts struct {
 // StopMessageLiveLocation Use this method to stop updating a live location message before live_period expires. On success, if the message is not an inline message, the edited Message is returned, otherwise True is returned.
 // - opts (type StopMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stopmessagelivelocation
-func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, error) {
+func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	v := urlLib.Values{}
 	if opts != nil {
 		if opts.ChatId != 0 {
@@ -3254,18 +3302,26 @@ func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Mes
 		v.Add("inline_message_id", opts.InlineMessageId)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
 		v.Add("reply_markup", string(bs))
 	}
 
 	r, err := bot.Get("stopMessageLiveLocation", v)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var m Message
-	return &m, json.Unmarshal(r, &m)
+	if err := json.Unmarshal(r, &m); err != nil {
+		var b bool
+		if err := json.Unmarshal(r, &b); err != nil {
+			return nil, false, err
+		}
+		return nil, b, nil
+	}
+	return &m, true, nil
+
 }
 
 // StopPollOpts is the set of optional fields for Bot.StopPoll.

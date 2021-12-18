@@ -137,13 +137,13 @@ func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
 	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
-		Text:      "You pressed a button!",
+		Text: "You pressed a button!",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	_, err = cb.Message.EditText(b, "You edited the start message.", nil)
+	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
 	if err != nil {
 		return fmt.Errorf("failed to edit start message text: %w", err)
 	}

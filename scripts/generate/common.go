@@ -73,12 +73,16 @@ func isTgArray(s string) bool {
 	return strings.HasPrefix(s, "Array of ")
 }
 
+func isPointer(s string) bool {
+	return strings.HasPrefix(s, "*")
+}
+
 func isArray(s string) bool {
 	return strings.HasPrefix(s, "[]")
 }
 
-func getDefaultReturnVal(d APIDescription, s string) string {
-	if strings.HasPrefix(s, "*") || strings.HasPrefix(s, "[]") {
+func getDefaultTypeVal(d APIDescription, s string) string {
+	if isPointer(s) || isArray(s) {
 		return "nil"
 	}
 
@@ -99,6 +103,14 @@ func getDefaultReturnVal(d APIDescription, s string) string {
 		// this isnt great
 		return s
 	}
+}
+
+func getDefaultReturnVals(d APIDescription, types []string) []string {
+	var retVals []string
+	for _, retType := range types {
+		retVals = append(retVals, getDefaultTypeVal(d, retType))
+	}
+	return retVals
 }
 
 func goTypeStringer(t string) string {

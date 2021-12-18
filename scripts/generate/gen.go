@@ -293,23 +293,23 @@ func (f Field) getPreferredType() (string, error) {
 	return "", fmt.Errorf("unable to choose one of %v for field %s", f.Types, f.Name)
 }
 
-func (m MethodDescription) GetReturnType(d APIDescription) (string, error) {
-	var prefRetVal string
-
-	if len(m.Returns) == 1 {
-		prefRetVal = m.Returns[0]
-	} else if len(m.Returns) == 2 && m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean {
-		prefRetVal = m.Returns[0]
-	} else {
-		return "", fmt.Errorf("failed to determine return type for method %s", m.Name)
+func (m MethodDescription) GetReturnTypes(d APIDescription) ([]string, error) {
+	// We currently only support dual returns for msg+bool
+	if len(m.Returns) >= 2 && !(len(m.Returns) == 2 && m.Returns[0] == tgTypeMessage && m.Returns[1] == tgTypeBoolean) {
+		return nil, fmt.Errorf("no support for multiple returns for types %s", m.Name)
 	}
 
-	retType := toGoType(prefRetVal)
-	if isTgType(d, retType) && len(d.Types[prefRetVal].Subtypes) == 0 {
-		retType = "*" + retType
+	var retTypes []string
+	for _, prefRetVal := range m.Returns {
+		goRetType := toGoType(prefRetVal)
+		if isTgType(d, goRetType) && len(d.Types[prefRetVal].Subtypes) == 0 {
+			goRetType = "*" + goRetType
+		}
+
+		retTypes = append(retTypes, goRetType)
 	}
 
-	return retType, nil
+	return retTypes, nil
 }
 
 func (m MethodDescription) optsName() string {
