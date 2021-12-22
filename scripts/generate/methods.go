@@ -64,27 +64,31 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		method.WriteString("\n" + optionalsStruct)
 	}
 
+	// Generate method description
 	desc, err := tgMethod.description()
 	if err != nil {
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
+	// Generate method contents, setting up values in expected format
 	valueGen, hasData, err := tgMethod.argsToValues(d, strings.Join(defaultRetVals, ","))
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
 
+	// Generate return statements
+	returnGen, err := returnValues(d, retTypes)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate return values: %w", err)
+	}
+
 	method.WriteString(desc)
 	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + strings.Join(retTypes, ", ") + ", error) {")
 	method.WriteString("\n	v := urlLib.Values{}")
-
-	if hasData {
-		method.WriteString("\n	data := map[string]NamedReader{}")
-	}
-
 	method.WriteString(valueGen)
 	method.WriteString("\n")
 
+	// If sending data, we need to do it over POST
 	if hasData {
 		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data)")
 	} else {
@@ -96,39 +100,13 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString("\n	}")
 	method.WriteString("\n")
 
-	retValues, err := returnValues(d, retTypes)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate return values: %w", err)
-	}
-	method.WriteString(retValues)
+	method.WriteString(returnGen)
 	method.WriteString("\n}")
 
 	return method.String(), nil
 }
 
 func returnValues(d APIDescription, retTypes []string) (string, error) {
-	if len(retTypes) == 2 && retTypes[0] == "*Message" && retTypes[1] == "bool" {
-		// Manual bit of code injected for dual returns of msg+bool.
-		// If the unmarshal into msg is a success, we return msg + true. This populates an expected bool value.
-		// if msg unmarshal fails, we see if it unmarshals to bool; if success, return nil + bool
-		// if bool unmarshal fails, this is an unknown type; fail completely.
-		return `
-var m Message
-if err := json.Unmarshal(r, &m); err != nil {
-	var b bool
-	if err := json.Unmarshal(r, &b); err != nil {
-		return nil, false, err
-	}
-	return nil, b, nil
-}
-return &m, true, nil
-`, nil
-	} else if len(retTypes) >= 2 {
-		return "", fmt.Errorf("no existing support for multiple return types of %v", retTypes)
-	}
-
-	returnString := strings.Builder{}
-
 	retType := retTypes[0]
 	retVarType := retType
 	retVarName := getRetVarName(retVarType)
@@ -137,6 +115,29 @@ return &m, true, nil
 		retVarType = strings.TrimLeft(retVarType, "*")
 		addr = "&"
 	}
+
+	if len(retTypes) == 2 && retTypes[1] == "bool" {
+		// Manual bit of code injected for dual returns of TYPE+bool.
+		// If the unmarshal into TYPE is a success, we return TYPE + true. This populates an expected bool value.
+		// if TYPE unmarshal fails, we see if it unmarshals to bool; if success, return nil + bool
+		// if bool unmarshal fails, this is an unknown type; fail completely.
+		defaultRetVal := getDefaultTypeVal(d, retVarType)
+		return fmt.Sprintf(`
+var %s %s
+if err := json.Unmarshal(r, &%s); err != nil {
+	var b bool
+	if err := json.Unmarshal(r, &b); err != nil {
+		return %s, false, err
+	}
+	return %s, b, nil
+}
+return %s, true, nil
+`, retVarName, retVarType, retVarName, defaultRetVal, defaultRetVal, addr+retVarName), nil
+	} else if len(retTypes) >= 2 {
+		return "", fmt.Errorf("no existing support for multiple return types of %v", retTypes)
+	}
+
+	returnString := strings.Builder{}
 
 	if rawType := strings.TrimPrefix(retType, "[]"); isArray(retType) && len(d.Types[rawType].Subtypes) != 0 {
 		// Handle interface array returns such as []ChatMember from GetChatAdministrators
@@ -223,7 +224,11 @@ func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) 
 		bd.WriteString("\n}")
 	}
 
-	return bd.String(), hasData, nil
+	if hasData {
+		return "\ndata := map[string]NamedReader{}" + bd.String(), true, nil
+	}
+
+	return bd.String(), false, nil
 }
 
 func generateValue(d APIDescription, f Field, goParam string, defaultRetVal string) (string, bool, error) {
