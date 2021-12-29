@@ -74,7 +74,7 @@ func (c Chat) EditInviteLink(b *Bot, inviteLink string, opts *EditChatInviteLink
 }
 
 // EditCaption Helper method for Bot.EditMessageCaption
-func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, error) {
+func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageCaptionOpts{}
 	}
@@ -90,7 +90,7 @@ func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, er
 }
 
 // EditLiveLocation Helper method for Bot.EditMessageLiveLocation
-func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, error) {
+func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageLiveLocationOpts{}
 	}
@@ -106,7 +106,7 @@ func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, o
 }
 
 // EditMedia Helper method for Bot.EditMessageMedia
-func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, error) {
+func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageMediaOpts{}
 	}
@@ -122,7 +122,7 @@ func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts)
 }
 
 // EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
-func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, error) {
+func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageReplyMarkupOpts{}
 	}
@@ -138,7 +138,7 @@ func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Mes
 }
 
 // EditText Helper method for Bot.EditMessageText
-func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, error) {
+func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageTextOpts{}
 	}
@@ -259,7 +259,7 @@ func (c Chat) SetTitle(b *Bot, title string) (bool, error) {
 }
 
 // StopLiveLocation Helper method for Bot.StopMessageLiveLocation
-func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, error) {
+func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &StopMessageLiveLocationOpts{}
 	}

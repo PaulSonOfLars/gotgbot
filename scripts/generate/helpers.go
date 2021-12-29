@@ -68,7 +68,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 		newMethodName = strings.Title(newMethodName)
 
-		ret, err := tgMethod.GetReturnType(d)
+		ret, err := tgMethod.GetReturnTypes(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
 		}
@@ -89,7 +89,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			Receiver:     receiverName,
 			TypeName:     typeName,
 			HelperName:   newMethodName,
-			ReturnType:   ret,
+			ReturnType:   strings.Join(ret, ", "),
 			FuncDefArgs:  funcDefArgs,
 			Contents:     optsContent,
 			OptsName:     tgMethod.optsName(),
@@ -120,7 +120,7 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 
 		if fName, ok := fields[mf.Name]; ok {
 			if !mf.Required {
-				def := getDefaultReturnVal(d, prefType)
+				def := getDefaultTypeVal(d, prefType)
 				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
 				optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = " + receiverName + "." + snakeToTitle(fName))
 				optsContent.WriteString("\n	}")
