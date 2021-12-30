@@ -21,6 +21,7 @@ var mdV2Map = map[string]string{
 	"pre":           "```",
 	"underline":     "__",
 	"strikethrough": "~",
+	"spoiler":       "||",
 }
 
 var htmlMap = map[string]string{
@@ -30,6 +31,7 @@ var htmlMap = map[string]string{
 	"pre":           "pre",
 	"underline":     "u",
 	"strikethrough": "s",
+	"spoiler":       "span class=\"tg-spoiler\"",
 }
 
 // OriginalMD gets the original markdown formatting of a message text.
@@ -182,8 +184,8 @@ func fillNestedMarkdownV2(data []uint16, ent MessageEntity, start int64, entitie
 func writeFinalHTML(data []uint16, ent MessageEntity, start int64, cntnt string) string {
 	prevText := html.EscapeString(string(utf16.Decode(data[start:ent.Offset])))
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough":
-		return prevText + "<" + htmlMap[ent.Type] + ">" + cntnt + "</" + htmlMap[ent.Type] + ">"
+	case "bold", "italic", "code", "underline", "strikethrough", "spoiler":
+		return prevText + "<" + htmlMap[ent.Type] + ">" + cntnt + "</" + closeHTMLTag(htmlMap[ent.Type]) + ">"
 	case "pre":
 		// <pre>text</pre>
 		if ent.Language == "" {
@@ -200,11 +202,19 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int64, cntnt string)
 	}
 }
 
+// closeHTMLTag makes sure to generate the correct HTML closing tag for a given opening tag.
+func closeHTMLTag(s string) string {
+	if !strings.HasPrefix(s, "span") {
+		return s
+	}
+	return "span"
+}
+
 func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt string) string {
 	prevText := string(utf16.Decode(data[start:ent.Offset]))
 	pre, cleanCntnt, post := splitEdgeWhitespace(cntnt)
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough", "pre":
+	case "bold", "italic", "code", "underline", "strikethrough", "pre", "spoiler":
 		return prevText + pre + mdV2Map[ent.Type] + cleanCntnt + mdV2Map[ent.Type] + post
 	case "text_mention":
 		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post
