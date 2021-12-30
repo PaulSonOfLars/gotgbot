@@ -333,6 +333,8 @@ type CopyMessageOpts struct {
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -363,6 +365,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1010,6 +1013,8 @@ func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
 type ForwardMessageOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the forwarded message from forwarding and saving
+	ProtectContent bool
 }
 
 // ForwardMessage Use this method to forward messages of any kind. Service messages can't be forwarded. On success, the sent Message is returned.
@@ -1025,6 +1030,7 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 	v.Add("message_id", strconv.FormatInt(messageId, 10))
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 	}
 
 	r, err := bot.Get("forwardMessage", v)
@@ -1494,6 +1500,8 @@ type SendAnimationOpts struct {
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1573,6 +1581,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1613,6 +1622,8 @@ type SendAudioOpts struct {
 	Thumb InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1689,6 +1700,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 			}
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1738,6 +1750,8 @@ type SendContactOpts struct {
 	Vcard string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1761,6 +1775,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 		v.Add("last_name", opts.LastName)
 		v.Add("vcard", opts.Vcard)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1789,6 +1804,8 @@ type SendDiceOpts struct {
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1807,6 +1824,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	if opts != nil {
 		v.Add("emoji", opts.Emoji)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1843,6 +1861,8 @@ type SendDocumentOpts struct {
 	DisableContentTypeDetection bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1914,6 +1934,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		}
 		v.Add("disable_content_type_detection", strconv.FormatBool(opts.DisableContentTypeDetection))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -1940,6 +1961,8 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 type SendGameOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -1959,6 +1982,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 	v.Add("game_short_name", gameShortName)
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2013,6 +2037,8 @@ type SendInvoiceOpts struct {
 	IsFlexible bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2077,6 +2103,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v.Add("send_email_to_provider", strconv.FormatBool(opts.SendEmailToProvider))
 		v.Add("is_flexible", strconv.FormatBool(opts.IsFlexible))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2109,6 +2136,8 @@ type SendLocationOpts struct {
 	ProximityAlertRadius int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2142,6 +2171,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 			v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2168,6 +2198,8 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 type SendMediaGroupOpts struct {
 	// Sends messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent messages from forwarding and saving
+	ProtectContent bool
 	// If the messages are a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2200,6 +2232,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2225,6 +2258,8 @@ type SendMessageOpts struct {
 	DisableWebPagePreview bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of sent messages from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2253,6 +2288,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		}
 		v.Add("disable_web_page_preview", strconv.FormatBool(opts.DisableWebPagePreview))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2285,6 +2321,8 @@ type SendPhotoOpts struct {
 	CaptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2334,6 +2372,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 			v.Add("caption_entities", string(bs))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2380,6 +2419,8 @@ type SendPollOpts struct {
 	IsClosed bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2429,6 +2470,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		}
 		v.Add("is_closed", strconv.FormatBool(opts.IsClosed))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2455,6 +2497,8 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 type SendStickerOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2495,6 +2539,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 	}
 	if opts != nil {
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2529,6 +2574,8 @@ type SendVenueOpts struct {
 	GooglePlaceType string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2558,6 +2605,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		v.Add("google_place_id", opts.GooglePlaceId)
 		v.Add("google_place_type", opts.GooglePlaceType)
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2600,6 +2648,8 @@ type SendVideoOpts struct {
 	SupportsStreaming bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2680,6 +2730,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 		v.Add("supports_streaming", strconv.FormatBool(opts.SupportsStreaming))
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2712,6 +2763,8 @@ type SendVideoNoteOpts struct {
 	Thumb InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2779,6 +2832,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 			}
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}
@@ -2813,6 +2867,8 @@ type SendVoiceOpts struct {
 	Duration int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
 	// Pass True, if the message should be sent even if the specified replied-to message is not found
@@ -2865,6 +2921,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
 		}
 		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
 		if opts.ReplyToMessageId != 0 {
 			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
 		}

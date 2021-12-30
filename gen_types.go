@@ -62,9 +62,9 @@ type Audio struct {
 // BotCommand This object represents a bot command.
 // https://core.telegram.org/bots/api#botcommand
 type BotCommand struct {
-	// Text of the command, 1-32 characters. Can contain only lowercase English letters, digits and underscores.
+	// Text of the command; 1-32 characters. Can contain only lowercase English letters, digits and underscores.
 	Command string `json:"command"`
-	// Description of the command, 3-256 characters.
+	// Description of the command; 1-256 characters.
 	Description string `json:"description"`
 }
 
@@ -3474,9 +3474,9 @@ type MaskPosition struct {
 type Message struct {
 	// Unique message identifier inside this chat
 	MessageId int64 `json:"message_id"`
-	// Optional. Sender, empty for messages sent to channels
+	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	From *User `json:"from,omitempty"`
-	// Optional. Sender of the message, sent on behalf of a chat. The channel itself for channel messages. The supergroup itself for messages from anonymous group administrators. The linked channel for messages automatically forwarded to the discussion group
+	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group.  For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
 	// Date the message was sent in Unix time
 	Date int64 `json:"date"`
@@ -3488,7 +3488,7 @@ type Message struct {
 	ForwardFromChat *Chat `json:"forward_from_chat,omitempty"`
 	// Optional. For messages forwarded from channels, identifier of the original message in the channel
 	ForwardFromMessageId int64 `json:"forward_from_message_id,omitempty"`
-	// Optional. For messages forwarded from channels, signature of the post author if present
+	// Optional. For forwarded messages that were originally sent in channels or by an anonymous chat administrator, signature of the message sender if present
 	ForwardSignature string `json:"forward_signature,omitempty"`
 	// Optional. Sender's name for messages forwarded from users who disallow adding a link to their account in forwarded messages
 	ForwardSenderName string `json:"forward_sender_name,omitempty"`
@@ -3600,7 +3600,7 @@ type MessageAutoDeleteTimerChanged struct {
 // MessageEntity This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 // https://core.telegram.org/bots/api#messageentity
 type MessageEntity struct {
-	// Type of the entity. Can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames)
+	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames)
 	Type string `json:"type"`
 	// Offset in UTF-16 code units to the start of the entity
 	Offset int64 `json:"offset"`
