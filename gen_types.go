@@ -4379,6 +4379,8 @@ type Sticker struct {
 	Height int64 `json:"height"`
 	// True, if the sticker is animated
 	IsAnimated bool `json:"is_animated"`
+	// True, if the sticker is a video sticker
+	IsVideo bool `json:"is_video"`
 	// Optional. Sticker thumbnail in the .WEBP or .JPG format
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 	// Optional. Emoji associated with the sticker
@@ -4400,11 +4402,13 @@ type StickerSet struct {
 	Title string `json:"title"`
 	// True, if the sticker set contains animated stickers
 	IsAnimated bool `json:"is_animated"`
+	// True, if the sticker set contains video stickers
+	IsVideo bool `json:"is_video"`
 	// True, if the sticker set contains masks
 	ContainsMasks bool `json:"contains_masks"`
 	// List of all set stickers
 	Stickers []Sticker `json:"stickers,omitempty"`
-	// Optional. Sticker set thumbnail in the .WEBP or .TGS format
+	// Optional. Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 }
 

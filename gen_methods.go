@@ -16,13 +16,15 @@ import (
 type AddStickerToSetOpts struct {
 	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
 	PngSticker InputFile
-	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/animated_stickers#technical-requirements for technical requirements
+	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
 	TgsSticker InputFile
+	// WEBM video with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#video-sticker-requirements for technical requirements
+	WebmSticker InputFile
 	// A JSON-serialized object for position where the mask should be placed on faces
 	MaskPosition MaskPosition
 }
 
-// AddStickerToSet Use this method to add a new sticker to a set created by the bot. You must use exactly one of the fields png_sticker or tgs_sticker. Animated stickers can be added to animated sticker sets and only to them. Animated sticker sets can have up to 50 stickers. Static sticker sets can have up to 120 stickers. Returns True on success.
+// AddStickerToSet Use this method to add a new sticker to a set created by the bot. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Animated stickers can be added to animated sticker sets and only to them. Animated sticker sets can have up to 50 stickers. Static sticker sets can have up to 120 stickers. Returns True on success.
 // - user_id (type int64): User identifier of sticker set owner
 // - name (type string): Sticker set name
 // - emojis (type string): One or more emoji corresponding to the sticker
@@ -72,6 +74,24 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
+			}
+		}
+		if opts.WebmSticker != nil {
+			switch m := opts.WebmSticker.(type) {
+			case NamedReader:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = m
+
+			case io.Reader:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
+
+			default:
+				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
 			}
 		}
 		bs, err := json.Marshal(opts.MaskPosition)
@@ -431,15 +451,17 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 type CreateNewStickerSetOpts struct {
 	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
 	PngSticker InputFile
-	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/animated_stickers#technical-requirements for technical requirements
+	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
 	TgsSticker InputFile
+	// WEBM video with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#video-sticker-requirements for technical requirements
+	WebmSticker InputFile
 	// Pass True, if a set of mask stickers should be created
 	ContainsMasks bool
 	// A JSON-serialized object for position where the mask should be placed on faces
 	MaskPosition MaskPosition
 }
 
-// CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker or tgs_sticker. Returns True on success.
+// CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Returns True on success.
 // - user_id (type int64): User identifier of created sticker set owner
 // - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot username>". <bot_username> is case insensitive. 1-64 characters.
 // - title (type string): Sticker set title, 1-64 characters
@@ -491,6 +513,24 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
+			}
+		}
+		if opts.WebmSticker != nil {
+			switch m := opts.WebmSticker.(type) {
+			case NamedReader:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = m
+
+			case io.Reader:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = NamedFile{File: m}
+
+			case []byte:
+				v.Add("webm_sticker", "attach://webm_sticker")
+				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
+
+			default:
+				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
 			}
 		}
 		v.Add("contains_masks", strconv.FormatBool(opts.ContainsMasks))
@@ -2258,7 +2298,7 @@ type SendMessageOpts struct {
 	DisableWebPagePreview bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
-	// Protects the contents of sent messages from forwarding and saving
+	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
@@ -2507,7 +2547,7 @@ type SendStickerOpts struct {
 	ReplyMarkup ReplyMarkup
 }
 
-// SendSticker Use this method to send static .WEBP or animated .TGS stickers. On success, the sent Message is returned.
+// SendSticker Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendStickerOpts): All optional parameters.
@@ -3220,11 +3260,11 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, e
 
 // SetStickerSetThumbOpts is the set of optional fields for Bot.SetStickerSetThumb.
 type SetStickerSetThumbOpts struct {
-	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/animated_stickers#technical-requirements for animated sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated sticker set thumbnail can't be uploaded via HTTP URL.
+	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements, or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated sticker set thumbnails can't be uploaded via HTTP URL.
 	Thumb InputFile
 }
 
-// SetStickerSetThumb Use this method to set the thumbnail of a sticker set. Animated thumbnails can be set for animated sticker sets only. Returns True on success.
+// SetStickerSetThumb Use this method to set the thumbnail of a sticker set. Animated thumbnails can be set for animated sticker sets only. Video thumbnails can be set only for video sticker sets only. Returns True on success.
 // - name (type string): Sticker set name
 // - user_id (type int64): User identifier of the sticker set owner
 // - opts (type SetStickerSetThumbOpts): All optional parameters.
@@ -3420,7 +3460,7 @@ type UnbanChatMemberOpts struct {
 }
 
 // UnbanChatMember Use this method to unban a previously banned user in a supergroup or channel. The user will not return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be removed from the chat. If you don't want this, use the parameter only_if_banned. Returns True on success.
-// - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @username)
+// - chat_id (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 // - user_id (type int64): Unique identifier of the target user
 // - opts (type UnbanChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unbanchatmember
