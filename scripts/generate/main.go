@@ -60,7 +60,7 @@ func updatePinnedCommit() (string, error) {
 	}
 
 	// Get the latest commit from github
-	req, err := http.NewRequestWithContext(context.Background(), "GET", latestCommitURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, latestCommitURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request for latest commit: %w", err)
 	}
@@ -87,7 +87,7 @@ func updatePinnedCommit() (string, error) {
 }
 
 func getAPISpecAtCommit(commit string) (APIDescription, error) {
-	req, err := http.NewRequestWithContext(context.Background(), "GET", fmt.Sprintf(schemaURL, commit), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, fmt.Sprintf(schemaURL, commit), nil)
 	if err != nil {
 		return APIDescription{}, fmt.Errorf("failed to create request for telegram bot api spec: %w", err)
 	}

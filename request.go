@@ -78,7 +78,7 @@ func (bot *Bot) Get(method string, params url.Values) (json.RawMessage, error) {
 
 // GetWithContext allows sending a Get request with an existing context.
 func (bot *Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", bot.methodEnpoint(method), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, bot.methodEnpoint(method), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build GET request to %s: %w", method, err)
 	}
@@ -132,7 +132,7 @@ func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.V
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", bot.methodEnpoint(method), b)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEnpoint(method), b)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
