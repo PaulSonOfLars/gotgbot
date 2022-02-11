@@ -38,13 +38,13 @@ func ChatID(id int64) filters.Message {
 
 func ForwardFromUserID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.ForwardFrom.Id == id
+		return m.ForwardFrom != nil && m.ForwardFrom.Id == id
 	}
 }
 
 func ForwardFromChatID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.ForwardFromChat.Id == id
+		return m.ForwardFromChat != nil && m.ForwardFromChat.Id == id
 	}
 }
 
