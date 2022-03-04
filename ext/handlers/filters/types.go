@@ -9,5 +9,6 @@ type (
 	InlineQuery        func(iq *gotgbot.InlineQuery) bool
 	Message            func(msg *gotgbot.Message) bool
 	Poll               func(poll *gotgbot.Poll) bool
+	PollAnswer         func(pa *gotgbot.PollAnswer) bool
 	ChatJoinRequest    func(cjr *gotgbot.ChatJoinRequest) bool
 )
