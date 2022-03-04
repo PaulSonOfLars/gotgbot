@@ -24,7 +24,7 @@ func (r Poll) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.Poll == nil {
 		return false
 	}
-  return r.Filter == nil || r.Filter(u.Poll)
+	return r.Filter == nil || r.Filter(u.Poll)
 }
 
 func (r Poll) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
