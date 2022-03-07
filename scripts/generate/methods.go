@@ -244,6 +244,19 @@ func generateValue(d APIDescription, f Field, goParam string, defaultRetVal stri
 			// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
 			// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
 			// To avoid this, we want to make sure not to add default integers or floats to requests.
+			// This is a good rule of thumb, however... it doesn't ALWAYS work.
+			// So, any exceptions should go here:
+			// TODO: Make sure these are exceptions are tied to the method they're being generated for, not just the field name
+			if f.Name == "correct_option_id" {
+				// correct_option_id (in sendPoll) is dependant on the "type" field being "quiz".
+				// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
+				return fmt.Sprintf(`
+if opts.Type == "quiz" {
+	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
+	%s
+}`, addParam), false, nil
+			}
+
 			// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
 			return fmt.Sprintf(`
 if %s != %s {

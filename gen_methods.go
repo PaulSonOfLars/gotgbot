@@ -2490,7 +2490,8 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
 		v.Add("type", opts.Type)
 		v.Add("allows_multiple_answers", strconv.FormatBool(opts.AllowsMultipleAnswers))
-		if opts.CorrectOptionId != 0 {
+		if opts.Type == "quiz" {
+			// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
 			v.Add("correct_option_id", strconv.FormatInt(opts.CorrectOptionId, 10))
 		}
 		v.Add("explanation", opts.Explanation)
