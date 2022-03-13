@@ -3396,7 +3396,7 @@ type Invoice struct {
 }
 
 // KeyboardButton This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields request_contact, request_location, and request_poll are mutually exclusive.
-// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
+// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message. Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
 // https://core.telegram.org/bots/api#keyboardbutton
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
@@ -3476,7 +3476,7 @@ type Message struct {
 	MessageId int64 `json:"message_id"`
 	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	From *User `json:"from,omitempty"`
-	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group.  For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
 	// Date the message was sent in Unix time
 	Date int64 `json:"date"`
@@ -4431,7 +4431,7 @@ type SuccessfulPayment struct {
 	ProviderPaymentChargeId string `json:"provider_payment_charge_id"`
 }
 
-// Update This object represents an incoming update.At most one of the optional parameters can be present in any given update.
+// Update This object represents an incoming update. At most one of the optional parameters can be present in any given update.
 // https://core.telegram.org/bots/api#update
 type Update struct {
 	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using Webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.

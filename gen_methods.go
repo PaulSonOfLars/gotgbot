@@ -161,7 +161,7 @@ type AnswerInlineQueryOpts struct {
 	SwitchPmParameter string
 }
 
-// AnswerInlineQuery Use this method to send answers to an inline query. On success, True is returned.No more than 50 results per query are allowed.
+// AnswerInlineQuery Use this method to send answers to an inline query. On success, True is returned. No more than 50 results per query are allowed.
 // - inline_query_id (type string): Unique identifier for the answered query
 // - results (type []InlineQueryResult): A JSON-serialized array of results for the inline query
 // - opts (type AnswerInlineQueryOpts): All optional parameters.
@@ -463,7 +463,7 @@ type CreateNewStickerSetOpts struct {
 
 // CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Returns True on success.
 // - user_id (type int64): User identifier of created sticker set owner
-// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot username>". <bot_username> is case insensitive. 1-64 characters.
+// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "by<bot username>". <bot_username> is case insensitive. 1-64 characters.
 // - title (type string): Sticker set title, 1-64 characters
 // - emojis (type string): One or more emoji corresponding to the sticker
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
@@ -600,7 +600,14 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
-// DeleteMessage Use this method to delete a message, including service messages, with the following limitations:- A message can only be deleted if it was sent less than 48 hours ago.- A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.- Bots can delete outgoing messages in private chats, groups, and supergroups.- Bots can delete incoming messages in private chats.- Bots granted can_post_messages permissions can delete outgoing messages in channels.- If the bot is an administrator of a group, it can delete any message there.- If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.Returns True on success.
+// DeleteMessage Use this method to delete a message, including service messages, with the following limitations:
+// - A message can only be deleted if it was sent less than 48 hours ago.
+// - A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
+// - Bots can delete outgoing messages in private chats, groups, and supergroups.
+// - Bots can delete incoming messages in private chats.
+// - Bots granted can_post_messages permissions can delete outgoing messages in channels.
+// - If the bot is an administrator of a group, it can delete any message there.
+// - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of the message to delete
 // https://core.telegram.org/bots/api#deletemessage
