@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	urlLib "net/url" // renamed to avoid clashes with url vars
 	"strconv"
 )
 
@@ -31,27 +30,27 @@ type AddStickerToSetOpts struct {
 // - opts (type AddStickerToSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#addstickertoset
 func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *AddStickerToSetOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
-	v.Add("name", name)
-	v.Add("emojis", emojis)
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["name"] = name
+	v["emojis"] = emojis
 	if opts != nil {
 		if opts.PngSticker != nil {
 			switch m := opts.PngSticker.(type) {
 			case string:
-				v.Add("png_sticker", m)
+				v["png_sticker"] = m
 
 			case NamedReader:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = m
 
 			case io.Reader:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -61,15 +60,15 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 		if opts.TgsSticker != nil {
 			switch m := opts.TgsSticker.(type) {
 			case NamedReader:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = m
 
 			case io.Reader:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -79,15 +78,15 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 		if opts.WebmSticker != nil {
 			switch m := opts.WebmSticker.(type) {
 			case NamedReader:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = m
 
 			case io.Reader:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -98,7 +97,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
 		}
-		v.Add("mask_position", string(bs))
+		v["mask_position"] = string(bs)
 	}
 
 	r, err := bot.Post("addStickerToSet", v, data)
@@ -127,18 +126,18 @@ type AnswerCallbackQueryOpts struct {
 // - opts (type AnswerCallbackQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answercallbackquery
 func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallbackQueryOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("callback_query_id", callbackQueryId)
+	v := map[string]string{}
+	v["callback_query_id"] = callbackQueryId
 	if opts != nil {
-		v.Add("text", opts.Text)
-		v.Add("show_alert", strconv.FormatBool(opts.ShowAlert))
-		v.Add("url", opts.Url)
+		v["text"] = opts.Text
+		v["show_alert"] = strconv.FormatBool(opts.ShowAlert)
+		v["url"] = opts.Url
 		if opts.CacheTime != 0 {
-			v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+			v["cache_time"] = strconv.FormatInt(opts.CacheTime, 10)
 		}
 	}
 
-	r, err := bot.Get("answerCallbackQuery", v)
+	r, err := bot.Post("answerCallbackQuery", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -167,26 +166,26 @@ type AnswerInlineQueryOpts struct {
 // - opts (type AnswerInlineQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answerinlinequery
 func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryResult, opts *AnswerInlineQueryOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("inline_query_id", inlineQueryId)
+	v := map[string]string{}
+	v["inline_query_id"] = inlineQueryId
 	if results != nil {
 		bs, err := json.Marshal(results)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field results: %w", err)
 		}
-		v.Add("results", string(bs))
+		v["results"] = string(bs)
 	}
 	if opts != nil {
 		if opts.CacheTime != 0 {
-			v.Add("cache_time", strconv.FormatInt(opts.CacheTime, 10))
+			v["cache_time"] = strconv.FormatInt(opts.CacheTime, 10)
 		}
-		v.Add("is_personal", strconv.FormatBool(opts.IsPersonal))
-		v.Add("next_offset", opts.NextOffset)
-		v.Add("switch_pm_text", opts.SwitchPmText)
-		v.Add("switch_pm_parameter", opts.SwitchPmParameter)
+		v["is_personal"] = strconv.FormatBool(opts.IsPersonal)
+		v["next_offset"] = opts.NextOffset
+		v["switch_pm_text"] = opts.SwitchPmText
+		v["switch_pm_parameter"] = opts.SwitchPmParameter
 	}
 
-	r, err := bot.Get("answerInlineQuery", v)
+	r, err := bot.Post("answerInlineQuery", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -207,14 +206,14 @@ type AnswerPreCheckoutQueryOpts struct {
 // - opts (type AnswerPreCheckoutQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answerprecheckoutquery
 func (bot *Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("pre_checkout_query_id", preCheckoutQueryId)
-	v.Add("ok", strconv.FormatBool(ok))
+	v := map[string]string{}
+	v["pre_checkout_query_id"] = preCheckoutQueryId
+	v["ok"] = strconv.FormatBool(ok)
 	if opts != nil {
-		v.Add("error_message", opts.ErrorMessage)
+		v["error_message"] = opts.ErrorMessage
 	}
 
-	r, err := bot.Get("answerPreCheckoutQuery", v)
+	r, err := bot.Post("answerPreCheckoutQuery", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -237,21 +236,21 @@ type AnswerShippingQueryOpts struct {
 // - opts (type AnswerShippingQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answershippingquery
 func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("shipping_query_id", shippingQueryId)
-	v.Add("ok", strconv.FormatBool(ok))
+	v := map[string]string{}
+	v["shipping_query_id"] = shippingQueryId
+	v["ok"] = strconv.FormatBool(ok)
 	if opts != nil {
 		if opts.ShippingOptions != nil {
 			bs, err := json.Marshal(opts.ShippingOptions)
 			if err != nil {
 				return false, fmt.Errorf("failed to marshal field shipping_options: %w", err)
 			}
-			v.Add("shipping_options", string(bs))
+			v["shipping_options"] = string(bs)
 		}
-		v.Add("error_message", opts.ErrorMessage)
+		v["error_message"] = opts.ErrorMessage
 	}
 
-	r, err := bot.Get("answerShippingQuery", v)
+	r, err := bot.Post("answerShippingQuery", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -265,11 +264,11 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#approvechatjoinrequest
 func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 
-	r, err := bot.Get("approveChatJoinRequest", v)
+	r, err := bot.Post("approveChatJoinRequest", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -292,17 +291,17 @@ type BanChatMemberOpts struct {
 // - opts (type BanChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#banchatmember
 func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
 		if opts.UntilDate != 0 {
-			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+			v["until_date"] = strconv.FormatInt(opts.UntilDate, 10)
 		}
-		v.Add("revoke_messages", strconv.FormatBool(opts.RevokeMessages))
+		v["revoke_messages"] = strconv.FormatBool(opts.RevokeMessages)
 	}
 
-	r, err := bot.Get("banChatMember", v)
+	r, err := bot.Post("banChatMember", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -316,11 +315,11 @@ func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpt
 // - sender_chat_id (type int64): Unique identifier of the target sender chat
 // https://core.telegram.org/bots/api#banchatsenderchat
 func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("sender_chat_id", strconv.FormatInt(senderChatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["sender_chat_id"] = strconv.FormatInt(senderChatId, 10)
 
-	r, err := bot.Get("banChatSenderChat", v)
+	r, err := bot.Post("banChatSenderChat", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -332,9 +331,9 @@ func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64) (bool, error
 // Close Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
 // https://core.telegram.org/bots/api#close
 func (bot *Bot) Close() (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 
-	r, err := bot.Get("close", v)
+	r, err := bot.Post("close", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -370,36 +369,36 @@ type CopyMessageOpts struct {
 // - opts (type CopyMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#copymessage
 func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["from_chat_id"] = strconv.FormatInt(fromChatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("copyMessage", v)
+	r, err := bot.Post("copyMessage", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -425,20 +424,20 @@ type CreateChatInviteLinkOpts struct {
 // - opts (type CreateChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createchatinvitelink
 func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
-		v.Add("name", opts.Name)
+		v["name"] = opts.Name
 		if opts.ExpireDate != 0 {
-			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+			v["expire_date"] = strconv.FormatInt(opts.ExpireDate, 10)
 		}
 		if opts.MemberLimit != 0 {
-			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+			v["member_limit"] = strconv.FormatInt(opts.MemberLimit, 10)
 		}
-		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
+		v["creates_join_request"] = strconv.FormatBool(opts.CreatesJoinRequest)
 	}
 
-	r, err := bot.Get("createChatInviteLink", v)
+	r, err := bot.Post("createChatInviteLink", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -469,28 +468,28 @@ type CreateNewStickerSetOpts struct {
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createnewstickerset
 func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts *CreateNewStickerSetOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
-	v.Add("name", name)
-	v.Add("title", title)
-	v.Add("emojis", emojis)
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["name"] = name
+	v["title"] = title
+	v["emojis"] = emojis
 	if opts != nil {
 		if opts.PngSticker != nil {
 			switch m := opts.PngSticker.(type) {
 			case string:
-				v.Add("png_sticker", m)
+				v["png_sticker"] = m
 
 			case NamedReader:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = m
 
 			case io.Reader:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("png_sticker", "attach://png_sticker")
+				v["png_sticker"] = "attach://png_sticker"
 				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -500,15 +499,15 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 		if opts.TgsSticker != nil {
 			switch m := opts.TgsSticker.(type) {
 			case NamedReader:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = m
 
 			case io.Reader:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("tgs_sticker", "attach://tgs_sticker")
+				v["tgs_sticker"] = "attach://tgs_sticker"
 				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -518,27 +517,27 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 		if opts.WebmSticker != nil {
 			switch m := opts.WebmSticker.(type) {
 			case NamedReader:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = m
 
 			case io.Reader:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("webm_sticker", "attach://webm_sticker")
+				v["webm_sticker"] = "attach://webm_sticker"
 				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
 			}
 		}
-		v.Add("contains_masks", strconv.FormatBool(opts.ContainsMasks))
+		v["contains_masks"] = strconv.FormatBool(opts.ContainsMasks)
 		bs, err := json.Marshal(opts.MaskPosition)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
 		}
-		v.Add("mask_position", string(bs))
+		v["mask_position"] = string(bs)
 	}
 
 	r, err := bot.Post("createNewStickerSet", v, data)
@@ -555,11 +554,11 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#declinechatjoinrequest
 func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 
-	r, err := bot.Get("declineChatJoinRequest", v)
+	r, err := bot.Post("declineChatJoinRequest", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -572,10 +571,10 @@ func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64) (bool, error)
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("deleteChatPhoto", v)
+	r, err := bot.Post("deleteChatPhoto", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -588,10 +587,10 @@ func (bot *Bot) DeleteChatPhoto(chatId int64) (bool, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("deleteChatStickerSet", v)
+	r, err := bot.Post("deleteChatStickerSet", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -612,11 +611,11 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 // - message_id (type int64): Identifier of the message to delete
 // https://core.telegram.org/bots/api#deletemessage
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
 
-	r, err := bot.Get("deleteMessage", v)
+	r, err := bot.Post("deleteMessage", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -637,17 +636,17 @@ type DeleteMyCommandsOpts struct {
 // - opts (type DeleteMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletemycommands
 func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		bs, err := json.Marshal(opts.Scope)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
-		v.Add("scope", string(bs))
-		v.Add("language_code", opts.LanguageCode)
+		v["scope"] = string(bs)
+		v["language_code"] = opts.LanguageCode
 	}
 
-	r, err := bot.Get("deleteMyCommands", v)
+	r, err := bot.Post("deleteMyCommands", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -660,10 +659,10 @@ func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
 // - sticker (type string): File identifier of the sticker
 // https://core.telegram.org/bots/api#deletestickerfromset
 func (bot *Bot) DeleteStickerFromSet(sticker string) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("sticker", sticker)
+	v := map[string]string{}
+	v["sticker"] = sticker
 
-	r, err := bot.Get("deleteStickerFromSet", v)
+	r, err := bot.Post("deleteStickerFromSet", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -682,12 +681,12 @@ type DeleteWebhookOpts struct {
 // - opts (type DeleteWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletewebhook
 func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
-		v.Add("drop_pending_updates", strconv.FormatBool(opts.DropPendingUpdates))
+		v["drop_pending_updates"] = strconv.FormatBool(opts.DropPendingUpdates)
 	}
 
-	r, err := bot.Get("deleteWebhook", v)
+	r, err := bot.Post("deleteWebhook", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -714,21 +713,21 @@ type EditChatInviteLinkOpts struct {
 // - opts (type EditChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editchatinvitelink
 func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("invite_link", inviteLink)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["invite_link"] = inviteLink
 	if opts != nil {
-		v.Add("name", opts.Name)
+		v["name"] = opts.Name
 		if opts.ExpireDate != 0 {
-			v.Add("expire_date", strconv.FormatInt(opts.ExpireDate, 10))
+			v["expire_date"] = strconv.FormatInt(opts.ExpireDate, 10)
 		}
 		if opts.MemberLimit != 0 {
-			v.Add("member_limit", strconv.FormatInt(opts.MemberLimit, 10))
+			v["member_limit"] = strconv.FormatInt(opts.MemberLimit, 10)
 		}
-		v.Add("creates_join_request", strconv.FormatBool(opts.CreatesJoinRequest))
+		v["creates_join_request"] = strconv.FormatBool(opts.CreatesJoinRequest)
 	}
 
-	r, err := bot.Get("editChatInviteLink", v)
+	r, err := bot.Post("editChatInviteLink", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -759,32 +758,32 @@ type EditMessageCaptionOpts struct {
 // - opts (type EditMessageCaptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagecaption
 func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["inline_message_id"] = opts.InlineMessageId
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, false, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("editMessageCaption", v)
+	r, err := bot.Post("editMessageCaption", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -825,34 +824,34 @@ type EditMessageLiveLocationOpts struct {
 // - opts (type EditMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagelivelocation
 func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	v := map[string]string{}
+	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
+	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 		if opts.HorizontalAccuracy != 0.0 {
-			v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
+			v["horizontal_accuracy"] = strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64)
 		}
 		if opts.Heading != 0 {
-			v.Add("heading", strconv.FormatInt(opts.Heading, 10))
+			v["heading"] = strconv.FormatInt(opts.Heading, 10)
 		}
 		if opts.ProximityAlertRadius != 0 {
-			v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+			v["proximity_alert_radius"] = strconv.FormatInt(opts.ProximityAlertRadius, 10)
 		}
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("editMessageLiveLocation", v)
+	r, err := bot.Post("editMessageLiveLocation", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -886,26 +885,26 @@ type EditMessageMediaOpts struct {
 // - opts (type EditMessageMediaOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagemedia
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
 	inputMediaBs, err := media.InputMediaParams("media", data)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
 	}
-	v.Add("media", string(inputMediaBs))
+	v["media"] = string(inputMediaBs)
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
 	r, err := bot.Post("editMessageMedia", v, data)
@@ -941,23 +940,23 @@ type EditMessageReplyMarkupOpts struct {
 // - opts (type EditMessageReplyMarkupOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagereplymarkup
 func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("editMessageReplyMarkup", v)
+	r, err := bot.Post("editMessageReplyMarkup", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -997,33 +996,33 @@ type EditMessageTextOpts struct {
 // - opts (type EditMessageTextOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editmessagetext
 func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
-	v.Add("text", text)
+	v := map[string]string{}
+	v["text"] = text
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
-		v.Add("parse_mode", opts.ParseMode)
+		v["inline_message_id"] = opts.InlineMessageId
+		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
 			bs, err := json.Marshal(opts.Entities)
 			if err != nil {
 				return nil, false, fmt.Errorf("failed to marshal field entities: %w", err)
 			}
-			v.Add("entities", string(bs))
+			v["entities"] = string(bs)
 		}
-		v.Add("disable_web_page_preview", strconv.FormatBool(opts.DisableWebPagePreview))
+		v["disable_web_page_preview"] = strconv.FormatBool(opts.DisableWebPagePreview)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("editMessageText", v)
+	r, err := bot.Post("editMessageText", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1044,10 +1043,10 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64) (string, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("exportChatInviteLink", v)
+	r, err := bot.Post("exportChatInviteLink", v, nil)
 	if err != nil {
 		return "", err
 	}
@@ -1071,16 +1070,16 @@ type ForwardMessageOpts struct {
 // - opts (type ForwardMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#forwardmessage
 func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("from_chat_id", strconv.FormatInt(fromChatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["from_chat_id"] = strconv.FormatInt(fromChatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 	}
 
-	r, err := bot.Get("forwardMessage", v)
+	r, err := bot.Post("forwardMessage", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1093,10 +1092,10 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchat
 func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("getChat", v)
+	r, err := bot.Post("getChat", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1109,10 +1108,10 @@ func (bot *Bot) GetChat(chatId int64) (*Chat, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("getChatAdministrators", v)
+	r, err := bot.Post("getChatAdministrators", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1125,11 +1124,11 @@ func (bot *Bot) GetChatAdministrators(chatId int64) ([]ChatMember, error) {
 // - user_id (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#getchatmember
 func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 
-	r, err := bot.Get("getChatMember", v)
+	r, err := bot.Post("getChatMember", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1141,10 +1140,10 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64) (ChatMember, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchatmembercount
 func (bot *Bot) GetChatMemberCount(chatId int64) (int64, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("getChatMemberCount", v)
+	r, err := bot.Post("getChatMemberCount", v, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -1158,10 +1157,10 @@ func (bot *Bot) GetChatMemberCount(chatId int64) (int64, error) {
 // - file_id (type string): File identifier to get info about
 // https://core.telegram.org/bots/api#getfile
 func (bot *Bot) GetFile(fileId string) (*File, error) {
-	v := urlLib.Values{}
-	v.Add("file_id", fileId)
+	v := map[string]string{}
+	v["file_id"] = fileId
 
-	r, err := bot.Get("getFile", v)
+	r, err := bot.Post("getFile", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1185,19 +1184,19 @@ type GetGameHighScoresOpts struct {
 // - opts (type GetGameHighScoresOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getgamehighscores
 func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]GameHighScore, error) {
-	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 	}
 
-	r, err := bot.Get("getGameHighScores", v)
+	r, err := bot.Post("getGameHighScores", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1209,9 +1208,9 @@ func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]
 // GetMe A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
 // https://core.telegram.org/bots/api#getme
 func (bot *Bot) GetMe() (*User, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 
-	r, err := bot.Get("getMe", v)
+	r, err := bot.Post("getMe", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1232,17 +1231,17 @@ type GetMyCommandsOpts struct {
 // - opts (type GetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getmycommands
 func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		bs, err := json.Marshal(opts.Scope)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
-		v.Add("scope", string(bs))
-		v.Add("language_code", opts.LanguageCode)
+		v["scope"] = string(bs)
+		v["language_code"] = opts.LanguageCode
 	}
 
-	r, err := bot.Get("getMyCommands", v)
+	r, err := bot.Post("getMyCommands", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1255,10 +1254,10 @@ func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 // - name (type string): Name of the sticker set
 // https://core.telegram.org/bots/api#getstickerset
 func (bot *Bot) GetStickerSet(name string) (*StickerSet, error) {
-	v := urlLib.Values{}
-	v.Add("name", name)
+	v := map[string]string{}
+	v["name"] = name
 
-	r, err := bot.Get("getStickerSet", v)
+	r, err := bot.Post("getStickerSet", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1283,27 +1282,27 @@ type GetUpdatesOpts struct {
 // - opts (type GetUpdatesOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getupdates
 func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		if opts.Offset != 0 {
-			v.Add("offset", strconv.FormatInt(opts.Offset, 10))
+			v["offset"] = strconv.FormatInt(opts.Offset, 10)
 		}
 		if opts.Limit != 0 {
-			v.Add("limit", strconv.FormatInt(opts.Limit, 10))
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
 		}
 		if opts.Timeout != 0 {
-			v.Add("timeout", strconv.FormatInt(opts.Timeout, 10))
+			v["timeout"] = strconv.FormatInt(opts.Timeout, 10)
 		}
 		if opts.AllowedUpdates != nil {
 			bs, err := json.Marshal(opts.AllowedUpdates)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field allowed_updates: %w", err)
 			}
-			v.Add("allowed_updates", string(bs))
+			v["allowed_updates"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("getUpdates", v)
+	r, err := bot.Post("getUpdates", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1325,18 +1324,18 @@ type GetUserProfilePhotosOpts struct {
 // - opts (type GetUserProfilePhotosOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
-	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
 		if opts.Offset != 0 {
-			v.Add("offset", strconv.FormatInt(opts.Offset, 10))
+			v["offset"] = strconv.FormatInt(opts.Offset, 10)
 		}
 		if opts.Limit != 0 {
-			v.Add("limit", strconv.FormatInt(opts.Limit, 10))
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
 		}
 	}
 
-	r, err := bot.Get("getUserProfilePhotos", v)
+	r, err := bot.Post("getUserProfilePhotos", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1348,9 +1347,9 @@ func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpt
 // GetWebhookInfo Use this method to get current webhook status. Requires no parameters. On success, returns a WebhookInfo object. If the bot is using getUpdates, will return an object with the url field empty.
 // https://core.telegram.org/bots/api#getwebhookinfo
 func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 
-	r, err := bot.Get("getWebhookInfo", v)
+	r, err := bot.Post("getWebhookInfo", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1363,10 +1362,10 @@ func (bot *Bot) GetWebhookInfo() (*WebhookInfo, error) {
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#leavechat
 func (bot *Bot) LeaveChat(chatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("leaveChat", v)
+	r, err := bot.Post("leaveChat", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1378,9 +1377,9 @@ func (bot *Bot) LeaveChat(chatId int64) (bool, error) {
 // LogOut Use this method to log out from the cloud Bot API server before launching the bot locally. You must log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns True on success. Requires no parameters.
 // https://core.telegram.org/bots/api#logout
 func (bot *Bot) LogOut() (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 
-	r, err := bot.Get("logOut", v)
+	r, err := bot.Post("logOut", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1401,14 +1400,14 @@ type PinChatMessageOpts struct {
 // - opts (type PinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#pinchatmessage
 func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 	}
 
-	r, err := bot.Get("pinChatMessage", v)
+	r, err := bot.Post("pinChatMessage", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1449,24 +1448,24 @@ type PromoteChatMemberOpts struct {
 // - opts (type PromoteChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#promotechatmember
 func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
-		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
-		v.Add("can_manage_chat", strconv.FormatBool(opts.CanManageChat))
-		v.Add("can_post_messages", strconv.FormatBool(opts.CanPostMessages))
-		v.Add("can_edit_messages", strconv.FormatBool(opts.CanEditMessages))
-		v.Add("can_delete_messages", strconv.FormatBool(opts.CanDeleteMessages))
-		v.Add("can_manage_voice_chats", strconv.FormatBool(opts.CanManageVoiceChats))
-		v.Add("can_restrict_members", strconv.FormatBool(opts.CanRestrictMembers))
-		v.Add("can_promote_members", strconv.FormatBool(opts.CanPromoteMembers))
-		v.Add("can_change_info", strconv.FormatBool(opts.CanChangeInfo))
-		v.Add("can_invite_users", strconv.FormatBool(opts.CanInviteUsers))
-		v.Add("can_pin_messages", strconv.FormatBool(opts.CanPinMessages))
+		v["is_anonymous"] = strconv.FormatBool(opts.IsAnonymous)
+		v["can_manage_chat"] = strconv.FormatBool(opts.CanManageChat)
+		v["can_post_messages"] = strconv.FormatBool(opts.CanPostMessages)
+		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
+		v["can_delete_messages"] = strconv.FormatBool(opts.CanDeleteMessages)
+		v["can_manage_voice_chats"] = strconv.FormatBool(opts.CanManageVoiceChats)
+		v["can_restrict_members"] = strconv.FormatBool(opts.CanRestrictMembers)
+		v["can_promote_members"] = strconv.FormatBool(opts.CanPromoteMembers)
+		v["can_change_info"] = strconv.FormatBool(opts.CanChangeInfo)
+		v["can_invite_users"] = strconv.FormatBool(opts.CanInviteUsers)
+		v["can_pin_messages"] = strconv.FormatBool(opts.CanPinMessages)
 	}
 
-	r, err := bot.Get("promoteChatMember", v)
+	r, err := bot.Post("promoteChatMember", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1488,21 +1487,21 @@ type RestrictChatMemberOpts struct {
 // - opts (type RestrictChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#restrictchatmember
 func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
 	}
-	v.Add("permissions", string(bs))
+	v["permissions"] = string(bs)
 	if opts != nil {
 		if opts.UntilDate != 0 {
-			v.Add("until_date", strconv.FormatInt(opts.UntilDate, 10))
+			v["until_date"] = strconv.FormatInt(opts.UntilDate, 10)
 		}
 	}
 
-	r, err := bot.Get("restrictChatMember", v)
+	r, err := bot.Post("restrictChatMember", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1516,11 +1515,11 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 // - invite_link (type string): The invite link to revoke
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string) (*ChatInviteLink, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("invite_link", inviteLink)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["invite_link"] = inviteLink
 
-	r, err := bot.Get("revokeChatInviteLink", v)
+	r, err := bot.Post("revokeChatInviteLink", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1563,24 +1562,24 @@ type SendAnimationOpts struct {
 // - opts (type SendAnimationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendanimation
 func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if animation != nil {
 		switch m := animation.(type) {
 		case string:
-			v.Add("animation", m)
+			v["animation"] = m
 
 		case NamedReader:
-			v.Add("animation", "attach://animation")
+			v["animation"] = "attach://animation"
 			data["animation"] = m
 
 		case io.Reader:
-			v.Add("animation", "attach://animation")
+			v["animation"] = "attach://animation"
 			data["animation"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("animation", "attach://animation")
+			v["animation"] = "attach://animation"
 			data["animation"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -1589,56 +1588,56 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 	}
 	if opts != nil {
 		if opts.Duration != 0 {
-			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
 		if opts.Width != 0 {
-			v.Add("width", strconv.FormatInt(opts.Width, 10))
+			v["width"] = strconv.FormatInt(opts.Width, 10)
 		}
 		if opts.Height != 0 {
-			v.Add("height", strconv.FormatInt(opts.Height, 10))
+			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
 			}
 		}
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -1686,24 +1685,24 @@ type SendAudioOpts struct {
 // - opts (type SendAudioOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendaudio
 func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if audio != nil {
 		switch m := audio.(type) {
 		case string:
-			v.Add("audio", m)
+			v["audio"] = m
 
 		case NamedReader:
-			v.Add("audio", "attach://audio")
+			v["audio"] = "attach://audio"
 			data["audio"] = m
 
 		case io.Reader:
-			v.Add("audio", "attach://audio")
+			v["audio"] = "attach://audio"
 			data["audio"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("audio", "attach://audio")
+			v["audio"] = "attach://audio"
 			data["audio"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -1711,53 +1710,53 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 	}
 	if opts != nil {
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
 		if opts.Duration != 0 {
-			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
-		v.Add("performer", opts.Performer)
-		v.Add("title", opts.Title)
+		v["performer"] = opts.Performer
+		v["title"] = opts.Title
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
 			}
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -1776,11 +1775,11 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 // - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("action", action)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["action"] = action
 
-	r, err := bot.Get("sendChatAction", v)
+	r, err := bot.Post("sendChatAction", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -1814,29 +1813,29 @@ type SendContactOpts struct {
 // - opts (type SendContactOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendcontact
 func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("phone_number", phoneNumber)
-	v.Add("first_name", firstName)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["phone_number"] = phoneNumber
+	v["first_name"] = firstName
 	if opts != nil {
-		v.Add("last_name", opts.LastName)
-		v.Add("vcard", opts.Vcard)
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["last_name"] = opts.LastName
+		v["vcard"] = opts.Vcard
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendContact", v)
+	r, err := bot.Post("sendContact", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1866,26 +1865,26 @@ type SendDiceOpts struct {
 // - opts (type SendDiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#senddice
 func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
-		v.Add("emoji", opts.Emoji)
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["emoji"] = opts.Emoji
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendDice", v)
+	r, err := bot.Post("sendDice", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1924,24 +1923,24 @@ type SendDocumentOpts struct {
 // - opts (type SendDocumentOpts): All optional parameters.
 // https://core.telegram.org/bots/api#senddocument
 func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumentOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if document != nil {
 		switch m := document.(type) {
 		case string:
-			v.Add("document", m)
+			v["document"] = m
 
 		case NamedReader:
-			v.Add("document", "attach://document")
+			v["document"] = "attach://document"
 			data["document"] = m
 
 		case io.Reader:
-			v.Add("document", "attach://document")
+			v["document"] = "attach://document"
 			data["document"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("document", "attach://document")
+			v["document"] = "attach://document"
 			data["document"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -1952,46 +1951,46 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
 			}
 		}
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
-		v.Add("disable_content_type_detection", strconv.FormatBool(opts.DisableContentTypeDetection))
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_content_type_detection"] = strconv.FormatBool(opts.DisableContentTypeDetection)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2024,24 +2023,24 @@ type SendGameOpts struct {
 // - opts (type SendGameOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendgame
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("game_short_name", gameShortName)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["game_short_name"] = gameShortName
 	if opts != nil {
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("sendGame", v)
+	r, err := bot.Post("sendGame", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2105,64 +2104,64 @@ type SendInvoiceOpts struct {
 // - opts (type SendInvoiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendinvoice
 func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("title", title)
-	v.Add("description", description)
-	v.Add("payload", payload)
-	v.Add("provider_token", providerToken)
-	v.Add("currency", currency)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["title"] = title
+	v["description"] = description
+	v["payload"] = payload
+	v["provider_token"] = providerToken
+	v["currency"] = currency
 	if prices != nil {
 		bs, err := json.Marshal(prices)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field prices: %w", err)
 		}
-		v.Add("prices", string(bs))
+		v["prices"] = string(bs)
 	}
 	if opts != nil {
 		if opts.MaxTipAmount != 0 {
-			v.Add("max_tip_amount", strconv.FormatInt(opts.MaxTipAmount, 10))
+			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
 		if opts.SuggestedTipAmounts != nil {
 			bs, err := json.Marshal(opts.SuggestedTipAmounts)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field suggested_tip_amounts: %w", err)
 			}
-			v.Add("suggested_tip_amounts", string(bs))
+			v["suggested_tip_amounts"] = string(bs)
 		}
-		v.Add("start_parameter", opts.StartParameter)
-		v.Add("provider_data", opts.ProviderData)
-		v.Add("photo_url", opts.PhotoUrl)
+		v["start_parameter"] = opts.StartParameter
+		v["provider_data"] = opts.ProviderData
+		v["photo_url"] = opts.PhotoUrl
 		if opts.PhotoSize != 0 {
-			v.Add("photo_size", strconv.FormatInt(opts.PhotoSize, 10))
+			v["photo_size"] = strconv.FormatInt(opts.PhotoSize, 10)
 		}
 		if opts.PhotoWidth != 0 {
-			v.Add("photo_width", strconv.FormatInt(opts.PhotoWidth, 10))
+			v["photo_width"] = strconv.FormatInt(opts.PhotoWidth, 10)
 		}
 		if opts.PhotoHeight != 0 {
-			v.Add("photo_height", strconv.FormatInt(opts.PhotoHeight, 10))
+			v["photo_height"] = strconv.FormatInt(opts.PhotoHeight, 10)
 		}
-		v.Add("need_name", strconv.FormatBool(opts.NeedName))
-		v.Add("need_phone_number", strconv.FormatBool(opts.NeedPhoneNumber))
-		v.Add("need_email", strconv.FormatBool(opts.NeedEmail))
-		v.Add("need_shipping_address", strconv.FormatBool(opts.NeedShippingAddress))
-		v.Add("send_phone_number_to_provider", strconv.FormatBool(opts.SendPhoneNumberToProvider))
-		v.Add("send_email_to_provider", strconv.FormatBool(opts.SendEmailToProvider))
-		v.Add("is_flexible", strconv.FormatBool(opts.IsFlexible))
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["need_name"] = strconv.FormatBool(opts.NeedName)
+		v["need_phone_number"] = strconv.FormatBool(opts.NeedPhoneNumber)
+		v["need_email"] = strconv.FormatBool(opts.NeedEmail)
+		v["need_shipping_address"] = strconv.FormatBool(opts.NeedShippingAddress)
+		v["send_phone_number_to_provider"] = strconv.FormatBool(opts.SendPhoneNumberToProvider)
+		v["send_email_to_provider"] = strconv.FormatBool(opts.SendEmailToProvider)
+		v["is_flexible"] = strconv.FormatBool(opts.IsFlexible)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("sendInvoice", v)
+	r, err := bot.Post("sendInvoice", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2200,39 +2199,39 @@ type SendLocationOpts struct {
 // - opts (type SendLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendlocation
 func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
+	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
 		if opts.HorizontalAccuracy != 0.0 {
-			v.Add("horizontal_accuracy", strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64))
+			v["horizontal_accuracy"] = strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64)
 		}
 		if opts.LivePeriod != 0 {
-			v.Add("live_period", strconv.FormatInt(opts.LivePeriod, 10))
+			v["live_period"] = strconv.FormatInt(opts.LivePeriod, 10)
 		}
 		if opts.Heading != 0 {
-			v.Add("heading", strconv.FormatInt(opts.Heading, 10))
+			v["heading"] = strconv.FormatInt(opts.Heading, 10)
 		}
 		if opts.ProximityAlertRadius != 0 {
-			v.Add("proximity_alert_radius", strconv.FormatInt(opts.ProximityAlertRadius, 10))
+			v["proximity_alert_radius"] = strconv.FormatInt(opts.ProximityAlertRadius, 10)
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendLocation", v)
+	r, err := bot.Post("sendLocation", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2259,9 +2258,9 @@ type SendMediaGroupOpts struct {
 // - opts (type SendMediaGroupOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendmediagroup
 func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
@@ -2275,15 +2274,15 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal raw json list of InputMedia for field: media %w", err)
 		}
-		v.Add("media", string(bs))
+		v["media"] = string(bs)
 	}
 	if opts != nil {
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 	}
 
 	r, err := bot.Post("sendMediaGroup", v, data)
@@ -2321,35 +2320,35 @@ type SendMessageOpts struct {
 // - opts (type SendMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendmessage
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("text", text)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["text"] = text
 	if opts != nil {
-		v.Add("parse_mode", opts.ParseMode)
+		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
 			bs, err := json.Marshal(opts.Entities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field entities: %w", err)
 			}
-			v.Add("entities", string(bs))
+			v["entities"] = string(bs)
 		}
-		v.Add("disable_web_page_preview", strconv.FormatBool(opts.DisableWebPagePreview))
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_web_page_preview"] = strconv.FormatBool(opts.DisableWebPagePreview)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendMessage", v)
+	r, err := bot.Post("sendMessage", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2384,24 +2383,24 @@ type SendPhotoOpts struct {
 // - opts (type SendPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendphoto
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
 		switch m := photo.(type) {
 		case string:
-			v.Add("photo", m)
+			v["photo"] = m
 
 		case NamedReader:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = m
 
 		case io.Reader:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -2409,27 +2408,27 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		}
 	}
 	if opts != nil {
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2483,56 +2482,56 @@ type SendPollOpts struct {
 // - opts (type SendPollOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendpoll
 func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *SendPollOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("question", question)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["question"] = question
 	if options != nil {
 		bs, err := json.Marshal(options)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field options: %w", err)
 		}
-		v.Add("options", string(bs))
+		v["options"] = string(bs)
 	}
 	if opts != nil {
-		v.Add("is_anonymous", strconv.FormatBool(opts.IsAnonymous))
-		v.Add("type", opts.Type)
-		v.Add("allows_multiple_answers", strconv.FormatBool(opts.AllowsMultipleAnswers))
+		v["is_anonymous"] = strconv.FormatBool(opts.IsAnonymous)
+		v["type"] = opts.Type
+		v["allows_multiple_answers"] = strconv.FormatBool(opts.AllowsMultipleAnswers)
 		if opts.Type == "quiz" {
 			// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
-			v.Add("correct_option_id", strconv.FormatInt(opts.CorrectOptionId, 10))
+			v["correct_option_id"] = strconv.FormatInt(opts.CorrectOptionId, 10)
 		}
-		v.Add("explanation", opts.Explanation)
-		v.Add("explanation_parse_mode", opts.ExplanationParseMode)
+		v["explanation"] = opts.Explanation
+		v["explanation_parse_mode"] = opts.ExplanationParseMode
 		if opts.ExplanationEntities != nil {
 			bs, err := json.Marshal(opts.ExplanationEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field explanation_entities: %w", err)
 			}
-			v.Add("explanation_entities", string(bs))
+			v["explanation_entities"] = string(bs)
 		}
 		if opts.OpenPeriod != 0 {
-			v.Add("open_period", strconv.FormatInt(opts.OpenPeriod, 10))
+			v["open_period"] = strconv.FormatInt(opts.OpenPeriod, 10)
 		}
 		if opts.CloseDate != 0 {
-			v.Add("close_date", strconv.FormatInt(opts.CloseDate, 10))
+			v["close_date"] = strconv.FormatInt(opts.CloseDate, 10)
 		}
-		v.Add("is_closed", strconv.FormatBool(opts.IsClosed))
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["is_closed"] = strconv.FormatBool(opts.IsClosed)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendPoll", v)
+	r, err := bot.Post("sendPoll", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2561,24 +2560,24 @@ type SendStickerOpts struct {
 // - opts (type SendStickerOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendsticker
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if sticker != nil {
 		switch m := sticker.(type) {
 		case string:
-			v.Add("sticker", m)
+			v["sticker"] = m
 
 		case NamedReader:
-			v.Add("sticker", "attach://sticker")
+			v["sticker"] = "attach://sticker"
 			data["sticker"] = m
 
 		case io.Reader:
-			v.Add("sticker", "attach://sticker")
+			v["sticker"] = "attach://sticker"
 			data["sticker"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("sticker", "attach://sticker")
+			v["sticker"] = "attach://sticker"
 			data["sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -2586,18 +2585,18 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		}
 	}
 	if opts != nil {
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2641,33 +2640,33 @@ type SendVenueOpts struct {
 // - opts (type SendVenueOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvenue
 func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("latitude", strconv.FormatFloat(latitude, 'f', -1, 64))
-	v.Add("longitude", strconv.FormatFloat(longitude, 'f', -1, 64))
-	v.Add("title", title)
-	v.Add("address", address)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
+	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
+	v["title"] = title
+	v["address"] = address
 	if opts != nil {
-		v.Add("foursquare_id", opts.FoursquareId)
-		v.Add("foursquare_type", opts.FoursquareType)
-		v.Add("google_place_id", opts.GooglePlaceId)
-		v.Add("google_place_type", opts.GooglePlaceType)
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["foursquare_id"] = opts.FoursquareId
+		v["foursquare_type"] = opts.FoursquareType
+		v["google_place_id"] = opts.GooglePlaceId
+		v["google_place_type"] = opts.GooglePlaceType
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
-	r, err := bot.Get("sendVenue", v)
+	r, err := bot.Post("sendVenue", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2712,24 +2711,24 @@ type SendVideoOpts struct {
 // - opts (type SendVideoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideo
 func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if video != nil {
 		switch m := video.(type) {
 		case string:
-			v.Add("video", m)
+			v["video"] = m
 
 		case NamedReader:
-			v.Add("video", "attach://video")
+			v["video"] = "attach://video"
 			data["video"] = m
 
 		case io.Reader:
-			v.Add("video", "attach://video")
+			v["video"] = "attach://video"
 			data["video"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("video", "attach://video")
+			v["video"] = "attach://video"
 			data["video"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -2738,57 +2737,57 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 	}
 	if opts != nil {
 		if opts.Duration != 0 {
-			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
 		if opts.Width != 0 {
-			v.Add("width", strconv.FormatInt(opts.Width, 10))
+			v["width"] = strconv.FormatInt(opts.Width, 10)
 		}
 		if opts.Height != 0 {
-			v.Add("height", strconv.FormatInt(opts.Height, 10))
+			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
 			}
 		}
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
-		v.Add("supports_streaming", strconv.FormatBool(opts.SupportsStreaming))
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["supports_streaming"] = strconv.FormatBool(opts.SupportsStreaming)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2827,24 +2826,24 @@ type SendVideoNoteOpts struct {
 // - opts (type SendVideoNoteOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideonote
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if videoNote != nil {
 		switch m := videoNote.(type) {
 		case string:
-			v.Add("video_note", m)
+			v["video_note"] = m
 
 		case NamedReader:
-			v.Add("video_note", "attach://video_note")
+			v["video_note"] = "attach://video_note"
 			data["video_note"] = m
 
 		case io.Reader:
-			v.Add("video_note", "attach://video_note")
+			v["video_note"] = "attach://video_note"
 			data["video_note"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("video_note", "attach://video_note")
+			v["video_note"] = "attach://video_note"
 			data["video_note"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -2853,44 +2852,44 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 	}
 	if opts != nil {
 		if opts.Duration != 0 {
-			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
 		if opts.Length != 0 {
-			v.Add("length", strconv.FormatInt(opts.Length, 10))
+			v["length"] = strconv.FormatInt(opts.Length, 10)
 		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
 			}
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2931,24 +2930,24 @@ type SendVoiceOpts struct {
 // - opts (type SendVoiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvoice
 func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if voice != nil {
 		switch m := voice.(type) {
 		case string:
-			v.Add("voice", m)
+			v["voice"] = m
 
 		case NamedReader:
-			v.Add("voice", "attach://voice")
+			v["voice"] = "attach://voice"
 			data["voice"] = m
 
 		case io.Reader:
-			v.Add("voice", "attach://voice")
+			v["voice"] = "attach://voice"
 			data["voice"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("voice", "attach://voice")
+			v["voice"] = "attach://voice"
 			data["voice"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -2956,30 +2955,30 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		}
 	}
 	if opts != nil {
-		v.Add("caption", opts.Caption)
-		v.Add("parse_mode", opts.ParseMode)
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
 			}
-			v.Add("caption_entities", string(bs))
+			v["caption_entities"] = string(bs)
 		}
 		if opts.Duration != 0 {
-			v.Add("duration", strconv.FormatInt(opts.Duration, 10))
+			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
-		v.Add("disable_notification", strconv.FormatBool(opts.DisableNotification))
-		v.Add("protect_content", strconv.FormatBool(opts.ProtectContent))
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
-			v.Add("reply_to_message_id", strconv.FormatInt(opts.ReplyToMessageId, 10))
+			v["reply_to_message_id"] = strconv.FormatInt(opts.ReplyToMessageId, 10)
 		}
-		v.Add("allow_sending_without_reply", strconv.FormatBool(opts.AllowSendingWithoutReply))
+		v["allow_sending_without_reply"] = strconv.FormatBool(opts.AllowSendingWithoutReply)
 		if opts.ReplyMarkup != nil {
 			bs, err := json.Marshal(opts.ReplyMarkup)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 			}
-			v.Add("reply_markup", string(bs))
+			v["reply_markup"] = string(bs)
 		}
 	}
 
@@ -2998,12 +2997,12 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 // - custom_title (type string): New custom title for the administrator; 0-16 characters, emoji are not allowed
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
-	v.Add("custom_title", customTitle)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["custom_title"] = customTitle
 
-	r, err := bot.Get("setChatAdministratorCustomTitle", v)
+	r, err := bot.Post("setChatAdministratorCustomTitle", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3023,13 +3022,13 @@ type SetChatDescriptionOpts struct {
 // - opts (type SetChatDescriptionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatdescription
 func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
-		v.Add("description", opts.Description)
+		v["description"] = opts.Description
 	}
 
-	r, err := bot.Get("setChatDescription", v)
+	r, err := bot.Post("setChatDescription", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3043,15 +3042,15 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
 	}
-	v.Add("permissions", string(bs))
+	v["permissions"] = string(bs)
 
-	r, err := bot.Get("setChatPermissions", v)
+	r, err := bot.Post("setChatPermissions", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3065,21 +3064,21 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions) (b
 // - photo (type InputFile): New chat photo, uploaded using multipart/form-data
 // https://core.telegram.org/bots/api#setchatphoto
 func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
 		switch m := photo.(type) {
 		case NamedReader:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = m
 
 		case io.Reader:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("photo", "attach://photo")
+			v["photo"] = "attach://photo"
 			data["photo"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
@@ -3101,11 +3100,11 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile) (bool, error) {
 // - sticker_set_name (type string): Name of the sticker set to be set as the group sticker set
 // https://core.telegram.org/bots/api#setchatstickerset
 func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("sticker_set_name", stickerSetName)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["sticker_set_name"] = stickerSetName
 
-	r, err := bot.Get("setChatStickerSet", v)
+	r, err := bot.Post("setChatStickerSet", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3119,11 +3118,11 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string) (bool, er
 // - title (type string): New chat title, 1-255 characters
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("title", title)
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["title"] = title
 
-	r, err := bot.Get("setChatTitle", v)
+	r, err := bot.Post("setChatTitle", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3152,22 +3151,22 @@ type SetGameScoreOpts struct {
 // - opts (type SetGameScoreOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setgamescore
 func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
-	v.Add("score", strconv.FormatInt(score, 10))
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["score"] = strconv.FormatInt(score, 10)
 	if opts != nil {
-		v.Add("force", strconv.FormatBool(opts.Force))
-		v.Add("disable_edit_message", strconv.FormatBool(opts.DisableEditMessage))
+		v["force"] = strconv.FormatBool(opts.Force)
+		v["disable_edit_message"] = strconv.FormatBool(opts.DisableEditMessage)
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 	}
 
-	r, err := bot.Get("setGameScore", v)
+	r, err := bot.Post("setGameScore", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -3197,24 +3196,24 @@ type SetMyCommandsOpts struct {
 // - opts (type SetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setmycommands
 func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if commands != nil {
 		bs, err := json.Marshal(commands)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field commands: %w", err)
 		}
-		v.Add("commands", string(bs))
+		v["commands"] = string(bs)
 	}
 	if opts != nil {
 		bs, err := json.Marshal(opts.Scope)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
-		v.Add("scope", string(bs))
-		v.Add("language_code", opts.LanguageCode)
+		v["scope"] = string(bs)
+		v["language_code"] = opts.LanguageCode
 	}
 
-	r, err := bot.Get("setMyCommands", v)
+	r, err := bot.Post("setMyCommands", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3229,17 +3228,17 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 // - errors (type []PassportElementError): A JSON-serialized array describing the errors
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if errors != nil {
 		bs, err := json.Marshal(errors)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field errors: %w", err)
 		}
-		v.Add("errors", string(bs))
+		v["errors"] = string(bs)
 	}
 
-	r, err := bot.Get("setPassportDataErrors", v)
+	r, err := bot.Post("setPassportDataErrors", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3253,11 +3252,11 @@ func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementErro
 // - position (type int64): New sticker position in the set, zero-based
 // https://core.telegram.org/bots/api#setstickerpositioninset
 func (bot *Bot) SetStickerPositionInSet(sticker string, position int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("sticker", sticker)
-	v.Add("position", strconv.FormatInt(position, 10))
+	v := map[string]string{}
+	v["sticker"] = sticker
+	v["position"] = strconv.FormatInt(position, 10)
 
-	r, err := bot.Get("setStickerPositionInSet", v)
+	r, err := bot.Post("setStickerPositionInSet", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3278,26 +3277,26 @@ type SetStickerSetThumbOpts struct {
 // - opts (type SetStickerSetThumbOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setstickersetthumb
 func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSetThumbOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("name", name)
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v["name"] = name
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
-				v.Add("thumb", m)
+				v["thumb"] = m
 
 			case NamedReader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = m
 
 			case io.Reader:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("thumb", "attach://thumb")
+				v["thumb"] = "attach://thumb"
 				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
@@ -3335,40 +3334,40 @@ type SetWebhookOpts struct {
 // - opts (type SetWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setwebhook
 func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("url", url)
+	v["url"] = url
 	if opts != nil {
 		if opts.Certificate != nil {
 			switch m := opts.Certificate.(type) {
 			case NamedReader:
-				v.Add("certificate", "attach://certificate")
+				v["certificate"] = "attach://certificate"
 				data["certificate"] = m
 
 			case io.Reader:
-				v.Add("certificate", "attach://certificate")
+				v["certificate"] = "attach://certificate"
 				data["certificate"] = NamedFile{File: m}
 
 			case []byte:
-				v.Add("certificate", "attach://certificate")
+				v["certificate"] = "attach://certificate"
 				data["certificate"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Certificate)
 			}
 		}
-		v.Add("ip_address", opts.IpAddress)
+		v["ip_address"] = opts.IpAddress
 		if opts.MaxConnections != 0 {
-			v.Add("max_connections", strconv.FormatInt(opts.MaxConnections, 10))
+			v["max_connections"] = strconv.FormatInt(opts.MaxConnections, 10)
 		}
 		if opts.AllowedUpdates != nil {
 			bs, err := json.Marshal(opts.AllowedUpdates)
 			if err != nil {
 				return false, fmt.Errorf("failed to marshal field allowed_updates: %w", err)
 			}
-			v.Add("allowed_updates", string(bs))
+			v["allowed_updates"] = string(bs)
 		}
-		v.Add("drop_pending_updates", strconv.FormatBool(opts.DropPendingUpdates))
+		v["drop_pending_updates"] = strconv.FormatBool(opts.DropPendingUpdates)
 	}
 
 	r, err := bot.Post("setWebhook", v, data)
@@ -3396,23 +3395,23 @@ type StopMessageLiveLocationOpts struct {
 // - opts (type StopMessageLiveLocationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stopmessagelivelocation
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	if opts != nil {
 		if opts.ChatId != 0 {
-			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
-		v.Add("inline_message_id", opts.InlineMessageId)
+		v["inline_message_id"] = opts.InlineMessageId
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("stopMessageLiveLocation", v)
+	r, err := bot.Post("stopMessageLiveLocation", v, nil)
 	if err != nil {
 		return nil, false, err
 	}
@@ -3441,18 +3440,18 @@ type StopPollOpts struct {
 // - opts (type StopPollOpts): All optional parameters.
 // https://core.telegram.org/bots/api#stoppoll
 func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("message_id", strconv.FormatInt(messageId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
 		}
-		v.Add("reply_markup", string(bs))
+		v["reply_markup"] = string(bs)
 	}
 
-	r, err := bot.Get("stopPoll", v)
+	r, err := bot.Post("stopPoll", v, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -3473,14 +3472,14 @@ type UnbanChatMemberOpts struct {
 // - opts (type UnbanChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unbanchatmember
 func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
-		v.Add("only_if_banned", strconv.FormatBool(opts.OnlyIfBanned))
+		v["only_if_banned"] = strconv.FormatBool(opts.OnlyIfBanned)
 	}
 
-	r, err := bot.Get("unbanChatMember", v)
+	r, err := bot.Post("unbanChatMember", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3494,11 +3493,11 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 // - sender_chat_id (type int64): Unique identifier of the target sender chat
 // https://core.telegram.org/bots/api#unbanchatsenderchat
 func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
-	v.Add("sender_chat_id", strconv.FormatInt(senderChatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["sender_chat_id"] = strconv.FormatInt(senderChatId, 10)
 
-	r, err := bot.Get("unbanChatSenderChat", v)
+	r, err := bot.Post("unbanChatSenderChat", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3511,10 +3510,10 @@ func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64) (bool, err
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
-	r, err := bot.Get("unpinAllChatMessages", v)
+	r, err := bot.Post("unpinAllChatMessages", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3534,15 +3533,15 @@ type UnpinChatMessageOpts struct {
 // - opts (type UnpinChatMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
-	v := urlLib.Values{}
-	v.Add("chat_id", strconv.FormatInt(chatId, 10))
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
 		if opts.MessageId != 0 {
-			v.Add("message_id", strconv.FormatInt(opts.MessageId, 10))
+			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
 	}
 
-	r, err := bot.Get("unpinChatMessage", v)
+	r, err := bot.Post("unpinChatMessage", v, nil)
 	if err != nil {
 		return false, err
 	}
@@ -3556,21 +3555,21 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 // - png_sticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
 // https://core.telegram.org/bots/api#uploadstickerfile
 func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile) (*File, error) {
-	v := urlLib.Values{}
+	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v.Add("user_id", strconv.FormatInt(userId, 10))
+	v["user_id"] = strconv.FormatInt(userId, 10)
 	if pngSticker != nil {
 		switch m := pngSticker.(type) {
 		case NamedReader:
-			v.Add("png_sticker", "attach://png_sticker")
+			v["png_sticker"] = "attach://png_sticker"
 			data["png_sticker"] = m
 
 		case io.Reader:
-			v.Add("png_sticker", "attach://png_sticker")
+			v["png_sticker"] = "attach://png_sticker"
 			data["png_sticker"] = NamedFile{File: m}
 
 		case []byte:
-			v.Add("png_sticker", "attach://png_sticker")
+			v["png_sticker"] = "attach://png_sticker"
 			data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:

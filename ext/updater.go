@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -89,7 +88,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// - needing to convert the opt values to strings to pass to the values.
 	// - unnecessary unmarshalling of the (possibly multiple) full Update structs.
 	// Yes, this also makes me sad. :/
-	v := url.Values{}
+	v := map[string]string{}
 	dropPendingUpdates := false
 	pollTimeout := time.Second * 10
 
@@ -99,21 +98,21 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 			pollTimeout = opts.Timeout
 		}
 
-		v.Add("offset", strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10))
-		v.Add("limit", strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10))
-		v.Add("timeout", strconv.FormatInt(opts.GetUpdatesOpts.Timeout, 10))
+		v["offset"] = strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10)
+		v["limit"] = strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10)
+		v["timeout"] = strconv.FormatInt(opts.GetUpdatesOpts.Timeout, 10)
 		if opts.GetUpdatesOpts.AllowedUpdates != nil {
-			bytes, err := json.Marshal(opts.GetUpdatesOpts.AllowedUpdates)
+			bs, err := json.Marshal(opts.GetUpdatesOpts.AllowedUpdates)
 			if err != nil {
 				return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
 			}
-			v.Add("allowed_updates", string(bytes))
+			v["allowed_updates"] = string(bs)
 		}
 	}
 
 	// Copy bot, such that we can edit values for polling
 	pollingBot := *b
-	pollingBot.GetTimeout = pollTimeout
+	pollingBot.RequestTimeout = pollTimeout
 
 	go u.Dispatcher.Start(b)
 	go u.pollingLoop(pollingBot, dropPendingUpdates, v)
@@ -121,18 +120,18 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v url.Values) {
+func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v map[string]string) {
 	u.running = true
 
 	// if dropPendingUpdates, force the offset to -1
 	if dropPendingUpdates {
-		v.Set("offset", "-1")
+		v["offset"] = "-1"
 	}
 
 	var offset int64
 	for u.running {
 		// note: this bot instance uses a custom http.Client with longer timeouts
-		r, err := b.Get("getUpdates", v)
+		r, err := b.Post("getUpdates", v, nil)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
@@ -164,7 +163,7 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v url.Valu
 		}
 
 		offset = lastUpdate.UpdateId + 1
-		v.Set("offset", strconv.FormatInt(offset, 10))
+		v["offset"] = strconv.FormatInt(offset, 10)
 		if dropPendingUpdates {
 			// Setting the offset to -1 gets just the last update; this should be skipped too.
 			dropPendingUpdates = false

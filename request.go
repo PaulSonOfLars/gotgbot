@@ -8,7 +8,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -16,10 +15,8 @@ import (
 const (
 	// DefaultAPIURL is the default telegram API URL.
 	DefaultAPIURL = "https://api.telegram.org"
-	// DefaultGetTimeout is the default timeout to be set for a GET request.
-	DefaultGetTimeout = time.Second * 3
-	// DefaultPostTimeout is the default timeout to be set for a POST request.
-	DefaultPostTimeout = time.Second * 10
+	// DefaultTimeout is the default timeout to be set for all requests.
+	DefaultTimeout = time.Second * 10
 )
 
 type Response struct {
@@ -38,7 +35,7 @@ type Response struct {
 
 type TelegramError struct {
 	Method      string
-	Params      url.Values
+	Params      map[string]string
 	Code        int
 	Description string
 }
@@ -65,68 +62,31 @@ func (nf NamedFile) Name() string {
 	return nf.FileName
 }
 
-func (bot *Bot) Get(method string, params url.Values) (json.RawMessage, error) {
-	if bot.GetTimeout == 0 {
-		bot.GetTimeout = DefaultGetTimeout
+func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader) (json.RawMessage, error) {
+	if bot.RequestTimeout == 0 {
+		bot.RequestTimeout = DefaultTimeout
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), bot.GetTimeout)
-	defer cancel()
-
-	return bot.GetWithContext(ctx, method, params)
-}
-
-// GetWithContext allows sending a Get request with an existing context.
-func (bot *Bot) GetWithContext(ctx context.Context, method string, params url.Values) (json.RawMessage, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, bot.methodEnpoint(method), nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build GET request to %s: %w", method, err)
-	}
-
-	req.URL.RawQuery = params.Encode()
-
-	resp, err := bot.Client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute GET request to %s: %w", method, err)
-	}
-	defer resp.Body.Close()
-
-	var r Response
-	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return nil, fmt.Errorf("failed to decode GET request to %s: %w", method, err)
-	}
-
-	if !r.Ok {
-		return nil, &TelegramError{
-			Method:      method,
-			Params:      params,
-			Code:        r.ErrorCode,
-			Description: r.Description,
-		}
-	}
-
-	return r.Result, nil
-}
-
-func (bot *Bot) Post(method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
-	if bot.PostTimeout == 0 {
-		bot.PostTimeout = DefaultPostTimeout
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), bot.PostTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), bot.RequestTimeout)
 	defer cancel()
 
 	return bot.PostWithContext(ctx, method, params, data)
 }
 
 // PostWithContext allows sending a Post request with an existing context.
-func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.Values, data map[string]NamedReader) (json.RawMessage, error) {
+func (bot *Bot) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 	contentType := "application/json"
 
+	// Check if there are any files to upload
 	if len(data) > 0 {
 		var err error
-		contentType, err = fillBuffer(b, data)
+		contentType, err = fillBuffer(b, params, data)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := json.NewEncoder(b).Encode(params)
 		if err != nil {
 			return nil, err
 		}
@@ -137,7 +97,6 @@ func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.V
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
 
-	req.URL.RawQuery = params.Encode()
 	req.Header.Set("Content-Type", contentType)
 
 	resp, err := bot.Client.Do(req)
@@ -163,8 +122,15 @@ func (bot *Bot) PostWithContext(ctx context.Context, method string, params url.V
 	return r.Result, nil
 }
 
-func fillBuffer(b *bytes.Buffer, data map[string]NamedReader) (string, error) {
+func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]NamedReader) (string, error) {
 	w := multipart.NewWriter(b)
+
+	for k, v := range params {
+		err := w.WriteField(k, v)
+		if err != nil {
+			return "", fmt.Errorf("failed to write multipart field %s with vale %s: %w", k, v, err)
+		}
+	}
 
 	for field, file := range data {
 		fileName := file.Name()
