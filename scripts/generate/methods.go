@@ -87,11 +87,17 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString(valueGen)
 	method.WriteString("\n")
 
+	method.WriteString("\nvar reqOpts *RequestOpts")
+	method.WriteString("\nif opts != nil {")
+	method.WriteString("\n	reqOpts = opts.RequestOpts")
+	method.WriteString("\n}")
+	method.WriteString("\n")
+
 	// If sending data, we need to do it over POST
 	if hasData {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data, reqOpts)")
 	} else {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, nil)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
 	}
 
 	method.WriteString("\n	if err != nil {")
@@ -360,21 +366,18 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 	}
 
-	optionalsStruct := ""
+	optionalsName := m.optsName()
+	optionalsStructBuilder := strings.Builder{}
+	optionalsStructBuilder.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
+	optionalsStructBuilder.WriteString("\ntype " + optionalsName + " struct {")
+	optionalsStructBuilder.WriteString(optionals.String())
+	optionalsStructBuilder.WriteString("\n// RequestOpts are an additional optional field to configure timeouts for individual requests")
+	optionalsStructBuilder.WriteString("\nRequestOpts *RequestOpts")
+	optionalsStructBuilder.WriteString("\n}")
 
-	if optionals.Len() > 0 {
-		optionalsName := m.optsName()
-		bd := strings.Builder{}
-		bd.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
-		bd.WriteString("\ntype " + optionalsName + " struct {")
-		bd.WriteString(optionals.String())
-		bd.WriteString("\n}")
-		optionalsStruct = bd.String()
+	requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
 
-		requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
-	}
-
-	return strings.Join(requiredArgs, ", "), optionalsStruct, nil
+	return strings.Join(requiredArgs, ", "), optionalsStructBuilder.String(), nil
 }
 
 type readerBranchesData struct {

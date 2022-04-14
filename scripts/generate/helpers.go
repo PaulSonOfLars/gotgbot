@@ -139,10 +139,8 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 		funcCallArgList = append(funcCallArgList, snakeToCamel(mf.Name))
 	}
 
-	if hasOpts {
-		funcDefArgList = append(funcDefArgList, "opts *"+tgMethod.optsName())
-		funcCallArgList = append(funcCallArgList, "opts")
-	}
+	funcDefArgList = append(funcDefArgList, "opts *"+tgMethod.optsName())
+	funcCallArgList = append(funcCallArgList, "opts")
 
 	return funcCallArgList, funcDefArgList, optsContent.String(), nil
 }

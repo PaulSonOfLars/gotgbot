@@ -61,8 +61,8 @@ type PollingOpts struct {
 	// DropPendingUpdates decides whether or not to drop "pending" updates; these are updates which were sent before
 	// the bot was started.
 	DropPendingUpdates bool
-	// Timeout is the local HTTP client timeout to be used. It is recommended to set this to GetUpdateOpts.Timeout+1.
-	Timeout time.Duration
+	// RequestOpts is for the HTTP options to use when polling telegram's API.
+	RequestOpts *gotgbot.RequestOpts
 	// GetUpdatesOpts represents the opts passed to GetUpdates.
 	// Note: It is recommended you edit the values here when running in production environments.
 	// Changes might include:
@@ -90,12 +90,14 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// Yes, this also makes me sad. :/
 	v := map[string]string{}
 	dropPendingUpdates := false
-	pollTimeout := time.Second * 10
+	reqOpts := &gotgbot.RequestOpts{
+		Timeout: time.Second * 10,
+	}
 
 	if opts != nil {
 		dropPendingUpdates = opts.DropPendingUpdates
-		if opts.Timeout != 0 {
-			pollTimeout = opts.Timeout
+		if opts.RequestOpts != nil {
+			reqOpts = opts.RequestOpts
 		}
 
 		v["offset"] = strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10)
@@ -110,17 +112,13 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 		}
 	}
 
-	// Copy bot, such that we can edit values for polling
-	pollingBot := *b
-	pollingBot.RequestTimeout = pollTimeout
-
 	go u.Dispatcher.Start(b)
-	go u.pollingLoop(pollingBot, dropPendingUpdates, v)
+	go u.pollingLoop(b, reqOpts, dropPendingUpdates, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v map[string]string) {
+func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
 	u.running = true
 
 	// if dropPendingUpdates, force the offset to -1
@@ -131,7 +129,7 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, dropPendingUpdates bool, v map[stri
 	var offset int64
 	for u.running {
 		// note: this bot instance uses a custom http.Client with longer timeouts
-		r, err := b.Post("getUpdates", v, nil)
+		r, err := b.Post("getUpdates", v, nil, opts)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
