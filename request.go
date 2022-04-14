@@ -62,10 +62,9 @@ func (nf NamedFile) Name() string {
 	return nf.FileName
 }
 
-// RequestOpts defines any request-specific timeouts used to
+// RequestOpts defines any request-specific options used to interact with the telegram API.
 type RequestOpts struct {
 	// Timeout for the HTTP request to the telegram API.
-	// Ignored if defined within Bot.PostWithContext.
 	Timeout time.Duration
 	// Custom API URL to use for requests.
 	APIURL string
@@ -79,7 +78,7 @@ func (bot *Bot) Post(method string, params map[string]string, data map[string]Na
 	return bot.PostWithContext(ctx, method, params, data, opts)
 }
 
-// getTimeoutContext returns the appropriate context for the current settings
+// getTimeoutContext returns the appropriate context for the current settings.
 func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc) {
 	if opts != nil {
 		if opts.Timeout > 0 {
@@ -103,11 +102,11 @@ func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.C
 }
 
 // PostWithContext allows sending a POST request to the telegram bot API with an existing context.
-// - ctx: the timeout contexts to be used
-// - method: the telegram API method to call
-// - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc
+// - ctx: the timeout contexts to be used.
+// - method: the telegram API method to call.
+// - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 // - data: map of any files to be sending to the telegram API.
-// - opts: request opts to use
+// - opts: request opts to use.
 func (bot *Bot) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 	contentType := "application/json"
