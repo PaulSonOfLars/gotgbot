@@ -183,6 +183,19 @@ func (c Chat) GetMemberCount(b *Bot) (int64, error) {
 	return b.GetChatMemberCount(c.Id)
 }
 
+// GetMenuButton Helper method for Bot.GetChatMenuButton
+func (c Chat) GetMenuButton(b *Bot, opts *GetChatMenuButtonOpts) (MenuButton, error) {
+	if opts == nil {
+		opts = &GetChatMenuButtonOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = c.Id
+	}
+
+	return b.GetChatMenuButton(opts)
+}
+
 // Get Helper method for Bot.GetFile
 func (f File) Get(b *Bot) (*File, error) {
 	return b.GetFile(f.FileId)
@@ -236,6 +249,19 @@ func (c Chat) SetAdministratorCustomTitle(b *Bot, userId int64, customTitle stri
 // SetDescription Helper method for Bot.SetChatDescription
 func (c Chat) SetDescription(b *Bot, opts *SetChatDescriptionOpts) (bool, error) {
 	return b.SetChatDescription(c.Id, opts)
+}
+
+// SetMenuButton Helper method for Bot.SetChatMenuButton
+func (c Chat) SetMenuButton(b *Bot, opts *SetChatMenuButtonOpts) (bool, error) {
+	if opts == nil {
+		opts = &SetChatMenuButtonOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = c.Id
+	}
+
+	return b.SetChatMenuButton(opts)
 }
 
 // SetPermissions Helper method for Bot.SetChatPermissions

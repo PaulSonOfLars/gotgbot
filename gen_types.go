@@ -414,6 +414,33 @@ type Chat struct {
 	Location *ChatLocation `json:"location,omitempty"`
 }
 
+// ChatAdministratorRights Represents the rights of an administrator in a chat.
+// https://core.telegram.org/bots/api#chatadministratorrights
+type ChatAdministratorRights struct {
+	// True, if the user's presence in the chat is hidden
+	IsAnonymous bool `json:"is_anonymous"`
+	// True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	CanManageChat bool `json:"can_manage_chat"`
+	// True, if the administrator can delete messages of other users
+	CanDeleteMessages bool `json:"can_delete_messages"`
+	// True, if the administrator can manage video chats
+	CanManageVideoChats bool `json:"can_manage_video_chats"`
+	// True, if the administrator can restrict, ban or unban chat members
+	CanRestrictMembers bool `json:"can_restrict_members"`
+	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	CanPromoteMembers bool `json:"can_promote_members"`
+	// True, if the user is allowed to change the chat title, photo and other settings
+	CanChangeInfo bool `json:"can_change_info"`
+	// True, if the user is allowed to invite new users to the chat
+	CanInviteUsers bool `json:"can_invite_users"`
+	// Optional. True, if the administrator can post in the channel; channels only
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
+	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+}
+
 // ChatInviteLink Represents an invite link for a chat.
 // https://core.telegram.org/bots/api#chatinvitelink
 type ChatInviteLink struct {
@@ -493,8 +520,8 @@ type MergedChatMember struct {
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
 	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
-	// Optional. True, if the administrator can manage voice chats (Only for administrator)
-	CanManageVoiceChats bool `json:"can_manage_voice_chats,omitempty"`
+	// Optional. True, if the administrator can manage video chats (Only for administrator)
+	CanManageVideoChats bool `json:"can_manage_video_chats,omitempty"`
 	// Optional. True, if the administrator can restrict, ban or unban chat members (Only for administrator)
 	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
 	// Optional. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user) (Only for administrator)
@@ -645,8 +672,8 @@ type ChatMemberAdministrator struct {
 	CanManageChat bool `json:"can_manage_chat"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages"`
-	// True, if the administrator can manage voice chats
-	CanManageVoiceChats bool `json:"can_manage_voice_chats"`
+	// True, if the administrator can manage video chats
+	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	// True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool `json:"can_restrict_members"`
 	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
@@ -684,7 +711,7 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		IsAnonymous:         v.IsAnonymous,
 		CanManageChat:       v.CanManageChat,
 		CanDeleteMessages:   v.CanDeleteMessages,
-		CanManageVoiceChats: v.CanManageVoiceChats,
+		CanManageVideoChats: v.CanManageVideoChats,
 		CanRestrictMembers:  v.CanRestrictMembers,
 		CanPromoteMembers:   v.CanPromoteMembers,
 		CanChangeInfo:       v.CanChangeInfo,
@@ -1195,10 +1222,12 @@ type InlineKeyboardButton struct {
 	Text string `json:"text"`
 	// Optional. HTTP or tg:// url to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
-	// Optional. An HTTP URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
-	LoginUrl *LoginUrl `json:"login_url,omitempty"`
 	// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
 	CallbackData string `json:"callback_data,omitempty"`
+	// Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Available only in private chats between a user and the bot.
+	WebApp *WebAppInfo `json:"web_app,omitempty"`
+	// Optional. An HTTP URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
+	LoginUrl *LoginUrl `json:"login_url,omitempty"`
 	// Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. Can be empty, in which case just the bot's username will be inserted. Note: This offers an easy way for users to start using your bot in inline mode when they are currently in a private chat with it. Especially useful when combined with switch_pm... actions - in this case the user will be automatically returned to the chat they switched from, skipping the chat selection screen.
 	SwitchInlineQuery *string `json:"switch_inline_query,omitempty"`
 	// Optional. If set, pressing the button will insert the bot's username and the specified inline query in the current chat's input field. Can be empty, in which case only the bot's username will be inserted. This offers a quick way for the user to open your bot in inline mode in the same chat - good for selecting something from multiple options.
@@ -3395,18 +3424,22 @@ type Invoice struct {
 	TotalAmount int64 `json:"total_amount"`
 }
 
-// KeyboardButton This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields request_contact, request_location, and request_poll are mutually exclusive.
-// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message. Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
+// KeyboardButton This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields web_app, request_contact, request_location, and request_poll are mutually exclusive.
+// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
+// Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
+// Note: web_app option will only work in Telegram versions released after 16 April, 2022. Older clients will display unsupported message.
 // https://core.telegram.org/bots/api#keyboardbutton
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
 	Text string `json:"text"`
-	// Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only
+	// Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only.
 	RequestContact bool `json:"request_contact,omitempty"`
-	// Optional. If True, the user's current location will be sent when the button is pressed. Available in private chats only
+	// Optional. If True, the user's current location will be sent when the button is pressed. Available in private chats only.
 	RequestLocation bool `json:"request_location,omitempty"`
-	// Optional. If specified, the user will be asked to create a poll and send it to the bot when the button is pressed. Available in private chats only
+	// Optional. If specified, the user will be asked to create a poll and send it to the bot when the button is pressed. Available in private chats only.
 	RequestPoll *KeyboardButtonPollType `json:"request_poll,omitempty"`
+	// Optional. If specified, the described Web App will be launched when the button is pressed. The Web App will be able to send a "web_app_data" service message. Available in private chats only.
+	WebApp *WebAppInfo `json:"web_app,omitempty"`
 }
 
 // KeyboardButtonPollType This object represents type of a poll, which is allowed to be created and sent when the corresponding button is pressed.
@@ -3468,6 +3501,210 @@ type MaskPosition struct {
 	// Mask scaling coefficient. For example, 2.0 means double size.
 	Scale float64 `json:"scale"`
 }
+
+// MenuButton This object describes the bot's menu button in a private chat. It should be one of
+// - MenuButtonCommands
+// - MenuButtonWebApp
+// - MenuButtonDefault
+// If a menu button other than MenuButtonDefault is set for a private chat, then it is applied in the chat. Otherwise the default menu button is applied. By default, the menu button opens the list of bot commands.
+// https://core.telegram.org/bots/api#menubutton
+type MenuButton interface {
+	GetType() string
+	menuButton()
+	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
+	MergeMenuButton() MergedMenuButton
+}
+
+// MergedMenuButton is a helper type to simplify interactions with the various MenuButton subtypes.
+type MergedMenuButton struct {
+	// Type of the button, must be commands
+	Type string `json:"type"`
+	// Optional. Text on the button (Only for web_app)
+	Text string `json:"text,omitempty"`
+	// Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. (Only for web_app)
+	WebApp *WebAppInfo `json:"web_app,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedMenuButton) GetType() string {
+	return v.Type
+}
+
+// MergedMenuButton.menuButton is a dummy method to avoid interface implementation.
+func (v MergedMenuButton) menuButton() {}
+
+// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+func (v MergedMenuButton) MergeMenuButton() MergedMenuButton {
+	return v
+}
+
+// unmarshalMenuButtonArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalMenuButton.
+func unmarshalMenuButtonArray(d json.RawMessage) ([]MenuButton, error) {
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	var vs []MenuButton
+	for _, d := range ds {
+		v, err := unmarshalMenuButton(d)
+		if err != nil {
+			return nil, err
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalMenuButton is a JSON unmarshal helper to marshal the right structs into a MenuButton interface
+// based on the Type field.
+func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.Type {
+	case "commands":
+		s := MenuButtonCommands{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "web_app":
+		s := MenuButtonWebApp{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "default":
+		s := MenuButtonDefault{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+}
+
+// MenuButtonCommands Represents a menu button, which opens the bot's list of commands.
+// https://core.telegram.org/bots/api#menubuttoncommands
+type MenuButtonCommands struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MenuButtonCommands) GetType() string {
+	return "commands"
+}
+
+// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+func (v MenuButtonCommands) MergeMenuButton() MergedMenuButton {
+	return MergedMenuButton{
+		Type: "commands",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v MenuButtonCommands) MarshalJSON() ([]byte, error) {
+	type alias MenuButtonCommands
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "commands",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// MenuButtonCommands.menuButton is a dummy method to avoid interface implementation.
+func (v MenuButtonCommands) menuButton() {}
+
+// MenuButtonDefault Describes that no specific value for the menu button was set.
+// https://core.telegram.org/bots/api#menubuttondefault
+type MenuButtonDefault struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MenuButtonDefault) GetType() string {
+	return "default"
+}
+
+// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+func (v MenuButtonDefault) MergeMenuButton() MergedMenuButton {
+	return MergedMenuButton{
+		Type: "default",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v MenuButtonDefault) MarshalJSON() ([]byte, error) {
+	type alias MenuButtonDefault
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "default",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// MenuButtonDefault.menuButton is a dummy method to avoid interface implementation.
+func (v MenuButtonDefault) menuButton() {}
+
+// MenuButtonWebApp Represents a menu button, which launches a Web App.
+// https://core.telegram.org/bots/api#menubuttonwebapp
+type MenuButtonWebApp struct {
+	// Text on the button
+	Text string `json:"text"`
+	// Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery.
+	WebApp WebAppInfo `json:"web_app"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MenuButtonWebApp) GetType() string {
+	return "web_app"
+}
+
+// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+func (v MenuButtonWebApp) MergeMenuButton() MergedMenuButton {
+	return MergedMenuButton{
+		Type:   "web_app",
+		Text:   v.Text,
+		WebApp: &v.WebApp,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v MenuButtonWebApp) MarshalJSON() ([]byte, error) {
+	type alias MenuButtonWebApp
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "web_app",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// MenuButtonWebApp.menuButton is a dummy method to avoid interface implementation.
+func (v MenuButtonWebApp) menuButton() {}
 
 // Message This object represents a message.
 // https://core.telegram.org/bots/api#message
@@ -3578,14 +3815,16 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
-	// Optional. Service message: voice chat scheduled
-	VoiceChatScheduled *VoiceChatScheduled `json:"voice_chat_scheduled,omitempty"`
-	// Optional. Service message: voice chat started
-	VoiceChatStarted *VoiceChatStarted `json:"voice_chat_started,omitempty"`
-	// Optional. Service message: voice chat ended
-	VoiceChatEnded *VoiceChatEnded `json:"voice_chat_ended,omitempty"`
-	// Optional. Service message: new participants invited to a voice chat
-	VoiceChatParticipantsInvited *VoiceChatParticipantsInvited `json:"voice_chat_participants_invited,omitempty"`
+	// Optional. Service message: video chat scheduled
+	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
+	// Optional. Service message: video chat started
+	VideoChatStarted *VideoChatStarted `json:"video_chat_started,omitempty"`
+	// Optional. Service message: video chat ended
+	VideoChatEnded *VideoChatEnded `json:"video_chat_ended,omitempty"`
+	// Optional. Service message: new participants invited to a video chat
+	VideoChatParticipantsInvited *VideoChatParticipantsInvited `json:"video_chat_participants_invited,omitempty"`
+	// Optional. Service message: data sent by a Web App
+	WebAppData *WebAppData `json:"web_app_data,omitempty"`
 	// Optional. Inline keyboard attached to the message. login_url buttons are represented as ordinary url buttons.
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
@@ -4325,6 +4564,13 @@ type ResponseParameters struct {
 	RetryAfter int64 `json:"retry_after,omitempty"`
 }
 
+// SentWebAppMessage Contains information about an inline message sent by a Web App on behalf of a user.
+// https://core.telegram.org/bots/api#sentwebappmessage
+type SentWebAppMessage struct {
+	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message.
+	InlineMessageId string `json:"inline_message_id,omitempty"`
+}
+
 // ShippingAddress This object represents a shipping address.
 // https://core.telegram.org/bots/api#shippingaddress
 type ShippingAddress struct {
@@ -4431,7 +4677,8 @@ type SuccessfulPayment struct {
 	ProviderPaymentChargeId string `json:"provider_payment_charge_id"`
 }
 
-// Update This object represents an incoming update. At most one of the optional parameters can be present in any given update.
+// Update This object represents an incoming update.
+// At most one of the optional parameters can be present in any given update.
 // https://core.telegram.org/bots/api#update
 type Update struct {
 	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using Webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
@@ -4540,6 +4787,31 @@ type Video struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
+// VideoChatEnded This object represents a service message about a video chat ended in the chat.
+// https://core.telegram.org/bots/api#videochatended
+type VideoChatEnded struct {
+	// Video chat duration in seconds
+	Duration int64 `json:"duration"`
+}
+
+// VideoChatParticipantsInvited This object represents a service message about new members invited to a video chat.
+// https://core.telegram.org/bots/api#videochatparticipantsinvited
+type VideoChatParticipantsInvited struct {
+	// New members that were invited to the video chat
+	Users []User `json:"users,omitempty"`
+}
+
+// VideoChatScheduled This object represents a service message about a video chat scheduled in the chat.
+// https://core.telegram.org/bots/api#videochatscheduled
+type VideoChatScheduled struct {
+	// Point in time (Unix timestamp) when the video chat is supposed to be started by a chat administrator
+	StartDate int64 `json:"start_date"`
+}
+
+// VideoChatStarted This object represents a service message about a video chat started in the chat. Currently holds no information.
+// https://core.telegram.org/bots/api#videochatstarted
+type VideoChatStarted struct{}
+
 // VideoNote This object represents a video message (available in Telegram apps as of v.4.0).
 // https://core.telegram.org/bots/api#videonote
 type VideoNote struct {
@@ -4572,30 +4844,21 @@ type Voice struct {
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
-// VoiceChatEnded This object represents a service message about a voice chat ended in the chat.
-// https://core.telegram.org/bots/api#voicechatended
-type VoiceChatEnded struct {
-	// Voice chat duration in seconds
-	Duration int64 `json:"duration"`
+// WebAppData Contains data sent from a Web App to the bot.
+// https://core.telegram.org/bots/api#webappdata
+type WebAppData struct {
+	// The data. Be aware that a bad client can send arbitrary data in this field.
+	Data string `json:"data"`
+	// Text of the web_app keyboard button, from which the Web App was opened. Be aware that a bad client can send arbitrary data in this field.
+	ButtonText string `json:"button_text"`
 }
 
-// VoiceChatParticipantsInvited This object represents a service message about new members invited to a voice chat.
-// https://core.telegram.org/bots/api#voicechatparticipantsinvited
-type VoiceChatParticipantsInvited struct {
-	// Optional. New members that were invited to the voice chat
-	Users []User `json:"users,omitempty"`
+// WebAppInfo Contains information about a Web App.
+// https://core.telegram.org/bots/api#webappinfo
+type WebAppInfo struct {
+	// An HTTPS URL of a Web App to be opened with additional data as specified in Initializing Web Apps
+	Url string `json:"url"`
 }
-
-// VoiceChatScheduled This object represents a service message about a voice chat scheduled in the chat.
-// https://core.telegram.org/bots/api#voicechatscheduled
-type VoiceChatScheduled struct {
-	// Point in time (Unix timestamp) when the voice chat is supposed to be started by a chat administrator
-	StartDate int64 `json:"start_date"`
-}
-
-// VoiceChatStarted This object represents a service message about a voice chat started in the chat. Currently holds no information.
-// https://core.telegram.org/bots/api#voicechatstarted
-type VoiceChatStarted struct{}
 
 // WebhookInfo Contains information about the current status of a webhook.
 // https://core.telegram.org/bots/api#webhookinfo
@@ -4612,6 +4875,8 @@ type WebhookInfo struct {
 	LastErrorDate int64 `json:"last_error_date,omitempty"`
 	// Optional. Error message in human-readable format for the most recent error that happened when trying to deliver an update via webhook
 	LastErrorMessage string `json:"last_error_message,omitempty"`
+	// Optional. Unix time of the most recent error that happened when trying to synchronize available updates with Telegram datacenters
+	LastSynchronizationErrorDate int64 `json:"last_synchronization_error_date,omitempty"`
 	// Optional. Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
 	MaxConnections int64 `json:"max_connections,omitempty"`
 	// Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member

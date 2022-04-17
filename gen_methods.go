@@ -161,7 +161,8 @@ type AnswerInlineQueryOpts struct {
 	SwitchPmParameter string
 }
 
-// AnswerInlineQuery Use this method to send answers to an inline query. On success, True is returned. No more than 50 results per query are allowed.
+// AnswerInlineQuery Use this method to send answers to an inline query. On success, True is returned.
+// No more than 50 results per query are allowed.
 // - inline_query_id (type string): Unique identifier for the answered query
 // - results (type []InlineQueryResult): A JSON-serialized array of results for the inline query
 // - opts (type AnswerInlineQueryOpts): All optional parameters.
@@ -258,6 +259,28 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 
 	var b bool
 	return b, json.Unmarshal(r, &b)
+}
+
+// AnswerWebAppQuery Use this method to set the result of an interaction with a Web App and send a corresponding message on behalf of the user to the chat from which the query originated. On success, a SentWebAppMessage object is returned.
+// - web_app_query_id (type string): Unique identifier for the query to be answered
+// - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
+// https://core.telegram.org/bots/api#answerwebappquery
+func (bot *Bot) AnswerWebAppQuery(webAppQueryId string, result InlineQueryResult) (*SentWebAppMessage, error) {
+	v := urlLib.Values{}
+	v.Add("web_app_query_id", webAppQueryId)
+	bs, err := json.Marshal(result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field result: %w", err)
+	}
+	v.Add("result", string(bs))
+
+	r, err := bot.Get("answerWebAppQuery", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var s SentWebAppMessage
+	return &s, json.Unmarshal(r, &s)
 }
 
 // ApproveChatJoinRequest Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
@@ -463,7 +486,7 @@ type CreateNewStickerSetOpts struct {
 
 // CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Returns True on success.
 // - user_id (type int64): User identifier of created sticker set owner
-// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "by<bot username>". <bot_username> is case insensitive. 1-64 characters.
+// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
 // - title (type string): Sticker set title, 1-64 characters
 // - emojis (type string): One or more emoji corresponding to the sticker
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
@@ -607,7 +630,8 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64) (bool, error) {
 // - Bots can delete incoming messages in private chats.
 // - Bots granted can_post_messages permissions can delete outgoing messages in channels.
 // - If the bot is an administrator of a group, it can delete any message there.
-// - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there. Returns True on success.
+// - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.
+// Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - message_id (type int64): Identifier of the message to delete
 // https://core.telegram.org/bots/api#deletemessage
@@ -1153,6 +1177,31 @@ func (bot *Bot) GetChatMemberCount(chatId int64) (int64, error) {
 	return i, json.Unmarshal(r, &i)
 }
 
+// GetChatMenuButtonOpts is the set of optional fields for Bot.GetChatMenuButton.
+type GetChatMenuButtonOpts struct {
+	// Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
+	ChatId int64
+}
+
+// GetChatMenuButton Use this method to get the current value of the bot's menu button in a private chat, or the default menu button. Returns MenuButton on success.
+// - opts (type GetChatMenuButtonOpts): All optional parameters.
+// https://core.telegram.org/bots/api#getchatmenubutton
+func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, error) {
+	v := urlLib.Values{}
+	if opts != nil {
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+	}
+
+	r, err := bot.Get("getChatMenuButton", v)
+	if err != nil {
+		return nil, err
+	}
+
+	return unmarshalMenuButton(r)
+}
+
 // GetFile Use this method to get basic info about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
 // Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
 // - file_id (type string): File identifier to get info about
@@ -1249,6 +1298,30 @@ func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 
 	var b []BotCommand
 	return b, json.Unmarshal(r, &b)
+}
+
+// GetMyDefaultAdministratorRightsOpts is the set of optional fields for Bot.GetMyDefaultAdministratorRights.
+type GetMyDefaultAdministratorRightsOpts struct {
+	// Pass True to get default administrator rights of the bot in channels. Otherwise, default administrator rights of the bot for groups and supergroups will be returned.
+	ForChannels bool
+}
+
+// GetMyDefaultAdministratorRights Use this method to get the current default administrator rights of the bot. Returns ChatAdministratorRights on success.
+// - opts (type GetMyDefaultAdministratorRightsOpts): All optional parameters.
+// https://core.telegram.org/bots/api#getmydefaultadministratorrights
+func (bot *Bot) GetMyDefaultAdministratorRights(opts *GetMyDefaultAdministratorRightsOpts) (*ChatAdministratorRights, error) {
+	v := urlLib.Values{}
+	if opts != nil {
+		v.Add("for_channels", strconv.FormatBool(opts.ForChannels))
+	}
+
+	r, err := bot.Get("getMyDefaultAdministratorRights", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatAdministratorRights
+	return &c, json.Unmarshal(r, &c)
 }
 
 // GetStickerSet Use this method to get a sticker set. On success, a StickerSet object is returned.
@@ -1429,8 +1502,8 @@ type PromoteChatMemberOpts struct {
 	CanEditMessages bool
 	// Pass True, if the administrator can delete messages of other users
 	CanDeleteMessages bool
-	// Pass True, if the administrator can manage voice chats
-	CanManageVoiceChats bool
+	// Pass True, if the administrator can manage video chats
+	CanManageVideoChats bool
 	// Pass True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
 	// Pass True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
@@ -1458,7 +1531,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		v.Add("can_post_messages", strconv.FormatBool(opts.CanPostMessages))
 		v.Add("can_edit_messages", strconv.FormatBool(opts.CanEditMessages))
 		v.Add("can_delete_messages", strconv.FormatBool(opts.CanDeleteMessages))
-		v.Add("can_manage_voice_chats", strconv.FormatBool(opts.CanManageVoiceChats))
+		v.Add("can_manage_video_chats", strconv.FormatBool(opts.CanManageVideoChats))
 		v.Add("can_restrict_members", strconv.FormatBool(opts.CanRestrictMembers))
 		v.Add("can_promote_members", strconv.FormatBool(opts.CanPromoteMembers))
 		v.Add("can_change_info", strconv.FormatBool(opts.CanChangeInfo))
@@ -3038,6 +3111,39 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetChatMenuButtonOpts is the set of optional fields for Bot.SetChatMenuButton.
+type SetChatMenuButtonOpts struct {
+	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
+	ChatId int64
+	// A JSON-serialized object for the new bot's menu button. Defaults to MenuButtonDefault
+	MenuButton MenuButton
+}
+
+// SetChatMenuButton Use this method to change the bot's menu button in a private chat, or the default menu button. Returns True on success.
+// - opts (type SetChatMenuButtonOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setchatmenubutton
+func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
+	v := urlLib.Values{}
+	if opts != nil {
+		if opts.ChatId != 0 {
+			v.Add("chat_id", strconv.FormatInt(opts.ChatId, 10))
+		}
+		bs, err := json.Marshal(opts.MenuButton)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field menu_button: %w", err)
+		}
+		v.Add("menu_button", string(bs))
+	}
+
+	r, err := bot.Get("setChatMenuButton", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
@@ -3215,6 +3321,37 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 	}
 
 	r, err := bot.Get("setMyCommands", v)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMyDefaultAdministratorRightsOpts is the set of optional fields for Bot.SetMyDefaultAdministratorRights.
+type SetMyDefaultAdministratorRightsOpts struct {
+	// A JSON-serialized object describing new default administrator rights. If not specified, the default administrator rights will be cleared.
+	Rights ChatAdministratorRights
+	// Pass True to change the default administrator rights of the bot in channels. Otherwise, the default administrator rights of the bot for groups and supergroups will be changed.
+	ForChannels bool
+}
+
+// SetMyDefaultAdministratorRights Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are are free to modify the list before adding the bot. Returns True on success.
+// - opts (type SetMyDefaultAdministratorRightsOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setmydefaultadministratorrights
+func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorRightsOpts) (bool, error) {
+	v := urlLib.Values{}
+	if opts != nil {
+		bs, err := json.Marshal(opts.Rights)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field rights: %w", err)
+		}
+		v.Add("rights", string(bs))
+		v.Add("for_channels", strconv.FormatBool(opts.ForChannels))
+	}
+
+	r, err := bot.Get("setMyDefaultAdministratorRights", v)
 	if err != nil {
 		return false, err
 	}
