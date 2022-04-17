@@ -85,6 +85,10 @@ issues:
       linters:
         - prealloc
         - goerr113
+    # Exclude some `staticcheck` messages.
+    - linters:
+        - staticcheck
+      text: "SA1019:" # warning about "strings.Title" being deprecated for unicode issue; we dont need unicode here.
 
   # Enable default excludes, for common sense values.
   exclude-use-default: true
