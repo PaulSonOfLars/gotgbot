@@ -12,7 +12,7 @@ type Command struct {
 	Triggers     []rune
 	AllowEdited  bool
 	AllowChannel bool
-	Command      string
+	Command      string // should be lowercase for case-insensitivity
 	Response     Response
 }
 
@@ -21,7 +21,7 @@ func NewCommand(c string, r Response) Command {
 		Triggers:     []rune{'/'},
 		AllowEdited:  false,
 		AllowChannel: false,
-		Command:      c,
+		Command:      strings.ToLower(c),
 		Response:     r,
 	}
 }
