@@ -90,9 +90,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// Yes, this also makes me sad. :/
 	v := map[string]string{}
 	dropPendingUpdates := false
-	reqOpts := &gotgbot.RequestOpts{
-		Timeout: time.Second * 10,
-	}
+	reqOpts := b.DefaultRequestOpts
 
 	if opts != nil {
 		dropPendingUpdates = opts.DropPendingUpdates
