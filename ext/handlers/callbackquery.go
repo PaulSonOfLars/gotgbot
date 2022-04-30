@@ -21,11 +21,11 @@ func NewCallback(filter filters.CallbackQuery, r Response) CallbackQuery {
 	}
 }
 
-func (cb CallbackQuery) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
+func (cb CallbackQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	return cb.Response(b, ctx)
 }
 
-func (cb CallbackQuery) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
+func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.CallbackQuery == nil {
 		return false
 	}

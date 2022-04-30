@@ -20,17 +20,18 @@ import (
 
 `)
 
-	file.WriteString("type Bot interface {")
 	file.WriteString(`
-// Essential methods to perform HTTP requests
-// POST request to the bot API.
-Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
-// POST request to the bot API, with a context.
-PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
-// Get the current bot details - usually obtained by a GetMe() at bot instantiation.
-Me() User
-
-// Generated API methods`)
+// Our overall Bot interface which can be used to implement middleware and testing abstractions.
+type Bot interface {
+	// Essential methods to perform HTTP requests
+	// PostWithContext sends POST requests to the bot API, with a context.
+	PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
+	// TimeoutContext calculates the relevant context, with appropriate request timeout.
+	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
+	// Me gets the current bot details - usually obtained by a GetMe() at bot instantiation.
+	Me() User
+	
+	// Generated API methods`)
 	for _, tgMethodName := range orderedMethods(d) {
 		tgMethod := d.Methods[tgMethodName]
 

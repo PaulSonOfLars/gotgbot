@@ -16,9 +16,9 @@ const DefaultMaxRoutines = 50
 type (
 	// DispatcherErrorHandler allows for handling the returned errors from matched handlers.
 	// It takes the non-nil error returned by the handler.
-	DispatcherErrorHandler func(b gotgbot.Bot, ctx *Context, err error) DispatcherAction
+	DispatcherErrorHandler func(b *gotgbot.Bot, ctx *Context, err error) DispatcherAction
 	// DispatcherPanicHandler allows for handling goroutine panics, where the 'r' value contains the reason for the panic.
-	DispatcherPanicHandler func(b gotgbot.Bot, ctx *Context, r interface{})
+	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, r interface{})
 )
 
 type DispatcherAction int64
@@ -122,7 +122,7 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 }
 
 // Start to handle incoming updates.
-func (d *Dispatcher) Start(b gotgbot.Bot) {
+func (d *Dispatcher) Start(b *gotgbot.Bot) {
 	if d.limiter == nil {
 		d.limitlessDispatcher(b)
 		return
@@ -136,7 +136,7 @@ func (d *Dispatcher) Stop() {
 	d.waitGroup.Wait()
 }
 
-func (d *Dispatcher) limitedDispatcher(b gotgbot.Bot) {
+func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot) {
 	for upd := range d.updatesChan {
 		d.waitGroup.Add(1)
 
@@ -152,7 +152,7 @@ func (d *Dispatcher) limitedDispatcher(b gotgbot.Bot) {
 	}
 }
 
-func (d *Dispatcher) limitlessDispatcher(b gotgbot.Bot) {
+func (d *Dispatcher) limitlessDispatcher(b *gotgbot.Bot) {
 	for upd := range d.updatesChan {
 		d.waitGroup.Add(1)
 
@@ -179,7 +179,7 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
-func (d *Dispatcher) ProcessRawUpdate(b gotgbot.Bot, r json.RawMessage) {
+func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
 		d.ErrorLog.Println("failed to process raw update: " + err.Error())
@@ -190,7 +190,7 @@ func (d *Dispatcher) ProcessRawUpdate(b gotgbot.Bot, r json.RawMessage) {
 }
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
-func (d *Dispatcher) ProcessUpdate(b gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) {
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) {
 	var ctx *Context
 
 	defer func() {

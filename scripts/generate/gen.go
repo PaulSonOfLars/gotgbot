@@ -181,9 +181,9 @@ func generate(d APIDescription) error {
 		return fmt.Errorf("failed to generate helpers: %w", err)
 	}
 
-	if err := generateBotInterface(d); err != nil {
-		return fmt.Errorf("failed to bot interface: %w", err)
-	}
+	// if err := generateBotInterface(d); err != nil {
+	// 	return fmt.Errorf("failed to bot interface: %w", err)
+	// }
 	return nil
 }
 

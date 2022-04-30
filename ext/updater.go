@@ -78,7 +78,7 @@ type PollingOpts struct {
 
 // StartPolling starts polling updates from telegram using the getUdpates long-polling method.
 // See the PollingOpts for optional values to set in production environments.
-func (u *Updater) StartPolling(b gotgbot.Bot, opts *PollingOpts) error {
+func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// TODO: De-duplicate this code.
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
@@ -114,7 +114,7 @@ func (u *Updater) StartPolling(b gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(b gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
+func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
 	u.running = true
 
 	// if dropPendingUpdates, force the offset to -1
@@ -124,8 +124,7 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, opts *gotgbot.RequestOpts, dropPend
 
 	var offset int64
 	for u.running {
-		// note: this bot instance uses a custom http.Client with longer timeouts
-		r, err := b.Post("getUpdates", v, nil, opts)
+		r, err := u.getUpdates(b, opts, v)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
@@ -171,6 +170,16 @@ func (u *Updater) pollingLoop(b gotgbot.Bot, opts *gotgbot.RequestOpts, dropPend
 	}
 }
 
+// getUpdates ensures the context is correctly applied to each call.
+// The use of PostWithContext means that we respect middleware usage.
+func (u *Updater) getUpdates(b *gotgbot.Bot, opts *gotgbot.RequestOpts, v map[string]string) (json.RawMessage, error) {
+	ctx, cancel := b.TimeoutContext(opts)
+	defer cancel()
+
+	r, err := b.PostWithContext(ctx, "getUpdates", v, nil, opts)
+	return r, err
+}
+
 // Idle starts an infinite loop to avoid the program exciting while the background threads handle updates.
 func (u *Updater) Idle() {
 	u.idle = true
@@ -203,7 +212,7 @@ func (u *Updater) Stop() error {
 }
 
 // StartWebhook Starts the webhook server. The opts parameter allows for specifying TLS settings.
-func (u *Updater) StartWebhook(b gotgbot.Bot, opts WebhookOpts) error {
+func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	var tls bool
 	if opts.CertFile == "" && opts.KeyFile == "" {
 		tls = false
