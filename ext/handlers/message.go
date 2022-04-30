@@ -24,7 +24,7 @@ func NewMessage(f filters.Message, r Response) Message {
 	}
 }
 
-func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (m Message) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.Message != nil {
 		return m.Filter == nil || m.Filter(u.Message)
 	}
@@ -54,7 +54,7 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	return false
 }
 
-func (m Message) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (m Message) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return m.Response(b, ctx)
 }
 

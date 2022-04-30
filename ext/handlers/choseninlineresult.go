@@ -20,11 +20,11 @@ func NewChosenInlineResult(filter filters.ChosenInlineResult, r Response) Chosen
 	}
 }
 
-func (i ChosenInlineResult) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (i ChosenInlineResult) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return i.Response(b, ctx)
 }
 
-func (i ChosenInlineResult) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (i ChosenInlineResult) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.ChosenInlineResult == nil {
 		return false
 	}

@@ -7,8 +7,8 @@ import (
 
 //go:generate go run ./scripts/generate
 
-// Bot is the core Bot object used to send and receive messages.
-type Bot struct {
+// APIBot is the default Bot struct used to send and receive messages to the telegram API.
+type APIBot struct {
 	// The bot's User info, as returned by Bot.GetMe. Populated when created through the NewBot method.
 	User
 	// Token stores the bot's secret token obtained from t.me/BotFather, and used to interact with telegram's API.
@@ -30,10 +30,10 @@ type BotOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// NewBot returns a new Bot struct populated with the necessary defaults.
-func NewBot(token string, opts *BotOpts) (*Bot, error) {
+// NewBot returns a new Bot interface populated with the necessary defaults.
+func NewBot(token string, opts *BotOpts) (Bot, error) {
 	// Barebones bot - token not verified yet, no settings set
-	b := Bot{Token: token}
+	b := APIBot{Token: token}
 
 	// Large timeout on the initial GetMe request as this can sometimes be slow.
 	getMeReqOpts := &RequestOpts{
@@ -61,4 +61,8 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 
 	b.User = *botUser
 	return &b, nil
+}
+
+func (bot *APIBot) Me() User {
+	return bot.User
 }

@@ -26,7 +26,7 @@ func NewCommand(c string, r Response) Command {
 	}
 }
 
-func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (c Command) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.Message != nil {
 		if u.Message.Text == "" && u.Message.Caption == "" {
 			return false
@@ -59,7 +59,7 @@ func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
 	return false
 }
 
-func (c Command) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (c Command) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return c.Response(b, ctx)
 }
 
@@ -67,7 +67,7 @@ func (c Command) Name() string {
 	return "command_" + c.Command
 }
 
-func (c Command) checkMessage(bot *gotgbot.Bot, msg *gotgbot.Message) bool {
+func (c Command) checkMessage(bot gotgbot.Bot, msg *gotgbot.Message) bool {
 	text := msg.Text
 	if msg.Caption != "" {
 		text = msg.Caption
@@ -80,7 +80,7 @@ func (c Command) checkMessage(bot *gotgbot.Bot, msg *gotgbot.Message) bool {
 		}
 
 		split := strings.Split(strings.ToLower(strings.Fields(text)[0]), "@")
-		if len(split) > 1 && split[1] != strings.ToLower(bot.User.Username) {
+		if len(split) > 1 && split[1] != strings.ToLower(bot.Me().Username) {
 			return false
 		}
 		cmd = split[0][1:]

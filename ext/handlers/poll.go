@@ -20,14 +20,14 @@ func NewPoll(f filters.Poll, r Response) Poll {
 	}
 }
 
-func (r Poll) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (r Poll) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.Poll == nil {
 		return false
 	}
 	return r.Filter == nil || r.Filter(u.Poll)
 }
 
-func (r Poll) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (r Poll) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return r.Response(b, ctx)
 }
 

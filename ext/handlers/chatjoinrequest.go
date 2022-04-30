@@ -20,14 +20,14 @@ func NewChatJoinRequest(f filters.ChatJoinRequest, r Response) ChatJoinRequest {
 	}
 }
 
-func (r ChatJoinRequest) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (r ChatJoinRequest) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.ChatJoinRequest == nil {
 		return false
 	}
 	return r.Filter == nil || r.Filter(u.ChatJoinRequest)
 }
 
-func (r ChatJoinRequest) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (r ChatJoinRequest) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return r.Response(b, ctx)
 }
 

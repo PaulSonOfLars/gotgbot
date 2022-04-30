@@ -20,11 +20,11 @@ func NewInlineQuery(f filters.InlineQuery, r Response) InlineQuery {
 	}
 }
 
-func (i InlineQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+func (i InlineQuery) HandleUpdate(b gotgbot.Bot, ctx *ext.Context) error {
 	return i.Response(b, ctx)
 }
 
-func (i InlineQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+func (i InlineQuery) CheckUpdate(b gotgbot.Bot, u *gotgbot.Update) bool {
 	if u.InlineQuery == nil {
 		return false
 	}

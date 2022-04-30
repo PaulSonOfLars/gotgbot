@@ -71,7 +71,7 @@ type RequestOpts struct {
 }
 
 // Post sends a POST request to the telegram bot API.
-func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *APIBot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	ctx, cancel := bot.getTimeoutContext(opts)
 	defer cancel()
 
@@ -79,7 +79,7 @@ func (bot *Bot) Post(method string, params map[string]string, data map[string]Na
 }
 
 // getTimeoutContext returns the appropriate context for the current settings.
-func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc) {
+func (bot *APIBot) getTimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc) {
 	if opts != nil {
 		if opts.Timeout > 0 {
 			// custom timeout defined
@@ -107,7 +107,7 @@ func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.C
 // - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 // - data: map of any files to be sending to the telegram API.
 // - opts: request opts to use.
-func (bot *Bot) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *APIBot) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 
 	var contentType string
@@ -199,12 +199,12 @@ func getCleanAPIURL(url string) string {
 }
 
 // GetAPIURL returns the currently used API endpoint.
-func (bot *Bot) GetAPIURL() string {
+func (bot *APIBot) GetAPIURL() string {
 	return bot.getAPIURL(nil)
 }
 
 // getAPIURL returns the currently used API endpoint.
-func (bot *Bot) getAPIURL(opts *RequestOpts) string {
+func (bot *APIBot) getAPIURL(opts *RequestOpts) string {
 	if opts != nil && opts.APIURL != "" {
 		return getCleanAPIURL(opts.APIURL)
 	}
@@ -214,6 +214,6 @@ func (bot *Bot) getAPIURL(opts *RequestOpts) string {
 	return DefaultAPIURL
 }
 
-func (bot *Bot) methodEnpoint(method string, opts *RequestOpts) string {
+func (bot *APIBot) methodEnpoint(method string, opts *RequestOpts) string {
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
 }

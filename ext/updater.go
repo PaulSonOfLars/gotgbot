@@ -78,7 +78,7 @@ type PollingOpts struct {
 
 // StartPolling starts polling updates from telegram using the getUdpates long-polling method.
 // See the PollingOpts for optional values to set in production environments.
-func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
+func (u *Updater) StartPolling(b gotgbot.Bot, opts *PollingOpts) error {
 	// TODO: De-duplicate this code.
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
@@ -114,7 +114,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
+func (u *Updater) pollingLoop(b gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
 	u.running = true
 
 	// if dropPendingUpdates, force the offset to -1
@@ -203,7 +203,7 @@ func (u *Updater) Stop() error {
 }
 
 // StartWebhook Starts the webhook server. The opts parameter allows for specifying TLS settings.
-func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
+func (u *Updater) StartWebhook(b gotgbot.Bot, opts WebhookOpts) error {
 	var tls bool
 	if opts.CertFile == "" && opts.KeyFile == "" {
 		tls = false
