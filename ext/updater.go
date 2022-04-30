@@ -61,8 +61,6 @@ type PollingOpts struct {
 	// DropPendingUpdates decides whether or not to drop "pending" updates; these are updates which were sent before
 	// the bot was started.
 	DropPendingUpdates bool
-	// RequestOpts is for the HTTP options to use when polling telegram's API.
-	RequestOpts *gotgbot.RequestOpts
 	// GetUpdatesOpts represents the opts passed to GetUpdates.
 	// Note: It is recommended you edit the values here when running in production environments.
 	// Changes might include:
@@ -90,12 +88,12 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	// Yes, this also makes me sad. :/
 	v := map[string]string{}
 	dropPendingUpdates := false
-	reqOpts := b.DefaultRequestOpts
+	var reqOpts *gotgbot.RequestOpts
 
 	if opts != nil {
 		dropPendingUpdates = opts.DropPendingUpdates
-		if opts.RequestOpts != nil {
-			reqOpts = opts.RequestOpts
+		if opts.GetUpdatesOpts.RequestOpts != nil {
+			reqOpts = opts.GetUpdatesOpts.RequestOpts
 		}
 
 		v["offset"] = strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10)
