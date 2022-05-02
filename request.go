@@ -20,7 +20,9 @@ const (
 )
 
 type BotClient interface {
+	// PostWithContext submits a POST HTTP request a bot API instance.
 	PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
+	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
 }
 

@@ -33,7 +33,7 @@ func (lb *sendWithoutReplyBotClient) PostWithContext(ctx context.Context, method
 		params["allow_sending_without_reply"] = "true"
 	}
 
-	// Call the child n
+	// Call the next bot client instance in the middleware chain.
 	val, err := lb.BotClient.PostWithContext(ctx, method, params, data, opts)
 	if err != nil {
 		// Middlewares can also be used to increase error visibility, in case they aren't logged elsewhere.
