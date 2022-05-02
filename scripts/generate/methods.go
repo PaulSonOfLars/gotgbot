@@ -88,16 +88,12 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString("\n	reqOpts = opts.RequestOpts")
 	method.WriteString("\n}")
 	method.WriteString("\n")
-	method.WriteString(`
-	ctx, cancel := bot.TimeoutContext(reqOpts)
-	defer cancel()
-`)
 
 	// If sending data, we need to do it over POST
 	if hasData {
-		method.WriteString("\nr, err := bot.PostWithContext(ctx, \"" + tgMethod.Name + "\", v, data, reqOpts)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data, reqOpts)")
 	} else {
-		method.WriteString("\nr, err := bot.PostWithContext(ctx, \"" + tgMethod.Name + "\", v, nil, reqOpts)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
 	}
 
 	method.WriteString("\n	if err != nil {")

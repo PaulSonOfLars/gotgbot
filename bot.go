@@ -1,6 +1,8 @@
 package gotgbot
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 )
@@ -69,4 +71,17 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 	bot.BotClient = mw(bot.BotClient)
 	return bot
+}
+
+var ErrNilBotClient = errors.New("nil BotClient")
+
+func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+	if bot.BotClient == nil {
+		return nil, ErrNilBotClient
+	}
+
+	ctx, cancel := bot.BotClient.TimeoutContext(opts)
+	defer cancel()
+
+	return bot.BotClient.PostWithContext(ctx, method, params, data, opts)
 }
