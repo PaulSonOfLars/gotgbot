@@ -237,6 +237,53 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
+// RemoveHandlerFromGroup removes a handler by name from the specified group.
+// If multiple handlers have the same name, only the first one is removed.
+// Returns true if the handler was successfully removed.
+func (d *Dispatcher) RemoveHandlerFromGroup(handlerName string, group int) bool {
+	currHandlers, ok := d.handlers[group]
+	if !ok {
+		// group does not exist; removal failed.
+		return false
+	}
+
+	for i, handler := range currHandlers {
+		if handler.Name() == handlerName {
+			d.handlers[group] = append(currHandlers[:i], currHandlers[i+1:]...)
+
+			// Had one item, we removed one, so none left.
+			if len(currHandlers) == 1 {
+				// No more handlers, so group should also be removed.
+				d.RemoveGroup(group)
+			}
+			return true
+		}
+	}
+	// handler not found - removal failed.
+	return false
+}
+
+// RemoveGroup removes an entire group from the dispatcher's processing.
+// If group can't be found, this is a noop.
+func (d *Dispatcher) RemoveGroup(group int) {
+	if _, ok := d.handlers[group]; !ok {
+		// Group doesn't exist in map, so already removed.
+		return
+	}
+
+	groups := d.handlerGroups
+	for j, handlerGroup := range groups {
+		if handlerGroup == group {
+			d.handlerGroups = append(groups[:j], groups[j+1:]...)
+			delete(d.handlers, group)
+			// Group found, and deleted. Success!
+			return
+		}
+	}
+	// Group not found in list - so already removed.
+	return
+}
+
 // processRawUpdate takes a JSON update to be unmarshalled and processed by Dispatcher.ProcessUpdate.
 func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 	var upd gotgbot.Update
