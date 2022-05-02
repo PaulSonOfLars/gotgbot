@@ -14,3 +14,10 @@ type Named struct {
 func (n Named) Name() string {
 	return n.CustomName
 }
+
+func NewNamedhandler(name string, handler ext.Handler) Named {
+	return Named{
+		CustomName: name,
+		Handler:    handler,
+	}
+}
