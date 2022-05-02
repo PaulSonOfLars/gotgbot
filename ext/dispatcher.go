@@ -58,6 +58,7 @@ type Dispatcher struct {
 	// updatesChan is the channel that the dispatcher receives all new updates on.
 	updatesChan chan json.RawMessage
 	// limiter is how we limit the maximum number of goroutines for handling updates.
+	// if nil, this is a limitless dispatcher.
 	limiter chan struct{}
 	// waitGroup handles the number of running operations to allow for clean shutdowns.
 	waitGroup sync.WaitGroup
@@ -73,6 +74,7 @@ type DispatcherOpts struct {
 	ErrorLog *log.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
+	// This defines how many updates can be processed at the same time.
 	// If MaxRoutines == 0, DefaultMaxRoutines is used instead.
 	// If MaxRoutines < 0, no limits are imposed.
 	// If MaxRoutines > 0, that value is used.
@@ -81,8 +83,6 @@ type DispatcherOpts struct {
 
 // NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
 func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
-	var limiter chan struct{}
-
 	var errFunc DispatcherErrorHandler
 	var panicFunc DispatcherPanicHandler
 
@@ -102,6 +102,8 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 		panicFunc = opts.Panic
 	}
 
+	var limiter chan struct{}
+	// if maxRoutines < 0, we use a limitless dispatcher. (limiter == nil)
 	if maxRoutines >= 0 {
 		if maxRoutines == 0 {
 			maxRoutines = DefaultMaxRoutines
@@ -119,6 +121,16 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 		limiter:     limiter,
 		waitGroup:   sync.WaitGroup{},
 	}
+}
+
+// CurrentUsage returns the current number of concurrently processing updates.
+func (d *Dispatcher) CurrentUsage() int {
+	return len(d.limiter)
+}
+
+// MaxUsage returns the maximum number of concurrently processing updates.
+func (d *Dispatcher) MaxUsage() int {
+	return cap(d.limiter)
 }
 
 // Start to handle incoming updates.
