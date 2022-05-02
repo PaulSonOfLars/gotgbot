@@ -28,7 +28,7 @@ type BotOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// NewBot returns a new Bot interface populated with the necessary defaults.
+// NewBot returns a new Bot struct populated with the necessary defaults.
 func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	botClient := &BaseBotClient{
 		Token:              token,
