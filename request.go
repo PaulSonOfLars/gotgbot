@@ -24,6 +24,10 @@ type BotClient interface {
 	PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
 	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
+	// GetAPIURL gets the URL of the API the bot is interacting with.
+	GetAPIURL() string
+	// GetToken gets the current bots' token.
+	GetToken() string
 }
 
 type BaseBotClient struct {
@@ -224,6 +228,11 @@ func getCleanAPIURL(url string) string {
 // GetAPIURL returns the currently used API endpoint.
 func (bot *BaseBotClient) GetAPIURL() string {
 	return bot.getAPIURL(nil)
+}
+
+// GetToken returns the currently used token.
+func (bot *BaseBotClient) GetToken() string {
+	return bot.Token
 }
 
 // getAPIURL returns the currently used API endpoint.
