@@ -26,7 +26,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	urlLib "net/url" // renamed to avoid clashes with url vars
 	"strconv"
 )
 `)
@@ -84,15 +83,21 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 	method.WriteString(desc)
 	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + strings.Join(retTypes, ", ") + ", error) {")
-	method.WriteString("\n	v := urlLib.Values{}")
+	method.WriteString("\n	v := map[string]string{}")
 	method.WriteString(valueGen)
+	method.WriteString("\n")
+
+	method.WriteString("\nvar reqOpts *RequestOpts")
+	method.WriteString("\nif opts != nil {")
+	method.WriteString("\n	reqOpts = opts.RequestOpts")
+	method.WriteString("\n}")
 	method.WriteString("\n")
 
 	// If sending data, we need to do it over POST
 	if hasData {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data, reqOpts)")
 	} else {
-		method.WriteString("\nr, err := bot.Get(\"" + tgMethod.Name + "\", v)")
+		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
 	}
 
 	method.WriteString("\n	if err != nil {")
@@ -239,7 +244,7 @@ func generateValue(d APIDescription, f Field, goParam string, defaultRetVal stri
 
 	stringer := goTypeStringer(fieldType)
 	if stringer != "" {
-		addParam := fmt.Sprintf(`v.Add("%s", %s)`, f.Name, fmt.Sprintf(stringer, goParam))
+		addParam := fmt.Sprintf(`v["%s"] = %s`, f.Name, fmt.Sprintf(stringer, goParam))
 		if !f.Required && (fieldType == "int64" || fieldType == "float64") {
 			// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
 			// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
@@ -321,7 +326,7 @@ if %s != %s {
 		bd.WriteString("\n	if err != nil {")
 		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
 		bd.WriteString("\n	}")
-		bd.WriteString("\n	v.Add(\"" + f.Name + "\", string(bs))")
+		bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
 
 		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\n}")
@@ -361,21 +366,18 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 	}
 
-	optionalsStruct := ""
+	optionalsName := m.optsName()
+	optionalsStructBuilder := strings.Builder{}
+	optionalsStructBuilder.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
+	optionalsStructBuilder.WriteString("\ntype " + optionalsName + " struct {")
+	optionalsStructBuilder.WriteString(optionals.String())
+	optionalsStructBuilder.WriteString("\n// RequestOpts are an additional optional field to configure timeouts for individual requests")
+	optionalsStructBuilder.WriteString("\nRequestOpts *RequestOpts")
+	optionalsStructBuilder.WriteString("\n}")
 
-	if optionals.Len() > 0 {
-		optionalsName := m.optsName()
-		bd := strings.Builder{}
-		bd.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
-		bd.WriteString("\ntype " + optionalsName + " struct {")
-		bd.WriteString(optionals.String())
-		bd.WriteString("\n}")
-		optionalsStruct = bd.String()
+	requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
 
-		requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
-	}
-
-	return strings.Join(requiredArgs, ", "), optionalsStruct, nil
+	return strings.Join(requiredArgs, ", "), optionalsStructBuilder.String(), nil
 }
 
 type readerBranchesData struct {
@@ -388,15 +390,15 @@ const readerBranch = `
 if {{.GoParam}} != nil {
 	switch m := {{.GoParam}}.(type) {
 	case NamedReader:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = m
 
 	case io.Reader:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = NamedFile{File: m}
 
 	case []byte:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
 
 	default:
@@ -408,18 +410,18 @@ const stringOrReaderBranch = `
 if {{.GoParam}} != nil {
 	switch m := {{.GoParam}}.(type) {
 	case string:
-		v.Add("{{.Name}}", m)
+		v["{{.Name}}"] = m
 
 	case NamedReader:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = m
 
 	case io.Reader:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = NamedFile{File: m}
 
 	case []byte:
-		v.Add("{{.Name}}", "attach://{{.Name}}")
+		v["{{.Name}}"] = "attach://{{.Name}}"
 		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
 
 	default:
@@ -432,7 +434,7 @@ inputMediaBs, err := {{.GoParam}}.InputMediaParams("{{.Name}}" , data)
 if err != nil {
 	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
 }
-v.Add("{{.Name}}", string(inputMediaBs))`
+v["{{.Name}}"] = string(inputMediaBs)`
 
 const inputMediaArrayParamsBranch = `
 if {{.GoParam}} != nil {
@@ -448,5 +450,5 @@ if {{.GoParam}} != nil {
 	if err != nil {
 		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list of InputMedia for field: {{.Name}} %w", err)
 	}
-	v.Add("{{.Name}}", string(bs))
+	v["{{.Name}}"] = string(bs)
 }`

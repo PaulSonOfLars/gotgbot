@@ -15,9 +15,11 @@ import (
 func main() {
 	// Create bot from environment value.
 	b, err := gotgbot.NewBot(os.Getenv("TOKEN"), &gotgbot.BotOpts{
-		Client:      http.Client{},
-		GetTimeout:  gotgbot.DefaultGetTimeout,
-		PostTimeout: gotgbot.DefaultPostTimeout,
+		Client: http.Client{},
+		DefaultRequestOpts: &gotgbot.RequestOpts{
+			Timeout: gotgbot.DefaultTimeout,
+			APIURL:  gotgbot.DefaultAPIURL,
+		},
 	})
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
@@ -27,21 +29,23 @@ func main() {
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
 		ErrorLog: nil,
 		DispatcherOpts: ext.DispatcherOpts{
+			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
 				fmt.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
-			Panic:       nil,
-			ErrorLog:    nil,
-			MaxRoutines: 0,
+			MaxRoutines: ext.DefaultMaxRoutines,
 		},
 	})
 	dispatcher := updater.Dispatcher
 
-	// Add echo handler to reply to all messages.
+	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
-	dispatcher.AddHandler(handlers.NewCommand("source", source))
+	// Answer callback query sent in the /start command.
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
+	// /source command to send the bot source code
+	dispatcher.AddHandler(handlers.NewCommand("source", source))
+	// Add echo handler to reply to all messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.All, echo))
 
 	// Start receiving updates.
