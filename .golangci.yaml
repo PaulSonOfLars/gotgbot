@@ -62,7 +62,7 @@ linters:
     #    - nilassign
     - nilerr
     - noctx
-    #    - nolintlint
+    - nolintlint
     #    - paralleltest
     - prealloc
     - promlinter
@@ -90,6 +90,9 @@ issues:
         - gosec
       text: "G404:" # warning about insecure math/rand. We dont care about this in tests!
       path: "\\w*_test.go"
+    - linters:
+        - gosimple
+      text: "S1023:" # allow redundant return statements. They can be nice for readability.
 
   # Enable default excludes, for common sense values.
   exclude-use-default: true
