@@ -24,7 +24,7 @@ type sendWithoutReplyBotClient struct {
 
 // Define wrapper around existing PostWithContext method.
 // Note: this is the only method that needs redefining.
-func (lb *sendWithoutReplyBotClient) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b *sendWithoutReplyBotClient) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	// For all sendable methods, we want to allow sending if the message has been deleted.
 	// So, we edit the params to allow for that.
 	// We also log this, for the sake of the example. :)
@@ -34,7 +34,7 @@ func (lb *sendWithoutReplyBotClient) PostWithContext(ctx context.Context, method
 	}
 
 	// Call the next bot client instance in the middleware chain.
-	val, err := lb.BotClient.PostWithContext(ctx, method, params, data, opts)
+	val, err := b.BotClient.PostWithContext(ctx, method, params, data, opts)
 	if err != nil {
 		// Middlewares can also be used to increase error visibility, in case they aren't logged elsewhere.
 		fmt.Println("warning, got an error:", err)
