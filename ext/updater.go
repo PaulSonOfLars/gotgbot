@@ -124,7 +124,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 
 	var offset int64
 	for u.running {
-		r, err := u.getUpdates(b, opts, v)
+		r, err := b.Post("getUpdates", v, nil, opts)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
@@ -168,16 +168,6 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			u.UpdateChan <- temp
 		}
 	}
-}
-
-// getUpdates ensures the context is correctly applied to each call.
-// The use of PostWithContext means that we respect middleware usage.
-func (u *Updater) getUpdates(b *gotgbot.Bot, opts *gotgbot.RequestOpts, v map[string]string) (json.RawMessage, error) {
-	ctx, cancel := b.TimeoutContext(opts)
-	defer cancel()
-
-	r, err := b.PostWithContext(ctx, "getUpdates", v, nil, opts)
-	return r, err
 }
 
 // Idle starts an infinite loop to avoid the program exciting while the background threads handle updates.
