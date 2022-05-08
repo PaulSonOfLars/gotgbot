@@ -204,8 +204,11 @@ func (u *Updater) Stop() error {
 		}
 	}
 
-	// stop the polling loop
-	u.running <- false
+	if u.running != nil {
+		// stop the polling loop
+		u.running <- false
+		close(u.running)
+	}
 
 	close(u.UpdateChan)
 
@@ -214,6 +217,7 @@ func (u *Updater) Stop() error {
 	if u.stopIdling != nil {
 		// stop idling
 		u.stopIdling <- false
+		close(u.stopIdling)
 	}
 	return nil
 }
