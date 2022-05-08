@@ -22,9 +22,9 @@ type Updater struct {
 	UpdateChan chan json.RawMessage
 	ErrorLog   *log.Logger
 
-	idle    bool
-	running bool
-	server  *http.Server
+	stopIdling chan bool
+	running    chan bool
+	server     *http.Server
 }
 
 var errorLog = log.New(os.Stderr, "ERROR", log.LstdFlags)
@@ -115,7 +115,6 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 }
 
 func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPendingUpdates bool, v map[string]string) {
-	u.running = true
 
 	// if dropPendingUpdates, force the offset to -1
 	if dropPendingUpdates {
@@ -123,8 +122,17 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 	}
 
 	var offset int64
-	for u.running {
-		// note: this bot instance uses a custom http.Client with longer timeouts
+
+	u.running = make(chan bool)
+	for true {
+		select {
+		case <-u.running:
+			// if anything comes in, stop.
+			return
+		default:
+			// continue as usual
+		}
+
 		r, err := b.Post("getUpdates", v, nil, opts)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
@@ -173,9 +181,15 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 
 // Idle starts an infinite loop to avoid the program exciting while the background threads handle updates.
 func (u *Updater) Idle() {
-	u.idle = true
+	u.stopIdling = make(chan bool)
 
-	for u.idle {
+	for true {
+		select {
+		case <-u.stopIdling:
+			return
+		default:
+			// continue as usual
+		}
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -191,14 +205,16 @@ func (u *Updater) Stop() error {
 	}
 
 	// stop the polling loop
-	u.running = false
+	u.running <- false
 
 	close(u.UpdateChan)
 
 	u.Dispatcher.Stop()
 
-	// stop idling
-	u.idle = false
+	if u.stopIdling != nil {
+		// stop idling
+		u.stopIdling <- false
+	}
 	return nil
 }
 
