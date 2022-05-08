@@ -124,7 +124,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 	var offset int64
 
 	u.running = make(chan bool)
-	for true {
+	for {
 		select {
 		case <-u.running:
 			// if anything comes in, stop.
@@ -183,7 +183,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 func (u *Updater) Idle() {
 	u.stopIdling = make(chan bool)
 
-	for true {
+	for {
 		select {
 		case <-u.stopIdling:
 			return
