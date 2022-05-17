@@ -53,13 +53,9 @@ func main() {
 	err = updater.StartPolling(b, &ext.PollingOpts{
 		DropPendingUpdates: true,
 		GetUpdatesOpts: gotgbot.GetUpdatesOpts{
-			Offset:         0,
-			Limit:          0,
-			Timeout:        9,
-			AllowedUpdates: nil,
+			Timeout: 9,
 			RequestOpts: &gotgbot.RequestOpts{
 				Timeout: time.Second * 10,
-				APIURL:  "",
 			},
 		},
 	})
