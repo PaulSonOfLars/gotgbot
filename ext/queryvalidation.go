@@ -16,7 +16,7 @@ func ValidateLoginQuery(query url.Values, token string) bool {
 }
 
 // ValidateWebAppInitData validates a webapp's initData field for safe use on the server-side.
-// The initData fiels is stored as a query string, so this is converted and then validated.
+// The initData field is stored as a query string, so this is converted and then validated.
 // See https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app for more details.
 func ValidateWebAppInitData(initData string, token string) (bool, error) {
 	query, err := url.ParseQuery(initData)
