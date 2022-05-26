@@ -3,10 +3,18 @@ package gotgbot
 // Sender is a merge of the User and SenderChat fields of a message, to provide easier interaction with
 // message senders from the telegram API.
 type Sender struct {
-	User               *User
-	Chat               *Chat
+	// The User defined as the sender (if applicable)
+	User *User
+	// The Chat defined as the sender (if applicable)
+	Chat *Chat
+	// Whether the sender was an automatic forward; eg, a linked channel.
 	IsAutomaticForward bool
-	ChatId             int64
+	// The location that was sent to. Required to determine if the sender is a linked channel, an anonymous channel,
+	// or an anonymous admin.
+	ChatId int64
+	// The custom admin title of the anonymous group administrator sender.
+	// Only available if IsAnonymousAdmin is true.
+	AuthorSignature string
 }
 
 // GetSender populates the relevant fields of a Sender struct given a message.
@@ -16,6 +24,7 @@ func (m Message) GetSender() *Sender {
 		Chat:               m.SenderChat,
 		IsAutomaticForward: m.IsAutomaticForward,
 		ChatId:             m.Chat.Id,
+		AuthorSignature:    m.AuthorSignature,
 	}
 }
 
