@@ -19,12 +19,22 @@ func TestValidateLoginQuery(t *testing.T) {
 	query.Set("hash", "67fbf533a5e28a9bf93e12ca06b706e91383b96f51b9486af229ddcbc07ea801")
 
 	t.Run("valid", func(t *testing.T) {
-		if !ValidateLoginQuery(query, "test_token") {
+		ok, err := ValidateLoginQuery(query, "test_token")
+		if err != nil {
+			t.Errorf("failed to validate login query: %v", err)
+			return
+		}
+		if !ok {
 			t.Errorf("ValidateLoginQuery() with valid values should be true")
 		}
 	})
 	t.Run("invalid", func(t *testing.T) {
-		if ValidateLoginQuery(query, "invalid_token") {
+		ok, err := ValidateLoginQuery(query, "invalid_token")
+		if err != nil {
+			t.Errorf("failed to validate login query: %v", err)
+			return
+		}
+		if ok {
 			t.Errorf("ValidateLoginQuery() with invalid values should be false")
 		}
 	})
@@ -32,7 +42,12 @@ func TestValidateLoginQuery(t *testing.T) {
 	// If no hash is provided, fail
 	query.Del("hash")
 	t.Run("no hash", func(t *testing.T) {
-		if ValidateLoginQuery(query, "invalid_token") {
+		ok, err := ValidateLoginQuery(query, "invalid_token")
+		if err != nil {
+			t.Errorf("failed to validate login query: %v", err)
+			return
+		}
+		if ok {
 			t.Errorf("ValidateLoginQuery() with no hash values should be false")
 		}
 	})
@@ -70,7 +85,7 @@ func TestValidateWebApp(t *testing.T) {
 	t.Run("valid initData", func(t *testing.T) {
 		ok, err := ValidateWebAppInitData(webAppQuery.Encode(), "test_token")
 		if err != nil {
-			t.Errorf("Failed to parse query: %v", err)
+			t.Errorf("Failed to validate webapp query: %v", err)
 			return
 		}
 		if !ok {
@@ -80,7 +95,7 @@ func TestValidateWebApp(t *testing.T) {
 	t.Run("invalid initData", func(t *testing.T) {
 		ok, err := ValidateWebAppInitData(webAppQuery.Encode(), "invalid_token")
 		if err != nil {
-			t.Errorf("Failed to parse query: %v", err)
+			t.Errorf("Failed to validate webapp query: %v", err)
 			return
 		}
 		if ok {
@@ -89,12 +104,22 @@ func TestValidateWebApp(t *testing.T) {
 	})
 
 	t.Run("valid query", func(t *testing.T) {
-		if !ValidateWebAppQuery(webAppQuery, "test_token") {
+		ok, err := ValidateWebAppQuery(webAppQuery, "test_token")
+		if err != nil {
+			t.Errorf("Failed to validate webapp query: %v", err)
+			return
+		}
+		if !ok {
 			t.Errorf("ValidateWebAppQuery() with valid values should be true")
 		}
 	})
 	t.Run("invalid query", func(t *testing.T) {
-		if ValidateWebAppQuery(webAppQuery, "invalid_token") {
+		ok, err := ValidateWebAppQuery(webAppQuery, "invalid_token")
+		if err != nil {
+			t.Errorf("Failed to validate webapp query: %v", err)
+			return
+		}
+		if ok {
 			t.Errorf("ValidateWebAppQuery() with invalid values should be false")
 		}
 	})
