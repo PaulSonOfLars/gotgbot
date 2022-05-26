@@ -25,7 +25,13 @@ func index(webappURL string) func(writer http.ResponseWriter, request *http.Requ
 
 func validate(token string) func(writer http.ResponseWriter, request *http.Request) {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		if ext.ValidateWebAppQuery(request.URL.Query(), token) {
+		ok, err := ext.ValidateWebAppQuery(request.URL.Query(), token)
+		if err != nil {
+			writer.Write([]byte("validation failed; error: " + err.Error()))
+			writer.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if ok {
 			writer.Write([]byte("validation success; user is authenticated."))
 		} else {
 			writer.Write([]byte("validation failed; data cannot be trusted."))
