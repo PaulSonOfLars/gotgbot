@@ -66,6 +66,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		if update.CallbackQuery.Message != nil {
 			msg = update.CallbackQuery.Message
 			chat = &update.CallbackQuery.Message.Chat
+			// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
 			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
 		}
 
