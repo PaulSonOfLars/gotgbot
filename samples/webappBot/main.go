@@ -19,16 +19,16 @@ import (
 // URL="<your_url_here>" TOKEN="<your_token_here>" go run .
 // Then, simply send /start to your bot, and enjoy your webapp demo.
 func main() {
-	// Get necessary configuration from environment variables.
+	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
 	if token == "" {
-		panic("token not defined")
+		panic("TOKEN environment variable is empty")
 	}
 
 	// This MUST be an HTTPS URL for telegram to accept it.
 	webappURL := os.Getenv("URL")
 	if webappURL == "" {
-		panic("webapp URL not defined")
+		panic("URL environment variable is empty")
 	}
 
 	// Create our bot.
