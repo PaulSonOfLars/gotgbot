@@ -19,6 +19,26 @@ const (
 	DefaultTimeout = time.Second * 5
 )
 
+type BotClient interface {
+	// PostWithContext submits a POST HTTP request a bot API instance.
+	PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
+	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
+	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
+	// GetAPIURL gets the URL of the API the bot is interacting with.
+	GetAPIURL() string
+	// GetToken gets the current bots' token.
+	GetToken() string
+}
+
+type BaseBotClient struct {
+	// Token stores the bot's secret token obtained from t.me/BotFather, and used to interact with telegram's API.
+	Token string
+	// Client is the HTTP Client used for all HTTP requests made for this bot.
+	Client http.Client
+	// The default request opts for this bot instance.
+	DefaultRequestOpts *RequestOpts
+}
+
 type Response struct {
 	// Ok: if true, request was successful, and result can be found in the Result field.
 	// If false, error can be explained in the Description.
@@ -70,35 +90,41 @@ type RequestOpts struct {
 	APIURL string
 }
 
-// Post sends a POST request to the telegram bot API.
-func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
-	ctx, cancel := bot.getTimeoutContext(opts)
-	defer cancel()
-
-	return bot.PostWithContext(ctx, method, params, data, opts)
-}
-
-// getTimeoutContext returns the appropriate context for the current settings.
-func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc) {
+// TimeoutContext returns the appropriate context for the current settings.
+func (bot *BaseBotClient) TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc) {
 	if opts != nil {
-		if opts.Timeout > 0 {
-			// custom timeout defined
-			return context.WithTimeout(context.Background(), opts.Timeout)
-
-		} else if opts.Timeout < 0 {
-			return context.Background(), func() {}
+		ctx, cancelFunc := timeoutFromOpts(opts)
+		if ctx != nil {
+			return ctx, cancelFunc
 		}
 	}
 
 	if bot.DefaultRequestOpts != nil {
-		if bot.DefaultRequestOpts.Timeout > 0 {
-			return context.WithTimeout(context.Background(), bot.DefaultRequestOpts.Timeout)
-		} else if bot.DefaultRequestOpts.Timeout < 0 {
-			return context.Background(), func() {}
+		ctx, cancelFunc := timeoutFromOpts(bot.DefaultRequestOpts)
+		if ctx != nil {
+			return ctx, cancelFunc
 		}
 	}
 
 	return context.WithTimeout(context.Background(), DefaultTimeout)
+}
+
+func timeoutFromOpts(opts *RequestOpts) (context.Context, context.CancelFunc) {
+	// nothing? no timeout.
+	if opts == nil {
+		return nil, nil
+	}
+
+	if opts.Timeout > 0 {
+		// > 0 timeout defined.
+		return context.WithTimeout(context.Background(), opts.Timeout)
+
+	} else if opts.Timeout < 0 {
+		// < 0  no timeout; infinite.
+		return context.Background(), func() {}
+	}
+	// 0 == nothing defined, use defaults.
+	return nil, nil
 }
 
 // PostWithContext allows sending a POST request to the telegram bot API with an existing context.
@@ -106,8 +132,9 @@ func (bot *Bot) getTimeoutContext(opts *RequestOpts) (context.Context, context.C
 // - method: the telegram API method to call.
 // - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 // - data: map of any files to be sending to the telegram API.
-// - opts: request opts to use.
-func (bot *Bot) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+// - opts: request opts to use. Note: Timeout opts are ignored when used in PostWithContext. Timeout handling is the
+//         responsibility of the caller/context owner.
+func (bot *BaseBotClient) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 
 	var contentType string
@@ -199,12 +226,17 @@ func getCleanAPIURL(url string) string {
 }
 
 // GetAPIURL returns the currently used API endpoint.
-func (bot *Bot) GetAPIURL() string {
+func (bot *BaseBotClient) GetAPIURL() string {
 	return bot.getAPIURL(nil)
 }
 
+// GetToken returns the currently used token.
+func (bot *BaseBotClient) GetToken() string {
+	return bot.Token
+}
+
 // getAPIURL returns the currently used API endpoint.
-func (bot *Bot) getAPIURL(opts *RequestOpts) string {
+func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
 	if opts != nil && opts.APIURL != "" {
 		return getCleanAPIURL(opts.APIURL)
 	}
@@ -214,6 +246,6 @@ func (bot *Bot) getAPIURL(opts *RequestOpts) string {
 	return DefaultAPIURL
 }
 
-func (bot *Bot) methodEnpoint(method string, opts *RequestOpts) string {
+func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string {
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
 }

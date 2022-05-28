@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -45,11 +46,19 @@ func main() {
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
 	// /source command to send the bot source code
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
-	// Add echo handler to reply to all messages.
-	dispatcher.AddHandler(handlers.NewMessage(message.All, echo))
+	// Add echo handler to reply to all text messages.
+	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
 
 	// Start receiving updates.
-	err = updater.StartPolling(b, &ext.PollingOpts{DropPendingUpdates: true})
+	err = updater.StartPolling(b, &ext.PollingOpts{
+		DropPendingUpdates: true,
+		GetUpdatesOpts: gotgbot.GetUpdatesOpts{
+			Timeout: 9,
+			RequestOpts: &gotgbot.RequestOpts{
+				Timeout: time.Second * 10,
+			},
+		},
+	})
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}

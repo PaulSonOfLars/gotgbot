@@ -180,6 +180,7 @@ func generate(d APIDescription) error {
 	if err := generateHelpers(d); err != nil {
 		return fmt.Errorf("failed to generate helpers: %w", err)
 	}
+
 	return nil
 }
 

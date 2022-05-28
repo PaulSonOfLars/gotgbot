@@ -1,22 +1,20 @@
 package gotgbot
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 )
 
 //go:generate go run ./scripts/generate
 
-// Bot is the core Bot object used to send and receive messages.
+// Bot is the default Bot struct used to send and receive messages to the telegram API.
 type Bot struct {
 	// The bot's User info, as returned by Bot.GetMe. Populated when created through the NewBot method.
 	User
-	// Token stores the bot's secret token obtained from t.me/BotFather, and used to interact with telegram's API.
-	Token string
-	// Client is the HTTP Client used for all HTTP requests made for this bot.
-	Client http.Client
-	// The default request opts for this bot instance.
-	DefaultRequestOpts *RequestOpts
+	// The bot client to use to make requests
+	BotClient
 }
 
 // BotOpts declares all optional parameters for the NewBot function.
@@ -32,8 +30,11 @@ type BotOpts struct {
 
 // NewBot returns a new Bot struct populated with the necessary defaults.
 func NewBot(token string, opts *BotOpts) (*Bot, error) {
-	// Barebones bot - token not verified yet, no settings set
-	b := Bot{Token: token}
+	botClient := &BaseBotClient{
+		Token:              token,
+		Client:             http.Client{},
+		DefaultRequestOpts: nil,
+	}
 
 	// Large timeout on the initial GetMe request as this can sometimes be slow.
 	getMeReqOpts := &RequestOpts{
@@ -42,13 +43,17 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	}
 
 	if opts != nil {
-		b.Client = opts.Client
+		botClient.Client = opts.Client
 		if opts.DefaultRequestOpts != nil {
-			b.DefaultRequestOpts = opts.DefaultRequestOpts
+			botClient.DefaultRequestOpts = opts.DefaultRequestOpts
 		}
 		if opts.RequestOpts != nil {
 			getMeReqOpts = opts.RequestOpts
 		}
+	}
+
+	b := Bot{
+		BotClient: botClient,
 	}
 
 	// Get bot info. This serves two purposes:
@@ -61,4 +66,22 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 
 	b.User = *botUser
 	return &b, nil
+}
+
+func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
+	bot.BotClient = mw(bot.BotClient)
+	return bot
+}
+
+var ErrNilBotClient = errors.New("nil BotClient")
+
+func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+	if bot.BotClient == nil {
+		return nil, ErrNilBotClient
+	}
+
+	ctx, cancel := bot.BotClient.TimeoutContext(opts)
+	defer cancel()
+
+	return bot.BotClient.PostWithContext(ctx, method, params, data, opts)
 }

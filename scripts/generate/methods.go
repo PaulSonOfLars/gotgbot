@@ -47,16 +47,9 @@ import (
 func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, error) {
 	method := strings.Builder{}
 
-	retTypes, err := tgMethod.GetReturnTypes(d)
+	methodSignature, retTypes, optionalsStruct, err := generateMethodSignature(d, tgMethod)
 	if err != nil {
-		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
-	}
-
-	defaultRetVals := getDefaultReturnVals(d, retTypes)
-
-	args, optionalsStruct, err := tgMethod.getArgs()
-	if err != nil {
-		return "", fmt.Errorf("failed to get args for method %s: %w", tgMethod.Name, err)
+		return "", err
 	}
 
 	if optionalsStruct != "" {
@@ -69,8 +62,11 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
+	// Generate list of default return values (for error handling).
+	defaultRetVals := strings.Join(getDefaultReturnVals(d, retTypes), ", ")
+
 	// Generate method contents, setting up values in expected format
-	valueGen, hasData, err := tgMethod.argsToValues(d, strings.Join(defaultRetVals, ","))
+	valueGen, hasData, err := tgMethod.argsToValues(d, defaultRetVals)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
@@ -82,7 +78,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	method.WriteString(desc)
-	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + args + ") (" + strings.Join(retTypes, ", ") + ", error) {")
+	method.WriteString("\nfunc (bot *Bot) " + methodSignature + " {")
 	method.WriteString("\n	v := map[string]string{}")
 	method.WriteString(valueGen)
 	method.WriteString("\n")
@@ -101,7 +97,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	method.WriteString("\n	if err != nil {")
-	method.WriteString("\n		return " + strings.Join(defaultRetVals, ", ") + ", err")
+	method.WriteString("\n		return " + defaultRetVals + ", err")
 	method.WriteString("\n	}")
 	method.WriteString("\n")
 
@@ -109,6 +105,21 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString("\n}")
 
 	return method.String(), nil
+}
+
+func generateMethodSignature(d APIDescription, tgMethod MethodDescription) (string, []string, string, error) {
+	retTypes, err := tgMethod.GetReturnTypes(d)
+	if err != nil {
+		return "", nil, "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
+	}
+
+	args, optionalsStruct, err := tgMethod.getArgs()
+	if err != nil {
+		return "", nil, "", fmt.Errorf("failed to get args for method %s: %w", tgMethod.Name, err)
+	}
+
+	methodSignature := strings.Title(tgMethod.Name) + "(" + args + ") (" + strings.Join(retTypes, ", ") + ", error)"
+	return methodSignature, retTypes, optionalsStruct, nil
 }
 
 func returnValues(d APIDescription, retTypes []string) (string, error) {
