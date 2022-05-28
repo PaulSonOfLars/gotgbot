@@ -9,13 +9,18 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
 func main() {
+	// Get token from the environment variable
+	token := os.Getenv("TOKEN")
+	if token == "" {
+		panic("TOKEN environment variable is empty")
+	}
+
 	// Create bot from environment value.
-	b, err := gotgbot.NewBot(os.Getenv("TOKEN"), &gotgbot.BotOpts{
+	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
 		Client: http.Client{},
 		DefaultRequestOpts: &gotgbot.RequestOpts{
 			Timeout: gotgbot.DefaultTimeout,
@@ -40,12 +45,6 @@ func main() {
 	})
 	dispatcher := updater.Dispatcher
 
-	// /start command to introduce the bot
-	dispatcher.AddHandler(handlers.NewCommand("start", start))
-	// Answer callback query sent in the /start command.
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
-	// /source command to send the bot source code
-	dispatcher.AddHandler(handlers.NewCommand("source", source))
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
 
@@ -66,101 +65,6 @@ func main() {
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
-}
-
-func source(b *gotgbot.Bot, ctx *ext.Context) error {
-	f, err := os.Open("samples/echoBot/main.go")
-	if err != nil {
-		return fmt.Errorf("failed to open source: %w", err)
-	}
-
-	_, err = b.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
-		Caption:          "Here is my source code.",
-		ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to send source: %w", err)
-	}
-
-	// Alternative file sending solutions:
-
-	// --- By file_id:
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, "file_id", &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	// }
-
-	// --- By []byte:
-	// bs, err := ioutil.ReadFile("samples/echoBot/main.go")
-	// if err != nil {
-	//	return fmt.Errorf("failed to open source: %w", err)
-	// }
-	//
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, bs, &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	// }
-
-	// --- By custom name:
-	// f2, err := os.Open("samples/echoBot/main.go")
-	// if err != nil {
-	//	return fmt.Errorf("failed to open source: %w", err)
-	//	return err
-	// }
-	//
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, gotgbot.NamedFile{
-	//	File:     f2,
-	//	FileName: "NewFileName",
-	// }, &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	//	return err
-	// }
-
-	return nil
-}
-
-// start introduces the bot.
-func start(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
-		ParseMode: "html",
-		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Press me", CallbackData: "start_callback"},
-			}},
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to send start message: %w", err)
-	}
-	return nil
-}
-
-// startCB edits the start message.
-func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-
-	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
-		Text: "You pressed a button!",
-	})
-	if err != nil {
-		return fmt.Errorf("failed to answer start callback query: %w", err)
-	}
-
-	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
-	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
-	}
-	return nil
 }
 
 // echo replies to a messages with its own contents.

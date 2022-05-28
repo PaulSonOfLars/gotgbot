@@ -9,7 +9,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 )
 
 func main() {
@@ -31,9 +31,6 @@ func main() {
 		panic("failed to create new bot: " + err.Error())
 	}
 
-	// Load middleware
-	b.UseMiddleware(SendWithoutReply)
-
 	// Create updater and dispatcher.
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
 		ErrorLog: nil,
@@ -48,8 +45,10 @@ func main() {
 	})
 	dispatcher := updater.Dispatcher
 
-	// Add echo handler to reply to all text messages.
-	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
+	// /start command to introduce the bot
+	dispatcher.AddHandler(handlers.NewCommand("start", start))
+	// Answer callback query sent in the /start command.
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
@@ -70,11 +69,36 @@ func main() {
 	updater.Idle()
 }
 
-// echo replies to a messages with its own contents.
-func echo(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
+// start introduces the bot.
+func start(b *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
+		ParseMode: "html",
+		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
+			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
+				{Text: "Press me", CallbackData: "start_callback"},
+			}},
+		},
+	})
 	if err != nil {
-		return fmt.Errorf("failed to echo message: %w", err)
+		return fmt.Errorf("failed to send start message: %w", err)
+	}
+	return nil
+}
+
+// startCB edits the start message.
+func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+		Text: "You pressed a button!",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to answer start callback query: %w", err)
+	}
+
+	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
+	if err != nil {
+		return fmt.Errorf("failed to edit start message text: %w", err)
 	}
 	return nil
 }
