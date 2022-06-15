@@ -32,7 +32,7 @@ type Animation struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size in bytes
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -53,7 +53,7 @@ type Audio struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size in bytes
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. Thumbnail of the album cover to which the music file belongs
 	Thumb *PhotoSize `json:"thumb,omitempty"`
@@ -363,7 +363,7 @@ type CallbackQuery struct {
 	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
 	ChatInstance string `json:"chat_instance"`
-	// Optional. Data associated with the callback button. Be aware that a bad client can send arbitrary data in this field.
+	// Optional. Data associated with the callback button. Be aware that the message, from which originated the query, can contain no callback buttons with this data.
 	Data string `json:"data,omitempty"`
 	// Optional. Short name of a Game to be returned, serves as the unique identifier for the game
 	GameShortName string `json:"game_short_name,omitempty"`
@@ -1068,7 +1068,7 @@ type ChatPhoto struct {
 }
 
 // ChosenInlineResult Represents a result of an inline query that was chosen by the user and sent to their chat partner.
-// Note: It is necessary to enable inline feedback via @Botfather in order to receive these objects in updates.
+// Note: It is necessary to enable inline feedback via @BotFather in order to receive these objects in updates.
 // https://core.telegram.org/bots/api#choseninlineresult
 type ChosenInlineResult struct {
 	// The unique identifier for the result that was chosen
@@ -1120,7 +1120,7 @@ type Document struct {
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size in bytes
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -1167,7 +1167,7 @@ type File struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Optional. File size in bytes, if known
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
 	FilePath string `json:"file_path,omitempty"`
@@ -1220,7 +1220,7 @@ type GameHighScore struct {
 type InlineKeyboardButton struct {
 	// Label text on the button
 	Text string `json:"text"`
-	// Optional. HTTP or tg:// url to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
+	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
 	// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
 	CallbackData string `json:"callback_data,omitempty"`
@@ -2661,7 +2661,7 @@ type InlineQueryResultVideo struct {
 	Id string `json:"id"`
 	// A valid URL for the embedded video player or video file
 	VideoUrl string `json:"video_url"`
-	// Mime type of the content of video url, "text/html" or "video/mp4"
+	// Mime type of the content of the video URL, "text/html" or "video/mp4"
 	MimeType string `json:"mime_type"`
 	// URL of the thumbnail (JPEG only) for the video
 	ThumbUrl string `json:"thumb_url"`
@@ -2829,7 +2829,7 @@ type InputInvoiceMessageContent struct {
 	Description string `json:"description"`
 	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
 	Payload string `json:"payload"`
-	// Payment provider token, obtained via Botfather
+	// Payment provider token, obtained via @BotFather
 	ProviderToken string `json:"provider_token"`
 	// Three-letter ISO 4217 currency code, see more on currencies
 	Currency string `json:"currency"`
@@ -2841,9 +2841,9 @@ type InputInvoiceMessageContent struct {
 	SuggestedTipAmounts []int64 `json:"suggested_tip_amounts,omitempty"`
 	// Optional. A JSON-serialized object for data about the invoice, which will be shared with the payment provider. A detailed description of the required fields should be provided by the payment provider.
 	ProviderData string `json:"provider_data,omitempty"`
-	// Optional. URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
+	// Optional. URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
 	PhotoUrl string `json:"photo_url,omitempty"`
-	// Optional. Photo size
+	// Optional. Photo size in bytes
 	PhotoSize int64 `json:"photo_size,omitempty"`
 	// Optional. Photo width
 	PhotoWidth int64 `json:"photo_width,omitempty"`
@@ -2857,9 +2857,9 @@ type InputInvoiceMessageContent struct {
 	NeedEmail bool `json:"need_email,omitempty"`
 	// Optional. Pass True, if you require the user's shipping address to complete the order
 	NeedShippingAddress bool `json:"need_shipping_address,omitempty"`
-	// Optional. Pass True, if user's phone number should be sent to provider
+	// Optional. Pass True, if the user's phone number should be sent to provider
 	SendPhoneNumberToProvider bool `json:"send_phone_number_to_provider,omitempty"`
-	// Optional. Pass True, if user's email address should be sent to provider
+	// Optional. Pass True, if the user's email address should be sent to provider
 	SendEmailToProvider bool `json:"send_email_to_provider,omitempty"`
 	// Optional. Pass True, if the final price depends on the shipping method
 	IsFlexible bool `json:"is_flexible,omitempty"`
@@ -3845,7 +3845,7 @@ type MessageEntity struct {
 	Offset int64 `json:"offset"`
 	// Length of the entity in UTF-16 code units
 	Length int64 `json:"length"`
-	// Optional. For "text_link" only, url that will be opened after user taps on the text
+	// Optional. For "text_link" only, URL that will be opened after user taps on the text
 	Url string `json:"url,omitempty"`
 	// Optional. For "text_mention" only, the mentioned user
 	User *User `json:"user,omitempty"`
@@ -4681,7 +4681,7 @@ type SuccessfulPayment struct {
 // At most one of the optional parameters can be present in any given update.
 // https://core.telegram.org/bots/api#update
 type Update struct {
-	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using Webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
+	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
 	UpdateId int64 `json:"update_id"`
 	// Optional. New incoming message of any kind - text, photo, sticker, etc.
 	Message *Message `json:"message,omitempty"`
@@ -4781,9 +4781,9 @@ type Video struct {
 	Thumb *PhotoSize `json:"thumb,omitempty"`
 	// Optional. Original filename as defined by sender
 	FileName string `json:"file_name,omitempty"`
-	// Optional. Mime type of a file as defined by sender
+	// Optional. Mime type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size in bytes
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 }
 
@@ -4840,7 +4840,7 @@ type Voice struct {
 	Duration int64 `json:"duration"`
 	// Optional. MIME type of the file as defined by sender
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. File size in bytes
+	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 }
 

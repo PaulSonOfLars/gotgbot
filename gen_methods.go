@@ -122,7 +122,7 @@ type AnswerCallbackQueryOpts struct {
 	Text string
 	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
-	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @Botfather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
+	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
 	Url string
 	// The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
 	CacheTime int64
@@ -2560,7 +2560,7 @@ type SendGameOpts struct {
 
 // SendGame Use this method to send a game. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat
-// - game_short_name (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via Botfather.
+// - game_short_name (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather.
 // - opts (type SendGameOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendgame
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
@@ -2603,11 +2603,11 @@ type SendInvoiceOpts struct {
 	SuggestedTipAmounts []int64
 	// Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter
 	StartParameter string
-	// A JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
+	// JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
 	ProviderData string
 	// URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
 	PhotoUrl string
-	// Photo size
+	// Photo size in bytes
 	PhotoSize int64
 	// Photo width
 	PhotoWidth int64
@@ -2621,9 +2621,9 @@ type SendInvoiceOpts struct {
 	NeedEmail bool
 	// Pass True, if you require the user's shipping address to complete the order
 	NeedShippingAddress bool
-	// Pass True, if user's phone number should be sent to provider
+	// Pass True, if the user's phone number should be sent to provider
 	SendPhoneNumberToProvider bool
-	// Pass True, if user's email address should be sent to provider
+	// Pass True, if the user's email address should be sent to provider
 	SendEmailToProvider bool
 	// Pass True, if the final price depends on the shipping method
 	IsFlexible bool
@@ -2646,7 +2646,7 @@ type SendInvoiceOpts struct {
 // - title (type string): Product name, 1-32 characters
 // - description (type string): Product description, 1-255 characters
 // - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
-// - provider_token (type string): Payments provider token, obtained via Botfather
+// - provider_token (type string): Payment provider token, obtained via @BotFather
 // - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
 // - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
 // - opts (type SendInvoiceOpts): All optional parameters.
@@ -3682,7 +3682,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 type SetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
 	ChatId int64
-	// A JSON-serialized object for the new bot's menu button. Defaults to MenuButtonDefault
+	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 	MenuButton MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4136,9 +4136,9 @@ type SetWebhookOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// SetWebhook Use this method to specify a url and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified url, containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
-// If you'd like to make sure that the Webhook request comes from Telegram, we recommend using a secret path in the URL, e.g. https://www.example.com/<token>. Since nobody else knows your bot's token, you can be pretty sure it's us.
-// - url (type string): HTTPS url to send updates to. Use an empty string to remove webhook integration
+// SetWebhook Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
+// If you'd like to make sure that the webhook request comes from Telegram, we recommend using a secret path in the URL, e.g. https://www.example.com/<token>. Since nobody else knows your bot's token, you can be pretty sure it's us.
+// - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
 // - opts (type SetWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setwebhook
 func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
