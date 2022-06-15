@@ -21,11 +21,16 @@ type Bot struct {
 type BotOpts struct {
 	// HTTP client with any custom settings (eg proxy information) that might be necessary.
 	Client http.Client
-	// Default request opts to use when no other request opts are specified.
-	DefaultRequestOpts *RequestOpts
+	// Disables the token validity check.
+	// Useful when running in time-constrained environments where the startup time should be minimised, and where the
+	// token can be assumed to be valid (eg lambdas).
+	// Warning: Disabling the token check will mean that the Bot.User struct will no longer be populated.
+	DisableTokenCheck bool
 	// Request opts to use for checking token validity with Bot.GetMe. Can be slow - a high timeout (eg 10s) is
 	// recommended.
 	RequestOpts *RequestOpts
+	// Default opts to use for all requests, when no other request opts are specified.
+	DefaultRequestOpts *RequestOpts
 }
 
 // NewBot returns a new Bot struct populated with the necessary defaults.
@@ -42,6 +47,7 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		APIURL:  DefaultAPIURL,
 	}
 
+	checkTokenValidity := true
 	if opts != nil {
 		botClient.Client = opts.Client
 		if opts.DefaultRequestOpts != nil {
@@ -50,21 +56,24 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		if opts.RequestOpts != nil {
 			getMeReqOpts = opts.RequestOpts
 		}
+		checkTokenValidity = !opts.DisableTokenCheck
 	}
 
 	b := Bot{
 		BotClient: botClient,
 	}
 
-	// Get bot info. This serves two purposes:
-	// 1. Check token is valid.
-	// 2. Populate the bot struct "User" field.
-	botUser, err := b.GetMe(&GetMeOpts{RequestOpts: getMeReqOpts})
-	if err != nil {
-		return nil, err
+	if checkTokenValidity {
+		// Get bot info. This serves two purposes:
+		// 1. Check token is valid.
+		// 2. Populate the bot struct "User" field.
+		botUser, err := b.GetMe(&GetMeOpts{RequestOpts: getMeReqOpts})
+		if err != nil {
+			return nil, err
+		}
+		b.User = *botUser
 	}
 
-	b.User = *botUser
 	return &b, nil
 }
 
