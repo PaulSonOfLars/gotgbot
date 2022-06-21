@@ -13,7 +13,7 @@ import (
 
 // AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet.
 type AddStickerToSetOpts struct {
-	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	PngSticker InputFile
 	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
 	TgsSticker InputFile
@@ -529,7 +529,7 @@ type CreateChatInviteLinkOpts struct {
 	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
-	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
+	// The maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
 	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 	CreatesJoinRequest bool
@@ -569,9 +569,111 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 	return &c, json.Unmarshal(r, &c)
 }
 
+// CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink.
+type CreateInvoiceLinkOpts struct {
+	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
+	MaxTipAmount int64
+	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
+	SuggestedTipAmounts []int64
+	// JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
+	ProviderData string
+	// URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
+	PhotoUrl string
+	// Photo size in bytes
+	PhotoSize int64
+	// Photo width
+	PhotoWidth int64
+	// Photo height
+	PhotoHeight int64
+	// Pass True, if you require the user's full name to complete the order
+	NeedName bool
+	// Pass True, if you require the user's phone number to complete the order
+	NeedPhoneNumber bool
+	// Pass True, if you require the user's email address to complete the order
+	NeedEmail bool
+	// Pass True, if you require the user's shipping address to complete the order
+	NeedShippingAddress bool
+	// Pass True, if the user's phone number should be sent to the provider
+	SendPhoneNumberToProvider bool
+	// Pass True, if the user's email address should be sent to the provider
+	SendEmailToProvider bool
+	// Pass True, if the final price depends on the shipping method
+	IsFlexible bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// CreateInvoiceLink Use this method to create a link for an invoice. Returns the created invoice link as String on success.
+// - title (type string): Product name, 1-32 characters
+// - description (type string): Product description, 1-255 characters
+// - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+// - provider_token (type string): Payment provider token, obtained via BotFather
+// - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
+// - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+// - opts (type CreateInvoiceLinkOpts): All optional parameters.
+// https://core.telegram.org/bots/api#createinvoicelink
+func (bot *Bot) CreateInvoiceLink(title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *CreateInvoiceLinkOpts) (string, error) {
+	v := map[string]string{}
+	v["title"] = title
+	v["description"] = description
+	v["payload"] = payload
+	v["provider_token"] = providerToken
+	v["currency"] = currency
+	if prices != nil {
+		bs, err := json.Marshal(prices)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal field prices: %w", err)
+		}
+		v["prices"] = string(bs)
+	}
+	if opts != nil {
+		if opts.MaxTipAmount != 0 {
+			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
+		}
+		if opts.SuggestedTipAmounts != nil {
+			bs, err := json.Marshal(opts.SuggestedTipAmounts)
+			if err != nil {
+				return "", fmt.Errorf("failed to marshal field suggested_tip_amounts: %w", err)
+			}
+			v["suggested_tip_amounts"] = string(bs)
+		}
+		v["provider_data"] = opts.ProviderData
+		v["photo_url"] = opts.PhotoUrl
+		if opts.PhotoSize != 0 {
+			v["photo_size"] = strconv.FormatInt(opts.PhotoSize, 10)
+		}
+		if opts.PhotoWidth != 0 {
+			v["photo_width"] = strconv.FormatInt(opts.PhotoWidth, 10)
+		}
+		if opts.PhotoHeight != 0 {
+			v["photo_height"] = strconv.FormatInt(opts.PhotoHeight, 10)
+		}
+		v["need_name"] = strconv.FormatBool(opts.NeedName)
+		v["need_phone_number"] = strconv.FormatBool(opts.NeedPhoneNumber)
+		v["need_email"] = strconv.FormatBool(opts.NeedEmail)
+		v["need_shipping_address"] = strconv.FormatBool(opts.NeedShippingAddress)
+		v["send_phone_number_to_provider"] = strconv.FormatBool(opts.SendPhoneNumberToProvider)
+		v["send_email_to_provider"] = strconv.FormatBool(opts.SendEmailToProvider)
+		v["is_flexible"] = strconv.FormatBool(opts.IsFlexible)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Post("createInvoiceLink", v, nil, reqOpts)
+	if err != nil {
+		return "", err
+	}
+
+	var s string
+	return s, json.Unmarshal(r, &s)
+}
+
 // CreateNewStickerSetOpts is the set of optional fields for Bot.CreateNewStickerSet.
 type CreateNewStickerSetOpts struct {
-	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	PngSticker InputFile
 	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
 	TgsSticker InputFile
@@ -587,7 +689,7 @@ type CreateNewStickerSetOpts struct {
 
 // CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Returns True on success.
 // - user_id (type int64): User identifier of created sticker set owner
-// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
+// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only English letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
 // - title (type string): Sticker set title, 1-64 characters
 // - emojis (type string): One or more emoji corresponding to the sticker
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
@@ -901,7 +1003,7 @@ type EditChatInviteLinkOpts struct {
 	Name string
 	// Point in time (Unix timestamp) when the link will expire
 	ExpireDate int64
-	// Maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
+	// The maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
 	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 	CreatesJoinRequest bool
@@ -1026,7 +1128,7 @@ type EditMessageLiveLocationOpts struct {
 	HorizontalAccuracy float64
 	// Direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
 	Heading int64
-	// Maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
+	// The maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
 	ProximityAlertRadius int64
 	// A JSON-serialized object for a new inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
@@ -1494,9 +1596,9 @@ type GetFileOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetFile Use this method to get basic info about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
+// GetFile Use this method to get basic information about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
 // Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
-// - file_id (type string): File identifier to get info about
+// - file_id (type string): File identifier to get information about
 // https://core.telegram.org/bots/api#getfile
 func (bot *Bot) GetFile(fileId string, opts *GetFileOpts) (*File, error) {
 	v := map[string]string{}
@@ -2029,7 +2131,7 @@ type SendAnimationOpts struct {
 	Width int64
 	// Animation height
 	Height int64
-	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
 	Caption string
@@ -2053,7 +2155,7 @@ type SendAnimationOpts struct {
 
 // SendAnimation Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - animation (type InputFile): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - animation (type InputFile): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendAnimationOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendanimation
 func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
@@ -2164,7 +2266,7 @@ type SendAudioOpts struct {
 	Performer string
 	// Track name
 	Title string
-	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -2183,7 +2285,7 @@ type SendAudioOpts struct {
 // SendAudio Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
 // For sending voice messages, use the sendVoice method instead.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - audio (type InputFile): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - audio (type InputFile): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendAudioOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendaudio
 func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*Message, error) {
@@ -2427,7 +2529,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 
 // SendDocumentOpts is the set of optional fields for Bot.SendDocument.
 type SendDocumentOpts struct {
-	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
 	Caption string
@@ -2453,7 +2555,7 @@ type SendDocumentOpts struct {
 
 // SendDocument Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - document (type InputFile): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - document (type InputFile): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendDocumentOpts): All optional parameters.
 // https://core.telegram.org/bots/api#senddocument
 func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumentOpts) (*Message, error) {
@@ -2955,7 +3057,7 @@ type SendPhotoOpts struct {
 
 // SendPhoto Use this method to send photos. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendphoto
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
@@ -3146,7 +3248,7 @@ type SendStickerOpts struct {
 
 // SendSticker Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendStickerOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendsticker
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
@@ -3285,7 +3387,7 @@ type SendVideoOpts struct {
 	Width int64
 	// Video height
 	Height int64
-	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
@@ -3309,9 +3411,9 @@ type SendVideoOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// SendVideo Use this method to send video files, Telegram clients support mp4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+// SendVideo Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - video (type InputFile): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - video (type InputFile): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendVideoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideo
 func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*Message, error) {
@@ -3415,7 +3517,7 @@ type SendVideoNoteOpts struct {
 	Duration int64
 	// Video width and height, i.e. diameter of the video message
 	Length int64
-	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -3431,9 +3533,9 @@ type SendVideoNoteOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// SendVideoNote As of v.4.0, Telegram clients support rounded square mp4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
+// SendVideoNote As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - video_note (type InputFile): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
+// - video_note (type InputFile): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
 // - opts (type SendVideoNoteOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvideonote
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
@@ -3544,7 +3646,7 @@ type SendVoiceOpts struct {
 
 // SendVoice Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
 // - chat_id (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // - opts (type SendVoiceOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendvoice
 func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
@@ -4066,7 +4168,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *Se
 
 // SetStickerSetThumbOpts is the set of optional fields for Bot.SetStickerSetThumb.
 type SetStickerSetThumbOpts struct {
-	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements, or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More info on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated sticker set thumbnails can't be uploaded via HTTP URL.
+	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements, or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated sticker set thumbnails can't be uploaded via HTTP URL.
 	Thumb InputFile
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4126,18 +4228,20 @@ type SetWebhookOpts struct {
 	Certificate InputFile
 	// The fixed IP address which will be used to send webhook requests instead of the IP address resolved through DNS
 	IpAddress string
-	// Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
+	// The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
 	MaxConnections int64
 	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to the setWebhook, so unwanted updates may be received for a short period of time.
 	AllowedUpdates []string
 	// Pass True to drop all pending updates
 	DropPendingUpdates bool
+	// A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters. Only characters A-Z, a-z, 0-9, _ and - are allowed. The header is useful to ensure that the request comes from a webhook set by you.
+	SecretToken string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
 
 // SetWebhook Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
-// If you'd like to make sure that the webhook request comes from Telegram, we recommend using a secret path in the URL, e.g. https://www.example.com/<token>. Since nobody else knows your bot's token, you can be pretty sure it's us.
+// If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter secret_token. If specified, the request will contain a header "X-Telegram-Bot-Api-Secret-Token" with the secret token as content.
 // - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
 // - opts (type SetWebhookOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setwebhook
@@ -4176,6 +4280,7 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 			v["allowed_updates"] = string(bs)
 		}
 		v["drop_pending_updates"] = strconv.FormatBool(opts.DropPendingUpdates)
+		v["secret_token"] = opts.SecretToken
 	}
 
 	var reqOpts *RequestOpts
@@ -4421,7 +4526,7 @@ type UploadStickerFileOpts struct {
 
 // UploadStickerFile Use this method to upload a .PNG file with a sticker for later use in createNewStickerSet and addStickerToSet methods (can be used multiple times). Returns the uploaded File on success.
 // - user_id (type int64): User identifier of sticker file owner
-// - png_sticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More info on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - png_sticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 // https://core.telegram.org/bots/api#uploadstickerfile
 func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]string{}
