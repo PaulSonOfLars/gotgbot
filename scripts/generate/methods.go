@@ -193,7 +193,7 @@ func (m MethodDescription) description() (string, error) {
 			return "", err
 		}
 
-		description.WriteString("\n// - " + f.Name + " (type " + prefType + "): " + f.Description)
+		description.WriteString("\n// - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
 	}
 
 	if hasOptionals {
