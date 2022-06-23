@@ -24,12 +24,12 @@ func (i InlineQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	return i.Response(b, ctx)
 }
 
-func (i InlineQuery) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
-	if u.InlineQuery == nil {
+func (i InlineQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.InlineQuery == nil {
 		return false
 	}
 
-	return i.Filter == nil || i.Filter(u.InlineQuery)
+	return i.Filter == nil || i.Filter(ctx.InlineQuery)
 }
 
 func (i InlineQuery) Name() string {

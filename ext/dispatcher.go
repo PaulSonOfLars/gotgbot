@@ -203,7 +203,7 @@ func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
 func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) {
-	var ctx *Context
+	ctx := NewContext(update, data)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -219,12 +219,8 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 
 	for _, groupNum := range d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
-			if !handler.CheckUpdate(b, update) {
+			if !handler.CheckUpdate(b, ctx) {
 				continue
-			}
-
-			if ctx == nil {
-				ctx = NewContext(update, data)
 			}
 
 			err := handler.HandleUpdate(b, ctx)

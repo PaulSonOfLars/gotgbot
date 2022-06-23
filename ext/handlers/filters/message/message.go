@@ -109,7 +109,12 @@ func Caption(msg *gotgbot.Message) bool {
 }
 
 func Command(msg *gotgbot.Message) bool {
-	return len(msg.Entities) > 0 && msg.Entities[0].Type == "bot_command" && msg.Entities[0].Offset == 0
+	if msg.Text != "" {
+		return len(msg.Entities) > 0 && msg.Entities[0].Type == "bot_command" && msg.Entities[0].Offset == 0
+	} else if msg.Caption != "" {
+		return len(msg.CaptionEntities) > 0 && msg.CaptionEntities[0].Type == "bot_command" && msg.CaptionEntities[0].Offset == 0
+	}
+	return false
 }
 
 func Animation(msg *gotgbot.Message) bool {
