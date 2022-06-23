@@ -38,7 +38,7 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 
 func (c Conversation) getStateKey(ctx *ext.Context) string {
 	// TODO: Need to allow for customising the state key by userid/chatid (messageid?)
-	return fmt.Sprintf("%s-%s", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
+	return fmt.Sprintf("%d-%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
 }
 
 func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
