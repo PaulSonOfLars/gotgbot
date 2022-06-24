@@ -21,7 +21,7 @@ const (
 	KeyStrategySenderAndChat KeyStrategy = iota
 	// KeyStrategySender gives a unique conversation to each sender, but that conversation is available in all chats.
 	KeyStrategySender
-	// KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together
+	// KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together.
 	KeyStrategyChat
 )
 
@@ -169,7 +169,10 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	if stateChange.End {
 		// Mark the conversation as ended by deleting the conversation reference.
-		c.StateStorage.Delete(key)
+		err := c.StateStorage.Delete(key)
+		if err != nil {
+			return fmt.Errorf("failed to end conversation: %w", err)
+		}
 	}
 
 	if stateChange.NextState != nil {
@@ -180,7 +183,7 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		err := c.StateStorage.Set(key, *stateChange.NextState)
 		if err != nil {
-			return fmt.Errorf("failed to set new conversation state: %w", err)
+			return fmt.Errorf("failed to update conversation state: %w", err)
 		}
 	}
 
