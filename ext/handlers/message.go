@@ -25,29 +25,23 @@ func NewMessage(f filters.Message, r Response) Message {
 }
 
 func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
+	// Normal incoming message in a group/private chat.
 	if u.Message != nil {
 		return m.Filter == nil || m.Filter(u.Message)
 	}
 
-	// if no edits and message is edited
+	// If edits are allowed, and message is edited.
 	if m.AllowEdited && u.EditedMessage != nil {
-		if u.EditedMessage.Text == "" && u.EditedMessage.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(u.EditedMessage)
 	}
-	// if no channel and message is channel message
+
+	// If channels are allowed, and message is a channel post.
 	if m.AllowChannel && u.ChannelPost != nil {
-		if u.ChannelPost.Text == "" && u.ChannelPost.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(u.ChannelPost)
 	}
-	// if no channel, no edits, and post is edited
+
+	// If edits AND channels are allowed, and message is a channel post.
 	if m.AllowChannel && m.AllowEdited && u.EditedChannelPost != nil {
-		if u.EditedChannelPost.Text == "" && u.EditedChannelPost.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(u.EditedChannelPost)
 	}
 
