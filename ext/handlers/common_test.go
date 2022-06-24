@@ -33,13 +33,13 @@ func NewTestBot() *gotgbot.Bot {
 	}
 }
 
-func NewMessage(updateId int64, userId int64, chatId int64, message string) *ext.Context {
-	return newMessage(updateId, userId, chatId, message, nil)
+func NewMessage(userId int64, chatId int64, message string) *ext.Context {
+	return newMessage(userId, chatId, message, nil)
 }
 
-func NewCommandMessage(updateId int64, userId int64, chatId int64, command string, args []string) *ext.Context {
+func NewCommandMessage(userId int64, chatId int64, command string, args []string) *ext.Context {
 	msg, ents := buildCommand(command, args)
-	return newMessage(updateId, userId, chatId, msg, ents)
+	return newMessage(userId, chatId, msg, ents)
 }
 
 func buildCommand(cmd string, args []string) (string, []gotgbot.MessageEntity) {
@@ -53,14 +53,14 @@ func buildCommand(cmd string, args []string) (string, []gotgbot.MessageEntity) {
 		}
 }
 
-func newMessage(updateId int64, userId int64, chatId int64, message string, entities []gotgbot.MessageEntity) *ext.Context {
+func newMessage(userId int64, chatId int64, message string, entities []gotgbot.MessageEntity) *ext.Context {
 	chatType := "supergroup"
 	if userId == chatId {
 		chatType = "private"
 	}
 
 	return ext.NewContext(&gotgbot.Update{
-		UpdateId: updateId,
+		UpdateId: rand.Int63(), // should this be consistent?
 		Message: &gotgbot.Message{
 			MessageId: rand.Int63(), // should this be consistent?
 			Text:      message,

@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"errors"
-	"math/rand"
 	"testing"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -13,7 +12,6 @@ import (
 
 func TestBasicConversation(t *testing.T) {
 	b := NewTestBot()
-	updateIdCounter := rand.Int63()
 
 	const nextStep = "nextStep"
 	var started bool
@@ -31,20 +29,21 @@ func TestBasicConversation(t *testing.T) {
 			})},
 		},
 		[]ext.Handler{},
+		[]ext.Handler{},
 	)
 
 	var userId int64 = 123
 	var chatId int64 = 1234
 
 	// Emulate sending the "start" command, triggering the entrypoint.
-	startCommand := NewCommandMessage(updateIdCounter, userId, chatId, "start", []string{})
+	startCommand := NewCommandMessage(userId, chatId, "start", []string{})
 	runHandler(t, b, &conv, startCommand, "", nextStep)
 	if !started {
 		t.Fatalf("expected the entrypoint handler to have run")
 	}
 
 	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
-	textMessage := NewMessage(updateIdCounter, userId, chatId, "message")
+	textMessage := NewMessage(userId, chatId, "message")
 	runHandler(t, b, &conv, textMessage, nextStep, "")
 	if !ended {
 		t.Fatalf("expected the internal handler to have run")
@@ -58,7 +57,6 @@ func TestBasicConversation(t *testing.T) {
 
 func TestBasicKeyedConversation(t *testing.T) {
 	b := NewTestBot()
-	updateIdCounter := rand.Int63()
 
 	const nextStep = "nextStep"
 
@@ -72,6 +70,7 @@ func TestBasicKeyedConversation(t *testing.T) {
 			})},
 		},
 		[]ext.Handler{},
+		[]ext.Handler{},
 	)
 	// Make sure that we key by sender in one chat
 	conv.KeyStrategy = handlers.KeyStrategySender
@@ -81,8 +80,8 @@ func TestBasicKeyedConversation(t *testing.T) {
 	var chatId int64 = 1234
 
 	// Emulate sending the "start" command, triggering the entrypoint.
-	startFromUserOne := NewCommandMessage(updateIdCounter, userIdOne, chatId, "start", []string{})
-	messageFromTwo := NewMessage(updateIdCounter, userIdTwo, chatId, "message")
+	startFromUserOne := NewCommandMessage(userIdOne, chatId, "start", []string{})
+	messageFromTwo := NewMessage(userIdTwo, chatId, "message")
 
 	runHandler(t, b, &conv, startFromUserOne, "", nextStep)
 
@@ -107,7 +106,6 @@ func TestBasicKeyedConversation(t *testing.T) {
 
 func TestFallbackConversation(t *testing.T) {
 	b := NewTestBot()
-	updateIdCounter := rand.Int63()
 
 	const nextStep = "nextStep"
 	var started bool
@@ -129,20 +127,21 @@ func TestFallbackConversation(t *testing.T) {
 			fallback = true
 			return handlers.EndConversation()
 		})},
+		nil,
 	)
 
 	var userId int64 = 123
 	var chatId int64 = 1234
 
 	// Emulate sending the "start" command, triggering the entrypoint.
-	startCommand := NewCommandMessage(updateIdCounter, userId, chatId, "start", []string{})
+	startCommand := NewCommandMessage(userId, chatId, "start", []string{})
 	runHandler(t, b, &conv, startCommand, "", nextStep)
 	if !started {
 		t.Fatalf("expected the entrypoint handler to have run")
 	}
 
 	// Emulate sending the "cancel" command, triggering the fallback handler (and causing it to "end").
-	cancelCommand := NewCommandMessage(updateIdCounter, userId, chatId, "cancel", []string{})
+	cancelCommand := NewCommandMessage(userId, chatId, "cancel", []string{})
 	runHandler(t, b, &conv, cancelCommand, nextStep, "")
 	if !fallback {
 		t.Fatalf("expected the fallback handler to have run")
@@ -159,7 +158,6 @@ func TestFallbackConversation(t *testing.T) {
 
 func TestNestedConversation(t *testing.T) {
 	b := NewTestBot()
-	updateIdCounter := rand.Int63()
 
 	const firstStep = "firstStep"
 	const secondStep = "secondStep"
@@ -180,7 +178,10 @@ func TestNestedConversation(t *testing.T) {
 			nestedStep: {handlers.NewMessage(message.Contains(finishNestedText), func(b *gotgbot.Bot, ctx *ext.Context) error {
 				return handlers.EndConversationToParentState(handlers.NextConversationState(thirdStep))
 			})},
-		}, nil)
+		},
+		nil,
+		nil,
+	)
 
 	conv := handlers.NewConversation(
 		[]ext.Handler{handlers.NewCommand(startCmd, func(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -196,6 +197,7 @@ func TestNestedConversation(t *testing.T) {
 			})},
 		},
 		nil,
+		nil,
 	)
 
 	t.Logf("main   conv: %p", &conv)
@@ -205,20 +207,20 @@ func TestNestedConversation(t *testing.T) {
 	var chatId int64 = 1234
 
 	// Emulate sending the "start" command, triggering the entrypoint.
-	start := NewCommandMessage(updateIdCounter, userId, chatId, startCmd, []string{})
+	start := NewCommandMessage(userId, chatId, startCmd, []string{})
 	runHandler(t, b, &conv, start, "", firstStep)
 
 	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
-	textMessage := NewMessage(updateIdCounter, userId, chatId, messageText)
+	textMessage := NewMessage(userId, chatId, messageText)
 	runHandler(t, b, &conv, textMessage, firstStep, secondStep)
 
 	// Emulate sending the "nested_start" command, triggering the entrypoint of the nested conversation.
-	nestedStart := NewCommandMessage(updateIdCounter, userId, chatId, nestedStartCmd, []string{})
+	nestedStart := NewCommandMessage(userId, chatId, nestedStartCmd, []string{})
 	willRunHandler(t, b, &nestedConv, nestedStart, "")
 	runHandler(t, b, &conv, nestedStart, secondStep, secondStep)
 
 	// Emulate sending the "nested_start" command, triggering the entrypoint of the nested conversation.
-	nestedFinish := NewMessage(updateIdCounter, userId, chatId, finishNestedText)
+	nestedFinish := NewMessage(userId, chatId, finishNestedText)
 	willRunHandler(t, b, &nestedConv, nestedFinish, nestedStep)
 	runHandler(t, b, &conv, nestedFinish, secondStep, thirdStep)
 
@@ -229,7 +231,7 @@ func TestNestedConversation(t *testing.T) {
 	t.Log("Nested conversation finished")
 
 	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
-	finish := NewMessage(updateIdCounter, userId, chatId, finishText)
+	finish := NewMessage(userId, chatId, finishText)
 	runHandler(t, b, &conv, finish, thirdStep, "")
 
 	// Ensure conversation has ended.

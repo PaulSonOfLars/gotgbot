@@ -34,9 +34,11 @@ const (
 type Conversation struct {
 	// EntryPoints is the list of handlers to start the conversation.
 	EntryPoints []ext.Handler
-	// States maintain the list of states and mappings for each action.
+	// States is the map of possible states, with a list of possible handlers for each one.
 	States map[string][]ext.Handler
-	// Fallbacks is the list of handlers to end the conversation halfway (eg, with /cancel commands)
+	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands)
+	Exits []ext.Handler
+	// Fallbacks is the list of handlers to handle updates which haven't been matched by any states.
 	Fallbacks []ext.Handler
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
@@ -46,10 +48,11 @@ type Conversation struct {
 	StateStorage ConversationStorage
 }
 
-func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, fallbacks []ext.Handler) Conversation {
+func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, exits []ext.Handler, fallbacks []ext.Handler) Conversation {
 	return Conversation{
 		EntryPoints: entryPoints,
 		States:      states,
+		Exits:       exits,
 		Fallbacks:   fallbacks,
 		// By default, conversations are per-user and per-chat; so each user gets a unique conversation for each chat.
 		KeyStrategy: KeyStrategySenderAndChat,
@@ -67,6 +70,7 @@ var ConversationKeyNotFound = errors.New("conversation key not found")
 // If you are looking to persist conversation data, you should implement this interface with you backend of choice.
 type ConversationStorage interface {
 	// Get returns the state for the specified conversation key.
+	// Note that this is checked at each incoming message, so may be a bottleneck for some implementations.
 	//
 	// If the key is not found (and as such, this conversation has not yet started), this method should return the
 	// ConversationKeyNotFound error.
@@ -245,32 +249,37 @@ func (c Conversation) Name() string {
 // getNextHandler goes through all the handlers in the conversation, until finds a handler that matches.
 // If no matching handler is found, returns nil.
 func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx *ext.Context) (ext.Handler, error) {
-	// Check if ongoing conversation
+	// Check if a conversation has already started for this user.
 	currState, err := c.StateStorage.Get(conversationKey)
 	if err != nil {
 		if errors.Is(err, ConversationKeyNotFound) {
 			// If this is an unknown conversation key, then we know this is a new conversation, so we check all
-			// entrypoints
+			// entrypoints.
 			return checkHandlerList(c.EntryPoints, b, ctx), nil
 		}
 		// Else, we need to handle the error.
 		return nil, err
 	}
 
-	// If reentry is allowed, check the entrypoints again
+	// If reentry is allowed, check the entrypoints again.
+	// TODO: test reentry
 	if c.AllowReEntry {
 		if next := checkHandlerList(c.EntryPoints, b, ctx); next != nil {
 			return next, nil
 		}
 	}
 
-	// else, check state mappings
+	// Else, exits -> handle any conversation exits/cancellations.
+	if next := checkHandlerList(c.Exits, b, ctx); next != nil {
+		return next, nil
+	}
+
+	// Else, check state mappings (the magic happens here!).
 	if next := checkHandlerList(c.States[currState], b, ctx); next != nil {
 		return next, nil
 	}
 
-	// TODO: do we check fallbacks BEFORE or AFTER the main states?
-	// else, fallbacks -> handle any cancellations
+	// Else, fallbacks -> handle any updates which havent been caught by the state or exit handlers.
 	if next := checkHandlerList(c.Fallbacks, b, ctx); next != nil {
 		return next, nil
 	}

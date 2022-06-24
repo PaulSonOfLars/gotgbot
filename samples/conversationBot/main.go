@@ -21,7 +21,7 @@ const (
 )
 
 func main() {
-	// Get token from the environment variable
+	// Get token from the environment variable.
 	token := os.Getenv("TOKEN")
 	if token == "" {
 		panic("TOKEN environment variable is empty")
@@ -60,6 +60,7 @@ func main() {
 			AGE:  {handlers.NewMessage(noCommands, age)},
 		},
 		[]ext.Handler{handlers.NewCommand("cancel", cancel)},
+		nil,
 	))
 
 	// Start receiving updates.
