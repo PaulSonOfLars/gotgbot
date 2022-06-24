@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -11,6 +12,18 @@ import (
 
 // TODO: Add a "block" option to force linear processing. Also a "waiting" state to handle blocked handlers.
 // TODO: Allow for timeouts (and a "timeout" state to handle that)
+
+type KeyStrategy int64
+
+// Note: If you add a new keystrategy here, make sure to add it to the getStateKey method!
+const (
+	// KeyStrategySenderAndChat ensures that each sender get a unique conversation in each chats.
+	KeyStrategySenderAndChat KeyStrategy = iota
+	// KeyStrategySender gives a unique conversation to each sender, but that conversation is available in all chats.
+	KeyStrategySender
+	// KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together
+	KeyStrategyChat
+)
 
 // The Conversation handler is an advanced handler which allows for running a sequence of commands in a stateful manner.
 // An example of this flow can be found at t.me/Botfather; upon receiving the "/newbot" command, the user is asked for
@@ -27,8 +40,9 @@ type Conversation struct {
 	Fallbacks []ext.Handler
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
-
-	// StateStorage is responsible for storing all running conversations
+	// KeyStrategy defines how to calculate keys for each conversation.
+	KeyStrategy KeyStrategy
+	// StateStorage is responsible for storing all running conversations.
 	StateStorage ConversationStorage
 }
 
@@ -37,6 +51,8 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 		EntryPoints: entryPoints,
 		States:      states,
 		Fallbacks:   fallbacks,
+		// By default, conversations are per-user and per-chat; so each user gets a unique conversation for each chat.
+		KeyStrategy: KeyStrategySenderAndChat,
 
 		// Instantiate default map-based storage
 		StateStorage: &ConversationStorageMap{
@@ -110,8 +126,17 @@ func (c *ConversationStorageMap) Delete(key string) error {
 
 // TODO: should this be exported?
 func (c Conversation) getStateKey(ctx *ext.Context) string {
-	// TODO: Need to allow for customising the state key by userid/chatid (messageid?)
-	return fmt.Sprintf("%d/%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
+	switch c.KeyStrategy {
+	case KeyStrategySender:
+		return strconv.FormatInt(ctx.EffectiveSender.Id(), 10)
+	case KeyStrategyChat:
+		return strconv.FormatInt(ctx.EffectiveChat.Id, 10)
+	case KeyStrategySenderAndChat:
+		fallthrough
+	default:
+		// Default to KeyStrategySenderAndChat if unknown strategy
+		return fmt.Sprintf("%d/%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
+	}
 }
 
 // CurrentState is exposed for testing purposes.

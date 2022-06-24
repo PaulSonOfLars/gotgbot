@@ -55,6 +55,56 @@ func TestBasicConversation(t *testing.T) {
 		t.Fatalf("expected the conversation to be finished")
 	}
 }
+
+func TestBasicKeyedConversation(t *testing.T) {
+	b := NewTestBot()
+	updateIdCounter := rand.Int63()
+
+	const nextStep = "nextStep"
+
+	conv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+			return handlers.NextConversationState(nextStep)
+		})},
+		map[string][]ext.Handler{
+			nextStep: {handlers.NewMessage(message.Contains("message"), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				return handlers.EndConversation()
+			})},
+		},
+		[]ext.Handler{},
+	)
+	// Make sure that we key by sender in one chat
+	conv.KeyStrategy = handlers.KeyStrategySender
+
+	var userIdOne int64 = 123
+	var userIdTwo int64 = 456
+	var chatId int64 = 1234
+
+	// Emulate sending the "start" command, triggering the entrypoint.
+	startFromUserOne := NewCommandMessage(updateIdCounter, userIdOne, chatId, "start", []string{})
+	messageFromTwo := NewMessage(updateIdCounter, userIdTwo, chatId, "message")
+
+	runEntrypoint(t, b, &conv, startFromUserOne)
+
+	// We have now started a conversation with user one
+	s, err := conv.CurrentState(startFromUserOne)
+	if err != nil {
+		t.Fatalf("%d should now have started the conversation and be at %s", userIdOne, nextStep)
+	}
+	if s != nextStep {
+		t.Fatalf("%d should now have moved state to %s, but was %s", userIdOne, nextStep, s)
+	}
+
+	// But user two doesnt exist
+	s2, err := conv.CurrentState(messageFromTwo)
+	if err == nil {
+		t.Fatalf("%d should not have a conversation at this point, but got %s", userIdTwo, s2)
+	}
+	if !errors.Is(err, handlers.ConversationKeyNotFound) {
+		t.Fatalf("%d should not have a conversation at this point", userIdTwo)
+	}
+}
+
 func TestFallbackConversation(t *testing.T) {
 	b := NewTestBot()
 	updateIdCounter := rand.Int63()
