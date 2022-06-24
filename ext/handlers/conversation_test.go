@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"errors"
 	"math/rand"
 	"testing"
 
@@ -50,7 +51,7 @@ func TestBasicConversation(t *testing.T) {
 	}
 
 	// Ensure conversation has ended.
-	if _, ok := conv.CurrentState(textMessage); ok {
+	if _, err := conv.CurrentState(textMessage); err == nil || !errors.Is(err, handlers.ConversationKeyNotFound) {
 		t.Fatalf("expected the conversation to be finished")
 	}
 }
@@ -101,7 +102,7 @@ func TestFallbackConversation(t *testing.T) {
 	}
 
 	// Ensure conversation has ended.
-	if _, ok := conv.CurrentState(cancelCommand); ok {
+	if _, err := conv.CurrentState(cancelCommand); err == nil || !errors.Is(err, handlers.ConversationKeyNotFound) {
 		t.Fatalf("expected the conversation to be finished")
 	}
 }
@@ -172,7 +173,7 @@ func TestNestedConversation(t *testing.T) {
 	runInternalHandler(t, b, &conv, secondStep, nestedFinish)
 
 	// Ensure nested conversation has ended.
-	if _, ok := nestedConv.CurrentState(nestedFinish); ok {
+	if _, err := nestedConv.CurrentState(nestedFinish); err == nil || !errors.Is(err, handlers.ConversationKeyNotFound) {
 		t.Fatalf("expected the nested conversation to be finished")
 	}
 	t.Log("Nested conversation finished")
@@ -182,7 +183,7 @@ func TestNestedConversation(t *testing.T) {
 	runInternalHandler(t, b, &conv, thirdStep, finish)
 
 	// Ensure conversation has ended.
-	if _, ok := conv.CurrentState(textMessage); ok {
+	if _, err := conv.CurrentState(textMessage); err == nil || !errors.Is(err, handlers.ConversationKeyNotFound) {
 		t.Fatalf("expected the conversation to be finished")
 	}
 }
@@ -197,7 +198,7 @@ func runEntrypoint(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, me
 func willRunEntrypoint(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context) {
 	t.Logf("conv %p: checking entrypoint message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
 
-	if _, ok := conv.CurrentState(message); ok {
+	if _, err := conv.CurrentState(message); err == nil || !errors.Is(err, handlers.ConversationKeyNotFound) {
 		t.Fatalf("expected the conversation to not be started")
 	}
 	if !conv.CheckUpdate(b, message) {
@@ -215,7 +216,11 @@ func runInternalHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversatio
 func willRunInternalHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, expectedState string, message *ext.Context) {
 	t.Logf("conv %p: checking internal message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
 
-	if state, ok := conv.CurrentState(message); !ok || state != expectedState {
+	state, err := conv.CurrentState(message)
+	if err != nil {
+		t.Fatalf("unexpected error while checking the current state of the conversation")
+	}
+	if state != expectedState {
 		t.Fatalf("expected the conversation to be at '%s', was '%s'", expectedState, state)
 	}
 	if !conv.CheckUpdate(b, message) {

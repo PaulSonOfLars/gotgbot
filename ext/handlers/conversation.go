@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -27,10 +28,8 @@ type Conversation struct {
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
 
-	// TODO: use sync/map to ensure concurrent safety? Or protect with rwmutex?
-	// TODO: dump/restore conversation states for persistence
-	// TODO: Allow for custom conversation state management without a map (interface with get/check/set)
-	conversationStates map[string]string
+	// StateStorage is responsible for storing all running conversations
+	StateStorage ConversationStorage
 }
 
 func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, fallbacks []ext.Handler) Conversation {
@@ -39,44 +38,116 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 		States:      states,
 		Fallbacks:   fallbacks,
 
-		conversationStates: map[string]string{},
+		// Instantiate default map-based storage
+		StateStorage: &ConversationStorageMap{
+			lock:               sync.RWMutex{},
+			conversationStates: map[string]string{},
+		},
 	}
 }
 
+var ConversationKeyNotFound = errors.New("conversation key not found")
+
+// ConversationStorage allows you to define custom backends for retaining conversation states.
+// If you are looking to persist conversation data, you should implement this interface with you backend of choice.
+type ConversationStorage interface {
+	// Get returns the state for the specified conversation key.
+	//
+	// If the key is not found (and as such, this conversation has not yet started), this method should return the
+	// ConversationKeyNotFound error.
+	Get(key string) (string, error)
+	// Set updates the conversation state.
+	Set(key string, state string) error
+	// Delete ends the conversation, removing the key from the storage.
+	Delete(key string) error
+}
+
+// ConversationStorageMap is a thread-safe in-memory implementation of the ConversationStorage interface.
+type ConversationStorageMap struct {
+	// TODO: dump/restore conversation states for persistence
+	conversationStates map[string]string
+	lock               sync.RWMutex
+}
+
+func (c *ConversationStorageMap) Get(key string) (string, error) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	if c.conversationStates == nil {
+		return "", ConversationKeyNotFound
+	}
+
+	s, ok := c.conversationStates[key]
+	if !ok {
+		return "", ConversationKeyNotFound
+	}
+	return s, nil
+}
+
+func (c *ConversationStorageMap) Set(key string, state string) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.conversationStates == nil {
+		c.conversationStates = map[string]string{}
+	}
+
+	c.conversationStates[key] = state
+	return nil
+}
+
+func (c *ConversationStorageMap) Delete(key string) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.conversationStates == nil {
+		return nil
+	}
+
+	delete(c.conversationStates, key)
+	return nil
+}
+
+// TODO: should this be exported?
 func (c Conversation) getStateKey(ctx *ext.Context) string {
 	// TODO: Need to allow for customising the state key by userid/chatid (messageid?)
-	return fmt.Sprintf("%d-%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
+	return fmt.Sprintf("%d/%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
 }
 
 // CurrentState is exposed for testing purposes.
-func (c Conversation) CurrentState(ctx *ext.Context) (string, bool) {
-	s, ok := c.conversationStates[c.getStateKey(ctx)]
-	return s, ok
+// TODO: Should we un-export this?
+func (c Conversation) CurrentState(ctx *ext.Context) (string, error) {
+	return c.StateStorage.Get(c.getStateKey(ctx))
 }
 
 func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	// TODO: should checkUpdate return a method pointer to execute instead of a bool?
-	return c.getNextHandler(c.getStateKey(ctx), b, ctx) != nil
+	// Note: Kinda sad that this error gets lost.
+	h, _ := c.getNextHandler(c.getStateKey(ctx), b, ctx)
+	// TODO: should checkUpdate return (method, error) instead of (bool)?
+	return h != nil
 }
 
 func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	key := c.getStateKey(ctx)
 
-	next := c.getNextHandler(key, b, ctx)
+	next, err := c.getNextHandler(key, b, ctx)
+	if err != nil {
+		return err
+	}
 	if next == nil {
 		// Note: this should be impossible
 		return nil
 	}
 
 	var stateChange *conversationStateChange
-	err := next.HandleUpdate(b, ctx)
+	err = next.HandleUpdate(b, ctx)
 	if !errors.As(err, &stateChange) {
 		return err
 	}
 
 	if stateChange.End {
 		// Mark the conversation as ended by deleting the conversation reference.
-		delete(c.conversationStates, key)
+		c.StateStorage.Delete(key)
 	}
 
 	if stateChange.NextState != nil {
@@ -85,7 +156,10 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 			// Check if the "next" state is a supported state.
 			return fmt.Errorf("unknown state: %w", stateChange)
 		}
-		c.conversationStates[key] = *stateChange.NextState
+		err := c.StateStorage.Set(key, *stateChange.NextState)
+		if err != nil {
+			return fmt.Errorf("failed to set new conversation state: %w", err)
+		}
 	}
 
 	if stateChange.ParentState != nil {
@@ -145,33 +219,38 @@ func (c Conversation) Name() string {
 
 // getNextHandler goes through all the handlers in the conversation, until finds a handler that matches.
 // If no matching handler is found, returns nil.
-func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx *ext.Context) ext.Handler {
+func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx *ext.Context) (ext.Handler, error) {
 	// Check if ongoing conversation
-	currState, ok := c.conversationStates[conversationKey]
-	if !ok {
-		// If no ongoing conversations, we can check entrypoints
-		return checkHandlerList(c.EntryPoints, b, ctx)
+	currState, err := c.StateStorage.Get(conversationKey)
+	if err != nil {
+		if errors.Is(err, ConversationKeyNotFound) {
+			// If this is an unknown conversation key, then we know this is a new conversation, so we check all
+			// entrypoints
+			return checkHandlerList(c.EntryPoints, b, ctx), nil
+		}
+		// Else, we need to handle the error.
+		return nil, err
 	}
 
 	// If reentry is allowed, check the entrypoints again
 	if c.AllowReEntry {
 		if next := checkHandlerList(c.EntryPoints, b, ctx); next != nil {
-			return next
+			return next, nil
 		}
 	}
 
 	// else, check state mappings
 	if next := checkHandlerList(c.States[currState], b, ctx); next != nil {
-		return next
+		return next, nil
 	}
 
 	// TODO: do we check fallbacks BEFORE or AFTER the main states?
 	// else, fallbacks -> handle any cancellations
 	if next := checkHandlerList(c.Fallbacks, b, ctx); next != nil {
-		return next
+		return next, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // checkHandlerList iterates over a list of handlers until a match is found; at which point it is returned.
