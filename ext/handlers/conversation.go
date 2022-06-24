@@ -53,7 +53,6 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 		Fallbacks:   fallbacks,
 		// By default, conversations are per-user and per-chat; so each user gets a unique conversation for each chat.
 		KeyStrategy: KeyStrategySenderAndChat,
-
 		// Instantiate default map-based storage
 		StateStorage: &ConversationStorageMap{
 			lock:               sync.RWMutex{},
@@ -80,7 +79,6 @@ type ConversationStorage interface {
 
 // ConversationStorageMap is a thread-safe in-memory implementation of the ConversationStorage interface.
 type ConversationStorageMap struct {
-	// TODO: dump/restore conversation states for persistence
 	conversationStates map[string]string
 	lock               sync.RWMutex
 }
@@ -148,7 +146,6 @@ func (c Conversation) CurrentState(ctx *ext.Context) (string, error) {
 func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	// Note: Kinda sad that this error gets lost.
 	h, _ := c.getNextHandler(c.getStateKey(ctx), b, ctx)
-	// TODO: should checkUpdate return (method, error) instead of (bool)?
 	return h != nil
 }
 
