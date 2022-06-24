@@ -48,6 +48,16 @@ type Conversation struct {
 	StateStorage ConversationStorage
 }
 
+// ConversationState stores all the variables relevant to the current conversation state.
+//
+// Note: More keys may be added in the future to support additional features.
+// As such, any storage implementations should be flexible, and allow for storing the entire struct rather than
+// individual fields.
+type ConversationState struct {
+	// Key represents the name of the current state, as defined in the Conversation.States map.
+	Key string
+}
+
 func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, exits []ext.Handler, fallbacks []ext.Handler) Conversation {
 	return Conversation{
 		EntryPoints: entryPoints,
@@ -59,7 +69,7 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 		// Instantiate default map-based storage
 		StateStorage: &ConversationStorageMap{
 			lock:               sync.RWMutex{},
-			conversationStates: map[string]string{},
+			conversationStates: map[string]ConversationState{},
 		},
 	}
 }
@@ -68,46 +78,47 @@ var ConversationKeyNotFound = errors.New("conversation key not found")
 
 // ConversationStorage allows you to define custom backends for retaining conversation states.
 // If you are looking to persist conversation data, you should implement this interface with you backend of choice.
+// Note: Make sure to store the entire ConversationState struct; future changes may add new fields.
 type ConversationStorage interface {
 	// Get returns the state for the specified conversation key.
 	// Note that this is checked at each incoming message, so may be a bottleneck for some implementations.
 	//
 	// If the key is not found (and as such, this conversation has not yet started), this method should return the
 	// ConversationKeyNotFound error.
-	Get(key string) (string, error)
+	Get(key string) (*ConversationState, error)
 	// Set updates the conversation state.
-	Set(key string, state string) error
+	Set(key string, state ConversationState) error
 	// Delete ends the conversation, removing the key from the storage.
 	Delete(key string) error
 }
 
 // ConversationStorageMap is a thread-safe in-memory implementation of the ConversationStorage interface.
 type ConversationStorageMap struct {
-	conversationStates map[string]string
+	conversationStates map[string]ConversationState
 	lock               sync.RWMutex
 }
 
-func (c *ConversationStorageMap) Get(key string) (string, error) {
+func (c *ConversationStorageMap) Get(key string) (*ConversationState, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
 	if c.conversationStates == nil {
-		return "", ConversationKeyNotFound
+		return nil, ConversationKeyNotFound
 	}
 
 	s, ok := c.conversationStates[key]
 	if !ok {
-		return "", ConversationKeyNotFound
+		return nil, ConversationKeyNotFound
 	}
-	return s, nil
+	return &s, nil
 }
 
-func (c *ConversationStorageMap) Set(key string, state string) error {
+func (c *ConversationStorageMap) Set(key string, state ConversationState) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	if c.conversationStates == nil {
-		c.conversationStates = map[string]string{}
+		c.conversationStates = map[string]ConversationState{}
 	}
 
 	c.conversationStates[key] = state
@@ -143,7 +154,7 @@ func (c Conversation) getStateKey(ctx *ext.Context) string {
 
 // CurrentState is exposed for testing purposes.
 // TODO: Should we un-export this?
-func (c Conversation) CurrentState(ctx *ext.Context) (string, error) {
+func (c Conversation) CurrentState(ctx *ext.Context) (*ConversationState, error) {
 	return c.StateStorage.Get(c.getStateKey(ctx))
 }
 
@@ -185,7 +196,7 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 			// Check if the "next" state is a supported state.
 			return fmt.Errorf("unknown state: %w", stateChange)
 		}
-		err := c.StateStorage.Set(key, *stateChange.NextState)
+		err := c.StateStorage.Set(key, ConversationState{Key: *stateChange.NextState})
 		if err != nil {
 			return fmt.Errorf("failed to update conversation state: %w", err)
 		}
@@ -275,7 +286,7 @@ func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx
 	}
 
 	// Else, check state mappings (the magic happens here!).
-	if next := checkHandlerList(c.States[currState], b, ctx); next != nil {
+	if next := checkHandlerList(c.States[currState.Key], b, ctx); next != nil {
 		return next, nil
 	}
 
