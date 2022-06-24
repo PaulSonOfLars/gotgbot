@@ -95,7 +95,6 @@ func TestFallbackConversation(t *testing.T) {
 
 	const nextStep = "nextStep"
 	var started bool
-	var internal bool
 	var fallback bool
 
 	conv := handlers.NewConversation(
@@ -105,7 +104,7 @@ func TestFallbackConversation(t *testing.T) {
 		})},
 		map[string][]ext.Handler{
 			nextStep: {handlers.NewMessage(message.Contains("message"), func(b *gotgbot.Bot, ctx *ext.Context) error {
-				internal = true
+				t.Fatalf("internal handler should not have run")
 				return handlers.EndConversation()
 			})},
 		},
@@ -132,9 +131,6 @@ func TestFallbackConversation(t *testing.T) {
 	if !fallback {
 		t.Fatalf("expected the fallback handler to have run")
 	}
-	if internal {
-		t.Fatalf("internal handler should not have run")
-	}
 
 	// Ensure conversation has ended.
 	checkExpectedState(t, &conv, cancelCommand, "")
@@ -144,7 +140,6 @@ func TestReEntryConversation(t *testing.T) {
 
 	const nextStep = "nextStep"
 	startCount := 0
-	internal := false
 
 	conv := handlers.NewConversation(
 		[]ext.Handler{handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -153,7 +148,8 @@ func TestReEntryConversation(t *testing.T) {
 		})},
 		map[string][]ext.Handler{
 			nextStep: {handlers.NewMessage(message.Contains("message"), func(b *gotgbot.Bot, ctx *ext.Context) error {
-				internal = true
+				// We don't want this to happen!
+				t.Fatalf("internal handler should not have run")
 				return handlers.EndConversation()
 			})},
 		},
@@ -178,9 +174,6 @@ func TestReEntryConversation(t *testing.T) {
 	runHandler(t, b, &conv, cancelCommand, nextStep, nextStep) // Should hit
 	if startCount != 2 {
 		t.Fatalf("expected the entrypoint handler to have run a second time")
-	}
-	if internal {
-		t.Fatalf("internal handler should not have run")
 	}
 
 	checkExpectedState(t, &conv, cancelCommand, nextStep)
