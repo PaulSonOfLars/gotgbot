@@ -37,44 +37,188 @@ func TestBasicConversation(t *testing.T) {
 
 	// Emulate sending the "start" command, triggering the entrypoint.
 	startCommand := NewCommandMessage(updateIdCounter, userId, chatId, "start", []string{})
-	checkEntrypointHasRun(t, b, conv, startCommand, &started)
+	runEntrypoint(t, b, &conv, startCommand)
+	if !started {
+		t.Fatalf("expected the entrypoint handler to have run")
+	}
 
 	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
 	textMessage := NewMessage(updateIdCounter, userId, chatId, "message")
-	checkInternalHandlerHasRun(t, b, conv, nextStep, textMessage, &ended)
+	runInternalHandler(t, b, &conv, nextStep, textMessage)
+	if !ended {
+		t.Fatalf("expected the internal handler to have run")
+	}
 
 	// Ensure conversation has ended.
 	if _, ok := conv.CurrentState(textMessage); ok {
-		t.Errorf("expected the conversation to be finished")
+		t.Fatalf("expected the conversation to be finished")
+	}
+}
+func TestFallbackConversation(t *testing.T) {
+	b := NewTestBot()
+	updateIdCounter := rand.Int63()
+
+	const nextStep = "nextStep"
+	var started bool
+	var internal bool
+	var fallback bool
+
+	conv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+			started = true
+			return handlers.NextConversationState(nextStep)
+		})},
+		map[string][]ext.Handler{
+			nextStep: {handlers.NewMessage(message.Contains("message"), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				internal = true
+				return handlers.EndConversation()
+			})},
+		},
+		[]ext.Handler{handlers.NewCommand("cancel", func(b *gotgbot.Bot, ctx *ext.Context) error {
+			fallback = true
+			return handlers.EndConversation()
+		})},
+	)
+
+	var userId int64 = 123
+	var chatId int64 = 1234
+
+	// Emulate sending the "start" command, triggering the entrypoint.
+	startCommand := NewCommandMessage(updateIdCounter, userId, chatId, "start", []string{})
+	runEntrypoint(t, b, &conv, startCommand)
+	if !started {
+		t.Fatalf("expected the entrypoint handler to have run")
+	}
+
+	// Emulate sending the "cancel" command, triggering the fallback handler (and causing it to "end").
+	cancelCommand := NewCommandMessage(updateIdCounter, userId, chatId, "cancel", []string{})
+	runInternalHandler(t, b, &conv, nextStep, cancelCommand)
+	if !fallback {
+		t.Fatalf("expected the fallback handler to have run")
+	}
+	if internal {
+		t.Fatalf("did not expect the internal handler to have run")
+	}
+
+	// Ensure conversation has ended.
+	if _, ok := conv.CurrentState(cancelCommand); ok {
+		t.Fatalf("expected the conversation to be finished")
 	}
 }
 
-func checkEntrypointHasRun(t *testing.T, b *gotgbot.Bot, conv handlers.Conversation, startCommand *ext.Context, started *bool) {
-	if _, ok := conv.CurrentState(startCommand); ok {
-		t.Errorf("expected the conversation to not be started")
+func TestNestedConversation(t *testing.T) {
+	b := NewTestBot()
+	updateIdCounter := rand.Int63()
+
+	const firstStep = "firstStep"
+	const secondStep = "secondStep"
+	const nestedStep = "nestedStep"
+	const thirdStep = "thirdStep"
+
+	const startCmd = "start"
+	const nestedStartCmd = "nested_start"
+	const messageText = "message"
+	const finishNestedText = "finish nested"
+	const finishText = "finish"
+
+	nestedConv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand(nestedStartCmd, func(b *gotgbot.Bot, ctx *ext.Context) error {
+			return handlers.NextConversationState(nestedStep)
+		})},
+		map[string][]ext.Handler{
+			nestedStep: {handlers.NewMessage(message.Contains(finishNestedText), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				return handlers.EndConversationToParentState(handlers.NextConversationState(thirdStep))
+			})},
+		}, nil)
+
+	conv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand(startCmd, func(b *gotgbot.Bot, ctx *ext.Context) error {
+			return handlers.NextConversationState(firstStep)
+		})},
+		map[string][]ext.Handler{
+			firstStep: {handlers.NewMessage(message.Contains(messageText), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				return handlers.NextConversationState(secondStep)
+			})},
+			secondStep: {nestedConv},
+			thirdStep: {handlers.NewMessage(message.Contains(finishText), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				return handlers.EndConversation()
+			})},
+		},
+		nil,
+	)
+
+	t.Logf("main   conv: %p", &conv)
+	t.Logf("nested conv: %p", &nestedConv)
+
+	var userId int64 = 123
+	var chatId int64 = 1234
+
+	// Emulate sending the "start" command, triggering the entrypoint.
+	start := NewCommandMessage(updateIdCounter, userId, chatId, startCmd, []string{})
+	runEntrypoint(t, b, &conv, start)
+
+	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
+	textMessage := NewMessage(updateIdCounter, userId, chatId, messageText)
+	runInternalHandler(t, b, &conv, firstStep, textMessage)
+
+	// Emulate sending the "nested_start" command, triggering the entrypoint of the nested conversation.
+	nestedStart := NewCommandMessage(updateIdCounter, userId, chatId, nestedStartCmd, []string{})
+	willRunEntrypoint(t, b, &nestedConv, nestedStart)
+	runInternalHandler(t, b, &conv, secondStep, nestedStart)
+
+	// Emulate sending the "nested_start" command, triggering the entrypoint of the nested conversation.
+	nestedFinish := NewMessage(updateIdCounter, userId, chatId, finishNestedText)
+	willRunInternalHandler(t, b, &nestedConv, nestedStep, nestedFinish)
+	runInternalHandler(t, b, &conv, secondStep, nestedFinish)
+
+	// Ensure nested conversation has ended.
+	if _, ok := nestedConv.CurrentState(nestedFinish); ok {
+		t.Fatalf("expected the nested conversation to be finished")
 	}
-	if !conv.CheckUpdate(b, startCommand) {
-		t.Errorf("expected the entrypoint handler to match")
-	}
-	if err := conv.HandleUpdate(b, startCommand); err != nil {
-		t.Errorf("unexpected error from update handling entrypoint")
-	}
-	if !*started {
-		t.Errorf("expected the entrypoiny handler to have run")
+	t.Log("Nested conversation finished")
+
+	// Emulate sending the "message" text, triggering the internal handler (and causing it to "end").
+	finish := NewMessage(updateIdCounter, userId, chatId, finishText)
+	runInternalHandler(t, b, &conv, thirdStep, finish)
+
+	// Ensure conversation has ended.
+	if _, ok := conv.CurrentState(textMessage); ok {
+		t.Fatalf("expected the conversation to be finished")
 	}
 }
 
-func checkInternalHandlerHasRun(t *testing.T, b *gotgbot.Bot, conv handlers.Conversation, expectedState string, textMessage *ext.Context, ended *bool) {
-	if state, ok := conv.CurrentState(textMessage); !ok || state != expectedState {
-		t.Errorf("expected the conversation to be at '%s', was '%s'", expectedState, state)
+func runEntrypoint(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context) {
+	willRunEntrypoint(t, b, conv, message)
+	if err := conv.HandleUpdate(b, message); err != nil {
+		t.Fatalf("unexpected error from update handling entrypoint: %s", err.Error())
 	}
-	if !conv.CheckUpdate(b, textMessage) {
-		t.Errorf("expected the internal handler to match")
+}
+
+func willRunEntrypoint(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context) {
+	t.Logf("conv %p: checking entrypoint message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
+
+	if _, ok := conv.CurrentState(message); ok {
+		t.Fatalf("expected the conversation to not be started")
 	}
-	if err := conv.HandleUpdate(b, textMessage); err != nil {
-		t.Errorf("unexpected error from update handling internal handler")
+	if !conv.CheckUpdate(b, message) {
+		t.Fatalf("conv %p: expected the entrypoint handler to match text: %s", conv, message.Message.Text)
 	}
-	if !*ended {
-		t.Errorf("expected the interna; handler to have run")
+}
+
+func runInternalHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, expectedState string, message *ext.Context) {
+	willRunInternalHandler(t, b, conv, expectedState, message)
+	if err := conv.HandleUpdate(b, message); err != nil {
+		t.Fatalf("unexpected error from update handling internal handler: %s", err.Error())
+	}
+}
+
+func willRunInternalHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, expectedState string, message *ext.Context) {
+	t.Logf("conv %p: checking internal message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
+
+	if state, ok := conv.CurrentState(message); !ok || state != expectedState {
+		t.Fatalf("expected the conversation to be at '%s', was '%s'", expectedState, state)
+	}
+	if !conv.CheckUpdate(b, message) {
+		t.Fatalf("conv %p: expected the internal handler to match text: %s", conv, message.Message.Text)
 	}
 }

@@ -11,6 +11,12 @@ import (
 // TODO: Add a "block" option to force linear processing. Also a "waiting" state to handle blocked handlers.
 // TODO: Allow for timeouts (and a "timeout" state to handle that)
 
+// The Conversation handler is an advanced handler which allows for running a sequence of commands in a stateful manner.
+// An example of this flow can be found at t.me/Botfather; upon receiving the "/newbot" command, the user is asked for
+// the name of their bot, which is sent as a separate message.
+//
+// The bot's internal state allows it to check at which point of the conversation the user is, and decide how to handle
+// the next update.
 type Conversation struct {
 	// EntryPoints is the list of handlers to start the conversation.
 	EntryPoints []ext.Handler
@@ -21,8 +27,9 @@ type Conversation struct {
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
 
-	// TODO: dump/restore conversation states
 	// TODO: use sync/map to ensure concurrent safety? Or protect with rwmutex?
+	// TODO: dump/restore conversation states for persistence
+	// TODO: Allow for custom conversation state management without a map (interface with get/check/set)
 	conversationStates map[string]string
 }
 
@@ -68,39 +75,64 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	if stateChange.End {
-		// TODO:  double-check end conversation flow when parents are used
+		// Mark the conversation as ended by deleting the conversation reference.
 		delete(c.conversationStates, key)
-		// TODO: can we end parent conversation from child?
-		// TODO: how do we know which parent state to map to?
-		return nil
 	}
 
-	if _, ok := c.States[stateChange.NextState]; !ok {
-		// TODO: checked that wrapped statechange remains unwrappable and is used by parent as expected
-		return fmt.Errorf("unknown state: %w", stateChange)
+	if stateChange.NextState != nil {
+		// If the next state is defined, then move to it.
+		if _, ok := c.States[*stateChange.NextState]; !ok {
+			// Check if the "next" state is a supported state.
+			return fmt.Errorf("unknown state: %w", stateChange)
+		}
+		c.conversationStates[key] = *stateChange.NextState
 	}
-	c.conversationStates[key] = stateChange.NextState
+
+	if stateChange.ParentState != nil {
+		// If a parent state is set, return that state for it to be handled.
+		return stateChange.ParentState
+	}
+
 	return nil
 }
 
 type conversationStateChange struct {
-	NextState string
-	End       bool
+	NextState   *string
+	End         bool
+	ParentState *conversationStateChange
 }
 
 func (s *conversationStateChange) Error() string {
-	if s.End {
-		return "not an error; conversation end"
-	}
-	return "conversation state change to: " + s.NextState
+	// Avoid infinite print recursion by changing type
+	type tmp *conversationStateChange
+	return fmt.Sprintf("conversation state change: %+v", tmp(s))
 }
 
-func NextConversationState(nextState string) error {
-	return &conversationStateChange{NextState: nextState}
+// NextConversationState moves to the defined state in the current conversation.
+func NextConversationState(nextState string) *conversationStateChange {
+	return &conversationStateChange{NextState: &nextState}
 }
 
+// NextParentConversationState moves to the defined state in the parent conversation, without changing the state of the current one.
+func NextParentConversationState(parentState *conversationStateChange) error {
+	return &conversationStateChange{ParentState: parentState}
+}
+
+// NextConversationStateAndParentState moves both the current conversation state, as well as the parent conversation
+// state.
+// Can be helpful in the case of certain circular conversations.
+func NextConversationStateAndParentState(nextState string, parentState *conversationStateChange) error {
+	return &conversationStateChange{NextState: &nextState, ParentState: parentState}
+}
+
+// EndConversation ends the current conversation.
 func EndConversation() error {
 	return &conversationStateChange{End: true}
+}
+
+// EndConversationToParentState ends the current conversation and moves the parent conversation to the new state.
+func EndConversationToParentState(parentState *conversationStateChange) error {
+	return &conversationStateChange{End: true, ParentState: parentState}
 }
 
 func (c Conversation) Name() string {
