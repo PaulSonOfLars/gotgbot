@@ -54,7 +54,12 @@ func Regex(p string) (filters.Message, error) {
 		return nil, err
 	}
 	return func(m *gotgbot.Message) bool {
-		return r.MatchString(m.Text)
+		if m.Text != "" {
+			return r.MatchString(m.Text)
+		} else if m.Caption != "" {
+			return r.MatchString(m.Caption)
+		}
+		return false
 	}, nil
 }
 
@@ -94,13 +99,26 @@ func Text(msg *gotgbot.Message) bool {
 
 func HasPrefix(prefix string) filters.Message {
 	return func(msg *gotgbot.Message) bool {
-		return strings.HasPrefix(msg.Text, prefix)
+		return strings.HasPrefix(msg.Text, prefix) || strings.HasSuffix(msg.Caption, prefix)
+
 	}
 }
 
 func HasSuffix(suffix string) filters.Message {
 	return func(msg *gotgbot.Message) bool {
-		return strings.HasSuffix(msg.Text, suffix)
+		return strings.HasSuffix(msg.Text, suffix) || strings.HasSuffix(msg.Caption, suffix)
+	}
+}
+
+func Contains(contains string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return strings.Contains(msg.Text, contains) || strings.Contains(msg.Caption, contains)
+	}
+}
+
+func Equal(eq string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return msg.Text == eq || msg.Caption == eq
 	}
 }
 
