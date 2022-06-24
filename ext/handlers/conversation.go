@@ -96,9 +96,13 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// conversationStateChange handles all the possible states that can be returned from a conversation.
 type conversationStateChange struct {
-	NextState   *string
-	End         bool
+	// The next state to handle in the current conversation.
+	NextState *string
+	// End the current conversation
+	End bool
+	// Move the parent conversation (if any) to the desired state.
 	ParentState *conversationStateChange
 }
 
@@ -139,6 +143,8 @@ func (c Conversation) Name() string {
 	return fmt.Sprintf("conversation_%p", c.States)
 }
 
+// getNextHandler goes through all the handlers in the conversation, until finds a handler that matches.
+// If no matching handler is found, returns nil.
 func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx *ext.Context) ext.Handler {
 	// Check if ongoing conversation
 	currState, ok := c.conversationStates[conversationKey]
@@ -168,6 +174,7 @@ func (c Conversation) getNextHandler(conversationKey string, b *gotgbot.Bot, ctx
 	return nil
 }
 
+// checkHandlerList iterates over a list of handlers until a match is found; at which point it is returned.
 func checkHandlerList(handlers []ext.Handler, b *gotgbot.Bot, ctx *ext.Context) ext.Handler {
 	for _, h := range handlers {
 		if h.CheckUpdate(b, ctx) {
