@@ -41,6 +41,12 @@ func (c Conversation) getStateKey(ctx *ext.Context) string {
 	return fmt.Sprintf("%d-%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id)
 }
 
+// CurrentState is exposed for testing purposes.
+func (c Conversation) CurrentState(ctx *ext.Context) (string, bool) {
+	s, ok := c.conversationStates[c.getStateKey(ctx)]
+	return s, ok
+}
+
 func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	// TODO: should checkUpdate return a method pointer to execute instead of a bool?
 	return c.getNextHandler(c.getStateKey(ctx), b, ctx) != nil
