@@ -236,6 +236,11 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	go u.Dispatcher.Start(b)
 
 	mux := http.NewServeMux()
+
+	if opts.Mux != nil {
+		mux = opts.Mux
+	}
+
 	mux.HandleFunc("/"+opts.URLPath, func(w http.ResponseWriter, r *http.Request) {
 		bytes, _ := ioutil.ReadAll(r.Body)
 		u.UpdateChan <- bytes
@@ -253,7 +258,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 		} else {
 			err = u.server.ListenAndServe()
 		}
-		if err != nil && errors.Is(err, http.ErrServerClosed) {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			panic("http server failed: " + err.Error())
 		}
 	}()
@@ -268,6 +273,8 @@ type WebhookOpts struct {
 
 	CertFile string
 	KeyFile  string
+
+	Mux *http.ServeMux
 }
 
 // GetListenAddr returns the local listening address, including port.
