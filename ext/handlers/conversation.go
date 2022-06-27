@@ -12,6 +12,7 @@ import (
 
 // TODO: Add a "block" option to force linear processing. Also a "waiting" state to handle blocked handlers.
 // TODO: Allow for timeouts (and a "timeout" state to handle that)
+// TODO: Allow for storing conversation data locally
 
 type KeyStrategy int64
 
@@ -42,6 +43,7 @@ type Conversation struct {
 	Fallbacks []ext.Handler
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
+	// TODO: move key logic to the ConversationStorage struct so users can define their own
 	// KeyStrategy defines how to calculate keys for each conversation.
 	KeyStrategy KeyStrategy
 	// StateStorage is responsible for storing all running conversations.
