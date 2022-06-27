@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -299,5 +300,5 @@ func (w *WebhookOpts) GetListenAddr() string {
 // GetWebhookURL returns the domain in the form domain/path.
 // eg: example.com/super_secret_token
 func (w *WebhookOpts) GetWebhookURL(domain string) string {
-	return fmt.Sprintf("%s/%s", domain, w.URLPath)
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), w.URLPath)
 }

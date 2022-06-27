@@ -17,7 +17,7 @@ import (
 // ngrok http 8080
 // Then, copy paste the HTTPS URL obtained from ngrok (changes every time you run it), and run the following command
 // from the samples/echoWebhookBot directory:
-// TOKEN="<your_token_here>" WEBHOOK_URL="<your_url_here>"  WEBHOOK_SECRET="<random_string_here>" go run .
+// TOKEN="<your_token_here>" WEBHOOK_DOMAIN="<your_domain_here>"  WEBHOOK_SECRET="<random_string_here>" go run .
 // Then, simply send /start to your bot; if it replies, you've successfully set up webhooks.
 func main() {
 	// Get token from the environment variable.
@@ -26,12 +26,12 @@ func main() {
 		panic("TOKEN environment variable is empty")
 	}
 
-	// Get a webhook secret from the environment variable.
-	webhookUrl := os.Getenv("WEBHOOK_URL")
-	if webhookUrl == "" {
-		panic("WEBHOOK_URL environment variable is empty")
+	// Get the webhook domain from the environment variable.
+	webhookDomain := os.Getenv("WEBHOOK_DOMAIN")
+	if webhookDomain == "" {
+		panic("WEBHOOK_DOMAIN environment variable is empty")
 	}
-	// Get a webhook secret from the environment variable.
+	// Get the webhook secret from the environment variable.
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 	if webhookSecret == "" {
 		panic("WEBHOOK_SECRET environment variable is empty")
@@ -68,20 +68,23 @@ func main() {
 
 	// Start the webhook server. We start the server before we set the webhook itself, so that when telegram starts
 	// sending updates, the server is already ready.
-	err = updater.StartWebhook(b, ext.WebhookOpts{
-		Listen:      "0.0.0.0",
-		Port:        8443,
-		URLPath:     token,         // Using the token as the endpoint to hit ensures that strangers dont fake updates to you
-		SecretToken: webhookSecret, // This allows us to verify that the webhook has been set by us (and not another bot
-	})
+	webhookOpts := ext.WebhookOpts{
+		Listen:      "0.0.0.0", // This example assumes you're in a dev environment running ngrok on 8080.
+		Port:        8080,
+		URLPath:     token,         // Using a secret (like the token) as the endpoint ensure that strangers aren't crafting fake updates.
+		SecretToken: webhookSecret, // Setting a webhook secret (must be here AND in SetWebhook!) ensures that the webhook is set by you.
+	}
+	err = updater.StartWebhook(b, webhookOpts)
 	if err != nil {
 		panic("failed to start webhook: " + err.Error())
 	}
 
-	// Set the webhook. This tells telegram where to send the updates.
-	_, err = b.SetWebhook(webhookUrl, &gotgbot.SetWebhookOpts{
+	// Get the full webhook URL that we are expecting to receive updates at.
+	webhookURL := webhookOpts.GetWebhookURL(webhookDomain)
+
+	// Tell telegram where they should send updates for you to receive them in a secure manner.
+	_, err = b.SetWebhook(webhookURL, &gotgbot.SetWebhookOpts{
 		MaxConnections:     100,
-		AllowedUpdates:     nil,
 		DropPendingUpdates: true,
 		SecretToken:        webhookSecret, // The secret token passed at webhook start time.
 	})
