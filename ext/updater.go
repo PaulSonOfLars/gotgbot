@@ -134,7 +134,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			// continue as usual
 		}
 
-		r, err := b.Post("getUpdates", v, nil, opts)
+		r, err := b.Request("getUpdates", v, nil, opts)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
