@@ -35,6 +35,10 @@ type BaseBotClient struct {
 	Token string
 	// Client is the HTTP Client used for all HTTP requests made for this bot.
 	Client http.Client
+	// UseTestEnvironment defines whether this bot was created to run on telegram's test environment.
+	// Enabling this uses a slightly different API path.
+	// See https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment for more details.
+	UseTestEnvironment bool
 	// The default request opts for this bot instance.
 	DefaultRequestOpts *RequestOpts
 }
@@ -247,5 +251,8 @@ func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
 }
 
 func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string {
+	if bot.UseTestEnvironment {
+		return fmt.Sprintf("%s/bot%s/test/%s", bot.getAPIURL(opts), bot.Token, method)
+	}
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
 }
