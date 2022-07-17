@@ -107,7 +107,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("addStickerToSet", v, data, reqOpts)
+	r, err := bot.Request("addStickerToSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -151,7 +151,7 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("answerCallbackQuery", v, nil, reqOpts)
+	r, err := bot.Request("answerCallbackQuery", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -207,7 +207,7 @@ func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryRes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("answerInlineQuery", v, nil, reqOpts)
+	r, err := bot.Request("answerInlineQuery", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -242,7 +242,7 @@ func (bot *Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("answerPreCheckoutQuery", v, nil, reqOpts)
+	r, err := bot.Request("answerPreCheckoutQuery", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -286,7 +286,7 @@ func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *Answe
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("answerShippingQuery", v, nil, reqOpts)
+	r, err := bot.Request("answerShippingQuery", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -319,7 +319,7 @@ func (bot *Bot) AnswerWebAppQuery(webAppQueryId string, result InlineQueryResult
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("answerWebAppQuery", v, nil, reqOpts)
+	r, err := bot.Request("answerWebAppQuery", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +348,7 @@ func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *Approve
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("approveChatJoinRequest", v, nil, reqOpts)
+	r, err := bot.Request("approveChatJoinRequest", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -388,7 +388,7 @@ func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("banChatMember", v, nil, reqOpts)
+	r, err := bot.Request("banChatMember", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -417,7 +417,7 @@ func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanCha
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("banChatSenderChat", v, nil, reqOpts)
+	r, err := bot.Request("banChatSenderChat", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -442,7 +442,7 @@ func (bot *Bot) Close(opts *CloseOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("close", v, nil, reqOpts)
+	r, err := bot.Request("close", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -514,7 +514,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("copyMessage", v, nil, reqOpts)
+	r, err := bot.Request("copyMessage", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -560,7 +560,7 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("createChatInviteLink", v, nil, reqOpts)
+	r, err := bot.Request("createChatInviteLink", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -662,7 +662,7 @@ func (bot *Bot) CreateInvoiceLink(title string, description string, payload stri
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("createInvoiceLink", v, nil, reqOpts)
+	r, err := bot.Request("createInvoiceLink", v, nil, reqOpts)
 	if err != nil {
 		return "", err
 	}
@@ -772,7 +772,7 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("createNewStickerSet", v, data, reqOpts)
+	r, err := bot.Request("createNewStickerSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -801,7 +801,7 @@ func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64, opts *Decline
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("declineChatJoinRequest", v, nil, reqOpts)
+	r, err := bot.Request("declineChatJoinRequest", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -828,7 +828,7 @@ func (bot *Bot) DeleteChatPhoto(chatId int64, opts *DeleteChatPhotoOpts) (bool, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteChatPhoto", v, nil, reqOpts)
+	r, err := bot.Request("deleteChatPhoto", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -855,7 +855,7 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteChatStickerSet", v, nil, reqOpts)
+	r, err := bot.Request("deleteChatStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -892,7 +892,7 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessage
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteMessage", v, nil, reqOpts)
+	r, err := bot.Request("deleteMessage", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -930,7 +930,7 @@ func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteMyCommands", v, nil, reqOpts)
+	r, err := bot.Request("deleteMyCommands", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -957,7 +957,7 @@ func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetO
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteStickerFromSet", v, nil, reqOpts)
+	r, err := bot.Request("deleteStickerFromSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -988,7 +988,7 @@ func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("deleteWebhook", v, nil, reqOpts)
+	r, err := bot.Request("deleteWebhook", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1036,7 +1036,7 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editChatInviteLink", v, nil, reqOpts)
+	r, err := bot.Request("editChatInviteLink", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1099,7 +1099,7 @@ func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editMessageCaption", v, nil, reqOpts)
+	r, err := bot.Request("editMessageCaption", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1174,7 +1174,7 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editMessageLiveLocation", v, nil, reqOpts)
+	r, err := bot.Request("editMessageLiveLocation", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1237,7 +1237,7 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editMessageMedia", v, data, reqOpts)
+	r, err := bot.Request("editMessageMedia", v, data, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1293,7 +1293,7 @@ func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Messa
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editMessageReplyMarkup", v, nil, reqOpts)
+	r, err := bot.Request("editMessageReplyMarkup", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1366,7 +1366,7 @@ func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Messag
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("editMessageText", v, nil, reqOpts)
+	r, err := bot.Request("editMessageText", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1401,7 +1401,7 @@ func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("exportChatInviteLink", v, nil, reqOpts)
+	r, err := bot.Request("exportChatInviteLink", v, nil, reqOpts)
 	if err != nil {
 		return "", err
 	}
@@ -1441,7 +1441,7 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("forwardMessage", v, nil, reqOpts)
+	r, err := bot.Request("forwardMessage", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1468,7 +1468,7 @@ func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*Chat, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getChat", v, nil, reqOpts)
+	r, err := bot.Request("getChat", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1495,7 +1495,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsO
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getChatAdministrators", v, nil, reqOpts)
+	r, err := bot.Request("getChatAdministrators", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1523,7 +1523,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64, opts *GetChatMemberOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getChatMember", v, nil, reqOpts)
+	r, err := bot.Request("getChatMember", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1549,7 +1549,7 @@ func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getChatMemberCount", v, nil, reqOpts)
+	r, err := bot.Request("getChatMemberCount", v, nil, reqOpts)
 	if err != nil {
 		return 0, err
 	}
@@ -1582,7 +1582,7 @@ func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, erro
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getChatMenuButton", v, nil, reqOpts)
+	r, err := bot.Request("getChatMenuButton", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1609,7 +1609,7 @@ func (bot *Bot) GetFile(fileId string, opts *GetFileOpts) (*File, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getFile", v, nil, reqOpts)
+	r, err := bot.Request("getFile", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1652,7 +1652,7 @@ func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getGameHighScores", v, nil, reqOpts)
+	r, err := bot.Request("getGameHighScores", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1677,7 +1677,7 @@ func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getMe", v, nil, reqOpts)
+	r, err := bot.Request("getMe", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1715,7 +1715,7 @@ func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getMyCommands", v, nil, reqOpts)
+	r, err := bot.Request("getMyCommands", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1746,7 +1746,7 @@ func (bot *Bot) GetMyDefaultAdministratorRights(opts *GetMyDefaultAdministratorR
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getMyDefaultAdministratorRights", v, nil, reqOpts)
+	r, err := bot.Request("getMyDefaultAdministratorRights", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1773,7 +1773,7 @@ func (bot *Bot) GetStickerSet(name string, opts *GetStickerSetOpts) (*StickerSet
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getStickerSet", v, nil, reqOpts)
+	r, err := bot.Request("getStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1825,7 +1825,7 @@ func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getUpdates", v, nil, reqOpts)
+	r, err := bot.Request("getUpdates", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1865,7 +1865,7 @@ func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getUserProfilePhotos", v, nil, reqOpts)
+	r, err := bot.Request("getUserProfilePhotos", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1890,7 +1890,7 @@ func (bot *Bot) GetWebhookInfo(opts *GetWebhookInfoOpts) (*WebhookInfo, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("getWebhookInfo", v, nil, reqOpts)
+	r, err := bot.Request("getWebhookInfo", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1917,7 +1917,7 @@ func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("leaveChat", v, nil, reqOpts)
+	r, err := bot.Request("leaveChat", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1942,7 +1942,7 @@ func (bot *Bot) LogOut(opts *LogOutOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("logOut", v, nil, reqOpts)
+	r, err := bot.Request("logOut", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1977,7 +1977,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("pinChatMessage", v, nil, reqOpts)
+	r, err := bot.Request("pinChatMessage", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2042,7 +2042,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("promoteChatMember", v, nil, reqOpts)
+	r, err := bot.Request("promoteChatMember", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2085,7 +2085,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("restrictChatMember", v, nil, reqOpts)
+	r, err := bot.Request("restrictChatMember", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2114,7 +2114,7 @@ func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *Revo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("revokeChatInviteLink", v, nil, reqOpts)
+	r, err := bot.Request("revokeChatInviteLink", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2243,7 +2243,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendAnimation", v, data, reqOpts)
+	r, err := bot.Request("sendAnimation", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2369,7 +2369,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendAudio", v, data, reqOpts)
+	r, err := bot.Request("sendAudio", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2399,7 +2399,7 @@ func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatAction
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendChatAction", v, nil, reqOpts)
+	r, err := bot.Request("sendChatAction", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2462,7 +2462,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendContact", v, nil, reqOpts)
+	r, err := bot.Request("sendContact", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2518,7 +2518,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendDice", v, nil, reqOpts)
+	r, err := bot.Request("sendDice", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2635,7 +2635,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendDocument", v, data, reqOpts)
+	r, err := bot.Request("sendDocument", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2688,7 +2688,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendGame", v, nil, reqOpts)
+	r, err := bot.Request("sendGame", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2816,7 +2816,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendInvoice", v, nil, reqOpts)
+	r, err := bot.Request("sendInvoice", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2893,7 +2893,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendLocation", v, nil, reqOpts)
+	r, err := bot.Request("sendLocation", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2954,7 +2954,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendMediaGroup", v, data, reqOpts)
+	r, err := bot.Request("sendMediaGroup", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3024,7 +3024,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendMessage", v, nil, reqOpts)
+	r, err := bot.Request("sendMessage", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3115,7 +3115,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendPhoto", v, data, reqOpts)
+	r, err := bot.Request("sendPhoto", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3221,7 +3221,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendPoll", v, nil, reqOpts)
+	r, err := bot.Request("sendPoll", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3297,7 +3297,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendSticker", v, data, reqOpts)
+	r, err := bot.Request("sendSticker", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3370,7 +3370,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendVenue", v, nil, reqOpts)
+	r, err := bot.Request("sendVenue", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3502,7 +3502,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendVideo", v, data, reqOpts)
+	r, err := bot.Request("sendVideo", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3611,7 +3611,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendVideoNote", v, data, reqOpts)
+	r, err := bot.Request("sendVideoNote", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3707,7 +3707,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("sendVoice", v, data, reqOpts)
+	r, err := bot.Request("sendVoice", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3738,7 +3738,7 @@ func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, cust
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatAdministratorCustomTitle", v, nil, reqOpts)
+	r, err := bot.Request("setChatAdministratorCustomTitle", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3771,7 +3771,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatDescription", v, nil, reqOpts)
+	r, err := bot.Request("setChatDescription", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3811,7 +3811,7 @@ func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatMenuButton", v, nil, reqOpts)
+	r, err := bot.Request("setChatMenuButton", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3844,7 +3844,7 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, op
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatPermissions", v, nil, reqOpts)
+	r, err := bot.Request("setChatPermissions", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3891,7 +3891,7 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatPhoto", v, data, reqOpts)
+	r, err := bot.Request("setChatPhoto", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3920,7 +3920,7 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string, opts *Set
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatStickerSet", v, nil, reqOpts)
+	r, err := bot.Request("setChatStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3949,7 +3949,7 @@ func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts)
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setChatTitle", v, nil, reqOpts)
+	r, err := bot.Request("setChatTitle", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4000,7 +4000,7 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setGameScore", v, nil, reqOpts)
+	r, err := bot.Request("setGameScore", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -4054,7 +4054,7 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setMyCommands", v, nil, reqOpts)
+	r, err := bot.Request("setMyCommands", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4092,7 +4092,7 @@ func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorR
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setMyDefaultAdministratorRights", v, nil, reqOpts)
+	r, err := bot.Request("setMyDefaultAdministratorRights", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4128,7 +4128,7 @@ func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementErro
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setPassportDataErrors", v, nil, reqOpts)
+	r, err := bot.Request("setPassportDataErrors", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4157,7 +4157,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *Se
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setStickerPositionInSet", v, nil, reqOpts)
+	r, err := bot.Request("setStickerPositionInSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4213,7 +4213,7 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setStickerSetThumb", v, data, reqOpts)
+	r, err := bot.Request("setStickerSetThumb", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4288,7 +4288,7 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("setWebhook", v, data, reqOpts)
+	r, err := bot.Request("setWebhook", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4336,7 +4336,7 @@ func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Mes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("stopMessageLiveLocation", v, nil, reqOpts)
+	r, err := bot.Request("stopMessageLiveLocation", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -4383,7 +4383,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Po
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("stopPoll", v, nil, reqOpts)
+	r, err := bot.Request("stopPoll", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4418,7 +4418,7 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("unbanChatMember", v, nil, reqOpts)
+	r, err := bot.Request("unbanChatMember", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4447,7 +4447,7 @@ func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *Unba
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("unbanChatSenderChat", v, nil, reqOpts)
+	r, err := bot.Request("unbanChatSenderChat", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4474,7 +4474,7 @@ func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("unpinAllChatMessages", v, nil, reqOpts)
+	r, err := bot.Request("unpinAllChatMessages", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4509,7 +4509,7 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("unpinChatMessage", v, nil, reqOpts)
+	r, err := bot.Request("unpinChatMessage", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4556,7 +4556,7 @@ func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile, opts *Uplo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Post("uploadStickerFile", v, data, reqOpts)
+	r, err := bot.Request("uploadStickerFile", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}

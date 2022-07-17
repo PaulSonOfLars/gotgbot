@@ -84,7 +84,7 @@ func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 
 var ErrNilBotClient = errors.New("nil BotClient")
 
-func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *Bot) Request(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	if bot.BotClient == nil {
 		return nil, ErrNilBotClient
 	}
@@ -92,5 +92,5 @@ func (bot *Bot) Post(method string, params map[string]string, data map[string]Na
 	ctx, cancel := bot.BotClient.TimeoutContext(opts)
 	defer cancel()
 
-	return bot.BotClient.PostWithContext(ctx, method, params, data, opts)
+	return bot.BotClient.RequestWithContext(ctx, method, params, data, opts)
 }
