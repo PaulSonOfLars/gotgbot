@@ -56,7 +56,7 @@ linters:
     - gomoddirectives
     - goprintffuncname
     - gosec
-    - ifshort
+    #    - ifshort
     - importas
     #    - lll
     - makezero
@@ -65,7 +65,7 @@ linters:
     #    - nilassign
     - nilerr
     - noctx
-    - nolintlint
+    #    - nolintlint
     #    - paralleltest
     - prealloc
     - promlinter
@@ -118,6 +118,5 @@ linters-settings:
       # use the struct field name to check the name of the struct tag
       use-field-name: true
       rules:
-        # any struct tag type can be used.
-        # support string case: `camel`, `pascal`, `kebab`, `snake`, `goCamel`, `goPascal`, `goKebab`, `goSnake`, `upper`, `lower`
+        # JSON must use snake case
         json: snake

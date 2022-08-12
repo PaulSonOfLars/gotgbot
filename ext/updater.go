@@ -248,8 +248,9 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	})
 
 	u.server = &http.Server{
-		Addr:    opts.GetListenAddr(),
-		Handler: mux,
+		Addr:              opts.GetListenAddr(),
+		Handler:           mux,
+		ReadHeaderTimeout: time.Second * 5,
 	}
 
 	go func() {
