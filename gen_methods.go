@@ -164,7 +164,7 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 type AnswerInlineQueryOpts struct {
 	// The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300.
 	CacheTime int64
-	// Pass True, if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query
+	// Pass True if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query
 	IsPersonal bool
 	// Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don't support pagination. Offset length can't exceed 64 bytes.
 	NextOffset string
@@ -263,7 +263,7 @@ type AnswerShippingQueryOpts struct {
 
 // AnswerShippingQuery If you sent an invoice requesting a shipping address and the parameter is_flexible was specified, the Bot API will send an Update with a shipping_query field to the bot. Use this method to reply to shipping queries. On success, True is returned.
 // - shippingQueryId (type string): Unique identifier for the query to be answered
-// - ok (type bool): Specify True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
+// - ok (type bool): Pass True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
 // - opts (type AnswerShippingQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answershippingquery
 func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
@@ -465,7 +465,7 @@ type CopyMessageOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -473,7 +473,7 @@ type CopyMessageOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// CopyMessage Use this method to copy messages of any kind. Service messages and invoice messages can't be copied. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+// CopyMessage Use this method to copy messages of any kind. Service messages and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - fromChatId (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
 // - messageId (type int64): Message identifier in the chat specified in from_chat_id
@@ -585,19 +585,19 @@ type CreateInvoiceLinkOpts struct {
 	PhotoWidth int64
 	// Photo height
 	PhotoHeight int64
-	// Pass True, if you require the user's full name to complete the order
+	// Pass True if you require the user's full name to complete the order
 	NeedName bool
-	// Pass True, if you require the user's phone number to complete the order
+	// Pass True if you require the user's phone number to complete the order
 	NeedPhoneNumber bool
-	// Pass True, if you require the user's email address to complete the order
+	// Pass True if you require the user's email address to complete the order
 	NeedEmail bool
-	// Pass True, if you require the user's shipping address to complete the order
+	// Pass True if you require the user's shipping address to complete the order
 	NeedShippingAddress bool
-	// Pass True, if the user's phone number should be sent to the provider
+	// Pass True if the user's phone number should be sent to the provider
 	SendPhoneNumberToProvider bool
-	// Pass True, if the user's email address should be sent to the provider
+	// Pass True if the user's email address should be sent to the provider
 	SendEmailToProvider bool
-	// Pass True, if the final price depends on the shipping method
+	// Pass True if the final price depends on the shipping method
 	IsFlexible bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -679,8 +679,8 @@ type CreateNewStickerSetOpts struct {
 	TgsSticker InputFile
 	// WEBM video with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#video-sticker-requirements for technical requirements
 	WebmSticker InputFile
-	// Pass True, if a set of mask stickers should be created
-	ContainsMasks bool
+	// Type of stickers in the set, pass "regular" or "mask". Custom emoji sticker sets can't be created via the Bot API at the moment. By default, a regular sticker set is created.
+	StickerType string
 	// A JSON-serialized object for position where the mask should be placed on faces
 	MaskPosition MaskPosition
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -759,7 +759,7 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
 			}
 		}
-		v["contains_masks"] = strconv.FormatBool(opts.ContainsMasks)
+		v["sticker_type"] = opts.StickerType
 		bs, err := json.Marshal(opts.MaskPosition)
 		if err != nil {
 			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
@@ -1483,7 +1483,7 @@ type GetChatAdministratorsOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetChatAdministrators Use this method to get a list of administrators in a chat. On success, returns an Array of ChatMember objects that contains information about all chat administrators except other bots. If the chat is a group or a supergroup and no administrators were appointed, only the creator will be returned.
+// GetChatAdministrators Use this method to get a list of administrators in a chat, which aren't bots. Returns an Array of ChatMember objects.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
@@ -1590,6 +1590,39 @@ func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, erro
 	return unmarshalMenuButton(r)
 }
 
+// GetCustomEmojiStickersOpts is the set of optional fields for Bot.GetCustomEmojiStickers.
+type GetCustomEmojiStickersOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetCustomEmojiStickers Use this method to get information about custom emoji stickers by their identifiers. Returns an Array of Sticker objects.
+// - customEmojiIds (type []string): List of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
+// https://core.telegram.org/bots/api#getcustomemojistickers
+func (bot *Bot) GetCustomEmojiStickers(customEmojiIds []string, opts *GetCustomEmojiStickersOpts) ([]Sticker, error) {
+	v := map[string]string{}
+	if customEmojiIds != nil {
+		bs, err := json.Marshal(customEmojiIds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field custom_emoji_ids: %w", err)
+		}
+		v["custom_emoji_ids"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getCustomEmojiStickers", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s []Sticker
+	return s, json.Unmarshal(r, &s)
+}
+
 // GetFileOpts is the set of optional fields for Bot.GetFile.
 type GetFileOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1630,7 +1663,7 @@ type GetGameHighScoresOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetGameHighScores Use this method to get data for high score tables. Will return the score of the specified user and several of their neighbors in a game. On success, returns an Array of GameHighScore objects.
+// GetGameHighScores Use this method to get data for high score tables. Will return the score of the specified user and several of their neighbors in a game. Returns an Array of GameHighScore objects.
 // - userId (type int64): Target user id
 // - opts (type GetGameHighScoresOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getgamehighscores
@@ -1696,7 +1729,7 @@ type GetMyCommandsOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetMyCommands Use this method to get the current list of the bot's commands for the given scope and user language. Returns Array of BotCommand on success. If commands aren't set, an empty list is returned.
+// GetMyCommands Use this method to get the current list of the bot's commands for the given scope and user language. Returns an Array of BotCommand objects. If commands aren't set, an empty list is returned.
 // - opts (type GetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getmycommands
 func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
@@ -1796,7 +1829,7 @@ type GetUpdatesOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetUpdates Use this method to receive incoming updates using long polling (wiki). An Array of Update objects is returned.
+// GetUpdates Use this method to receive incoming updates using long polling (wiki). Returns an Array of Update objects.
 // - opts (type GetUpdatesOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getupdates
 func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
@@ -1953,7 +1986,7 @@ func (bot *Bot) LogOut(opts *LogOutOpts) (bool, error) {
 
 // PinChatMessageOpts is the set of optional fields for Bot.PinChatMessage.
 type PinChatMessageOpts struct {
-	// Pass True, if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
+	// Pass True if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
 	DisableNotification bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1988,27 +2021,27 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 
 // PromoteChatMemberOpts is the set of optional fields for Bot.PromoteChatMember.
 type PromoteChatMemberOpts struct {
-	// Pass True, if the administrator's presence in the chat is hidden
+	// Pass True if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True, if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Pass True if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool
-	// Pass True, if the administrator can create channel posts, channels only
+	// Pass True if the administrator can create channel posts, channels only
 	CanPostMessages bool
-	// Pass True, if the administrator can edit messages of other users and can pin messages, channels only
+	// Pass True if the administrator can edit messages of other users and can pin messages, channels only
 	CanEditMessages bool
-	// Pass True, if the administrator can delete messages of other users
+	// Pass True if the administrator can delete messages of other users
 	CanDeleteMessages bool
-	// Pass True, if the administrator can manage video chats
+	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
-	// Pass True, if the administrator can restrict, ban or unban chat members
+	// Pass True if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
-	// Pass True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
+	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
-	// Pass True, if the administrator can change chat title, photo and other settings
+	// Pass True if the administrator can change chat title, photo and other settings
 	CanChangeInfo bool
-	// Pass True, if the administrator can invite new users to the chat
+	// Pass True if the administrator can invite new users to the chat
 	CanInviteUsers bool
-	// Pass True, if the administrator can pin messages, supergroups only
+	// Pass True if the administrator can pin messages, supergroups only
 	CanPinMessages bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2145,7 +2178,7 @@ type SendAnimationOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2274,7 +2307,7 @@ type SendAudioOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2420,7 +2453,7 @@ type SendContactOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2481,7 +2514,7 @@ type SendDiceOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2545,7 +2578,7 @@ type SendDocumentOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2652,7 +2685,7 @@ type SendGameOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game.
 	ReplyMarkup InlineKeyboardMarkup
@@ -2715,19 +2748,19 @@ type SendInvoiceOpts struct {
 	PhotoWidth int64
 	// Photo height
 	PhotoHeight int64
-	// Pass True, if you require the user's full name to complete the order
+	// Pass True if you require the user's full name to complete the order
 	NeedName bool
-	// Pass True, if you require the user's phone number to complete the order
+	// Pass True if you require the user's phone number to complete the order
 	NeedPhoneNumber bool
-	// Pass True, if you require the user's email address to complete the order
+	// Pass True if you require the user's email address to complete the order
 	NeedEmail bool
-	// Pass True, if you require the user's shipping address to complete the order
+	// Pass True if you require the user's shipping address to complete the order
 	NeedShippingAddress bool
-	// Pass True, if the user's phone number should be sent to provider
+	// Pass True if the user's phone number should be sent to provider
 	SendPhoneNumberToProvider bool
-	// Pass True, if the user's email address should be sent to provider
+	// Pass True if the user's email address should be sent to provider
 	SendEmailToProvider bool
-	// Pass True, if the final price depends on the shipping method
+	// Pass True if the final price depends on the shipping method
 	IsFlexible bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -2735,7 +2768,7 @@ type SendInvoiceOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
 	ReplyMarkup InlineKeyboardMarkup
@@ -2841,7 +2874,7 @@ type SendLocationOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -2910,7 +2943,7 @@ type SendMediaGroupOpts struct {
 	ProtectContent bool
 	// If the messages are a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2977,7 +3010,7 @@ type SendMessageOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3047,7 +3080,7 @@ type SendPhotoOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3144,7 +3177,7 @@ type SendPollOpts struct {
 	OpenPeriod int64
 	// Point in time (Unix timestamp) when the poll will be automatically closed. Must be at least 5 and no more than 600 seconds in the future. Can't be used together with open_period.
 	CloseDate int64
-	// Pass True, if the poll needs to be immediately closed. This can be useful for poll preview.
+	// Pass True if the poll needs to be immediately closed. This can be useful for poll preview.
 	IsClosed bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -3152,7 +3185,7 @@ type SendPollOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3238,7 +3271,7 @@ type SendStickerOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3322,7 +3355,7 @@ type SendVenueOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3395,7 +3428,7 @@ type SendVideoOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
-	// Pass True, if the uploaded video is suitable for streaming
+	// Pass True if the uploaded video is suitable for streaming
 	SupportsStreaming bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -3403,7 +3436,7 @@ type SendVideoOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3525,7 +3558,7 @@ type SendVideoNoteOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3636,7 +3669,7 @@ type SendVoiceOpts struct {
 	ProtectContent bool
 	// If the message is a reply, ID of the original message
 	ReplyToMessageId int64
-	// Pass True, if the message should be sent even if the specified replied-to message is not found
+	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
@@ -3960,9 +3993,9 @@ func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts)
 
 // SetGameScoreOpts is the set of optional fields for Bot.SetGameScore.
 type SetGameScoreOpts struct {
-	// Pass True, if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters
+	// Pass True if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters
 	Force bool
-	// Pass True, if the game message should not be automatically edited to include the current scoreboard
+	// Pass True if the game message should not be automatically edited to include the current scoreboard
 	DisableEditMessage bool
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
