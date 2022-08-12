@@ -250,7 +250,8 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	u.server = &http.Server{
 		Addr:              opts.GetListenAddr(),
 		Handler:           mux,
-		ReadHeaderTimeout: time.Second * 5,
+		ReadTimeout:       opts.ReadTimeout,
+		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}
 
 	go func() {
@@ -277,6 +278,13 @@ type WebhookOpts struct {
 	// URLPath defines the path to listen at; eg <domainname>/<URLPath>.
 	// Using the bot token here is often a good idea, as it is a secret known only by telegram.
 	URLPath string
+	// ReadTimeout is passed to the http server to limit the time it takes to read an incoming request.
+	// See http.Server for more details.
+	ReadTimeout time.Duration
+	// ReadHeaderTimeout is passed to the http server to limit the time it takes to read the headers of an incoming
+	// request.
+	// See http.Server for more details.
+	ReadHeaderTimeout time.Duration
 
 	// HTTPS cert and key files for custom signed certificates
 	CertFile string
