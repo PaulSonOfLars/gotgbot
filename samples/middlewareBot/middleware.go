@@ -16,7 +16,7 @@ type sendWithoutReplyBotClient struct {
 	gotgbot.BotClient
 }
 
-// Define wrapper around existing PostWithContext method.
+// Define wrapper around existing RequestWithContext method.
 // Note: this is the only method that needs redefining.
 func (b *sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	// For all sendable methods, we want to allow sending if the message has been deleted.
