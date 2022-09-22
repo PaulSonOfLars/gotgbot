@@ -21,7 +21,7 @@ package gotgbot
 
 		helper, err := generateHelperDef(d, tgMethod)
 		if err != nil {
-			return fmt.Errorf("failed to generate helpersfor %s: %w", tgMethodName, err)
+			return fmt.Errorf("failed to generate helpers for %s: %w", tgMethodName, err)
 		}
 
 		if helper == "" {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -239,4 +240,30 @@ func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, er
 	}
 
 	return types, nil
+}
+
+// extractQuotedValues is a very basic quote extraction method. It only works on normal double quotes ("), it does not
+// handle any sort of escaping, and it expects an even number of quotes to function.
+// But that's all we need for this package, and so we're happy.
+func extractQuotedValues(in string) ([]string, error) {
+	if strings.Count(in, "\"")%2 != 0 {
+		return nil, errors.New("uneven number of quotes in string")
+	}
+
+	var out []string
+	startIdx := -1
+	for idx, r := range in {
+		if r == '"' {
+			if startIdx == -1 {
+				// This is an opening quote
+				startIdx = idx
+				continue
+			}
+
+			// This is a closing quote, so append to outputs and reset startIdx.
+			out = append(out, in[startIdx+1:idx])
+			startIdx = -1
+		}
+	}
+	return out, nil
 }

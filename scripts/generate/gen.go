@@ -181,6 +181,10 @@ func generate(d APIDescription) error {
 		return fmt.Errorf("failed to generate helpers: %w", err)
 	}
 
+	if err := generateConsts(d); err != nil {
+		return fmt.Errorf("failed to generate consts: %w", err)
+	}
+
 	return nil
 }
 
