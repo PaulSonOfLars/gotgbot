@@ -81,14 +81,14 @@ func generateStickerTypeConsts(d APIDescription) (string, error) {
 
 func generateParseModeConsts() string {
 	// Adding these manually because they're not part of the spec, and theyre not going to change much anyway.
-	formattingTypes := []string{"HTML", "MarkdownV2", "Markdown", "Text"}
+	formattingTypes := []string{"HTML", "MarkdownV2", "Markdown", "None"}
 
 	out := strings.Builder{}
 	out.WriteString("// The consts listed below represent all the parse_mode options that can be sent to telegram.\n")
 	out.WriteString("const (\n")
 	for _, t := range formattingTypes {
 		constName := "ParseMode" + t
-		if t == "Text" {
+		if t == "None" {
 			// no parsemode == empty string value.
 			out.WriteString(writeConst(constName, ""))
 			continue

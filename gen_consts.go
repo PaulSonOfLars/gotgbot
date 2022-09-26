@@ -26,7 +26,7 @@ const (
 	ParseModeHTML       = "HTML"
 	ParseModeMarkdownV2 = "MarkdownV2"
 	ParseModeMarkdown   = "Markdown"
-	ParseModeText       = ""
+	ParseModeNone       = ""
 )
 
 // The consts listed below represent all the sticker types that can be obtained from telegram.
