@@ -7,6 +7,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/conversation"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
@@ -30,6 +31,7 @@ func TestBasicConversation(t *testing.T) {
 		},
 		[]ext.Handler{},
 		[]ext.Handler{},
+		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	var userId int64 = 123
@@ -69,9 +71,9 @@ func TestBasicKeyedConversation(t *testing.T) {
 		},
 		[]ext.Handler{},
 		[]ext.Handler{},
+		// Make sure that we key by sender in one chat
+		conversation.NewInMemoryStorage(conversation.KeyStrategySender),
 	)
-	// Make sure that we key by sender in one chat
-	conv.KeyStrategy = handlers.KeyStrategySender
 
 	var userIdOne int64 = 123
 	var userIdTwo int64 = 456
@@ -113,6 +115,7 @@ func TestFallbackConversation(t *testing.T) {
 			return handlers.EndConversation()
 		})},
 		nil,
+		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	var userId int64 = 123
@@ -155,6 +158,7 @@ func TestReEntryConversation(t *testing.T) {
 		},
 		nil,
 		nil,
+		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 	// Enable reentry
 	conv.AllowReEntry = true
@@ -204,6 +208,7 @@ func TestNestedConversation(t *testing.T) {
 		},
 		nil,
 		nil,
+		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	conv := handlers.NewConversation(
@@ -221,6 +226,7 @@ func TestNestedConversation(t *testing.T) {
 		},
 		nil,
 		nil,
+		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	t.Logf("main   conv: %p", &conv)
@@ -278,14 +284,14 @@ func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, m
 }
 
 func checkExpectedState(t *testing.T, conv *handlers.Conversation, message *ext.Context, nextState string) {
-	state, err := conv.CurrentState(message)
+	currentState, err := conv.StateStorage.Get(message)
 	if nextState == "" {
-		if !errors.Is(err, handlers.ConversationKeyNotFound) {
-			t.Fatalf("should not have a conversation, but got state: %s", state)
+		if !errors.Is(err, conversation.KeyNotFound) {
+			t.Fatalf("should not have a conversation, but got currentState: %s", currentState)
 		}
 	} else if err != nil {
-		t.Fatalf("unexpected error while checking the current state of the conversation")
-	} else if state == nil || state.Key != nextState {
-		t.Fatalf("expected the conversation to be at '%s', was '%s'", nextState, state)
+		t.Fatalf("unexpected error while checking the current currentState of the conversation")
+	} else if currentState == nil || currentState.Key != nextState {
+		t.Fatalf("expected the conversation to be at '%s', was '%s'", nextState, currentState)
 	}
 }
