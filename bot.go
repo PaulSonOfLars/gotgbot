@@ -26,6 +26,10 @@ type BotOpts struct {
 	// token can be assumed to be valid (eg lambdas).
 	// Warning: Disabling the token check will mean that the Bot.User struct will no longer be populated.
 	DisableTokenCheck bool
+	// UseTestEnvironment defines whether this bot was created to run on telegram's test environment.
+	// Enabling this uses a slightly different API path.
+	// See https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment for more details.
+	UseTestEnvironment bool
 	// Request opts to use for checking token validity with Bot.GetMe. Can be slow - a high timeout (eg 10s) is
 	// recommended.
 	RequestOpts *RequestOpts
@@ -50,6 +54,7 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	checkTokenValidity := true
 	if opts != nil {
 		botClient.Client = opts.Client
+		botClient.UseTestEnvironment = opts.UseTestEnvironment
 		if opts.DefaultRequestOpts != nil {
 			botClient.DefaultRequestOpts = opts.DefaultRequestOpts
 		}
@@ -84,7 +89,7 @@ func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 
 var ErrNilBotClient = errors.New("nil BotClient")
 
-func (bot *Bot) Post(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *Bot) Request(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	if bot.BotClient == nil {
 		return nil, ErrNilBotClient
 	}
@@ -92,5 +97,5 @@ func (bot *Bot) Post(method string, params map[string]string, data map[string]Na
 	ctx, cancel := bot.BotClient.TimeoutContext(opts)
 	defer cancel()
 
-	return bot.BotClient.PostWithContext(ctx, method, params, data, opts)
+	return bot.BotClient.RequestWithContext(ctx, method, params, data, opts)
 }

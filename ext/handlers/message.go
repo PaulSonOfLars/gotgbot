@@ -29,25 +29,16 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return m.Filter == nil || m.Filter(ctx.Message)
 	}
 
-	// if no edits and message is edited
+	// If edits are allowed, and message is edited.
 	if m.AllowEdited && ctx.EditedMessage != nil {
-		if ctx.EditedMessage.Text == "" && ctx.EditedMessage.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(ctx.EditedMessage)
 	}
-	// if no channel and message is channel message
+	// If channel posts are allowed, and message is channel post.
 	if m.AllowChannel && ctx.ChannelPost != nil {
-		if ctx.ChannelPost.Text == "" && ctx.ChannelPost.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(ctx.ChannelPost)
 	}
-	// if no channel, no edits, and post is edited
+	// If channel posts and edits are allowed, and post is edited.
 	if m.AllowChannel && m.AllowEdited && ctx.EditedChannelPost != nil {
-		if ctx.EditedChannelPost.Text == "" && ctx.EditedChannelPost.Caption == "" {
-			return false
-		}
 		return m.Filter == nil || m.Filter(ctx.EditedChannelPost)
 	}
 

@@ -20,8 +20,8 @@ const (
 )
 
 type BotClient interface {
-	// PostWithContext submits a POST HTTP request a bot API instance.
-	PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
+	// RequestWithContext submits a POST HTTP request a bot API instance.
+	RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
 	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
 	// GetAPIURL gets the URL of the API the bot is interacting with.
@@ -35,6 +35,10 @@ type BaseBotClient struct {
 	Token string
 	// Client is the HTTP Client used for all HTTP requests made for this bot.
 	Client http.Client
+	// UseTestEnvironment defines whether this bot was created to run on telegram's test environment.
+	// Enabling this uses a slightly different API path.
+	// See https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment for more details.
+	UseTestEnvironment bool
 	// The default request opts for this bot instance.
 	DefaultRequestOpts *RequestOpts
 }
@@ -127,14 +131,14 @@ func timeoutFromOpts(opts *RequestOpts) (context.Context, context.CancelFunc) {
 	return nil, nil
 }
 
-// PostWithContext allows sending a POST request to the telegram bot API with an existing context.
-// - ctx: the timeout contexts to be used.
-// - method: the telegram API method to call.
-// - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
-// - data: map of any files to be sending to the telegram API.
-// - opts: request opts to use. Note: Timeout opts are ignored when used in PostWithContext. Timeout handling is the
-//         responsibility of the caller/context owner.
-func (bot *BaseBotClient) PostWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+// RequestWithContext allows sending a POST request to the telegram bot API with an existing context.
+//   - ctx: the timeout contexts to be used.
+//   - method: the telegram API method to call.
+//   - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
+//   - data: map of any files to be sending to the telegram API.
+//   - opts: request opts to use. Note: Timeout opts are ignored when used in RequestWithContext. Timeout handling is the
+//     responsibility of the caller/context owner.
+func (bot *BaseBotClient) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 
 	var contentType string
@@ -247,5 +251,8 @@ func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
 }
 
 func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string {
+	if bot.UseTestEnvironment {
+		return fmt.Sprintf("%s/bot%s/test/%s", bot.getAPIURL(opts), bot.Token, method)
+	}
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
 }

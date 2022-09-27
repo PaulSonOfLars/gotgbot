@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -133,7 +134,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			// continue as usual
 		}
 
-		r, err := b.Post("getUpdates", v, nil, opts)
+		r, err := b.Request("getUpdates", v, nil, opts)
 		if err != nil {
 			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
 			time.Sleep(time.Second)
@@ -237,13 +238,20 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/"+opts.URLPath, func(w http.ResponseWriter, r *http.Request) {
+		if opts.SecretToken != "" && opts.SecretToken != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
+			// Drop any updates from invalid secret tokens.
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		bytes, _ := ioutil.ReadAll(r.Body)
 		u.UpdateChan <- bytes
 	})
 
 	u.server = &http.Server{
-		Addr:    opts.GetListenAddr(),
-		Handler: mux,
+		Addr:              opts.GetListenAddr(),
+		Handler:           mux,
+		ReadTimeout:       opts.ReadTimeout,
+		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}
 
 	go func() {
@@ -261,13 +269,30 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 	return nil
 }
 
+// WebhookOpts represent various fields that are needed for configuring the local webhook server.
 type WebhookOpts struct {
-	Listen  string
-	Port    int
+	// Listen is the address to listen on (eg: localhost, 0.0.0.0, etc).
+	Listen string
+	// Port is the port listen on (eg 443, 8443, etc).
+	Port int
+	// URLPath defines the path to listen at; eg <domainname>/<URLPath>.
+	// Using the bot token here is often a good idea, as it is a secret known only by telegram.
 	URLPath string
+	// ReadTimeout is passed to the http server to limit the time it takes to read an incoming request.
+	// See http.Server for more details.
+	ReadTimeout time.Duration
+	// ReadHeaderTimeout is passed to the http server to limit the time it takes to read the headers of an incoming
+	// request.
+	// See http.Server for more details.
+	ReadHeaderTimeout time.Duration
 
+	// HTTPS cert and key files for custom signed certificates
 	CertFile string
 	KeyFile  string
+
+	// The secret token used in the Bot.SetWebhook call, which can be used to ensure that the request comes from a
+	// webhook set by you.
+	SecretToken string
 }
 
 // GetListenAddr returns the local listening address, including port.
@@ -284,5 +309,5 @@ func (w *WebhookOpts) GetListenAddr() string {
 // GetWebhookURL returns the domain in the form domain/path.
 // eg: example.com/super_secret_token
 func (w *WebhookOpts) GetWebhookURL(domain string) string {
-	return fmt.Sprintf("%s/%s", domain, w.URLPath)
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), w.URLPath)
 }

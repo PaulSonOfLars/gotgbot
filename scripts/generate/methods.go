@@ -91,9 +91,9 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 	// If sending data, we need to do it over POST
 	if hasData {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, data, reqOpts)")
+		method.WriteString("\nr, err := bot.Request(\"" + tgMethod.Name + "\", v, data, reqOpts)")
 	} else {
-		method.WriteString("\nr, err := bot.Post(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
+		method.WriteString("\nr, err := bot.Request(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
 	}
 
 	method.WriteString("\n	if err != nil {")
