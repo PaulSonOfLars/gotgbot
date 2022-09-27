@@ -24,6 +24,19 @@ type Conversation struct {
 	EntryPoints []ext.Handler
 	// States is the map of possible states, with a list of possible handlers for each one.
 	States map[string][]ext.Handler
+	// StateStorage is responsible for storing all running conversations.
+	StateStorage conversation.Storage
+
+	// The following are all optional fields:
+	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands)
+	Exits []ext.Handler
+	// Fallbacks is the list of handlers to handle updates which haven't been matched by any states.
+	Fallbacks []ext.Handler
+	// If True, a user can restart the conversation by hitting one of the entry points.
+	AllowReEntry bool
+}
+
+type ConversationOpts struct {
 	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands)
 	Exits []ext.Handler
 	// Fallbacks is the list of handlers to handle updates which haven't been matched by any states.
@@ -34,15 +47,25 @@ type Conversation struct {
 	StateStorage conversation.Storage
 }
 
-func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, exits []ext.Handler, fallbacks []ext.Handler, storage conversation.Storage) Conversation {
-	return Conversation{
+func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, opts *ConversationOpts) Conversation {
+	c := Conversation{
 		EntryPoints: entryPoints,
 		States:      states,
-		Exits:       exits,
-		Fallbacks:   fallbacks,
-		// Instantiate default map-based storage
-		StateStorage: storage,
+		// Setup a default storage medium
+		StateStorage: conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	}
+
+	if opts != nil {
+		c.Exits = opts.Exits
+		c.Fallbacks = opts.Fallbacks
+
+		// If no StateStorage is specified, we should keep the default.
+		if opts.StateStorage != nil {
+			c.StateStorage = opts.StateStorage
+		}
+	}
+
+	return c
 }
 
 func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {

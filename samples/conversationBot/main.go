@@ -60,9 +60,10 @@ func main() {
 			NAME: {handlers.NewMessage(noCommands, name)},
 			AGE:  {handlers.NewMessage(noCommands, age)},
 		},
-		[]ext.Handler{handlers.NewCommand("cancel", cancel)},
-		nil,
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
+		&handlers.ConversationOpts{
+			Exits:        []ext.Handler{handlers.NewCommand("cancel", cancel)},
+			StateStorage: conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
+		},
 	))
 
 	// Start receiving updates.

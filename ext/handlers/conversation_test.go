@@ -29,9 +29,7 @@ func TestBasicConversation(t *testing.T) {
 				return handlers.EndConversation()
 			})},
 		},
-		[]ext.Handler{},
-		[]ext.Handler{},
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
+		nil,
 	)
 
 	var userId int64 = 123
@@ -69,10 +67,10 @@ func TestBasicKeyedConversation(t *testing.T) {
 				return handlers.EndConversation()
 			})},
 		},
-		[]ext.Handler{},
-		[]ext.Handler{},
-		// Make sure that we key by sender in one chat
-		conversation.NewInMemoryStorage(conversation.KeyStrategySender),
+		&handlers.ConversationOpts{
+			// Make sure that we key by sender in one chat
+			StateStorage: conversation.NewInMemoryStorage(conversation.KeyStrategySender),
+		},
 	)
 
 	var userIdOne int64 = 123
@@ -110,12 +108,12 @@ func TestFallbackConversation(t *testing.T) {
 				return handlers.EndConversation()
 			})},
 		},
-		[]ext.Handler{handlers.NewCommand("cancel", func(b *gotgbot.Bot, ctx *ext.Context) error {
-			fallback = true
-			return handlers.EndConversation()
-		})},
-		nil,
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
+		&handlers.ConversationOpts{
+			Exits: []ext.Handler{handlers.NewCommand("cancel", func(b *gotgbot.Bot, ctx *ext.Context) error {
+				fallback = true
+				return handlers.EndConversation()
+			})},
+		},
 	)
 
 	var userId int64 = 123
@@ -157,8 +155,6 @@ func TestReEntryConversation(t *testing.T) {
 			})},
 		},
 		nil,
-		nil,
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 	// Enable reentry
 	conv.AllowReEntry = true
@@ -207,8 +203,6 @@ func TestNestedConversation(t *testing.T) {
 			})},
 		},
 		nil,
-		nil,
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	conv := handlers.NewConversation(
@@ -225,8 +219,6 @@ func TestNestedConversation(t *testing.T) {
 			})},
 		},
 		nil,
-		nil,
-		conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
 	)
 
 	t.Logf("main   conv: %p", &conv)
