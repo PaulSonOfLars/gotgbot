@@ -451,8 +451,39 @@ func (bot *Bot) Close(opts *CloseOpts) (bool, error) {
 	return b, json.Unmarshal(r, &b)
 }
 
+// CloseForumTopicOpts is the set of optional fields for Bot.CloseForumTopic.
+type CloseForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// CloseForumTopic Use this method to close an open topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// https://core.telegram.org/bots/api#closeforumtopic
+func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *CloseForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("closeForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // CopyMessageOpts is the set of optional fields for Bot.CopyMessage.
 type CopyMessageOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
 	Caption string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
@@ -485,6 +516,9 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 	v["from_chat_id"] = strconv.FormatInt(fromChatId, 10)
 	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -567,6 +601,46 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 
 	var c ChatInviteLink
 	return &c, json.Unmarshal(r, &c)
+}
+
+// CreateForumTopicOpts is the set of optional fields for Bot.CreateForumTopic.
+type CreateForumTopicOpts struct {
+	// Color of the topic icon in RGB format. Currently, must be one of 7322096 (0x6FB9F0), 16766590 (0xFFD67E), 13338331 (0xCB86DB), 9367192 (0x8EEE98), 16749490 (0xFF93B2), or 16478047 (0xFB6F5F)
+	IconColor int64
+	// Unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
+	IconCustomEmojiId string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// CreateForumTopic Use this method to create a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns information about the created topic as a ForumTopic object.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - name (type string): Topic name, 1-128 characters
+// - opts (type CreateForumTopicOpts): All optional parameters.
+// https://core.telegram.org/bots/api#createforumtopic
+func (bot *Bot) CreateForumTopic(chatId int64, name string, opts *CreateForumTopicOpts) (*ForumTopic, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["name"] = name
+	if opts != nil {
+		if opts.IconColor != 0 {
+			v["icon_color"] = strconv.FormatInt(opts.IconColor, 10)
+		}
+		v["icon_custom_emoji_id"] = opts.IconCustomEmojiId
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("createForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var f ForumTopic
+	return &f, json.Unmarshal(r, &f)
 }
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink.
@@ -864,6 +938,35 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpt
 	return b, json.Unmarshal(r, &b)
 }
 
+// DeleteForumTopicOpts is the set of optional fields for Bot.DeleteForumTopic.
+type DeleteForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteForumTopic Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// https://core.telegram.org/bots/api#deleteforumtopic
+func (bot *Bot) DeleteForumTopic(chatId int64, messageThreadId int64, opts *DeleteForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("deleteForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // DeleteMessageOpts is the set of optional fields for Bot.DeleteMessage.
 type DeleteMessageOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -872,6 +975,7 @@ type DeleteMessageOpts struct {
 
 // DeleteMessage Use this method to delete a message, including service messages, with the following limitations:
 // - A message can only be deleted if it was sent less than 48 hours ago.
+// - Service messages about a supergroup, channel, or forum topic creation can't be deleted.
 // - A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
 // - Bots can delete outgoing messages in private chats, groups, and supergroups.
 // - Bots can delete incoming messages in private chats.
@@ -1043,6 +1147,39 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 
 	var c ChatInviteLink
 	return &c, json.Unmarshal(r, &c)
+}
+
+// EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic.
+type EditForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditForumTopic Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// - name (type string): New topic name, 1-128 characters
+// - iconCustomEmojiId (type string): New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
+// https://core.telegram.org/bots/api#editforumtopic
+func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, name string, iconCustomEmojiId string, opts *EditForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
+	v["name"] = name
+	v["icon_custom_emoji_id"] = iconCustomEmojiId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("editForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // EditMessageCaptionOpts is the set of optional fields for Bot.EditMessageCaption.
@@ -1412,6 +1549,8 @@ func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpt
 
 // ForwardMessageOpts is the set of optional fields for Bot.ForwardMessage.
 type ForwardMessageOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the forwarded message from forwarding and saving
@@ -1432,6 +1571,9 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 	v["from_chat_id"] = strconv.FormatInt(fromChatId, 10)
 	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 	}
@@ -1649,6 +1791,31 @@ func (bot *Bot) GetFile(fileId string, opts *GetFileOpts) (*File, error) {
 
 	var f File
 	return &f, json.Unmarshal(r, &f)
+}
+
+// GetForumTopicIconStickersOpts is the set of optional fields for Bot.GetForumTopicIconStickers.
+type GetForumTopicIconStickersOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetForumTopicIconStickers Use this method to get custom emoji stickers, which can be used as a forum topic icon by any user. Requires no parameters. Returns an Array of Sticker objects.
+// https://core.telegram.org/bots/api#getforumtopiciconstickers
+func (bot *Bot) GetForumTopicIconStickers(opts *GetForumTopicIconStickersOpts) ([]Sticker, error) {
+	v := map[string]string{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getForumTopicIconStickers", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s []Sticker
+	return s, json.Unmarshal(r, &s)
 }
 
 // GetGameHighScoresOpts is the set of optional fields for Bot.GetGameHighScores.
@@ -2043,6 +2210,8 @@ type PromoteChatMemberOpts struct {
 	CanInviteUsers bool
 	// Pass True if the administrator can pin messages, supergroups only
 	CanPinMessages bool
+	// Pass True if the user is allowed to create, rename, close, and reopen forum topics, supergroups only
+	CanManageTopics bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -2068,6 +2237,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		v["can_change_info"] = strconv.FormatBool(opts.CanChangeInfo)
 		v["can_invite_users"] = strconv.FormatBool(opts.CanInviteUsers)
 		v["can_pin_messages"] = strconv.FormatBool(opts.CanPinMessages)
+		v["can_manage_topics"] = strconv.FormatBool(opts.CanManageTopics)
 	}
 
 	var reqOpts *RequestOpts
@@ -2076,6 +2246,35 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 	}
 
 	r, err := bot.Request("promoteChatMember", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// ReopenForumTopicOpts is the set of optional fields for Bot.ReopenForumTopic.
+type ReopenForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ReopenForumTopic Use this method to reopen a closed topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// https://core.telegram.org/bots/api#reopenforumtopic
+func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *ReopenForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("reopenForumTopic", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2158,6 +2357,8 @@ func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *Revo
 
 // SendAnimationOpts is the set of optional fields for Bot.SendAnimation.
 type SendAnimationOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Duration of sent animation in seconds
 	Duration int64
 	// Animation width
@@ -2217,6 +2418,9 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -2287,6 +2491,8 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 
 // SendAudioOpts is the set of optional fields for Bot.SendAudio.
 type SendAudioOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Audio caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the audio caption. See formatting options for more details.
@@ -2347,6 +2553,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -2443,6 +2652,8 @@ func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatAction
 
 // SendContactOpts is the set of optional fields for Bot.SendContact.
 type SendContactOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Contact's last name
 	LastName string
 	// Additional data about the contact in the form of a vCard, 0-2048 bytes
@@ -2455,7 +2666,7 @@ type SendContactOpts struct {
 	ReplyToMessageId int64
 	// Pass True if the message should be sent even if the specified replied-to message is not found
 	AllowSendingWithoutReply bool
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove keyboard or to force a reply from the user.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2473,6 +2684,9 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["last_name"] = opts.LastName
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -2506,6 +2720,8 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 
 // SendDiceOpts is the set of optional fields for Bot.SendDice.
 type SendDiceOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -2530,6 +2746,9 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -2562,6 +2781,8 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 
 // SendDocumentOpts is the set of optional fields for Bot.SendDocument.
 type SendDocumentOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumb InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
@@ -2617,6 +2838,9 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.Thumb != nil {
 			switch m := opts.Thumb.(type) {
 			case string:
@@ -2679,6 +2903,8 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 
 // SendGameOpts is the set of optional fields for Bot.SendGame.
 type SendGameOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -2703,6 +2929,9 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["game_short_name"] = gameShortName
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -2732,6 +2961,8 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 
 // SendInvoiceOpts is the set of optional fields for Bot.SendInvoice.
 type SendInvoiceOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
@@ -2802,6 +3033,9 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v["prices"] = string(bs)
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
@@ -2860,6 +3094,8 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 
 // SendLocationOpts is the set of optional fields for Bot.SendLocation.
 type SendLocationOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
 	// Period in seconds for which the location will be updated (see Live Locations, should be between 60 and 86400.
@@ -2894,6 +3130,9 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.HorizontalAccuracy != 0.0 {
 			v["horizontal_accuracy"] = strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64)
 		}
@@ -2937,6 +3176,8 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 
 // SendMediaGroupOpts is the set of optional fields for Bot.SendMediaGroup.
 type SendMediaGroupOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Sends messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
@@ -2974,6 +3215,9 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 		v["media"] = string(bs)
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -2998,6 +3242,8 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 
 // SendMessageOpts is the set of optional fields for Bot.SendMessage.
 type SendMessageOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
@@ -3028,6 +3274,9 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["text"] = text
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
 			bs, err := json.Marshal(opts.Entities)
@@ -3068,6 +3317,8 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 
 // SendPhotoOpts is the set of optional fields for Bot.SendPhoto.
 type SendPhotoOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the photo caption. See formatting options for more details.
@@ -3119,6 +3370,9 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -3159,6 +3413,8 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 
 // SendPollOpts is the set of optional fields for Bot.SendPoll.
 type SendPollOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// True, if the poll needs to be anonymous, defaults to True
 	IsAnonymous bool
 	// Poll type, "quiz" or "regular", defaults to "regular"
@@ -3211,6 +3467,9 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		v["options"] = string(bs)
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["is_anonymous"] = strconv.FormatBool(opts.IsAnonymous)
 		v["type"] = opts.Type
 		v["allows_multiple_answers"] = strconv.FormatBool(opts.AllowsMultipleAnswers)
@@ -3265,6 +3524,8 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 
 // SendStickerOpts is the set of optional fields for Bot.SendSticker.
 type SendStickerOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -3310,6 +3571,9 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -3341,6 +3605,8 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 
 // SendVenueOpts is the set of optional fields for Bot.SendVenue.
 type SendVenueOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Foursquare identifier of the venue
 	FoursquareId string
 	// Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
@@ -3379,6 +3645,9 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 	v["title"] = title
 	v["address"] = address
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["foursquare_id"] = opts.FoursquareId
 		v["foursquare_type"] = opts.FoursquareType
 		v["google_place_id"] = opts.GooglePlaceId
@@ -3414,6 +3683,8 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 
 // SendVideoOpts is the set of optional fields for Bot.SendVideo.
 type SendVideoOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width
@@ -3475,6 +3746,9 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -3546,6 +3820,8 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 
 // SendVideoNoteOpts is the set of optional fields for Bot.SendVideoNote.
 type SendVideoNoteOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width and height, i.e. diameter of the video message
@@ -3597,6 +3873,9 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -3655,6 +3934,8 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 
 // SendVoiceOpts is the set of optional fields for Bot.SendVoice.
 type SendVoiceOpts struct {
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
 	// Voice message caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the voice message caption. See formatting options for more details.
@@ -3708,6 +3989,9 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		}
 	}
 	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -3970,7 +4254,7 @@ type SetChatTitleOpts struct {
 
 // SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - title (type string): New chat title, 1-255 characters
+// - title (type string): New chat title, 1-128 characters
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4060,7 +4344,7 @@ type SetMyCommandsOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// SetMyCommands Use this method to change the list of the bot's commands. See https://core.telegram.org/bots#commands for more details about bot commands. Returns True on success.
+// SetMyCommands Use this method to change the list of the bot's commands. See this manual for more details about bot commands. Returns True on success.
 // - commands (type []BotCommand): A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
 // - opts (type SetMyCommandsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setmycommands
@@ -4508,6 +4792,35 @@ func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpt
 	}
 
 	r, err := bot.Request("unpinAllChatMessages", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// UnpinAllForumTopicMessagesOpts is the set of optional fields for Bot.UnpinAllForumTopicMessages.
+type UnpinAllForumTopicMessagesOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// UnpinAllForumTopicMessages Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// https://core.telegram.org/bots/api#unpinallforumtopicmessages
+func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("unpinAllForumTopicMessages", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
