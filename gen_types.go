@@ -384,8 +384,14 @@ type Chat struct {
 	FirstName string `json:"first_name,omitempty"`
 	// Optional. Last name of the other party in a private chat
 	LastName string `json:"last_name,omitempty"`
+	// Optional. True, if the supergroup chat is a forum (has topics enabled)
+	IsForum bool `json:"is_forum,omitempty"`
 	// Optional. Chat photo. Returned only in getChat.
 	Photo *ChatPhoto `json:"photo,omitempty"`
+	// Optional. If non-empty, the list of all active chat usernames; for private chats, supergroups and channels. Returned only in getChat.
+	ActiveUsernames []string `json:"active_usernames,omitempty"`
+	// Optional. Custom emoji identifier of emoji status of the other party in a private chat. Returned only in getChat.
+	EmojiStatusCustomEmojiId string `json:"emoji_status_custom_emoji_id,omitempty"`
 	// Optional. Bio of the other party in a private chat. Returned only in getChat.
 	Bio string `json:"bio,omitempty"`
 	// Optional. True, if privacy settings of the other party in the private chat allows to use tg://user?id=<user_id> links only in chats with the user. Returned only in getChat.
@@ -445,6 +451,8 @@ type ChatAdministratorRights struct {
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
+	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 }
 
 // ChatInviteLink Represents an invite link for a chat.
@@ -542,6 +550,8 @@ type MergedChatMember struct {
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only (Only for administrator, restricted)
+	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
 	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues (Only for restricted)
@@ -694,6 +704,8 @@ type ChatMemberAdministrator struct {
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
+	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
 }
@@ -725,6 +737,7 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		CanPostMessages:     v.CanPostMessages,
 		CanEditMessages:     v.CanEditMessages,
 		CanPinMessages:      v.CanPinMessages,
+		CanManageTopics:     v.CanManageTopics,
 		CustomTitle:         v.CustomTitle,
 	}
 }
@@ -931,6 +944,8 @@ type ChatMemberRestricted struct {
 	CanInviteUsers bool `json:"can_invite_users"`
 	// True, if the user is allowed to pin messages
 	CanPinMessages bool `json:"can_pin_messages"`
+	// True, if the user is allowed to create forum topics
+	CanManageTopics bool `json:"can_manage_topics"`
 	// True, if the user is allowed to send text messages, contacts, locations and venues
 	CanSendMessages bool `json:"can_send_messages"`
 	// True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
@@ -964,6 +979,7 @@ func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 		CanChangeInfo:         v.CanChangeInfo,
 		CanInviteUsers:        v.CanInviteUsers,
 		CanPinMessages:        v.CanPinMessages,
+		CanManageTopics:       v.CanManageTopics,
 		CanSendMessages:       v.CanSendMessages,
 		CanSendMediaMessages:  v.CanSendMediaMessages,
 		CanSendPolls:          v.CanSendPolls,
@@ -1058,6 +1074,8 @@ type ChatPermissions struct {
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
 	// Optional. True, if the user is allowed to pin messages. Ignored in public supergroups
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is allowed to create forum topics. If omitted defaults to the value of can_pin_messages
+	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 }
 
 // ChatPhoto This object represents a chat photo.
@@ -1192,6 +1210,38 @@ type ForceReply struct {
 
 // ForceReply.replyMarkup is a dummy method to avoid interface implementation.
 func (v ForceReply) replyMarkup() {}
+
+// ForumTopic This object represents a forum topic.
+// https://core.telegram.org/bots/api#forumtopic
+type ForumTopic struct {
+	// Unique identifier of the forum topic
+	MessageThreadId int64 `json:"message_thread_id"`
+	// Name of the topic
+	Name string `json:"name"`
+	// Color of the topic icon in RGB format
+	IconColor int64 `json:"icon_color"`
+	// Optional. Unique identifier of the custom emoji shown as the topic icon
+	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
+}
+
+// ForumTopicClosed This object represents a service message about a forum topic closed in the chat. Currently holds no information.
+// https://core.telegram.org/bots/api#forumtopicclosed
+type ForumTopicClosed struct{}
+
+// ForumTopicCreated This object represents a service message about a new forum topic created in the chat.
+// https://core.telegram.org/bots/api#forumtopiccreated
+type ForumTopicCreated struct {
+	// Name of the topic
+	Name string `json:"name"`
+	// Color of the topic icon in RGB format
+	IconColor int64 `json:"icon_color"`
+	// Optional. Unique identifier of the custom emoji shown as the topic icon
+	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
+}
+
+// ForumTopicReopened This object represents a service message about a forum topic reopened in the chat. Currently holds no information.
+// https://core.telegram.org/bots/api#forumtopicreopened
+type ForumTopicReopened struct{}
 
 // Game This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
 // https://core.telegram.org/bots/api#game
@@ -3717,6 +3767,8 @@ func (v MenuButtonWebApp) menuButton() {}
 type Message struct {
 	// Unique message identifier inside this chat
 	MessageId int64 `json:"message_id"`
+	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
+	MessageThreadId int64 `json:"message_thread_id,omitempty"`
 	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
@@ -3737,6 +3789,8 @@ type Message struct {
 	ForwardSenderName string `json:"forward_sender_name,omitempty"`
 	// Optional. For forwarded messages, date the original message was sent in Unix time
 	ForwardDate int64 `json:"forward_date,omitempty"`
+	// Optional. True, if the message is sent to a forum topic
+	IsTopicMessage bool `json:"is_topic_message,omitempty"`
 	// Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
 	IsAutomaticForward bool `json:"is_automatic_forward,omitempty"`
 	// Optional. For replies, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
@@ -3821,6 +3875,12 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	// Optional. Service message: forum topic created
+	ForumTopicCreated *ForumTopicCreated `json:"forum_topic_created,omitempty"`
+	// Optional. Service message: forum topic closed
+	ForumTopicClosed *ForumTopicClosed `json:"forum_topic_closed,omitempty"`
+	// Optional. Service message: forum topic reopened
+	ForumTopicReopened *ForumTopicReopened `json:"forum_topic_reopened,omitempty"`
 	// Optional. Service message: video chat scheduled
 	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
 	// Optional. Service message: video chat started
