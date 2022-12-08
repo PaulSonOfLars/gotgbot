@@ -11,7 +11,6 @@ import (
 
 // TODO: Add a "block" option to force linear processing. Also a "waiting" state to handle blocked handlers.
 // TODO: Allow for timeouts (and a "timeout" state to handle that)
-// TODO: Allow for storing conversation data locally
 
 // The Conversation handler is an advanced handler which allows for running a sequence of commands in a stateful manner.
 // An example of this flow can be found at t.me/Botfather; upon receiving the "/newbot" command, the user is asked for
@@ -77,7 +76,7 @@ func (c Conversation) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	next, err := c.getNextHandler(b, ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get next handler in conversation: %w", err)
 	}
 	if next == nil {
 		// Note: this should be impossible
@@ -87,6 +86,7 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	var stateChange *ConversationStateChange
 	err = next.HandleUpdate(b, ctx)
 	if !errors.As(err, &stateChange) {
+		// We don't wrap this error, as users might want to handle it explicitly
 		return err
 	}
 
