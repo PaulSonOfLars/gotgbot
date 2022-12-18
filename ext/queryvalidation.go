@@ -87,7 +87,7 @@ func generateHMAC256(data string, secretKey []byte) ([]byte, error) {
 	hmac256Writer := hmac.New(sha256.New, secretKey)
 	_, err := hmac256Writer.Write([]byte(data))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to write HMAC256: %w", err)
 	}
 
 	return hmac256Writer.Sum(nil), nil
@@ -97,7 +97,7 @@ func getSHA256(data string) ([]byte, error) {
 	sha256Writer := sha256.New()
 	_, err := sha256Writer.Write([]byte(data))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to write SHA256: %w", err)
 	}
 
 	return sha256Writer.Sum(nil), nil

@@ -1,6 +1,7 @@
 package message
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -51,10 +52,15 @@ func ForwardFromChatID(id int64) filters.Message {
 func Regex(p string) (filters.Message, error) {
 	r, err := regexp.Compile(p)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to compile regex: %w", err)
 	}
 	return func(m *gotgbot.Message) bool {
-		return r.MatchString(m.Text)
+		if m.Text != "" {
+			return r.MatchString(m.Text)
+		} else if m.Caption != "" {
+			return r.MatchString(m.Caption)
+		}
+		return false
 	}, nil
 }
 
@@ -94,13 +100,26 @@ func Text(msg *gotgbot.Message) bool {
 
 func HasPrefix(prefix string) filters.Message {
 	return func(msg *gotgbot.Message) bool {
-		return strings.HasPrefix(msg.Text, prefix)
+		return strings.HasPrefix(msg.Text, prefix) || strings.HasSuffix(msg.Caption, prefix)
+
 	}
 }
 
 func HasSuffix(suffix string) filters.Message {
 	return func(msg *gotgbot.Message) bool {
-		return strings.HasSuffix(msg.Text, suffix)
+		return strings.HasSuffix(msg.Text, suffix) || strings.HasSuffix(msg.Caption, suffix)
+	}
+}
+
+func Contains(contains string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return strings.Contains(msg.Text, contains) || strings.Contains(msg.Caption, contains)
+	}
+}
+
+func Equal(eq string) filters.Message {
+	return func(msg *gotgbot.Message) bool {
+		return msg.Text == eq || msg.Caption == eq
 	}
 }
 
@@ -109,7 +128,12 @@ func Caption(msg *gotgbot.Message) bool {
 }
 
 func Command(msg *gotgbot.Message) bool {
-	return len(msg.Entities) > 0 && msg.Entities[0].Type == "bot_command" && msg.Entities[0].Offset == 0
+	if msg.Text != "" {
+		return len(msg.Entities) > 0 && msg.Entities[0].Type == "bot_command" && msg.Entities[0].Offset == 0
+	} else if msg.Caption != "" {
+		return len(msg.CaptionEntities) > 0 && msg.CaptionEntities[0].Type == "bot_command" && msg.CaptionEntities[0].Offset == 0
+	}
+	return false
 }
 
 func Animation(msg *gotgbot.Message) bool {

@@ -3,6 +3,7 @@ package gotgbot
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -74,7 +75,7 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		// 2. Populate the bot struct "User" field.
 		botUser, err := b.GetMe(&GetMeOpts{RequestOpts: getMeReqOpts})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to check bot token: %w", err)
 		}
 		b.User = *botUser
 	}

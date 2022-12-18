@@ -24,25 +24,22 @@ func NewMessage(f filters.Message, r Response) Message {
 	}
 }
 
-func (m Message) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
-	// Normal incoming message in a group/private chat.
-	if u.Message != nil {
-		return m.Filter == nil || m.Filter(u.Message)
+func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.Message != nil {
+		return m.Filter == nil || m.Filter(ctx.Message)
 	}
 
 	// If edits are allowed, and message is edited.
-	if m.AllowEdited && u.EditedMessage != nil {
-		return m.Filter == nil || m.Filter(u.EditedMessage)
+	if m.AllowEdited && ctx.EditedMessage != nil {
+		return m.Filter == nil || m.Filter(ctx.EditedMessage)
 	}
-
-	// If channels are allowed, and message is a channel post.
-	if m.AllowChannel && u.ChannelPost != nil {
-		return m.Filter == nil || m.Filter(u.ChannelPost)
+	// If channel posts are allowed, and message is channel post.
+	if m.AllowChannel && ctx.ChannelPost != nil {
+		return m.Filter == nil || m.Filter(ctx.ChannelPost)
 	}
-
-	// If edits AND channels are allowed, and message is a channel post.
-	if m.AllowChannel && m.AllowEdited && u.EditedChannelPost != nil {
-		return m.Filter == nil || m.Filter(u.EditedChannelPost)
+	// If channel posts and edits are allowed, and post is edited.
+	if m.AllowChannel && m.AllowEdited && ctx.EditedChannelPost != nil {
+		return m.Filter == nil || m.Filter(ctx.EditedChannelPost)
 	}
 
 	return false

@@ -26,34 +26,34 @@ func NewCommand(c string, r Response) Command {
 	}
 }
 
-func (c Command) CheckUpdate(b *gotgbot.Bot, u *gotgbot.Update) bool {
-	if u.Message != nil {
-		if u.Message.Text == "" && u.Message.Caption == "" {
+func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.Message != nil {
+		if ctx.Message.Text == "" && ctx.Message.Caption == "" {
 			return false
 		}
-		return c.checkMessage(b, u.Message)
+		return c.checkMessage(b, ctx.Message)
 	}
 
 	// if no edits and message is edited
-	if c.AllowEdited && u.EditedMessage != nil {
-		if u.EditedMessage.Text == "" && u.EditedMessage.Caption == "" {
+	if c.AllowEdited && ctx.EditedMessage != nil {
+		if ctx.EditedMessage.Text == "" && ctx.EditedMessage.Caption == "" {
 			return false
 		}
-		return c.checkMessage(b, u.EditedMessage)
+		return c.checkMessage(b, ctx.EditedMessage)
 	}
 	// if no channel and message is channel message
-	if c.AllowChannel && u.ChannelPost != nil {
-		if u.ChannelPost.Text == "" && u.ChannelPost.Caption == "" {
+	if c.AllowChannel && ctx.ChannelPost != nil {
+		if ctx.ChannelPost.Text == "" && ctx.ChannelPost.Caption == "" {
 			return false
 		}
-		return c.checkMessage(b, u.ChannelPost)
+		return c.checkMessage(b, ctx.ChannelPost)
 	}
 	// if no channel, no edits, and post is edited
-	if c.AllowChannel && c.AllowEdited && u.EditedChannelPost != nil {
-		if u.EditedChannelPost.Text == "" && u.EditedChannelPost.Caption == "" {
+	if c.AllowChannel && c.AllowEdited && ctx.EditedChannelPost != nil {
+		if ctx.EditedChannelPost.Text == "" && ctx.EditedChannelPost.Caption == "" {
 			return false
 		}
-		return c.checkMessage(b, u.EditedChannelPost)
+		return c.checkMessage(b, ctx.EditedChannelPost)
 	}
 
 	return false
