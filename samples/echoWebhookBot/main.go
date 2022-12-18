@@ -53,14 +53,14 @@ func main() {
 	// Create updater and dispatcher.
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
 		ErrorLog: nil,
-		DispatcherOpts: ext.DispatcherOpts{
+		Dispatcher: ext.NewDispatcher(&ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
 				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 			MaxRoutines: ext.DefaultMaxRoutines,
-		},
+		}),
 	})
 	dispatcher := updater.Dispatcher
 
@@ -72,22 +72,18 @@ func main() {
 	webhookOpts := ext.WebhookOpts{
 		Listen:      "0.0.0.0", // This example assumes you're in a dev environment running ngrok on 8080.
 		Port:        8080,
-		URLPath:     token,         // Using a secret (like the token) as the endpoint ensure that strangers aren't crafting fake updates.
-		SecretToken: webhookSecret, // Setting a webhook secret (must be here AND in SetWebhook!) ensures that the webhook is set by you.
+		SecretToken: webhookSecret, // Setting a webhook secret here allows you to ensure the webhook is set by you (must be set here AND in SetWebhook!).
 	}
-	err = updater.StartWebhook(b, webhookOpts)
+	// We use the token as the urlPath for the webhook, as using a secret ensures that strangers aren't crafting fake updates.
+	err = updater.StartWebhook(b, token, webhookOpts)
 	if err != nil {
 		panic("failed to start webhook: " + err.Error())
 	}
 
-	// Get the full webhook URL that we are expecting to receive updates at.
-	webhookURL := webhookOpts.GetWebhookURL(webhookDomain)
-
-	// Tell telegram where they should send updates for you to receive them in a secure manner.
-	_, err = b.SetWebhook(webhookURL, &gotgbot.SetWebhookOpts{
+	err = updater.SetWebhooks(webhookDomain, &gotgbot.SetWebhookOpts{
 		MaxConnections:     100,
 		DropPendingUpdates: true,
-		SecretToken:        webhookSecret, // The secret token passed at webhook start time.
+		SecretToken:        webhookOpts.SecretToken,
 	})
 	if err != nil {
 		panic("failed to set webhook: " + err.Error())
