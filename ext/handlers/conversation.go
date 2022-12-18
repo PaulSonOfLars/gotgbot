@@ -176,7 +176,7 @@ func (c Conversation) getNextHandler(b *gotgbot.Bot, ctx *ext.Context) (ext.Hand
 			return checkHandlerList(c.EntryPoints, b, ctx), nil
 		}
 		// Else, we need to handle the error.
-		return nil, err
+		return nil, fmt.Errorf("failed to get state from conversation storage: %w", err)
 	}
 
 	// If reentry is allowed, check the entrypoints again.

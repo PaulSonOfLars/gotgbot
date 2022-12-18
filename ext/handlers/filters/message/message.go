@@ -1,6 +1,7 @@
 package message
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -51,7 +52,7 @@ func ForwardFromChatID(id int64) filters.Message {
 func Regex(p string) (filters.Message, error) {
 	r, err := regexp.Compile(p)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to compile regex: %w", err)
 	}
 	return func(m *gotgbot.Message) bool {
 		if m.Text != "" {
