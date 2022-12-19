@@ -12,6 +12,9 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
+var ErrPanicRecovered = errors.New("panic recovered")
+var ErrUnknownDispatcherAction = errors.New("unknown dispatcher action")
+
 const DefaultMaxRoutines = 50
 
 type (
@@ -219,7 +222,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 				return
 
 			} else if d.UnhandledErrFunc != nil {
-				d.UnhandledErrFunc(fmt.Errorf("panic recovered while processing updates: %v\n%s", r, cleanedStack()))
+				d.UnhandledErrFunc(fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack()))
 				return
 
 			} else {
@@ -262,7 +265,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 						// Stop all group handling.
 						return nil
 					default:
-						return fmt.Errorf("unknown action '%s', ending groups here", action)
+						return fmt.Errorf("%w: '%s', ending groups here", err, action)
 					}
 				}
 			}
