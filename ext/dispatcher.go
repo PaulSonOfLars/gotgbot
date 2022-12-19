@@ -3,9 +3,10 @@ package ext
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 	"runtime/debug"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -21,18 +22,18 @@ type (
 	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, r interface{})
 )
 
-type DispatcherAction int64
+type DispatcherAction string
 
 const (
 	// DispatcherActionNoop stops iteration of current group and moves to the next one.
 	// This is the default action, and the same as would happen if the handler had completed successfully.
-	DispatcherActionNoop DispatcherAction = iota
+	DispatcherActionNoop DispatcherAction = "noop"
 	// DispatcherActionContinueGroups continues iterating over current group as if the current handler did not match.
 	// Functionally the same as returning ContinueGroups.
-	DispatcherActionContinueGroups
+	DispatcherActionContinueGroups DispatcherAction = "continue-groups"
 	// DispatcherActionEndGroups ends all group iteration.
 	// Functionally the same as returning EndGroups.
-	DispatcherActionEndGroups
+	DispatcherActionEndGroups DispatcherAction = "end-groups"
 )
 
 var (
@@ -41,14 +42,20 @@ var (
 )
 
 type Dispatcher struct {
-	// Error handles any errors that occur during handler execution. The return type determines how to handle the
-	// current group iteration. Default is DispatcherActionNoop; move to next group.
+	// Error handles any errors that are returned by matched handlers.
+	// The return type determines how to proceed with the current group iteration.
+	// The default action is DispatcherActionNoop, which will simply move to next group as expected.
 	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
-	// If this field is nil, the stack is logged to ErrorLog.
+	// Panics from handlers are automatically recovered to ensure bot stability. Once recovered, this method is called
+	// and is left to determine how to log or handle the errors.
+	// If this field is nil, the error will be passed to UnhandledErrFunc.
 	Panic DispatcherPanicHandler
-	// ErrorLog is the output to log to when handling a library error, or recovering from a panic from user code.
-	ErrorLog *log.Logger
+	// UnhandledErrFunc is the most basic of error handling methods, and does not have access to any bot objets.
+	// It defines how to handle previously unhandled dispatcher errors. By design, these errors are mostly considered
+	// benign, and don't necessarily need to be handled. If unhandled, the errors are simply logged to os.Stderr.
+	// The most common use of this method is to overwrite the default logger.
+	UnhandledErrFunc ErrorFunc
 
 	// handlerGroups represents the list of available handler groups, numerically sorted.
 	handlerGroups []int
@@ -66,12 +73,16 @@ type Dispatcher struct {
 
 type DispatcherOpts struct {
 	// Error handles any errors that occur during handler execution.
+	// More info at Dispatcher.Error.
 	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
 	// If no panic handlers are defined, the stack is logged to ErrorLog.
+	// More info at Dispatcher.Panic.
 	Panic DispatcherPanicHandler
-	// ErrorLog is the output to log to when handling a library error, or recovering from a panic from user code.
-	ErrorLog *log.Logger
+	// UnhandledErrFunc defines the default handling of any unhandled errors from the dispatcher.
+	// Most commonly used for logging.
+	// More info at Dispatcher.UnhandledErrFunc.
+	UnhandledErrFunc ErrorFunc
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
 	// This defines how many updates can be processed at the same time.
@@ -83,23 +94,23 @@ type DispatcherOpts struct {
 
 // NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
 func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
-	var errFunc DispatcherErrorHandler
-	var panicFunc DispatcherPanicHandler
+	var errHandler DispatcherErrorHandler
+	var panicHandler DispatcherPanicHandler
+	var unhandledErrFunc ErrorFunc
 
 	maxRoutines := DefaultMaxRoutines
-	errLog := errorLog
 
 	if opts != nil {
 		if opts.MaxRoutines != 0 {
 			maxRoutines = opts.MaxRoutines
 		}
 
-		if opts.ErrorLog != nil {
-			errLog = opts.ErrorLog
+		if opts.UnhandledErrFunc != nil {
+			unhandledErrFunc = opts.UnhandledErrFunc
 		}
 
-		errFunc = opts.Error
-		panicFunc = opts.Panic
+		errHandler = opts.Error
+		panicHandler = opts.Panic
 	}
 
 	var limiter chan struct{}
@@ -113,13 +124,13 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 	}
 
 	return &Dispatcher{
-		Error:       errFunc,
-		Panic:       panicFunc,
-		ErrorLog:    errLog,
-		updatesChan: updates,
-		handlers:    make(map[int][]Handler),
-		limiter:     limiter,
-		waitGroup:   sync.WaitGroup{},
+		Error:            errHandler,
+		Panic:            panicHandler,
+		UnhandledErrFunc: unhandledErrFunc,
+		updatesChan:      updates,
+		handlers:         make(map[int][]Handler),
+		limiter:          limiter,
+		waitGroup:        sync.WaitGroup{},
 	}
 }
 
@@ -135,44 +146,41 @@ func (d *Dispatcher) MaxUsage() int {
 
 // Start to handle incoming updates.
 func (d *Dispatcher) Start(b *gotgbot.Bot) {
-	if d.limiter == nil {
-		d.limitlessDispatcher(b)
-		return
-	}
+	// Listen to updates as they come in from the updater.
+	for upd := range d.updatesChan {
+		d.waitGroup.Add(1)
 
-	d.limitedDispatcher(b)
+		// If a limiter has been set, we use it to control the number of concurrent updates being processed.
+		if d.limiter != nil {
+			// Send data to limiter.
+			// If limiter buffer is full, this will block, until another update finishes processing.
+			d.limiter <- struct{}{}
+		}
+
+		go func(upd json.RawMessage) {
+			err := d.ProcessRawUpdate(b, upd)
+			if err != nil {
+				// We don't return here; we still want to free the limiter and the waitgroup!
+				if d.UnhandledErrFunc != nil {
+					d.UnhandledErrFunc(err)
+				} else {
+					errorLog.Println("Failed to process update: " + err.Error())
+				}
+			}
+
+			if d.limiter != nil {
+				// Pop an item from the limiter, allowing another update to process.
+				<-d.limiter
+			}
+			d.waitGroup.Done()
+		}(upd)
+	}
 }
 
 // Stop waits for all currently processing updates to finish, and then returns.
 func (d *Dispatcher) Stop() {
 	d.waitGroup.Wait()
-}
-
-func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot) {
-	for upd := range d.updatesChan {
-		d.waitGroup.Add(1)
-
-		// Send empty data to limiter.
-		// if limiter buffer is full, it blocks until another update finishes processing.
-		d.limiter <- struct{}{}
-		go func(upd json.RawMessage) {
-			d.ProcessRawUpdate(b, upd)
-
-			<-d.limiter
-			d.waitGroup.Done()
-		}(upd)
-	}
-}
-
-func (d *Dispatcher) limitlessDispatcher(b *gotgbot.Bot) {
-	for upd := range d.updatesChan {
-		d.waitGroup.Add(1)
-
-		go func(upd json.RawMessage) {
-			d.ProcessRawUpdate(b, upd)
-			d.waitGroup.Done()
-		}(upd)
-	}
+	close(d.limiter)
 }
 
 // AddHandler adds a new handler to the dispatcher. The dispatcher will call CheckUpdate() to see whether the handler
@@ -191,18 +199,17 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
-func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) {
+func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
-		d.ErrorLog.Println("failed to process raw update: " + err.Error())
-		return
+		return fmt.Errorf("failed to unmarshal update: %w", err)
 	}
 
-	d.ProcessUpdate(b, &upd, nil)
+	return d.ProcessUpdate(b, &upd, nil)
 }
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) {
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) error {
 	ctx := NewContext(update, data)
 
 	defer func() {
@@ -210,10 +217,16 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 			if d.Panic != nil {
 				d.Panic(b, ctx, r)
 				return
+
+			} else if d.UnhandledErrFunc != nil {
+				d.UnhandledErrFunc(fmt.Errorf("panic recovered while processing updates: %v\n%s", r, cleanedStack()))
+				return
+
+			} else {
+				// Print the reason for panic + stack for some sort of helpful log output.
+				errorLog.Println(r)
+				errorLog.Println(cleanedStack())
 			}
-			// Print reason for panic + stack for some sort of helpful log output
-			d.ErrorLog.Println(r)
-			d.ErrorLog.Println(string(debug.Stack()))
 		}
 	}()
 
@@ -228,9 +241,11 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 				if errors.Is(err, ContinueGroups) {
 					// Continue handling current group.
 					continue
+
 				} else if errors.Is(err, EndGroups) {
 					// Stop all group handling.
-					return
+					return nil
+
 				} else {
 					action := DispatcherActionNoop
 					if d.Error != nil {
@@ -245,10 +260,9 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 						continue
 					case DispatcherActionEndGroups:
 						// Stop all group handling.
-						return
+						return nil
 					default:
-						d.ErrorLog.Printf("unknown action %d, ending groups here", action)
-						return
+						return fmt.Errorf("unknown action '%s', ending groups here", action)
 					}
 				}
 			}
@@ -256,4 +270,12 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 			break // move to next group
 		}
 	}
+	return nil
+}
+
+// cleanedStack obtains a "cleaned" version of the stack trace which doesn't point the last few lines to the library.
+// This is because historically, people see the library in the stack trace, and immediately blame it, when in fact it is
+// recovering their errors.
+func cleanedStack() string {
+	return strings.Join(strings.Split(string(debug.Stack()), "\n")[4:], "\n")
 }

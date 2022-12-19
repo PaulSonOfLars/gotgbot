@@ -17,10 +17,19 @@ import (
 
 var ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
 
+type ErrorFunc func(error)
+
 type Updater struct {
+	// Dispatcher is where all the incoming updates are sent to be processed.
 	Dispatcher *Dispatcher
+	// UpdateChan is the link between the Updater and the Dispatcher; sending updates here will get them processed by
+	// the Dispatcher.
 	UpdateChan chan json.RawMessage
-	ErrorLog   *log.Logger
+	// UnhandledErrFunc defines how to handle previously unhandled errors, such as failures to get updates (polling),
+	// or failures to unmarshal.
+	// In most cases, the expected usage is to log the error to the preferred error handler.
+	// If undefined, unhandled errors will be logged to stderr.
+	UnhandledErrFunc ErrorFunc
 
 	stopIdling chan bool
 	running    chan bool
@@ -30,19 +39,19 @@ type Updater struct {
 var errorLog = log.New(os.Stderr, "ERROR", log.LstdFlags)
 
 type UpdaterOpts struct {
-	ErrorLog *log.Logger
+	ErrorFunc ErrorFunc
 
 	DispatcherOpts DispatcherOpts
 }
 
 // NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
 func NewUpdater(opts *UpdaterOpts) Updater {
-	errLog := errorLog
+	var errFunc ErrorFunc
 	var dispatcherOpts DispatcherOpts
 
 	if opts != nil {
-		if opts.ErrorLog != nil {
-			errLog = opts.ErrorLog
+		if opts.ErrorFunc != nil {
+			errFunc = opts.ErrorFunc
 		}
 
 		dispatcherOpts = opts.DispatcherOpts
@@ -50,9 +59,9 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 
 	updateChan := make(chan json.RawMessage)
 	return Updater{
-		ErrorLog:   errLog,
-		Dispatcher: NewDispatcher(updateChan, &dispatcherOpts),
-		UpdateChan: updateChan,
+		UnhandledErrFunc: errFunc,
+		Dispatcher:       NewDispatcher(updateChan, &dispatcherOpts),
+		UpdateChan:       updateChan,
 	}
 }
 
@@ -135,8 +144,12 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 
 		r, err := b.Request("getUpdates", v, nil, opts)
 		if err != nil {
-			u.ErrorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
-			time.Sleep(time.Second)
+			if u.UnhandledErrFunc != nil {
+				u.UnhandledErrFunc(err)
+			} else {
+				errorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
+				time.Sleep(time.Second)
+			}
 			continue
 
 		} else if r == nil {
@@ -146,7 +159,11 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 
 		var rawUpdates []json.RawMessage
 		if err := json.Unmarshal(r, &rawUpdates); err != nil {
-			u.ErrorLog.Println("failed to unmarshal updates: " + err.Error())
+			if u.UnhandledErrFunc != nil {
+				u.UnhandledErrFunc(err)
+			} else {
+				errorLog.Println("failed to unmarshal updates: " + err.Error())
+			}
 			continue
 		}
 
@@ -160,7 +177,11 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 		}
 
 		if err := json.Unmarshal(rawUpdates[len(rawUpdates)-1], &lastUpdate); err != nil {
-			u.ErrorLog.Println("failed to unmarshal last update: " + err.Error())
+			if u.UnhandledErrFunc != nil {
+				u.UnhandledErrFunc(err)
+			} else {
+				errorLog.Println("failed to unmarshal last update: " + err.Error())
+			}
 			continue
 		}
 
