@@ -1193,7 +1193,7 @@ type EditForumTopicOpts struct {
 	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
 	Name string
 	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
-	IconCustomEmojiId string
+	IconCustomEmojiId *string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -1209,7 +1209,10 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
 	if opts != nil {
 		v["name"] = opts.Name
-		v["icon_custom_emoji_id"] = opts.IconCustomEmojiId
+		// icon_custom_emoji_id has different behaviour if it's empty, or if it's unspecified; so we need to handle that.
+		if opts.IconCustomEmojiId != nil {
+			v["icon_custom_emoji_id"] = *opts.IconCustomEmojiId
+		}
 	}
 
 	var reqOpts *RequestOpts
