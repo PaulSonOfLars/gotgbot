@@ -182,17 +182,11 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 
 // Idle starts an infinite loop to avoid the program exciting while the background threads handle updates.
 func (u *Updater) Idle() {
+	// Create the idling channel
 	u.stopIdling = make(chan bool)
 
-	for {
-		select {
-		case <-u.stopIdling:
-			return
-		default:
-			// continue as usual
-		}
-		time.Sleep(1 * time.Second)
-	}
+	// Wait until some input is received from the idle channel, which will stop the idling.
+	<-u.stopIdling
 }
 
 // Stop stops the current updater and dispatcher instances.
