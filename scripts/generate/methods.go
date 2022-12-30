@@ -171,7 +171,6 @@ return %s, true, nil
 
 func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
-	hasOptionals := false
 
 	for idx, d := range m.Description {
 		text := d
@@ -184,7 +183,6 @@ func (m MethodDescription) description() (string, error) {
 
 	for _, f := range m.Fields {
 		if !f.Required {
-			hasOptionals = true
 			continue
 		}
 
@@ -196,9 +194,8 @@ func (m MethodDescription) description() (string, error) {
 		description.WriteString("\n// - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
 	}
 
-	if hasOptionals {
-		description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
-	}
+	// All methods have the optional `RequestOpts`
+	description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
 
 	description.WriteString("\n// " + m.Href)
 

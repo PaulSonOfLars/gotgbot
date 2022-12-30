@@ -304,6 +304,7 @@ type AnswerWebAppQueryOpts struct {
 // AnswerWebAppQuery Use this method to set the result of an interaction with a Web App and send a corresponding message on behalf of the user to the chat from which the query originated. On success, a SentWebAppMessage object is returned.
 // - webAppQueryId (type string): Unique identifier for the query to be answered
 // - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
+// - opts (type AnswerWebAppQueryOpts): All optional parameters.
 // https://core.telegram.org/bots/api#answerwebappquery
 func (bot *Bot) AnswerWebAppQuery(webAppQueryId string, result InlineQueryResult, opts *AnswerWebAppQueryOpts) (*SentWebAppMessage, error) {
 	v := map[string]string{}
@@ -337,6 +338,7 @@ type ApproveChatJoinRequestOpts struct {
 // ApproveChatJoinRequest Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
+// - opts (type ApproveChatJoinRequestOpts): All optional parameters.
 // https://core.telegram.org/bots/api#approvechatjoinrequest
 func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
@@ -406,6 +408,7 @@ type BanChatSenderChatOpts struct {
 // BanChatSenderChat Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - senderChatId (type int64): Unique identifier of the target sender chat
+// - opts (type BanChatSenderChatOpts): All optional parameters.
 // https://core.telegram.org/bots/api#banchatsenderchat
 func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -433,6 +436,7 @@ type CloseOpts struct {
 }
 
 // Close Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
+// - opts (type CloseOpts): All optional parameters.
 // https://core.telegram.org/bots/api#close
 func (bot *Bot) Close(opts *CloseOpts) (bool, error) {
 	v := map[string]string{}
@@ -460,6 +464,7 @@ type CloseForumTopicOpts struct {
 // CloseForumTopic Use this method to close an open topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// - opts (type CloseForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#closeforumtopic
 func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *CloseForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -488,6 +493,7 @@ type CloseGeneralForumTopicOpts struct {
 
 // CloseGeneralForumTopic Use this method to close an open 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - opts (type CloseGeneralForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#closegeneralforumtopic
 func (bot *Bot) CloseGeneralForumTopic(chatId int64, opts *CloseGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -891,6 +897,7 @@ type DeclineChatJoinRequestOpts struct {
 // DeclineChatJoinRequest Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
+// - opts (type DeclineChatJoinRequestOpts): All optional parameters.
 // https://core.telegram.org/bots/api#declinechatjoinrequest
 func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64, opts *DeclineChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
@@ -919,6 +926,7 @@ type DeleteChatPhotoOpts struct {
 
 // DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - opts (type DeleteChatPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64, opts *DeleteChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
@@ -946,6 +954,7 @@ type DeleteChatStickerSetOpts struct {
 
 // DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - opts (type DeleteChatStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -974,6 +983,7 @@ type DeleteForumTopicOpts struct {
 // DeleteForumTopic Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// - opts (type DeleteForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deleteforumtopic
 func (bot *Bot) DeleteForumTopic(chatId int64, messageThreadId int64, opts *DeleteForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -1012,6 +1022,7 @@ type DeleteMessageOpts struct {
 // Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - messageId (type int64): Identifier of the message to delete
+// - opts (type DeleteMessageOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletemessage
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessageOpts) (bool, error) {
 	v := map[string]string{}
@@ -1078,6 +1089,7 @@ type DeleteStickerFromSetOpts struct {
 
 // DeleteStickerFromSet Use this method to delete a sticker from a set created by the bot. Returns True on success.
 // - sticker (type string): File identifier of the sticker
+// - opts (type DeleteStickerFromSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#deletestickerfromset
 func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -1223,6 +1235,7 @@ type EditGeneralForumTopicOpts struct {
 // EditGeneralForumTopic Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - name (type string): New topic name, 1-128 characters
+// - opts (type EditGeneralForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editgeneralforumtopic
 func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -1589,6 +1602,7 @@ type ExportChatInviteLinkOpts struct {
 
 // ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - opts (type ExportChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpts) (string, error) {
 	v := map[string]string{}
@@ -1661,6 +1675,7 @@ type GetChatOpts struct {
 
 // GetChat Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.). Returns a Chat object on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+// - opts (type GetChatOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getchat
 func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*Chat, error) {
 	v := map[string]string{}
@@ -1688,6 +1703,7 @@ type GetChatAdministratorsOpts struct {
 
 // GetChatAdministrators Use this method to get a list of administrators in a chat, which aren't bots. Returns an Array of ChatMember objects.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+// - opts (type GetChatAdministratorsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
 	v := map[string]string{}
@@ -1715,6 +1731,7 @@ type GetChatMemberOpts struct {
 // GetChatMember Use this method to get information about a member of a chat. The method is guaranteed to work only if the bot is an administrator in the chat. Returns a ChatMember object on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
+// - opts (type GetChatMemberOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getchatmember
 func (bot *Bot) GetChatMember(chatId int64, userId int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	v := map[string]string{}
@@ -1742,6 +1759,7 @@ type GetChatMemberCountOpts struct {
 
 // GetChatMemberCount Use this method to get the number of members in a chat. Returns Int on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+// - opts (type GetChatMemberCountOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getchatmembercount
 func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (int64, error) {
 	v := map[string]string{}
@@ -1801,6 +1819,7 @@ type GetCustomEmojiStickersOpts struct {
 
 // GetCustomEmojiStickers Use this method to get information about custom emoji stickers by their identifiers. Returns an Array of Sticker objects.
 // - customEmojiIds (type []string): List of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
+// - opts (type GetCustomEmojiStickersOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getcustomemojistickers
 func (bot *Bot) GetCustomEmojiStickers(customEmojiIds []string, opts *GetCustomEmojiStickersOpts) ([]Sticker, error) {
 	v := map[string]string{}
@@ -1835,6 +1854,7 @@ type GetFileOpts struct {
 // GetFile Use this method to get basic information about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
 // Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
 // - fileId (type string): File identifier to get information about
+// - opts (type GetFileOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getfile
 func (bot *Bot) GetFile(fileId string, opts *GetFileOpts) (*File, error) {
 	v := map[string]string{}
@@ -1861,6 +1881,7 @@ type GetForumTopicIconStickersOpts struct {
 }
 
 // GetForumTopicIconStickers Use this method to get custom emoji stickers, which can be used as a forum topic icon by any user. Requires no parameters. Returns an Array of Sticker objects.
+// - opts (type GetForumTopicIconStickersOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getforumtopiciconstickers
 func (bot *Bot) GetForumTopicIconStickers(opts *GetForumTopicIconStickersOpts) ([]Sticker, error) {
 	v := map[string]string{}
@@ -1929,6 +1950,7 @@ type GetMeOpts struct {
 }
 
 // GetMe A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
+// - opts (type GetMeOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getme
 func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
 	v := map[string]string{}
@@ -2024,6 +2046,7 @@ type GetStickerSetOpts struct {
 
 // GetStickerSet Use this method to get a sticker set. On success, a StickerSet object is returned.
 // - name (type string): Name of the sticker set
+// - opts (type GetStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getstickerset
 func (bot *Bot) GetStickerSet(name string, opts *GetStickerSetOpts) (*StickerSet, error) {
 	v := map[string]string{}
@@ -2142,6 +2165,7 @@ type GetWebhookInfoOpts struct {
 }
 
 // GetWebhookInfo Use this method to get current webhook status. Requires no parameters. On success, returns a WebhookInfo object. If the bot is using getUpdates, will return an object with the url field empty.
+// - opts (type GetWebhookInfoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#getwebhookinfo
 func (bot *Bot) GetWebhookInfo(opts *GetWebhookInfoOpts) (*WebhookInfo, error) {
 	v := map[string]string{}
@@ -2168,6 +2192,7 @@ type HideGeneralForumTopicOpts struct {
 
 // HideGeneralForumTopic Use this method to hide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically closed if it was open. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - opts (type HideGeneralForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#hidegeneralforumtopic
 func (bot *Bot) HideGeneralForumTopic(chatId int64, opts *HideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2195,6 +2220,7 @@ type LeaveChatOpts struct {
 
 // LeaveChat Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+// - opts (type LeaveChatOpts): All optional parameters.
 // https://core.telegram.org/bots/api#leavechat
 func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -2221,6 +2247,7 @@ type LogOutOpts struct {
 }
 
 // LogOut Use this method to log out from the cloud Bot API server before launching the bot locally. You must log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns True on success. Requires no parameters.
+// - opts (type LogOutOpts): All optional parameters.
 // https://core.telegram.org/bots/api#logout
 func (bot *Bot) LogOut(opts *LogOutOpts) (bool, error) {
 	v := map[string]string{}
@@ -2351,6 +2378,7 @@ type ReopenForumTopicOpts struct {
 // ReopenForumTopic Use this method to reopen a closed topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// - opts (type ReopenForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#reopenforumtopic
 func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *ReopenForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2379,6 +2407,7 @@ type ReopenGeneralForumTopicOpts struct {
 
 // ReopenGeneralForumTopic Use this method to reopen a closed 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically unhidden if it was hidden. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - opts (type ReopenGeneralForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#reopengeneralforumtopic
 func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2450,6 +2479,7 @@ type RevokeChatInviteLinkOpts struct {
 // RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as ChatInviteLink object.
 // - chatId (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
 // - inviteLink (type string): The invite link to revoke
+// - opts (type RevokeChatInviteLinkOpts): All optional parameters.
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *RevokeChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
@@ -4175,6 +4205,7 @@ type SetChatAdministratorCustomTitleOpts struct {
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - userId (type int64): Unique identifier of the target user
 // - customTitle (type string): New custom title for the administrator; 0-16 characters, emoji are not allowed
+// - opts (type SetChatAdministratorCustomTitleOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string, opts *SetChatAdministratorCustomTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4278,6 +4309,7 @@ type SetChatPermissionsOpts struct {
 // SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
+// - opts (type SetChatPermissionsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, opts *SetChatPermissionsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4311,6 +4343,7 @@ type SetChatPhotoOpts struct {
 // SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - photo (type InputFile): New chat photo, uploaded using multipart/form-data
+// - opts (type SetChatPhotoOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatphoto
 func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
@@ -4358,6 +4391,7 @@ type SetChatStickerSetOpts struct {
 // SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - stickerSetName (type string): Name of the sticker set to be set as the group sticker set
+// - opts (type SetChatStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchatstickerset
 func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string, opts *SetChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -4387,6 +4421,7 @@ type SetChatTitleOpts struct {
 // SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - title (type string): New chat title, 1-128 characters
+// - opts (type SetChatTitleOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4560,6 +4595,7 @@ type SetPassportDataErrorsOpts struct {
 // Use this if the data submitted by the user doesn't satisfy the standards your service requires for any reason. For example, if a birthday date seems invalid, a submitted document is blurry, a scan shows evidence of tampering, etc. Supply some details in the error message to make sure the user knows how to correct the issues.
 // - userId (type int64): User identifier
 // - errors (type []PassportElementError): A JSON-serialized array describing the errors
+// - opts (type SetPassportDataErrorsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError, opts *SetPassportDataErrorsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4595,6 +4631,7 @@ type SetStickerPositionInSetOpts struct {
 // SetStickerPositionInSet Use this method to move a sticker in a set created by the bot to a specific position. Returns True on success.
 // - sticker (type string): File identifier of the sticker
 // - position (type int64): New sticker position in the set, zero-based
+// - opts (type SetStickerPositionInSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setstickerpositioninset
 func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -4885,6 +4922,7 @@ type UnbanChatSenderChatOpts struct {
 // UnbanChatSenderChat Use this method to unban a previously banned channel chat in a supergroup or channel. The bot must be an administrator for this to work and must have the appropriate administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - senderChatId (type int64): Unique identifier of the target sender chat
+// - opts (type UnbanChatSenderChatOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unbanchatsenderchat
 func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *UnbanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -4913,6 +4951,7 @@ type UnhideGeneralForumTopicOpts struct {
 
 // UnhideGeneralForumTopic Use this method to unhide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - opts (type UnhideGeneralForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unhidegeneralforumtopic
 func (bot *Bot) UnhideGeneralForumTopic(chatId int64, opts *UnhideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -4940,6 +4979,7 @@ type UnpinAllChatMessagesOpts struct {
 
 // UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+// - opts (type UnpinAllChatMessagesOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpts) (bool, error) {
 	v := map[string]string{}
@@ -4968,6 +5008,7 @@ type UnpinAllForumTopicMessagesOpts struct {
 // UnpinAllForumTopicMessages Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+// - opts (type UnpinAllForumTopicMessagesOpts): All optional parameters.
 // https://core.telegram.org/bots/api#unpinallforumtopicmessages
 func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
 	v := map[string]string{}
@@ -5032,6 +5073,7 @@ type UploadStickerFileOpts struct {
 // UploadStickerFile Use this method to upload a .PNG file with a sticker for later use in createNewStickerSet and addStickerToSet methods (can be used multiple times). Returns the uploaded File on success.
 // - userId (type int64): User identifier of sticker file owner
 // - pngSticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - opts (type UploadStickerFileOpts): All optional parameters.
 // https://core.telegram.org/bots/api#uploadstickerfile
 func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]string{}
