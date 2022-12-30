@@ -480,6 +480,33 @@ func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *Close
 	return b, json.Unmarshal(r, &b)
 }
 
+// CloseGeneralForumTopicOpts is the set of optional fields for Bot.CloseGeneralForumTopic.
+type CloseGeneralForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// CloseGeneralForumTopic Use this method to close an open 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// https://core.telegram.org/bots/api#closegeneralforumtopic
+func (bot *Bot) CloseGeneralForumTopic(chatId int64, opts *CloseGeneralForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("closeGeneralForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // CopyMessageOpts is the set of optional fields for Bot.CopyMessage.
 type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -1151,6 +1178,10 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 
 // EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic.
 type EditForumTopicOpts struct {
+	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
+	Name string
+	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
+	IconCustomEmojiId string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -1158,15 +1189,16 @@ type EditForumTopicOpts struct {
 // EditForumTopic Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 // - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - name (type string): New topic name, 1-128 characters
-// - iconCustomEmojiId (type string): New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
+// - opts (type EditForumTopicOpts): All optional parameters.
 // https://core.telegram.org/bots/api#editforumtopic
-func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, name string, iconCustomEmojiId string, opts *EditForumTopicOpts) (bool, error) {
+func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditForumTopicOpts) (bool, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
-	v["name"] = name
-	v["icon_custom_emoji_id"] = iconCustomEmojiId
+	if opts != nil {
+		v["name"] = opts.Name
+		v["icon_custom_emoji_id"] = opts.IconCustomEmojiId
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1174,6 +1206,35 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, name string,
 	}
 
 	r, err := bot.Request("editForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// EditGeneralForumTopicOpts is the set of optional fields for Bot.EditGeneralForumTopic.
+type EditGeneralForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditGeneralForumTopic Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// - name (type string): New topic name, 1-128 characters
+// https://core.telegram.org/bots/api#editgeneralforumtopic
+func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["name"] = name
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("editGeneralForumTopic", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1651,7 +1712,7 @@ type GetChatMemberOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetChatMember Use this method to get information about a member of a chat. Returns a ChatMember object on success.
+// GetChatMember Use this method to get information about a member of a chat. The method is guaranteed to work only if the bot is an administrator in the chat. Returns a ChatMember object on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
 // https://core.telegram.org/bots/api#getchatmember
@@ -2099,6 +2160,33 @@ func (bot *Bot) GetWebhookInfo(opts *GetWebhookInfoOpts) (*WebhookInfo, error) {
 	return &w, json.Unmarshal(r, &w)
 }
 
+// HideGeneralForumTopicOpts is the set of optional fields for Bot.HideGeneralForumTopic.
+type HideGeneralForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// HideGeneralForumTopic Use this method to hide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically closed if it was open. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// https://core.telegram.org/bots/api#hidegeneralforumtopic
+func (bot *Bot) HideGeneralForumTopic(chatId int64, opts *HideGeneralForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("hideGeneralForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // LeaveChatOpts is the set of optional fields for Bot.LeaveChat.
 type LeaveChatOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2283,6 +2371,33 @@ func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *Reop
 	return b, json.Unmarshal(r, &b)
 }
 
+// ReopenGeneralForumTopicOpts is the set of optional fields for Bot.ReopenGeneralForumTopic.
+type ReopenGeneralForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ReopenGeneralForumTopic Use this method to reopen a closed 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically unhidden if it was hidden. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// https://core.telegram.org/bots/api#reopengeneralforumtopic
+func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("reopenGeneralForumTopic", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember.
 type RestrictChatMemberOpts struct {
 	// Date when restrictions will be lifted for the user, unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
@@ -2373,6 +2488,8 @@ type SendAnimationOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True if the animation needs to be covered with a spoiler animation
+	HasSpoiler bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -2460,6 +2577,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -2622,6 +2740,8 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 
 // SendChatActionOpts is the set of optional fields for Bot.SendChatAction.
 type SendChatActionOpts struct {
+	// Unique identifier for the target message thread; supergroups only
+	MessageThreadId int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -2630,11 +2750,17 @@ type SendChatActionOpts struct {
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 // - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
+// - opts (type SendChatActionOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["action"] = action
+	if opts != nil {
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -3325,6 +3451,8 @@ type SendPhotoOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True if the photo needs to be covered with a spoiler animation
+	HasSpoiler bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -3382,6 +3510,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -3699,6 +3828,8 @@ type SendVideoOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True if the video needs to be covered with a spoiler animation
+	HasSpoiler bool
 	// Pass True if the uploaded video is suitable for streaming
 	SupportsStreaming bool
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -3788,6 +3919,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["supports_streaming"] = strconv.FormatBool(opts.SupportsStreaming)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -4765,6 +4897,33 @@ func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *Unba
 	}
 
 	r, err := bot.Request("unbanChatSenderChat", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// UnhideGeneralForumTopicOpts is the set of optional fields for Bot.UnhideGeneralForumTopic.
+type UnhideGeneralForumTopicOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// UnhideGeneralForumTopic Use this method to unhide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
+// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+// https://core.telegram.org/bots/api#unhidegeneralforumtopic
+func (bot *Bot) UnhideGeneralForumTopic(chatId int64, opts *UnhideGeneralForumTopicOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("unhideGeneralForumTopic", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
