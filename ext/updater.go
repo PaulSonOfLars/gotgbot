@@ -17,6 +17,7 @@ import (
 )
 
 var ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
+var ErrExpectedEmptyServer = errors.New("expected server to be nil")
 
 type botData struct {
 	bot        *gotgbot.Bot
@@ -239,7 +240,7 @@ func (u *Updater) Stop() error {
 // StartWebhook starts the webhook server for a single bot instance. The opts parameter allows for specifying various webhook settings.
 func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
 	if u.server != nil {
-		return fmt.Errorf("expected the server to be nil")
+		return ErrExpectedEmptyServer
 	}
 
 	u.AddWebhook(b, urlPath, opts)
