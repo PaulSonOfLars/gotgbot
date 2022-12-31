@@ -255,7 +255,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, opts WebhookOpts) error {
 		} else {
 			err = u.server.ListenAndServe()
 		}
-		if err != nil && errors.Is(err, http.ErrServerClosed) {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			panic("http server failed: " + err.Error())
 		}
 	}()
