@@ -65,7 +65,6 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 	return Updater{
 		ErrorLog:   errLog,
 		Dispatcher: dispatcher,
-		serveMux:   http.NewServeMux(),
 	}
 }
 
@@ -89,15 +88,18 @@ type PollingOpts struct {
 	GetUpdatesOpts gotgbot.GetUpdatesOpts
 }
 
-// StartPolling starts polling updates from telegram using the getUdpates long-polling method.
-// See the PollingOpts for optional values to set in production environments.
+// StartPolling starts polling updates from telegram using getUpdates long-polling.
+// See PollingOpts for optional values to set in production environments.
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
-	// TODO: De-duplicate this code.
+	if u.botMapping == nil {
+		u.botMapping = make(map[string]botData)
+	}
+
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
 	// - needing to re-allocate new url.values structs.
-	// - needing to convert the opt values to strings to pass to the values.
-	// - unnecessary unmarshalling of the (possibly multiple) full Update structs.
+	// - needing to convert the 'opt' values to strings.
+	// - unnecessary unmarshalling of multiple full Update structs.
 	// Yes, this also makes me sad. :/
 	v := map[string]string{}
 	dropPendingUpdates := false
@@ -252,6 +254,9 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 	if u.serveMux == nil {
 		u.serveMux = http.NewServeMux()
 	}
+	if u.botMapping == nil {
+		u.botMapping = make(map[string]botData)
+	}
 
 	updateChan := make(chan json.RawMessage)
 	u.serveMux.HandleFunc("/"+urlPath, func(w http.ResponseWriter, r *http.Request) {
@@ -272,6 +277,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 }
 
 // SetWebhooks sets all the webhooks for the bots using this updater.
+// This should be called after all the bots have been added through AddWebhook.
 func (u *Updater) SetWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
 	for _, data := range u.botMapping {
 		_, err := data.bot.SetWebhook(fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), data.urlPath), opts)
