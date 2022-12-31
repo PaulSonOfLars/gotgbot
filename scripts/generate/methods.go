@@ -66,7 +66,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	defaultRetVals := strings.Join(getDefaultReturnVals(d, retTypes), ", ")
 
 	// Generate method contents, setting up values in expected format
-	valueGen, hasData, err := tgMethod.argsToValues(d, defaultRetVals)
+	valueGen, hasData, err := tgMethod.argsToValues(d, tgMethod.Name, defaultRetVals)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
@@ -171,7 +171,6 @@ return %s, true, nil
 
 func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
-	hasOptionals := false
 
 	for idx, d := range m.Description {
 		text := d
@@ -184,7 +183,6 @@ func (m MethodDescription) description() (string, error) {
 
 	for _, f := range m.Fields {
 		if !f.Required {
-			hasOptionals = true
 			continue
 		}
 
@@ -196,16 +194,15 @@ func (m MethodDescription) description() (string, error) {
 		description.WriteString("\n// - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
 	}
 
-	if hasOptionals {
-		description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
-	}
+	// All methods have the optional `RequestOpts`
+	description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
 
 	description.WriteString("\n// " + m.Href)
 
 	return description.String(), nil
 }
 
-func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) (string, bool, error) {
+func (m MethodDescription) argsToValues(d APIDescription, methodName string, defaultRetVal string) (string, bool, error) {
 	hasData := false
 	bd := strings.Builder{}
 
@@ -217,7 +214,7 @@ func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) 
 			continue
 		}
 
-		contents, data, err := generateValue(d, f, goParam, defaultRetVal)
+		contents, data, err := generateValue(d, methodName, f, goParam, defaultRetVal)
 		if err != nil {
 			return "", false, err
 		}
@@ -229,7 +226,7 @@ func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) 
 		bd.WriteString("\nif opts != nil {")
 		for _, f := range optionals {
 			goParam := "opts." + snakeToTitle(f.Name)
-			contents, data, err := generateValue(d, f, goParam, defaultRetVal)
+			contents, data, err := generateValue(d, methodName, f, goParam, defaultRetVal)
 			if err != nil {
 				return "", false, err
 			}
@@ -247,7 +244,7 @@ func (m MethodDescription) argsToValues(d APIDescription, defaultRetVal string) 
 	return bd.String(), false, nil
 }
 
-func generateValue(d APIDescription, f Field, goParam string, defaultRetVal string) (string, bool, error) {
+func generateValue(d APIDescription, methodName string, f Field, goParam string, defaultRetVal string) (string, bool, error) {
 	fieldType, err := f.getPreferredType()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to get preferred type: %w", err)
@@ -255,32 +252,41 @@ func generateValue(d APIDescription, f Field, goParam string, defaultRetVal stri
 
 	stringer := goTypeStringer(fieldType)
 	if stringer != "" {
-		addParam := fmt.Sprintf(`v["%s"] = %s`, f.Name, fmt.Sprintf(stringer, goParam))
-		if !f.Required && (fieldType == "int64" || fieldType == "float64") {
-			// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
-			// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
-			// To avoid this, we want to make sure not to add default integers or floats to requests.
-			// This is a good rule of thumb, however... it doesn't ALWAYS work.
-			// So, any exceptions should go here:
-			// TODO: Make sure these are exceptions are tied to the method they're being generated for, not just the field name
-			if f.Name == "correct_option_id" {
-				// correct_option_id (in sendPoll) is dependant on the "type" field being "quiz".
-				// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
-				return fmt.Sprintf(`
+		if !f.Required {
+			// Ints and Floats should generally not be sent if they're 0.
+			if fieldType == "int64" || fieldType == "float64" {
+				// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
+				// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
+				// To avoid this, we want to make sure not to add default integers or floats to requests.
+				// This is a good rule of thumb, however... it doesn't ALWAYS work.
+				// So, any exceptions should go here:
+				if methodName == "sendPoll" && f.Name == "correct_option_id" {
+					// correct_option_id (in sendPoll) is dependent on the "type" field being "quiz".
+					// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
+					return fmt.Sprintf(`
 if opts.Type == "quiz" {
 	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
 	%s
-}`, addParam), false, nil
-			}
+}`, addURLParam(f, stringer, goParam)), false, nil
+				}
 
-			// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
-			return fmt.Sprintf(`
+				// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
+				return fmt.Sprintf(`
 if %s != %s {
 	%s
-}`, goParam, getDefaultTypeVal(d, fieldType), addParam), false, nil
+}`, goParam, getDefaultTypeVal(d, fieldType), addURLParam(f, stringer, goParam)), false, nil
+			}
+
+			if methodName == "editForumTopic" && f.Name == "icon_custom_emoji_id" {
+				return fmt.Sprintf(`
+// icon_custom_emoji_id has different behaviour if it's empty, or if it's unspecified; so we need to handle that.
+if %s != nil {
+	v["%s"] = %s
+}`, goParam, f.Name, fmt.Sprintf(goTypeStringer("*"+fieldType), goParam)), false, nil
+			}
 		}
 
-		return "\n" + addParam, false, nil
+		return "\n" + addURLParam(f, stringer, goParam), false, nil
 	}
 
 	bd := strings.Builder{}
@@ -346,6 +352,10 @@ if %s != %s {
 	return bd.String(), hasData, nil
 }
 
+func addURLParam(f Field, stringer string, goParam string) string {
+	return fmt.Sprintf(`v["%s"] = %s`, f.Name, fmt.Sprintf(stringer, goParam))
+}
+
 func getRetVarName(retType string) string {
 	for isPointer(retType) {
 		retType = strings.TrimPrefix(retType, "*")
@@ -374,6 +384,12 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		}
 
 		optionals.WriteString("\n// " + f.Description)
+		if m.Name == "editForumTopic" && f.Name == "icon_custom_emoji_id" {
+			// Special case for the editForumTopic method's icon_custom_emoji_id param, which has different behaviour
+			// between empty and unset values.
+			optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), "*"+fieldType))
+			continue
+		}
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 	}
 

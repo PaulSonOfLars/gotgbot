@@ -124,6 +124,8 @@ func goTypeStringer(t string) string {
 		return "strconv.FormatBool(%s)"
 	case "string":
 		return "%s"
+	case "*string":
+		return "*%s"
 	default:
 		return ""
 	}
