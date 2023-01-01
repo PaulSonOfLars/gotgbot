@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -15,12 +16,9 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
-// These are the conversation handler states.
-const (
-	NAME = "name"
-	AGE  = "age"
-)
-
+// This bot demonstrates a basic conversation handler. Conversation handlers help you to track states across multiple
+// messages.
+// In this case, the bot has commands to start a conversation, which then causes it to ask for your name and your age.
 func main() {
 	// Get token from the environment variable.
 	token := os.Getenv("TOKEN")
@@ -46,7 +44,7 @@ func main() {
 		DispatcherOpts: ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				fmt.Println("an error occurred while handling update:", err.Error())
+				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 			MaxRoutines: ext.DefaultMaxRoutines,
@@ -79,11 +77,17 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	fmt.Printf("%s has been started...\n", b.User.Username)
+	log.Printf("%s has been started...\n", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
 }
+
+// These are the conversation handler states.
+const (
+	NAME = "name"
+	AGE  = "age"
+)
 
 // Create a matcher which only matches text which is not a command
 func noCommands(msg *gotgbot.Message) bool {

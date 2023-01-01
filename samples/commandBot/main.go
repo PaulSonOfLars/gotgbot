@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -11,6 +12,9 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 )
 
+// This bot demonstrates some example interactions with commands on telegram.
+// It has a basic start command with a bot intro.
+// It also has a source command, which sends the bot sourcecode, as a file.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
@@ -36,7 +40,7 @@ func main() {
 		DispatcherOpts: ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				fmt.Println("an error occurred while handling update:", err.Error())
+				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 			MaxRoutines: ext.DefaultMaxRoutines,
@@ -62,7 +66,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	fmt.Printf("%s has been started...\n", b.User.Username)
+	log.Printf("%s has been started...\n", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()

@@ -4,6 +4,9 @@ set -euo pipefail
 # regenerate library
 go generate
 
+# regenerate docs
+./scripts/ci/generate-sample-bot-descriptions.sh
+
 # Check if a diff is found. If yes, fail.
 diff="$(git diff)"
 if [[ -n "$diff" ]]; then

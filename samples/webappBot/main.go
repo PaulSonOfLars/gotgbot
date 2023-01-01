@@ -10,13 +10,14 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 )
 
-// This bot is slightly more complex to run, since it requires a running webserver, as well as an HTTPS domain.
+// This bot shows how to use this library to server a webapp.
+// Webapps are slightly more complex to run, since they require a running webserver, as well as an HTTPS domain.
 // For development purposes, we recommend running this with a tool such as ngrok (https://ngrok.com/).
 // Simply install ngrok, make an account on the website, and run:
-// ngrok http 8080
-// Then, copy paste the HTTPS URL obtained from ngrok (changes every time you run it), and run the following command
+// `ngrok http 8080`
+// Then, copy-paste the HTTPS URL obtained from ngrok (changes every time you run it), and run the following command
 // from the samples/webappBot directory:
-// URL="<your_url_here>" TOKEN="<your_token_here>" go run .
+// `URL="<your_url_here>" TOKEN="<your_token_here>" go run .`
 // Then, simply send /start to your bot, and enjoy your webapp demo.
 func main() {
 	// Get token from the environment variable
@@ -49,7 +50,7 @@ func main() {
 		DispatcherOpts: ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				fmt.Println("an error occurred while handling update:", err.Error())
+				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 			MaxRoutines: ext.DefaultMaxRoutines,
@@ -67,7 +68,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	fmt.Printf("%s has been started...\n", b.User.Username)
+	log.Printf("%s has been started...\n", b.User.Username)
 
 	// Setup new HTTP server mux to handle different paths.
 	mux := http.NewServeMux()
