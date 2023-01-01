@@ -7,3 +7,6 @@ set -euo pipefail
 
 # Run golangci-lint to lint against all go code in the repo. Configuration in .golangci.yaml.
 golangci-lint run
+
+# Ensure all generated code has up to date.
+./scripts/ci/ensure-generated.sh >/dev/null

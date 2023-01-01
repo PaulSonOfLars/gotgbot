@@ -55,8 +55,6 @@ type Dispatcher struct {
 	// handlers represents all available handles, split into groups (see handlerGroups).
 	handlers map[int][]Handler
 
-	// updatesChan is the channel that the dispatcher receives all new updates on.
-	updatesChan chan json.RawMessage
 	// limiter is how we limit the maximum number of goroutines for handling updates.
 	// if nil, this is a limitless dispatcher.
 	limiter chan struct{}
@@ -82,7 +80,7 @@ type DispatcherOpts struct {
 }
 
 // NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
-func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatcher {
+func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errFunc DispatcherErrorHandler
 	var panicFunc DispatcherPanicHandler
 
@@ -113,13 +111,12 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 	}
 
 	return &Dispatcher{
-		Error:       errFunc,
-		Panic:       panicFunc,
-		ErrorLog:    errLog,
-		updatesChan: updates,
-		handlers:    make(map[int][]Handler),
-		limiter:     limiter,
-		waitGroup:   sync.WaitGroup{},
+		Error:     errFunc,
+		Panic:     panicFunc,
+		ErrorLog:  errLog,
+		handlers:  make(map[int][]Handler),
+		limiter:   limiter,
+		waitGroup: sync.WaitGroup{},
 	}
 }
 
@@ -134,13 +131,13 @@ func (d *Dispatcher) MaxUsage() int {
 }
 
 // Start to handle incoming updates.
-func (d *Dispatcher) Start(b *gotgbot.Bot) {
+func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 	if d.limiter == nil {
-		d.limitlessDispatcher(b)
+		d.limitlessDispatcher(b, updates)
 		return
 	}
 
-	d.limitedDispatcher(b)
+	d.limitedDispatcher(b, updates)
 }
 
 // Stop waits for all currently processing updates to finish, and then returns.
@@ -148,8 +145,8 @@ func (d *Dispatcher) Stop() {
 	d.waitGroup.Wait()
 }
 
-func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot) {
-	for upd := range d.updatesChan {
+func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot, updates chan json.RawMessage) {
+	for upd := range updates {
 		d.waitGroup.Add(1)
 
 		// Send empty data to limiter.
@@ -164,8 +161,8 @@ func (d *Dispatcher) limitedDispatcher(b *gotgbot.Bot) {
 	}
 }
 
-func (d *Dispatcher) limitlessDispatcher(b *gotgbot.Bot) {
-	for upd := range d.updatesChan {
+func (d *Dispatcher) limitlessDispatcher(b *gotgbot.Bot, updates chan json.RawMessage) {
+	for upd := range updates {
 		d.waitGroup.Add(1)
 
 		go func(upd json.RawMessage) {
