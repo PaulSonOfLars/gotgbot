@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -23,7 +22,7 @@ func (b *sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, meth
 	// So, we edit the params to allow for that.
 	// We also log this, for the sake of the example. :)
 	if strings.HasPrefix(method, "send") || method == "copyMessage" {
-		fmt.Println("Applying middleware to", method)
+		log.Println("Applying middleware to", method)
 		params["allow_sending_without_reply"] = "true"
 	}
 
@@ -31,7 +30,7 @@ func (b *sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, meth
 	val, err := b.BotClient.RequestWithContext(ctx, method, params, data, opts)
 	if err != nil {
 		// Middlewares can also be used to increase error visibility, in case they aren't logged elsewhere.
-		fmt.Println("warning, got an error:", err)
+		log.Println("warning, got an error:", err)
 	}
 	return val, err
 }
