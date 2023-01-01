@@ -48,7 +48,7 @@ type UpdaterOpts struct {
 }
 
 // NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
-func NewUpdater(opts *UpdaterOpts) Updater {
+func NewUpdater(opts *UpdaterOpts) *Updater {
 	errLog := errorLog
 	// Default dispatcher
 	dispatcher := NewDispatcher(nil)
@@ -62,7 +62,7 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 		}
 	}
 
-	return Updater{
+	return &Updater{
 		ErrorLog:   errLog,
 		Dispatcher: dispatcher,
 	}
@@ -239,7 +239,9 @@ func (u *Updater) Stop() error {
 	return nil
 }
 
-// StartWebhook starts the webhook server for a single bot instance. The opts parameter allows for specifying various webhook settings.
+// StartWebhook starts the webhook server for a single bot instance.
+// This does NOT set the webhook on telegram - this should be done by the caller.
+// The opts parameter allows for specifying various webhook settings.
 func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
 	if u.server != nil {
 		return ErrExpectedEmptyServer
@@ -249,7 +251,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 	return u.StartServer(opts)
 }
 
-// AddWebhook prepares the webhook server to receive webhook updates on a specific path.
+// AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
 func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 	if u.serveMux == nil {
 		u.serveMux = http.NewServeMux()
@@ -276,8 +278,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 	}
 }
 
-// SetWebhooks sets all the webhooks for the bots using this updater.
-// This should be called after all the bots have been added through AddWebhook.
+// SetWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
 func (u *Updater) SetWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
 	for _, data := range u.botMapping {
 		_, err := data.bot.SetWebhook(fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), data.urlPath), opts)
@@ -290,7 +291,9 @@ func (u *Updater) SetWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error
 	return nil
 }
 
-// StartServer Starts the webhook server for all registered bots. The opts parameter allows for specifying TLS settings.
+// StartServer starts the webhook server for all the bots added via AddWebhook.
+// We recommend calling this BEFORE setting individual webhooks.
+// The opts parameter allows for specifying TLS settings.
 func (u *Updater) StartServer(opts WebhookOpts) error {
 	var tls bool
 	if opts.CertFile == "" && opts.KeyFile == "" {
