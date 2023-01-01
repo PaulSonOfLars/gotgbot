@@ -94,6 +94,7 @@ func main() {
 	log.Println("All bots have been gracefully stopped.")
 }
 
+// startLongPollingBots demonstrates how to start multiple bots with long-polling.
 func startLongPollingBots(updater *ext.Updater, bots []*gotgbot.Bot) error {
 	for idx, b := range bots {
 		err := updater.StartPolling(b, &ext.PollingOpts{
@@ -115,6 +116,7 @@ func startLongPollingBots(updater *ext.Updater, bots []*gotgbot.Bot) error {
 	return nil
 }
 
+// startWebhookBots demonstrates how to start multiple bots with webhooks.
 func startWebhookBots(updater *ext.Updater, bots []*gotgbot.Bot, domain string, webhookSecret string) error {
 	opts := ext.WebhookOpts{
 		Listen:      "0.0.0.0", // This example assumes you're in a dev environment running ngrok on 8080.
@@ -122,20 +124,20 @@ func startWebhookBots(updater *ext.Updater, bots []*gotgbot.Bot, domain string, 
 		SecretToken: webhookSecret,
 	}
 
-	// We start the server before we set the webhooks, so that we are immediately able to process incoming updates.
+	// We start the server before we set the webhooks, so that incoming requests can be processed immediately.
 	err := updater.StartServer(opts)
 	if err != nil {
 		return fmt.Errorf("failed to start the webhook server: %w", err)
 	}
 
-	// We iterate over all the bots, to register them with the updater.
+	// We add all the bots to the updater.
 	for idx, b := range bots {
 		updater.AddWebhook(b, b.GetToken(), opts)
 		log.Printf("bot %d: %s has been added to the updater\n", idx, b.User.Username)
 	}
 
-	// We set the webhooks for all the registered bots, so telegram starts sending updates.
-	return updater.SetWebhooks(domain, &gotgbot.SetWebhookOpts{
+	// We set the webhooks for all the added bots, so telegram starts sending updates.
+	return updater.SetAllBotWebhooks(domain, &gotgbot.SetWebhookOpts{
 		MaxConnections:     100,
 		AllowedUpdates:     nil,
 		DropPendingUpdates: false,

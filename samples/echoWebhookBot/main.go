@@ -80,7 +80,7 @@ func main() {
 		panic("failed to start webhook: " + err.Error())
 	}
 
-	err = updater.SetWebhooks(webhookDomain, &gotgbot.SetWebhookOpts{
+	err = updater.SetAllBotWebhooks(webhookDomain, &gotgbot.SetWebhookOpts{
 		MaxConnections:     100,
 		DropPendingUpdates: true,
 		SecretToken:        webhookOpts.SecretToken,

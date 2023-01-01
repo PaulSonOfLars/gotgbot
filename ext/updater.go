@@ -19,6 +19,7 @@ import (
 var ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
 var ErrExpectedEmptyServer = errors.New("expected server to be nil")
 
+// botData is an internal struct that is used by the updater to keep track of the necessary update channels for each bot.
 type botData struct {
 	bot        *gotgbot.Bot
 	updateChan chan json.RawMessage
@@ -276,10 +277,13 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 		updateChan: updateChan,
 		urlPath:    urlPath,
 	}
+
+	// Webhook has been added; relevant dispatcher should also be started.
+	go u.Dispatcher.Start(b, updateChan)
 }
 
-// SetWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
-func (u *Updater) SetWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
+// SetAllBotWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
+func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
 	for _, data := range u.botMapping {
 		_, err := data.bot.SetWebhook(fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), data.urlPath), opts)
 		if err != nil {
@@ -295,6 +299,10 @@ func (u *Updater) SetWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error
 // We recommend calling this BEFORE setting individual webhooks.
 // The opts parameter allows for specifying TLS settings.
 func (u *Updater) StartServer(opts WebhookOpts) error {
+	if u.serveMux == nil {
+		u.serveMux = http.NewServeMux()
+	}
+
 	var tls bool
 	if opts.CertFile == "" && opts.KeyFile == "" {
 		tls = false
@@ -302,11 +310,6 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		tls = true
 	} else {
 		return ErrMissingCertOrKeyFile
-	}
-
-	for _, data := range u.botMapping {
-		// start dispatcher for each bot
-		go u.Dispatcher.Start(data.bot, data.updateChan)
 	}
 
 	u.server = &http.Server{
