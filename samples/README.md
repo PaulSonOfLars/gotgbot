@@ -25,6 +25,12 @@ In this case, the bot has commands to start a conversation, which then causes it
 
 This bot is as basic as it gets - it simply repeats everything you say.
 
+## samples/echoMultiBot
+
+This bot demonstrates how to create echo bot that works with multiple bot instances at once.
+It also shows how to stop the bot gracefully using the Updater.Stop() mechanism.
+It has options to use either polling or webhooks.
+
 ## samples/echoWebhookBot
 
 This bot repeats everything you say - but it uses webhooks instead of long polling.

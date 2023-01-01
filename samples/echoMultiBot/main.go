@@ -14,10 +14,10 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
+// This bot demonstrates how to create echo bot that works with multiple bot instances at once.
+// It also shows how to stop the bot gracefully using the Updater.Stop() mechanism.
+// It has options to use either polling or webhooks.
 func main() {
-	// This example defines how to define an echo bot that works for multiple bot instances at once.
-	// It also shows how to stop the bot gracefully using the Updater.Stop() mechanism.
-	// It has options to toggle between polling, or webhooks.
 
 	// Get comma separated bot tokens from environment variable
 	tokens := os.Getenv("TOKENS")
