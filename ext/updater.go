@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -25,18 +24,19 @@ type Updater struct {
 	// UpdateChan is the link between the Updater and the Dispatcher; sending updates here will get them processed by
 	// the Dispatcher.
 	UpdateChan chan json.RawMessage
-	// UnhandledErrFunc defines how to handle previously unhandled errors, such as failures to get updates (polling),
-	// or failures to unmarshal.
-	// In most cases, the expected usage is to log the error to the preferred error handler.
-	// If undefined, unhandled errors will be logged to stderr.
+
+	// UnhandledErrFunc allows more flexibility for handling previously unhandled errors, such as failures to get
+	// updates (when long-polling), or failures to unmarshal.
+	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
+	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// If nil, logging is done via the log package's standard logger.
+	ErrorLog *log.Logger
 
 	stopIdling chan bool
 	running    chan bool
 	server     *http.Server
 }
-
-var errorLog = log.New(os.Stderr, "ERROR", log.LstdFlags)
 
 type UpdaterOpts struct {
 	ErrorFunc ErrorFunc
@@ -62,6 +62,14 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 		UnhandledErrFunc: errFunc,
 		Dispatcher:       NewDispatcher(updateChan, &dispatcherOpts),
 		UpdateChan:       updateChan,
+	}
+}
+
+func (u *Updater) logf(format string, args ...interface{}) {
+	if u.ErrorLog != nil {
+		u.ErrorLog.Printf(format, args...)
+	} else {
+		log.Printf(format, args...)
 	}
 }
 
@@ -147,7 +155,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				errorLog.Println("failed to get updates; sleeping 1s: " + err.Error())
+				u.logf("Failed to get updates; sleeping 1s: %s", err.Error())
 				time.Sleep(time.Second)
 			}
 			continue
@@ -162,7 +170,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				errorLog.Println("failed to unmarshal updates: " + err.Error())
+				u.logf("Failed to unmarshal updates: %s", err.Error())
 			}
 			continue
 		}
@@ -180,7 +188,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, dropPen
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				errorLog.Println("failed to unmarshal last update: " + err.Error())
+				u.logf("Failed to unmarshal last update: %s", err.Error())
 			}
 			continue
 		}

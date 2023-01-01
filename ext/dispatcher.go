@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -12,8 +13,10 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
-var ErrPanicRecovered = errors.New("panic recovered")
-var ErrUnknownDispatcherAction = errors.New("unknown dispatcher action")
+var (
+	ErrPanicRecovered          = errors.New("panic recovered")
+	ErrUnknownDispatcherAction = errors.New("unknown dispatcher action")
+)
 
 const DefaultMaxRoutines = 50
 
@@ -54,11 +57,14 @@ type Dispatcher struct {
 	// and is left to determine how to log or handle the errors.
 	// If this field is nil, the error will be passed to UnhandledErrFunc.
 	Panic DispatcherPanicHandler
-	// UnhandledErrFunc is the most basic of error handling methods, and does not have access to any bot objets.
-	// It defines how to handle previously unhandled dispatcher errors. By design, these errors are mostly considered
-	// benign, and don't necessarily need to be handled. If unhandled, the errors are simply logged to os.Stderr.
-	// The most common use of this method is to overwrite the default logger.
+
+	// UnhandledErrFunc provides more flexibility for handling unhandled internal dispatcher errors.
+	// By design, these errors are mostly considered benign, and don't necessarily need to be handled.
+	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
+	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// If nil, logging is done via the log package's standard logger.
+	ErrorLog *log.Logger
 
 	// handlerGroups represents the list of available handler groups, numerically sorted.
 	handlerGroups []int
@@ -137,6 +143,14 @@ func NewDispatcher(updates chan json.RawMessage, opts *DispatcherOpts) *Dispatch
 	}
 }
 
+func (d *Dispatcher) logf(format string, args ...interface{}) {
+	if d.ErrorLog != nil {
+		d.ErrorLog.Printf(format, args...)
+	} else {
+		log.Printf(format, args...)
+	}
+}
+
 // CurrentUsage returns the current number of concurrently processing updates.
 func (d *Dispatcher) CurrentUsage() int {
 	return len(d.limiter)
@@ -161,21 +175,24 @@ func (d *Dispatcher) Start(b *gotgbot.Bot) {
 		}
 
 		go func(upd json.RawMessage) {
+			// We defer here so that whatever happens, we can clean up the dispatcher.
+			defer func() {
+				if d.limiter != nil {
+					// Pop an item from the limiter, allowing another update to process.
+					<-d.limiter
+				}
+				d.waitGroup.Done()
+			}()
+
 			err := d.ProcessRawUpdate(b, upd)
 			if err != nil {
-				// We don't return here; we still want to free the limiter and the waitgroup!
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
 				} else {
-					errorLog.Println("Failed to process update: " + err.Error())
+					d.logf("Failed to process update: %s", err.Error())
 				}
 			}
 
-			if d.limiter != nil {
-				// Pop an item from the limiter, allowing another update to process.
-				<-d.limiter
-			}
-			d.waitGroup.Done()
 		}(upd)
 	}
 }
@@ -227,8 +244,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 
 			} else {
 				// Print the reason for panic + stack for some sort of helpful log output.
-				errorLog.Println(r)
-				errorLog.Println(cleanedStack())
+				d.logf("panic recovered: %v\n%s", r, cleanedStack())
 			}
 		}
 	}()
@@ -265,7 +281,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 						// Stop all group handling.
 						return nil
 					default:
-						return fmt.Errorf("%w: '%s', ending groups here", err, action)
+						return fmt.Errorf("%w: '%s', ending groups here", ErrUnknownDispatcherAction, action)
 					}
 				}
 			}
