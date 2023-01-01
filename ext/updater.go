@@ -25,7 +25,7 @@ type Updater struct {
 	// the Dispatcher.
 	UpdateChan chan json.RawMessage
 
-	// UnhandledErrFunc allows more flexibility for handling previously unhandled errors, such as failures to get
+	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
 	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
@@ -38,20 +38,27 @@ type Updater struct {
 	server     *http.Server
 }
 
+// UpdaterOpts defines various fields that can be changed to configure a new Updater.
 type UpdaterOpts struct {
-	ErrorFunc ErrorFunc
+	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
+	// updates (when long-polling), or failures to unmarshal.
+	// If nil, the error goes to ErrorLog.
+	UnhandledErrFunc ErrorFunc
+	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// If nil, logging is done via the log package's standard logger.
+	ErrorLog *log.Logger
 
 	DispatcherOpts DispatcherOpts
 }
 
 // NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
 func NewUpdater(opts *UpdaterOpts) Updater {
-	var errFunc ErrorFunc
+	var unhandledErrFunc ErrorFunc
 	var dispatcherOpts DispatcherOpts
 
 	if opts != nil {
-		if opts.ErrorFunc != nil {
-			errFunc = opts.ErrorFunc
+		if opts.UnhandledErrFunc != nil {
+			unhandledErrFunc = opts.UnhandledErrFunc
 		}
 
 		dispatcherOpts = opts.DispatcherOpts
@@ -59,7 +66,7 @@ func NewUpdater(opts *UpdaterOpts) Updater {
 
 	updateChan := make(chan json.RawMessage)
 	return Updater{
-		UnhandledErrFunc: errFunc,
+		UnhandledErrFunc: unhandledErrFunc,
 		Dispatcher:       NewDispatcher(updateChan, &dispatcherOpts),
 		UpdateChan:       updateChan,
 	}

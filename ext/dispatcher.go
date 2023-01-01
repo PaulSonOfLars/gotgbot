@@ -58,7 +58,7 @@ type Dispatcher struct {
 	// If this field is nil, the error will be passed to UnhandledErrFunc.
 	Panic DispatcherPanicHandler
 
-	// UnhandledErrFunc provides more flexibility for handling unhandled internal dispatcher errors.
+	// UnhandledErrFunc provides more flexibility for dealing with internal unhandled dispatcher errors.
 	// By design, these errors are mostly considered benign, and don't necessarily need to be handled.
 	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
@@ -88,10 +88,13 @@ type DispatcherOpts struct {
 	// If no panic handlers are defined, the stack is logged to ErrorLog.
 	// More info at Dispatcher.Panic.
 	Panic DispatcherPanicHandler
-	// UnhandledErrFunc defines the default handling of any unhandled errors from the dispatcher.
-	// Most commonly used for logging.
-	// More info at Dispatcher.UnhandledErrFunc.
+	// UnhandledErrFunc provides more flexibility for dealing with internal unhandled dispatcher errors.
+	// By design, these errors are mostly considered benign, and don't necessarily need to be handled.
+	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
+	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// If nil, logging is done via the log package's standard logger.
+	ErrorLog *log.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
 	// This defines how many updates can be processed at the same time.
