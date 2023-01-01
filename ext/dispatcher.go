@@ -58,8 +58,9 @@ type Dispatcher struct {
 	// If this field is nil, the error will be passed to UnhandledErrFunc.
 	Panic DispatcherPanicHandler
 
-	// UnhandledErrFunc provides more flexibility for dealing with internal unhandled dispatcher errors.
-	// By design, these errors are mostly considered benign, and don't necessarily need to be handled.
+	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
+	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
+	// dispatcher actions.
 	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
@@ -88,8 +89,10 @@ type DispatcherOpts struct {
 	// If no panic handlers are defined, the stack is logged to ErrorLog.
 	// More info at Dispatcher.Panic.
 	Panic DispatcherPanicHandler
-	// UnhandledErrFunc provides more flexibility for dealing with internal unhandled dispatcher errors.
-	// By design, these errors are mostly considered benign, and don't necessarily need to be handled.
+
+	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
+	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
+	// dispatcher actions.
 	// If nil, the error goes to ErrorLog.
 	UnhandledErrFunc ErrorFunc
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
@@ -232,29 +235,35 @@ func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 }
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) error {
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) (err error) {
 	ctx := NewContext(update, data)
 
 	defer func() {
 		if r := recover(); r != nil {
+			// If a panic handler is defined, handle the error.
 			if d.Panic != nil {
 				d.Panic(b, ctx, r)
 				return
 
-			} else if d.UnhandledErrFunc != nil {
-				d.UnhandledErrFunc(fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack()))
-				return
-
 			} else {
-				// Print the reason for panic + stack for some sort of helpful log output.
-				d.logf("panic recovered: %v\n%s", r, cleanedStack())
+				// Otherwise, create an error from the panic, and return it.
+				err = fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack())
+				return
 			}
 		}
 	}()
 
+	err = d.iterateOverHandlerGroups(b, ctx)
+	// We don't inline this, because we want to make sure that the defer function can override the error in the case of
+	// a panic.
+	return err
+}
+
+func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) error {
 	for _, groupNum := range d.handlerGroups {
 		for _, handler := range d.handlers[groupNum] {
 			if !handler.CheckUpdate(b, ctx) {
+				// Handler filter doesn't match this update; continue.
 				continue
 			}
 
@@ -289,7 +298,8 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 				}
 			}
 
-			break // move to next group
+			// Handler matched this update, move to next group by default.
+			break
 		}
 	}
 	return nil
