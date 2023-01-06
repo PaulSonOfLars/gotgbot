@@ -1,4 +1,4 @@
-module github.com/PaulSonOfLars/gotgbot/samples/echoWebhookBot
+module github.com/PaulSonOfLars/gotgbot/samples/echoMultiBot
 
 go 1.15
 
