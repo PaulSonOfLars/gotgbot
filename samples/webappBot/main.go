@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -46,7 +47,6 @@ func main() {
 
 	// Create updater and dispatcher to handle updates in a simple manner.
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		ErrorLog: nil,
 		Dispatcher: ext.NewDispatcher(&ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {

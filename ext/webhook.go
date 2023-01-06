@@ -23,7 +23,7 @@ type WebhookOpts struct {
 	CertFile string
 	KeyFile  string
 
-	// SecretToken to be used by the bots on this webhook
+	// SecretToken to be used by the bots on this webhook. Used as a security measure to ensure that you set the webhook.
 	SecretToken string
 }
 

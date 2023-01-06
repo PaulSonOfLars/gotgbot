@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"

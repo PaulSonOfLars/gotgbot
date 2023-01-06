@@ -27,8 +27,8 @@ func validate(token string) func(writer http.ResponseWriter, request *http.Reque
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ok, err := ext.ValidateWebAppQuery(request.URL.Query(), token)
 		if err != nil {
-			writer.Write([]byte("validation failed; error: " + err.Error()))
 			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write([]byte("validation failed; error: " + err.Error()))
 			return
 		}
 		if ok {

@@ -40,15 +40,14 @@ func main() {
 
 	// Create updater and dispatcher.
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		ErrorLog: nil,
-		DispatcherOpts: ext.DispatcherOpts{
+		Dispatcher: ext.NewDispatcher(&ext.DispatcherOpts{
 			// If an error is returned by a handler, log it and continue going.
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
 				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 			MaxRoutines: ext.DefaultMaxRoutines,
-		},
+		}),
 	})
 	dispatcher := updater.Dispatcher
 
