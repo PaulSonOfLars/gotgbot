@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -350,12 +351,20 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 	}
 
 	var tls bool
-	if opts.CertFile == "" && opts.KeyFile == "" {
+	switch {
+	case opts.CertFile == "" && opts.KeyFile == "":
 		tls = false
-	} else if opts.CertFile != "" && opts.KeyFile != "" {
+	case opts.CertFile != "" && opts.KeyFile != "":
 		tls = true
-	} else {
+	default:
 		return ErrMissingCertOrKeyFile
+	}
+
+	var network string
+	if opts.UnixListen != "" {
+		network = "unix"
+	} else {
+		network = "tcp"
 	}
 
 	u.webhookServer = &http.Server{
@@ -365,12 +374,18 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}
 
+	var err error
+	var ln net.Listener
+	if ln, err = net.Listen(network, u.webhookServer.Addr); err != nil {
+		panic("listening on " + network + ":" + u.webhookServer.Addr + " failed: " + err.Error())
+	}
+
 	go func() {
 		var err error
 		if tls {
-			err = u.webhookServer.ListenAndServeTLS(opts.CertFile, opts.KeyFile)
+			err = u.webhookServer.ServeTLS(ln, opts.CertFile, opts.KeyFile)
 		} else {
-			err = u.webhookServer.ListenAndServe()
+			err = u.webhookServer.Serve(ln)
 		}
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			panic("http server failed: " + err.Error())
