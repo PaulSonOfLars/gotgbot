@@ -203,7 +203,9 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 // Stop waits for all currently processing updates to finish, and then returns.
 func (d *Dispatcher) Stop() {
 	d.waitGroup.Wait()
-	close(d.limiter)
+	if d.limiter != nil {
+		close(d.limiter)
+	}
 }
 
 // AddHandler adds a new handler to the dispatcher. The dispatcher will call CheckUpdate() to see whether the handler
