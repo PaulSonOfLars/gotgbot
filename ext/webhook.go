@@ -11,6 +11,8 @@ type WebhookOpts struct {
 	Listen string
 	// Port is the port listen on (eg 443, 8443, etc).
 	Port int
+	// UnixListen is the UNIX socket to listen on (mutually exclusive with Listen/Port options)
+	UnixListen string
 	// ReadTimeout is passed to the http server to limit the time it takes to read an incoming request.
 	// See http.Server for more details.
 	ReadTimeout time.Duration
@@ -29,6 +31,9 @@ type WebhookOpts struct {
 
 // GetListenAddr returns the local listening address, including port.
 func (w *WebhookOpts) GetListenAddr() string {
+	if w.UnixListen != "" {
+		return w.UnixListen
+	}
 	if w.Listen == "" {
 		w.Listen = "0.0.0.0"
 	}
