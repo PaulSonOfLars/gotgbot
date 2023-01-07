@@ -165,6 +165,7 @@ func (d *Dispatcher) MaxUsage() int {
 }
 
 // Start to handle incoming updates.
+// This is a blocking method; it should be called as a goroutine, such that it can receive incoming updates.
 func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 	// Listen to updates as they come in from the updater.
 	for upd := range updates {
