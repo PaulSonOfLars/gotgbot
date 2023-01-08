@@ -78,7 +78,7 @@ func updatePinnedCommit() (string, error) {
 
 	commit := res[0].Sha
 
-	err = os.WriteFile(specCommitFileName, []byte(commit), 0600)
+	err = os.WriteFile(specCommitFileName, []byte(commit), 0o600)
 	if err != nil {
 		return "", fmt.Errorf("failed to update commit pin file: %w", err)
 	}

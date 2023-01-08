@@ -9,9 +9,9 @@ import (
 )
 
 type CallbackQuery struct {
-	AllowChannel bool
 	Filter       filters.CallbackQuery
 	Response     Response
+	AllowChannel bool
 }
 
 func NewCallback(filter filters.CallbackQuery, r Response) CallbackQuery {

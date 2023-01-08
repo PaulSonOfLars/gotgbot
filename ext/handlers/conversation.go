@@ -36,14 +36,14 @@ type Conversation struct {
 }
 
 type ConversationOpts struct {
+	// StateStorage is responsible for storing all running conversations.
+	StateStorage conversation.Storage
 	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands)
 	Exits []ext.Handler
 	// Fallbacks is the list of handlers to handle updates which haven't been matched by any states.
 	Fallbacks []ext.Handler
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
-	// StateStorage is responsible for storing all running conversations.
-	StateStorage conversation.Storage
 }
 
 func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, opts *ConversationOpts) Conversation {
@@ -122,10 +122,10 @@ func (c Conversation) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 type ConversationStateChange struct {
 	// The next state to handle in the current conversation.
 	NextState *string
-	// End the current conversation
-	End bool
 	// Move the parent conversation (if any) to the desired state.
 	ParentState *ConversationStateChange
+	// End the current conversation
+	End bool
 }
 
 func (s *ConversationStateChange) Error() string {

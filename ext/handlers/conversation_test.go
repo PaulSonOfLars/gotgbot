@@ -136,6 +136,7 @@ func TestFallbackConversation(t *testing.T) {
 	// Ensure conversation has ended.
 	checkExpectedState(t, &conv, cancelCommand, "")
 }
+
 func TestReEntryConversation(t *testing.T) {
 	b := NewTestBot()
 

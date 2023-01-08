@@ -18,7 +18,6 @@ import (
 // It also shows how to stop the bot gracefully using the Updater.Stop() mechanism.
 // It has options to use either polling or webhooks.
 func main() {
-
 	// Get comma separated bot tokens from environment variable
 	tokens := os.Getenv("TOKENS")
 	if tokens == "" {
