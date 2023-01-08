@@ -33,11 +33,11 @@ func NewTestBot() *gotgbot.Bot {
 	}
 }
 
-func NewMessage(userId int64, chatId int64, message string) *ext.Context {
+func NewMessage(userId, chatId int64, message string) *ext.Context {
 	return newMessage(userId, chatId, message, nil)
 }
 
-func NewCommandMessage(userId int64, chatId int64, command string, args []string) *ext.Context {
+func NewCommandMessage(userId, chatId int64, command string, args []string) *ext.Context {
 	msg, ents := buildCommand(command, args)
 	return newMessage(userId, chatId, msg, ents)
 }
@@ -53,7 +53,7 @@ func buildCommand(cmd string, args []string) (string, []gotgbot.MessageEntity) {
 		}
 }
 
-func newMessage(userId int64, chatId int64, message string, entities []gotgbot.MessageEntity) *ext.Context {
+func newMessage(userId, chatId int64, message string, entities []gotgbot.MessageEntity) *ext.Context {
 	chatType := "supergroup"
 	if userId == chatId {
 		chatType = "private"

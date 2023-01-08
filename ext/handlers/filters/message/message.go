@@ -101,7 +101,6 @@ func Text(msg *gotgbot.Message) bool {
 func HasPrefix(prefix string) filters.Message {
 	return func(msg *gotgbot.Message) bool {
 		return strings.HasPrefix(msg.Text, prefix) || strings.HasSuffix(msg.Caption, prefix)
-
 	}
 }
 

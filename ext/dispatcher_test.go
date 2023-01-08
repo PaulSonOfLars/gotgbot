@@ -28,7 +28,6 @@ func TestDispatcherStop(t *testing.T) {
 	if !waited {
 		t.Errorf("Dispatcher was stopped before the updates were done being handled.")
 	}
-
 }
 
 func TestLimitedDispatcherStop(t *testing.T) {

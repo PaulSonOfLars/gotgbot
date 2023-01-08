@@ -196,7 +196,6 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 					d.logf("Failed to process update: %s", err.Error())
 				}
 			}
-
 		}(upd)
 	}
 }
@@ -243,13 +242,13 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 			// If a panic handler is defined, handle the error.
 			if d.Panic != nil {
 				d.Panic(b, ctx, r)
-				return
 
-			} else {
-				// Otherwise, create an error from the panic, and return it.
-				err = fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack())
 				return
 			}
+			// Otherwise, create an error from the panic, and return it.
+			err = fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack())
+
+			return
 		}
 	}()
 

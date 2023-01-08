@@ -171,7 +171,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling <-chan struct{}, updateChan chan json.RawMessage, dropPendingUpdates bool, v map[string]string) {
+func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling <-chan struct{}, updateChan chan<- json.RawMessage, dropPendingUpdates bool, v map[string]string) {
 	// if dropPendingUpdates, force the offset to -1
 	if dropPendingUpdates {
 		v["offset"] = "-1"

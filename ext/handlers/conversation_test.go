@@ -136,6 +136,7 @@ func TestFallbackConversation(t *testing.T) {
 	// Ensure conversation has ended.
 	checkExpectedState(t, &conv, cancelCommand, "")
 }
+
 func TestReEntryConversation(t *testing.T) {
 	b := NewTestBot()
 
@@ -256,7 +257,7 @@ func TestNestedConversation(t *testing.T) {
 	checkExpectedState(t, &conv, textMessage, "")
 }
 
-func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, currentState string, nextState string) {
+func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, currentState, nextState string) {
 	willRunHandler(t, b, conv, message, currentState)
 	if err := conv.HandleUpdate(b, message); err != nil {
 		t.Fatalf("unexpected error from handler: %s", err.Error())
