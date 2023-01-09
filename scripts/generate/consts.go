@@ -30,6 +30,12 @@ package gotgbot
 	}
 	consts.WriteString(stickerTypeConsts)
 
+	chatTypeConsts, err := generateChatTypeConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat types: %w", err)
+	}
+	consts.WriteString(chatTypeConsts)
+
 	return writeGenToFile(consts, "gen_consts.go")
 }
 
@@ -72,6 +78,32 @@ func generateStickerTypeConsts(d APIDescription) (string, error) {
 		}
 		for _, t := range types {
 			constName := "StickerType" + snakeToTitle(t)
+			out.WriteString(writeConst(constName, t))
+		}
+	}
+	out.WriteString(")\n\n")
+	return out.String(), nil
+}
+
+func generateChatTypeConsts(d APIDescription) (string, error) {
+	updType, ok := d.Types["Chat"]
+	if !ok {
+		return "", errors.New("missing 'Chat' type data")
+	}
+	out := strings.Builder{}
+	out.WriteString("// The consts listed below represent all the chat types that can be obtained from telegram.\n")
+	out.WriteString("const (\n")
+	for _, f := range updType.Fields {
+		if f.Name != "type" {
+			// the field we want to look at is called "type", ignore all others.
+			continue
+		}
+		types, err := extractQuotedValues(f.Description)
+		if err != nil {
+			return "", fmt.Errorf("failed to get quoted types: %w", err)
+		}
+		for _, t := range types {
+			constName := "ChatType" + snakeToTitle(t)
 			out.WriteString(writeConst(constName, t))
 		}
 	}
