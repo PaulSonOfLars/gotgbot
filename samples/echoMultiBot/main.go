@@ -18,7 +18,6 @@ import (
 // It also shows how to stop the bot gracefully using the Updater.Stop() mechanism.
 // It has options to use either polling or webhooks.
 func main() {
-
 	// Get comma separated bot tokens from environment variable
 	tokens := os.Getenv("TOKENS")
 	if tokens == "" {
@@ -119,8 +118,7 @@ func startLongPollingBots(updater *ext.Updater, bots []*gotgbot.Bot) error {
 // startWebhookBots demonstrates how to start multiple bots with webhooks.
 func startWebhookBots(updater *ext.Updater, bots []*gotgbot.Bot, domain string, webhookSecret string) error {
 	opts := ext.WebhookOpts{
-		Listen:      "0.0.0.0", // This example assumes you're in a dev environment running ngrok on 8080.
-		Port:        8080,
+		ListenAddr:  "127.0.0.1:8080", // This example assumes you're in a dev environment running ngrok on 8080.
 		SecretToken: webhookSecret,
 	}
 
