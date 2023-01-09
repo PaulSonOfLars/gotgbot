@@ -362,23 +362,18 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		return ErrMissingCertOrKeyFile
 	}
 
-	var network string
-	if opts.UnixListen != "" {
-		network = "unix"
-	} else {
-		network = "tcp"
+	opts.setDefaults()
+
+	ln, err := net.Listen(opts.ListenNet, opts.ListenAddr)
+	if err != nil {
+		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
 	}
 
 	u.webhookServer = &http.Server{
-		Addr:              opts.GetListenAddr(),
+		Addr:              ln.Addr().String(),
 		Handler:           u.serveMux,
 		ReadTimeout:       opts.ReadTimeout,
 		ReadHeaderTimeout: opts.ReadHeaderTimeout,
-	}
-
-	ln, err := net.Listen(network, u.webhookServer.Addr)
-	if err != nil {
-		return fmt.Errorf("failed to listen on %s:%s: %w", network, u.webhookServer.Addr, err)
 	}
 
 	go func() {
