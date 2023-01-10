@@ -331,7 +331,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 // SetAllBotWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
 func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
 	for _, data := range u.botMapping {
-		_, err := data.bot.SetWebhook(fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), data.urlPath), opts)
+		_, err := data.bot.SetWebhook(strings.Join([]string{strings.TrimSuffix(domain, "/"), data.urlPath}, "/"), opts)
 		if err != nil {
 			// Extract the botID, so we don't intentionally log the token
 			botId := strings.Split(data.bot.GetToken(), ":")[0]
