@@ -28,7 +28,7 @@ type botData struct {
 	// updateChan represents the incoming updates channel.
 	updateChan chan json.RawMessage
 	// polling allows us to close the polling loop.
-	polling chan bool
+	polling chan struct{}
 	// urlPath defines the incoming webhook URL path for this bot.
 	urlPath string
 }
@@ -48,7 +48,7 @@ type Updater struct {
 	ErrorLog *log.Logger
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
-	stopIdling chan bool
+	stopIdling chan struct{}
 	// serveMux is where all our webhook paths are added for the server to use.
 	serveMux *http.ServeMux
 	// webhookServer is the server in charge of receiving all incoming webhook updates.
@@ -158,7 +158,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	}
 
 	updateChan := make(chan json.RawMessage)
-	pollChan := make(chan bool)
+	pollChan := make(chan struct{})
 	u.botMapping[b.GetToken()] = &botData{
 		bot:        b,
 		updateChan: updateChan,
@@ -171,7 +171,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling chan bool, updateChan chan json.RawMessage, dropPendingUpdates bool, v map[string]string) {
+func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling <-chan struct{}, updateChan chan<- json.RawMessage, dropPendingUpdates bool, v map[string]string) {
 	// if dropPendingUpdates, force the offset to -1
 	if dropPendingUpdates {
 		v["offset"] = "-1"
@@ -249,7 +249,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling
 // Idle starts an infinite loop to avoid the program exciting while the background threads handle updates.
 func (u *Updater) Idle() {
 	// Create the idling channel
-	u.stopIdling = make(chan bool)
+	u.stopIdling = make(chan struct{})
 
 	// Wait until some input is received from the idle channel, which will stop the idling.
 	<-u.stopIdling
@@ -270,7 +270,6 @@ func (u *Updater) Stop() error {
 		// Close polling loops first, to ensure any updates currently being polled have the time to be sent to the
 		// updateChan.
 		if data.polling != nil {
-			data.polling <- false
 			close(data.polling)
 		}
 
@@ -283,7 +282,6 @@ func (u *Updater) Stop() error {
 
 	// Finally, atop idling.
 	if u.stopIdling != nil {
-		u.stopIdling <- false
 		close(u.stopIdling)
 	}
 	return nil
@@ -334,7 +332,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 // SetAllBotWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
 func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
 	for _, data := range u.botMapping {
-		_, err := data.bot.SetWebhook(fmt.Sprintf("%s/%s", strings.TrimSuffix(domain, "/"), data.urlPath), opts)
+		_, err := data.bot.SetWebhook(strings.Join([]string{strings.TrimSuffix(domain, "/"), data.urlPath}, "/"), opts)
 		if err != nil {
 			// Extract the botID, so we don't intentionally log the token
 			botId := strings.Split(data.bot.GetToken(), ":")[0]

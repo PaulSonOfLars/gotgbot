@@ -24,11 +24,17 @@ package gotgbot
 
 	consts.WriteString(generateParseModeConsts())
 
-	stickerTypeConsts, err := generateStickerTypeConsts(d)
+	stickerTypeConsts, err := generateTypeConsts(d, "Sticker")
 	if err != nil {
 		return fmt.Errorf("failed to generate consts for sticker types: %w", err)
 	}
 	consts.WriteString(stickerTypeConsts)
+
+	chatTypeConsts, err := generateTypeConsts(d, "Chat")
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat types: %w", err)
+	}
+	consts.WriteString(chatTypeConsts)
 
 	return writeGenToFile(consts, "gen_consts.go")
 }
@@ -53,13 +59,13 @@ func generateUpdateTypeConsts(d APIDescription) (string, error) {
 	return out.String(), nil
 }
 
-func generateStickerTypeConsts(d APIDescription) (string, error) {
-	updType, ok := d.Types["Sticker"]
+func generateTypeConsts(d APIDescription, typeName string) (string, error) {
+	updType, ok := d.Types[typeName]
 	if !ok {
-		return "", errors.New("missing 'Sticker' type data")
+		return "", errors.New("missing '" + typeName + "' type data")
 	}
 	out := strings.Builder{}
-	out.WriteString("// The consts listed below represent all the sticker types that can be obtained from telegram.\n")
+	out.WriteString("// The consts listed below represent all the " + strings.ToLower(typeName) + " types that can be obtained from telegram.\n")
 	out.WriteString("const (\n")
 	for _, f := range updType.Fields {
 		if f.Name != "type" {
@@ -71,7 +77,7 @@ func generateStickerTypeConsts(d APIDescription) (string, error) {
 			return "", fmt.Errorf("failed to get quoted types: %w", err)
 		}
 		for _, t := range types {
-			constName := "StickerType" + snakeToTitle(t)
+			constName := typeName + "Type" + snakeToTitle(t)
 			out.WriteString(writeConst(constName, t))
 		}
 	}

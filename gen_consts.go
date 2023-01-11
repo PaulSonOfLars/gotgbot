@@ -35,3 +35,11 @@ const (
 	StickerTypeMask        = "mask"
 	StickerTypeCustomEmoji = "custom_emoji"
 )
+
+// The consts listed below represent all the chat types that can be obtained from telegram.
+const (
+	ChatTypePrivate    = "private"
+	ChatTypeGroup      = "group"
+	ChatTypeSupergroup = "supergroup"
+	ChatTypeChannel    = "channel"
+)
