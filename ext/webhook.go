@@ -28,8 +28,9 @@ type WebhookOpts struct {
 	SecretToken string
 }
 
-func (w *WebhookOpts) setDefaults() {
+func (w *WebhookOpts) GetListenNet() string {
 	if w.ListenNet == "" {
-		w.ListenNet = "tcp"
+		return "tcp"
 	}
+	return w.ListenNet
 }
