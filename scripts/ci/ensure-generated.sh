@@ -4,8 +4,11 @@ set -euo pipefail
 # regenerate library
 go generate
 
-# regenerate docs
+# regenerate sample bot docs.
 ./scripts/ci/generate-sample-bot-descriptions.sh
+
+# verify go.mod for sample bots.
+./scripts/ci/ensure-consistent-sample-mod-files.sh
 
 # Check if a diff is found. If yes, fail.
 diff="$(git diff)"

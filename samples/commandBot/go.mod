@@ -1,7 +1,7 @@
-module github.com/PaulSonOfLars/gotgbot/samples/echoBot
+module github.com/PaulSonOfLars/gotgbot/samples/commandBot
 
 go 1.15
 
-require github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.8
+require github.com/PaulSonOfLars/gotgbot/v2 v2.99.99
 
 replace github.com/PaulSonOfLars/gotgbot/v2 => ../../
