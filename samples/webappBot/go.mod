@@ -1,4 +1,4 @@
-module github.com/PaulSonOfLars/gotgbot/samples/webappbot
+module github.com/PaulSonOfLars/gotgbot/samples/webappBot
 
 go 1.15
 

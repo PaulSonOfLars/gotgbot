@@ -1,4 +1,4 @@
-module github.com/PaulSonOfLars/gotgbot/samples/echoBot
+module github.com/PaulSonOfLars/gotgbot/samples/middlewareBot
 
 go 1.15
 
