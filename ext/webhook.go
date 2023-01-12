@@ -1,16 +1,17 @@
 package ext
 
 import (
-	"fmt"
 	"time"
 )
 
 // WebhookOpts represent various fields that are needed for configuring the local webhook server.
 type WebhookOpts struct {
-	// Listen is the address to listen on (eg: localhost, 0.0.0.0, etc).
-	Listen string
-	// Port is the port listen on (eg 443, 8443, etc).
-	Port int
+	// ListenAddr is the address and port to listen on (eg: localhost:http, 0.0.0.0:8080, :https, "[::1]:", etc).
+	// See the net package for details.
+	ListenAddr string
+	// ListenNet is the network type to listen on (must be "tcp", "tcp4", "tcp6", "unix" or "unixpacket").
+	// Empty means the default, "tcp".
+	ListenNet string
 	// ReadTimeout is passed to the http server to limit the time it takes to read an incoming request.
 	// See http.Server for more details.
 	ReadTimeout time.Duration
@@ -27,13 +28,9 @@ type WebhookOpts struct {
 	SecretToken string
 }
 
-// GetListenAddr returns the local listening address, including port.
-func (w *WebhookOpts) GetListenAddr() string {
-	if w.Listen == "" {
-		w.Listen = "0.0.0.0"
+func (w *WebhookOpts) GetListenNet() string {
+	if w.ListenNet == "" {
+		return "tcp"
 	}
-	if w.Port == 0 {
-		w.Port = 443
-	}
-	return fmt.Sprintf("%s:%d", w.Listen, w.Port)
+	return w.ListenNet
 }

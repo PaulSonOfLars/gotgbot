@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -350,27 +351,31 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 	}
 
 	var tls bool
-	if opts.CertFile == "" && opts.KeyFile == "" {
+	switch {
+	case opts.CertFile == "" && opts.KeyFile == "":
 		tls = false
-	} else if opts.CertFile != "" && opts.KeyFile != "" {
+	case opts.CertFile != "" && opts.KeyFile != "":
 		tls = true
-	} else {
+	default:
 		return ErrMissingCertOrKeyFile
 	}
 
+	ln, err := net.Listen(opts.GetListenNet(), opts.ListenAddr)
+	if err != nil {
+		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
+	}
+
 	u.webhookServer = &http.Server{
-		Addr:              opts.GetListenAddr(),
 		Handler:           u.serveMux,
 		ReadTimeout:       opts.ReadTimeout,
 		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}
 
 	go func() {
-		var err error
 		if tls {
-			err = u.webhookServer.ListenAndServeTLS(opts.CertFile, opts.KeyFile)
+			err = u.webhookServer.ServeTLS(ln, opts.CertFile, opts.KeyFile)
 		} else {
-			err = u.webhookServer.ListenAndServe()
+			err = u.webhookServer.Serve(ln)
 		}
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			panic("http server failed: " + err.Error())
