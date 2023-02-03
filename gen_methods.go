@@ -1731,7 +1731,7 @@ type GetChatMemberOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetChatMember Use this method to get information about a member of a chat. The method is guaranteed to work only if the bot is an administrator in the chat. Returns a ChatMember object on success.
+// GetChatMember Use this method to get information about a member of a chat. The method is guaranteed to work for other users, only if the bot is an administrator in the chat. Returns a ChatMember object on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
 // - opts (type GetChatMemberOpts): All optional parameters.
@@ -2320,7 +2320,7 @@ type PromoteChatMemberOpts struct {
 	CanManageVideoChats bool
 	// Pass True if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
-	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
+	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
 	// Pass True if the administrator can change chat title, photo and other settings
 	CanChangeInfo bool
@@ -2432,6 +2432,8 @@ func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTo
 
 // RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember.
 type RestrictChatMemberOpts struct {
+	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
+	UseIndependentChatPermissions bool
 	// Date when restrictions will be lifted for the user, unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 	UntilDate int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2454,6 +2456,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 	}
 	v["permissions"] = string(bs)
 	if opts != nil {
+		v["use_independent_chat_permissions"] = strconv.FormatBool(opts.UseIndependentChatPermissions)
 		if opts.UntilDate != 0 {
 			v["until_date"] = strconv.FormatInt(opts.UntilDate, 10)
 		}
@@ -4305,6 +4308,8 @@ func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 
 // SetChatPermissionsOpts is the set of optional fields for Bot.SetChatPermissions.
 type SetChatPermissionsOpts struct {
+	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
+	UseIndependentChatPermissions bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4322,6 +4327,9 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, op
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
 	}
 	v["permissions"] = string(bs)
+	if opts != nil {
+		v["use_independent_chat_permissions"] = strconv.FormatBool(opts.UseIndependentChatPermissions)
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
