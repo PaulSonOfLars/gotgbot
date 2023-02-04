@@ -3596,9 +3596,9 @@ type KeyboardButtonRequestChat struct {
 	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
 	ChatIsChannel bool `json:"chat_is_channel"`
 	// Optional. Pass True to request a forum supergroup, pass False to request a non-forum chat. If not specified, no additional restrictions are applied.
-	ChatIsForum bool `json:"chat_is_forum,omitempty"`
+	ChatIsForum *bool `json:"chat_is_forum,omitempty"`
 	// Optional. Pass True to request a supergroup or a channel with a username, pass False to request a chat without a username. If not specified, no additional restrictions are applied.
-	ChatHasUsername bool `json:"chat_has_username,omitempty"`
+	ChatHasUsername *bool `json:"chat_has_username,omitempty"`
 	// Optional. Pass True to request a chat owned by the user. Otherwise, no additional restrictions are applied.
 	ChatIsCreated bool `json:"chat_is_created,omitempty"`
 	// Optional. A JSON-serialized object listing the required administrator rights of the user in the chat. If not specified, no additional restrictions are applied.
@@ -3615,9 +3615,9 @@ type KeyboardButtonRequestUser struct {
 	// Signed 32-bit identifier of the request
 	RequestId int64 `json:"request_id"`
 	// Optional. Pass True to request a bot, pass False to request a regular user. If not specified, no additional restrictions are applied.
-	UserIsBot bool `json:"user_is_bot,omitempty"`
+	UserIsBot *bool `json:"user_is_bot,omitempty"`
 	// Optional. Pass True to request a premium user, pass False to request a non-premium user. If not specified, no additional restrictions are applied.
-	UserIsPremium bool `json:"user_is_premium,omitempty"`
+	UserIsPremium *bool `json:"user_is_premium,omitempty"`
 }
 
 // LabeledPrice This object represents a portion of the price for goods or services.
@@ -3655,7 +3655,7 @@ type LoginUrl struct {
 	// Optional. New text of the button in forwarded messages.
 	ForwardText string `json:"forward_text,omitempty"`
 	// Optional. Username of a bot, which will be used for user authorization. See Setting up a bot for more details. If not specified, the current bot's username will be assumed. The url's domain must be the same as the domain linked with the bot. See Linking your domain to the bot for more details.
-	BotUsername string `json:"bot_username,omitempty"`
+	BotUsername *string `json:"bot_username,omitempty"`
 	// Optional. Pass True to request the permission for your bot to send messages to the user.
 	RequestWriteAccess bool `json:"request_write_access,omitempty"`
 }

@@ -189,8 +189,8 @@ func (c Chat) GetMenuButton(b *Bot, opts *GetChatMenuButtonOpts) (MenuButton, er
 		opts = &GetChatMenuButtonOpts{}
 	}
 
-	if opts.ChatId == 0 {
-		opts.ChatId = c.Id
+	if opts.ChatId == nil {
+		opts.ChatId = &c.Id
 	}
 
 	return b.GetChatMenuButton(opts)
@@ -257,8 +257,8 @@ func (c Chat) SetMenuButton(b *Bot, opts *SetChatMenuButtonOpts) (bool, error) {
 		opts = &SetChatMenuButtonOpts{}
 	}
 
-	if opts.ChatId == 0 {
-		opts.ChatId = c.Id
+	if opts.ChatId == nil {
+		opts.ChatId = &c.Id
 	}
 
 	return b.SetChatMenuButton(opts)
@@ -326,8 +326,8 @@ func (m Message) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 		opts = &UnpinChatMessageOpts{}
 	}
 
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
+	if opts.MessageId == nil {
+		opts.MessageId = &m.MessageId
 	}
 
 	return b.UnpinChatMessage(m.Chat.Id, opts)

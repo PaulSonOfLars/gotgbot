@@ -120,9 +120,13 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 
 		if fName, ok := fields[mf.Name]; ok {
 			if !mf.Required {
-				def := getDefaultTypeVal(d, prefType)
-				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + def + " {")
-				optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = " + receiverName + "." + snakeToTitle(fName))
+				defaultValue := getDefaultTypeVal(d, prefType)
+				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + defaultValue + " {")
+				if isPointer(prefType) {
+					optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = &" + receiverName + "." + snakeToTitle(fName))
+				} else {
+					optsContent.WriteString("\n		opts." + snakeToTitle(mf.Name) + " = " + receiverName + "." + snakeToTitle(fName))
+				}
 				optsContent.WriteString("\n	}")
 				continue
 			}

@@ -119,7 +119,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 // AnswerCallbackQueryOpts is the set of optional fields for Bot.AnswerCallbackQuery.
 type AnswerCallbackQueryOpts struct {
 	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
-	Text string
+	Text *string
 	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
 	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
@@ -138,7 +138,9 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 	v := map[string]string{}
 	v["callback_query_id"] = callbackQueryId
 	if opts != nil {
-		v["text"] = opts.Text
+		if opts.Text != nil {
+			v["text"] = *opts.Text
+		}
 		v["show_alert"] = strconv.FormatBool(opts.ShowAlert)
 		v["url"] = opts.Url
 		if opts.CacheTime != 0 {
@@ -518,7 +520,7 @@ type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
-	Caption string
+	Caption *string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
@@ -552,7 +554,9 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
-		v["caption"] = opts.Caption
+		if opts.Caption != nil {
+			v["caption"] = *opts.Caption
+		}
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
@@ -1191,7 +1195,7 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 // EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic.
 type EditForumTopicOpts struct {
 	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
-	Name string
+	Name *string
 	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
 	IconCustomEmojiId *string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1208,8 +1212,9 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
 	if opts != nil {
-		v["name"] = opts.Name
-		// icon_custom_emoji_id has different behaviour if it's empty, or if it's unspecified; so we need to handle that.
+		if opts.Name != nil {
+			v["name"] = *opts.Name
+		}
 		if opts.IconCustomEmojiId != nil {
 			v["icon_custom_emoji_id"] = *opts.IconCustomEmojiId
 		}
@@ -1785,7 +1790,7 @@ func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (
 // GetChatMenuButtonOpts is the set of optional fields for Bot.GetChatMenuButton.
 type GetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
-	ChatId int64
+	ChatId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -1796,8 +1801,8 @@ type GetChatMenuButtonOpts struct {
 func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.ChatId != 0 {
-			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		if opts.ChatId != nil {
+			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
 	}
 
@@ -4269,7 +4274,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // SetChatMenuButtonOpts is the set of optional fields for Bot.SetChatMenuButton.
 type SetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
-	ChatId int64
+	ChatId *int64
 	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 	MenuButton MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4282,8 +4287,8 @@ type SetChatMenuButtonOpts struct {
 func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.ChatId != 0 {
-			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		if opts.ChatId != nil {
+			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
 		bs, err := json.Marshal(opts.MenuButton)
 		if err != nil {
@@ -4561,7 +4566,7 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 // SetMyDefaultAdministratorRightsOpts is the set of optional fields for Bot.SetMyDefaultAdministratorRights.
 type SetMyDefaultAdministratorRightsOpts struct {
 	// A JSON-serialized object describing new default administrator rights. If not specified, the default administrator rights will be cleared.
-	Rights ChatAdministratorRights
+	Rights *ChatAdministratorRights
 	// Pass True to change the default administrator rights of the bot in channels. Otherwise, the default administrator rights of the bot for groups and supergroups will be changed.
 	ForChannels bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4574,11 +4579,13 @@ type SetMyDefaultAdministratorRightsOpts struct {
 func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorRightsOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		bs, err := json.Marshal(opts.Rights)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field rights: %w", err)
+		if opts.Rights != nil {
+			bs, err := json.Marshal(opts.Rights)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field rights: %w", err)
+			}
+			v["rights"] = string(bs)
 		}
-		v["rights"] = string(bs)
 		v["for_channels"] = strconv.FormatBool(opts.ForChannels)
 	}
 
@@ -5043,7 +5050,7 @@ func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, 
 // UnpinChatMessageOpts is the set of optional fields for Bot.UnpinChatMessage.
 type UnpinChatMessageOpts struct {
 	// Identifier of a message to unpin. If not specified, the most recent pinned message (by sending date) will be unpinned.
-	MessageId int64
+	MessageId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -5056,8 +5063,8 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
-		if opts.MessageId != 0 {
-			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
+		if opts.MessageId != nil {
+			v["message_id"] = strconv.FormatInt(*opts.MessageId, 10)
 		}
 	}
 
