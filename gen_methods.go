@@ -1193,7 +1193,7 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 // EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic.
 type EditForumTopicOpts struct {
 	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
-	Name *string
+	Name string
 	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
 	IconCustomEmojiId *string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1210,9 +1210,7 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
 	if opts != nil {
-		if opts.Name != nil {
-			v["name"] = *opts.Name
-		}
+		v["name"] = opts.Name
 		if opts.IconCustomEmojiId != nil {
 			v["icon_custom_emoji_id"] = *opts.IconCustomEmojiId
 		}
