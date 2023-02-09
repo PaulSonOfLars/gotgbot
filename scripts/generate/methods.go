@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	readerBranchTmpl                = template.Must(template.New("readerBranch").Parse(readerBranch))
-	stringOrReaderBranchTmpl        = template.Must(template.New("stringOrReaderBranch").Parse(stringOrReaderBranch))
+	inputFileBranchTmpl             = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
 	inputMediaParamsBranchTmpl      = template.Must(template.New("inputMediaParamsBranch").Parse(inputMediaParamsBranch))
 	inputMediaArrayParamsBranchTmpl = template.Must(template.New("inputMediaArrayParamsBranch").Parse(inputMediaArrayParamsBranch))
 )
@@ -294,17 +293,11 @@ if %s != nil {
 	switch fieldType {
 	case tgTypeInputFile:
 		hasData = true
-
-		t := stringOrReaderBranchTmpl
-		if len(f.Types) == 1 {
-			// This is actually just an inputfile, not "InputFile or String", so don't support string
-			t = readerBranchTmpl
-		}
-
-		err = t.Execute(&bd, readerBranchesData{
+		err = inputFileBranchTmpl.Execute(&bd, readerBranchesData{
 			GoParam:       goParam,
 			DefaultReturn: defaultRetVal,
 			Name:          f.Name,
+			AllowString:   len(f.Types) > 1, // Either "InputFile", or "InputFile or String"; so if two types, strings are supported.
 		})
 		if err != nil {
 			return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
@@ -411,48 +404,14 @@ type readerBranchesData struct {
 	GoParam       string
 	DefaultReturn string
 	Name          string
+	AllowString   bool
 }
 
-const readerBranch = `
+const inputFileBranch = `
 if {{.GoParam}} != nil {
-	switch m := {{.GoParam}}.(type) {
-	case NamedReader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = m
-
-	case io.Reader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: m}
-
-	case []byte:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
-
-	default:
-		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
-	}
-}`
-
-const stringOrReaderBranch = `
-if {{.GoParam}} != nil {
-	switch m := {{.GoParam}}.(type) {
-	case string:
-		v["{{.Name}}"] = m
-
-	case NamedReader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = m
-
-	case io.Reader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: m}
-
-	case []byte:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
-
-	default:
-		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
+	err := attachFile("{{.Name}}", {{.GoParam}}, v, data, {{.AllowString}})
+	if err != nil {
+		return {{.DefaultReturn}}, fmt.Errorf("failed to attach file: %w", err)
 	}
 }`
 

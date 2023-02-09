@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -255,4 +256,31 @@ func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string
 		return fmt.Sprintf("%s/bot%s/test/%s", bot.getAPIURL(opts), bot.Token, method)
 	}
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
+}
+
+func attachFile(key string, file InputFile, v map[string]string, data map[string]NamedReader, allowString bool) error {
+	switch m := file.(type) {
+	case string:
+		if !allowString {
+			return errors.New("method does not support string parameters")
+		}
+
+		v[key] = m
+
+	case NamedReader:
+		v[key] = "attach://" + key
+		data[key] = m
+
+	case io.Reader:
+		v[key] = "attach://" + key
+		data[key] = NamedFile{File: m}
+
+	case []byte:
+		v[key] = "attach://" + key
+		data[key] = NamedFile{File: bytes.NewReader(m)}
+
+	default:
+		return fmt.Errorf("unknown type for InputFile with key %s: %T", key, file)
+	}
+	return nil
 }

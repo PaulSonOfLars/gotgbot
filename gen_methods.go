@@ -39,60 +39,21 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 	v["emojis"] = emojis
 	if opts != nil {
 		if opts.PngSticker != nil {
-			switch m := opts.PngSticker.(type) {
-			case string:
-				v["png_sticker"] = m
-
-			case NamedReader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = m
-
-			case io.Reader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
+			err := attachFile("png_sticker", opts.PngSticker, v, data, true)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		if opts.TgsSticker != nil {
-			switch m := opts.TgsSticker.(type) {
-			case NamedReader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = m
-
-			case io.Reader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
+			err := attachFile("tgs_sticker", opts.TgsSticker, v, data, false)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		if opts.WebmSticker != nil {
-			switch m := opts.WebmSticker.(type) {
-			case NamedReader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = m
-
-			case io.Reader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
+			err := attachFile("webm_sticker", opts.WebmSticker, v, data, false)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		bs, err := json.Marshal(opts.MaskPosition)
@@ -810,60 +771,21 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emo
 	v["emojis"] = emojis
 	if opts != nil {
 		if opts.PngSticker != nil {
-			switch m := opts.PngSticker.(type) {
-			case string:
-				v["png_sticker"] = m
-
-			case NamedReader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = m
-
-			case io.Reader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
+			err := attachFile("png_sticker", opts.PngSticker, v, data, true)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		if opts.TgsSticker != nil {
-			switch m := opts.TgsSticker.(type) {
-			case NamedReader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = m
-
-			case io.Reader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
+			err := attachFile("tgs_sticker", opts.TgsSticker, v, data, false)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		if opts.WebmSticker != nil {
-			switch m := opts.WebmSticker.(type) {
-			case NamedReader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = m
-
-			case io.Reader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
+			err := attachFile("webm_sticker", opts.WebmSticker, v, data, false)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["sticker_type"] = opts.StickerType
@@ -2547,24 +2469,9 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if animation != nil {
-		switch m := animation.(type) {
-		case string:
-			v["animation"] = m
-
-		case NamedReader:
-			v["animation"] = "attach://animation"
-			data["animation"] = m
-
-		case io.Reader:
-			v["animation"] = "attach://animation"
-			data["animation"] = NamedFile{File: m}
-
-		case []byte:
-			v["animation"] = "attach://animation"
-			data["animation"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", animation)
+		err := attachFile("animation", animation, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -2581,24 +2488,9 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -2683,24 +2575,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if audio != nil {
-		switch m := audio.(type) {
-		case string:
-			v["audio"] = m
-
-		case NamedReader:
-			v["audio"] = "attach://audio"
-			data["audio"] = m
-
-		case io.Reader:
-			v["audio"] = "attach://audio"
-			data["audio"] = NamedFile{File: m}
-
-		case []byte:
-			v["audio"] = "attach://audio"
-			data["audio"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", audio)
+		err := attachFile("audio", audio, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -2722,24 +2599,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -2976,24 +2838,9 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if document != nil {
-		switch m := document.(type) {
-		case string:
-			v["document"] = m
-
-		case NamedReader:
-			v["document"] = "attach://document"
-			data["document"] = m
-
-		case io.Reader:
-			v["document"] = "attach://document"
-			data["document"] = NamedFile{File: m}
-
-		case []byte:
-			v["document"] = "attach://document"
-			data["document"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", document)
+		err := attachFile("document", document, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -3001,24 +2848,9 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -3510,24 +3342,9 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
-		switch m := photo.(type) {
-		case string:
-			v["photo"] = m
-
-		case NamedReader:
-			v["photo"] = "attach://photo"
-			data["photo"] = m
-
-		case io.Reader:
-			v["photo"] = "attach://photo"
-			data["photo"] = NamedFile{File: m}
-
-		case []byte:
-			v["photo"] = "attach://photo"
-			data["photo"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", photo)
+		err := attachFile("photo", photo, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -3712,24 +3529,9 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if sticker != nil {
-		switch m := sticker.(type) {
-		case string:
-			v["sticker"] = m
-
-		case NamedReader:
-			v["sticker"] = "attach://sticker"
-			data["sticker"] = m
-
-		case io.Reader:
-			v["sticker"] = "attach://sticker"
-			data["sticker"] = NamedFile{File: m}
-
-		case []byte:
-			v["sticker"] = "attach://sticker"
-			data["sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", sticker)
+		err := attachFile("sticker", sticker, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -3889,24 +3691,9 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if video != nil {
-		switch m := video.(type) {
-		case string:
-			v["video"] = m
-
-		case NamedReader:
-			v["video"] = "attach://video"
-			data["video"] = m
-
-		case io.Reader:
-			v["video"] = "attach://video"
-			data["video"] = NamedFile{File: m}
-
-		case []byte:
-			v["video"] = "attach://video"
-			data["video"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", video)
+		err := attachFile("video", video, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -3923,24 +3710,9 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -4017,24 +3789,9 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if videoNote != nil {
-		switch m := videoNote.(type) {
-		case string:
-			v["video_note"] = m
-
-		case NamedReader:
-			v["video_note"] = "attach://video_note"
-			data["video_note"] = m
-
-		case io.Reader:
-			v["video_note"] = "attach://video_note"
-			data["video_note"] = NamedFile{File: m}
-
-		case []byte:
-			v["video_note"] = "attach://video_note"
-			data["video_note"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", videoNote)
+		err := attachFile("video_note", videoNote, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -4048,24 +3805,9 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 			v["length"] = strconv.FormatInt(opts.Length, 10)
 		}
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -4133,24 +3875,9 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if voice != nil {
-		switch m := voice.(type) {
-		case string:
-			v["voice"] = m
-
-		case NamedReader:
-			v["voice"] = "attach://voice"
-			data["voice"] = m
-
-		case io.Reader:
-			v["voice"] = "attach://voice"
-			data["voice"] = NamedFile{File: m}
-
-		case []byte:
-			v["voice"] = "attach://voice"
-			data["voice"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", voice)
+		err := attachFile("voice", voice, v, data, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 	if opts != nil {
@@ -4353,21 +4080,9 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 	data := map[string]NamedReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
-		switch m := photo.(type) {
-		case NamedReader:
-			v["photo"] = "attach://photo"
-			data["photo"] = m
-
-		case io.Reader:
-			v["photo"] = "attach://photo"
-			data["photo"] = NamedFile{File: m}
-
-		case []byte:
-			v["photo"] = "attach://photo"
-			data["photo"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return false, fmt.Errorf("unknown type for InputFile: %T", photo)
+		err := attachFile("photo", photo, v, data, false)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 
@@ -4675,24 +4390,9 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
 		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
-			case string:
-				v["thumb"] = m
-
-			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
-
-			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
-
-			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+			err := attachFile("thumb", opts.Thumb, v, data, true)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 	}
@@ -4740,21 +4440,9 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 	v["url"] = url
 	if opts != nil {
 		if opts.Certificate != nil {
-			switch m := opts.Certificate.(type) {
-			case NamedReader:
-				v["certificate"] = "attach://certificate"
-				data["certificate"] = m
-
-			case io.Reader:
-				v["certificate"] = "attach://certificate"
-				data["certificate"] = NamedFile{File: m}
-
-			case []byte:
-				v["certificate"] = "attach://certificate"
-				data["certificate"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Certificate)
+			err := attachFile("certificate", opts.Certificate, v, data, false)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach file: %w", err)
 			}
 		}
 		v["ip_address"] = opts.IpAddress
@@ -5083,21 +4771,9 @@ func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile, opts *Uplo
 	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	if pngSticker != nil {
-		switch m := pngSticker.(type) {
-		case NamedReader:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = m
-
-		case io.Reader:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = NamedFile{File: m}
-
-		case []byte:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", pngSticker)
+		err := attachFile("png_sticker", pngSticker, v, data, false)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach file: %w", err)
 		}
 	}
 
