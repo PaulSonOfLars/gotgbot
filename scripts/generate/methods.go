@@ -21,10 +21,8 @@ func generateMethods(d APIDescription) error {
 package gotgbot
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 )
 `)
