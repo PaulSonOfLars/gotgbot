@@ -283,6 +283,10 @@ func (f Field) getPreferredType() (string, error) {
 		// Some fields are marked as "May be empty", in which case the empty values are still meaningful.
 		// These should be handled as pointers, so we can differentiate the empty case.
 		if (strings.Contains(f.Description, "May be empty") || strings.Contains(f.Description, "If not specified")) && !(isPointer(goType) || isArray(goType)) {
+			// Note: we override the AnswerCallbackQuery 'text' field to not be a pointer, because "" and nil have the same outcome here.
+			if f.Name == "text" && strings.Contains(f.Description, "nothing will be shown") {
+				return goType, nil
+			}
 			return "*" + goType, nil
 		}
 

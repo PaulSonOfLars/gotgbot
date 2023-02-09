@@ -119,7 +119,7 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *
 // AnswerCallbackQueryOpts is the set of optional fields for Bot.AnswerCallbackQuery.
 type AnswerCallbackQueryOpts struct {
 	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
-	Text *string
+	Text string
 	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
 	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
@@ -138,9 +138,7 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 	v := map[string]string{}
 	v["callback_query_id"] = callbackQueryId
 	if opts != nil {
-		if opts.Text != nil {
-			v["text"] = *opts.Text
-		}
+		v["text"] = opts.Text
 		v["show_alert"] = strconv.FormatBool(opts.ShowAlert)
 		v["url"] = opts.Url
 		if opts.CacheTime != 0 {
