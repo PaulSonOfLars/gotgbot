@@ -258,11 +258,14 @@ func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string
 	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
 }
 
+var ErrUnsupportedStringParameter = errors.New("method does not support string parameters")
+var ErrUnsupportedInputFileType = errors.New("unsupported type for InputFile")
+
 func attachFile(key string, file InputFile, v map[string]string, data map[string]NamedReader, allowString bool) error {
 	switch m := file.(type) {
 	case string:
 		if !allowString {
-			return errors.New("method does not support string parameters")
+			return ErrUnsupportedStringParameter
 		}
 
 		v[key] = m
@@ -280,7 +283,7 @@ func attachFile(key string, file InputFile, v map[string]string, data map[string
 		data[key] = NamedFile{File: bytes.NewReader(m)}
 
 	default:
-		return fmt.Errorf("unknown type for InputFile with key %s: %T", key, file)
+		return fmt.Errorf("%w: key %s with type %T", ErrUnsupportedInputFileType, key, file)
 	}
 	return nil
 }
