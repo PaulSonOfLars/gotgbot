@@ -277,12 +277,11 @@ if %s != %s {
 }`, goParam, getDefaultTypeVal(d, fieldType), addURLParam(f, stringer, goParam)), false, nil
 			}
 
-			if methodName == "editForumTopic" && f.Name == "icon_custom_emoji_id" {
+			if isPointer(fieldType) {
 				return fmt.Sprintf(`
-// icon_custom_emoji_id has different behaviour if it's empty, or if it's unspecified; so we need to handle that.
 if %s != nil {
 	v["%s"] = %s
-}`, goParam, f.Name, fmt.Sprintf(goTypeStringer("*"+fieldType), goParam)), false, nil
+}`, goParam, f.Name, fmt.Sprintf(goTypeStringer(fieldType), goParam)), false, nil
 			}
 		}
 
@@ -335,7 +334,7 @@ if %s != nil {
 		}
 
 	default:
-		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
+		if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\nif " + goParam + " != nil {")
 		}
 
@@ -345,7 +344,7 @@ if %s != nil {
 		bd.WriteString("\n	}")
 		bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
 
-		if isArray(fieldType) || fieldType == tgTypeReplyMarkup {
+		if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
 			bd.WriteString("\n}")
 		}
 	}
@@ -384,12 +383,6 @@ func (m MethodDescription) getArgs() (string, string, error) {
 		}
 
 		optionals.WriteString("\n// " + f.Description)
-		if m.Name == "editForumTopic" && f.Name == "icon_custom_emoji_id" {
-			// Special case for the editForumTopic method's icon_custom_emoji_id param, which has different behaviour
-			// between empty and unset values.
-			optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), "*"+fieldType))
-			continue
-		}
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 	}
 

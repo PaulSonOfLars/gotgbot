@@ -265,3 +265,11 @@ func MediaGroup(msg *gotgbot.Message) bool {
 func IsAutomaticForward(msg *gotgbot.Message) bool {
 	return msg.IsAutomaticForward
 }
+
+func UserShared(msg *gotgbot.Message) bool {
+	return msg.UserShared != nil
+}
+
+func ChatShared(msg *gotgbot.Message) bool {
+	return msg.ChatShared != nil
+}

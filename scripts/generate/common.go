@@ -118,10 +118,14 @@ func goTypeStringer(t string) string {
 	switch t {
 	case "int64":
 		return "strconv.FormatInt(%s, 10)"
+	case "*int64":
+		return "strconv.FormatInt(*%s, 10)"
 	case "float64":
 		return "strconv.FormatFloat(%s, 'f', -1, 64)"
 	case "bool":
 		return "strconv.FormatBool(%s)"
+	case "*bool":
+		return "strconv.FormatBool(*%s)"
 	case "string":
 		return "%s"
 	case "*string":

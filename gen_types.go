@@ -443,7 +443,7 @@ type ChatAdministratorRights struct {
 	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	// True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool `json:"can_restrict_members"`
-	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by the user)
 	CanPromoteMembers bool `json:"can_promote_members"`
 	// True, if the user is allowed to change the chat title, photo and other settings
 	CanChangeInfo bool `json:"can_change_info"`
@@ -489,6 +489,8 @@ type ChatJoinRequest struct {
 	Chat Chat `json:"chat"`
 	// User that sent the join request
 	From User `json:"from"`
+	// Identifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 24 hours to send messages until the join request is processed, assuming no other administrator contacted the user.
+	UserChatId int64 `json:"user_chat_id"`
 	// Date the request was sent in Unix time
 	Date int64 `json:"date"`
 	// Optional. Bio of the user.
@@ -542,7 +544,7 @@ type MergedChatMember struct {
 	CanManageVideoChats bool `json:"can_manage_video_chats,omitempty"`
 	// Optional. True, if the administrator can restrict, ban or unban chat members (Only for administrator)
 	CanRestrictMembers bool `json:"can_restrict_members,omitempty"`
-	// Optional. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user) (Only for administrator)
+	// Optional. True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by the user) (Only for administrator)
 	CanPromoteMembers bool `json:"can_promote_members,omitempty"`
 	// Optional. True, if the user is allowed to change the chat title, photo and other settings (Only for administrator, restricted)
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
@@ -558,10 +560,20 @@ type MergedChatMember struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
-	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues (Only for restricted)
+	// Optional. True, if the user is allowed to send text messages, contacts, invoices, locations and venues (Only for restricted)
 	CanSendMessages bool `json:"can_send_messages,omitempty"`
-	// Optional. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes (Only for restricted)
-	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
+	// Optional. True, if the user is allowed to send audios (Only for restricted)
+	CanSendAudios bool `json:"can_send_audios,omitempty"`
+	// Optional. True, if the user is allowed to send documents (Only for restricted)
+	CanSendDocuments bool `json:"can_send_documents,omitempty"`
+	// Optional. True, if the user is allowed to send photos (Only for restricted)
+	CanSendPhotos bool `json:"can_send_photos,omitempty"`
+	// Optional. True, if the user is allowed to send videos (Only for restricted)
+	CanSendVideos bool `json:"can_send_videos,omitempty"`
+	// Optional. True, if the user is allowed to send video notes (Only for restricted)
+	CanSendVideoNotes bool `json:"can_send_video_notes,omitempty"`
+	// Optional. True, if the user is allowed to send voice notes (Only for restricted)
+	CanSendVoiceNotes bool `json:"can_send_voice_notes,omitempty"`
 	// Optional. True, if the user is allowed to send polls (Only for restricted)
 	CanSendPolls bool `json:"can_send_polls,omitempty"`
 	// Optional. True, if the user is allowed to send animations, games, stickers and use inline bots (Only for restricted)
@@ -696,7 +708,7 @@ type ChatMemberAdministrator struct {
 	CanManageVideoChats bool `json:"can_manage_video_chats"`
 	// True, if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool `json:"can_restrict_members"`
-	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	// True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by the user)
 	CanPromoteMembers bool `json:"can_promote_members"`
 	// True, if the user is allowed to change the chat title, photo and other settings
 	CanChangeInfo bool `json:"can_change_info"`
@@ -942,6 +954,26 @@ type ChatMemberRestricted struct {
 	User User `json:"user"`
 	// True, if the user is a member of the chat at the moment of the request
 	IsMember bool `json:"is_member"`
+	// True, if the user is allowed to send text messages, contacts, invoices, locations and venues
+	CanSendMessages bool `json:"can_send_messages"`
+	// True, if the user is allowed to send audios
+	CanSendAudios bool `json:"can_send_audios"`
+	// True, if the user is allowed to send documents
+	CanSendDocuments bool `json:"can_send_documents"`
+	// True, if the user is allowed to send photos
+	CanSendPhotos bool `json:"can_send_photos"`
+	// True, if the user is allowed to send videos
+	CanSendVideos bool `json:"can_send_videos"`
+	// True, if the user is allowed to send video notes
+	CanSendVideoNotes bool `json:"can_send_video_notes"`
+	// True, if the user is allowed to send voice notes
+	CanSendVoiceNotes bool `json:"can_send_voice_notes"`
+	// True, if the user is allowed to send polls
+	CanSendPolls bool `json:"can_send_polls"`
+	// True, if the user is allowed to send animations, games, stickers and use inline bots
+	CanSendOtherMessages bool `json:"can_send_other_messages"`
+	// True, if the user is allowed to add web page previews to their messages
+	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
 	// True, if the user is allowed to change the chat title, photo and other settings
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
@@ -950,16 +982,6 @@ type ChatMemberRestricted struct {
 	CanPinMessages bool `json:"can_pin_messages"`
 	// True, if the user is allowed to create forum topics
 	CanManageTopics bool `json:"can_manage_topics"`
-	// True, if the user is allowed to send text messages, contacts, locations and venues
-	CanSendMessages bool `json:"can_send_messages"`
-	// True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes
-	CanSendMediaMessages bool `json:"can_send_media_messages"`
-	// True, if the user is allowed to send polls
-	CanSendPolls bool `json:"can_send_polls"`
-	// True, if the user is allowed to send animations, games, stickers and use inline bots
-	CanSendOtherMessages bool `json:"can_send_other_messages"`
-	// True, if the user is allowed to add web page previews to their messages
-	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
 	// Date when restrictions will be lifted for this user; unix time. If 0, then the user is restricted forever
 	UntilDate int64 `json:"until_date"`
 }
@@ -980,15 +1002,20 @@ func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 		Status:                "restricted",
 		User:                  v.User,
 		IsMember:              v.IsMember,
+		CanSendMessages:       v.CanSendMessages,
+		CanSendAudios:         v.CanSendAudios,
+		CanSendDocuments:      v.CanSendDocuments,
+		CanSendPhotos:         v.CanSendPhotos,
+		CanSendVideos:         v.CanSendVideos,
+		CanSendVideoNotes:     v.CanSendVideoNotes,
+		CanSendVoiceNotes:     v.CanSendVoiceNotes,
+		CanSendPolls:          v.CanSendPolls,
+		CanSendOtherMessages:  v.CanSendOtherMessages,
+		CanAddWebPagePreviews: v.CanAddWebPagePreviews,
 		CanChangeInfo:         v.CanChangeInfo,
 		CanInviteUsers:        v.CanInviteUsers,
 		CanPinMessages:        v.CanPinMessages,
 		CanManageTopics:       v.CanManageTopics,
-		CanSendMessages:       v.CanSendMessages,
-		CanSendMediaMessages:  v.CanSendMediaMessages,
-		CanSendPolls:          v.CanSendPolls,
-		CanSendOtherMessages:  v.CanSendOtherMessages,
-		CanAddWebPagePreviews: v.CanAddWebPagePreviews,
 		UntilDate:             v.UntilDate,
 	}
 }
@@ -1062,15 +1089,25 @@ func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 // ChatPermissions Describes actions that a non-administrator user is allowed to take in a chat.
 // https://core.telegram.org/bots/api#chatpermissions
 type ChatPermissions struct {
-	// Optional. True, if the user is allowed to send text messages, contacts, locations and venues
+	// Optional. True, if the user is allowed to send text messages, contacts, invoices, locations and venues
 	CanSendMessages bool `json:"can_send_messages,omitempty"`
-	// Optional. True, if the user is allowed to send audios, documents, photos, videos, video notes and voice notes, implies can_send_messages
-	CanSendMediaMessages bool `json:"can_send_media_messages,omitempty"`
-	// Optional. True, if the user is allowed to send polls, implies can_send_messages
+	// Optional. True, if the user is allowed to send audios
+	CanSendAudios bool `json:"can_send_audios,omitempty"`
+	// Optional. True, if the user is allowed to send documents
+	CanSendDocuments bool `json:"can_send_documents,omitempty"`
+	// Optional. True, if the user is allowed to send photos
+	CanSendPhotos bool `json:"can_send_photos,omitempty"`
+	// Optional. True, if the user is allowed to send videos
+	CanSendVideos bool `json:"can_send_videos,omitempty"`
+	// Optional. True, if the user is allowed to send video notes
+	CanSendVideoNotes bool `json:"can_send_video_notes,omitempty"`
+	// Optional. True, if the user is allowed to send voice notes
+	CanSendVoiceNotes bool `json:"can_send_voice_notes,omitempty"`
+	// Optional. True, if the user is allowed to send polls
 	CanSendPolls bool `json:"can_send_polls,omitempty"`
-	// Optional. True, if the user is allowed to send animations, games, stickers and use inline bots, implies can_send_media_messages
+	// Optional. True, if the user is allowed to send animations, games, stickers and use inline bots
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
-	// Optional. True, if the user is allowed to add web page previews to their messages, implies can_send_media_messages
+	// Optional. True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
 	// Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
@@ -1093,6 +1130,15 @@ type ChatPhoto struct {
 	BigFileId string `json:"big_file_id"`
 	// Unique file identifier of big (640x640) chat photo, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	BigFileUniqueId string `json:"big_file_unique_id"`
+}
+
+// ChatShared This object contains information about the chat whose identifier was shared with the bot using a KeyboardButtonRequestChat button.
+// https://core.telegram.org/bots/api#chatshared
+type ChatShared struct {
+	// Identifier of the request
+	RequestId int64 `json:"request_id"`
+	// Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
+	ChatId int64 `json:"chat_id"`
 }
 
 // ChosenInlineResult Represents a result of an inline query that was chosen by the user and sent to their chat partner.
@@ -3512,14 +3558,19 @@ type Invoice struct {
 	TotalAmount int64 `json:"total_amount"`
 }
 
-// KeyboardButton This object represents one button of the reply keyboard. For simple text buttons String can be used instead of this object to specify text of the button. Optional fields web_app, request_contact, request_location, and request_poll are mutually exclusive.
+// KeyboardButton This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_user, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
 // Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
 // Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
 // Note: web_app option will only work in Telegram versions released after 16 April, 2022. Older clients will display unsupported message.
+// Note: request_user and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
 // https://core.telegram.org/bots/api#keyboardbutton
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
 	Text string `json:"text"`
+	// Optional. If specified, pressing the button will open a list of suitable users. Tapping on any user will send their identifier to the bot in a "user_shared" service message. Available in private chats only.
+	RequestUser *KeyboardButtonRequestUser `json:"request_user,omitempty"`
+	// Optional. If specified, pressing the button will open a list of suitable chats. Tapping on a chat will send its identifier to the bot in a "chat_shared" service message. Available in private chats only.
+	RequestChat *KeyboardButtonRequestChat `json:"request_chat,omitempty"`
 	// Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only.
 	RequestContact bool `json:"request_contact,omitempty"`
 	// Optional. If True, the user's current location will be sent when the button is pressed. Available in private chats only.
@@ -3535,6 +3586,38 @@ type KeyboardButton struct {
 type KeyboardButtonPollType struct {
 	// Optional. If quiz is passed, the user will be allowed to create only polls in the quiz mode. If regular is passed, only regular polls will be allowed. Otherwise, the user will be allowed to create a poll of any type.
 	Type string `json:"type,omitempty"`
+}
+
+// KeyboardButtonRequestChat This object defines the criteria used to request a suitable chat. The identifier of the selected chat will be shared with the bot when the corresponding button is pressed.
+// https://core.telegram.org/bots/api#keyboardbuttonrequestchat
+type KeyboardButtonRequestChat struct {
+	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
+	RequestId int64 `json:"request_id"`
+	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
+	ChatIsChannel bool `json:"chat_is_channel"`
+	// Optional. Pass True to request a forum supergroup, pass False to request a non-forum chat. If not specified, no additional restrictions are applied.
+	ChatIsForum *bool `json:"chat_is_forum,omitempty"`
+	// Optional. Pass True to request a supergroup or a channel with a username, pass False to request a chat without a username. If not specified, no additional restrictions are applied.
+	ChatHasUsername *bool `json:"chat_has_username,omitempty"`
+	// Optional. Pass True to request a chat owned by the user. Otherwise, no additional restrictions are applied.
+	ChatIsCreated bool `json:"chat_is_created,omitempty"`
+	// Optional. A JSON-serialized object listing the required administrator rights of the user in the chat. The rights must be a superset of bot_administrator_rights. If not specified, no additional restrictions are applied.
+	UserAdministratorRights *ChatAdministratorRights `json:"user_administrator_rights,omitempty"`
+	// Optional. A JSON-serialized object listing the required administrator rights of the bot in the chat. The rights must be a subset of user_administrator_rights. If not specified, no additional restrictions are applied.
+	BotAdministratorRights *ChatAdministratorRights `json:"bot_administrator_rights,omitempty"`
+	// Optional. Pass True to request a chat with the bot as a member. Otherwise, no additional restrictions are applied.
+	BotIsMember bool `json:"bot_is_member,omitempty"`
+}
+
+// KeyboardButtonRequestUser This object defines the criteria used to request a suitable user. The identifier of the selected user will be shared with the bot when the corresponding button is pressed.
+// https://core.telegram.org/bots/api#keyboardbuttonrequestuser
+type KeyboardButtonRequestUser struct {
+	// Signed 32-bit identifier of the request, which will be received back in the UserShared object. Must be unique within the message
+	RequestId int64 `json:"request_id"`
+	// Optional. Pass True to request a bot, pass False to request a regular user. If not specified, no additional restrictions are applied.
+	UserIsBot *bool `json:"user_is_bot,omitempty"`
+	// Optional. Pass True to request a premium user, pass False to request a non-premium user. If not specified, no additional restrictions are applied.
+	UserIsPremium *bool `json:"user_is_premium,omitempty"`
 }
 
 // LabeledPrice This object represents a portion of the price for goods or services.
@@ -3572,7 +3655,7 @@ type LoginUrl struct {
 	// Optional. New text of the button in forwarded messages.
 	ForwardText string `json:"forward_text,omitempty"`
 	// Optional. Username of a bot, which will be used for user authorization. See Setting up a bot for more details. If not specified, the current bot's username will be assumed. The url's domain must be the same as the domain linked with the bot. See Linking your domain to the bot for more details.
-	BotUsername string `json:"bot_username,omitempty"`
+	BotUsername *string `json:"bot_username,omitempty"`
 	// Optional. Pass True to request the permission for your bot to send messages to the user.
 	RequestWriteAccess bool `json:"request_write_access,omitempty"`
 }
@@ -3903,6 +3986,10 @@ type Message struct {
 	Invoice *Invoice `json:"invoice,omitempty"`
 	// Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
 	SuccessfulPayment *SuccessfulPayment `json:"successful_payment,omitempty"`
+	// Optional. Service message: a user was shared with the bot
+	UserShared *UserShared `json:"user_shared,omitempty"`
+	// Optional. Service message: a chat was shared with the bot
+	ChatShared *ChatShared `json:"chat_shared,omitempty"`
 	// Optional. The domain name of the website on which the user has logged in. More about Telegram Login: https://core.telegram.org/widgets/login
 	ConnectedWebsite string `json:"connected_website,omitempty"`
 	// Optional. Service message: the user allowed the bot added to the attachment menu to write messages
@@ -4865,6 +4952,15 @@ type UserProfilePhotos struct {
 	TotalCount int64 `json:"total_count"`
 	// Requested profile pictures (in up to 4 sizes each)
 	Photos [][]PhotoSize `json:"photos,omitempty"`
+}
+
+// UserShared This object contains information about the user whose identifier was shared with the bot using a KeyboardButtonRequestUser button.
+// https://core.telegram.org/bots/api#usershared
+type UserShared struct {
+	// Identifier of the request
+	RequestId int64 `json:"request_id"`
+	// Identifier of the shared user. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the user and could be unable to use this identifier, unless the user is already known to the bot by some other means.
+	UserId int64 `json:"user_id"`
 }
 
 // Venue This object represents a venue.

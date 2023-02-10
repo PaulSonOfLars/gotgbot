@@ -518,7 +518,7 @@ type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
-	Caption string
+	Caption *string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
@@ -552,7 +552,9 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
-		v["caption"] = opts.Caption
+		if opts.Caption != nil {
+			v["caption"] = *opts.Caption
+		}
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			bs, err := json.Marshal(opts.CaptionEntities)
@@ -1209,7 +1211,6 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 	v["message_thread_id"] = strconv.FormatInt(messageThreadId, 10)
 	if opts != nil {
 		v["name"] = opts.Name
-		// icon_custom_emoji_id has different behaviour if it's empty, or if it's unspecified; so we need to handle that.
 		if opts.IconCustomEmojiId != nil {
 			v["icon_custom_emoji_id"] = *opts.IconCustomEmojiId
 		}
@@ -1731,7 +1732,7 @@ type GetChatMemberOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// GetChatMember Use this method to get information about a member of a chat. The method is guaranteed to work only if the bot is an administrator in the chat. Returns a ChatMember object on success.
+// GetChatMember Use this method to get information about a member of a chat. The method is only guaranteed to work for other users if the bot is an administrator in the chat. Returns a ChatMember object on success.
 // - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 // - userId (type int64): Unique identifier of the target user
 // - opts (type GetChatMemberOpts): All optional parameters.
@@ -1785,7 +1786,7 @@ func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (
 // GetChatMenuButtonOpts is the set of optional fields for Bot.GetChatMenuButton.
 type GetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
-	ChatId int64
+	ChatId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -1796,8 +1797,8 @@ type GetChatMenuButtonOpts struct {
 func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.ChatId != 0 {
-			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		if opts.ChatId != nil {
+			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
 	}
 
@@ -2320,7 +2321,7 @@ type PromoteChatMemberOpts struct {
 	CanManageVideoChats bool
 	// Pass True if the administrator can restrict, ban or unban chat members
 	CanRestrictMembers bool
-	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that he has promoted, directly or indirectly (promoted by administrators that were appointed by him)
+	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
 	// Pass True if the administrator can change chat title, photo and other settings
 	CanChangeInfo bool
@@ -2432,6 +2433,8 @@ func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTo
 
 // RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember.
 type RestrictChatMemberOpts struct {
+	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
+	UseIndependentChatPermissions bool
 	// Date when restrictions will be lifted for the user, unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 	UntilDate int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2454,6 +2457,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 	}
 	v["permissions"] = string(bs)
 	if opts != nil {
+		v["use_independent_chat_permissions"] = strconv.FormatBool(opts.UseIndependentChatPermissions)
 		if opts.UntilDate != 0 {
 			v["until_date"] = strconv.FormatInt(opts.UntilDate, 10)
 		}
@@ -4266,7 +4270,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // SetChatMenuButtonOpts is the set of optional fields for Bot.SetChatMenuButton.
 type SetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
-	ChatId int64
+	ChatId *int64
 	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 	MenuButton MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4279,8 +4283,8 @@ type SetChatMenuButtonOpts struct {
 func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.ChatId != 0 {
-			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		if opts.ChatId != nil {
+			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
 		bs, err := json.Marshal(opts.MenuButton)
 		if err != nil {
@@ -4305,6 +4309,8 @@ func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 
 // SetChatPermissionsOpts is the set of optional fields for Bot.SetChatPermissions.
 type SetChatPermissionsOpts struct {
+	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
+	UseIndependentChatPermissions bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4322,6 +4328,9 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, op
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
 	}
 	v["permissions"] = string(bs)
+	if opts != nil {
+		v["use_independent_chat_permissions"] = strconv.FormatBool(opts.UseIndependentChatPermissions)
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4553,7 +4562,7 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 // SetMyDefaultAdministratorRightsOpts is the set of optional fields for Bot.SetMyDefaultAdministratorRights.
 type SetMyDefaultAdministratorRightsOpts struct {
 	// A JSON-serialized object describing new default administrator rights. If not specified, the default administrator rights will be cleared.
-	Rights ChatAdministratorRights
+	Rights *ChatAdministratorRights
 	// Pass True to change the default administrator rights of the bot in channels. Otherwise, the default administrator rights of the bot for groups and supergroups will be changed.
 	ForChannels bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4566,11 +4575,13 @@ type SetMyDefaultAdministratorRightsOpts struct {
 func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorRightsOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		bs, err := json.Marshal(opts.Rights)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field rights: %w", err)
+		if opts.Rights != nil {
+			bs, err := json.Marshal(opts.Rights)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field rights: %w", err)
+			}
+			v["rights"] = string(bs)
 		}
-		v["rights"] = string(bs)
 		v["for_channels"] = strconv.FormatBool(opts.ForChannels)
 	}
 
@@ -5035,7 +5046,7 @@ func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, 
 // UnpinChatMessageOpts is the set of optional fields for Bot.UnpinChatMessage.
 type UnpinChatMessageOpts struct {
 	// Identifier of a message to unpin. If not specified, the most recent pinned message (by sending date) will be unpinned.
-	MessageId int64
+	MessageId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -5048,8 +5059,8 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
-		if opts.MessageId != 0 {
-			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
+		if opts.MessageId != nil {
+			v["message_id"] = strconv.FormatInt(*opts.MessageId, 10)
 		}
 	}
 
