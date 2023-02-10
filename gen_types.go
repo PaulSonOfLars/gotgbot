@@ -3591,7 +3591,7 @@ type KeyboardButtonPollType struct {
 // KeyboardButtonRequestChat This object defines the criteria used to request a suitable chat. The identifier of the selected chat will be shared with the bot when the corresponding button is pressed.
 // https://core.telegram.org/bots/api#keyboardbuttonrequestchat
 type KeyboardButtonRequestChat struct {
-	// Signed 32-bit identifier of the request
+	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
 	RequestId int64 `json:"request_id"`
 	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
 	ChatIsChannel bool `json:"chat_is_channel"`
@@ -3601,7 +3601,7 @@ type KeyboardButtonRequestChat struct {
 	ChatHasUsername *bool `json:"chat_has_username,omitempty"`
 	// Optional. Pass True to request a chat owned by the user. Otherwise, no additional restrictions are applied.
 	ChatIsCreated bool `json:"chat_is_created,omitempty"`
-	// Optional. A JSON-serialized object listing the required administrator rights of the user in the chat. If not specified, no additional restrictions are applied.
+	// Optional. A JSON-serialized object listing the required administrator rights of the user in the chat. The rights must be a superset of bot_administrator_rights. If not specified, no additional restrictions are applied.
 	UserAdministratorRights *ChatAdministratorRights `json:"user_administrator_rights,omitempty"`
 	// Optional. A JSON-serialized object listing the required administrator rights of the bot in the chat. The rights must be a subset of user_administrator_rights. If not specified, no additional restrictions are applied.
 	BotAdministratorRights *ChatAdministratorRights `json:"bot_administrator_rights,omitempty"`
@@ -3612,7 +3612,7 @@ type KeyboardButtonRequestChat struct {
 // KeyboardButtonRequestUser This object defines the criteria used to request a suitable user. The identifier of the selected user will be shared with the bot when the corresponding button is pressed.
 // https://core.telegram.org/bots/api#keyboardbuttonrequestuser
 type KeyboardButtonRequestUser struct {
-	// Signed 32-bit identifier of the request
+	// Signed 32-bit identifier of the request, which will be received back in the UserShared object. Must be unique within the message
 	RequestId int64 `json:"request_id"`
 	// Optional. Pass True to request a bot, pass False to request a regular user. If not specified, no additional restrictions are applied.
 	UserIsBot *bool `json:"user_is_bot,omitempty"`
