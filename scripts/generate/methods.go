@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	readerBranchTmpl                = template.Must(template.New("readerBranch").Parse(readerBranch))
-	stringOrReaderBranchTmpl        = template.Must(template.New("stringOrReaderBranch").Parse(stringOrReaderBranch))
-	inputMediaParamsBranchTmpl      = template.Must(template.New("inputMediaParamsBranch").Parse(inputMediaParamsBranch))
-	inputMediaArrayParamsBranchTmpl = template.Must(template.New("inputMediaArrayParamsBranch").Parse(inputMediaArrayParamsBranch))
+	readerBranchTmpl           = template.Must(template.New("readerBranch").Parse(readerBranch))
+	stringOrReaderBranchTmpl   = template.Must(template.New("stringOrReaderBranch").Parse(stringOrReaderBranch))
+	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
+	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -309,28 +309,28 @@ if %s != nil {
 			return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
 		}
 
-	case tgTypeInputMedia:
+	case tgTypeInputMedia, tgTypeInputSticker:
 		hasData = true
 
-		err = inputMediaParamsBranchTmpl.Execute(&bd, readerBranchesData{
+		err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
 			GoParam:       goParam,
 			DefaultReturn: defaultRetVal,
 			Name:          f.Name,
 		})
 		if err != nil {
-			return "", false, fmt.Errorf("failed to execute inputmedia branch template: %w", err)
+			return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker branch template: %w", err)
 		}
 
-	case "[]" + tgTypeInputMedia:
+	case "[]" + tgTypeInputMedia, "[]" + tgTypeInputSticker:
 		hasData = true
 
-		err = inputMediaArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
+		err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
 			GoParam:       goParam,
 			DefaultReturn: defaultRetVal,
 			Name:          f.Name,
 		})
 		if err != nil {
-			return "", false, fmt.Errorf("failed to execute inputmedia array branch template: %w", err)
+			return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
 		}
 
 	default:
@@ -449,26 +449,33 @@ if {{.GoParam}} != nil {
 	}
 }`
 
-const inputMediaParamsBranch = `
-inputMediaBs, err := {{.GoParam}}.InputMediaParams("{{.Name}}" , data)
+const inputStickerParamsBranch = `
+inputStickerBs, err := {{.GoParam}}.InputStickerParams("{{.Name}}" , data)
 if err != nil {
 	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
 }
-v["{{.Name}}"] = string(inputMediaBs)`
+v["{{.Name}}"] = string(inputStickerBs)`
 
-const inputMediaArrayParamsBranch = `
+const inputParamsBranch = `
+inputBs, err := {{.GoParam}}.InputParams("{{.Name}}" , data)
+if err != nil {
+	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
+}
+v["{{.Name}}"] = string(inputBs)`
+
+const inputArrayParamsBranch = `
 if {{.GoParam}} != nil {
 	var rawList []json.RawMessage
 	for idx, im := range {{.GoParam}} {
-		inputMediaBs, err := im.InputMediaParams("{{.Name}}" + strconv.Itoa(idx), data)
+		inputBs, err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
 		if err != nil {
-			return {{.DefaultReturn}}, fmt.Errorf("failed to marshal InputMedia list item %d for field {{.Name}}: %w", idx, err)
+			return {{.DefaultReturn}}, fmt.Errorf("failed to marshal list item %d for field {{.Name}}: %w", idx, err)
 		}
-		rawList = append(rawList, inputMediaBs)
+		rawList = append(rawList, inputBs)
 	}
 	bs, err := json.Marshal(rawList)
 	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list of InputMedia for field: {{.Name}} %w", err)
+		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list for field: {{.Name}} %w", err)
 	}
 	v["{{.Name}}"] = string(bs)
 }`

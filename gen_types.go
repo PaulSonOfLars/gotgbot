@@ -10,6 +10,7 @@ import (
 )
 
 type ReplyMarkup interface {
+	// replyMarkup exists to avoid external types implementing this interface.
 	replyMarkup()
 }
 
@@ -79,6 +80,7 @@ type BotCommand struct {
 // https://core.telegram.org/bots/api#botcommandscope
 type BotCommandScope interface {
 	GetType() string
+	// botCommandScope exists to avoid external types implementing this interface.
 	botCommandScope()
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
@@ -533,6 +535,7 @@ type ChatLocation struct {
 type ChatMember interface {
 	GetStatus() string
 	GetUser() User
+	// chatMember exists to avoid external types implementing this interface.
 	chatMember()
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
@@ -1429,6 +1432,7 @@ type InlineQuery struct {
 type InlineQueryResult interface {
 	GetType() string
 	GetId() string
+	// inlineQueryResult exists to avoid external types implementing this interface.
 	inlineQueryResult()
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
@@ -3035,9 +3039,10 @@ func (v InputLocationMessageContent) inputMessageContent() {}
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFile
+	// inputMedia exists to avoid external types implementing this interface.
 	inputMedia()
-	// InputMediaParams allows for uploading InputMedia files with attachments.
-	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
+	// InputParams allows for uploading attachments with files.
+	InputParams(string, map[string]NamedReader) ([]byte, error)
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
 }
@@ -3115,28 +3120,6 @@ type InputMediaAnimation struct {
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
 }
 
-func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
-}
-
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaAnimation) GetType() string {
 	return "animation"
@@ -3179,6 +3162,28 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 // InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAnimation) inputMedia() {}
 
+func (v InputMediaAnimation) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMediaAudio Represents an audio file to be treated as music to be sent.
 // https://core.telegram.org/bots/api#inputmediaaudio
 type InputMediaAudio struct {
@@ -3198,28 +3203,6 @@ type InputMediaAudio struct {
 	Performer string `json:"performer,omitempty"`
 	// Optional. Title of the audio
 	Title string `json:"title,omitempty"`
-}
-
-func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3263,6 +3246,28 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 // InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAudio) inputMedia() {}
 
+func (v InputMediaAudio) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMediaDocument Represents a general file to be sent.
 // https://core.telegram.org/bots/api#inputmediadocument
 type InputMediaDocument struct {
@@ -3278,28 +3283,6 @@ type InputMediaDocument struct {
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
 	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album.
 	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
-}
-
-func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3341,22 +3324,7 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 // InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaDocument) inputMedia() {}
 
-// InputMediaPhoto Represents a photo to be sent.
-// https://core.telegram.org/bots/api#inputmediaphoto
-type InputMediaPhoto struct {
-	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
-	// Optional. Caption of the photo to be sent, 0-1024 characters after entities parsing
-	Caption string `json:"caption,omitempty"`
-	// Optional. Mode for parsing entities in the photo caption. See formatting options for more details.
-	ParseMode string `json:"parse_mode,omitempty"`
-	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True if the photo needs to be covered with a spoiler animation
-	HasSpoiler bool `json:"has_spoiler,omitempty"`
-}
-
-func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputMediaDocument) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
 		switch m := v.Media.(type) {
 		case string:
@@ -3371,11 +3339,26 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 			data[mediaName] = NamedFile{File: m}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
 		}
 	}
 
 	return json.Marshal(v)
+}
+
+// InputMediaPhoto Represents a photo to be sent.
+// https://core.telegram.org/bots/api#inputmediaphoto
+type InputMediaPhoto struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Caption of the photo to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the photo caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True if the photo needs to be covered with a spoiler animation
+	HasSpoiler bool `json:"has_spoiler,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3416,6 +3399,28 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaPhoto) inputMedia() {}
 
+func (v InputMediaPhoto) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMediaVideo Represents a video to be sent.
 // https://core.telegram.org/bots/api#inputmediavideo
 type InputMediaVideo struct {
@@ -3439,28 +3444,6 @@ type InputMediaVideo struct {
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 	// Optional. Pass True if the video needs to be covered with a spoiler animation
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
-}
-
-func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3506,6 +3489,28 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 // InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaVideo) inputMedia() {}
 
+func (v InputMediaVideo) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
 // - InputTextMessageContent
 // - InputLocationMessageContent
@@ -3514,6 +3519,7 @@ func (v InputMediaVideo) inputMedia() {}
 // - InputInvoiceMessageContent
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
+	// inputMessageContent exists to avoid external types implementing this interface.
 	inputMessageContent()
 }
 
@@ -3528,6 +3534,28 @@ type InputSticker struct {
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 	// Optional. List of 0-20 search keywords for the sticker with total length of up to 64 characters. For "regular" and "custom_emoji" stickers only.
 	Keywords []string `json:"keywords,omitempty"`
+}
+
+func (v InputSticker) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Sticker != nil {
+		switch m := v.Sticker.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Sticker = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Sticker = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Sticker)
+		}
+	}
+
+	return json.Marshal(v)
 }
 
 // InputTextMessageContent Represents the content of a text message to be sent as the result of an inline query.
@@ -3708,6 +3736,7 @@ type MaskPosition struct {
 // https://core.telegram.org/bots/api#menubutton
 type MenuButton interface {
 	GetType() string
+	// menuButton exists to avoid external types implementing this interface.
 	menuButton()
 	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
 	MergeMenuButton() MergedMenuButton
@@ -4121,6 +4150,7 @@ type PassportElementError interface {
 	GetSource() string
 	GetType() string
 	GetMessage() string
+	// passportElementError exists to avoid external types implementing this interface.
 	passportElementError()
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError

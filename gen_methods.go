@@ -25,20 +25,21 @@ type AddStickerToSetOpts struct {
 // https://core.telegram.org/bots/api#addstickertoset
 func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]string{}
+	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
-	bs, err := json.Marshal(sticker)
+	inputBs, err := sticker.InputParams("sticker", data)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(bs)
+	v["sticker"] = string(inputBs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Request("addStickerToSet", v, nil, reqOpts)
+	r, err := bot.Request("addStickerToSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -731,13 +732,22 @@ type CreateNewStickerSetOpts struct {
 // https://core.telegram.org/bots/api#createnewstickerset
 func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, stickers []InputSticker, stickerFormat string, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]string{}
+	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["title"] = title
 	if stickers != nil {
-		bs, err := json.Marshal(stickers)
+		var rawList []json.RawMessage
+		for idx, im := range stickers {
+			inputBs, err := im.InputParams("stickers"+strconv.Itoa(idx), data)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal list item %d for field stickers: %w", idx, err)
+			}
+			rawList = append(rawList, inputBs)
+		}
+		bs, err := json.Marshal(rawList)
 		if err != nil {
-			return false, fmt.Errorf("failed to marshal field stickers: %w", err)
+			return false, fmt.Errorf("failed to marshal raw json list for field: stickers %w", err)
 		}
 		v["stickers"] = string(bs)
 	}
@@ -752,7 +762,7 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, sti
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Request("createNewStickerSet", v, nil, reqOpts)
+	r, err := bot.Request("createNewStickerSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1326,11 +1336,11 @@ type EditMessageMediaOpts struct {
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	inputMediaBs, err := media.InputMediaParams("media", data)
+	inputBs, err := media.InputParams("media", data)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
 	}
-	v["media"] = string(inputMediaBs)
+	v["media"] = string(inputBs)
 	if opts != nil {
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
@@ -3326,15 +3336,15 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
-			inputMediaBs, err := im.InputMediaParams("media"+strconv.Itoa(idx), data)
+			inputBs, err := im.InputParams("media"+strconv.Itoa(idx), data)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal InputMedia list item %d for field media: %w", idx, err)
+				return nil, fmt.Errorf("failed to marshal list item %d for field media: %w", idx, err)
 			}
-			rawList = append(rawList, inputMediaBs)
+			rawList = append(rawList, inputBs)
 		}
 		bs, err := json.Marshal(rawList)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal raw json list of InputMedia for field: media %w", err)
+			return nil, fmt.Errorf("failed to marshal raw json list for field: media %w", err)
 		}
 		v["media"] = string(bs)
 	}
