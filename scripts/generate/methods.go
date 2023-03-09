@@ -449,13 +449,6 @@ if {{.GoParam}} != nil {
 	}
 }`
 
-const inputStickerParamsBranch = `
-inputStickerBs, err := {{.GoParam}}.InputStickerParams("{{.Name}}" , data)
-if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
-}
-v["{{.Name}}"] = string(inputStickerBs)`
-
 const inputParamsBranch = `
 inputBs, err := {{.GoParam}}.InputParams("{{.Name}}" , data)
 if err != nil {
