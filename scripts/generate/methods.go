@@ -190,8 +190,6 @@ func (m MethodDescription) description() (string, error) {
 	// All methods have the optional `RequestOpts`
 	description.WriteString("\n//  - opts (type " + m.optsName() + "): All optional parameters.")
 
-	description.WriteString("\n// " + m.Href)
-
 	return description.String(), nil
 }
 

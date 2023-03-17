@@ -126,7 +126,7 @@ func docs(name string, href string, ds []string) string {
 	for _, text := range ds {
 		// if this is a list item, we should add extra indentation to make sure it renders right in the docs pages.
 		if strings.HasPrefix(text, "- ") {
-			text = "  " + text
+			text = " " + text
 		}
 
 		bd.WriteString("\n// " + text)
