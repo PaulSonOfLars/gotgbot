@@ -103,6 +103,24 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	return typeDef.String(), nil
 }
 
+// fieldContainsInputFile checks whether the field's type contains any inputfiles, and thus might be used to send data.
+func fieldContainsInputFile(d APIDescription, field Field) (bool, error) {
+	goType, err := field.getPreferredType()
+	if err != nil {
+		return false, err
+	}
+	cleanName := strings.TrimPrefix(goType, "[]")
+	tgType, ok := d.Types[cleanName]
+	if !ok {
+		return false, nil
+	}
+
+	ok, _, err = containsInputFile(d, tgType, map[string]bool{})
+	return ok, err
+}
+
+// containsInputFile returns a boolean to indicate whether or not tgType contains an InputFile.
+// If true, it also returns the field name of that inputfile.
 func containsInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (bool, string, error) {
 	// If already checked, we don't need to check again. This avoids infinite recursive loops.
 	if checked[tgType.Name] {
@@ -110,14 +128,20 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 	}
 	checked[tgType.Name] = true
 
+	if tgType.Name == tgTypeInputMedia {
+		return true, "media", nil
+	}
+
 	for _, f := range tgType.Fields {
 		goType, err := f.getPreferredType()
 		if err != nil {
 			return false, "", err
 		}
+
 		if goType == tgTypeInputFile {
 			return true, f.Name, nil
 		}
+
 		if isTgType(d, goType) {
 			ok, _, err := containsInputFile(d, d.Types[goType], checked)
 			if err != nil {
@@ -413,6 +437,14 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 	commonFields := getCommonFields(subtypes)
 
+	hasInputFile, fieldName, err := containsInputFile(d, subtypes[0], map[string]bool{})
+	if err != nil {
+		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
+	}
+
+	// If the inputfile is a common field, then the interface contains fields.
+	hasInputFile = hasInputFile && contains(fieldName, getFieldNames(commonFields))
+
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
 	for _, f := range commonFields {
@@ -427,7 +459,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
 	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
 
-	if name == tgTypeInputMedia {
+	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
 		bd.WriteString("\nInputParams(string, map[string]NamedReader) ([]byte, error)")
 	}

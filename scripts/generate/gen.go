@@ -159,11 +159,10 @@ const (
 	tgTypeFloat   = "Float"
 	tgTypeInteger = "Integer"
 	// These are all custom telegram types.
-	tgTypeMessage      = "Message"
-	tgTypeFile         = "File"
-	tgTypeInputFile    = "InputFile"
-	tgTypeInputMedia   = "InputMedia"
-	tgTypeInputSticker = "InputSticker"
+	tgTypeMessage    = "Message"
+	tgTypeFile       = "File"
+	tgTypeInputFile  = "InputFile"
+	tgTypeInputMedia = "InputMedia"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )

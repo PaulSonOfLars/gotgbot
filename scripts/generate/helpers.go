@@ -46,6 +46,10 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	for _, typeName := range orderedTgTypes(d) {
+		if typeName == tgTypeFile {
+			continue
+		}
+
 		tgType := d.Types[typeName]
 
 		newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
@@ -53,10 +57,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			continue
 		}
 
-		fields := map[string]string{}
-
-		getMethodFieldsTypeMatches(tgMethod, typeName, fields)
-
+		fields := getMethodFieldsTypeMatches(tgMethod, typeName)
 		if len(fields) == 0 {
 			continue
 		}
@@ -176,7 +177,8 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 	return repl, nil
 }
 
-func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string, fields map[string]string) {
+func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string) map[string]string {
+	fields := map[string]string{}
 	for _, f := range tgMethod.Fields {
 		if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
 			idField := "id"
@@ -190,6 +192,7 @@ func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string, fie
 			fields[titleToSnake(typeName)+"_id"] = idField
 		}
 	}
+	return fields
 }
 
 var helperFuncTmpl = template.Must(template.New("helperFunc").Parse(helperFunc))
