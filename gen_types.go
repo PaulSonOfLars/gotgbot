@@ -10,6 +10,7 @@ import (
 )
 
 type ReplyMarkup interface {
+	// replyMarkup exists to avoid external types implementing this interface.
 	replyMarkup()
 }
 
@@ -27,7 +28,7 @@ type Animation struct {
 	// Duration of the video in seconds as defined by sender
 	Duration int64 `json:"duration"`
 	// Optional. Animation thumbnail as defined by sender
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. Original animation filename as defined by sender
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
@@ -56,7 +57,7 @@ type Audio struct {
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. Thumbnail of the album cover to which the music file belongs
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 }
 
 // BotCommand This object represents a bot command.
@@ -79,6 +80,7 @@ type BotCommand struct {
 // https://core.telegram.org/bots/api#botcommandscope
 type BotCommandScope interface {
 	GetType() string
+	// botCommandScope exists to avoid external types implementing this interface.
 	botCommandScope()
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
@@ -346,6 +348,20 @@ func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
 // BotCommandScopeDefault.botCommandScope is a dummy method to avoid interface implementation.
 func (v BotCommandScopeDefault) botCommandScope() {}
 
+// BotDescription This object represents the bot's description.
+// https://core.telegram.org/bots/api#botdescription
+type BotDescription struct {
+	// The bot's description
+	Description string `json:"description"`
+}
+
+// BotShortDescription This object represents the bot's short description.
+// https://core.telegram.org/bots/api#botshortdescription
+type BotShortDescription struct {
+	// The bot's short description
+	ShortDescription string `json:"short_description"`
+}
+
 // CallbackGame A placeholder, currently holds no information. Use BotFather to set up your game.
 // https://core.telegram.org/bots/api#callbackgame
 type CallbackGame struct{}
@@ -519,6 +535,7 @@ type ChatLocation struct {
 type ChatMember interface {
 	GetStatus() string
 	GetUser() User
+	// chatMember exists to avoid external types implementing this interface.
 	chatMember()
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
@@ -1189,7 +1206,7 @@ type Document struct {
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
 	// Optional. Document thumbnail as defined by sender
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. Original filename as defined by sender
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
@@ -1415,6 +1432,7 @@ type InlineQuery struct {
 type InlineQueryResult interface {
 	GetType() string
 	GetId() string
+	// inlineQueryResult exists to avoid external types implementing this interface.
 	inlineQueryResult()
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
@@ -1461,11 +1479,11 @@ type MergedInlineQueryResult struct {
 	// Optional. Pass True if you don't want the URL to be shown in the message (Only for article)
 	HideUrl bool `json:"hide_url,omitempty"`
 	// Optional. Url of the thumbnail for the result (Only for article, contact, document, gif, location, mpeg4_gif, photo, venue, video)
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width (Only for article, contact, document, location, venue)
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height (Only for article, contact, document, location, venue)
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 	// Optional. A valid URL for the audio file (Only for audio)
 	AudioUrl string `json:"audio_url,omitempty"`
 	// Optional. Performer (Only for audio)
@@ -1495,7 +1513,7 @@ type MergedInlineQueryResult struct {
 	// Optional. Duration of the GIF in seconds (Only for gif)
 	GifDuration int64 `json:"gif_duration,omitempty"`
 	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg" (Only for gif, mpeg4_gif)
-	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
+	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Location latitude in degrees (Only for location, venue)
 	Latitude float64 `json:"latitude,omitempty"`
 	// Optional. Location longitude in degrees (Only for location, venue)
@@ -1582,11 +1600,11 @@ type InlineQueryResultArticle struct {
 	// Optional. Short description of the result
 	Description string `json:"description,omitempty"`
 	// Optional. Url of the thumbnail for the result
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -1610,9 +1628,9 @@ func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResu
 		Url:                 v.Url,
 		HideUrl:             v.HideUrl,
 		Description:         v.Description,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbWidth:          v.ThumbWidth,
-		ThumbHeight:         v.ThumbHeight,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailWidth:      v.ThumbnailWidth,
+		ThumbnailHeight:     v.ThumbnailHeight,
 	}
 }
 
@@ -2214,11 +2232,11 @@ type InlineQueryResultContact struct {
 	// Optional. Content of the message to be sent instead of the contact
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2242,9 +2260,9 @@ func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResu
 		Vcard:               v.Vcard,
 		ReplyMarkup:         v.ReplyMarkup,
 		InputMessageContent: v.InputMessageContent,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbWidth:          v.ThumbWidth,
-		ThumbHeight:         v.ThumbHeight,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailWidth:      v.ThumbnailWidth,
+		ThumbnailHeight:     v.ThumbnailHeight,
 	}
 }
 
@@ -2289,11 +2307,11 @@ type InlineQueryResultDocument struct {
 	// Optional. Content of the message to be sent instead of the file
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. URL of the thumbnail (JPEG only) for the file
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2320,9 +2338,9 @@ func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryRes
 		Description:         v.Description,
 		ReplyMarkup:         v.ReplyMarkup,
 		InputMessageContent: v.InputMessageContent,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbWidth:          v.ThumbWidth,
-		ThumbHeight:         v.ThumbHeight,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailWidth:      v.ThumbnailWidth,
+		ThumbnailHeight:     v.ThumbnailHeight,
 	}
 }
 
@@ -2404,9 +2422,9 @@ type InlineQueryResultGif struct {
 	// Optional. Duration of the GIF in seconds
 	GifDuration int64 `json:"gif_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
-	ThumbUrl string `json:"thumb_url"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
-	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
+	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
 	// Optional. Caption of the GIF file to be sent, 0-1024 characters after entities parsing
@@ -2440,8 +2458,8 @@ func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 		GifWidth:            v.GifWidth,
 		GifHeight:           v.GifHeight,
 		GifDuration:         v.GifDuration,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbMimeType:       v.ThumbMimeType,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailMimeType:   v.ThumbnailMimeType,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -2492,11 +2510,11 @@ type InlineQueryResultLocation struct {
 	// Optional. Content of the message to be sent instead of the location
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2523,9 +2541,9 @@ func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryRes
 		ProximityAlertRadius: v.ProximityAlertRadius,
 		ReplyMarkup:          v.ReplyMarkup,
 		InputMessageContent:  v.InputMessageContent,
-		ThumbUrl:             v.ThumbUrl,
-		ThumbWidth:           v.ThumbWidth,
-		ThumbHeight:          v.ThumbHeight,
+		ThumbnailUrl:         v.ThumbnailUrl,
+		ThumbnailWidth:       v.ThumbnailWidth,
+		ThumbnailHeight:      v.ThumbnailHeight,
 	}
 }
 
@@ -2559,9 +2577,9 @@ type InlineQueryResultMpeg4Gif struct {
 	// Optional. Video duration in seconds
 	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
-	ThumbUrl string `json:"thumb_url"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
-	ThumbMimeType string `json:"thumb_mime_type,omitempty"`
+	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
 	// Optional. Caption of the MPEG-4 file to be sent, 0-1024 characters after entities parsing
@@ -2595,8 +2613,8 @@ func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryRes
 		Mpeg4Width:          v.Mpeg4Width,
 		Mpeg4Height:         v.Mpeg4Height,
 		Mpeg4Duration:       v.Mpeg4Duration,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbMimeType:       v.ThumbMimeType,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailMimeType:   v.ThumbnailMimeType,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -2630,7 +2648,7 @@ type InlineQueryResultPhoto struct {
 	// A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
 	PhotoUrl string `json:"photo_url"`
 	// URL of the thumbnail for the photo
-	ThumbUrl string `json:"thumb_url"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 	// Optional. Width of the photo
 	PhotoWidth int64 `json:"photo_width,omitempty"`
 	// Optional. Height of the photo
@@ -2667,7 +2685,7 @@ func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult
 		Type:                "photo",
 		Id:                  v.Id,
 		PhotoUrl:            v.PhotoUrl,
-		ThumbUrl:            v.ThumbUrl,
+		ThumbnailUrl:        v.ThumbnailUrl,
 		PhotoWidth:          v.PhotoWidth,
 		PhotoHeight:         v.PhotoHeight,
 		Title:               v.Title,
@@ -2723,11 +2741,11 @@ type InlineQueryResultVenue struct {
 	// Optional. Content of the message to be sent instead of the venue
 	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
-	ThumbUrl string `json:"thumb_url,omitempty"`
+	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
-	ThumbWidth int64 `json:"thumb_width,omitempty"`
+	ThumbnailWidth int64 `json:"thumbnail_width,omitempty"`
 	// Optional. Thumbnail height
-	ThumbHeight int64 `json:"thumb_height,omitempty"`
+	ThumbnailHeight int64 `json:"thumbnail_height,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2755,9 +2773,9 @@ func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult
 		GooglePlaceType:     v.GooglePlaceType,
 		ReplyMarkup:         v.ReplyMarkup,
 		InputMessageContent: v.InputMessageContent,
-		ThumbUrl:            v.ThumbUrl,
-		ThumbWidth:          v.ThumbWidth,
-		ThumbHeight:         v.ThumbHeight,
+		ThumbnailUrl:        v.ThumbnailUrl,
+		ThumbnailWidth:      v.ThumbnailWidth,
+		ThumbnailHeight:     v.ThumbnailHeight,
 	}
 }
 
@@ -2787,7 +2805,7 @@ type InlineQueryResultVideo struct {
 	// MIME type of the content of the video URL, "text/html" or "video/mp4"
 	MimeType string `json:"mime_type"`
 	// URL of the thumbnail (JPEG only) for the video
-	ThumbUrl string `json:"thumb_url"`
+	ThumbnailUrl string `json:"thumbnail_url"`
 	// Title for the result
 	Title string `json:"title"`
 	// Optional. Caption of the video to be sent, 0-1024 characters after entities parsing
@@ -2827,7 +2845,7 @@ func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult
 		Id:                  v.Id,
 		VideoUrl:            v.VideoUrl,
 		MimeType:            v.MimeType,
-		ThumbUrl:            v.ThumbUrl,
+		ThumbnailUrl:        v.ThumbnailUrl,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -3021,9 +3039,10 @@ func (v InputLocationMessageContent) inputMessageContent() {}
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFile
+	// inputMedia exists to avoid external types implementing this interface.
 	inputMedia()
-	// InputMediaParams allows for uploading InputMedia files with attachments.
-	InputMediaParams(string, map[string]NamedReader) ([]byte, error)
+	// InputParams allows for uploading attachments with files.
+	InputParams(string, map[string]NamedReader) ([]byte, error)
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
 }
@@ -3035,7 +3054,7 @@ type MergedInputMedia struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Media InputFile `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for animation, document, audio, video)
-	Thumb *InputFile `json:"thumb,omitempty"`
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
 	// Optional. Caption of the animation to be sent, 0-1024 characters after entities parsing
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the animation caption. See formatting options for more details.
@@ -3084,7 +3103,7 @@ type InputMediaAnimation struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Media InputFile `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb *InputFile `json:"thumb,omitempty"`
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
 	// Optional. Caption of the animation to be sent, 0-1024 characters after entities parsing
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the animation caption. See formatting options for more details.
@@ -3099,28 +3118,6 @@ type InputMediaAnimation struct {
 	Duration int64 `json:"duration,omitempty"`
 	// Optional. Pass True if the animation needs to be covered with a spoiler animation
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
-}
-
-func (v InputMediaAnimation) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3138,7 +3135,7 @@ func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "animation",
 		Media:           v.Media,
-		Thumb:           v.Thumb,
+		Thumbnail:       v.Thumbnail,
 		Caption:         v.Caption,
 		ParseMode:       v.ParseMode,
 		CaptionEntities: v.CaptionEntities,
@@ -3165,28 +3162,7 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 // InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAnimation) inputMedia() {}
 
-// InputMediaAudio Represents an audio file to be treated as music to be sent.
-// https://core.telegram.org/bots/api#inputmediaaudio
-type InputMediaAudio struct {
-	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
-	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb *InputFile `json:"thumb,omitempty"`
-	// Optional. Caption of the audio to be sent, 0-1024 characters after entities parsing
-	Caption string `json:"caption,omitempty"`
-	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details.
-	ParseMode string `json:"parse_mode,omitempty"`
-	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Duration of the audio in seconds
-	Duration int64 `json:"duration,omitempty"`
-	// Optional. Performer of the audio
-	Performer string `json:"performer,omitempty"`
-	// Optional. Title of the audio
-	Title string `json:"title,omitempty"`
-}
-
-func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputMediaAnimation) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
 		switch m := v.Media.(type) {
 		case string:
@@ -3201,11 +3177,32 @@ func (v InputMediaAudio) InputMediaParams(mediaName string, data map[string]Name
 			data[mediaName] = NamedFile{File: m}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
 		}
 	}
 
 	return json.Marshal(v)
+}
+
+// InputMediaAudio Represents an audio file to be treated as music to be sent.
+// https://core.telegram.org/bots/api#inputmediaaudio
+type InputMediaAudio struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	// Optional. Caption of the audio to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Duration of the audio in seconds
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. Performer of the audio
+	Performer string `json:"performer,omitempty"`
+	// Optional. Title of the audio
+	Title string `json:"title,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3223,7 +3220,7 @@ func (v InputMediaAudio) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:            "audio",
 		Media:           v.Media,
-		Thumb:           v.Thumb,
+		Thumbnail:       v.Thumbnail,
 		Caption:         v.Caption,
 		ParseMode:       v.ParseMode,
 		CaptionEntities: v.CaptionEntities,
@@ -3249,24 +3246,7 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 // InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAudio) inputMedia() {}
 
-// InputMediaDocument Represents a general file to be sent.
-// https://core.telegram.org/bots/api#inputmediadocument
-type InputMediaDocument struct {
-	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
-	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb *InputFile `json:"thumb,omitempty"`
-	// Optional. Caption of the document to be sent, 0-1024 characters after entities parsing
-	Caption string `json:"caption,omitempty"`
-	// Optional. Mode for parsing entities in the document caption. See formatting options for more details.
-	ParseMode string `json:"parse_mode,omitempty"`
-	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album.
-	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
-}
-
-func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputMediaAudio) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
 		switch m := v.Media.(type) {
 		case string:
@@ -3281,11 +3261,28 @@ func (v InputMediaDocument) InputMediaParams(mediaName string, data map[string]N
 			data[mediaName] = NamedFile{File: m}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
 		}
 	}
 
 	return json.Marshal(v)
+}
+
+// InputMediaDocument Represents a general file to be sent.
+// https://core.telegram.org/bots/api#inputmediadocument
+type InputMediaDocument struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	// Optional. Caption of the document to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the document caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album.
+	DisableContentTypeDetection bool `json:"disable_content_type_detection,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3303,7 +3300,7 @@ func (v InputMediaDocument) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:                        "document",
 		Media:                       v.Media,
-		Thumb:                       v.Thumb,
+		Thumbnail:                   v.Thumbnail,
 		Caption:                     v.Caption,
 		ParseMode:                   v.ParseMode,
 		CaptionEntities:             v.CaptionEntities,
@@ -3327,22 +3324,7 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 // InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaDocument) inputMedia() {}
 
-// InputMediaPhoto Represents a photo to be sent.
-// https://core.telegram.org/bots/api#inputmediaphoto
-type InputMediaPhoto struct {
-	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
-	// Optional. Caption of the photo to be sent, 0-1024 characters after entities parsing
-	Caption string `json:"caption,omitempty"`
-	// Optional. Mode for parsing entities in the photo caption. See formatting options for more details.
-	ParseMode string `json:"parse_mode,omitempty"`
-	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True if the photo needs to be covered with a spoiler animation
-	HasSpoiler bool `json:"has_spoiler,omitempty"`
-}
-
-func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputMediaDocument) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
 	if v.Media != nil {
 		switch m := v.Media.(type) {
 		case string:
@@ -3357,11 +3339,26 @@ func (v InputMediaPhoto) InputMediaParams(mediaName string, data map[string]Name
 			data[mediaName] = NamedFile{File: m}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
 		}
 	}
 
 	return json.Marshal(v)
+}
+
+// InputMediaPhoto Represents a photo to be sent.
+// https://core.telegram.org/bots/api#inputmediaphoto
+type InputMediaPhoto struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Caption of the photo to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the photo caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True if the photo needs to be covered with a spoiler animation
+	HasSpoiler bool `json:"has_spoiler,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3402,13 +3399,35 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaPhoto) inputMedia() {}
 
+func (v InputMediaPhoto) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMediaVideo Represents a video to be sent.
 // https://core.telegram.org/bots/api#inputmediavideo
 type InputMediaVideo struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Media InputFile `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb *InputFile `json:"thumb,omitempty"`
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
 	// Optional. Caption of the video to be sent, 0-1024 characters after entities parsing
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the video caption. See formatting options for more details.
@@ -3427,28 +3446,6 @@ type InputMediaVideo struct {
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
 }
 
-func (v InputMediaVideo) InputMediaParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
-		}
-	}
-
-	return json.Marshal(v)
-}
-
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaVideo) GetType() string {
 	return "video"
@@ -3464,7 +3461,7 @@ func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
 		Type:              "video",
 		Media:             v.Media,
-		Thumb:             v.Thumb,
+		Thumbnail:         v.Thumbnail,
 		Caption:           v.Caption,
 		ParseMode:         v.ParseMode,
 		CaptionEntities:   v.CaptionEntities,
@@ -3492,6 +3489,28 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 // InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaVideo) inputMedia() {}
 
+func (v InputMediaVideo) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputMessageContent This object represents the content of a message to be sent as a result of an inline query. Telegram clients currently support the following 5 types:
 // - InputTextMessageContent
 // - InputLocationMessageContent
@@ -3500,7 +3519,43 @@ func (v InputMediaVideo) inputMedia() {}
 // - InputInvoiceMessageContent
 // https://core.telegram.org/bots/api#inputmessagecontent
 type InputMessageContent interface {
+	// inputMessageContent exists to avoid external types implementing this interface.
 	inputMessageContent()
+}
+
+// InputSticker This object describes a sticker to be added to a sticker set.
+// https://core.telegram.org/bots/api#inputsticker
+type InputSticker struct {
+	// The added sticker. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. Animated and video stickers can't be uploaded via HTTP URL. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Sticker InputFile `json:"sticker"`
+	// List of 1-20 emoji associated with the sticker
+	EmojiList []string `json:"emoji_list,omitempty"`
+	// Optional. Position where the mask should be placed on faces. For "mask" stickers only.
+	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
+	// Optional. List of 0-20 search keywords for the sticker with total length of up to 64 characters. For "regular" and "custom_emoji" stickers only.
+	Keywords []string `json:"keywords,omitempty"`
+}
+
+func (v InputSticker) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Sticker != nil {
+		switch m := v.Sticker.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Sticker = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Sticker = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Sticker)
+		}
+	}
+
+	return json.Marshal(v)
 }
 
 // InputTextMessageContent Represents the content of a text message to be sent as the result of an inline query.
@@ -3681,6 +3736,7 @@ type MaskPosition struct {
 // https://core.telegram.org/bots/api#menubutton
 type MenuButton interface {
 	GetType() string
+	// menuButton exists to avoid external types implementing this interface.
 	menuButton()
 	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
 	MergeMenuButton() MergedMenuButton
@@ -4094,6 +4150,7 @@ type PassportElementError interface {
 	GetSource() string
 	GetType() string
 	GetMessage() string
+	// passportElementError exists to avoid external types implementing this interface.
 	passportElementError()
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError
@@ -4829,7 +4886,7 @@ type Sticker struct {
 	// True, if the sticker is a video sticker
 	IsVideo bool `json:"is_video"`
 	// Optional. Sticker thumbnail in the .WEBP or .JPG format
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. Emoji associated with the sticker
 	Emoji string `json:"emoji,omitempty"`
 	// Optional. Name of the sticker set to which the sticker belongs
@@ -4840,6 +4897,8 @@ type Sticker struct {
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 	// Optional. For custom emoji stickers, unique identifier of the custom emoji
 	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
+	// Optional. True, if the sticker must be repainted to a text color in messages, the color of the Telegram Premium badge in emoji status, white color on chat photos, or another appropriate color in other places
+	NeedsRepainting bool `json:"needs_repainting,omitempty"`
 	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }
@@ -4860,7 +4919,7 @@ type StickerSet struct {
 	// List of all set stickers
 	Stickers []Sticker `json:"stickers,omitempty"`
 	// Optional. Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 }
 
 // SuccessfulPayment This object contains basic information about a successful payment.
@@ -4996,7 +5055,7 @@ type Video struct {
 	// Duration of the video in seconds as defined by sender
 	Duration int64 `json:"duration"`
 	// Optional. Video thumbnail
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. Original filename as defined by sender
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by sender
@@ -5042,7 +5101,7 @@ type VideoNote struct {
 	// Duration of the video in seconds as defined by sender
 	Duration int64 `json:"duration"`
 	// Optional. Video thumbnail
-	Thumb *PhotoSize `json:"thumb,omitempty"`
+	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. File size in bytes
 	FileSize int64 `json:"file_size,omitempty"`
 }

@@ -13,94 +13,26 @@ import (
 
 // AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet.
 type AddStickerToSetOpts struct {
-	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	PngSticker InputFile
-	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
-	TgsSticker InputFile
-	// WEBM video with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#video-sticker-requirements for technical requirements
-	WebmSticker InputFile
-	// A JSON-serialized object for position where the mask should be placed on faces
-	MaskPosition MaskPosition
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
 
-// AddStickerToSet Use this method to add a new sticker to a set created by the bot. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Animated stickers can be added to animated sticker sets and only to them. Animated sticker sets can have up to 50 stickers. Static sticker sets can have up to 120 stickers. Returns True on success.
+// AddStickerToSet Use this method to add a new sticker to a set created by the bot. The format of the added sticker must match the format of the other stickers in the set. Emoji sticker sets can have up to 200 stickers. Animated and video sticker sets can have up to 50 stickers. Static sticker sets can have up to 120 stickers. Returns True on success.
 // - userId (type int64): User identifier of sticker set owner
 // - name (type string): Sticker set name
-// - emojis (type string): One or more emoji corresponding to the sticker
+// - sticker (type InputSticker): A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set isn't changed.
 // - opts (type AddStickerToSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#addstickertoset
-func (bot *Bot) AddStickerToSet(userId int64, name string, emojis string, opts *AddStickerToSetOpts) (bool, error) {
+func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
-	v["emojis"] = emojis
-	if opts != nil {
-		if opts.PngSticker != nil {
-			switch m := opts.PngSticker.(type) {
-			case string:
-				v["png_sticker"] = m
-
-			case NamedReader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = m
-
-			case io.Reader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
-			}
-		}
-		if opts.TgsSticker != nil {
-			switch m := opts.TgsSticker.(type) {
-			case NamedReader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = m
-
-			case io.Reader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
-			}
-		}
-		if opts.WebmSticker != nil {
-			switch m := opts.WebmSticker.(type) {
-			case NamedReader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = m
-
-			case io.Reader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
-			}
-		}
-		bs, err := json.Marshal(opts.MaskPosition)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
-		}
-		v["mask_position"] = string(bs)
+	inputBs, err := sticker.InputParams("sticker", data)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
+	v["sticker"] = string(inputBs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -782,98 +714,47 @@ func (bot *Bot) CreateInvoiceLink(title string, description string, payload stri
 
 // CreateNewStickerSetOpts is the set of optional fields for Bot.CreateNewStickerSet.
 type CreateNewStickerSetOpts struct {
-	// PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	PngSticker InputFile
-	// TGS animation with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#animated-sticker-requirements for technical requirements
-	TgsSticker InputFile
-	// WEBM video with the sticker, uploaded using multipart/form-data. See https://core.telegram.org/stickers#video-sticker-requirements for technical requirements
-	WebmSticker InputFile
-	// Type of stickers in the set, pass "regular" or "mask". Custom emoji sticker sets can't be created via the Bot API at the moment. By default, a regular sticker set is created.
+	// Type of stickers in the set, pass "regular", "mask", or "custom_emoji". By default, a regular sticker set is created.
 	StickerType string
-	// A JSON-serialized object for position where the mask should be placed on faces
-	MaskPosition MaskPosition
+	// Pass True if stickers in the sticker set must be repainted to the color of text when used in messages, the accent color if used as emoji status, white on chat photos, or another appropriate color based on context; for custom emoji sticker sets only
+	NeedsRepainting bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
 
-// CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. You must use exactly one of the fields png_sticker, tgs_sticker, or webm_sticker. Returns True on success.
+// CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. Returns True on success.
 // - userId (type int64): User identifier of created sticker set owner
 // - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only English letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
 // - title (type string): Sticker set title, 1-64 characters
-// - emojis (type string): One or more emoji corresponding to the sticker
+// - stickers (type []InputSticker): A JSON-serialized list of 1-50 initial stickers to be added to the sticker set
+// - stickerFormat (type string): Format of stickers in the set, must be one of "static", "animated", "video"
 // - opts (type CreateNewStickerSetOpts): All optional parameters.
 // https://core.telegram.org/bots/api#createnewstickerset
-func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, emojis string, opts *CreateNewStickerSetOpts) (bool, error) {
+func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, stickers []InputSticker, stickerFormat string, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["title"] = title
-	v["emojis"] = emojis
-	if opts != nil {
-		if opts.PngSticker != nil {
-			switch m := opts.PngSticker.(type) {
-			case string:
-				v["png_sticker"] = m
-
-			case NamedReader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = m
-
-			case io.Reader:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["png_sticker"] = "attach://png_sticker"
-				data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.PngSticker)
+	if stickers != nil {
+		var rawList []json.RawMessage
+		for idx, im := range stickers {
+			inputBs, err := im.InputParams("stickers"+strconv.Itoa(idx), data)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal list item %d for field stickers: %w", idx, err)
 			}
+			rawList = append(rawList, inputBs)
 		}
-		if opts.TgsSticker != nil {
-			switch m := opts.TgsSticker.(type) {
-			case NamedReader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = m
-
-			case io.Reader:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["tgs_sticker"] = "attach://tgs_sticker"
-				data["tgs_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.TgsSticker)
-			}
-		}
-		if opts.WebmSticker != nil {
-			switch m := opts.WebmSticker.(type) {
-			case NamedReader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = m
-
-			case io.Reader:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: m}
-
-			case []byte:
-				v["webm_sticker"] = "attach://webm_sticker"
-				data["webm_sticker"] = NamedFile{File: bytes.NewReader(m)}
-
-			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.WebmSticker)
-			}
-		}
-		v["sticker_type"] = opts.StickerType
-		bs, err := json.Marshal(opts.MaskPosition)
+		bs, err := json.Marshal(rawList)
 		if err != nil {
-			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
+			return false, fmt.Errorf("failed to marshal raw json list for field: stickers %w", err)
 		}
-		v["mask_position"] = string(bs)
+		v["stickers"] = string(bs)
+	}
+	v["sticker_format"] = stickerFormat
+	if opts != nil {
+		v["sticker_type"] = opts.StickerType
+		v["needs_repainting"] = strconv.FormatBool(opts.NeedsRepainting)
 	}
 
 	var reqOpts *RequestOpts
@@ -1103,6 +984,34 @@ func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetO
 	}
 
 	r, err := bot.Request("deleteStickerFromSet", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteStickerSetOpts is the set of optional fields for Bot.DeleteStickerSet.
+type DeleteStickerSetOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteStickerSet Use this method to delete a sticker set that was created by the bot. Returns True on success.
+// - name (type string): Sticker set name
+// - opts (type DeleteStickerSetOpts): All optional parameters.
+// https://core.telegram.org/bots/api#deletestickerset
+func (bot *Bot) DeleteStickerSet(name string, opts *DeleteStickerSetOpts) (bool, error) {
+	v := map[string]string{}
+	v["name"] = name
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("deleteStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1427,11 +1336,11 @@ type EditMessageMediaOpts struct {
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	inputMediaBs, err := media.InputMediaParams("media", data)
+	inputBs, err := media.InputParams("media", data)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
 	}
-	v["media"] = string(inputMediaBs)
+	v["media"] = string(inputBs)
 	if opts != nil {
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
@@ -2042,6 +1951,68 @@ func (bot *Bot) GetMyDefaultAdministratorRights(opts *GetMyDefaultAdministratorR
 	return &c, json.Unmarshal(r, &c)
 }
 
+// GetMyDescriptionOpts is the set of optional fields for Bot.GetMyDescription.
+type GetMyDescriptionOpts struct {
+	// A two-letter ISO 639-1 language code or an empty string
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetMyDescription Use this method to get the current bot description for the given user language. Returns BotDescription on success.
+// - opts (type GetMyDescriptionOpts): All optional parameters.
+// https://core.telegram.org/bots/api#getmydescription
+func (bot *Bot) GetMyDescription(opts *GetMyDescriptionOpts) (*BotDescription, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getMyDescription", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var b BotDescription
+	return &b, json.Unmarshal(r, &b)
+}
+
+// GetMyShortDescriptionOpts is the set of optional fields for Bot.GetMyShortDescription.
+type GetMyShortDescriptionOpts struct {
+	// A two-letter ISO 639-1 language code or an empty string
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetMyShortDescription Use this method to get the current bot short description for the given user language. Returns BotShortDescription on success.
+// - opts (type GetMyShortDescriptionOpts): All optional parameters.
+// https://core.telegram.org/bots/api#getmyshortdescription
+func (bot *Bot) GetMyShortDescription(opts *GetMyShortDescriptionOpts) (*BotShortDescription, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getMyShortDescription", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var b BotShortDescription
+	return &b, json.Unmarshal(r, &b)
+}
+
 // GetStickerSetOpts is the set of optional fields for Bot.GetStickerSet.
 type GetStickerSetOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2518,7 +2489,7 @@ type SendAnimationOpts struct {
 	// Animation height
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb InputFile
+	Thumbnail InputFile
 	// Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the animation caption. See formatting options for more details.
@@ -2584,25 +2555,25 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 		if opts.Height != 0 {
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -2661,7 +2632,7 @@ type SendAudioOpts struct {
 	// Track name
 	Title string
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb InputFile
+	Thumbnail InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -2725,25 +2696,25 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -2947,7 +2918,7 @@ type SendDocumentOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb InputFile
+	Thumbnail InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the document caption. See formatting options for more details.
@@ -3004,25 +2975,25 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -3365,15 +3336,15 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
-			inputMediaBs, err := im.InputMediaParams("media"+strconv.Itoa(idx), data)
+			inputBs, err := im.InputParams("media"+strconv.Itoa(idx), data)
 			if err != nil {
-				return nil, fmt.Errorf("failed to marshal InputMedia list item %d for field media: %w", idx, err)
+				return nil, fmt.Errorf("failed to marshal list item %d for field media: %w", idx, err)
 			}
-			rawList = append(rawList, inputMediaBs)
+			rawList = append(rawList, inputBs)
 		}
 		bs, err := json.Marshal(rawList)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal raw json list of InputMedia for field: media %w", err)
+			return nil, fmt.Errorf("failed to marshal raw json list for field: media %w", err)
 		}
 		v["media"] = string(bs)
 	}
@@ -3692,6 +3663,8 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 type SendStickerOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Emoji associated with the sticker; only for just uploaded stickers
+	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -3708,7 +3681,7 @@ type SendStickerOpts struct {
 
 // SendSticker Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
 // - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP or .TGS sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video stickers can only be sent by a file_id. Animated stickers can't be sent via an HTTP URL.
 // - opts (type SendStickerOpts): All optional parameters.
 // https://core.telegram.org/bots/api#sendsticker
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
@@ -3740,6 +3713,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyToMessageId != 0 {
@@ -3858,7 +3832,7 @@ type SendVideoOpts struct {
 	// Video height
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb InputFile
+	Thumbnail InputFile
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
@@ -3926,25 +3900,25 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 		if opts.Height != 0 {
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 		v["caption"] = opts.Caption
@@ -3996,7 +3970,7 @@ type SendVideoNoteOpts struct {
 	// Video width and height, i.e. diameter of the video message
 	Length int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumb InputFile
+	Thumbnail InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -4051,25 +4025,25 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		if opts.Length != 0 {
 			v["length"] = strconv.FormatInt(opts.Length, 10)
 		}
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return nil, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -4454,6 +4428,39 @@ func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts)
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetCustomEmojiStickerSetThumbnailOpts is the set of optional fields for Bot.SetCustomEmojiStickerSetThumbnail.
+type SetCustomEmojiStickerSetThumbnailOpts struct {
+	// Custom emoji identifier of a sticker from the sticker set; pass an empty string to drop the thumbnail and use the first sticker as the thumbnail.
+	CustomEmojiId string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetCustomEmojiStickerSetThumbnail Use this method to set the thumbnail of a custom emoji sticker set. Returns True on success.
+// - name (type string): Sticker set name
+// - opts (type SetCustomEmojiStickerSetThumbnailOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setcustomemojistickersetthumbnail
+func (bot *Bot) SetCustomEmojiStickerSetThumbnail(name string, opts *SetCustomEmojiStickerSetThumbnailOpts) (bool, error) {
+	v := map[string]string{}
+	v["name"] = name
+	if opts != nil {
+		v["custom_emoji_id"] = opts.CustomEmojiId
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setCustomEmojiStickerSetThumbnail", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SetGameScoreOpts is the set of optional fields for Bot.SetGameScore.
 type SetGameScoreOpts struct {
 	// Pass True if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters
@@ -4569,7 +4576,7 @@ type SetMyDefaultAdministratorRightsOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// SetMyDefaultAdministratorRights Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are are free to modify the list before adding the bot. Returns True on success.
+// SetMyDefaultAdministratorRights Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are free to modify the list before adding the bot. Returns True on success.
 // - opts (type SetMyDefaultAdministratorRightsOpts): All optional parameters.
 // https://core.telegram.org/bots/api#setmydefaultadministratorrights
 func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorRightsOpts) (bool, error) {
@@ -4591,6 +4598,74 @@ func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorR
 	}
 
 	r, err := bot.Request("setMyDefaultAdministratorRights", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMyDescriptionOpts is the set of optional fields for Bot.SetMyDescription.
+type SetMyDescriptionOpts struct {
+	// New bot description; 0-512 characters. Pass an empty string to remove the dedicated description for the given language.
+	Description string
+	// A two-letter ISO 639-1 language code. If empty, the description will be applied to all users for whose language there is no dedicated description.
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetMyDescription Use this method to change the bot's description, which is shown in the chat with the bot if the chat is empty. Returns True on success.
+// - opts (type SetMyDescriptionOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setmydescription
+func (bot *Bot) SetMyDescription(opts *SetMyDescriptionOpts) (bool, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["description"] = opts.Description
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setMyDescription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMyShortDescriptionOpts is the set of optional fields for Bot.SetMyShortDescription.
+type SetMyShortDescriptionOpts struct {
+	// New short description for the bot; 0-120 characters. Pass an empty string to remove the dedicated short description for the given language.
+	ShortDescription string
+	// A two-letter ISO 639-1 language code. If empty, the short description will be applied to all users for whose language there is no dedicated short description.
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetMyShortDescription Use this method to change the bot's short description, which is shown on the bot's profile page and is sent together with the link when users share the bot. Returns True on success.
+// - opts (type SetMyShortDescriptionOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setmyshortdescription
+func (bot *Bot) SetMyShortDescription(opts *SetMyShortDescriptionOpts) (bool, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["short_description"] = opts.ShortDescription
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setMyShortDescription", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4636,6 +4711,118 @@ func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementErro
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetStickerEmojiListOpts is the set of optional fields for Bot.SetStickerEmojiList.
+type SetStickerEmojiListOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetStickerEmojiList Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
+// - sticker (type string): File identifier of the sticker
+// - emojiList (type []string): A JSON-serialized list of 1-20 emoji associated with the sticker
+// - opts (type SetStickerEmojiListOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setstickeremojilist
+func (bot *Bot) SetStickerEmojiList(sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
+	v := map[string]string{}
+	v["sticker"] = sticker
+	if emojiList != nil {
+		bs, err := json.Marshal(emojiList)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field emoji_list: %w", err)
+		}
+		v["emoji_list"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setStickerEmojiList", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetStickerKeywordsOpts is the set of optional fields for Bot.SetStickerKeywords.
+type SetStickerKeywordsOpts struct {
+	// A JSON-serialized list of 0-20 search keywords for the sticker with total length of up to 64 characters
+	Keywords []string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetStickerKeywords Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
+// - sticker (type string): File identifier of the sticker
+// - opts (type SetStickerKeywordsOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setstickerkeywords
+func (bot *Bot) SetStickerKeywords(sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
+	v := map[string]string{}
+	v["sticker"] = sticker
+	if opts != nil {
+		if opts.Keywords != nil {
+			bs, err := json.Marshal(opts.Keywords)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field keywords: %w", err)
+			}
+			v["keywords"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setStickerKeywords", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetStickerMaskPositionOpts is the set of optional fields for Bot.SetStickerMaskPosition.
+type SetStickerMaskPositionOpts struct {
+	// A JSON-serialized object with the position where the mask should be placed on faces. Omit the parameter to remove the mask position.
+	MaskPosition MaskPosition
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetStickerMaskPosition Use this method to change the mask position of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns True on success.
+// - sticker (type string): File identifier of the sticker
+// - opts (type SetStickerMaskPositionOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setstickermaskposition
+func (bot *Bot) SetStickerMaskPosition(sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
+	v := map[string]string{}
+	v["sticker"] = sticker
+	if opts != nil {
+		bs, err := json.Marshal(opts.MaskPosition)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
+		}
+		v["mask_position"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setStickerMaskPosition", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SetStickerPositionInSetOpts is the set of optional fields for Bot.SetStickerPositionInSet.
 type SetStickerPositionInSetOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4666,44 +4853,44 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *Se
 	return b, json.Unmarshal(r, &b)
 }
 
-// SetStickerSetThumbOpts is the set of optional fields for Bot.SetStickerSetThumb.
-type SetStickerSetThumbOpts struct {
-	// A PNG image with the thumbnail, must be up to 128 kilobytes in size and have width and height exactly 100px, or a TGS animation with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements, or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated sticker set thumbnails can't be uploaded via HTTP URL.
-	Thumb InputFile
+// SetStickerSetThumbnailOpts is the set of optional fields for Bot.SetStickerSetThumbnail.
+type SetStickerSetThumbnailOpts struct {
+	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements), or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
+	Thumbnail InputFile
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
 
-// SetStickerSetThumb Use this method to set the thumbnail of a sticker set. Animated thumbnails can be set for animated sticker sets only. Video thumbnails can be set only for video sticker sets only. Returns True on success.
+// SetStickerSetThumbnail Use this method to set the thumbnail of a regular or mask sticker set. The format of the thumbnail file must match the format of the stickers in the set. Returns True on success.
 // - name (type string): Sticker set name
 // - userId (type int64): User identifier of the sticker set owner
-// - opts (type SetStickerSetThumbOpts): All optional parameters.
-// https://core.telegram.org/bots/api#setstickersetthumb
-func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSetThumbOpts) (bool, error) {
+// - opts (type SetStickerSetThumbnailOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setstickersetthumbnail
+func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, opts *SetStickerSetThumbnailOpts) (bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
 	v["name"] = name
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	if opts != nil {
-		if opts.Thumb != nil {
-			switch m := opts.Thumb.(type) {
+		if opts.Thumbnail != nil {
+			switch m := opts.Thumbnail.(type) {
 			case string:
-				v["thumb"] = m
+				v["thumbnail"] = m
 
 			case NamedReader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = m
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = m
 
 			case io.Reader:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: m}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: m}
 
 			case []byte:
-				v["thumb"] = "attach://thumb"
-				data["thumb"] = NamedFile{File: bytes.NewReader(m)}
+				v["thumbnail"] = "attach://thumbnail"
+				data["thumbnail"] = NamedFile{File: bytes.NewReader(m)}
 
 			default:
-				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Thumb)
+				return false, fmt.Errorf("unknown type for InputFile: %T", opts.Thumbnail)
 			}
 		}
 	}
@@ -4713,7 +4900,37 @@ func (bot *Bot) SetStickerSetThumb(name string, userId int64, opts *SetStickerSe
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.Request("setStickerSetThumb", v, data, reqOpts)
+	r, err := bot.Request("setStickerSetThumbnail", v, data, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetStickerSetTitleOpts is the set of optional fields for Bot.SetStickerSetTitle.
+type SetStickerSetTitleOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetStickerSetTitle Use this method to set the title of a created sticker set. Returns True on success.
+// - name (type string): Sticker set name
+// - title (type string): Sticker set title, 1-64 characters
+// - opts (type SetStickerSetTitleOpts): All optional parameters.
+// https://core.telegram.org/bots/api#setstickersettitle
+func (bot *Bot) SetStickerSetTitle(name string, title string, opts *SetStickerSetTitleOpts) (bool, error) {
+	v := map[string]string{}
+	v["name"] = name
+	v["title"] = title
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setStickerSetTitle", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -5084,33 +5301,35 @@ type UploadStickerFileOpts struct {
 	RequestOpts *RequestOpts
 }
 
-// UploadStickerFile Use this method to upload a .PNG file with a sticker for later use in createNewStickerSet and addStickerToSet methods (can be used multiple times). Returns the uploaded File on success.
+// UploadStickerFile Use this method to upload a file with a sticker for later use in the createNewStickerSet and addStickerToSet methods (the file can be used multiple times). Returns the uploaded File on success.
 // - userId (type int64): User identifier of sticker file owner
-// - pngSticker (type InputFile): PNG image with the sticker, must be up to 512 kilobytes in size, dimensions must not exceed 512px, and either width or height must be exactly 512px. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - sticker (type InputFile): A file with the sticker in .WEBP, .PNG, .TGS, or .WEBM format. See https://core.telegram.org/stickers for technical requirements. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+// - stickerFormat (type string): Format of the sticker, must be one of "static", "animated", "video"
 // - opts (type UploadStickerFileOpts): All optional parameters.
 // https://core.telegram.org/bots/api#uploadstickerfile
-func (bot *Bot) UploadStickerFile(userId int64, pngSticker InputFile, opts *UploadStickerFileOpts) (*File, error) {
+func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat string, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
-	if pngSticker != nil {
-		switch m := pngSticker.(type) {
+	if sticker != nil {
+		switch m := sticker.(type) {
 		case NamedReader:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = m
+			v["sticker"] = "attach://sticker"
+			data["sticker"] = m
 
 		case io.Reader:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = NamedFile{File: m}
+			v["sticker"] = "attach://sticker"
+			data["sticker"] = NamedFile{File: m}
 
 		case []byte:
-			v["png_sticker"] = "attach://png_sticker"
-			data["png_sticker"] = NamedFile{File: bytes.NewReader(m)}
+			v["sticker"] = "attach://sticker"
+			data["sticker"] = NamedFile{File: bytes.NewReader(m)}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputFile: %T", pngSticker)
+			return nil, fmt.Errorf("unknown type for InputFile: %T", sticker)
 		}
 	}
+	v["sticker_format"] = stickerFormat
 
 	var reqOpts *RequestOpts
 	if opts != nil {

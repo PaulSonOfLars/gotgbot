@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,7 +9,7 @@ import (
 )
 
 var (
-	inputMediaParamsTmpl      = template.Must(template.New("inputMediaParamsMethod").Parse(inputMediaParamsMethod))
+	inputParamsTmpl           = template.Must(template.New("inputParamsMethod").Parse(inputParamsMethod))
 	customMarshalTmpl         = template.Must(template.New("customMarshal").Parse(customMarshal))
 	customUnmarshalTmpl       = template.Must(template.New("customUnmarshal").Parse(customUnmarshal))
 	customStructUnmarshalTmpl = template.Must(template.New("customStructUnmarshal").Parse(customStructUnmarshal))
@@ -85,7 +86,50 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	}
 	typeDef.WriteString(interfaces)
 
+	ok, fieldName, err := containsInputFile(d, tgType, map[string]bool{})
+	if err != nil {
+		return "", fmt.Errorf("failed to check if type requires special handling")
+	}
+	if ok {
+		err = inputParamsTmpl.Execute(&typeDef, inputParamsMethodData{
+			Type:  tgType.Name,
+			Field: snakeToTitle(fieldName),
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to generate %s inputparam methods: %w", tgType.Name, err)
+		}
+	}
+
 	return typeDef.String(), nil
+}
+
+func containsInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (bool, string, error) {
+	// If already checked, we don't need to check again. This avoids infinite recursive loops.
+	if checked[tgType.Name] {
+		return false, "", nil
+	}
+	checked[tgType.Name] = true
+
+	for _, f := range tgType.Fields {
+		goType, err := f.getPreferredType()
+		if err != nil {
+			return false, "", err
+		}
+		if goType == tgTypeInputFile {
+			return true, f.Name, nil
+		}
+		if isTgType(d, goType) {
+			ok, _, err := containsInputFile(d, d.Types[goType], checked)
+			if err != nil {
+				return false, "", fmt.Errorf("failed to check if %s contains inputfiles", goType)
+			}
+			if ok {
+				// We return an error, because we can't actually handle this case yet.
+				return false, "", errors.New("no support for recursive checks of inputfiles yet")
+			}
+		}
+	}
+	return false, "", nil
 }
 
 func generateParentType(d APIDescription, tgType TypeDescription) (string, error) {
@@ -183,17 +227,6 @@ func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (strin
 		parentType, err := getTypeByName(d, parentTypeName)
 		if err != nil {
 			return "", fmt.Errorf("failed to get parent type %s of %s: %w", parentTypeName, tgType.Name, err)
-		}
-
-		if parentTypeName == tgTypeInputMedia {
-			// We also need to setup the interface method
-			err = inputMediaParamsTmpl.Execute(&typeInterfaces, interfaceMethodData{
-				Type:       tgType.Name,
-				ParentType: parentTypeName,
-			})
-			if err != nil {
-				return "", fmt.Errorf("failed to generate %s interface methods for %s: %w", parentType.Name, tgType.Name, err)
-			}
 		}
 
 		commonFields, err := commonFieldGenerator(d, tgType, parentType)
@@ -391,11 +424,12 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	// create a dummy func to avoid external types implementing this interface
+	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
 	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
 
 	if name == tgTypeInputMedia {
-		bd.WriteString(fmt.Sprintf("\n// %sParams allows for uploading %s files with attachments.", name, name))
-		bd.WriteString(fmt.Sprintf("\n%sParams(string, map[string]NamedReader) ([]byte, error)", name))
+		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
+		bd.WriteString("\nInputParams(string, map[string]NamedReader) ([]byte, error)")
 	}
 
 	if len(commonFields) > 0 {
@@ -625,28 +659,28 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 }
 `
 
-type interfaceMethodData struct {
-	Type       string
-	ParentType string
+type inputParamsMethodData struct {
+	Type  string
+	Field string
 }
 
-const inputMediaParamsMethod = `
-func (v {{.Type}}) {{.ParentType}}Params(mediaName string, data map[string]NamedReader) ([]byte, error) {
-	if v.Media != nil {
-		switch m := v.Media.(type) {
+const inputParamsMethod = `
+func (v {{.Type}}) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.{{.Field}} != nil {
+		switch m := v.{{.Field}}.(type) {
 		case string:
 			// ok, noop
 
 		case NamedReader:
-			v.Media = "attach://" + mediaName
+			v.{{.Field}} = "attach://" + mediaName
 			data[mediaName] = m
 
 		case io.Reader:
-			v.Media = "attach://" + mediaName
+			v.{{.Field}} = "attach://" + mediaName
 			data[mediaName] = NamedFile{File: m}
 
 		default:
-			return nil, fmt.Errorf("unknown type for InputMedia: %T", v.Media)
+			return nil, fmt.Errorf("unknown type: %T", v.{{.Field}})
 		}
 	}
 	
