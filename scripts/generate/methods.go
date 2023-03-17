@@ -172,14 +172,7 @@ return %s, true, nil
 func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
 
-	for idx, d := range m.Description {
-		text := d
-		if idx == 0 {
-			text = strings.Title(m.Name) + " " + d
-		}
-
-		description.WriteString("\n// " + text)
-	}
+	description.WriteString(m.docs())
 
 	for _, f := range m.Fields {
 		if !f.Required {
@@ -191,13 +184,11 @@ func (m MethodDescription) description() (string, error) {
 			return "", err
 		}
 
-		description.WriteString("\n// - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
+		description.WriteString("\n//  - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
 	}
 
 	// All methods have the optional `RequestOpts`
-	description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
-
-	description.WriteString("\n// " + m.Href)
+	description.WriteString("\n//  - opts (type " + m.optsName() + "): All optional parameters.")
 
 	return description.String(), nil
 }

@@ -8,12 +8,16 @@ import (
 
 // TODO: extend to be used as a generic cancel context?
 type Context struct {
+	// gotgbot.Update is inlined so that we can access all fields immediately if necessary.
 	*gotgbot.Update
+	// Data represents update-local storage.
+	// This can be used to pass data across handlers - for example, to cache operations relevant to the current update,
+	// such as admin checks.
 	Data map[string]interface{}
 
-	// EffectiveMessage is the message which triggered the update, if possible
+	// EffectiveMessage is the message which triggered the update, if possible.
 	EffectiveMessage *gotgbot.Message
-	// EffectiveChat is the chat the update was triggered in, if possible
+	// EffectiveChat is the chat the update was triggered in, if possible.
 	EffectiveChat *gotgbot.Chat
 	// EffectiveUser is the user who triggered the update, if possible.
 	// Note: when adding a user, the user who ADDED should be the EffectiveUser;
@@ -23,10 +27,10 @@ type Context struct {
 	// in the case of linked channels, anonymous admins, or anonymous channels.
 	EffectiveUser *gotgbot.User
 	// EffectiveSender is the sender of the update. This can be either:
-	// - a user
-	// - an anonymous admin of the current chat, speaking through the chat
-	// - the linked channel of the current chat
-	// - an anonymous user, speaking through a channel
+	//  - a user
+	//  - an anonymous admin of the current chat, speaking through the chat
+	//  - the linked channel of the current chat
+	//  - an anonymous user, speaking through a channel
 	EffectiveSender *gotgbot.Sender
 }
 
