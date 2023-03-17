@@ -288,19 +288,35 @@ if %s != nil {
 		return "\n" + addURLParam(f, stringer, goParam), false, nil
 	}
 
-	bd := strings.Builder{}
-	hasData := false
-	switch fieldType {
-	case tgTypeInputFile:
-		hasData = true
+	complexString, hasData, err := stringComplexField(d, f, fieldType, goParam, defaultRetVal)
+	if err != nil {
+		return "", false, err
+	}
 
+	if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
+		return fmt.Sprintf(`
+if %s != nil {
+%s
+}`, goParam, strings.TrimSpace(complexString)), hasData, nil
+	}
+
+	return complexString, hasData, nil
+}
+
+// stringComplexField allows us to string any complex types.
+// This includes custom tg structs, as well anything which might contain data.
+func stringComplexField(d APIDescription, f Field, fieldType string, goParam string, defaultRetVal string) (string, bool, error) {
+	bd := strings.Builder{}
+
+	// Special case for InputFiles.
+	if fieldType == tgTypeInputFile {
 		t := stringOrReaderBranchTmpl
 		if len(f.Types) == 1 {
 			// This is actually just an inputfile, not "InputFile or String", so don't support string
 			t = readerBranchTmpl
 		}
 
-		err = t.Execute(&bd, readerBranchesData{
+		err := t.Execute(&bd, readerBranchesData{
 			GoParam:       goParam,
 			DefaultReturn: defaultRetVal,
 			Name:          f.Name,
@@ -308,47 +324,46 @@ if %s != nil {
 		if err != nil {
 			return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
 		}
-
-	case tgTypeInputMedia, tgTypeInputSticker:
-		hasData = true
-
-		err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
-			GoParam:       goParam,
-			DefaultReturn: defaultRetVal,
-			Name:          f.Name,
-		})
-		if err != nil {
-			return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker branch template: %w", err)
-		}
-
-	case "[]" + tgTypeInputMedia, "[]" + tgTypeInputSticker:
-		hasData = true
-
-		err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
-			GoParam:       goParam,
-			DefaultReturn: defaultRetVal,
-			Name:          f.Name,
-		})
-		if err != nil {
-			return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
-		}
-
-	default:
-		if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
-			bd.WriteString("\nif " + goParam + " != nil {")
-		}
-
-		bd.WriteString("\n	bs, err := json.Marshal(" + goParam + ")")
-		bd.WriteString("\n	if err != nil {")
-		bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-		bd.WriteString("\n	}")
-		bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
-
-		if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
-			bd.WriteString("\n}")
-		}
+		return bd.String(), true, nil
 	}
-	return bd.String(), hasData, nil
+
+	hasData, err := fieldContainsInputFile(d, f)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to check if field %s contains inputfiles: %w", f.Name, err)
+	}
+	if hasData {
+		// If the field contains data, it cannot be simply json marshalled, so we our own methods to include it.
+		// We need to do this slightly differently if we are dealing with arrays or not.
+		if isArray(fieldType) {
+			err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Name:          f.Name,
+			})
+			if err != nil {
+				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
+			}
+		} else {
+			err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Name:          f.Name,
+			})
+			if err != nil {
+				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker branch template: %w", err)
+			}
+		}
+		return bd.String(), true, nil
+	}
+
+	// If we aren't sending data, then we can just do it regularly.
+	bd.WriteString("\n	bs, err := json.Marshal(" + goParam + ")")
+	bd.WriteString("\n	if err != nil {")
+	bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
+	bd.WriteString("\n	}")
+	bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
+
+	return bd.String(), false, nil
 }
 
 func addURLParam(f Field, stringer string, goParam string) string {
@@ -457,18 +472,16 @@ if err != nil {
 v["{{.Name}}"] = string(inputBs)`
 
 const inputArrayParamsBranch = `
-if {{.GoParam}} != nil {
-	var rawList []json.RawMessage
-	for idx, im := range {{.GoParam}} {
-		inputBs, err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
-		if err != nil {
-			return {{.DefaultReturn}}, fmt.Errorf("failed to marshal list item %d for field {{.Name}}: %w", idx, err)
-		}
-		rawList = append(rawList, inputBs)
-	}
-	bs, err := json.Marshal(rawList)
+var rawList []json.RawMessage
+for idx, im := range {{.GoParam}} {
+	inputBs, err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
 	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list for field: {{.Name}} %w", err)
+		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal list item %d for field {{.Name}}: %w", idx, err)
 	}
-	v["{{.Name}}"] = string(bs)
-}`
+	rawList = append(rawList, inputBs)
+}
+bs, err := json.Marshal(rawList)
+if err != nil {
+	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list for field: {{.Name}} %w", err)
+}
+v["{{.Name}}"] = string(bs)`

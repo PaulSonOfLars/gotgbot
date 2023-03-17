@@ -114,6 +114,9 @@ func getDefaultReturnVals(d APIDescription, types []string) []string {
 	return retVals
 }
 
+// goTypeStringer provides us with the fmt strings that allow us to convert basic types into strings.
+// For example, we define how to handle ints, bools, and strings.
+// More complicated types should be handled separately.
 func goTypeStringer(t string) string {
 	switch t {
 	case "int64":
@@ -200,6 +203,15 @@ func getCommonFields(types []TypeDescription) []Field {
 	return fields
 }
 
+// getFieldNames turns a list of fields into a list of the field's names, as described.
+func getFieldNames(fs []Field) (out []string) {
+	for _, t := range fs {
+		out = append(out, t.Name)
+	}
+	return out
+}
+
+// getReplyMarkupTypes gets all the different types which are used in "reply_markup" fields.
 func getReplyMarkupTypes(d APIDescription) []TypeDescription {
 	typesMap := map[string]struct{}{}
 	for _, m := range d.Methods {
