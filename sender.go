@@ -54,8 +54,8 @@ func (s Sender) Username() string {
 
 // Name determines the name of the sender.
 // This is:
-// - Chat.Title for a Chat.
-// - User.FirstName + User.LastName for a User (the full name).
+//   - Chat.Title for a Chat.
+//   - User.FirstName + User.LastName for a User (the full name).
 func (s Sender) Name() string {
 	if s.Chat != nil {
 		return s.Chat.Title
@@ -71,8 +71,8 @@ func (s Sender) Name() string {
 
 // FirstName determines the firstname of the sender.
 // This is:
-// - Chat.Title for a Chat.
-// - User.FirstName for a User.
+//   - Chat.Title for a Chat.
+//   - User.FirstName for a User.
 func (s Sender) FirstName() string {
 	if s.Chat != nil {
 		return s.Chat.Title
@@ -85,8 +85,8 @@ func (s Sender) FirstName() string {
 
 // LastName determines the firstname of the sender.
 // This is:
-// - empty for a Chat.
-// - User.LastName for a User.
+//   - empty for a Chat.
+//   - User.LastName for a User.
 func (s Sender) LastName() string {
 	if s.Chat != nil {
 		return "" // empty; we define the "title" as being a firstname, so there is no lastname.

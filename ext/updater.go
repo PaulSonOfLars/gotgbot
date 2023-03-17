@@ -131,9 +131,9 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
-	// - needing to re-allocate new url.values structs.
-	// - needing to convert the 'opt' values to strings.
-	// - unnecessary unmarshalling of multiple full Update structs.
+	//  - needing to re-allocate new url.values structs.
+	//  - needing to convert the 'opt' values to strings.
+	//  - unnecessary unmarshalling of multiple full Update structs.
 	// Yes, this also makes me sad. :/
 	v := map[string]string{}
 	dropPendingUpdates := false
