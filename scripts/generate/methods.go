@@ -172,14 +172,7 @@ return %s, true, nil
 func (m MethodDescription) description() (string, error) {
 	description := strings.Builder{}
 
-	for idx, d := range m.Description {
-		text := d
-		if idx == 0 {
-			text = strings.Title(m.Name) + " " + d
-		}
-
-		description.WriteString("\n// " + text)
-	}
+	description.WriteString(m.docs())
 
 	for _, f := range m.Fields {
 		if !f.Required {

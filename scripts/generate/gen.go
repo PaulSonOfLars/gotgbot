@@ -109,19 +109,29 @@ func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, 
 	return common[0].Name, nil
 }
 
+func (m MethodDescription) docs() string {
+	return docs(strings.Title(m.Name), m.Href, m.Description)
+}
+
 func (td TypeDescription) docs() string {
-	docs := strings.Builder{}
-	for idx, desc := range td.Description {
-		text := desc
-		if idx == 0 {
-			text = td.Name + " " + desc
+	return docs(td.Name, td.Href, td.Description)
+}
+
+func docs(name string, href string, ds []string) string {
+	bd := strings.Builder{}
+	// Start by mentioning name, with docs link.
+	bd.WriteString(fmt.Sprintf("\n// %s (%s)", name, href))
+	// add a newline for nice paragraphing and readability
+	bd.WriteString("\n//")
+	for _, text := range ds {
+		// if this is a list item, we should add extra indentation to make sure it renders right in the docs pages.
+		if strings.HasPrefix(text, "- ") {
+			text = "  " + text
 		}
 
-		docs.WriteString("\n// " + text)
+		bd.WriteString("\n// " + text)
 	}
-
-	docs.WriteString("\n// " + td.Href)
-	return docs.String()
+	return bd.String()
 }
 
 type MethodDescription struct {
