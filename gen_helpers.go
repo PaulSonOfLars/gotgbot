@@ -196,11 +196,6 @@ func (c Chat) GetMenuButton(b *Bot, opts *GetChatMenuButtonOpts) (MenuButton, er
 	return b.GetChatMenuButton(opts)
 }
 
-// Get Helper method for Bot.GetFile
-func (f File) Get(b *Bot, opts *GetFileOpts) (*File, error) {
-	return b.GetFile(f.FileId, opts)
-}
-
 // GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
