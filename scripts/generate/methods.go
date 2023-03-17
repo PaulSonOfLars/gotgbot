@@ -191,11 +191,11 @@ func (m MethodDescription) description() (string, error) {
 			return "", err
 		}
 
-		description.WriteString("\n// - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
+		description.WriteString("\n//  - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
 	}
 
 	// All methods have the optional `RequestOpts`
-	description.WriteString("\n// - opts (type " + m.optsName() + "): All optional parameters.")
+	description.WriteString("\n//  - opts (type " + m.optsName() + "): All optional parameters.")
 
 	description.WriteString("\n// " + m.Href)
 

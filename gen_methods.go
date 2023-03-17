@@ -18,10 +18,11 @@ type AddStickerToSetOpts struct {
 }
 
 // AddStickerToSet Use this method to add a new sticker to a set created by the bot. The format of the added sticker must match the format of the other stickers in the set. Emoji sticker sets can have up to 200 stickers. Animated and video sticker sets can have up to 50 stickers. Static sticker sets can have up to 120 stickers. Returns True on success.
-// - userId (type int64): User identifier of sticker set owner
-// - name (type string): Sticker set name
-// - sticker (type InputSticker): A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set isn't changed.
-// - opts (type AddStickerToSetOpts): All optional parameters.
+//   - userId (type int64): User identifier of sticker set owner
+//   - name (type string): Sticker set name
+//   - sticker (type InputSticker): A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set isn't changed.
+//   - opts (type AddStickerToSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#addstickertoset
 func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -63,8 +64,9 @@ type AnswerCallbackQueryOpts struct {
 }
 
 // AnswerCallbackQuery Use this method to send answers to callback queries sent from inline keyboards. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
-// - callbackQueryId (type string): Unique identifier for the query to be answered
-// - opts (type AnswerCallbackQueryOpts): All optional parameters.
+//   - callbackQueryId (type string): Unique identifier for the query to be answered
+//   - opts (type AnswerCallbackQueryOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#answercallbackquery
 func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallbackQueryOpts) (bool, error) {
 	v := map[string]string{}
@@ -110,9 +112,10 @@ type AnswerInlineQueryOpts struct {
 
 // AnswerInlineQuery Use this method to send answers to an inline query. On success, True is returned.
 // No more than 50 results per query are allowed.
-// - inlineQueryId (type string): Unique identifier for the answered query
-// - results (type []InlineQueryResult): A JSON-serialized array of results for the inline query
-// - opts (type AnswerInlineQueryOpts): All optional parameters.
+//   - inlineQueryId (type string): Unique identifier for the answered query
+//   - results (type []InlineQueryResult): A JSON-serialized array of results for the inline query
+//   - opts (type AnswerInlineQueryOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#answerinlinequery
 func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryResult, opts *AnswerInlineQueryOpts) (bool, error) {
 	v := map[string]string{}
@@ -157,9 +160,10 @@ type AnswerPreCheckoutQueryOpts struct {
 }
 
 // AnswerPreCheckoutQuery Once the user has confirmed their payment and shipping details, the Bot API sends the final confirmation in the form of an Update with the field pre_checkout_query. Use this method to respond to such pre-checkout queries. On success, True is returned. Note: The Bot API must receive an answer within 10 seconds after the pre-checkout query was sent.
-// - preCheckoutQueryId (type string): Unique identifier for the query to be answered
-// - ok (type bool): Specify True if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order. Use False if there are any problems.
-// - opts (type AnswerPreCheckoutQueryOpts): All optional parameters.
+//   - preCheckoutQueryId (type string): Unique identifier for the query to be answered
+//   - ok (type bool): Specify True if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order. Use False if there are any problems.
+//   - opts (type AnswerPreCheckoutQueryOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#answerprecheckoutquery
 func (bot *Bot) AnswerPreCheckoutQuery(preCheckoutQueryId string, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
 	v := map[string]string{}
@@ -194,9 +198,10 @@ type AnswerShippingQueryOpts struct {
 }
 
 // AnswerShippingQuery If you sent an invoice requesting a shipping address and the parameter is_flexible was specified, the Bot API will send an Update with a shipping_query field to the bot. Use this method to reply to shipping queries. On success, True is returned.
-// - shippingQueryId (type string): Unique identifier for the query to be answered
-// - ok (type bool): Pass True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
-// - opts (type AnswerShippingQueryOpts): All optional parameters.
+//   - shippingQueryId (type string): Unique identifier for the query to be answered
+//   - ok (type bool): Pass True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
+//   - opts (type AnswerShippingQueryOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#answershippingquery
 func (bot *Bot) AnswerShippingQuery(shippingQueryId string, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
 	v := map[string]string{}
@@ -234,9 +239,10 @@ type AnswerWebAppQueryOpts struct {
 }
 
 // AnswerWebAppQuery Use this method to set the result of an interaction with a Web App and send a corresponding message on behalf of the user to the chat from which the query originated. On success, a SentWebAppMessage object is returned.
-// - webAppQueryId (type string): Unique identifier for the query to be answered
-// - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
-// - opts (type AnswerWebAppQueryOpts): All optional parameters.
+//   - webAppQueryId (type string): Unique identifier for the query to be answered
+//   - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
+//   - opts (type AnswerWebAppQueryOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#answerwebappquery
 func (bot *Bot) AnswerWebAppQuery(webAppQueryId string, result InlineQueryResult, opts *AnswerWebAppQueryOpts) (*SentWebAppMessage, error) {
 	v := map[string]string{}
@@ -268,9 +274,10 @@ type ApproveChatJoinRequestOpts struct {
 }
 
 // ApproveChatJoinRequest Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type ApproveChatJoinRequestOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type ApproveChatJoinRequestOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#approvechatjoinrequest
 func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
@@ -302,9 +309,10 @@ type BanChatMemberOpts struct {
 }
 
 // BanChatMember Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type BanChatMemberOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type BanChatMemberOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#banchatmember
 func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
 	v := map[string]string{}
@@ -338,9 +346,10 @@ type BanChatSenderChatOpts struct {
 }
 
 // BanChatSenderChat Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - senderChatId (type int64): Unique identifier of the target sender chat
-// - opts (type BanChatSenderChatOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - senderChatId (type int64): Unique identifier of the target sender chat
+//   - opts (type BanChatSenderChatOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#banchatsenderchat
 func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -368,7 +377,8 @@ type CloseOpts struct {
 }
 
 // Close Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
-// - opts (type CloseOpts): All optional parameters.
+//   - opts (type CloseOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#close
 func (bot *Bot) Close(opts *CloseOpts) (bool, error) {
 	v := map[string]string{}
@@ -394,9 +404,10 @@ type CloseForumTopicOpts struct {
 }
 
 // CloseForumTopic Use this method to close an open topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - opts (type CloseForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+//   - opts (type CloseForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#closeforumtopic
 func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *CloseForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -424,8 +435,9 @@ type CloseGeneralForumTopicOpts struct {
 }
 
 // CloseGeneralForumTopic Use this method to close an open 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - opts (type CloseGeneralForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type CloseGeneralForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#closegeneralforumtopic
 func (bot *Bot) CloseGeneralForumTopic(chatId int64, opts *CloseGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -470,10 +482,11 @@ type CopyMessageOpts struct {
 }
 
 // CopyMessage Use this method to copy messages of any kind. Service messages and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - fromChatId (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
-// - messageId (type int64): Message identifier in the chat specified in from_chat_id
-// - opts (type CopyMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - fromChatId (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+//   - messageId (type int64): Message identifier in the chat specified in from_chat_id
+//   - opts (type CopyMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#copymessage
 func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := map[string]string{}
@@ -539,8 +552,9 @@ type CreateChatInviteLinkOpts struct {
 }
 
 // CreateChatInviteLink Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type CreateChatInviteLinkOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type CreateChatInviteLinkOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#createchatinvitelink
 func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
@@ -581,9 +595,10 @@ type CreateForumTopicOpts struct {
 }
 
 // CreateForumTopic Use this method to create a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns information about the created topic as a ForumTopic object.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - name (type string): Topic name, 1-128 characters
-// - opts (type CreateForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - name (type string): Topic name, 1-128 characters
+//   - opts (type CreateForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#createforumtopic
 func (bot *Bot) CreateForumTopic(chatId int64, name string, opts *CreateForumTopicOpts) (*ForumTopic, error) {
 	v := map[string]string{}
@@ -645,13 +660,14 @@ type CreateInvoiceLinkOpts struct {
 }
 
 // CreateInvoiceLink Use this method to create a link for an invoice. Returns the created invoice link as String on success.
-// - title (type string): Product name, 1-32 characters
-// - description (type string): Product description, 1-255 characters
-// - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
-// - providerToken (type string): Payment provider token, obtained via BotFather
-// - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
-// - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
-// - opts (type CreateInvoiceLinkOpts): All optional parameters.
+//   - title (type string): Product name, 1-32 characters
+//   - description (type string): Product description, 1-255 characters
+//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+//   - providerToken (type string): Payment provider token, obtained via BotFather
+//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
+//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+//   - opts (type CreateInvoiceLinkOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#createinvoicelink
 func (bot *Bot) CreateInvoiceLink(title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *CreateInvoiceLinkOpts) (string, error) {
 	v := map[string]string{}
@@ -723,12 +739,13 @@ type CreateNewStickerSetOpts struct {
 }
 
 // CreateNewStickerSet Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. Returns True on success.
-// - userId (type int64): User identifier of created sticker set owner
-// - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only English letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
-// - title (type string): Sticker set title, 1-64 characters
-// - stickers (type []InputSticker): A JSON-serialized list of 1-50 initial stickers to be added to the sticker set
-// - stickerFormat (type string): Format of stickers in the set, must be one of "static", "animated", "video"
-// - opts (type CreateNewStickerSetOpts): All optional parameters.
+//   - userId (type int64): User identifier of created sticker set owner
+//   - name (type string): Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only English letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
+//   - title (type string): Sticker set title, 1-64 characters
+//   - stickers (type []InputSticker): A JSON-serialized list of 1-50 initial stickers to be added to the sticker set
+//   - stickerFormat (type string): Format of stickers in the set, must be one of "static", "animated", "video"
+//   - opts (type CreateNewStickerSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#createnewstickerset
 func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, stickers []InputSticker, stickerFormat string, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -778,9 +795,10 @@ type DeclineChatJoinRequestOpts struct {
 }
 
 // DeclineChatJoinRequest Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type DeclineChatJoinRequestOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type DeclineChatJoinRequestOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#declinechatjoinrequest
 func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64, opts *DeclineChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
@@ -808,8 +826,9 @@ type DeleteChatPhotoOpts struct {
 }
 
 // DeleteChatPhoto Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type DeleteChatPhotoOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type DeleteChatPhotoOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletechatphoto
 func (bot *Bot) DeleteChatPhoto(chatId int64, opts *DeleteChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
@@ -836,8 +855,9 @@ type DeleteChatStickerSetOpts struct {
 }
 
 // DeleteChatStickerSet Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - opts (type DeleteChatStickerSetOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type DeleteChatStickerSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -864,9 +884,10 @@ type DeleteForumTopicOpts struct {
 }
 
 // DeleteForumTopic Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - opts (type DeleteForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+//   - opts (type DeleteForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deleteforumtopic
 func (bot *Bot) DeleteForumTopic(chatId int64, messageThreadId int64, opts *DeleteForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -903,9 +924,10 @@ type DeleteMessageOpts struct {
 // - If the bot is an administrator of a group, it can delete any message there.
 // - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.
 // Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - messageId (type int64): Identifier of the message to delete
-// - opts (type DeleteMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - messageId (type int64): Identifier of the message to delete
+//   - opts (type DeleteMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletemessage
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessageOpts) (bool, error) {
 	v := map[string]string{}
@@ -937,7 +959,8 @@ type DeleteMyCommandsOpts struct {
 }
 
 // DeleteMyCommands Use this method to delete the list of the bot's commands for the given scope and user language. After deletion, higher level commands will be shown to affected users. Returns True on success.
-// - opts (type DeleteMyCommandsOpts): All optional parameters.
+//   - opts (type DeleteMyCommandsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletemycommands
 func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
 	v := map[string]string{}
@@ -971,8 +994,9 @@ type DeleteStickerFromSetOpts struct {
 }
 
 // DeleteStickerFromSet Use this method to delete a sticker from a set created by the bot. Returns True on success.
-// - sticker (type string): File identifier of the sticker
-// - opts (type DeleteStickerFromSetOpts): All optional parameters.
+//   - sticker (type string): File identifier of the sticker
+//   - opts (type DeleteStickerFromSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletestickerfromset
 func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -999,8 +1023,9 @@ type DeleteStickerSetOpts struct {
 }
 
 // DeleteStickerSet Use this method to delete a sticker set that was created by the bot. Returns True on success.
-// - name (type string): Sticker set name
-// - opts (type DeleteStickerSetOpts): All optional parameters.
+//   - name (type string): Sticker set name
+//   - opts (type DeleteStickerSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletestickerset
 func (bot *Bot) DeleteStickerSet(name string, opts *DeleteStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -1029,7 +1054,8 @@ type DeleteWebhookOpts struct {
 }
 
 // DeleteWebhook Use this method to remove webhook integration if you decide to switch back to getUpdates. Returns True on success.
-// - opts (type DeleteWebhookOpts): All optional parameters.
+//   - opts (type DeleteWebhookOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#deletewebhook
 func (bot *Bot) DeleteWebhook(opts *DeleteWebhookOpts) (bool, error) {
 	v := map[string]string{}
@@ -1066,9 +1092,10 @@ type EditChatInviteLinkOpts struct {
 }
 
 // EditChatInviteLink Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the edited invite link as a ChatInviteLink object.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - inviteLink (type string): The invite link to edit
-// - opts (type EditChatInviteLinkOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - inviteLink (type string): The invite link to edit
+//   - opts (type EditChatInviteLinkOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editchatinvitelink
 func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
@@ -1110,9 +1137,10 @@ type EditForumTopicOpts struct {
 }
 
 // EditForumTopic Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - opts (type EditForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+//   - opts (type EditForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editforumtopic
 func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -1146,9 +1174,10 @@ type EditGeneralForumTopicOpts struct {
 }
 
 // EditGeneralForumTopic Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - name (type string): New topic name, 1-128 characters
-// - opts (type EditGeneralForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - name (type string): New topic name, 1-128 characters
+//   - opts (type EditGeneralForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editgeneralforumtopic
 func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -1190,7 +1219,8 @@ type EditMessageCaptionOpts struct {
 }
 
 // EditMessageCaption Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - opts (type EditMessageCaptionOpts): All optional parameters.
+//   - opts (type EditMessageCaptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editmessagecaption
 func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -1261,9 +1291,10 @@ type EditMessageLiveLocationOpts struct {
 }
 
 // EditMessageLiveLocation Use this method to edit live location messages. A location can be edited until its live_period expires or editing is explicitly disabled by a call to stopMessageLiveLocation. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - latitude (type float64): Latitude of new location
-// - longitude (type float64): Longitude of new location
-// - opts (type EditMessageLiveLocationOpts): All optional parameters.
+//   - latitude (type float64): Latitude of new location
+//   - longitude (type float64): Longitude of new location
+//   - opts (type EditMessageLiveLocationOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editmessagelivelocation
 func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -1330,8 +1361,9 @@ type EditMessageMediaOpts struct {
 }
 
 // EditMessageMedia Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - media (type InputMedia): A JSON-serialized object for a new media content of the message
-// - opts (type EditMessageMediaOpts): All optional parameters.
+//   - media (type InputMedia): A JSON-serialized object for a new media content of the message
+//   - opts (type EditMessageMediaOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editmessagemedia
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -1393,7 +1425,8 @@ type EditMessageReplyMarkupOpts struct {
 }
 
 // EditMessageReplyMarkup Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - opts (type EditMessageReplyMarkupOpts): All optional parameters.
+//   - opts (type EditMessageReplyMarkupOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editmessagereplymarkup
 func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -1455,8 +1488,9 @@ type EditMessageTextOpts struct {
 }
 
 // EditMessageText Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - text (type string): New text of the message, 1-4096 characters after entities parsing
-// - opts (type EditMessageTextOpts): All optional parameters.
+//   - text (type string): New text of the message, 1-4096 characters after entities parsing
+//   - opts (type EditMessageTextOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#editmessagetext
 func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -1514,8 +1548,9 @@ type ExportChatInviteLinkOpts struct {
 }
 
 // ExportChatInviteLink Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type ExportChatInviteLinkOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type ExportChatInviteLinkOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpts) (string, error) {
 	v := map[string]string{}
@@ -1548,10 +1583,11 @@ type ForwardMessageOpts struct {
 }
 
 // ForwardMessage Use this method to forward messages of any kind. Service messages can't be forwarded. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - fromChatId (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
-// - messageId (type int64): Message identifier in the chat specified in from_chat_id
-// - opts (type ForwardMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - fromChatId (type int64): Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+//   - messageId (type int64): Message identifier in the chat specified in from_chat_id
+//   - opts (type ForwardMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#forwardmessage
 func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := map[string]string{}
@@ -1587,8 +1623,9 @@ type GetChatOpts struct {
 }
 
 // GetChat Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.). Returns a Chat object on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// - opts (type GetChatOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+//   - opts (type GetChatOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getchat
 func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*Chat, error) {
 	v := map[string]string{}
@@ -1615,8 +1652,9 @@ type GetChatAdministratorsOpts struct {
 }
 
 // GetChatAdministrators Use this method to get a list of administrators in a chat, which aren't bots. Returns an Array of ChatMember objects.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// - opts (type GetChatAdministratorsOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+//   - opts (type GetChatAdministratorsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getchatadministrators
 func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
 	v := map[string]string{}
@@ -1642,9 +1680,10 @@ type GetChatMemberOpts struct {
 }
 
 // GetChatMember Use this method to get information about a member of a chat. The method is only guaranteed to work for other users if the bot is an administrator in the chat. Returns a ChatMember object on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type GetChatMemberOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type GetChatMemberOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getchatmember
 func (bot *Bot) GetChatMember(chatId int64, userId int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	v := map[string]string{}
@@ -1671,8 +1710,9 @@ type GetChatMemberCountOpts struct {
 }
 
 // GetChatMemberCount Use this method to get the number of members in a chat. Returns Int on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// - opts (type GetChatMemberCountOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+//   - opts (type GetChatMemberCountOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getchatmembercount
 func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (int64, error) {
 	v := map[string]string{}
@@ -1701,7 +1741,8 @@ type GetChatMenuButtonOpts struct {
 }
 
 // GetChatMenuButton Use this method to get the current value of the bot's menu button in a private chat, or the default menu button. Returns MenuButton on success.
-// - opts (type GetChatMenuButtonOpts): All optional parameters.
+//   - opts (type GetChatMenuButtonOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getchatmenubutton
 func (bot *Bot) GetChatMenuButton(opts *GetChatMenuButtonOpts) (MenuButton, error) {
 	v := map[string]string{}
@@ -1731,8 +1772,9 @@ type GetCustomEmojiStickersOpts struct {
 }
 
 // GetCustomEmojiStickers Use this method to get information about custom emoji stickers by their identifiers. Returns an Array of Sticker objects.
-// - customEmojiIds (type []string): List of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
-// - opts (type GetCustomEmojiStickersOpts): All optional parameters.
+//   - customEmojiIds (type []string): List of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
+//   - opts (type GetCustomEmojiStickersOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getcustomemojistickers
 func (bot *Bot) GetCustomEmojiStickers(customEmojiIds []string, opts *GetCustomEmojiStickersOpts) ([]Sticker, error) {
 	v := map[string]string{}
@@ -1766,8 +1808,9 @@ type GetFileOpts struct {
 
 // GetFile Use this method to get basic information about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
 // Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
-// - fileId (type string): File identifier to get information about
-// - opts (type GetFileOpts): All optional parameters.
+//   - fileId (type string): File identifier to get information about
+//   - opts (type GetFileOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getfile
 func (bot *Bot) GetFile(fileId string, opts *GetFileOpts) (*File, error) {
 	v := map[string]string{}
@@ -1794,7 +1837,8 @@ type GetForumTopicIconStickersOpts struct {
 }
 
 // GetForumTopicIconStickers Use this method to get custom emoji stickers, which can be used as a forum topic icon by any user. Requires no parameters. Returns an Array of Sticker objects.
-// - opts (type GetForumTopicIconStickersOpts): All optional parameters.
+//   - opts (type GetForumTopicIconStickersOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getforumtopiciconstickers
 func (bot *Bot) GetForumTopicIconStickers(opts *GetForumTopicIconStickersOpts) ([]Sticker, error) {
 	v := map[string]string{}
@@ -1826,8 +1870,9 @@ type GetGameHighScoresOpts struct {
 }
 
 // GetGameHighScores Use this method to get data for high score tables. Will return the score of the specified user and several of their neighbors in a game. Returns an Array of GameHighScore objects.
-// - userId (type int64): Target user id
-// - opts (type GetGameHighScoresOpts): All optional parameters.
+//   - userId (type int64): Target user id
+//   - opts (type GetGameHighScoresOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getgamehighscores
 func (bot *Bot) GetGameHighScores(userId int64, opts *GetGameHighScoresOpts) ([]GameHighScore, error) {
 	v := map[string]string{}
@@ -1863,7 +1908,8 @@ type GetMeOpts struct {
 }
 
 // GetMe A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
-// - opts (type GetMeOpts): All optional parameters.
+//   - opts (type GetMeOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getme
 func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
 	v := map[string]string{}
@@ -1893,7 +1939,8 @@ type GetMyCommandsOpts struct {
 }
 
 // GetMyCommands Use this method to get the current list of the bot's commands for the given scope and user language. Returns an Array of BotCommand objects. If commands aren't set, an empty list is returned.
-// - opts (type GetMyCommandsOpts): All optional parameters.
+//   - opts (type GetMyCommandsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getmycommands
 func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 	v := map[string]string{}
@@ -1929,7 +1976,8 @@ type GetMyDefaultAdministratorRightsOpts struct {
 }
 
 // GetMyDefaultAdministratorRights Use this method to get the current default administrator rights of the bot. Returns ChatAdministratorRights on success.
-// - opts (type GetMyDefaultAdministratorRightsOpts): All optional parameters.
+//   - opts (type GetMyDefaultAdministratorRightsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getmydefaultadministratorrights
 func (bot *Bot) GetMyDefaultAdministratorRights(opts *GetMyDefaultAdministratorRightsOpts) (*ChatAdministratorRights, error) {
 	v := map[string]string{}
@@ -1960,7 +2008,8 @@ type GetMyDescriptionOpts struct {
 }
 
 // GetMyDescription Use this method to get the current bot description for the given user language. Returns BotDescription on success.
-// - opts (type GetMyDescriptionOpts): All optional parameters.
+//   - opts (type GetMyDescriptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getmydescription
 func (bot *Bot) GetMyDescription(opts *GetMyDescriptionOpts) (*BotDescription, error) {
 	v := map[string]string{}
@@ -1991,7 +2040,8 @@ type GetMyShortDescriptionOpts struct {
 }
 
 // GetMyShortDescription Use this method to get the current bot short description for the given user language. Returns BotShortDescription on success.
-// - opts (type GetMyShortDescriptionOpts): All optional parameters.
+//   - opts (type GetMyShortDescriptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getmyshortdescription
 func (bot *Bot) GetMyShortDescription(opts *GetMyShortDescriptionOpts) (*BotShortDescription, error) {
 	v := map[string]string{}
@@ -2020,8 +2070,9 @@ type GetStickerSetOpts struct {
 }
 
 // GetStickerSet Use this method to get a sticker set. On success, a StickerSet object is returned.
-// - name (type string): Name of the sticker set
-// - opts (type GetStickerSetOpts): All optional parameters.
+//   - name (type string): Name of the sticker set
+//   - opts (type GetStickerSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getstickerset
 func (bot *Bot) GetStickerSet(name string, opts *GetStickerSetOpts) (*StickerSet, error) {
 	v := map[string]string{}
@@ -2056,7 +2107,8 @@ type GetUpdatesOpts struct {
 }
 
 // GetUpdates Use this method to receive incoming updates using long polling (wiki). Returns an Array of Update objects.
-// - opts (type GetUpdatesOpts): All optional parameters.
+//   - opts (type GetUpdatesOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getupdates
 func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
 	v := map[string]string{}
@@ -2104,8 +2156,9 @@ type GetUserProfilePhotosOpts struct {
 }
 
 // GetUserProfilePhotos Use this method to get a list of profile pictures for a user. Returns a UserProfilePhotos object.
-// - userId (type int64): Unique identifier of the target user
-// - opts (type GetUserProfilePhotosOpts): All optional parameters.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type GetUserProfilePhotosOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (bot *Bot) GetUserProfilePhotos(userId int64, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	v := map[string]string{}
@@ -2140,7 +2193,8 @@ type GetWebhookInfoOpts struct {
 }
 
 // GetWebhookInfo Use this method to get current webhook status. Requires no parameters. On success, returns a WebhookInfo object. If the bot is using getUpdates, will return an object with the url field empty.
-// - opts (type GetWebhookInfoOpts): All optional parameters.
+//   - opts (type GetWebhookInfoOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#getwebhookinfo
 func (bot *Bot) GetWebhookInfo(opts *GetWebhookInfoOpts) (*WebhookInfo, error) {
 	v := map[string]string{}
@@ -2166,8 +2220,9 @@ type HideGeneralForumTopicOpts struct {
 }
 
 // HideGeneralForumTopic Use this method to hide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically closed if it was open. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - opts (type HideGeneralForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type HideGeneralForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#hidegeneralforumtopic
 func (bot *Bot) HideGeneralForumTopic(chatId int64, opts *HideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2194,8 +2249,9 @@ type LeaveChatOpts struct {
 }
 
 // LeaveChat Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
-// - opts (type LeaveChatOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+//   - opts (type LeaveChatOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#leavechat
 func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -2222,7 +2278,8 @@ type LogOutOpts struct {
 }
 
 // LogOut Use this method to log out from the cloud Bot API server before launching the bot locally. You must log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns True on success. Requires no parameters.
-// - opts (type LogOutOpts): All optional parameters.
+//   - opts (type LogOutOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#logout
 func (bot *Bot) LogOut(opts *LogOutOpts) (bool, error) {
 	v := map[string]string{}
@@ -2250,9 +2307,10 @@ type PinChatMessageOpts struct {
 }
 
 // PinChatMessage Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - messageId (type int64): Identifier of a message to pin
-// - opts (type PinChatMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - messageId (type int64): Identifier of a message to pin
+//   - opts (type PinChatMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#pinchatmessage
 func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	v := map[string]string{}
@@ -2307,9 +2365,10 @@ type PromoteChatMemberOpts struct {
 }
 
 // PromoteChatMember Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Pass False for all boolean parameters to demote a user. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type PromoteChatMemberOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type PromoteChatMemberOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#promotechatmember
 func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := map[string]string{}
@@ -2351,9 +2410,10 @@ type ReopenForumTopicOpts struct {
 }
 
 // ReopenForumTopic Use this method to reopen a closed topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - opts (type ReopenForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+//   - opts (type ReopenForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#reopenforumtopic
 func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *ReopenForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2381,8 +2441,9 @@ type ReopenGeneralForumTopicOpts struct {
 }
 
 // ReopenGeneralForumTopic Use this method to reopen a closed 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically unhidden if it was hidden. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - opts (type ReopenGeneralForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type ReopenGeneralForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#reopengeneralforumtopic
 func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -2413,10 +2474,11 @@ type RestrictChatMemberOpts struct {
 }
 
 // RestrictChatMember Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate administrator rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - userId (type int64): Unique identifier of the target user
-// - permissions (type ChatPermissions): A JSON-serialized object for new user permissions
-// - opts (type RestrictChatMemberOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - permissions (type ChatPermissions): A JSON-serialized object for new user permissions
+//   - opts (type RestrictChatMemberOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#restrictchatmember
 func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := map[string]string{}
@@ -2455,9 +2517,10 @@ type RevokeChatInviteLinkOpts struct {
 }
 
 // RevokeChatInviteLink Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as ChatInviteLink object.
-// - chatId (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
-// - inviteLink (type string): The invite link to revoke
-// - opts (type RevokeChatInviteLinkOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier of the target chat or username of the target channel (in the format @channelusername)
+//   - inviteLink (type string): The invite link to revoke
+//   - opts (type RevokeChatInviteLinkOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *RevokeChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
@@ -2513,9 +2576,10 @@ type SendAnimationOpts struct {
 }
 
 // SendAnimation Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - animation (type InputFile): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendAnimationOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - animation (type InputFile): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendAnimationOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendanimation
 func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]string{}
@@ -2649,9 +2713,10 @@ type SendAudioOpts struct {
 
 // SendAudio Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
 // For sending voice messages, use the sendVoice method instead.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - audio (type InputFile): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendAudioOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - audio (type InputFile): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendAudioOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendaudio
 func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]string{}
@@ -2756,9 +2821,10 @@ type SendChatActionOpts struct {
 
 // SendChatAction Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
-// - opts (type SendChatActionOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
+//   - opts (type SendChatActionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendchataction
 func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
 	v := map[string]string{}
@@ -2807,10 +2873,11 @@ type SendContactOpts struct {
 }
 
 // SendContact Use this method to send phone contacts. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - phoneNumber (type string): Contact's phone number
-// - firstName (type string): Contact's first name
-// - opts (type SendContactOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - phoneNumber (type string): Contact's phone number
+//   - firstName (type string): Contact's first name
+//   - opts (type SendContactOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendcontact
 func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]string{}
@@ -2873,8 +2940,9 @@ type SendDiceOpts struct {
 }
 
 // SendDice Use this method to send an animated emoji that will display a random value. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type SendDiceOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type SendDiceOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#senddice
 func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := map[string]string{}
@@ -2942,9 +3010,10 @@ type SendDocumentOpts struct {
 }
 
 // SendDocument Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - document (type InputFile): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendDocumentOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - document (type InputFile): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendDocumentOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#senddocument
 func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3054,9 +3123,10 @@ type SendGameOpts struct {
 }
 
 // SendGame Use this method to send a game. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat
-// - gameShortName (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather.
-// - opts (type SendGameOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - gameShortName (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather.
+//   - opts (type SendGameOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendgame
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3142,14 +3212,15 @@ type SendInvoiceOpts struct {
 }
 
 // SendInvoice Use this method to send invoices. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - title (type string): Product name, 1-32 characters
-// - description (type string): Product description, 1-255 characters
-// - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
-// - providerToken (type string): Payment provider token, obtained via @BotFather
-// - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
-// - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
-// - opts (type SendInvoiceOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - title (type string): Product name, 1-32 characters
+//   - description (type string): Product description, 1-255 characters
+//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+//   - providerToken (type string): Payment provider token, obtained via @BotFather
+//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
+//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+//   - opts (type SendInvoiceOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendinvoice
 func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3253,10 +3324,11 @@ type SendLocationOpts struct {
 }
 
 // SendLocation Use this method to send point on the map. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - latitude (type float64): Latitude of the location
-// - longitude (type float64): Longitude of the location
-// - opts (type SendLocationOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - latitude (type float64): Latitude of the location
+//   - longitude (type float64): Longitude of the location
+//   - opts (type SendLocationOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendlocation
 func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3325,9 +3397,10 @@ type SendMediaGroupOpts struct {
 }
 
 // SendMediaGroup Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - media (type []InputMedia): A JSON-serialized array describing messages to be sent, must include 2-10 items
-// - opts (type SendMediaGroupOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - media (type []InputMedia): A JSON-serialized array describing messages to be sent, must include 2-10 items
+//   - opts (type SendMediaGroupOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendmediagroup
 func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]string{}
@@ -3399,9 +3472,10 @@ type SendMessageOpts struct {
 }
 
 // SendMessage Use this method to send text messages. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
-// - opts (type SendMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
+//   - opts (type SendMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendmessage
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3476,9 +3550,10 @@ type SendPhotoOpts struct {
 }
 
 // SendPhoto Use this method to send photos. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendPhotoOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - photo (type InputFile): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendPhotoOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendphoto
 func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3587,10 +3662,11 @@ type SendPollOpts struct {
 }
 
 // SendPoll Use this method to send a native poll. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - question (type string): Poll question, 1-300 characters
-// - options (type []string): A JSON-serialized list of answer options, 2-10 strings 1-100 characters each
-// - opts (type SendPollOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - question (type string): Poll question, 1-300 characters
+//   - options (type []string): A JSON-serialized list of answer options, 2-10 strings 1-100 characters each
+//   - opts (type SendPollOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendpoll
 func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *SendPollOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3680,9 +3756,10 @@ type SendStickerOpts struct {
 }
 
 // SendSticker Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP or .TGS sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video stickers can only be sent by a file_id. Animated stickers can't be sent via an HTTP URL.
-// - opts (type SendStickerOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - sticker (type InputFile): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP or .TGS sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video stickers can only be sent by a file_id. Animated stickers can't be sent via an HTTP URL.
+//   - opts (type SendStickerOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendsticker
 func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3770,12 +3847,13 @@ type SendVenueOpts struct {
 }
 
 // SendVenue Use this method to send information about a venue. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - latitude (type float64): Latitude of the venue
-// - longitude (type float64): Longitude of the venue
-// - title (type string): Name of the venue
-// - address (type string): Address of the venue
-// - opts (type SendVenueOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - latitude (type float64): Latitude of the venue
+//   - longitude (type float64): Longitude of the venue
+//   - title (type string): Name of the venue
+//   - address (type string): Address of the venue
+//   - opts (type SendVenueOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendvenue
 func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3858,9 +3936,10 @@ type SendVideoOpts struct {
 }
 
 // SendVideo Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - video (type InputFile): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendVideoOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - video (type InputFile): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendVideoOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendvideo
 func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]string{}
@@ -3986,9 +4065,10 @@ type SendVideoNoteOpts struct {
 }
 
 // SendVideoNote As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - videoNote (type InputFile): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
-// - opts (type SendVideoNoteOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - videoNote (type InputFile): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
+//   - opts (type SendVideoNoteOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendvideonote
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]string{}
@@ -4102,9 +4182,10 @@ type SendVoiceOpts struct {
 }
 
 // SendVoice Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - opts (type SendVoiceOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - opts (type SendVoiceOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#sendvoice
 func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]string{}
@@ -4183,10 +4264,11 @@ type SetChatAdministratorCustomTitleOpts struct {
 }
 
 // SetChatAdministratorCustomTitle Use this method to set a custom title for an administrator in a supergroup promoted by the bot. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - userId (type int64): Unique identifier of the target user
-// - customTitle (type string): New custom title for the administrator; 0-16 characters, emoji are not allowed
-// - opts (type SetChatAdministratorCustomTitleOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - customTitle (type string): New custom title for the administrator; 0-16 characters, emoji are not allowed
+//   - opts (type SetChatAdministratorCustomTitleOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, customTitle string, opts *SetChatAdministratorCustomTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4217,8 +4299,9 @@ type SetChatDescriptionOpts struct {
 }
 
 // SetChatDescription Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type SetChatDescriptionOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type SetChatDescriptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatdescription
 func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
 	v := map[string]string{}
@@ -4252,7 +4335,8 @@ type SetChatMenuButtonOpts struct {
 }
 
 // SetChatMenuButton Use this method to change the bot's menu button in a private chat, or the default menu button. Returns True on success.
-// - opts (type SetChatMenuButtonOpts): All optional parameters.
+//   - opts (type SetChatMenuButtonOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatmenubutton
 func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 	v := map[string]string{}
@@ -4290,9 +4374,10 @@ type SetChatPermissionsOpts struct {
 }
 
 // SetChatPermissions Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
-// - opts (type SetChatPermissionsOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - permissions (type ChatPermissions): A JSON-serialized object for new default chat permissions
+//   - opts (type SetChatPermissionsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatpermissions
 func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, opts *SetChatPermissionsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4327,9 +4412,10 @@ type SetChatPhotoOpts struct {
 }
 
 // SetChatPhoto Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - photo (type InputFile): New chat photo, uploaded using multipart/form-data
-// - opts (type SetChatPhotoOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - photo (type InputFile): New chat photo, uploaded using multipart/form-data
+//   - opts (type SetChatPhotoOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatphoto
 func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
@@ -4375,9 +4461,10 @@ type SetChatStickerSetOpts struct {
 }
 
 // SetChatStickerSet Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - stickerSetName (type string): Name of the sticker set to be set as the group sticker set
-// - opts (type SetChatStickerSetOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - stickerSetName (type string): Name of the sticker set to be set as the group sticker set
+//   - opts (type SetChatStickerSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchatstickerset
 func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string, opts *SetChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -4405,9 +4492,10 @@ type SetChatTitleOpts struct {
 }
 
 // SetChatTitle Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - title (type string): New chat title, 1-128 characters
-// - opts (type SetChatTitleOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - title (type string): New chat title, 1-128 characters
+//   - opts (type SetChatTitleOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setchattitle
 func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4437,8 +4525,9 @@ type SetCustomEmojiStickerSetThumbnailOpts struct {
 }
 
 // SetCustomEmojiStickerSetThumbnail Use this method to set the thumbnail of a custom emoji sticker set. Returns True on success.
-// - name (type string): Sticker set name
-// - opts (type SetCustomEmojiStickerSetThumbnailOpts): All optional parameters.
+//   - name (type string): Sticker set name
+//   - opts (type SetCustomEmojiStickerSetThumbnailOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setcustomemojistickersetthumbnail
 func (bot *Bot) SetCustomEmojiStickerSetThumbnail(name string, opts *SetCustomEmojiStickerSetThumbnailOpts) (bool, error) {
 	v := map[string]string{}
@@ -4478,9 +4567,10 @@ type SetGameScoreOpts struct {
 }
 
 // SetGameScore Use this method to set the score of the specified user in a game message. On success, if the message is not an inline message, the Message is returned, otherwise True is returned. Returns an error, if the new score is not greater than the user's current score in the chat and force is False.
-// - userId (type int64): User identifier
-// - score (type int64): New score, must be non-negative
-// - opts (type SetGameScoreOpts): All optional parameters.
+//   - userId (type int64): User identifier
+//   - score (type int64): New score, must be non-negative
+//   - opts (type SetGameScoreOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setgamescore
 func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -4531,8 +4621,9 @@ type SetMyCommandsOpts struct {
 }
 
 // SetMyCommands Use this method to change the list of the bot's commands. See this manual for more details about bot commands. Returns True on success.
-// - commands (type []BotCommand): A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
-// - opts (type SetMyCommandsOpts): All optional parameters.
+//   - commands (type []BotCommand): A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
+//   - opts (type SetMyCommandsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setmycommands
 func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4577,7 +4668,8 @@ type SetMyDefaultAdministratorRightsOpts struct {
 }
 
 // SetMyDefaultAdministratorRights Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are free to modify the list before adding the bot. Returns True on success.
-// - opts (type SetMyDefaultAdministratorRightsOpts): All optional parameters.
+//   - opts (type SetMyDefaultAdministratorRightsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setmydefaultadministratorrights
 func (bot *Bot) SetMyDefaultAdministratorRights(opts *SetMyDefaultAdministratorRightsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4617,7 +4709,8 @@ type SetMyDescriptionOpts struct {
 }
 
 // SetMyDescription Use this method to change the bot's description, which is shown in the chat with the bot if the chat is empty. Returns True on success.
-// - opts (type SetMyDescriptionOpts): All optional parameters.
+//   - opts (type SetMyDescriptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setmydescription
 func (bot *Bot) SetMyDescription(opts *SetMyDescriptionOpts) (bool, error) {
 	v := map[string]string{}
@@ -4651,7 +4744,8 @@ type SetMyShortDescriptionOpts struct {
 }
 
 // SetMyShortDescription Use this method to change the bot's short description, which is shown on the bot's profile page and is sent together with the link when users share the bot. Returns True on success.
-// - opts (type SetMyShortDescriptionOpts): All optional parameters.
+//   - opts (type SetMyShortDescriptionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setmyshortdescription
 func (bot *Bot) SetMyShortDescription(opts *SetMyShortDescriptionOpts) (bool, error) {
 	v := map[string]string{}
@@ -4682,9 +4776,10 @@ type SetPassportDataErrorsOpts struct {
 
 // SetPassportDataErrors Informs a user that some of the Telegram Passport elements they provided contains errors. The user will not be able to re-submit their Passport to you until the errors are fixed (the contents of the field for which you returned the error must change). Returns True on success.
 // Use this if the data submitted by the user doesn't satisfy the standards your service requires for any reason. For example, if a birthday date seems invalid, a submitted document is blurry, a scan shows evidence of tampering, etc. Supply some details in the error message to make sure the user knows how to correct the issues.
-// - userId (type int64): User identifier
-// - errors (type []PassportElementError): A JSON-serialized array describing the errors
-// - opts (type SetPassportDataErrorsOpts): All optional parameters.
+//   - userId (type int64): User identifier
+//   - errors (type []PassportElementError): A JSON-serialized array describing the errors
+//   - opts (type SetPassportDataErrorsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (bot *Bot) SetPassportDataErrors(userId int64, errors []PassportElementError, opts *SetPassportDataErrorsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4718,9 +4813,10 @@ type SetStickerEmojiListOpts struct {
 }
 
 // SetStickerEmojiList Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-// - sticker (type string): File identifier of the sticker
-// - emojiList (type []string): A JSON-serialized list of 1-20 emoji associated with the sticker
-// - opts (type SetStickerEmojiListOpts): All optional parameters.
+//   - sticker (type string): File identifier of the sticker
+//   - emojiList (type []string): A JSON-serialized list of 1-20 emoji associated with the sticker
+//   - opts (type SetStickerEmojiListOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickeremojilist
 func (bot *Bot) SetStickerEmojiList(sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	v := map[string]string{}
@@ -4756,8 +4852,9 @@ type SetStickerKeywordsOpts struct {
 }
 
 // SetStickerKeywords Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-// - sticker (type string): File identifier of the sticker
-// - opts (type SetStickerKeywordsOpts): All optional parameters.
+//   - sticker (type string): File identifier of the sticker
+//   - opts (type SetStickerKeywordsOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickerkeywords
 func (bot *Bot) SetStickerKeywords(sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
 	v := map[string]string{}
@@ -4795,8 +4892,9 @@ type SetStickerMaskPositionOpts struct {
 }
 
 // SetStickerMaskPosition Use this method to change the mask position of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns True on success.
-// - sticker (type string): File identifier of the sticker
-// - opts (type SetStickerMaskPositionOpts): All optional parameters.
+//   - sticker (type string): File identifier of the sticker
+//   - opts (type SetStickerMaskPositionOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickermaskposition
 func (bot *Bot) SetStickerMaskPosition(sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
 	v := map[string]string{}
@@ -4830,9 +4928,10 @@ type SetStickerPositionInSetOpts struct {
 }
 
 // SetStickerPositionInSet Use this method to move a sticker in a set created by the bot to a specific position. Returns True on success.
-// - sticker (type string): File identifier of the sticker
-// - position (type int64): New sticker position in the set, zero-based
-// - opts (type SetStickerPositionInSetOpts): All optional parameters.
+//   - sticker (type string): File identifier of the sticker
+//   - position (type int64): New sticker position in the set, zero-based
+//   - opts (type SetStickerPositionInSetOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickerpositioninset
 func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]string{}
@@ -4862,9 +4961,10 @@ type SetStickerSetThumbnailOpts struct {
 }
 
 // SetStickerSetThumbnail Use this method to set the thumbnail of a regular or mask sticker set. The format of the thumbnail file must match the format of the stickers in the set. Returns True on success.
-// - name (type string): Sticker set name
-// - userId (type int64): User identifier of the sticker set owner
-// - opts (type SetStickerSetThumbnailOpts): All optional parameters.
+//   - name (type string): Sticker set name
+//   - userId (type int64): User identifier of the sticker set owner
+//   - opts (type SetStickerSetThumbnailOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickersetthumbnail
 func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, opts *SetStickerSetThumbnailOpts) (bool, error) {
 	v := map[string]string{}
@@ -4916,9 +5016,10 @@ type SetStickerSetTitleOpts struct {
 }
 
 // SetStickerSetTitle Use this method to set the title of a created sticker set. Returns True on success.
-// - name (type string): Sticker set name
-// - title (type string): Sticker set title, 1-64 characters
-// - opts (type SetStickerSetTitleOpts): All optional parameters.
+//   - name (type string): Sticker set name
+//   - title (type string): Sticker set title, 1-64 characters
+//   - opts (type SetStickerSetTitleOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setstickersettitle
 func (bot *Bot) SetStickerSetTitle(name string, title string, opts *SetStickerSetTitleOpts) (bool, error) {
 	v := map[string]string{}
@@ -4959,8 +5060,9 @@ type SetWebhookOpts struct {
 
 // SetWebhook Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
 // If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter secret_token. If specified, the request will contain a header "X-Telegram-Bot-Api-Secret-Token" with the secret token as content.
-// - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
-// - opts (type SetWebhookOpts): All optional parameters.
+//   - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
+//   - opts (type SetWebhookOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#setwebhook
 func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 	v := map[string]string{}
@@ -5029,7 +5131,8 @@ type StopMessageLiveLocationOpts struct {
 }
 
 // StopMessageLiveLocation Use this method to stop updating a live location message before live_period expires. On success, if the message is not an inline message, the edited Message is returned, otherwise True is returned.
-// - opts (type StopMessageLiveLocationOpts): All optional parameters.
+//   - opts (type StopMessageLiveLocationOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#stopmessagelivelocation
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	v := map[string]string{}
@@ -5079,9 +5182,10 @@ type StopPollOpts struct {
 }
 
 // StopPoll Use this method to stop a poll which was sent by the bot. On success, the stopped Poll is returned.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - messageId (type int64): Identifier of the original message with the poll
-// - opts (type StopPollOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - messageId (type int64): Identifier of the original message with the poll
+//   - opts (type StopPollOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#stoppoll
 func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
 	v := map[string]string{}
@@ -5118,9 +5222,10 @@ type UnbanChatMemberOpts struct {
 }
 
 // UnbanChatMember Use this method to unban a previously banned user in a supergroup or channel. The user will not return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be removed from the chat. If you don't want this, use the parameter only_if_banned. Returns True on success.
-// - chatId (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
-// - userId (type int64): Unique identifier of the target user
-// - opts (type UnbanChatMemberOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type UnbanChatMemberOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unbanchatmember
 func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := map[string]string{}
@@ -5151,9 +5256,10 @@ type UnbanChatSenderChatOpts struct {
 }
 
 // UnbanChatSenderChat Use this method to unban a previously banned channel chat in a supergroup or channel. The bot must be an administrator for this to work and must have the appropriate administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - senderChatId (type int64): Unique identifier of the target sender chat
-// - opts (type UnbanChatSenderChatOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - senderChatId (type int64): Unique identifier of the target sender chat
+//   - opts (type UnbanChatSenderChatOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unbanchatsenderchat
 func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *UnbanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
@@ -5181,8 +5287,9 @@ type UnhideGeneralForumTopicOpts struct {
 }
 
 // UnhideGeneralForumTopic Use this method to unhide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - opts (type UnhideGeneralForumTopicOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type UnhideGeneralForumTopicOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unhidegeneralforumtopic
 func (bot *Bot) UnhideGeneralForumTopic(chatId int64, opts *UnhideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
@@ -5209,8 +5316,9 @@ type UnpinAllChatMessagesOpts struct {
 }
 
 // UnpinAllChatMessages Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type UnpinAllChatMessagesOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type UnpinAllChatMessagesOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpts) (bool, error) {
 	v := map[string]string{}
@@ -5237,9 +5345,10 @@ type UnpinAllForumTopicMessagesOpts struct {
 }
 
 // UnpinAllForumTopicMessages Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-// - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
-// - opts (type UnpinAllForumTopicMessagesOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
+//   - opts (type UnpinAllForumTopicMessagesOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unpinallforumtopicmessages
 func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
 	v := map[string]string{}
@@ -5269,8 +5378,9 @@ type UnpinChatMessageOpts struct {
 }
 
 // UnpinChatMessage Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-// - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-// - opts (type UnpinChatMessageOpts): All optional parameters.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+//   - opts (type UnpinChatMessageOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
 	v := map[string]string{}
@@ -5302,10 +5412,11 @@ type UploadStickerFileOpts struct {
 }
 
 // UploadStickerFile Use this method to upload a file with a sticker for later use in the createNewStickerSet and addStickerToSet methods (the file can be used multiple times). Returns the uploaded File on success.
-// - userId (type int64): User identifier of sticker file owner
-// - sticker (type InputFile): A file with the sticker in .WEBP, .PNG, .TGS, or .WEBM format. See https://core.telegram.org/stickers for technical requirements. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-// - stickerFormat (type string): Format of the sticker, must be one of "static", "animated", "video"
-// - opts (type UploadStickerFileOpts): All optional parameters.
+//   - userId (type int64): User identifier of sticker file owner
+//   - sticker (type InputFile): A file with the sticker in .WEBP, .PNG, .TGS, or .WEBM format. See https://core.telegram.org/stickers for technical requirements. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+//   - stickerFormat (type string): Format of the sticker, must be one of "static", "animated", "video"
+//   - opts (type UploadStickerFileOpts): All optional parameters.
+//
 // https://core.telegram.org/bots/api#uploadstickerfile
 func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat string, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]string{}
