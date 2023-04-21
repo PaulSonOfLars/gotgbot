@@ -98,14 +98,12 @@ func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallback
 type AnswerInlineQueryOpts struct {
 	// The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300.
 	CacheTime int64
-	// Pass True if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query
+	// Pass True if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query.
 	IsPersonal bool
 	// Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don't support pagination. Offset length can't exceed 64 bytes.
 	NextOffset string
-	// If passed, clients will display a button with specified text that switches the user to a private chat with the bot and sends the bot a start message with the parameter switch_pm_parameter
-	SwitchPmText string
-	// Deep-linking parameter for the /start message sent to the bot when user presses the switch button. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed. Example: An inline bot that sends YouTube videos can ask the user to connect the bot to their YouTube account to adapt search results accordingly. To do this, it displays a 'Connect your YouTube account' button above the results, or even before showing any. The user presses the button, switches to a private chat with the bot and, in doing so, passes a start parameter that instructs the bot to return an OAuth link. Once done, the bot can offer a switch_inline button so that the user can easily return to the chat where they wanted to use the bot's inline capabilities.
-	SwitchPmParameter string
+	// A JSON-serialized object describing a button to be shown above inline query results
+	Button InlineQueryResultsButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -133,8 +131,11 @@ func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryRes
 		}
 		v["is_personal"] = strconv.FormatBool(opts.IsPersonal)
 		v["next_offset"] = opts.NextOffset
-		v["switch_pm_text"] = opts.SwitchPmText
-		v["switch_pm_parameter"] = opts.SwitchPmParameter
+		bs, err := json.Marshal(opts.Button)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field button: %w", err)
+		}
+		v["button"] = string(bs)
 	}
 
 	var reqOpts *RequestOpts
@@ -2032,6 +2033,38 @@ func (bot *Bot) GetMyDescription(opts *GetMyDescriptionOpts) (*BotDescription, e
 	return &b, json.Unmarshal(r, &b)
 }
 
+// GetMyNameOpts is the set of optional fields for Bot.GetMyName.
+type GetMyNameOpts struct {
+	// A two-letter ISO 639-1 language code or an empty string
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetMyName (https://core.telegram.org/bots/api#getmyname)
+//
+// Use this method to get the current bot name for the given user language. Returns BotName on success.
+//   - opts (type GetMyNameOpts): All optional parameters.
+func (bot *Bot) GetMyName(opts *GetMyNameOpts) (*BotName, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getMyName", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var b BotName
+	return &b, json.Unmarshal(r, &b)
+}
+
 // GetMyShortDescriptionOpts is the set of optional fields for Bot.GetMyShortDescription.
 type GetMyShortDescriptionOpts struct {
 	// A two-letter ISO 639-1 language code or an empty string
@@ -2095,7 +2128,7 @@ func (bot *Bot) GetStickerSet(name string, opts *GetStickerSetOpts) (*StickerSet
 
 // GetUpdatesOpts is the set of optional fields for Bot.GetUpdates.
 type GetUpdatesOpts struct {
-	// Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will forgotten.
+	// Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will be forgotten.
 	Offset int64
 	// Limits the number of updates to be retrieved. Values between 1-100 are accepted. Defaults to 100.
 	Limit int64
@@ -4726,6 +4759,41 @@ func (bot *Bot) SetMyDescription(opts *SetMyDescriptionOpts) (bool, error) {
 	}
 
 	r, err := bot.Request("setMyDescription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMyNameOpts is the set of optional fields for Bot.SetMyName.
+type SetMyNameOpts struct {
+	// New bot name; 0-64 characters. Pass an empty string to remove the dedicated name for the given language.
+	Name string
+	// A two-letter ISO 639-1 language code. If empty, the name will be shown to all users for whose language there is no dedicated name.
+	LanguageCode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetMyName (https://core.telegram.org/bots/api#setmyname)
+//
+// Use this method to change the bot's name. Returns True on success.
+//   - opts (type SetMyNameOpts): All optional parameters.
+func (bot *Bot) SetMyName(opts *SetMyNameOpts) (bool, error) {
+	v := map[string]string{}
+	if opts != nil {
+		v["name"] = opts.Name
+		v["language_code"] = opts.LanguageCode
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("setMyName", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
