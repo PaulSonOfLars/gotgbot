@@ -15,7 +15,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/inlinequery"
 )
 
-// This bot is as basic as it gets - it simply repeats everything you say.
+// This bot is as basic as inline query bots can get. It simply links the bot library every time.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
