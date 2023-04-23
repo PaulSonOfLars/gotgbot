@@ -103,7 +103,7 @@ type AnswerInlineQueryOpts struct {
 	// Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don't support pagination. Offset length can't exceed 64 bytes.
 	NextOffset string
 	// A JSON-serialized object describing a button to be shown above inline query results
-	Button InlineQueryResultsButton
+	Button *InlineQueryResultsButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -131,11 +131,13 @@ func (bot *Bot) AnswerInlineQuery(inlineQueryId string, results []InlineQueryRes
 		}
 		v["is_personal"] = strconv.FormatBool(opts.IsPersonal)
 		v["next_offset"] = opts.NextOffset
-		bs, err := json.Marshal(opts.Button)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field button: %w", err)
+		if opts.Button != nil {
+			bs, err := json.Marshal(opts.Button)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field button: %w", err)
+			}
+			v["button"] = string(bs)
 		}
-		v["button"] = string(bs)
 	}
 
 	var reqOpts *RequestOpts
@@ -953,7 +955,7 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessage
 // DeleteMyCommandsOpts is the set of optional fields for Bot.DeleteMyCommands.
 type DeleteMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	Scope BotCommandScope
+	Scope *BotCommandScope
 	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -967,11 +969,13 @@ type DeleteMyCommandsOpts struct {
 func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		bs, err := json.Marshal(opts.Scope)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field scope: %w", err)
+		if opts.Scope != nil {
+			bs, err := json.Marshal(opts.Scope)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field scope: %w", err)
+			}
+			v["scope"] = string(bs)
 		}
-		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 
@@ -1933,7 +1937,7 @@ func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
 // GetMyCommandsOpts is the set of optional fields for Bot.GetMyCommands.
 type GetMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
-	Scope BotCommandScope
+	Scope *BotCommandScope
 	// A two-letter ISO 639-1 language code or an empty string
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1947,11 +1951,13 @@ type GetMyCommandsOpts struct {
 func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 	v := map[string]string{}
 	if opts != nil {
-		bs, err := json.Marshal(opts.Scope)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal field scope: %w", err)
+		if opts.Scope != nil {
+			bs, err := json.Marshal(opts.Scope)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field scope: %w", err)
+			}
+			v["scope"] = string(bs)
 		}
-		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 
@@ -4363,7 +4369,7 @@ type SetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
 	ChatId *int64
 	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
-	MenuButton MenuButton
+	MenuButton *MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4378,11 +4384,13 @@ func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 		if opts.ChatId != nil {
 			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
-		bs, err := json.Marshal(opts.MenuButton)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field menu_button: %w", err)
+		if opts.MenuButton != nil {
+			bs, err := json.Marshal(opts.MenuButton)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field menu_button: %w", err)
+			}
+			v["menu_button"] = string(bs)
 		}
-		v["menu_button"] = string(bs)
 	}
 
 	var reqOpts *RequestOpts
@@ -4647,7 +4655,7 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 // SetMyCommandsOpts is the set of optional fields for Bot.SetMyCommands.
 type SetMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	Scope BotCommandScope
+	Scope *BotCommandScope
 	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4669,11 +4677,13 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 		v["commands"] = string(bs)
 	}
 	if opts != nil {
-		bs, err := json.Marshal(opts.Scope)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field scope: %w", err)
+		if opts.Scope != nil {
+			bs, err := json.Marshal(opts.Scope)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field scope: %w", err)
+			}
+			v["scope"] = string(bs)
 		}
-		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 
@@ -4955,7 +4965,7 @@ func (bot *Bot) SetStickerKeywords(sticker string, opts *SetStickerKeywordsOpts)
 // SetStickerMaskPositionOpts is the set of optional fields for Bot.SetStickerMaskPosition.
 type SetStickerMaskPositionOpts struct {
 	// A JSON-serialized object with the position where the mask should be placed on faces. Omit the parameter to remove the mask position.
-	MaskPosition MaskPosition
+	MaskPosition *MaskPosition
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4969,11 +4979,13 @@ func (bot *Bot) SetStickerMaskPosition(sticker string, opts *SetStickerMaskPosit
 	v := map[string]string{}
 	v["sticker"] = sticker
 	if opts != nil {
-		bs, err := json.Marshal(opts.MaskPosition)
-		if err != nil {
-			return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
+		if opts.MaskPosition != nil {
+			bs, err := json.Marshal(opts.MaskPosition)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field mask_position: %w", err)
+			}
+			v["mask_position"] = string(bs)
 		}
-		v["mask_position"] = string(bs)
 	}
 
 	var reqOpts *RequestOpts
