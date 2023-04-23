@@ -43,6 +43,10 @@ from the samples/echoWebhookBot directory:
 `TOKEN="<your_token_here>" WEBHOOK_DOMAIN="<your_domain_here>"  WEBHOOK_SECRET="<random_string_here>" go run .`
 Then, simply send /start to your bot; if it replies, you've successfully set up webhooks!
 
+## samples/inlinequeryBot
+
+This bot is as basic as inline query bots can get. It simply links the bot library every time.
+
 ## samples/middlewareBot
 
 This bot shows how to effectively use middlewares to modify and intercept HTTP requests to the bot API server.
