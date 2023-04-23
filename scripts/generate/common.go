@@ -69,16 +69,6 @@ func toGoType(s string) string {
 	return pref + s
 }
 
-func isBaseGoType(s string) bool {
-	s = stripPointersAndArrays(s)
-	for _, v := range tgToGoTypeMap {
-		if s == v {
-			return true
-		}
-	}
-	return false
-}
-
 func stripPointersAndArrays(retType string) string {
 	for isPointer(retType) {
 		retType = strings.TrimPrefix(retType, "*")

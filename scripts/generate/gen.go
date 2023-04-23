@@ -256,7 +256,7 @@ func isTgType(d APIDescription, goType string) bool {
 	return ok
 }
 
-func (f Field) getPreferredType() (string, error) {
+func (f Field) getPreferredType(d APIDescription) (string, error) {
 	if f.Name == "media" {
 		if len(f.Types) == 1 && f.Types[0] == "String" {
 			return tgTypeInputFile, nil
@@ -299,9 +299,16 @@ func (f Field) getPreferredType() (string, error) {
 	if len(f.Types) == 1 {
 		goType := toGoType(f.Types[0])
 
-		// Optional JSON fields should always be pointers.
-		if !f.Required && strings.Contains(f.Description, "JSON-serialized object") && !isBaseGoType(goType) {
-			return "*" + goType, nil
+		// Optional TG types should be pointers, unless they're already an interface type.
+		if !f.Required && isTgType(d, f.Types[0]) && !isArray(goType) && goType != tgTypeInputFile {
+			rawType, err := getTypeByName(d, f.Types[0])
+			if err != nil {
+				return "", fmt.Errorf("failed to get parent for %s: %w", f.Types[0], err)
+			}
+
+			if len(rawType.Subtypes) == 0 {
+				return "*" + goType, nil
+			}
 		}
 
 		// Some fields are marked as "May be empty", in which case the empty values are still meaningful.

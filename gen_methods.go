@@ -955,7 +955,7 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessage
 // DeleteMyCommandsOpts is the set of optional fields for Bot.DeleteMyCommands.
 type DeleteMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	Scope *BotCommandScope
+	Scope BotCommandScope
 	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -969,13 +969,11 @@ type DeleteMyCommandsOpts struct {
 func (bot *Bot) DeleteMyCommands(opts *DeleteMyCommandsOpts) (bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.Scope != nil {
-			bs, err := json.Marshal(opts.Scope)
-			if err != nil {
-				return false, fmt.Errorf("failed to marshal field scope: %w", err)
-			}
-			v["scope"] = string(bs)
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
+		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 
@@ -1937,7 +1935,7 @@ func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
 // GetMyCommandsOpts is the set of optional fields for Bot.GetMyCommands.
 type GetMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
-	Scope *BotCommandScope
+	Scope BotCommandScope
 	// A two-letter ISO 639-1 language code or an empty string
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1951,13 +1949,11 @@ type GetMyCommandsOpts struct {
 func (bot *Bot) GetMyCommands(opts *GetMyCommandsOpts) ([]BotCommand, error) {
 	v := map[string]string{}
 	if opts != nil {
-		if opts.Scope != nil {
-			bs, err := json.Marshal(opts.Scope)
-			if err != nil {
-				return nil, fmt.Errorf("failed to marshal field scope: %w", err)
-			}
-			v["scope"] = string(bs)
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
+		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 
@@ -4369,7 +4365,7 @@ type SetChatMenuButtonOpts struct {
 	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
 	ChatId *int64
 	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
-	MenuButton *MenuButton
+	MenuButton MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4384,13 +4380,11 @@ func (bot *Bot) SetChatMenuButton(opts *SetChatMenuButtonOpts) (bool, error) {
 		if opts.ChatId != nil {
 			v["chat_id"] = strconv.FormatInt(*opts.ChatId, 10)
 		}
-		if opts.MenuButton != nil {
-			bs, err := json.Marshal(opts.MenuButton)
-			if err != nil {
-				return false, fmt.Errorf("failed to marshal field menu_button: %w", err)
-			}
-			v["menu_button"] = string(bs)
+		bs, err := json.Marshal(opts.MenuButton)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field menu_button: %w", err)
 		}
+		v["menu_button"] = string(bs)
 	}
 
 	var reqOpts *RequestOpts
@@ -4655,7 +4649,7 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 // SetMyCommandsOpts is the set of optional fields for Bot.SetMyCommands.
 type SetMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	Scope *BotCommandScope
+	Scope BotCommandScope
 	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4677,13 +4671,11 @@ func (bot *Bot) SetMyCommands(commands []BotCommand, opts *SetMyCommandsOpts) (b
 		v["commands"] = string(bs)
 	}
 	if opts != nil {
-		if opts.Scope != nil {
-			bs, err := json.Marshal(opts.Scope)
-			if err != nil {
-				return false, fmt.Errorf("failed to marshal field scope: %w", err)
-			}
-			v["scope"] = string(bs)
+		bs, err := json.Marshal(opts.Scope)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field scope: %w", err)
 		}
+		v["scope"] = string(bs)
 		v["language_code"] = opts.LanguageCode
 	}
 

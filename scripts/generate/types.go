@@ -88,7 +88,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 	ok, fieldName, err := containsInputFile(d, tgType, map[string]bool{})
 	if err != nil {
-		return "", fmt.Errorf("failed to check if type requires special handling")
+		return "", fmt.Errorf("failed to check if type requires special handling: %w", err)
 	}
 	if ok {
 		err = inputParamsTmpl.Execute(&typeDef, inputParamsMethodData{
@@ -105,7 +105,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 
 // fieldContainsInputFile checks whether the field's type contains any inputfiles, and thus might be used to send data.
 func fieldContainsInputFile(d APIDescription, field Field) (bool, error) {
-	goType, err := field.getPreferredType()
+	goType, err := field.getPreferredType(d)
 	if err != nil {
 		return false, err
 	}
@@ -133,7 +133,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 	}
 
 	for _, f := range tgType.Fields {
-		goType, err := f.getPreferredType()
+		goType, err := f.getPreferredType(d)
 		if err != nil {
 			return false, "", err
 		}
@@ -145,7 +145,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 		if isTgType(d, goType) {
 			ok, _, err := containsInputFile(d, d.Types[goType], checked)
 			if err != nil {
-				return false, "", fmt.Errorf("failed to check if %s contains inputfiles", goType)
+				return false, "", fmt.Errorf("failed to check if %s contains inputfiles: %w", goType, err)
 			}
 			if ok {
 				// We return an error, because we can't actually handle this case yet.
@@ -192,7 +192,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 	var fields []customUnmarshalFieldData
 	generateCustomMarshal := false
 	for idx, f := range tgType.Fields {
-		prefType, err := f.getPreferredType()
+		prefType, err := f.getPreferredType(d)
 		if err != nil {
 			return "", err
 		}
@@ -331,7 +331,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
-		commonGetMethods, err := generateAllCommonGetMethods(tgType.Name, commonFields, constantField, shortName)
+		commonGetMethods, err := generateAllCommonGetMethods(d, tgType.Name, commonFields, constantField, shortName)
 		if err != nil {
 			return "", err
 		}
@@ -357,7 +357,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	return bd.String(), nil
 }
 
-func generateAllCommonGetMethods(typeName string, commonFields []Field, constantField string, shortName string) (string, error) {
+func generateAllCommonGetMethods(d APIDescription, typeName string, commonFields []Field, constantField string, shortName string) (string, error) {
 	bd := strings.Builder{}
 	for _, commonField := range commonFields {
 		commonValueName := "v." + snakeToTitle(commonField.Name)
@@ -365,7 +365,7 @@ func generateAllCommonGetMethods(typeName string, commonFields []Field, constant
 			commonValueName = strconv.Quote(shortName)
 		}
 
-		prefType, err := commonField.getPreferredType()
+		prefType, err := commonField.getPreferredType(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", commonField.Name, typeName, err)
 		}
@@ -399,7 +399,7 @@ func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error
 func generateStructFields(d APIDescription, fields []Field, constantFields []string) (string, error) {
 	typeFields := strings.Builder{}
 	for _, f := range fields {
-		fieldType, err := f.getPreferredType()
+		fieldType, err := f.getPreferredType(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
@@ -448,7 +448,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
 	for _, f := range commonFields {
-		prefType, err := f.getPreferredType()
+		prefType, err := f.getPreferredType(d)
 		if err != nil {
 			return "", err
 		}
@@ -478,7 +478,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 		bd.WriteString("\n" + mergedStruct)
 
-		commonGetMethods, err := generateAllCommonGetMethods("Merged"+name, commonFields, "", "")
+		commonGetMethods, err := generateAllCommonGetMethods(d, "Merged"+name, commonFields, "", "")
 		if err != nil {
 			return "", err
 		}
@@ -540,7 +540,7 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 		deref := false
 		for _, parentField := range allParentFields {
 			if parentField.Name == f.Name {
-				fieldType, err := f.getPreferredType()
+				fieldType, err := f.getPreferredType(d)
 				if err != nil {
 					return "", fmt.Errorf("failed to get preferred type: %w", err)
 				}
