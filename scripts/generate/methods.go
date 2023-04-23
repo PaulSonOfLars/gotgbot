@@ -57,7 +57,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	}
 
 	// Generate method description
-	desc, err := tgMethod.description()
+	desc, err := tgMethod.description(d)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
@@ -113,7 +113,7 @@ func generateMethodSignature(d APIDescription, tgMethod MethodDescription) (stri
 		return "", nil, "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
 
-	args, optionalsStruct, err := tgMethod.getArgs()
+	args, optionalsStruct, err := tgMethod.getArgs(d)
 	if err != nil {
 		return "", nil, "", fmt.Errorf("failed to get args for method %s: %w", tgMethod.Name, err)
 	}
@@ -169,7 +169,7 @@ return %s, true, nil
 	return returnString.String(), nil
 }
 
-func (m MethodDescription) description() (string, error) {
+func (m MethodDescription) description(d APIDescription) (string, error) {
 	description := strings.Builder{}
 
 	description.WriteString(m.docs())
@@ -179,7 +179,7 @@ func (m MethodDescription) description() (string, error) {
 			continue
 		}
 
-		prefType, err := f.getPreferredType()
+		prefType, err := f.getPreferredType(d)
 		if err != nil {
 			return "", err
 		}
@@ -236,7 +236,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string, def
 }
 
 func generateValue(d APIDescription, methodName string, f Field, goParam string, defaultRetVal string) (string, bool, error) {
-	fieldType, err := f.getPreferredType()
+	fieldType, err := f.getPreferredType(d)
 	if err != nil {
 		return "", false, fmt.Errorf("failed to get preferred type: %w", err)
 	}
@@ -367,12 +367,12 @@ func getRetVarName(retType string) string {
 	return strings.ToLower(retType[:1])
 }
 
-func (m MethodDescription) getArgs() (string, string, error) {
+func (m MethodDescription) getArgs(d APIDescription) (string, string, error) {
 	var requiredArgs []string
 	optionals := strings.Builder{}
 
 	for _, f := range m.Fields {
-		fieldType, err := f.getPreferredType()
+		fieldType, err := f.getPreferredType(d)
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get preferred type: %w", err)
 		}

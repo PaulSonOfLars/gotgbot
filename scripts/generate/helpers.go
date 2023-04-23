@@ -114,7 +114,7 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 	for _, mf := range tgMethod.Fields {
 		hasOpts = hasOpts || !mf.Required
 
-		prefType, err := mf.getPreferredType()
+		prefType, err := mf.getPreferredType(d)
 		if err != nil {
 			return nil, nil, "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 		}
@@ -158,7 +158,7 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 		}
 
 		for _, mf := range tgMethod.Fields {
-			prefType, err := f.getPreferredType()
+			prefType, err := f.getPreferredType(d)
 			if err != nil {
 				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 			}
