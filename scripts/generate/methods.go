@@ -362,13 +362,7 @@ func addURLParam(f Field, stringer string, goParam string) string {
 }
 
 func getRetVarName(retType string) string {
-	for isPointer(retType) {
-		retType = strings.TrimPrefix(retType, "*")
-	}
-
-	for isArray(retType) {
-		retType = strings.TrimPrefix(retType, "[]")
-	}
+	retType = stripPointersAndArrays(retType)
 
 	return strings.ToLower(retType[:1])
 }

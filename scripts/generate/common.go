@@ -49,6 +49,13 @@ func titleToCamelCase(str string) string {
 	return strings.ToLower(str[0:1]) + str[1:]
 }
 
+var tgToGoTypeMap = map[string]string{
+	tgTypeInteger: "int64",
+	tgTypeFloat:   "float64",
+	tgTypeBoolean: "bool",
+	tgTypeString:  "string",
+}
+
 func toGoType(s string) string {
 	pref := ""
 	for isTgArray(s) {
@@ -56,18 +63,31 @@ func toGoType(s string) string {
 		s = strings.TrimPrefix(s, "Array of ")
 	}
 
-	switch s {
-	case tgTypeInteger:
-		return pref + "int64"
-	case tgTypeFloat:
-		return pref + "float64"
-	case tgTypeBoolean:
-		return pref + "bool"
-	case tgTypeString:
-		return pref + "string"
+	if t, ok := tgToGoTypeMap[s]; ok {
+		return pref + t
+	}
+	return pref + s
+}
+
+func isBaseGoType(s string) bool {
+	s = stripPointersAndArrays(s)
+	for _, v := range tgToGoTypeMap {
+		if s == v {
+			return true
+		}
+	}
+	return false
+}
+
+func stripPointersAndArrays(retType string) string {
+	for isPointer(retType) {
+		retType = strings.TrimPrefix(retType, "*")
 	}
 
-	return pref + s
+	for isArray(retType) {
+		retType = strings.TrimPrefix(retType, "[]")
+	}
+	return retType
 }
 
 func isTgArray(s string) bool {

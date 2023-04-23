@@ -278,17 +278,31 @@ func (f Field) getPreferredType() (string, error) {
 		return tgTypeInputMedia, nil
 	}
 
-	if f.Name == "reply_markup" && len(f.Types) == 4 {
-		// Custom type used to handle the fact that reply_markup can take one of:
-		// InlineKeyboardMarkup
-		// ReplyKeyboardMarkup
-		// ReplyKeyboardRemove
-		// ForceReply
-		return tgTypeReplyMarkup, nil
+	if f.Name == "reply_markup" {
+		if len(f.Types) == 4 {
+			// TODO: this should check if the values are replymarkup children, instead of checking length
+			// Custom type used to handle the fact that reply_markup can take one of:
+			// InlineKeyboardMarkup
+			// ReplyKeyboardMarkup
+			// ReplyKeyboardRemove
+			// ForceReply
+			return tgTypeReplyMarkup, nil
+
+		} else if len(f.Types) == 1 {
+			return toGoType(f.Types[0]), nil
+
+		} else {
+			return "", fmt.Errorf("unable to handle reply_markup field with types: %v", f.Types)
+		}
 	}
 
 	if len(f.Types) == 1 {
 		goType := toGoType(f.Types[0])
+
+		// Optional JSON fields should always be pointers.
+		if !f.Required && strings.Contains(f.Description, "JSON-serialized object") && !isBaseGoType(goType) {
+			return "*" + goType, nil
+		}
 
 		// Some fields are marked as "May be empty", in which case the empty values are still meaningful.
 		// These should be handled as pointers, so we can differentiate the empty case.
