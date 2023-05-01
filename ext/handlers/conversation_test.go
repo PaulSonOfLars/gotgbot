@@ -154,10 +154,10 @@ func TestReEntryConversation(t *testing.T) {
 				return handlers.EndConversation()
 			})},
 		},
-		nil,
+		&handlers.ConversationOpts{
+			AllowReEntry: true,
+		},
 	)
-	// Enable reentry
-	conv.AllowReEntry = true
 
 	var userId int64 = 123
 	var chatId int64 = 1234

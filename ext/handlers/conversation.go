@@ -57,6 +57,7 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 	if opts != nil {
 		c.Exits = opts.Exits
 		c.Fallbacks = opts.Fallbacks
+		c.AllowReEntry = opts.AllowReEntry
 
 		// If no StateStorage is specified, we should keep the default.
 		if opts.StateStorage != nil {
