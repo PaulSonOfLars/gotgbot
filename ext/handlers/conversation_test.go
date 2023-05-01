@@ -155,7 +155,7 @@ func TestReEntryConversation(t *testing.T) {
 			})},
 		},
 		&handlers.ConversationOpts{
-			AllowReEntry: true, // Enable reentry
+			AllowReEntry: true,
 		},
 	)
 
