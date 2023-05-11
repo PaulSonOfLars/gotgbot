@@ -36,11 +36,12 @@ type Conversation struct {
 }
 
 type ConversationOpts struct {
-	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands)
+	// Exits is the list of handlers to exit the current conversation partway (eg /cancel commands). This returns
+	// EndConversation() by default, unless otherwise specified.
 	Exits []ext.Handler
-	// Fallbacks is the list of handlers to handle updates which haven't been matched by any states.
+	// Fallbacks is the list of handlers to handle updates which haven't been matched by any other handlers.
 	Fallbacks []ext.Handler
-	// If True, a user can restart the conversation by hitting one of the entry points.
+	// If True, a user can restart the conversation at any time by hitting one of the entry points again.
 	AllowReEntry bool
 	// StateStorage is responsible for storing all running conversations.
 	StateStorage conversation.Storage
@@ -189,7 +190,7 @@ func (c Conversation) getNextHandler(b *gotgbot.Bot, ctx *ext.Context) (ext.Hand
 
 	// Else, exits -> handle any conversation exits/cancellations.
 	if next := checkHandlerList(c.Exits, b, ctx); next != nil {
-		return next, nil
+		return wrappedExitHandler{h: next}, nil
 	}
 
 	// Else, check state mappings (the magic happens here!).
@@ -213,4 +214,25 @@ func checkHandlerList(handlers []ext.Handler, b *gotgbot.Bot, ctx *ext.Context) 
 		}
 	}
 	return nil
+}
+
+// wrappedExitHandler ensures that exit handlers return conversation ends by default.
+type wrappedExitHandler struct {
+	h ext.Handler
+}
+
+func (w wrappedExitHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	return w.h.CheckUpdate(b, ctx)
+}
+
+func (w wrappedExitHandler) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	err := w.h.HandleUpdate(b, ctx)
+	if err != nil {
+		return err
+	}
+	return EndConversation()
+}
+
+func (w wrappedExitHandler) Name() string {
+	return w.h.Name()
 }
