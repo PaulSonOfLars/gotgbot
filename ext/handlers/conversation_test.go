@@ -90,6 +90,62 @@ func TestBasicKeyedConversation(t *testing.T) {
 	checkExpectedState(t, &conv, messageFromTwo, "")
 }
 
+func TestBasicConversationExit(t *testing.T) {
+	b := NewTestBot()
+
+	const nextStep = "nextStep"
+	var started bool
+	var ended bool
+
+	conv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+			started = true
+			return handlers.NextConversationState(nextStep)
+		})},
+		map[string][]ext.Handler{
+			nextStep: {handlers.NewMessage(message.Contains("message"), func(b *gotgbot.Bot, ctx *ext.Context) error {
+				// noop
+				return nil
+			})},
+		},
+		&handlers.ConversationOpts{
+			Exits: []ext.Handler{handlers.NewCommand("cancel", func(b *gotgbot.Bot, ctx *ext.Context) error {
+				ended = true
+				return nil // exit should end the conversation by default, unless we specify something else.
+			})},
+		},
+	)
+
+	var userId int64 = 123
+	var chatId int64 = 1234
+
+	// Emulate sending the "start" command, triggering the entrypoint, and starting the conversation.
+	startCommand := NewCommandMessage(userId, chatId, "start", []string{})
+	runHandler(t, b, &conv, startCommand, "", nextStep)
+	if !started {
+		t.Fatalf("expected the entrypoint handler to have run")
+	}
+
+	// Emulate sending the "cancel" command, triggering the exitpoint, and immediately ending the conversation.
+	cancelCommand := NewCommandMessage(userId, chatId, "cancel", []string{})
+	runHandler(t, b, &conv, cancelCommand, nextStep, "")
+	if !ended {
+		t.Fatalf("expected the cancel command to have run")
+	}
+
+	// Ensure conversation has ended.
+	checkExpectedState(t, &conv, cancelCommand, "")
+
+	// Emulate sending the "message" text, which now should not interact with the conversation.
+	textMessage := NewMessage(userId, chatId, "message")
+	if conv.CheckUpdate(b, textMessage) {
+		t.Fatalf("did not expect the internal handler to run")
+	}
+
+	// Ensure conversation is still over.
+	checkExpectedState(t, &conv, textMessage, "")
+}
+
 func TestFallbackConversation(t *testing.T) {
 	b := NewTestBot()
 
@@ -256,6 +312,7 @@ func TestNestedConversation(t *testing.T) {
 	checkExpectedState(t, &conv, textMessage, "")
 }
 
+// runHandler ensures that the incoming update will trigger the conversation.
 func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, currentState string, nextState string) {
 	willRunHandler(t, b, conv, message, currentState)
 	if err := conv.HandleUpdate(b, message); err != nil {
@@ -265,6 +322,7 @@ func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, messa
 	checkExpectedState(t, conv, message, nextState)
 }
 
+// willRunHandler ensures that the incoming update will trigger the conversation.
 func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, expectedState string) {
 	t.Logf("conv %p: checking message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
 
@@ -279,7 +337,7 @@ func checkExpectedState(t *testing.T, conv *handlers.Conversation, message *ext.
 	currentState, err := conv.StateStorage.Get(message)
 	if nextState == "" {
 		if !errors.Is(err, conversation.KeyNotFound) {
-			t.Fatalf("should not have a conversation, but got currentState: %s", currentState)
+			t.Fatalf("expected not to have a conversation, but got currentState: %s", currentState)
 		}
 	} else if err != nil {
 		t.Fatalf("unexpected error while checking the current currentState of the conversation")
