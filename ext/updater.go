@@ -54,6 +54,7 @@ type Updater struct {
 	// webhookServer is the server in charge of receiving all incoming webhook updates.
 	webhookServer *http.Server
 	// botMapping keeps track of the data required for each bot. The key is the bot token.
+	// TODO: Add support for bot token migration.
 	botMapping map[string]*botData
 }
 
@@ -104,13 +105,19 @@ func (u *Updater) logf(format string, args ...interface{}) {
 
 // PollingOpts represents the optional values to start long polling.
 type PollingOpts struct {
-	// DropPendingUpdates decides  whether to drop "pending" updates; these are updates which were sent before
-	// the bot was started.
+	// DropPendingUpdates toggles whether to drop updates which were sent before the bot was started.
+	// Note: the DropPendingUpdates and DisableWebhookDeletion fields are mutually exclusive; both cannot be enabled at
+	//  the same time.
 	DropPendingUpdates bool
+	// DisableWebhookDeletion stops the updater from deleting webhooks before polling starts.
+	// By default, the updater deletes any existing webhooks, to ensure that getUpdates works as expected.
+	// Note: the DropPendingUpdates and DisableWebhookDeletion fields are mutually exclusive; both cannot be enabled at
+	//  the same time.
+	DisableWebhookDeletion bool
 	// GetUpdatesOpts represents the opts passed to GetUpdates.
 	// Note: It is recommended you edit the values here when running in production environments.
-	// Changes might include:
-	//    - Changing the "GetUpdatesOpts.AllowedUpdates" to only refer to relevant updates
+	// Suggestions include:
+	//    - Changing the "GetUpdatesOpts.AllowedUpdates" to only refer to updates relevant to your bot's functionality.
 	//    - Using a non-0 "GetUpdatesOpts.Timeout" value. This is how "long" telegram will hold the long-polling call
 	//    while waiting for new messages. A value of 0 causes telegram to reply immediately, which will then cause
 	//    your bot to immediately ask for more updates. While this can seem fine, it will eventually causing
@@ -119,7 +126,7 @@ type PollingOpts struct {
 	//    Keep in mind that a timeout of 10 does not mean you only get updates every 10s; by the nature of
 	//    long-polling, Telegram responds to your request as soon as new messages are available.
 	//    When setting this, it is recommended you set your PollingOpts.Timeout value to be slightly bigger (eg, +1).
-	GetUpdatesOpts gotgbot.GetUpdatesOpts
+	GetUpdatesOpts *gotgbot.GetUpdatesOpts
 }
 
 // StartPolling starts polling updates from telegram using getUpdates long-polling.
@@ -134,31 +141,56 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	//  - needing to re-allocate new url.values structs.
 	//  - needing to convert the 'opt' values to strings.
 	//  - unnecessary unmarshalling of multiple full Update structs.
-	// Yes, this also makes me sad. :/
 	v := map[string]string{}
-	dropPendingUpdates := false
 	var reqOpts *gotgbot.RequestOpts
 
 	if opts != nil {
-		dropPendingUpdates = opts.DropPendingUpdates
-		if opts.GetUpdatesOpts.RequestOpts != nil {
-			reqOpts = opts.GetUpdatesOpts.RequestOpts
+		if opts.DropPendingUpdates && opts.DisableWebhookDeletion {
+			// opts.DropPendingUpdates depends on webhook deletion being enabled.
+			// If webhook deletions are disabled, the user should consider setting the offset to -1 instead.
+			// This is not perfect, but achieves nearly the same effect.
+			return errors.New("pending updates cannot be dropped without webhook deletion; consider setting the offset to -1 instead of enabling DropPendingUpdates")
 		}
 
-		v["offset"] = strconv.FormatInt(opts.GetUpdatesOpts.Offset, 10)
-		v["limit"] = strconv.FormatInt(opts.GetUpdatesOpts.Limit, 10)
-		v["timeout"] = strconv.FormatInt(opts.GetUpdatesOpts.Timeout, 10)
-		if opts.GetUpdatesOpts.AllowedUpdates != nil {
-			bs, err := json.Marshal(opts.GetUpdatesOpts.AllowedUpdates)
+		if !opts.DisableWebhookDeletion {
+			// For polling to work, we want to make sure we don't have an existing webhook.
+			// Extra perk - we can also use this to drop pending updates!
+			_, err := b.DeleteWebhook(&gotgbot.DeleteWebhookOpts{
+				DropPendingUpdates: opts.DropPendingUpdates,
+				RequestOpts:        reqOpts,
+			})
 			if err != nil {
-				return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
+				return fmt.Errorf("failed to delete webhook: %w", err)
 			}
-			v["allowed_updates"] = string(bs)
+		}
+
+		if updateOpts := opts.GetUpdatesOpts; updateOpts != nil {
+			if updateOpts.RequestOpts != nil {
+				reqOpts = updateOpts.RequestOpts
+			}
+
+			if updateOpts.Offset != 0 {
+				v["offset"] = strconv.FormatInt(updateOpts.Offset, 10)
+			}
+			if updateOpts.Limit != 0 {
+				v["limit"] = strconv.FormatInt(updateOpts.Limit, 10)
+			}
+			if updateOpts.Timeout != 0 {
+				v["timeout"] = strconv.FormatInt(updateOpts.Timeout, 10)
+			}
+			if updateOpts.AllowedUpdates != nil {
+				bs, err := json.Marshal(updateOpts.AllowedUpdates)
+				if err != nil {
+					return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
+				}
+				v["allowed_updates"] = string(bs)
+			}
 		}
 	}
 
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
+
 	u.botMapping[b.GetToken()] = &botData{
 		bot:        b,
 		updateChan: updateChan,
@@ -166,28 +198,23 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	}
 
 	go u.Dispatcher.Start(b, updateChan)
-	go u.pollingLoop(b, reqOpts, pollChan, updateChan, dropPendingUpdates, v)
+	go u.pollingLoop(b, reqOpts, pollChan, updateChan, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling <-chan struct{}, updateChan chan<- json.RawMessage, dropPendingUpdates bool, v map[string]string) {
-	// if dropPendingUpdates, force the offset to -1
-	if dropPendingUpdates {
-		v["offset"] = "-1"
-	}
-
-	var offset int64
-
+func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, stopPolling <-chan struct{}, updateChan chan<- json.RawMessage, v map[string]string) {
 	for {
 		select {
-		case <-polling:
-			// if anything comes in, stop.
+		case <-stopPolling:
+			// if anything comes in, stop polling.
 			return
 		default:
-			// continue as usual
+			// otherwise, continue as usual
 		}
 
+		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
+		// unnecessary reallocation of url.Values in the polling loop.
 		r, err := b.Request("getUpdates", v, nil, opts)
 		if err != nil {
 			if u.UnhandledErrFunc != nil {
@@ -198,8 +225,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling
 			}
 			continue
 
-		} else if r == nil {
-			dropPendingUpdates = false
+		} else if len(r) == 0 {
 			continue
 		}
 
@@ -214,7 +240,6 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling
 		}
 
 		if len(rawUpdates) == 0 {
-			dropPendingUpdates = false
 			continue
 		}
 
@@ -222,6 +247,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling
 			UpdateId int64 `json:"update_id"`
 		}
 
+		// Only unmarshal the last update, so we can get the next update ID.
 		if err := json.Unmarshal(rawUpdates[len(rawUpdates)-1], &lastUpdate); err != nil {
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
@@ -231,14 +257,7 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, polling
 			continue
 		}
 
-		offset = lastUpdate.UpdateId + 1
-		v["offset"] = strconv.FormatInt(offset, 10)
-		if dropPendingUpdates {
-			// Setting the offset to -1 gets just the last update; this should be skipped too.
-			dropPendingUpdates = false
-			continue
-		}
-
+		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
 		for _, updData := range rawUpdates {
 			temp := updData // use new mem address to avoid loop conflicts
 			updateChan <- temp
@@ -343,7 +362,7 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 }
 
 // StartServer starts the webhook server for all the bots added via AddWebhook.
-// We recommend calling this BEFORE setting individual webhooks.
+// It is recommended to call this BEFORE calling setWebhooks.
 // The opts parameter allows for specifying TLS settings.
 func (u *Updater) StartServer(opts WebhookOpts) error {
 	if u.serveMux == nil {
