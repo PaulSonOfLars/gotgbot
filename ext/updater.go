@@ -129,6 +129,8 @@ type PollingOpts struct {
 	GetUpdatesOpts *gotgbot.GetUpdatesOpts
 }
 
+var ErrInvalidPendingUpdateAndWebhookConfiguration = errors.New("pending updates cannot be dropped without webhook deletion; consider setting the offset to -1 instead of enabling DropPendingUpdates")
+
 // StartPolling starts polling updates from telegram using getUpdates long-polling.
 // See PollingOpts for optional values to set in production environments.
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
@@ -149,7 +151,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 			// opts.DropPendingUpdates depends on webhook deletion being enabled.
 			// If webhook deletions are disabled, the user should consider setting the offset to -1 instead.
 			// This is not perfect, but achieves nearly the same effect.
-			return errors.New("pending updates cannot be dropped without webhook deletion; consider setting the offset to -1 instead of enabling DropPendingUpdates")
+			return ErrInvalidPendingUpdateAndWebhookConfiguration
 		}
 
 		if !opts.DisableWebhookDeletion {
