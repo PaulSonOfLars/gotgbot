@@ -193,6 +193,8 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int64, cntnt string)
 		}
 		// <pre><code class="lang">text</code></pre>
 		return prevText + `<pre><code class="` + ent.Language + `">` + cntnt + "</code></pre>"
+	case "custom_emoji":
+		return prevText + `<tg-emoji emoji-id="` + ent.CustomEmojiId + `">` + cntnt + "</tg-emoji>"
 	case "text_mention":
 		return prevText + `<a href="tg://user?id=` + strconv.FormatInt(ent.User.Id, 10) + `">` + cntnt + "</a>"
 	case "text_link":
@@ -216,6 +218,10 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 	switch ent.Type {
 	case "bold", "italic", "code", "underline", "strikethrough", "pre", "spoiler":
 		return prevText + pre + mdV2Map[ent.Type] + cleanCntnt + mdV2Map[ent.Type] + post
+	case "custom_emoji":
+		// Yes, custom emoji have a weird little ! at the front
+		// https://core.telegram.org/bots/api#markdownv2-style
+		return prevText + pre + "![" + cleanCntnt + "](tg://emoji?id=" + ent.CustomEmojiId + ")" + post
 	case "text_mention":
 		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post
 	case "text_link":
