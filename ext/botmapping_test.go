@@ -1,0 +1,55 @@
+package ext
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/PaulSonOfLars/gotgbot/v2"
+)
+
+func Test_botMapping(t *testing.T) {
+	bm := botMapping{}
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	updateChan := make(chan json.RawMessage)
+	pollChan := make(chan struct{})
+
+	// check that bots can be added fine
+	bm.addBot(b, updateChan, pollChan, "")
+	if len(bm.getBots()) != 1 {
+		t.Errorf("expected 1 bot, got %d", len(bm.getBots()))
+		t.FailNow()
+	}
+
+	// check that bot data is correct
+	bdata, ok := bm.getBot(b)
+	if !ok {
+		t.Errorf("failed to get bot with token %s", b.Token)
+		t.FailNow()
+	}
+	if bdata.polling != pollChan {
+		t.Errorf("polling channel was not the same")
+		t.FailNow()
+	}
+	if bdata.updateChan != updateChan {
+		t.Errorf("update channel was not the same")
+		t.FailNow()
+	}
+
+	// check that bot cant be removed
+	_, ok = bm.removeBot(b)
+	if !ok {
+		t.Errorf("failed to remove bot with token %s", b.Token)
+		t.FailNow()
+	}
+
+	_, ok = bm.getBot(b)
+	if ok {
+		t.Errorf("bot with token %s should be gone", b.Token)
+		t.FailNow()
+	}
+}

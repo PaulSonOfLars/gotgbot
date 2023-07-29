@@ -21,18 +21,6 @@ var (
 	ErrExpectedEmptyServer  = errors.New("expected server to be nil")
 )
 
-// botData is an internal struct used by the updater to keep track of the necessary update channels for each bot.
-type botData struct {
-	// bot represents the bot for which this data is relevant.
-	bot *gotgbot.Bot
-	// updateChan represents the incoming updates channel.
-	updateChan chan json.RawMessage
-	// polling allows us to close the polling loop.
-	polling chan struct{}
-	// urlPath defines the incoming webhook URL path for this bot.
-	urlPath string
-}
-
 type ErrorFunc func(error)
 
 type Updater struct {
@@ -53,9 +41,9 @@ type Updater struct {
 	serveMux *http.ServeMux
 	// webhookServer is the server in charge of receiving all incoming webhook updates.
 	webhookServer *http.Server
-	// botMapping keeps track of the data required for each bot. The key is the bot token.
-	// TODO: Add support for bot token migration.
-	botMapping map[string]*botData
+
+	// botMapping keeps track of the data required for each bot, in a thread-safe manner.
+	botMapping botMapping
 }
 
 // UpdaterOpts defines various fields that can be changed to configure a new Updater.
@@ -128,10 +116,6 @@ type PollingOpts struct {
 // StartPolling starts polling updates from telegram using getUpdates long-polling.
 // See PollingOpts for optional values to set in production environments.
 func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
-	if u.botMapping == nil {
-		u.botMapping = make(map[string]*botData)
-	}
-
 	// This logic is currently mostly duplicated over from the generated getUpdates code.
 	// This is a performance improvement to avoid:
 	//  - needing to re-allocate new url.values structs.
@@ -180,11 +164,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
 
-	u.botMapping[b.Token] = &botData{
-		bot:        b,
-		updateChan: updateChan,
-		polling:    pollChan,
-	}
+	u.botMapping.addBot(b, updateChan, pollChan, "")
 
 	go u.Dispatcher.Start(b, updateChan)
 	go u.pollingLoop(b, reqOpts, pollChan, updateChan, v)
@@ -273,17 +253,7 @@ func (u *Updater) Stop() error {
 		}
 	}
 
-	// Close all the update channels and polling loops
-	for _, data := range u.botMapping {
-		// Close polling loops first, to ensure any updates currently being polled have the time to be sent to the
-		// updateChan.
-		if data.polling != nil {
-			close(data.polling)
-		}
-
-		// Then, close the updates channel.
-		close(data.updateChan)
-	}
+	u.botMapping.stopAllBots()
 
 	// Stop the dispatcher from processing any further updates.
 	u.Dispatcher.Stop()
@@ -293,6 +263,27 @@ func (u *Updater) Stop() error {
 		close(u.stopIdling)
 	}
 	return nil
+}
+
+func (u *Updater) StopBot(b *gotgbot.Bot) bool {
+	bData, ok := u.botMapping.removeBot(b)
+	if !ok {
+		return false
+	}
+
+	stopBot(bData)
+	return true
+}
+
+func stopBot(data botData) {
+	// Close polling loops first, to ensure any updates currently being polled have the time to be sent to the
+	// updateChan.
+	if data.polling != nil {
+		close(data.polling)
+	}
+
+	// Then, close the updates channel.
+	close(data.updateChan)
 }
 
 // StartWebhook starts the webhook server for a single bot instance.
@@ -312,9 +303,6 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 	if u.serveMux == nil {
 		u.serveMux = http.NewServeMux()
 	}
-	if u.botMapping == nil {
-		u.botMapping = make(map[string]*botData)
-	}
 
 	updateChan := make(chan json.RawMessage)
 	u.serveMux.HandleFunc("/"+urlPath, func(w http.ResponseWriter, r *http.Request) {
@@ -327,11 +315,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 		updateChan <- bytes
 	})
 
-	u.botMapping[b.Token] = &botData{
-		bot:        b,
-		updateChan: updateChan,
-		urlPath:    urlPath,
-	}
+	u.botMapping.addBot(b, updateChan, nil, urlPath)
 
 	// Webhook has been added; relevant dispatcher should also be started.
 	go u.Dispatcher.Start(b, updateChan)
@@ -339,7 +323,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 
 // SetAllBotWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.
 func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts) error {
-	for _, data := range u.botMapping {
+	for _, data := range u.botMapping.getBots() {
 		_, err := data.bot.SetWebhook(strings.Join([]string{strings.TrimSuffix(domain, "/"), data.urlPath}, "/"), opts)
 		if err != nil {
 			// Extract the botID, so we don't intentionally log the token
