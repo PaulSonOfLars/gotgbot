@@ -44,18 +44,6 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 	}
 }
 
-// stopAllBots Stops all bots.
-func (m *botMapping) stopAllBots() {
-	m.mux.Lock()
-	defer m.mux.Unlock()
-
-	// Close all the update channels and polling loops
-	for key, bData := range m.mapping {
-		stopBot(bData)
-		delete(m.mapping, key)
-	}
-}
-
 func (m *botMapping) removeBot(b *gotgbot.Bot) (botData, bool) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
@@ -67,6 +55,18 @@ func (m *botMapping) removeBot(b *gotgbot.Bot) (botData, bool) {
 
 	delete(m.mapping, b.Token)
 	return bData, true
+}
+
+func (m *botMapping) removeAllBots() []botData {
+	m.mux.Lock()
+	defer m.mux.Unlock()
+
+	bots := make([]botData, 0, len(m.mapping))
+	for key, bData := range m.mapping {
+		bots = append(bots, bData)
+		delete(m.mapping, key)
+	}
+	return bots
 }
 
 func (m *botMapping) getBots() []botData {

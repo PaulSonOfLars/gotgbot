@@ -253,7 +253,8 @@ func (u *Updater) Stop() error {
 		}
 	}
 
-	u.botMapping.stopAllBots()
+	// Close all existing bot channels.
+	u.StopAllBots()
 
 	// Stop the dispatcher from processing any further updates.
 	u.Dispatcher.Stop()
@@ -273,6 +274,12 @@ func (u *Updater) StopBot(b *gotgbot.Bot) bool {
 
 	stopBot(bData)
 	return true
+}
+
+func (u *Updater) StopAllBots() {
+	for _, bData := range u.botMapping.removeAllBots() {
+		stopBot(bData)
+	}
 }
 
 func stopBot(data botData) {
