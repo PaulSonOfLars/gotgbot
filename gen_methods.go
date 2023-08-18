@@ -5442,6 +5442,35 @@ func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, 
 	return b, json.Unmarshal(r, &b)
 }
 
+// UnpinAllGeneralForumTopicMessagesOpts is the set of optional fields for Bot.UnpinAllGeneralForumTopicMessages.
+type UnpinAllGeneralForumTopicMessagesOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// UnpinAllGeneralForumTopicMessages (https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages)
+//
+// Use this method to clear the list of pinned messages in a General forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+//   - opts (type UnpinAllGeneralForumTopicMessagesOpts): All optional parameters.
+func (bot *Bot) UnpinAllGeneralForumTopicMessages(chatId int64, opts *UnpinAllGeneralForumTopicMessagesOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("unpinAllGeneralForumTopicMessages", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // UnpinChatMessageOpts is the set of optional fields for Bot.UnpinChatMessage.
 type UnpinChatMessageOpts struct {
 	// Identifier of a message to unpin. If not specified, the most recent pinned message (by sending date) will be unpinned.

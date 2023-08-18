@@ -432,6 +432,8 @@ type Chat struct {
 	ActiveUsernames []string `json:"active_usernames,omitempty"`
 	// Optional. Custom emoji identifier of emoji status of the other party in a private chat. Returned only in getChat.
 	EmojiStatusCustomEmojiId string `json:"emoji_status_custom_emoji_id,omitempty"`
+	// Optional. Expiration date of the emoji status of the other party in a private chat, if any. Returned only in getChat.
+	EmojiStatusExpirationDate int64 `json:"emoji_status_expiration_date,omitempty"`
 	// Optional. Bio of the other party in a private chat. Returned only in getChat.
 	Bio string `json:"bio,omitempty"`
 	// Optional. True, if privacy settings of the other party in the private chat allows to use tg://user?id=<user_id> links only in chats with the user. Returned only in getChat.
@@ -1429,7 +1431,7 @@ type InlineKeyboardButton struct {
 	WebApp *WebAppInfo `json:"web_app,omitempty"`
 	// Optional. An HTTPS URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
 	LoginUrl *LoginUrl `json:"login_url,omitempty"`
-	// Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. May be empty, in which case just the bot's username will be inserted. Note: This offers an easy way for users to start using your bot in inline mode when they are currently in a private chat with it. Especially useful when combined with switch_pm... actions - in this case the user will be automatically returned to the chat they switched from, skipping the chat selection screen.
+	// Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. May be empty, in which case just the bot's username will be inserted.
 	SwitchInlineQuery *string `json:"switch_inline_query,omitempty"`
 	// Optional. If set, pressing the button will insert the bot's username and the specified inline query in the current chat's input field. May be empty, in which case only the bot's username will be inserted. This offers a quick way for the user to open your bot in inline mode in the same chat - good for selecting something from multiple options.
 	SwitchInlineQueryCurrentChat *string `json:"switch_inline_query_current_chat,omitempty"`
@@ -4118,6 +4120,8 @@ type Message struct {
 	Photo []PhotoSize `json:"photo,omitempty"`
 	// Optional. Message is a sticker, information about the sticker
 	Sticker *Sticker `json:"sticker,omitempty"`
+	// Optional. Message is a forwarded story
+	Story *Story `json:"story,omitempty"`
 	// Optional. Message is a video, information about the video
 	Video *Video `json:"video,omitempty"`
 	// Optional. Message is a video note, information about the video message
@@ -4881,9 +4885,11 @@ type Poll struct {
 type PollAnswer struct {
 	// Unique poll identifier
 	PollId string `json:"poll_id"`
-	// The user, who changed the answer to the poll
-	User User `json:"user"`
-	// 0-based identifiers of answer options, chosen by the user. May be empty if the user retracted their vote.
+	// Optional. The chat that changed the answer to the poll, if the voter is anonymous
+	VoterChat *Chat `json:"voter_chat,omitempty"`
+	// Optional. The user that changed the answer to the poll, if the voter isn't anonymous
+	User *User `json:"user,omitempty"`
+	// 0-based identifiers of chosen answer options. May be empty if the vote was retracted.
 	OptionIds []int64 `json:"option_ids,omitempty"`
 }
 
@@ -5080,6 +5086,11 @@ type StickerSet struct {
 	// Optional. Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 }
+
+// Story (https://core.telegram.org/bots/api#story)
+//
+// This object represents a message about a forwarded story in the chat. Currently holds no information.
+type Story struct{}
 
 // SuccessfulPayment (https://core.telegram.org/bots/api#successfulpayment)
 //
