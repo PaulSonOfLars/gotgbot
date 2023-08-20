@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -26,17 +25,12 @@ func main() {
 
 	// Create bot from environment value.
 	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		Client: http.Client{},
-		DefaultRequestOpts: &gotgbot.RequestOpts{
-			Timeout: gotgbot.DefaultTimeout,
-			APIURL:  gotgbot.DefaultAPIURL,
-		},
+		// Setup botclient to collect metrics on client requests
+		BotClient: newMetricsClient(),
 	})
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
 	}
-
-	b.UseMiddleware(metrics)
 
 	// Create the dispatcher with our custom processor.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{

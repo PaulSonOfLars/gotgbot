@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -24,18 +23,11 @@ func main() {
 
 	// Create bot from environment value.
 	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		Client: http.Client{},
-		DefaultRequestOpts: &gotgbot.RequestOpts{
-			Timeout: gotgbot.DefaultTimeout,
-			APIURL:  gotgbot.DefaultAPIURL,
-		},
+		BotClient: newSendWithoutReplyClient(),
 	})
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
 	}
-
-	// Load middleware
-	b.UseMiddleware(SendWithoutReply)
 
 	// Create updater and dispatcher.
 	updater := ext.NewUpdater(&ext.UpdaterOpts{

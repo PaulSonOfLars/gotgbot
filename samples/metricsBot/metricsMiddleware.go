@@ -67,14 +67,14 @@ type metricsBotClient struct {
 
 // Define wrapper around existing RequestWithContext method.
 // Note: this is the only method that needs redefining.
-func (b *metricsBotClient) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b metricsBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	totalRequests.WithLabelValues(method).Inc()
 	timer := prometheus.NewTimer(requestDuration.With(prometheus.Labels{
 		"http_method": http.MethodPost,
 		"api_method":  method,
 	}))
 
-	val, err := b.BotClient.RequestWithContext(ctx, method, params, data, opts)
+	val, err := b.BotClient.RequestWithContext(ctx, token, method, params, data, opts)
 	timer.ObserveDuration()
 	if err != nil {
 		tgErr := &gotgbot.TelegramError{}
@@ -87,8 +87,15 @@ func (b *metricsBotClient) RequestWithContext(ctx context.Context, method string
 	return val, err
 }
 
-// metrics enables the metrics middleware.
-// To ensure metrics are accurate, we recommend calling this middleware first.
-func metrics(b gotgbot.BotClient) gotgbot.BotClient {
-	return &metricsBotClient{b}
+func newMetricsClient() metricsBotClient {
+	return metricsBotClient{
+		BotClient: &gotgbot.BaseBotClient{
+			Client:             http.Client{},
+			UseTestEnvironment: false,
+			DefaultRequestOpts: &gotgbot.RequestOpts{
+				Timeout: gotgbot.DefaultTimeout,
+				APIURL:  gotgbot.DefaultAPIURL,
+			},
+		},
+	}
 }

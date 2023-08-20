@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -18,7 +19,7 @@ type sendWithoutReplyBotClient struct {
 
 // Define wrapper around existing RequestWithContext method.
 // Note: this is the only method that needs redefining.
-func (b *sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	// For all sendable methods, we want to allow sending if the message has been deleted.
 	// So, we edit the params to allow for that.
 	// We also log this, for the sake of the example. :)
@@ -36,7 +37,15 @@ func (b *sendWithoutReplyBotClient) RequestWithContext(ctx context.Context, toke
 	return val, err
 }
 
-// SendWithoutReply is a simple method that we use to wrap the existing middleware with our new one.
-func SendWithoutReply(b gotgbot.BotClient) gotgbot.BotClient {
-	return &sendWithoutReplyBotClient{b}
+func newSendWithoutReplyClient() sendWithoutReplyBotClient {
+	return sendWithoutReplyBotClient{
+		BotClient: &gotgbot.BaseBotClient{
+			Client:             http.Client{},
+			UseTestEnvironment: false,
+			DefaultRequestOpts: &gotgbot.RequestOpts{
+				Timeout: gotgbot.DefaultTimeout,
+				APIURL:  gotgbot.DefaultAPIURL,
+			},
+		},
+	}
 }
