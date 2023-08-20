@@ -26,7 +26,7 @@ type BotOpts struct {
 	// BotClient allows for passing in custom configurations of BotClient, such as handling extra errors or providing
 	// metrics.
 	BotClient BotClient
-	// DisableTokenCheck can be used to isable the token validity check.
+	// DisableTokenCheck can be used to disable the token validity check.
 	// Useful when running in time-constrained environments where the startup time should be minimised, and where the
 	// token can be assumed to be valid (eg lambdas).
 	// Warning: Disabling the token check will mean that the Bot.User struct will no longer be populated.
