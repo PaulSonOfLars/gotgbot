@@ -27,8 +27,10 @@ type BotClient interface {
 	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
 	GetAPIURL(opts *RequestOpts) string
 	// FileURL gets the URL of a file at the API address that the bot is interacting with.
-	FileURL(token string, filePath string, opts *RequestOpts) string
+	FileURL(token string, tgFilePath string, opts *RequestOpts) string
 }
+
+var _ BotClient = &BaseBotClient{}
 
 type BaseBotClient struct {
 	// Client is the HTTP Client used for all HTTP requests made for this bot.
@@ -37,7 +39,7 @@ type BaseBotClient struct {
 	// Enabling this uses a slightly different API path.
 	// See https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment for more details.
 	UseTestEnvironment bool
-	// The default request opts for this bot instance.
+	// Default opts to use for all requests, when no other request opts are specified.
 	DefaultRequestOpts *RequestOpts
 }
 
@@ -237,9 +239,8 @@ func (bot *BaseBotClient) GetAPIURL(opts *RequestOpts) string {
 	return DefaultAPIURL
 }
 
-// GetToken returns the currently used token.
-func (bot *BaseBotClient) FileURL(token string, filePath string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/file/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(token), filePath)
+func (bot *BaseBotClient) FileURL(token string, tgFilePath string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/file/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(token), tgFilePath)
 }
 
 func (bot *BaseBotClient) getEnvAuth(token string) string {
