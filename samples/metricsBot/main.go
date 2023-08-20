@@ -14,7 +14,7 @@ import (
 
 // This bot shows how to gather various prometheus metrics from the dispatcher and bot client, such that they can be
 // scraped and placed on a dashboard.
-// Note: this example is NOT a bot to demonstrate useful chat metrics; it simply demonstrates how various bot metrics
+// Note: this example is NOT a bot to gather useful chat metrics; it simply demonstrates how various bot metrics
 // could be collected.
 func main() {
 	// Get token from the environment variable
