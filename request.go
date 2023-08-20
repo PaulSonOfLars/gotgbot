@@ -26,7 +26,9 @@ type BotClient interface {
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
 	// GetAPIURL gets the URL of the API the bot is interacting with.
 	GetAPIURL() string
-	// GetToken gets the current bots' token.
+	// GetFileURL gets the URL of a file at the API address that the bot is interacting with.
+	GetFileURL(filePath string, opts *RequestOpts) string
+	// GetToken gets the bot token.
 	GetToken() string
 }
 
@@ -157,7 +159,7 @@ func (bot *BaseBotClient) RequestWithContext(ctx context.Context, method string,
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEnpoint(method, opts), b)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(method, opts), b)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
@@ -221,17 +223,14 @@ func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]Named
 	return w.FormDataContentType(), nil
 }
 
-func getCleanAPIURL(url string) string {
-	if url == "" {
-		return DefaultAPIURL
-	}
-	// Trim suffix to ensure consistent output
-	return strings.TrimSuffix(url, "/")
-}
-
 // GetAPIURL returns the currently used API endpoint.
 func (bot *BaseBotClient) GetAPIURL() string {
 	return bot.getAPIURL(nil)
+}
+
+// GetToken returns the currently used token.
+func (bot *BaseBotClient) GetFileURL(filePath string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/file/%s/%s", bot.getAPIURL(opts), bot.getEnvAuth(), filePath)
 }
 
 // GetToken returns the currently used token.
@@ -242,17 +241,21 @@ func (bot *BaseBotClient) GetToken() string {
 // getAPIURL returns the currently used API endpoint.
 func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
 	if opts != nil && opts.APIURL != "" {
-		return getCleanAPIURL(opts.APIURL)
+		return strings.TrimSuffix(opts.APIURL, "/")
 	}
 	if bot.DefaultRequestOpts != nil && bot.DefaultRequestOpts.APIURL != "" {
-		return getCleanAPIURL(bot.DefaultRequestOpts.APIURL)
+		return strings.TrimSuffix(bot.DefaultRequestOpts.APIURL, "/")
 	}
 	return DefaultAPIURL
 }
 
-func (bot *BaseBotClient) methodEnpoint(method string, opts *RequestOpts) string {
+func (bot *BaseBotClient) getEnvAuth() string {
 	if bot.UseTestEnvironment {
-		return fmt.Sprintf("%s/bot%s/test/%s", bot.getAPIURL(opts), bot.Token, method)
+		return "bot" + bot.Token + "/test"
 	}
-	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.Token, method)
+	return "bot" + bot.Token
+}
+
+func (bot *BaseBotClient) methodEndpoint(method string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.getEnvAuth(), method)
 }

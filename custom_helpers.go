@@ -48,6 +48,6 @@ func (c Chat) Promote(b *Bot, userId int64, opts *PromoteChatMemberOpts) (bool, 
 }
 
 // GetURL gets the URL the file can be downloaded from.
-func (f File) GetURL(b *Bot) string {
-	return fmt.Sprintf("%s/file/bot%s/%s", b.GetAPIURL(), b.GetToken(), f.FilePath)
+func (f File) URL(b *Bot, opts *RequestOpts) string {
+	return b.GetFileURL(f.FilePath, opts)
 }
