@@ -24,10 +24,10 @@ type BotClient interface {
 	RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
 	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
-	// GetAPIURL gets the URL of the API the bot is interacting with.
-	GetAPIURL() string
-	// GetFileURL gets the URL of a file at the API address that the bot is interacting with.
-	GetFileURL(filePath string, opts *RequestOpts) string
+	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
+	GetAPIURL(opts *RequestOpts) string
+	// FileURL gets the URL of a file at the API address that the bot is interacting with.
+	FileURL(filePath string, opts *RequestOpts) string
 	// GetToken gets the bot token.
 	GetToken() string
 }
@@ -224,22 +224,7 @@ func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]Named
 }
 
 // GetAPIURL returns the currently used API endpoint.
-func (bot *BaseBotClient) GetAPIURL() string {
-	return bot.getAPIURL(nil)
-}
-
-// GetToken returns the currently used token.
-func (bot *BaseBotClient) GetFileURL(filePath string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/file/%s/%s", bot.getAPIURL(opts), bot.getEnvAuth(), filePath)
-}
-
-// GetToken returns the currently used token.
-func (bot *BaseBotClient) GetToken() string {
-	return bot.Token
-}
-
-// getAPIURL returns the currently used API endpoint.
-func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
+func (bot *BaseBotClient) GetAPIURL(opts *RequestOpts) string {
 	if opts != nil && opts.APIURL != "" {
 		return strings.TrimSuffix(opts.APIURL, "/")
 	}
@@ -247,6 +232,16 @@ func (bot *BaseBotClient) getAPIURL(opts *RequestOpts) string {
 		return strings.TrimSuffix(bot.DefaultRequestOpts.APIURL, "/")
 	}
 	return DefaultAPIURL
+}
+
+// GetToken returns the currently used token.
+func (bot *BaseBotClient) FileURL(filePath string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/file/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), filePath)
+}
+
+// GetToken returns the currently used token.
+func (bot *BaseBotClient) GetToken() string {
+	return bot.Token
 }
 
 func (bot *BaseBotClient) getEnvAuth() string {
@@ -257,5 +252,5 @@ func (bot *BaseBotClient) getEnvAuth() string {
 }
 
 func (bot *BaseBotClient) methodEndpoint(method string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/bot%s/%s", bot.getAPIURL(opts), bot.getEnvAuth(), method)
+	return fmt.Sprintf("%s/bot%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), method)
 }
