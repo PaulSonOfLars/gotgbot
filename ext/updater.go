@@ -272,17 +272,17 @@ func (u *Updater) StopBot(b *gotgbot.Bot) bool {
 		return false
 	}
 
-	stopBot(bData)
+	bData.stop()
 	return true
 }
 
 func (u *Updater) StopAllBots() {
 	for _, bData := range u.botMapping.removeAllBots() {
-		stopBot(bData)
+		bData.stop()
 	}
 }
 
-func stopBot(data botData) {
+func (data botData) stop() {
 	// Close polling loops first, to ensure any updates currently being polled have the time to be sent to the
 	// updateChan.
 	if data.polling != nil {
