@@ -106,14 +106,10 @@ func (u *Updater) logf(format string, args ...interface{}) {
 // PollingOpts represents the optional values to start long polling.
 type PollingOpts struct {
 	// DropPendingUpdates toggles whether to drop updates which were sent before the bot was started.
-	// Note: the DropPendingUpdates and DisableWebhookDeletion fields are mutually exclusive; both cannot be enabled at
-	//  the same time.
+	// This also implicitly enables webhook deletion.
 	DropPendingUpdates bool
-	// DisableWebhookDeletion stops the updater from deleting webhooks before polling starts.
-	// By default, the updater deletes any existing webhooks, to ensure that getUpdates works as expected.
-	// Note: the DropPendingUpdates and DisableWebhookDeletion fields are mutually exclusive; both cannot be enabled at
-	//  the same time.
-	DisableWebhookDeletion bool
+	// EnableWebhookDeletion deletes any existing webhooks to ensure that the updater works fine.
+	EnableWebhookDeletion bool
 	// GetUpdatesOpts represents the opts passed to GetUpdates.
 	// Note: It is recommended you edit the values here when running in production environments.
 	// Suggestions include:
@@ -128,8 +124,6 @@ type PollingOpts struct {
 	//    When setting this, it is recommended you set your PollingOpts.Timeout value to be slightly bigger (eg, +1).
 	GetUpdatesOpts *gotgbot.GetUpdatesOpts
 }
-
-var ErrInvalidPendingUpdateAndWebhookConfiguration = errors.New("pending updates cannot be dropped without webhook deletion; consider setting the offset to -1 instead of enabling DropPendingUpdates")
 
 // StartPolling starts polling updates from telegram using getUpdates long-polling.
 // See PollingOpts for optional values to set in production environments.
@@ -147,14 +141,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	var reqOpts *gotgbot.RequestOpts
 
 	if opts != nil {
-		if opts.DropPendingUpdates && opts.DisableWebhookDeletion {
-			// opts.DropPendingUpdates depends on webhook deletion being enabled.
-			// If webhook deletions are disabled, the user should consider setting the offset to -1 instead.
-			// This is not perfect, but achieves nearly the same effect.
-			return ErrInvalidPendingUpdateAndWebhookConfiguration
-		}
-
-		if !opts.DisableWebhookDeletion {
+		if opts.EnableWebhookDeletion || opts.DropPendingUpdates {
 			// For polling to work, we want to make sure we don't have an existing webhook.
 			// Extra perk - we can also use this to drop pending updates!
 			_, err := b.DeleteWebhook(&gotgbot.DeleteWebhookOpts{
