@@ -273,3 +273,7 @@ func UserShared(msg *gotgbot.Message) bool {
 func ChatShared(msg *gotgbot.Message) bool {
 	return msg.ChatShared != nil
 }
+
+func Story(msg *gotgbot.Message) bool {
+	return msg.Story != nil
+}
