@@ -269,8 +269,8 @@ func (u *Updater) Stop() error {
 	return nil
 }
 
-func (u *Updater) StopBot(b *gotgbot.Bot) bool {
-	bData, ok := u.botMapping.removeBot(b)
+func (u *Updater) StopBot(token string) bool {
+	bData, ok := u.botMapping.removeBot(token)
 	if !ok {
 		return false
 	}

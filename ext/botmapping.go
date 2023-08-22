@@ -52,16 +52,16 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 	return nil
 }
 
-func (m *botMapping) removeBot(b *gotgbot.Bot) (botData, bool) {
+func (m *botMapping) removeBot(token string) (botData, bool) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
-	bData, ok := m.mapping[b.Token]
+	bData, ok := m.mapping[token]
 	if !ok {
 		return botData{}, false
 	}
 
-	delete(m.mapping, b.Token)
+	delete(m.mapping, token)
 	return bData, true
 }
 
@@ -88,10 +88,10 @@ func (m *botMapping) getBots() []botData {
 	return bots
 }
 
-func (m *botMapping) getBot(b *gotgbot.Bot) (botData, bool) {
+func (m *botMapping) getBot(token string) (botData, bool) {
 	m.mux.RLock()
 	defer m.mux.RUnlock()
 
-	bData, ok := m.mapping[b.Token]
+	bData, ok := m.mapping[token]
 	return bData, ok
 }

@@ -41,7 +41,7 @@ func Test_botMapping(t *testing.T) {
 	}
 
 	// check that bot data is correct
-	bdata, ok := bm.getBot(b)
+	bdata, ok := bm.getBot(b.GetToken())
 	if !ok {
 		t.Errorf("failed to get bot with token %s", b.Token)
 		t.FailNow()
@@ -56,13 +56,13 @@ func Test_botMapping(t *testing.T) {
 	}
 
 	// check that bot cant be removed
-	_, ok = bm.removeBot(b)
+	_, ok = bm.removeBot(b.GetToken())
 	if !ok {
 		t.Errorf("failed to remove bot with token %s", b.Token)
 		t.FailNow()
 	}
 
-	_, ok = bm.getBot(b)
+	_, ok = bm.getBot(b.GetToken())
 	if ok {
 		t.Errorf("bot with token %s should be gone", b.Token)
 		t.FailNow()
