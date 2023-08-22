@@ -19,9 +19,24 @@ func Test_botMapping(t *testing.T) {
 	pollChan := make(chan struct{})
 
 	// check that bots can be added fine
-	bm.addBot(b, updateChan, pollChan, "")
+	err := bm.addBot(b, updateChan, pollChan, "")
+	if err != nil {
+		t.Errorf("expected to be able to add a new bot fine: %s", err.Error())
+		t.FailNow()
+	}
 	if len(bm.getBots()) != 1 {
 		t.Errorf("expected 1 bot, got %d", len(bm.getBots()))
+		t.FailNow()
+	}
+
+	// Adding the same bot twice should fail
+	err = bm.addBot(b, updateChan, pollChan, "")
+	if err == nil {
+		t.Errorf("adding the same bot twice should throw an error")
+		t.FailNow()
+	}
+	if len(bm.getBots()) != 1 {
+		t.Errorf("expected only haveing 1 bot when adding a duplicate, but got %d", len(bm.getBots()))
 		t.FailNow()
 	}
 

@@ -164,7 +164,10 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
 
-	u.botMapping.addBot(b, updateChan, pollChan, "")
+	err := u.botMapping.addBot(b, updateChan, pollChan, "")
+	if err != nil {
+		return fmt.Errorf("failed to add bot with long polling: %w", err)
+	}
 
 	go u.Dispatcher.Start(b, updateChan)
 	go u.pollingLoop(b, reqOpts, pollChan, updateChan, v)
@@ -301,12 +304,16 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 		return ErrExpectedEmptyServer
 	}
 
-	u.AddWebhook(b, urlPath, opts)
+	err := u.AddWebhook(b, urlPath, opts)
+	if err != nil {
+		return fmt.Errorf("failed to add webhook: %w", err)
+	}
+
 	return u.StartServer(opts)
 }
 
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
-func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
+func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
 	if u.serveMux == nil {
 		u.serveMux = http.NewServeMux()
 	}
@@ -322,10 +329,14 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 		updateChan <- bytes
 	})
 
-	u.botMapping.addBot(b, updateChan, nil, urlPath)
+	err := u.botMapping.addBot(b, updateChan, nil, urlPath)
+	if err != nil {
+		return fmt.Errorf("failed to add webhook for bot: %w", err)
+	}
 
 	// Webhook has been added; relevant dispatcher should also be started.
 	go u.Dispatcher.Start(b, updateChan)
+	return nil
 }
 
 // SetAllBotWebhooks sets all the webhooks for the bots that have been added to this updater via AddWebhook.

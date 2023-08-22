@@ -2,6 +2,7 @@ package ext
 
 import (
 	"encoding/json"
+	"errors"
 	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -27,13 +28,19 @@ type botMapping struct {
 	mux sync.RWMutex
 }
 
+var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
+
 // addBot Adds a new bot to the botMapping structure.
-func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string) {
+func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
 	if m.mapping == nil {
 		m.mapping = make(map[string]botData)
+	}
+
+	if _, ok := m.mapping[b.Token]; ok {
+		return ErrBotAlreadyExists
 	}
 
 	m.mapping[b.Token] = botData{
@@ -42,6 +49,7 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 		polling:    pollChan,
 		urlPath:    urlPath,
 	}
+	return nil
 }
 
 func (m *botMapping) removeBot(b *gotgbot.Bot) (botData, bool) {
