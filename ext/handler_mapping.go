@@ -52,7 +52,12 @@ func (m *handlerMappings) remove(name string, group int) bool {
 			return true
 		}
 
-		m.handlers[group] = append(currHandlers[:i], currHandlers[i+1:]...)
+		// Make sure to copy the handler list to ensure we don't change the values of the underlying arrays, which
+		// could cause slice access issues when used concurrently.
+		newHandlers := make([]Handler, len(m.handlers[group]))
+		copy(newHandlers, m.handlers[group])
+
+		m.handlers[group] = append(newHandlers[:i], newHandlers[i+1:]...)
 		return true
 	}
 	// handler not found - removal failed.

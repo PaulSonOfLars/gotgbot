@@ -41,19 +41,13 @@ func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
 	if len(currGroups) != 1 && len(startGroups) != 0 {
 		t.Errorf("Start groups should be 0, curr groups should be 1; got %d and %d", len(startGroups), len(currGroups))
 	}
-	if len(currGroups[0]) != 1 {
-		t.Errorf("length of group 0 in the groups list should be 1; got %d", len(currGroups[0]))
-	}
+	checkList(t, "currGroups", currGroups[0], firstHandler)
 
 	// Add a second handler.
 	m.add(secondHandler, 0)
 	newGroups := m.getGroups()
-	if len(currGroups[0]) != 1 {
-		t.Errorf("length of group 0 in currGroups should be 1; got %d", len(currGroups[0]))
-	}
-	if len(newGroups[0]) != 2 {
-		t.Errorf("length of group 0 in the newGroups 1; got %d", len(newGroups[0]))
-	}
+	checkList(t, "newgroups;currGroups", currGroups[0], firstHandler)
+	checkList(t, "newgroups;newGroups", newGroups[0], firstHandler, secondHandler)
 
 	// Remove second handler..
 	ok := m.remove(secondHandler.Name(), 0)
@@ -61,36 +55,17 @@ func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
 		t.Errorf("failed to remove second handler")
 	}
 	delGroups := m.getGroups()
-	if len(currGroups[0]) != 1 {
-		t.Errorf("length of group 0 in currGroups should be 1; got %d", len(currGroups[0]))
-	}
-	if len(newGroups[0]) != 2 {
-		t.Errorf("length of group 0 in the newGroups 1; got %d", len(newGroups[0]))
-	}
-	if len(delGroups[0]) != 1 {
-		t.Errorf("length of group 0 in delGroups should be 1; got %d", len(delGroups[0]))
-	}
+	checkList(t, "delgroups;currGroups", currGroups[0], firstHandler)
+	checkList(t, "delgroups;newGroups", newGroups[0], firstHandler, secondHandler)
+	checkList(t, "delgroups;delGroups", delGroups[0], firstHandler)
 
 	// Re-add second handler.
 	m.add(secondHandler, 0)
 	reAddedGroups := m.getGroups()
-	if len(currGroups[0]) != 1 &&
-		currGroups[0][0].Name() == firstHandler.Name() {
-		t.Errorf("length of group 0 in currGroups should be 1; got %d", len(currGroups[0]))
-	}
-	if len(newGroups[0]) != 2 &&
-		newGroups[0][1].Name() == secondHandler.Name() {
-		t.Errorf("length of group 0 in the newGroups 1; got %d", len(newGroups[0]))
-	}
-	if len(delGroups[0]) != 1 &&
-		delGroups[0][0].Name() == firstHandler.Name() {
-		t.Errorf("length of group 0 in delGroups should be 1; got %d", len(delGroups[0]))
-	}
-	if len(reAddedGroups[0]) != 2 &&
-		newGroups[0][0].Name() == firstHandler.Name() &&
-		newGroups[0][1].Name() == secondHandler.Name() {
-		t.Errorf("length of group 0 in reAddedGroups should be 2; got %d", len(reAddedGroups[0]))
-	}
+	checkList(t, "readded;currGroups", currGroups[0], firstHandler)
+	checkList(t, "readded;newGroups", newGroups[0], firstHandler, secondHandler)
+	checkList(t, "readded;delGroups", delGroups[0], firstHandler)
+	checkList(t, "readded;reAddedGroups", reAddedGroups[0], firstHandler, secondHandler)
 
 	// Remove first handler.
 	ok = m.remove(firstHandler.Name(), 0)
@@ -98,25 +73,20 @@ func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
 		t.Errorf("failed to remove second handler")
 	}
 	noFirstGroups := m.getGroups()
-	if len(currGroups[0]) != 1 &&
-		currGroups[0][0].Name() == firstHandler.Name() {
-		t.Errorf("length of group 0 in currGroups should be 1; got %d", len(currGroups[0]))
+	checkList(t, "nofirst;currGroups", currGroups[0], firstHandler)
+	checkList(t, "nofirst;newGroups", newGroups[0], firstHandler, secondHandler)
+	checkList(t, "nofirst;delGroups", delGroups[0], firstHandler)
+	checkList(t, "nofirst;reAddedGroups", reAddedGroups[0], firstHandler, secondHandler)
+	checkList(t, "nofirst;noFirstGroups", noFirstGroups[0], secondHandler)
+}
+
+func checkList(t *testing.T, name string, got []Handler, expected ...Handler) {
+	if len(got) != len(expected) {
+		t.Errorf("mismatch on length of expected outputs for %s - got %d, expected %d", name, len(got), len(expected))
 	}
-	if len(newGroups[0]) != 2 &&
-		newGroups[0][1].Name() == secondHandler.Name() {
-		t.Errorf("length of group 0 in the newGroups 1; got %d", len(newGroups[0]))
-	}
-	if len(delGroups[0]) != 1 &&
-		delGroups[0][0].Name() == firstHandler.Name() {
-		t.Errorf("length of group 0 in delGroups should be 1; got %d", len(delGroups[0]))
-	}
-	if len(reAddedGroups[0]) != 2 &&
-		reAddedGroups[0][0].Name() == firstHandler.Name() &&
-		reAddedGroups[0][1].Name() == secondHandler.Name() {
-		t.Errorf("length of group 0 in reAddedGroups should be 2; got %d", len(reAddedGroups[0]))
-	}
-	if len(noFirstGroups[0]) != 1 &&
-		noFirstGroups[0][0].Name() == secondHandler.Name() {
-		t.Errorf("length of group 0 in noFirstGroups should be 2; got %d", len(noFirstGroups[0]))
+	for idx, v := range got {
+		if v.Name() != expected[idx].Name() {
+			t.Errorf("unexpected output name for %s - IDX %d got %s, expected %s", name, idx, v.Name(), expected[idx].Name())
+		}
 	}
 }
