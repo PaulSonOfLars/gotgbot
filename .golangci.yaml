@@ -62,7 +62,7 @@ linters:
     #    - nilassign
     - nilerr
     - noctx
-    - nolintlint
+    #    - nolintlint
     #    - paralleltest
     - prealloc
     - promlinter

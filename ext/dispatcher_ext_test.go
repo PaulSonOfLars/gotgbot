@@ -100,9 +100,12 @@ func TestDispatcher(t *testing.T) {
 			}
 
 			t.Log("Processing one update...")
-			d.ProcessUpdate(nil, &gotgbot.Update{
+			err := d.ProcessUpdate(nil, &gotgbot.Update{
 				Message: &gotgbot.Message{Text: "test text"},
 			}, nil)
+			if err != nil {
+				t.Errorf("Unexpected error while processing updates: %s", err.Error())
+			}
 
 			// ensure events handled in order
 			if !sort.IntsAreSorted(events) {
