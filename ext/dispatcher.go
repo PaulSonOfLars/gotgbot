@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"runtime/debug"
-	"sort"
 	"strings"
 	"sync"
 
@@ -71,10 +70,8 @@ type Dispatcher struct {
 	// If nil, logging is done via the log package's standard logger.
 	ErrorLog *log.Logger
 
-	// handlerGroups represents the list of available handler groups, numerically sorted.
-	handlerGroups []int
-	// handlers represents all available handles, split into groups (see handlerGroups).
-	handlers map[int][]Handler
+	// handlers represents all available handlers.
+	handlers handlerMappings
 
 	// limiter is how we limit the maximum number of goroutines for handling updates.
 	// if nil, this is a limitless dispatcher.
@@ -152,7 +149,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 		Panic:            panicHandler,
 		UnhandledErrFunc: unhandledErrFunc,
 		ErrorLog:         errLog,
-		handlers:         make(map[int][]Handler),
+		handlers:         handlerMappings{},
 		limiter:          limiter,
 		waitGroup:        sync.WaitGroup{},
 	}
@@ -230,13 +227,8 @@ func (d *Dispatcher) AddHandler(handler Handler) {
 
 // AddHandlerToGroup adds a handler to a specific group; lowest number will be processed first.
 // Warning: Not thread safe.
-func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
-	currHandlers, ok := d.handlers[group]
-	if !ok {
-		d.handlerGroups = append(d.handlerGroups, group)
-		sort.Ints(d.handlerGroups)
-	}
-	d.handlers[group] = append(currHandlers, handler)
+func (d *Dispatcher) AddHandlerToGroup(h Handler, group int) {
+	d.handlers.add(h, group)
 }
 
 // RemoveHandlerFromGroup removes a handler by name from the specified group.
@@ -244,48 +236,14 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 // Returns true if the handler was successfully removed.
 // Warning: Not thread safe.
 func (d *Dispatcher) RemoveHandlerFromGroup(handlerName string, group int) bool {
-	currHandlers, ok := d.handlers[group]
-	if !ok {
-		// group does not exist; removal failed.
-		return false
-	}
-
-	for i, handler := range currHandlers {
-		if handler.Name() == handlerName {
-			d.handlers[group] = append(currHandlers[:i], currHandlers[i+1:]...)
-
-			// Had one item, we removed one, so none left.
-			if len(currHandlers) == 1 {
-				// No more handlers, so group should also be removed.
-				d.RemoveGroup(group)
-			}
-			return true
-		}
-	}
-	// handler not found - removal failed.
-	return false
+	return d.handlers.remove(handlerName, group)
 }
 
 // RemoveGroup removes an entire group from the dispatcher's processing.
 // If group can't be found, this is a noop.
 // Warning: Not thread safe.
-func (d *Dispatcher) RemoveGroup(group int) {
-	if _, ok := d.handlers[group]; !ok {
-		// Group doesn't exist in map, so already removed.
-		return
-	}
-
-	groups := d.handlerGroups
-	for j, handlerGroup := range groups {
-		if handlerGroup == group {
-			d.handlerGroups = append(groups[:j], groups[j+1:]...)
-			delete(d.handlers, group)
-			// Group found, and deleted. Success!
-			return
-		}
-	}
-	// Group not found in list - so already removed.
-	return
+func (d *Dispatcher) RemoveGroup(group int) bool {
+	return d.handlers.removeGroup(group)
 }
 
 // processRawUpdate takes a JSON update to be unmarshalled and processed by Dispatcher.ProcessUpdate.
@@ -325,8 +283,8 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[s
 }
 
 func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) error {
-	for _, groupNum := range d.handlerGroups {
-		for _, handler := range d.handlers[groupNum] {
+	for _, groups := range d.handlers.getGroups() {
+		for _, handler := range groups {
 			if !handler.CheckUpdate(b, ctx) {
 				// Handler filter doesn't match this update; continue.
 				continue
