@@ -91,9 +91,9 @@ func (m *handlerMappings) getGroups() [][]Handler {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	var handlers [][]Handler
-	for _, num := range m.handlerGroups {
-		handlers = append(handlers, m.handlers[num])
+	allHandlers := make([][]Handler, len(m.handlerGroups))
+	for idx, num := range m.handlerGroups {
+		allHandlers[idx] = m.handlers[num]
 	}
-	return handlers
+	return allHandlers
 }
