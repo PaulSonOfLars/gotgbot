@@ -2,8 +2,11 @@ package ext
 
 import (
 	"encoding/json"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
 func TestDispatcherStop(t *testing.T) {
@@ -55,4 +58,31 @@ func TestUnlimitedDispatcherStop(t *testing.T) {
 
 	go d.Start(nil, make(chan json.RawMessage))
 	d.Stop() // ensure no panics
+}
+
+func BenchmarkDispatcher(b *testing.B) {
+	d := NewDispatcher(nil)
+
+	wg := sync.WaitGroup{}
+	d.AddHandler(DummyHandler{F: func(b *gotgbot.Bot, ctx *Context) error {
+		wg.Done()
+		return nil
+	}})
+
+	updateChan := make(chan json.RawMessage)
+
+	go d.Start(&gotgbot.Bot{}, updateChan)
+
+	upd, err := json.Marshal(gotgbot.Update{Message: &gotgbot.Message{Text: "test"}})
+	if err != nil {
+		b.Fatalf("failed to marshal test msg: %s", err.Error())
+	}
+
+	for i := 0; i < b.N; i++ {
+		wg.Add(1)
+		go func() { updateChan <- upd }()
+	}
+
+	wg.Wait()
+	d.Stop()
 }

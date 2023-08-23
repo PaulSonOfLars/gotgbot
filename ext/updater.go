@@ -19,6 +19,7 @@ import (
 var (
 	ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
 	ErrExpectedEmptyServer  = errors.New("expected server to be nil")
+	ErrNotFound             = errors.New("not found")
 )
 
 type ErrorFunc func(error)
@@ -325,7 +326,16 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) e
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		bytes, _ := io.ReadAll(r.Body)
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			if u.UnhandledErrFunc != nil {
+				u.UnhandledErrFunc(err)
+			} else {
+				u.logf("Failed to read incoming webhook contents: %s", err.Error())
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		updateChan <- bytes
 	})
 
