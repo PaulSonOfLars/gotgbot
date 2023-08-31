@@ -60,10 +60,11 @@ type Response struct {
 }
 
 type TelegramError struct {
-	Method      string
-	Params      map[string]string
-	Code        int
-	Description string
+	Method         string
+	Params         map[string]string
+	Code           int
+	Description    string
+	ResponseParams *ResponseParameters
 }
 
 func (t *TelegramError) Error() string {
@@ -179,10 +180,11 @@ func (bot *BaseBotClient) RequestWithContext(ctx context.Context, method string,
 
 	if !r.Ok {
 		return nil, &TelegramError{
-			Method:      method,
-			Params:      params,
-			Code:        r.ErrorCode,
-			Description: r.Description,
+			Method:         method,
+			Params:         params,
+			Code:           r.ErrorCode,
+			Description:    r.Description,
+			ResponseParams: r.Parameters,
 		}
 	}
 
