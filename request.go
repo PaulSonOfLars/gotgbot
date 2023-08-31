@@ -60,10 +60,15 @@ type Response struct {
 }
 
 type TelegramError struct {
-	Method         string
-	Params         map[string]string
-	Code           int
-	Description    string
+	// The telegram method which raised the error.
+	Method string
+	// The HTTP parameters which raised the error.
+	Params map[string]string
+	// The error code returned by telegram.
+	Code int
+	// The error description returned by telegram.
+	Description string
+	// The additional parameters returned by telegram
 	ResponseParams *ResponseParameters
 }
 
