@@ -90,3 +90,47 @@ func checkList(t *testing.T, name string, got []Handler, expected ...Handler) {
 		}
 	}
 }
+
+func Test_handlerMappings_remove(t *testing.T) {
+	m := &handlerMappings{}
+	handler := dummy{name: "test"}
+
+	t.Run("nonExistent", func(t *testing.T) {
+		// removing an item that doesnt exist returns "false"
+		if got := m.remove(handler.Name(), 0); got {
+			t.Errorf("remove() = %v, want false", got)
+		}
+	})
+
+	t.Run("removalSuccess", func(t *testing.T) {
+		m.add(handler, 0)
+		// removing an item that DOES exist, returns true
+		if got := m.remove(handler.Name(), 0); !got {
+			t.Errorf("remove() = %v, want true", got)
+		}
+		// And so the second time, it returns false
+		if got := m.remove(handler.Name(), 0); got {
+			t.Errorf("remove() = %v, want false", got)
+		}
+	})
+
+	t.Run("removalSuccess", func(t *testing.T) {
+		m.add(handler, 0)
+		// removing an item that DOES exist, returns true
+		if got := m.remove(handler.Name(), 0); !got {
+			t.Errorf("remove() = %v, want true", got)
+		}
+		// And so the second time, it returns false
+		if got := m.remove(handler.Name(), 0); got {
+			t.Errorf("remove() = %v, want false", got)
+		}
+	})
+
+	t.Run("removalDifferentIndexes", func(t *testing.T) {
+		m.add(handler, 1)
+		m.add(handler, 2)
+		if got := m.remove(handler.Name(), 2); !got {
+			t.Errorf("remove() = %v, want true", got)
+		}
+	})
+}
