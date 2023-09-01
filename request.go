@@ -259,5 +259,5 @@ func (bot *BaseBotClient) getEnvAuth() string {
 }
 
 func (bot *BaseBotClient) methodEndpoint(method string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/bot%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), method)
+	return fmt.Sprintf("%s/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), method)
 }
