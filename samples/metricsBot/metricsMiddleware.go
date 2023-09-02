@@ -58,7 +58,7 @@ var (
 	)
 )
 
-// Define middleware BotClient
+// Define middleware BotClient.
 type metricsBotClient struct {
 	// Inline existing client to call, allowing us to chain middlewares.
 	// Inlining also avoids us having to redefine helper methods part of the interface.

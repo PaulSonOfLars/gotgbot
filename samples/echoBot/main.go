@@ -23,10 +23,12 @@ func main() {
 
 	// Create bot from environment value.
 	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		Client: http.Client{},
-		DefaultRequestOpts: &gotgbot.RequestOpts{
-			Timeout: gotgbot.DefaultTimeout,
-			APIURL:  gotgbot.DefaultAPIURL,
+		BotClient: &gotgbot.BaseBotClient{
+			Client: http.Client{},
+			DefaultRequestOpts: &gotgbot.RequestOpts{
+				Timeout: gotgbot.DefaultTimeout,
+				APIURL:  gotgbot.DefaultAPIURL,
+			},
 		},
 	})
 	if err != nil {

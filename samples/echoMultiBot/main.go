@@ -60,10 +60,12 @@ func main() {
 	bots := make([]*gotgbot.Bot, len(splitTokens))
 	for idx, token := range splitTokens {
 		b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-			Client: http.Client{},
-			DefaultRequestOpts: &gotgbot.RequestOpts{
-				Timeout: gotgbot.DefaultTimeout,
-				APIURL:  gotgbot.DefaultAPIURL,
+			BotClient: &gotgbot.BaseBotClient{
+				Client: http.Client{},
+				DefaultRequestOpts: &gotgbot.RequestOpts{
+					Timeout: gotgbot.DefaultTimeout,
+					APIURL:  gotgbot.DefaultAPIURL,
+				},
 			},
 		})
 		if err != nil {
