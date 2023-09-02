@@ -47,13 +47,6 @@ Then, simply send /start to your bot; if it replies, you've successfully set up 
 
 This bot is as basic as inline query bots can get. It simply links the bot library every time.
 
-## samples/metricsBot
-
-This bot shows how to gather various prometheus metrics from the dispatcher and bot client, such that they can be
-scraped and placed on a dashboard.
-Note: this example is NOT a bot to gather useful chat metrics; it simply demonstrates how various bot metrics
-could be collected.
-
 ## samples/middlewareBot
 
 This bot shows how to effectively use middlewares to modify and intercept HTTP requests to the bot API server.
