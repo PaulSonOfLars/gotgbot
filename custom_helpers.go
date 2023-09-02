@@ -49,5 +49,5 @@ func (c Chat) Promote(b *Bot, userId int64, opts *PromoteChatMemberOpts) (bool, 
 
 // URL gets the URL the file can be downloaded from.
 func (f File) URL(b *Bot, opts *RequestOpts) string {
-	return b.FileURL(f.FilePath, opts)
+	return b.FileURL(b.Token, f.FilePath, opts)
 }
