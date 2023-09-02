@@ -70,8 +70,7 @@ type metricsBotClient struct {
 func (b metricsBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	totalRequests.WithLabelValues(method).Inc()
 	timer := prometheus.NewTimer(requestDuration.With(prometheus.Labels{
-		"http_method": http.MethodPost,
-		"api_method":  method,
+		"api_method": method,
 	}))
 
 	val, err := b.BotClient.RequestWithContext(ctx, token, method, params, data, opts)
