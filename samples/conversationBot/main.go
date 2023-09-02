@@ -89,12 +89,12 @@ const (
 	AGE  = "age"
 )
 
-// Create a matcher which only matches text which is not a command
+// Create a matcher which only matches text which is not a command.
 func noCommands(msg *gotgbot.Message) bool {
 	return message.Text(msg) && !message.Command(msg)
 }
 
-// start introduces the bot and starts the conversation
+// start introduces the bot and starts the conversation.
 func start(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nWhat is your name?.", b.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
@@ -116,7 +116,7 @@ func cancel(b *gotgbot.Bot, ctx *ext.Context) error {
 	return handlers.EndConversation()
 }
 
-// name gets the user's name
+// name gets the user's name.
 func name(b *gotgbot.Bot, ctx *ext.Context) error {
 	inputName := ctx.EffectiveMessage.Text
 	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Nice to meet you, %s!\n\nAnd how old are you?", html.EscapeString(inputName)), &gotgbot.SendMessageOpts{
@@ -128,13 +128,13 @@ func name(b *gotgbot.Bot, ctx *ext.Context) error {
 	return handlers.NextConversationState(AGE)
 }
 
-// age gets the user's age
+// age gets the user's age.
 func age(b *gotgbot.Bot, ctx *ext.Context) error {
 	inputAge := ctx.EffectiveMessage.Text
 	ageNumber, err := strconv.ParseInt(inputAge, 10, 64)
 	if err != nil {
 		// If the number is not valid, try again!
-		ctx.EffectiveMessage.Reply(b, fmt.Sprintf("This doesn't seem to be a number. Could you repeat?"), &gotgbot.SendMessageOpts{
+		ctx.EffectiveMessage.Reply(b, "This doesn't seem to be a number. Could you repeat?", &gotgbot.SendMessageOpts{
 			ParseMode: "html",
 		})
 		// We try the age handler again

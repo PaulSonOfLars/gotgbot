@@ -55,9 +55,10 @@ func main() {
 	// Add echo handler to reply to all other text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
 
-	var bots []*gotgbot.Bot
 	// We iterate over all the tokens provided, to create and start polling on each one.
-	for idx, token := range strings.Split(tokens, ",") {
+	splitTokens := strings.Split(tokens, ",")
+	bots := make([]*gotgbot.Bot, len(splitTokens))
+	for idx, token := range splitTokens {
 		b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
 			Client: http.Client{},
 			DefaultRequestOpts: &gotgbot.RequestOpts{
@@ -68,7 +69,8 @@ func main() {
 		if err != nil {
 			panic(fmt.Errorf("bot %d: failed to create bot: %w", idx, err))
 		}
-		bots = append(bots, b)
+
+		bots[idx] = b
 	}
 
 	if webhookDomain != "" {

@@ -73,10 +73,10 @@ linters:
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    # Don't run forbidigo on samples, since prints are OK
     - path: samples/
       linters:
-        - forbidigo
+        - gomoddirectives # We allow replace directives in the samples/ directory as we want to keep up to date
+        - gosec # We don't use rand for security reasons here
     # Don't run error or allocation optimisations on scripts, since they're not necessary to generate code
     - path: scripts/generate/
       linters:
@@ -121,3 +121,8 @@ linters-settings:
       rules:
         # JSON must use snake case
         json: snake
+  errcheck:
+    check-type-assertions: true
+    exclude-functions:
+      - (github.com/PaulSonOfLars/gotgbot/v2.Message).Reply
+      - (net/http.ResponseWriter).Write
