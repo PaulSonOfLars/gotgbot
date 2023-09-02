@@ -47,12 +47,12 @@ type metricsProcessor struct {
 	processor ext.Processor
 }
 
-func (m metricsProcessor) ProcessUpdate(d *ext.Dispatcher, b *gotgbot.Bot, u *gotgbot.Update, data map[string]interface{}) error {
+func (m metricsProcessor) ProcessUpdate(d *ext.Dispatcher, b *gotgbot.Bot, ctx *ext.Context) error {
 	totalUpdates.Inc()
 	timer := prometheus.NewTimer(updateProcessingDuration)
 	defer timer.ObserveDuration()
 
-	return m.processor.ProcessUpdate(d, b, u, data)
+	return m.processor.ProcessUpdate(d, b, ctx)
 }
 
 func monitorDispatcherBuffer(d *ext.Dispatcher) {

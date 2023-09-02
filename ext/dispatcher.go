@@ -248,8 +248,29 @@ func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 }
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) error {
-	return d.Processor.ProcessUpdate(d, b, update, data)
+// This is also where we recover from any panics that are thrown by user code, to avoid taking down the bot.
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[string]interface{}) (err error) {
+	ctx := NewContext(u, data)
+
+	defer func() {
+		if r := recover(); r != nil {
+			// If a panic handler is defined, handle the error.
+			if d.Panic != nil {
+				d.Panic(b, ctx, r)
+				return
+
+			} else {
+				// Otherwise, create an error from the panic, and return it.
+				err = fmt.Errorf("%w: %v\n%s", ErrPanicRecovered, r, cleanedStack())
+				return
+			}
+		}
+	}()
+
+	err = d.Processor.ProcessUpdate(d, b, ctx)
+	// We don't inline this, because we want to make sure that the defer function can override the error in the case of
+	// a panic.
+	return err
 }
 
 func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) error {
