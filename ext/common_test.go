@@ -6,6 +6,7 @@ import (
 
 type DummyHandler struct {
 	F func(b *gotgbot.Bot, ctx *Context) error
+	N string
 }
 
 func (d DummyHandler) CheckUpdate(b *gotgbot.Bot, ctx *Context) bool {
@@ -17,7 +18,7 @@ func (d DummyHandler) HandleUpdate(b *gotgbot.Bot, ctx *Context) error {
 }
 
 func (d DummyHandler) Name() string {
-	return "dummy"
+	return "dummy" + d.N
 }
 
 func (u *Updater) InjectUpdate(token string, upd gotgbot.Update) error {

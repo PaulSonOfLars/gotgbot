@@ -1,8 +1,6 @@
 package ext
 
-import (
-	"github.com/PaulSonOfLars/gotgbot/v2"
-)
+import "github.com/PaulSonOfLars/gotgbot/v2"
 
 type Handler interface {
 	// CheckUpdate checks whether the update should handled by this handler.

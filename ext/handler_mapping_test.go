@@ -2,32 +2,13 @@ package ext
 
 import (
 	"testing"
-
-	"github.com/PaulSonOfLars/gotgbot/v2"
 )
-
-type dummy struct {
-	f    func(bot *gotgbot.Bot, ctx *Context) error
-	name string
-}
-
-func (d dummy) CheckUpdate(b *gotgbot.Bot, ctx *Context) bool {
-	return true
-}
-
-func (d dummy) HandleUpdate(b *gotgbot.Bot, ctx *Context) error {
-	return d.f(b, ctx)
-}
-
-func (d dummy) Name() string {
-	return "dummy" + d.name
-}
 
 // This test should demonstrate that once obtained, a list will not be changed by any additions/removals to that list by another call.
 func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
 	m := handlerMappings{}
-	firstHandler := dummy{name: "first"}
-	secondHandler := dummy{name: "second"}
+	firstHandler := DummyHandler{N: "first"}
+	secondHandler := DummyHandler{N: "second"}
 
 	// We expect 0 groups at the start
 	startGroups := m.getGroups()
@@ -93,7 +74,7 @@ func checkList(t *testing.T, name string, got []Handler, expected ...Handler) {
 
 func Test_handlerMappings_remove(t *testing.T) {
 	m := &handlerMappings{}
-	handler := dummy{name: "test"}
+	handler := DummyHandler{N: "test"}
 
 	t.Run("nonExistent", func(t *testing.T) {
 		// removing an item that doesnt exist returns "false"
