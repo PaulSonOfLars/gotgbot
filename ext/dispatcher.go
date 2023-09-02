@@ -48,6 +48,10 @@ var (
 )
 
 type Dispatcher struct {
+	// Processor defines how to process the raw updates being processed by the Dispatcher.
+	// This can be extended to include additional error handling, metrics, etc.
+	Processor Processor
+
 	// Error handles any errors that are returned by matched handlers.
 	// The return type determines how to proceed with the current group iteration.
 	// The default action is DispatcherActionNoop, which will simply move to next group as expected.
@@ -79,7 +83,10 @@ type Dispatcher struct {
 	waitGroup sync.WaitGroup
 }
 
+// DispatcherOpts can be used to configure or override default Dispatcher behaviours.
 type DispatcherOpts struct {
+	// Processor allows for providing custom Processor interfaces with different behaviours.
+	Processor Processor
 	// Error handles any errors that occur during handler execution.
 	// More info at Dispatcher.Error.
 	Error DispatcherErrorHandler
@@ -113,10 +120,14 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errLog *log.Logger
 
 	maxRoutines := DefaultMaxRoutines
+	processor := Processor(BaseProcessor{})
 
 	if opts != nil {
 		if opts.MaxRoutines != 0 {
 			maxRoutines = opts.MaxRoutines
+		}
+		if opts.Processor != nil {
+			processor = opts.Processor
 		}
 
 		errHandler = opts.Error
@@ -136,6 +147,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	}
 
 	return &Dispatcher{
+		Processor:        processor,
 		Error:            errHandler,
 		Panic:            panicHandler,
 		UnhandledErrFunc: unhandledErrFunc,
@@ -188,7 +200,7 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 				d.waitGroup.Done()
 			}()
 
-			err := d.ProcessRawUpdate(b, upd)
+			err := d.processRawUpdate(b, upd)
 			if err != nil {
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
@@ -225,7 +237,8 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
-func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
+// processRawUpdate takes a JSON update to be unmarshalled and processed by Dispatcher.ProcessUpdate.
+func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
 		return fmt.Errorf("failed to unmarshal update: %w", err)
@@ -235,8 +248,9 @@ func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 }
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) (err error) {
-	ctx := NewContext(update, data)
+// This is also where we recover from any panics that are thrown by user code, to avoid taking down the bot.
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[string]interface{}) (err error) {
+	ctx := NewContext(u, data)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -253,7 +267,7 @@ func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, update *gotgbot.Update, data 
 		}
 	}()
 
-	err = d.iterateOverHandlerGroups(b, ctx)
+	err = d.Processor.ProcessUpdate(d, b, ctx)
 	// We don't inline this, because we want to make sure that the defer function can override the error in the case of
 	// a panic.
 	return err

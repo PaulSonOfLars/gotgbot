@@ -23,30 +23,26 @@ type Bot struct {
 
 // BotOpts declares all optional parameters for the NewBot function.
 type BotOpts struct {
-	// HTTP client with any custom settings (eg proxy information) that might be necessary.
-	Client http.Client
-	// Disables the token validity check.
+	// BotClient allows for passing in custom configurations of BotClient, such as handling extra errors or providing
+	// metrics.
+	BotClient BotClient
+	// DisableTokenCheck can be used to disable the token validity check.
 	// Useful when running in time-constrained environments where the startup time should be minimised, and where the
 	// token can be assumed to be valid (eg lambdas).
 	// Warning: Disabling the token check will mean that the Bot.User struct will no longer be populated.
 	DisableTokenCheck bool
-	// UseTestEnvironment defines whether this bot was created to run on telegram's test environment.
-	// Enabling this uses a slightly different API path.
-	// See https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment for more details.
-	UseTestEnvironment bool
 	// Request opts to use for checking token validity with Bot.GetMe. Can be slow - a high timeout (eg 10s) is
 	// recommended.
 	RequestOpts *RequestOpts
-	// Default opts to use for all requests, when no other request opts are specified.
-	DefaultRequestOpts *RequestOpts
 }
 
 // NewBot returns a new Bot struct populated with the necessary defaults.
 func NewBot(token string, opts *BotOpts) (*Bot, error) {
-	botClient := &BaseBotClient{
+	botClient := BotClient(&BaseBotClient{
 		Client:             http.Client{},
+		UseTestEnvironment: false,
 		DefaultRequestOpts: nil,
-	}
+	})
 
 	// Large timeout on the initial GetMe request as this can sometimes be slow.
 	getMeReqOpts := &RequestOpts{
@@ -56,11 +52,10 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 
 	checkTokenValidity := true
 	if opts != nil {
-		botClient.Client = opts.Client
-		botClient.UseTestEnvironment = opts.UseTestEnvironment
-		if opts.DefaultRequestOpts != nil {
-			botClient.DefaultRequestOpts = opts.DefaultRequestOpts
+		if opts.BotClient != nil {
+			botClient = opts.BotClient
 		}
+
 		if opts.RequestOpts != nil {
 			getMeReqOpts = opts.RequestOpts
 		}
@@ -86,6 +81,9 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	return &b, nil
 }
 
+// UseMiddleware allows you to wrap the existing bot client to enhance functionality
+//
+// Deprecated: Instead of using middlewares, consider implementing the BotClient interface.
 func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 	bot.BotClient = mw(bot.BotClient)
 	return bot

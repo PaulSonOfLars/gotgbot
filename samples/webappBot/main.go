@@ -34,13 +34,7 @@ func main() {
 	}
 
 	// Create our bot.
-	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		Client: http.Client{},
-		DefaultRequestOpts: &gotgbot.RequestOpts{
-			Timeout: gotgbot.DefaultTimeout,
-			APIURL:  gotgbot.DefaultAPIURL,
-		},
-	})
+	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
 	}
