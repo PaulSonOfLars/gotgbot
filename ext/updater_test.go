@@ -40,9 +40,8 @@ func benchmarkUpdaterWithNBots(b *testing.B, numBot int) {
 	for i := 0; i < numBot; i++ {
 		token := strconv.Itoa(i)
 		err := u.AddWebhook(&gotgbot.Bot{
-			BotClient: &gotgbot.BaseBotClient{
-				Token: token,
-			},
+			Token:     token,
+			BotClient: &gotgbot.BaseBotClient{},
 		}, token, opts)
 		if err != nil {
 			b.Fatalf("failed to add webhook for bot: %s", err.Error())
