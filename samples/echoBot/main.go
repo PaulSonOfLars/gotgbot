@@ -26,8 +26,8 @@ func main() {
 		BotClient: &gotgbot.BaseBotClient{
 			Client: http.Client{},
 			DefaultRequestOpts: &gotgbot.RequestOpts{
-				Timeout: gotgbot.DefaultTimeout,
-				APIURL:  gotgbot.DefaultAPIURL,
+				Timeout: gotgbot.DefaultTimeout, // Customise the default request timeout here
+				APIURL:  gotgbot.DefaultAPIURL,  // As well as the Default API URL here (in case of using local bot API servers)
 			},
 		},
 	})

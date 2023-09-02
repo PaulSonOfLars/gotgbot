@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -27,15 +26,7 @@ func main() {
 	}
 
 	// Create bot from environment value.
-	b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		BotClient: &gotgbot.BaseBotClient{
-			Client: http.Client{},
-			DefaultRequestOpts: &gotgbot.RequestOpts{
-				Timeout: gotgbot.DefaultTimeout,
-				APIURL:  gotgbot.DefaultAPIURL,
-			},
-		},
-	})
+	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
 	}

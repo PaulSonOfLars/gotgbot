@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -59,15 +58,7 @@ func main() {
 	splitTokens := strings.Split(tokens, ",")
 	bots := make([]*gotgbot.Bot, len(splitTokens))
 	for idx, token := range splitTokens {
-		b, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-			BotClient: &gotgbot.BaseBotClient{
-				Client: http.Client{},
-				DefaultRequestOpts: &gotgbot.RequestOpts{
-					Timeout: gotgbot.DefaultTimeout,
-					APIURL:  gotgbot.DefaultAPIURL,
-				},
-			},
-		})
+		b, err := gotgbot.NewBot(token, nil)
 		if err != nil {
 			panic(fmt.Errorf("bot %d: failed to create bot: %w", idx, err))
 		}
