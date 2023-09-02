@@ -200,7 +200,7 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
 				d.waitGroup.Done()
 			}()
 
-			err := d.ProcessRawUpdate(b, upd)
+			err := d.processRawUpdate(b, upd)
 			if err != nil {
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
@@ -237,8 +237,8 @@ func (d *Dispatcher) AddHandlerToGroup(handler Handler, group int) {
 	d.handlers[group] = append(currHandlers, handler)
 }
 
-// ProcessRawUpdate takes a JSON update to be unmarshalled and processed by Dispatcher.ProcessUpdate.
-func (d *Dispatcher) ProcessRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
+// processRawUpdate takes a JSON update to be unmarshalled and processed by Dispatcher.ProcessUpdate.
+func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 	var upd gotgbot.Update
 	if err := json.Unmarshal(r, &upd); err != nil {
 		return fmt.Errorf("failed to unmarshal update: %w", err)
