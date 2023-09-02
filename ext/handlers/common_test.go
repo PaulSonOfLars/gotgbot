@@ -15,6 +15,7 @@ import (
 func NewTestBot() *gotgbot.Bot {
 	server := httptest.NewServer(nil)
 	return &gotgbot.Bot{
+		Token: "use-me",
 		User: gotgbot.User{
 			Id:        0,
 			IsBot:     false,
@@ -23,7 +24,6 @@ func NewTestBot() *gotgbot.Bot {
 			Username:  "gotgbot",
 		},
 		BotClient: &gotgbot.BaseBotClient{
-			Token:  "use-me",
 			Client: http.Client{},
 			DefaultRequestOpts: &gotgbot.RequestOpts{
 				Timeout: 0,

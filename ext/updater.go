@@ -180,7 +180,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
 
-	u.botMapping[b.GetToken()] = &botData{
+	u.botMapping[b.Token] = &botData{
 		bot:        b,
 		updateChan: updateChan,
 		polling:    pollChan,
@@ -327,7 +327,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) {
 		updateChan <- bytes
 	})
 
-	u.botMapping[b.GetToken()] = &botData{
+	u.botMapping[b.Token] = &botData{
 		bot:        b,
 		updateChan: updateChan,
 		urlPath:    urlPath,
@@ -343,7 +343,7 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 		_, err := data.bot.SetWebhook(strings.Join([]string{strings.TrimSuffix(domain, "/"), data.urlPath}, "/"), opts)
 		if err != nil {
 			// Extract the botID, so we don't intentionally log the token
-			botId := strings.Split(data.bot.GetToken(), ":")[0]
+			botId := strings.Split(data.bot.Token, ":")[0]
 			return fmt.Errorf("failed to set webhook for %s: %w", botId, err)
 		}
 	}

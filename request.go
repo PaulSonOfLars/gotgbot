@@ -21,20 +21,16 @@ const (
 
 type BotClient interface {
 	// RequestWithContext submits a POST HTTP request a bot API instance.
-	RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
+	RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error)
 	// TimeoutContext calculates the required timeout contect required given the passed RequestOpts, and any default opts defined by the BotClient.
 	TimeoutContext(opts *RequestOpts) (context.Context, context.CancelFunc)
 	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
 	GetAPIURL(opts *RequestOpts) string
 	// FileURL gets the URL of a file at the API address that the bot is interacting with.
-	FileURL(filePath string, opts *RequestOpts) string
-	// GetToken gets the bot token.
-	GetToken() string
+	FileURL(token string, filePath string, opts *RequestOpts) string
 }
 
 type BaseBotClient struct {
-	// Token stores the bot's secret token obtained from t.me/BotFather, and used to interact with telegram's API.
-	Token string
 	// Client is the HTTP Client used for all HTTP requests made for this bot.
 	Client http.Client
 	// UseTestEnvironment defines whether this bot was created to run on telegram's test environment.
@@ -146,7 +142,7 @@ func timeoutFromOpts(opts *RequestOpts) (context.Context, context.CancelFunc) {
 //   - data: map of any files to be sending to the telegram API.
 //   - opts: request opts to use. Note: Timeout opts are ignored when used in RequestWithContext. Timeout handling is the
 //     responsibility of the caller/context owner.
-func (bot *BaseBotClient) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *BaseBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
 	b := &bytes.Buffer{}
 
 	var contentType string
@@ -165,7 +161,7 @@ func (bot *BaseBotClient) RequestWithContext(ctx context.Context, method string,
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(method, opts), b)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), b)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
@@ -242,22 +238,17 @@ func (bot *BaseBotClient) GetAPIURL(opts *RequestOpts) string {
 }
 
 // GetToken returns the currently used token.
-func (bot *BaseBotClient) FileURL(filePath string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/file/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), filePath)
+func (bot *BaseBotClient) FileURL(token string, filePath string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/file/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(token), filePath)
 }
 
-// GetToken returns the currently used token.
-func (bot *BaseBotClient) GetToken() string {
-	return bot.Token
-}
-
-func (bot *BaseBotClient) getEnvAuth() string {
+func (bot *BaseBotClient) getEnvAuth(token string) string {
 	if bot.UseTestEnvironment {
-		return "bot" + bot.Token + "/test"
+		return "bot" + token + "/test"
 	}
-	return "bot" + bot.Token
+	return "bot" + token
 }
 
-func (bot *BaseBotClient) methodEndpoint(method string, opts *RequestOpts) string {
-	return fmt.Sprintf("%s/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(), method)
+func (bot *BaseBotClient) methodEndpoint(token string, method string, opts *RequestOpts) string {
+	return fmt.Sprintf("%s/%s/%s", bot.GetAPIURL(opts), bot.getEnvAuth(token), method)
 }

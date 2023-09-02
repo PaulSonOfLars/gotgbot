@@ -12,6 +12,9 @@ import (
 
 // Bot is the default Bot struct used to send and receive messages to the telegram API.
 type Bot struct {
+	// Token stores the bot's secret token obtained from t.me/BotFather, and used to interact with telegram's API.
+	Token string
+
 	// The bot's User info, as returned by Bot.GetMe. Populated when created through the NewBot method.
 	User
 	// The bot client to use to make requests
@@ -41,7 +44,6 @@ type BotOpts struct {
 // NewBot returns a new Bot struct populated with the necessary defaults.
 func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	botClient := &BaseBotClient{
-		Token:              token,
 		Client:             http.Client{},
 		DefaultRequestOpts: nil,
 	}
@@ -66,6 +68,7 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	}
 
 	b := Bot{
+		Token:     token,
 		BotClient: botClient,
 	}
 
@@ -98,5 +101,5 @@ func (bot *Bot) Request(method string, params map[string]string, data map[string
 	ctx, cancel := bot.BotClient.TimeoutContext(opts)
 	defer cancel()
 
-	return bot.BotClient.RequestWithContext(ctx, method, params, data, opts)
+	return bot.BotClient.RequestWithContext(ctx, bot.Token, method, params, data, opts)
 }
