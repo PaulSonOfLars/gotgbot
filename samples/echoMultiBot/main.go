@@ -125,7 +125,11 @@ func startWebhookBots(updater *ext.Updater, bots []*gotgbot.Bot, domain string, 
 
 	// We add all the bots to the updater.
 	for idx, b := range bots {
-		updater.AddWebhook(b, b.Token, opts)
+		err = updater.AddWebhook(b, b.Token, opts)
+		if err != nil {
+			return fmt.Errorf("failed to add bot: %w", err)
+		}
+
 		log.Printf("bot %d: %s has been added to the updater\n", idx, b.User.Username)
 	}
 
