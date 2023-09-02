@@ -5,8 +5,23 @@
 # it has execute permissions.
 set -euo pipefail
 
-# Run golangci-lint to lint against all go code in the repo. Configuration in .golangci.yaml.
+echo "Linting project..."
+# Run golangci-lint to lint against all the code in the lib.
 golangci-lint run
 
+
+# Run golangci-lint against samples
+echo "Linting samples..."
+for d in ./samples/*; do
+  if [[ ! -d "$d" ]]; then
+    continue
+  fi
+
+  pushd "$d" >/dev/null
+  golangci-lint run --config=../../.golangci.yaml --path-prefix="$d"
+  popd >/dev/null
+done
+
+echo "Checking generated docs are up to date..."
 # Ensure all generated code has up to date.
 ./scripts/ci/ensure-generated.sh >/dev/null
