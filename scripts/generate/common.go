@@ -148,7 +148,7 @@ func goTypeStringer(t string) string {
 	}
 }
 
-// getAllFields merges all the fields from list of types
+// getAllFields merges all the fields from list of types.
 func getAllFields(types []TypeDescription, parentType string) []Field {
 	if len(types) == 0 {
 		return nil
