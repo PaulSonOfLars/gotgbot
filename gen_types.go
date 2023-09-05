@@ -92,7 +92,7 @@ type BotCommandScope interface {
 
 // MergedBotCommandScope is a helper type to simplify interactions with the various BotCommandScope subtypes.
 type MergedBotCommandScope struct {
-	// Scope type, must be default
+	// Scope type
 	Type string `json:"type"`
 	// Optional. Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername) (Only for chat, chat_administrators, chat_member)
 	ChatId int64 `json:"chat_id,omitempty"`
@@ -574,7 +574,7 @@ type ChatMember interface {
 
 // MergedChatMember is a helper type to simplify interactions with the various ChatMember subtypes.
 type MergedChatMember struct {
-	// The member's status in the chat, always "creator"
+	// The member's status in the chat
 	Status string `json:"status"`
 	// Information about the user
 	User User `json:"user"`
@@ -1509,7 +1509,7 @@ type InlineQueryResult interface {
 
 // MergedInlineQueryResult is a helper type to simplify interactions with the various InlineQueryResult subtypes.
 type MergedInlineQueryResult struct {
-	// Type of the result, must be audio
+	// Type of the result
 	Type string `json:"type"`
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -3155,7 +3155,7 @@ type InputMedia interface {
 
 // MergedInputMedia is a helper type to simplify interactions with the various InputMedia subtypes.
 type MergedInputMedia struct {
-	// Type of the result, must be animation
+	// Type of the result
 	Type string `json:"type"`
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Media InputFile `json:"media"`
@@ -3870,7 +3870,7 @@ type MenuButton interface {
 
 // MergedMenuButton is a helper type to simplify interactions with the various MenuButton subtypes.
 type MergedMenuButton struct {
-	// Type of the button, must be commands
+	// Type of the button
 	Type string `json:"type"`
 	// Optional. Text on the button (Only for web_app)
 	Text string `json:"text,omitempty"`
@@ -4296,7 +4296,7 @@ type PassportElementError interface {
 
 // MergedPassportElementError is a helper type to simplify interactions with the various PassportElementError subtypes.
 type MergedPassportElementError struct {
-	// Error source, must be data
+	// Error source
 	Source string `json:"source"`
 	// The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
 	Type string `json:"type"`

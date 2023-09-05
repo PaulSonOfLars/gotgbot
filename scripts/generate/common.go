@@ -148,6 +148,7 @@ func goTypeStringer(t string) string {
 	}
 }
 
+// getAllFields merges all the fields from list of types.
 func getAllFields(types []TypeDescription, parentType string) []Field {
 	if len(types) == 0 {
 		return nil
@@ -158,7 +159,18 @@ func getAllFields(types []TypeDescription, parentType string) []Field {
 
 	for _, t := range types {
 		for _, f := range t.Fields {
-			isOK[f.Name] = append(isOK[f.Name], t.getTypeNameFromParent(parentType))
+			typeName := t.getTypeNameFromParent(parentType)
+			isOK[f.Name] = append(isOK[f.Name], typeName)
+
+			// Some fields need to be cleaned up to be agnostic across all fields.
+			// eg: 	The BotCommandScopeDefault has a "Type" field saying 'Scope type, must be default'
+			// This is clearly only valid for the "default" scope; not the others - hence, clean it.
+			for _, replace := range []string{
+				fmt.Sprintf(", must be %s", typeName),
+				fmt.Sprintf(", always \"%s\"", typeName),
+			} {
+				f.Description = strings.Replace(f.Description, replace, "", 1)
+			}
 
 			if len(isOK[f.Name]) == 1 {
 				fields = append(fields, f)
