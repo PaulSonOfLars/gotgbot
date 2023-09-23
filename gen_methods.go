@@ -2374,14 +2374,20 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 type PromoteChatMemberOpts struct {
 	// Pass True if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Pass True if the administrator can access the chat event log, chat statistics, boost list in channels, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool
-	// Pass True if the administrator can create channel posts, channels only
+	// Pass True if the administrator can post messages in the channel; channels only
 	CanPostMessages bool
-	// Pass True if the administrator can edit messages of other users and can pin messages, channels only
+	// Pass True if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool
 	// Pass True if the administrator can delete messages of other users
 	CanDeleteMessages bool
+	// Pass True if the administrator can post stories in the channel; channels only
+	CanPostStories bool
+	// Pass True if the administrator can edit stories posted by other users; channels only
+	CanEditStories bool
+	// Pass True if the administrator can delete stories posted by other users; channels only
+	CanDeleteStories bool
 	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
 	// Pass True if the administrator can restrict, ban or unban chat members
@@ -2416,6 +2422,9 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		v["can_post_messages"] = strconv.FormatBool(opts.CanPostMessages)
 		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
 		v["can_delete_messages"] = strconv.FormatBool(opts.CanDeleteMessages)
+		v["can_post_stories"] = strconv.FormatBool(opts.CanPostStories)
+		v["can_edit_stories"] = strconv.FormatBool(opts.CanEditStories)
+		v["can_delete_stories"] = strconv.FormatBool(opts.CanDeleteStories)
 		v["can_manage_video_chats"] = strconv.FormatBool(opts.CanManageVideoChats)
 		v["can_restrict_members"] = strconv.FormatBool(opts.CanRestrictMembers)
 		v["can_promote_members"] = strconv.FormatBool(opts.CanPromoteMembers)

@@ -502,7 +502,7 @@ type ChatAdministratorRights struct {
 	CanPostStories bool `json:"can_post_stories,omitempty"`
 	// Optional. True, if the administrator can edit stories posted by other users; channels only
 	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users
+	// Optional. True, if the administrator can delete stories posted by other users; channels only
 	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
@@ -614,7 +614,7 @@ type MergedChatMember struct {
 	CanPostStories bool `json:"can_post_stories,omitempty"`
 	// Optional. True, if the administrator can edit stories posted by other users; channels only (Only for administrator)
 	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users (Only for administrator)
+	// Optional. True, if the administrator can delete stories posted by other users; channels only (Only for administrator)
 	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
@@ -785,7 +785,7 @@ type ChatMemberAdministrator struct {
 	CanPostStories bool `json:"can_post_stories,omitempty"`
 	// Optional. True, if the administrator can edit stories posted by other users; channels only
 	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users
+	// Optional. True, if the administrator can delete stories posted by other users; channels only
 	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
