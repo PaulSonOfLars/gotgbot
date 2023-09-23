@@ -303,7 +303,7 @@ func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *Approve
 
 // BanChatMemberOpts is the set of optional fields for Bot.BanChatMember.
 type BanChatMemberOpts struct {
-	// Date when the user will be unbanned, unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
+	// Date when the user will be unbanned; Unix time. If user is banned for more than 366 days or less than 30 seconds from the current time they are considered to be banned forever. Applied for supergroups and channels only.
 	UntilDate int64
 	// Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
 	RevokeMessages bool
@@ -2374,14 +2374,20 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 type PromoteChatMemberOpts struct {
 	// Pass True if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True if the administrator can access the chat event log, chat statistics, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Pass True if the administrator can access the chat event log, chat statistics, boost list in channels, message statistics in channels, see channel members, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
 	CanManageChat bool
-	// Pass True if the administrator can create channel posts, channels only
+	// Pass True if the administrator can post messages in the channel; channels only
 	CanPostMessages bool
-	// Pass True if the administrator can edit messages of other users and can pin messages, channels only
+	// Pass True if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool
 	// Pass True if the administrator can delete messages of other users
 	CanDeleteMessages bool
+	// Pass True if the administrator can post stories in the channel; channels only
+	CanPostStories bool
+	// Pass True if the administrator can edit stories posted by other users; channels only
+	CanEditStories bool
+	// Pass True if the administrator can delete stories posted by other users; channels only
+	CanDeleteStories bool
 	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
 	// Pass True if the administrator can restrict, ban or unban chat members
@@ -2416,6 +2422,9 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		v["can_post_messages"] = strconv.FormatBool(opts.CanPostMessages)
 		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
 		v["can_delete_messages"] = strconv.FormatBool(opts.CanDeleteMessages)
+		v["can_post_stories"] = strconv.FormatBool(opts.CanPostStories)
+		v["can_edit_stories"] = strconv.FormatBool(opts.CanEditStories)
+		v["can_delete_stories"] = strconv.FormatBool(opts.CanDeleteStories)
 		v["can_manage_video_chats"] = strconv.FormatBool(opts.CanManageVideoChats)
 		v["can_restrict_members"] = strconv.FormatBool(opts.CanRestrictMembers)
 		v["can_promote_members"] = strconv.FormatBool(opts.CanPromoteMembers)
@@ -2503,7 +2512,7 @@ func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTo
 type RestrictChatMemberOpts struct {
 	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
 	UseIndependentChatPermissions bool
-	// Date when restrictions will be lifted for the user, unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
+	// Date when restrictions will be lifted for the user; Unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 	UntilDate int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
