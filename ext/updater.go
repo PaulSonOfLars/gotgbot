@@ -321,11 +321,6 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *WebhookOpts) 
 		secretToken = opts.SecretToken
 	}
 
-	_, ok := u.botMapping.getBot(b.Token)
-	if ok {
-		return fmt.Errorf("bot with token %s already exists", b.Token)
-	}
-
 	updateChan := make(chan json.RawMessage)
 
 	err := u.botMapping.addBot(b, updateChan, nil, urlPath, secretToken)

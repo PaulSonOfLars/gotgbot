@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -118,8 +119,8 @@ func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Check if this needs to be cleaned
-	b, ok := m.getBot(r.URL.Path)
+	potentialToken := strings.TrimPrefix(r.URL.Path, "/")
+	b, ok := m.getBot(potentialToken)
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
