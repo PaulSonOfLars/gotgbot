@@ -66,8 +66,11 @@ func main() {
 		ListenAddr:  "localhost:8080", // This example assumes you're in a dev environment running ngrok on 8080.
 		SecretToken: webhookSecret,    // Setting a webhook secret here allows you to ensure the webhook is set by you (must be set here AND in SetWebhook!).
 	}
-	// We use the token as the urlPath for the webhook, as using a secret ensures that strangers aren't crafting fake updates.
-	err = updater.StartWebhook(b, token, webhookOpts)
+
+	// The bot's urlPath can be anything. Here, we use "custom-path/<TOKEN>" as an example.
+	// It can be a good idea for the urlPath to contain the bot token, as that makes it very difficult for outside
+	// parties to find the update endpoint (which would allow them to inject their own updates).
+	err = updater.StartWebhook(b, "custom-path/"+token, webhookOpts)
 	if err != nil {
 		panic("failed to start webhook: " + err.Error())
 	}

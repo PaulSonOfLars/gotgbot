@@ -32,6 +32,8 @@ type botMapping struct {
 	mapping map[string]botData
 	// mux attempts to keep the botMapping data concurrency-safe.
 	mux sync.RWMutex
+	// urlMapping allows us to keep track of the webhook urls that are in use.
+	urlMapping map[string]string
 
 	// errFunc fills the same purpose as Updater.UnhandledErrFunc.
 	errFunc ErrorFunc
@@ -40,6 +42,7 @@ type botMapping struct {
 }
 
 var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
+var ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapping")
 
 // addBot Adds a new bot to the botMapping structure.
 func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string, webhookSecret string) error {
@@ -49,9 +52,15 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 	if m.mapping == nil {
 		m.mapping = make(map[string]botData)
 	}
+	if m.urlMapping == nil {
+		m.urlMapping = make(map[string]string)
+	}
 
 	if _, ok := m.mapping[b.Token]; ok {
 		return ErrBotAlreadyExists
+	}
+	if _, ok := m.urlMapping[urlPath]; ok {
+		return ErrBotUrlPathAlreadyExists
 	}
 
 	m.mapping[b.Token] = botData{
@@ -61,6 +70,7 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 		urlPath:       urlPath,
 		webhookSecret: webhookSecret,
 	}
+	m.urlMapping[urlPath] = b.Token
 	return nil
 }
 
@@ -74,6 +84,7 @@ func (m *botMapping) removeBot(token string) (botData, bool) {
 	}
 
 	delete(m.mapping, token)
+	delete(m.urlMapping, bData.urlPath)
 	return bData, true
 }
 
@@ -85,6 +96,7 @@ func (m *botMapping) removeAllBots() []botData {
 	for key, bData := range m.mapping {
 		bots = append(bots, bData)
 		delete(m.mapping, key)
+		delete(m.urlMapping, bData.urlPath)
 	}
 	return bots
 }
@@ -108,6 +120,19 @@ func (m *botMapping) getBot(token string) (botData, bool) {
 	return bData, ok
 }
 
+func (m *botMapping) getBotFromURL(urlPath string) (botData, bool) {
+	m.mux.RLock()
+	defer m.mux.RUnlock()
+
+	token, ok := m.urlMapping[strings.TrimPrefix(urlPath, "/")]
+	if !ok {
+		return botData{}, ok
+	}
+
+	bData, ok := m.mapping[token]
+	return bData, ok
+}
+
 // ServeHTTP dispatches the request to the handler whose
 // pattern most closely matches the request URL.
 func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -119,14 +144,15 @@ func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	potentialToken := strings.TrimPrefix(r.URL.Path, "/")
-	b, ok := m.getBot(potentialToken)
+	b, ok := m.getBotFromURL(r.URL.Path)
 	if !ok {
+		// If we don't recognise the URL, we return a 404.
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	if secret := b.webhookSecret; secret != "" && secret != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
+	headerSecret := r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
+	if b.webhookSecret != "" && b.webhookSecret != headerSecret {
 		// Drop any updates from invalid secret tokens.
 		w.WriteHeader(http.StatusUnauthorized)
 		return
