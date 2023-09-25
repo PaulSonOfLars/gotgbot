@@ -3,6 +3,9 @@ package ext
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"log"
+	"net/http"
 	"sync"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -18,6 +21,8 @@ type botData struct {
 	polling chan struct{}
 	// urlPath defines the incoming webhook URL path for this bot.
 	urlPath string
+	// webhookSecret stores the webhook secret for this bot
+	webhookSecret string
 }
 
 // botMapping Ensures that all botData is stored in a thread-safe manner.
@@ -26,12 +31,17 @@ type botMapping struct {
 	mapping map[string]botData
 	// mux attempts to keep the botMapping data concurrency-safe.
 	mux sync.RWMutex
+
+	// errFunc fills the same purpose as Updater.UnhandledErrFunc.
+	errFunc ErrorFunc
+	// errorLog fills the same purpose as Updater.ErrorLog.
+	errorLog *log.Logger
 }
 
 var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
 
 // addBot Adds a new bot to the botMapping structure.
-func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string) error {
+func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string, webhookSecret string) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
@@ -44,10 +54,11 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 	}
 
 	m.mapping[b.Token] = botData{
-		bot:        b,
-		updateChan: updateChan,
-		polling:    pollChan,
-		urlPath:    urlPath,
+		bot:           b,
+		updateChan:    updateChan,
+		polling:       pollChan,
+		urlPath:       urlPath,
+		webhookSecret: webhookSecret,
 	}
 	return nil
 }
@@ -94,4 +105,49 @@ func (m *botMapping) getBot(token string) (botData, bool) {
 
 	bData, ok := m.mapping[token]
 	return bData, ok
+}
+
+// ServeHTTP dispatches the request to the handler whose
+// pattern most closely matches the request URL.
+func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.RequestURI == "*" {
+		if r.ProtoAtLeast(1, 1) {
+			w.Header().Set("Connection", "close")
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// TODO: Check if this needs to be cleaned
+	b, ok := m.getBot(r.URL.Path)
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if secret := b.webhookSecret; secret != "" && secret != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
+		// Drop any updates from invalid secret tokens.
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	bytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		if m.errFunc != nil {
+			m.errFunc(err)
+		} else {
+			m.logf("Failed to read incoming update contents: %s", err.Error())
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	b.updateChan <- bytes
+}
+
+func (m *botMapping) logf(format string, args ...interface{}) {
+	if m.errorLog != nil {
+		m.errorLog.Printf(format, args...)
+	} else {
+		log.Printf(format, args...)
+	}
 }

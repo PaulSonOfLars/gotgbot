@@ -24,7 +24,8 @@ func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 		t.Errorf("failed to add webhook: %v", err)
 		return
 	}
-	// Adding a second time should fail
+
+	// Adding a second time should throw an error
 	err = u.AddWebhook(b, "test", nil)
 	if err == nil {
 		t.Errorf("should have failed to add the same webhook twice, but didnt")

@@ -20,7 +20,7 @@ func Test_botMapping(t *testing.T) {
 
 	t.Run("addBot", func(t *testing.T) {
 		// check that bots can be added fine
-		err := bm.addBot(b, updateChan, pollChan, "")
+		err := bm.addBot(b, updateChan, pollChan, "", "")
 		if err != nil {
 			t.Errorf("expected to be able to add a new bot fine: %s", err.Error())
 			t.FailNow()
@@ -33,7 +33,7 @@ func Test_botMapping(t *testing.T) {
 
 	t.Run("doubleAdd", func(t *testing.T) {
 		// Adding the same bot twice should fail
-		err := bm.addBot(b, updateChan, pollChan, "")
+		err := bm.addBot(b, updateChan, pollChan, "", "")
 		if err == nil {
 			t.Errorf("adding the same bot twice should throw an error")
 			t.FailNow()

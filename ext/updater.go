@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -38,8 +37,6 @@ type Updater struct {
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
 	stopIdling chan struct{}
-	// serveMux is where all our webhook paths are added for the server to use.
-	serveMux *http.ServeMux
 	// webhookServer is the server in charge of receiving all incoming webhook updates.
 	webhookServer *http.Server
 
@@ -78,9 +75,13 @@ func NewUpdater(opts *UpdaterOpts) *Updater {
 	}
 
 	return &Updater{
-		ErrorLog:         errLog,
-		UnhandledErrFunc: unhandledErrFunc,
 		Dispatcher:       dispatcher,
+		UnhandledErrFunc: unhandledErrFunc,
+		ErrorLog:         errLog,
+		botMapping: botMapping{
+			errFunc:  unhandledErrFunc,
+			errorLog: errLog,
+		},
 	}
 }
 
@@ -165,7 +166,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
 
-	err := u.botMapping.addBot(b, updateChan, pollChan, "")
+	err := u.botMapping.addBot(b, updateChan, pollChan, "", "")
 	if err != nil {
 		return fmt.Errorf("failed to add bot with long polling: %w", err)
 	}
@@ -315,31 +316,19 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
 func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *WebhookOpts) error {
-	if u.serveMux == nil {
-		u.serveMux = http.NewServeMux()
+	secretToken := ""
+	if opts != nil {
+		secretToken = opts.SecretToken
+	}
+
+	_, ok := u.botMapping.getBot(b.Token)
+	if ok {
+		return fmt.Errorf("bot with token %s already exists", b.Token)
 	}
 
 	updateChan := make(chan json.RawMessage)
-	u.serveMux.HandleFunc("/"+urlPath, func(w http.ResponseWriter, r *http.Request) {
-		if opts != nil && opts.SecretToken != "" && opts.SecretToken != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
-			// Drop any updates from invalid secret tokens.
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		bytes, err := io.ReadAll(r.Body)
-		if err != nil {
-			if u.UnhandledErrFunc != nil {
-				u.UnhandledErrFunc(err)
-			} else {
-				u.logf("Failed to read incoming webhook contents: %s", err.Error())
-			}
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		updateChan <- bytes
-	})
 
-	err := u.botMapping.addBot(b, updateChan, nil, urlPath)
+	err := u.botMapping.addBot(b, updateChan, nil, urlPath, secretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
@@ -366,10 +355,6 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 // It is recommended to call this BEFORE calling setWebhooks.
 // The opts parameter allows for specifying TLS settings.
 func (u *Updater) StartServer(opts WebhookOpts) error {
-	if u.serveMux == nil {
-		u.serveMux = http.NewServeMux()
-	}
-
 	var tls bool
 	switch {
 	case opts.CertFile == "" && opts.KeyFile == "":
@@ -386,7 +371,7 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 	}
 
 	u.webhookServer = &http.Server{
-		Handler:           u.serveMux,
+		Handler:           &u.botMapping,
 		ReadTimeout:       opts.ReadTimeout,
 		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}
