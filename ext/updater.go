@@ -306,7 +306,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 		return ErrExpectedEmptyServer
 	}
 
-	err := u.AddWebhook(b, urlPath, &opts)
+	err := u.AddWebhook(b, urlPath, opts)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook: %w", err)
 	}
@@ -315,15 +315,10 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 }
 
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
-func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *WebhookOpts) error {
-	secretToken := ""
-	if opts != nil {
-		secretToken = opts.SecretToken
-	}
-
+func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
 	updateChan := make(chan json.RawMessage)
 
-	err := u.botMapping.addBot(b, updateChan, nil, urlPath, secretToken)
+	err := u.botMapping.addBot(b, updateChan, nil, urlPath, opts.SecretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
