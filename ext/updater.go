@@ -305,7 +305,7 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 		return ErrExpectedEmptyServer
 	}
 
-	err := u.AddWebhook(b, urlPath, opts)
+	err := u.AddWebhook(b, urlPath, &opts)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook: %w", err)
 	}
@@ -314,14 +314,14 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 }
 
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
-func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
+func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *WebhookOpts) error {
 	if u.serveMux == nil {
 		u.serveMux = http.NewServeMux()
 	}
 
 	updateChan := make(chan json.RawMessage)
 	u.serveMux.HandleFunc("/"+urlPath, func(w http.ResponseWriter, r *http.Request) {
-		if opts.SecretToken != "" && opts.SecretToken != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
+		if opts != nil && opts.SecretToken != "" && opts.SecretToken != r.Header.Get("X-Telegram-Bot-Api-Secret-Token") {
 			// Drop any updates from invalid secret tokens.
 			w.WriteHeader(http.StatusUnauthorized)
 			return
