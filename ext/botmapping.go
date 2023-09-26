@@ -59,7 +59,7 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 	if _, ok := m.mapping[b.Token]; ok {
 		return ErrBotAlreadyExists
 	}
-	if _, ok := m.urlMapping[urlPath]; ok {
+	if _, ok := m.urlMapping[urlPath]; urlPath != "" && ok {
 		return ErrBotUrlPathAlreadyExists
 	}
 

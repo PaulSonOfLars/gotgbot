@@ -2,6 +2,7 @@ package ext_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -64,6 +65,22 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	err = u.AddWebhook(b, "test", ext.WebhookOpts{})
 	if err != nil {
 		t.Errorf("Failed to re-add a previously removed bot: %v", err)
+		return
+	}
+}
+
+func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
+	b := &gotgbot.Bot{
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{})
+	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+
+	err := u.AddWebhook(b, "", ext.WebhookOpts{})
+	if !errors.Is(err, ext.ErrEmptyPath) {
+		t.Errorf("Expected an empty path error trying to add an empty webhook : %v", err)
 		return
 	}
 }

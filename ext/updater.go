@@ -19,6 +19,7 @@ var (
 	ErrMissingCertOrKeyFile = errors.New("missing certfile or keyfile")
 	ErrExpectedEmptyServer  = errors.New("expected server to be nil")
 	ErrNotFound             = errors.New("not found")
+	ErrEmptyPath            = errors.New("empty path")
 )
 
 type ErrorFunc func(error)
@@ -316,6 +317,12 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
 func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
+	// We expect webhooks to use unique URL paths; otherwise, we wouldnt be able to differentiate them from polling, or
+	// from each other.
+	if urlPath == "" {
+		return fmt.Errorf("expected a non-empty url path: %w", ErrEmptyPath)
+	}
+
 	updateChan := make(chan json.RawMessage)
 
 	err := u.botMapping.addBot(b, updateChan, nil, urlPath, opts.SecretToken)
