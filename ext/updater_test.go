@@ -1,7 +1,12 @@
 package ext_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 
@@ -33,7 +38,7 @@ func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 	}
 }
 
-func TestUpdaterSupportsReAdding(t *testing.T) {
+func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	b := &gotgbot.Bot{
 		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
@@ -61,6 +66,205 @@ func TestUpdaterSupportsReAdding(t *testing.T) {
 		t.Errorf("Failed to re-add a previously removed bot: %v", err)
 		return
 	}
+}
+
+func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
+	server := basicTestServer(t, map[string]string{
+		"getUpdates":    `{}`,
+		"deleteWebhook": `{"ok": true, "result": true}`,
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL: server.URL,
+	}
+
+	b := &gotgbot.Bot{
+		Token: "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{
+			DefaultRequestOpts: reqOpts,
+		},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{})
+	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		EnableWebhookDeletion: true,
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start long poll on first bot: %v", err)
+		return
+	}
+}
+
+func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
+	server := basicTestServer(t, map[string]string{
+		"getUpdates": `{"ok": true, "result": []}`,
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL: server.URL,
+	}
+
+	b1 := &gotgbot.Bot{
+		Token: "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{
+
+			DefaultRequestOpts: reqOpts,
+		},
+	}
+	b2 := &gotgbot.Bot{
+		Token: "SOME_OTHER_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{
+			DefaultRequestOpts: reqOpts,
+		},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{})
+	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+
+	err := u.StartPolling(b1, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start long poll on first bot: %v", err)
+		return
+	}
+
+	// Adding a second time should throw an error
+	err = u.StartPolling(b2, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("should be able to add two different polling bots")
+		return
+	}
+}
+
+func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
+	server := basicTestServer(t, map[string]string{
+		"getUpdates": `{"ok": true, "result": []}`,
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL: server.URL,
+	}
+
+	b := &gotgbot.Bot{
+		Token: "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{
+			DefaultRequestOpts: reqOpts,
+		},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{})
+	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start long poll: %v", err)
+		return
+	}
+
+	// Adding a second time should throw an error
+	err = u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err == nil {
+		t.Errorf("should have failed to start the same long poll twice, but didnt")
+		return
+	}
+}
+
+func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
+	server := basicTestServer(t, map[string]string{
+		"getUpdates": `{"ok": true, "result": []}`,
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL: server.URL,
+	}
+
+	b := &gotgbot.Bot{
+		User:  gotgbot.User{},
+		Token: "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{
+			DefaultRequestOpts: reqOpts,
+		},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{})
+	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{RequestOpts: reqOpts},
+	})
+	if err != nil {
+		t.Errorf("failed to start longpoll: %v", err)
+		return
+	}
+
+	ok := u.StopBot(b.Token)
+	if !ok {
+		t.Errorf("failed to stop bot: %v", err)
+		return
+	}
+
+	// Should be able to re-add the bot now
+	err = u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{RequestOpts: reqOpts},
+	})
+	if err != nil {
+		t.Errorf("Failed to re-start a previously removed bot: %v", err)
+		return
+	}
+}
+
+func basicTestServer(t *testing.T, methods map[string]string) *httptest.Server {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		pathItems := strings.Split(r.URL.Path, "/")
+		lastItem := pathItems[len(pathItems)-1]
+		t.Logf("Received API call to '%s'", lastItem)
+
+		out, ok := methods[lastItem]
+		if ok {
+			fmt.Fprint(w, out)
+			return
+		}
+
+		t.Errorf("Unknown API endpoint: '%s'", lastItem)
+		bs, err := json.Marshal(gotgbot.Response{
+			Ok:          false,
+			ErrorCode:   400,
+			Description: "unknown test method: " + r.URL.Path,
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(bs)
+	}))
+
+	return srv
 }
 
 func BenchmarkUpdaterMultibots(b *testing.B) {
