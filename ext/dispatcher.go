@@ -46,8 +46,18 @@ var (
 	ContinueGroups = errors.New("group iteration continued")
 )
 
+// The UpdateDispatcher interface is used to abstract away common Dispatcher implementations.
+// It assumes that all incoming updates come through a JSON channel.
+type UpdateDispatcher interface {
+	Start(b *gotgbot.Bot, updates <-chan json.RawMessage)
+	Stop()
+}
+
+// The Dispatcher struct is the default UpdateDispatcher implementation.
+// It supports grouping of update handlers, allowing for powerful update handling flows.
+// Customise the handling of updates by wrapping the Processor struct.
 type Dispatcher struct {
-	// Processor defines how to process the raw updates being processed by the Dispatcher.
+	// Processor defines how to process the raw updates being handled by the Dispatcher.
 	// This can be extended to include additional error handling, metrics, etc.
 	Processor Processor
 
@@ -80,6 +90,9 @@ type Dispatcher struct {
 	waitGroup sync.WaitGroup
 }
 
+// Ensure compile-time type safety
+var _ UpdateDispatcher = &Dispatcher{}
+
 // DispatcherOpts can be used to configure or override default Dispatcher behaviours.
 type DispatcherOpts struct {
 	// Processor allows for providing custom Processor interfaces with different behaviours.
@@ -109,7 +122,7 @@ type DispatcherOpts struct {
 	MaxRoutines int
 }
 
-// NewDispatcher creates a new dispatcher, which process and handles incoming updates from the updates channel.
+// NewDispatcher creates a new Dispatcher, which process and handles incoming updates from the updates channel.
 func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errHandler DispatcherErrorHandler
 	var panicHandler DispatcherPanicHandler
@@ -175,7 +188,7 @@ func (d *Dispatcher) MaxUsage() int {
 
 // Start to handle incoming updates.
 // This is a blocking method; it should be called as a goroutine, such that it can receive incoming updates.
-func (d *Dispatcher) Start(b *gotgbot.Bot, updates chan json.RawMessage) {
+func (d *Dispatcher) Start(b *gotgbot.Bot, updates <-chan json.RawMessage) {
 	// Listen to updates as they come in from the updater.
 	for upd := range updates {
 		d.waitGroup.Add(1)

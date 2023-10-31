@@ -26,7 +26,9 @@ type ErrorFunc func(error)
 
 type Updater struct {
 	// Dispatcher is where all the incoming updates are sent to be processed.
-	Dispatcher *Dispatcher
+	// The Dispatcher runs in a separate goroutine, allowing for parallel update processing and dispatching.
+	// Once the Updater has received an update, it sends it to the Dispatcher over a JSON channel.
+	Dispatcher UpdateDispatcher
 
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.

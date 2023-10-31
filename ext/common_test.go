@@ -27,5 +27,5 @@ func (u *Updater) InjectUpdate(token string, upd gotgbot.Update) error {
 		return ErrNotFound
 	}
 
-	return u.Dispatcher.ProcessUpdate(bData.bot, &upd, nil)
+	return u.Dispatcher.(*Dispatcher).ProcessUpdate(bData.bot, &upd, nil)
 }
