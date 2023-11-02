@@ -90,7 +90,7 @@ type Dispatcher struct {
 	waitGroup sync.WaitGroup
 }
 
-// Ensure compile-time type safety
+// Ensure compile-time type safety.
 var _ UpdateDispatcher = &Dispatcher{}
 
 // DispatcherOpts can be used to configure or override default Dispatcher behaviours.
