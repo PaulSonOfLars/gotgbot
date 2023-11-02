@@ -58,23 +58,14 @@ type UpdaterOpts struct {
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
 	ErrorLog *log.Logger
-	// The dispatcher instance to be used by the updater.
-	Dispatcher *Dispatcher
 }
 
 // NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
-func NewUpdater(opts *UpdaterOpts) *Updater {
+func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
 	var errLog *log.Logger
 
-	// Default dispatcher, no special settings.
-	dispatcher := NewDispatcher(nil)
-
 	if opts != nil {
-		if opts.Dispatcher != nil {
-			dispatcher = opts.Dispatcher
-		}
-
 		unhandledErrFunc = opts.UnhandledErrFunc
 		errLog = opts.ErrorLog
 	}

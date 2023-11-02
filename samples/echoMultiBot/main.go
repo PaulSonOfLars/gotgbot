@@ -32,18 +32,15 @@ func main() {
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 
 	// Create updater and dispatcher.
-	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		ErrorLog: nil,
-		Dispatcher: ext.NewDispatcher(&ext.DispatcherOpts{
-			// If an error is returned by a handler, log it and continue going.
-			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				log.Println("an error occurred while handling update:", err.Error())
-				return ext.DispatcherActionNoop
-			},
-			MaxRoutines: ext.DefaultMaxRoutines,
-		}),
+	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
+		// If an error is returned by a handler, log it and continue going.
+		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+			log.Println("an error occurred while handling update:", err.Error())
+			return ext.DispatcherActionNoop
+		},
+		MaxRoutines: ext.DefaultMaxRoutines,
 	})
-	dispatcher := updater.Dispatcher
+	updater := ext.NewUpdater(dispatcher, nil)
 
 	// Add stop handler to stop all bots gracefully.
 	dispatcher.AddHandler(handlers.NewCommand("stop", func(b *gotgbot.Bot, ctx *ext.Context) error {

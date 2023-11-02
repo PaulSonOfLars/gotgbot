@@ -28,7 +28,7 @@ func BenchmarkUpdaterMultibots(b *testing.B) {
 
 func benchmarkUpdaterWithNBots(b *testing.B, numBot int) {
 	d := ext.NewDispatcher(nil)
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	wg := sync.WaitGroup{}
 	d.AddHandler(ext.DummyHandler{F: func(b *gotgbot.Bot, ctx *ext.Context) error {
