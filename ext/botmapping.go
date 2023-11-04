@@ -124,7 +124,7 @@ func (m *botMapping) getBotFromURL(urlPath string) (botData, bool) {
 	m.mux.RLock()
 	defer m.mux.RUnlock()
 
-	token, ok := m.urlMapping[strings.TrimPrefix(urlPath, "/")]
+	token, ok := m.urlMapping[urlPath]
 	if !ok {
 		return botData{}, ok
 	}
@@ -144,7 +144,7 @@ func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, ok := m.getBotFromURL(r.URL.Path)
+	b, ok := m.getBotFromURL(strings.TrimPrefix(r.URL.Path, "/"))
 	if !ok {
 		// If we don't recognise the URL, we return a 404.
 		w.WriteHeader(http.StatusNotFound)
