@@ -6,7 +6,7 @@ import (
 
 // This test should demonstrate that once obtained, a list will not be changed by any additions/removals to that list by another call.
 func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
-	m := handlerMappings{}
+	m := handlerMapping{}
 	firstHandler := DummyHandler{N: "first"}
 	secondHandler := DummyHandler{N: "second"}
 
@@ -73,7 +73,7 @@ func checkList(t *testing.T, name string, got []Handler, expected ...Handler) {
 }
 
 func Test_handlerMappings_remove(t *testing.T) {
-	m := &handlerMappings{}
+	m := &handlerMapping{}
 	handler := DummyHandler{N: "test"}
 
 	t.Run("nonExistent", func(t *testing.T) {
