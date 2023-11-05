@@ -167,7 +167,11 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	updateChan := make(chan json.RawMessage)
 	pollChan := make(chan struct{})
 
-	err := u.botMapping.addBot(b, updateChan, pollChan, "", "")
+	err := u.botMapping.addBot(botData{
+		bot:        b,
+		updateChan: updateChan,
+		polling:    pollChan,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to add bot with long polling: %w", err)
 	}
@@ -325,7 +329,12 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) e
 
 	updateChan := make(chan json.RawMessage)
 
-	err := u.botMapping.addBot(b, updateChan, nil, urlPath, opts.SecretToken)
+	err := u.botMapping.addBot(botData{
+		bot:           b,
+		updateChan:    updateChan,
+		urlPath:       urlPath,
+		webhookSecret: opts.SecretToken,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}

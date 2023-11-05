@@ -45,7 +45,7 @@ var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
 var ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapping")
 
 // addBot Adds a new bot to the botMapping structure.
-func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pollChan chan struct{}, urlPath string, webhookSecret string) error {
+func (m *botMapping) addBot(bData botData) error {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
@@ -56,21 +56,15 @@ func (m *botMapping) addBot(b *gotgbot.Bot, updateChan chan json.RawMessage, pol
 		m.urlMapping = make(map[string]string)
 	}
 
-	if _, ok := m.mapping[b.Token]; ok {
+	if _, ok := m.mapping[bData.bot.Token]; ok {
 		return ErrBotAlreadyExists
 	}
-	if _, ok := m.urlMapping[urlPath]; urlPath != "" && ok {
+	if _, ok := m.urlMapping[bData.urlPath]; bData.urlPath != "" && ok {
 		return ErrBotUrlPathAlreadyExists
 	}
 
-	m.mapping[b.Token] = botData{
-		bot:           b,
-		updateChan:    updateChan,
-		polling:       pollChan,
-		urlPath:       urlPath,
-		webhookSecret: webhookSecret,
-	}
-	m.urlMapping[urlPath] = b.Token
+	m.mapping[bData.bot.Token] = bData
+	m.urlMapping[bData.urlPath] = bData.bot.Token
 	return nil
 }
 
