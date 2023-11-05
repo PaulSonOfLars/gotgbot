@@ -34,7 +34,7 @@ type Updater struct {
 	UnhandledErrFunc ErrorFunc
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	ErrorLog Logger
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
 	stopIdling chan struct{}
@@ -53,7 +53,7 @@ type UpdaterOpts struct {
 	UnhandledErrFunc ErrorFunc
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	ErrorLog Logger
 	// The dispatcher instance to be used by the updater.
 	Dispatcher *Dispatcher
 }
@@ -61,7 +61,7 @@ type UpdaterOpts struct {
 // NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
 func NewUpdater(opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
-	var errLog *log.Logger
+	var errLog Logger
 
 	// Default dispatcher, no special settings.
 	dispatcher := NewDispatcher(nil)
