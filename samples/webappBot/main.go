@@ -40,17 +40,15 @@ func main() {
 	}
 
 	// Create updater and dispatcher to handle updates in a simple manner.
-	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		Dispatcher: ext.NewDispatcher(&ext.DispatcherOpts{
-			// If an error is returned by a handler, log it and continue going.
-			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				log.Println("an error occurred while handling update:", err.Error())
-				return ext.DispatcherActionNoop
-			},
-			MaxRoutines: ext.DefaultMaxRoutines,
-		}),
+	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
+		// If an error is returned by a handler, log it and continue going.
+		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+			log.Println("an error occurred while handling update:", err.Error())
+			return ext.DispatcherActionNoop
+		},
+		MaxRoutines: ext.DefaultMaxRoutines,
 	})
-	dispatcher := updater.Dispatcher
+	updater := ext.NewUpdater(dispatcher, nil)
 
 	// /start command to introduce the bot and send the URL
 	dispatcher.AddHandler(handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {

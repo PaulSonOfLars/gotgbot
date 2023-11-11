@@ -26,7 +26,9 @@ type ErrorFunc func(error)
 
 type Updater struct {
 	// Dispatcher is where all the incoming updates are sent to be processed.
-	Dispatcher *Dispatcher
+	// The Dispatcher runs in a separate goroutine, allowing for parallel update processing and dispatching.
+	// Once the Updater has received an update, it sends it to the Dispatcher over a JSON channel.
+	Dispatcher UpdateDispatcher
 
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
@@ -54,23 +56,14 @@ type UpdaterOpts struct {
 	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
 	ErrorLog *log.Logger
-	// The dispatcher instance to be used by the updater.
-	Dispatcher *Dispatcher
 }
 
-// NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
-func NewUpdater(opts *UpdaterOpts) *Updater {
+// NewUpdater Creates a new Updater, as well as a Dispatcher and any optional updater configurations (via UpdaterOpts).
+func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
 	var errLog *log.Logger
 
-	// Default dispatcher, no special settings.
-	dispatcher := NewDispatcher(nil)
-
 	if opts != nil {
-		if opts.Dispatcher != nil {
-			dispatcher = opts.Dispatcher
-		}
-
 		unhandledErrFunc = opts.UnhandledErrFunc
 		errLog = opts.ErrorLog
 	}

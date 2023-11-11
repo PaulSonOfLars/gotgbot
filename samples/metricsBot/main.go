@@ -48,7 +48,7 @@ func main() {
 	go monitorDispatcherBuffer(dispatcher)
 
 	// Create the updater with our customised dispatcher.
-	updater := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: dispatcher})
+	updater := ext.NewUpdater(dispatcher, nil)
 
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))

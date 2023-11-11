@@ -23,7 +23,7 @@ func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.AddWebhook(b, "test", ext.WebhookOpts{})
 	if err != nil {
@@ -47,7 +47,7 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.AddWebhook(b, "test", ext.WebhookOpts{})
 	if err != nil {
@@ -76,7 +76,7 @@ func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.AddWebhook(b, "", ext.WebhookOpts{})
 	if !errors.Is(err, ext.ErrEmptyPath) {
@@ -104,7 +104,7 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.StartPolling(b, &ext.PollingOpts{
 		EnableWebhookDeletion: true,
@@ -143,7 +143,7 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.StartPolling(b1, &ext.PollingOpts{
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
@@ -185,7 +185,7 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.StartPolling(b, &ext.PollingOpts{
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
@@ -228,7 +228,7 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 	}
 
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	err := u.StartPolling(b, &ext.PollingOpts{
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{RequestOpts: reqOpts},
@@ -303,7 +303,7 @@ func BenchmarkUpdaterMultibots(b *testing.B) {
 
 func benchmarkUpdaterWithNBots(b *testing.B, numBot int) {
 	d := ext.NewDispatcher(nil)
-	u := ext.NewUpdater(&ext.UpdaterOpts{Dispatcher: d})
+	u := ext.NewUpdater(d, nil)
 
 	wg := sync.WaitGroup{}
 	d.AddHandler(ext.DummyHandler{F: func(b *gotgbot.Bot, ctx *ext.Context) error {
