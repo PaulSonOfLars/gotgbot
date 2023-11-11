@@ -58,7 +58,7 @@ type UpdaterOpts struct {
 	ErrorLog *log.Logger
 }
 
-// NewUpdater Creates a new Updater, as well as the necessary structures required for the associated Dispatcher.
+// NewUpdater Creates a new Updater, as well as a Dispatcher and any optional updater configurations (via UpdaterOpts).
 func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
 	var errLog *log.Logger
