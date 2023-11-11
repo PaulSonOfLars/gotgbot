@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type handlerMappings struct {
+type handlerMapping struct {
 	// mutex is used to ensure everything threadsafe.
 	mutex sync.RWMutex
 
@@ -15,7 +15,7 @@ type handlerMappings struct {
 	handlers map[int][]Handler
 }
 
-func (m *handlerMappings) add(h Handler, group int) {
+func (m *handlerMapping) add(h Handler, group int) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -30,7 +30,7 @@ func (m *handlerMappings) add(h Handler, group int) {
 	m.handlers[group] = append(currHandlers, h)
 }
 
-func (m *handlerMappings) remove(name string, group int) bool {
+func (m *handlerMapping) remove(name string, group int) bool {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -77,7 +77,7 @@ func getIndex(find int, is []int) int {
 	return -1
 }
 
-func (m *handlerMappings) removeGroup(group int) bool {
+func (m *handlerMapping) removeGroup(group int) bool {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -100,7 +100,7 @@ func (m *handlerMappings) removeGroup(group int) bool {
 	return false
 }
 
-func (m *handlerMappings) getGroups() [][]Handler {
+func (m *handlerMapping) getGroups() [][]Handler {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 

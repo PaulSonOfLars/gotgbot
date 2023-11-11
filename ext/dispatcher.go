@@ -81,7 +81,7 @@ type Dispatcher struct {
 	ErrorLog *log.Logger
 
 	// handlers represents all available handlers.
-	handlers handlerMappings
+	handlers handlerMapping
 
 	// limiter is how we limit the maximum number of goroutines for handling updates.
 	// if nil, this is a limitless dispatcher.
@@ -162,7 +162,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 		Panic:            panicHandler,
 		UnhandledErrFunc: unhandledErrFunc,
 		ErrorLog:         errLog,
-		handlers:         handlerMappings{},
+		handlers:         handlerMapping{},
 		limiter:          limiter,
 		waitGroup:        sync.WaitGroup{},
 	}
