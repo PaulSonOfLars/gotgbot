@@ -73,12 +73,18 @@ func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 		prevText := string(utf16.Decode(utf16Data[prev:ent.Offset]))
 
 		text := utf16.Decode(utf16Data[ent.Offset:newPrev])
-		pre, cleanCntnt, post := splitEdgeWhitespace(string(text))
+		pre, cleanCntnt, post := splitEdgeWhitespace(string(text), ent)
 		cleanCntntRune := []rune(cleanCntnt)
 
 		switch ent.Type {
 		case "bold", "italic", "code":
 			out.WriteString(prevText + pre + mdMap[ent.Type] + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
+		case "pre":
+			if ent.Language == "" {
+				out.WriteString(prevText + pre + mdMap[ent.Type] + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
+			} else {
+				out.WriteString(prevText + pre + mdMap[ent.Type] + ent.Language + "\n" + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
+			}
 		case "text_mention":
 			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post)
 		case "text_link":
@@ -214,10 +220,15 @@ func closeHTMLTag(s string) string {
 
 func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt string) string {
 	prevText := string(utf16.Decode(data[start:ent.Offset]))
-	pre, cleanCntnt, post := splitEdgeWhitespace(cntnt)
+	pre, cleanCntnt, post := splitEdgeWhitespace(cntnt, ent)
 	switch ent.Type {
-	case "bold", "italic", "code", "underline", "strikethrough", "pre", "spoiler":
+	case "bold", "italic", "code", "underline", "strikethrough", "spoiler":
 		return prevText + pre + mdV2Map[ent.Type] + cleanCntnt + mdV2Map[ent.Type] + post
+	case "pre":
+		if ent.Language == "" {
+			return prevText + pre + mdV2Map[ent.Type] + "\n" + cleanCntnt + mdV2Map[ent.Type] + post
+		}
+		return prevText + pre + mdV2Map[ent.Type] + ent.Language + "\n" + cleanCntnt + mdV2Map[ent.Type] + post
 	case "custom_emoji":
 		// Yes, custom emoji have a weird little ! at the front
 		// https://core.telegram.org/bots/api#markdownv2-style
@@ -259,15 +270,17 @@ func getChildEntities(ent MessageEntity, ents []MessageEntity) []MessageEntity {
 	return children
 }
 
-func splitEdgeWhitespace(text string) (pre string, cntnt string, post string) {
+func splitEdgeWhitespace(text string, ent MessageEntity) (pre string, cntnt string, post string) {
+	keepNewLines := ent.Type == "pre"
+
 	bd := strings.Builder{}
 	rText := []rune(text)
-	for i := 0; i < len(rText) && unicode.IsSpace(rText[i]); i++ {
+	for i := 0; i < len(rText) && unicode.IsSpace(rText[i]) && (!keepNewLines || rText[i] != '\n'); i++ {
 		bd.WriteRune(rText[i])
 	}
 	pre = bd.String()
-	text = strings.TrimPrefix(text, pre)
 
+	text = strings.TrimPrefix(text, pre)
 	bd.Reset()
 	for i := len(rText) - 1; i >= 0 && unicode.IsSpace(rText[i]); i-- {
 		bd.WriteRune(rText[i])
