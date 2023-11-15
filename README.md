@@ -31,7 +31,13 @@ go get github.com/PaulSonOfLars/gotgbot/v2
 
 ### Example bots
 
-Sample bots can be found in the [samples directory](samples).
+Sample bots can be found in the [samples directory](./samples).
+
+Strongly recommend looking at:
+
+- [command bot](./samples/commandBot): To explore basic use of commands
+- [echo webhook bot](./samples/echoWebhookBot): To set up webhooks
+- [stateful client bot](./samples/statefulClientBot): To pass around shared data without global variables
 
 ## Docs
 
@@ -44,9 +50,9 @@ Contributions are welcome! More information on contributing can be found [here](
 ### Regenerating the generated code.
 
 If you've made changes to the code generation, you will probably need to regenerate the library code.
-This can be done simply by running `go generate` from the repo root. Running this will generate the code from the 
+This can be done simply by running `go generate` from the repo root. Running this will generate the code from the
 specification repo at the commit pinned in the `spec_commit` file.
 
 To upgrade the commit in `spec_commit` and regenerate your code, simply run `GOTGBOT_UPGRADE=true go generate`.
-This will fetch the latest commit sha, and regenerate the library against that, giving you the latest version 
+This will fetch the latest commit sha, and regenerate the library against that, giving you the latest version
 available.
