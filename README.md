@@ -35,9 +35,9 @@ Sample bots can be found in the [samples directory](./samples).
 
 Some recommended bots to look at:
 
-- [command bot](./samples/commandBot): To explore basic use of commands
-- [echo webhook bot](./samples/echoWebhookBot): To set up webhooks
-- [stateful client bot](./samples/statefulClientBot): To pass around shared data without global variables
+- [Command Bot](./samples/commandBot): To explore basic use of commands
+- [Webhook Bot](./samples/echoWebhookBot): To set up webhooks
+- [Stateful Client Bot](./samples/statefulClientBot): To pass around shared data without global variables
 
 ## Docs
 
