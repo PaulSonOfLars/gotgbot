@@ -33,7 +33,7 @@ go get github.com/PaulSonOfLars/gotgbot/v2
 
 Sample bots can be found in the [samples directory](./samples).
 
-Strongly recommend looking at:
+Some recommended bots to look at:
 
 - [command bot](./samples/commandBot): To explore basic use of commands
 - [echo webhook bot](./samples/echoWebhookBot): To set up webhooks
