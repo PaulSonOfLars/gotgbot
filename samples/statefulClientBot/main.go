@@ -79,8 +79,17 @@ func (c *client) start(b *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 
-	// Typecast the data to an int, and increment it.
-	count := countVal.(int) + 1
+	// Cast the data to an int so it can be used.
+	count, ok := countVal.(int)
+	if !ok {
+		ctx.EffectiveMessage.Reply(b, "'count' was not an integer, as was expected - this is a programmer error!", &gotgbot.SendMessageOpts{
+			ParseMode: "HTML",
+		})
+		return nil
+	}
+
+	// Increment our count (one more press!)
+	count += 1
 	c.setUserData(ctx, "count", count)
 	ctx.EffectiveMessage.Reply(b, fmt.Sprintf("You have pressed start %d times.", count), &gotgbot.SendMessageOpts{
 		ParseMode: "HTML",

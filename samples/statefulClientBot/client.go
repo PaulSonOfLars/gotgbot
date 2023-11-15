@@ -14,6 +14,12 @@ type client struct {
 	// If you use multiple maps, you may want to use a new mutex for each one.
 	rwMux sync.RWMutex
 
+	// We use a double map to:
+	// - map once for the user id
+	// - map a second time for the keys a user can have
+	// The second map has values of type "any" so anything can be stored in them, for the purpose of this example.
+	// This could be improved by using a struct with typed fields, though this would need some additional handling to
+	// ensure concurrent safety.
 	userData map[int64]map[string]any
 
 	// This struct could also contain:
