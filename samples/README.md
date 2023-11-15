@@ -59,6 +59,13 @@ could be collected.
 This bot shows how to effectively use middlewares to modify and intercept HTTP requests to the bot API server.
 In this example, the middleware sets the allow_sending_without_reply to certain methods, as well as make sure to log all error messages.
 
+## samples/statefulClientBot
+
+This bot demonstrates how to pass around variables to all handlers without changing any function signatures.
+That is - by using a struct with methods instead of simple functions.
+This pattern is great to avoid passing data around through global variables. The client can store database clients,
+cache clients, in memory clients, and many more.
+
 ## samples/webappBot
 
 This bot shows how to use this library to server a webapp.
