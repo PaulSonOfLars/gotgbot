@@ -33,6 +33,12 @@ func main() {
 		panic("URL environment variable is empty")
 	}
 
+	// Get the webhook secret from the environment variable.
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+	if webhookSecret == "" {
+		panic("WEBHOOK_SECRET environment variable is empty")
+	}
+
 	// Create our bot.
 	b, err := gotgbot.NewBot(token, nil)
 	if err != nil {
@@ -52,15 +58,27 @@ func main() {
 
 	// /start command to introduce the bot and send the URL
 	dispatcher.AddHandler(handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		// We can wrap commands with anonymous functions to pass in extra variables, like the webapp URL, or other
+		// configuration.
 		return start(b, ctx, webappURL)
 	}))
 
-	// Start receiving (and handling) updates.
-	err = updater.StartPolling(b, &ext.PollingOpts{DropPendingUpdates: true})
+	// We add the bot webhook to our updater, such that we can populate the updater's http.Handler.
+	err = updater.AddWebhook(b, b.Token, ext.WebhookOpts{SecretToken: webhookSecret})
 	if err != nil {
-		panic("failed to start polling: " + err.Error())
+		panic("Failed to add bot webhooks to updater: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", b.User.Username)
+
+	// We select a subpath to specify where the updater handler is found on the http.Server.
+	updaterSubpath := "/bots/"
+	err = updater.SetAllBotWebhooks(webappURL+updaterSubpath, &gotgbot.SetWebhookOpts{
+		MaxConnections:     100,
+		DropPendingUpdates: true,
+		SecretToken:        webhookSecret,
+	})
+	if err != nil {
+		panic("Failed to set bot webhooks: " + err.Error())
+	}
 
 	// Setup new HTTP server mux to handle different paths.
 	mux := http.NewServeMux()
@@ -68,11 +86,15 @@ func main() {
 	mux.HandleFunc("/", index(webappURL))
 	// This serves our "validation" API, which checks if the input data is valid.
 	mux.HandleFunc("/validate", validate(token))
+	// This serves the updater's webhook handler.
+	mux.HandleFunc(updaterSubpath, updater.GetHandlerFunc(updaterSubpath))
+
 	server := http.Server{
 		Handler: mux,
 		Addr:    "0.0.0.0:8080",
 	}
 
+	log.Printf("%s has been started...\n", b.User.Username)
 	// Start the webserver displaying the page.
 	// Note: ListenAndServe is a blocking operation, so we don't need to call updater.Idle() here.
 	if err := server.ListenAndServe(); err != nil {

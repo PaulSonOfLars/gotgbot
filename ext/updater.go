@@ -350,10 +350,10 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 	return nil
 }
 
-// GetHandler returns the http.Handler responsible for processing incoming webhook updates.
-// It is provided to allow for an alternative to the StartServer method, using a user-defined http server.
-func (u *Updater) GetHandler() http.Handler {
-	return &u.botMapping
+// GetHandlerFunc returns the http.HandlerFunc responsible for processing incoming webhook updates.
+// It is provided to allow for an alternative to the StartServer method using a user-defined http server.
+func (u *Updater) GetHandlerFunc(pathPrefix string) http.HandlerFunc {
+	return u.botMapping.getHandlerFunc(pathPrefix)
 }
 
 // StartServer starts the webhook server for all the bots added via AddWebhook.
@@ -376,7 +376,7 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 	}
 
 	u.webhookServer = &http.Server{
-		Handler:           u.GetHandler(),
+		Handler:           u.GetHandlerFunc("/"),
 		ReadTimeout:       opts.ReadTimeout,
 		ReadHeaderTimeout: opts.ReadHeaderTimeout,
 	}

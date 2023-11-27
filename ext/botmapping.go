@@ -127,42 +127,42 @@ func (m *botMapping) getBotFromURL(urlPath string) (botData, bool) {
 	return bData, ok
 }
 
-// ServeHTTP dispatches the request to the handler whose
-// pattern most closely matches the request URL.
-func (m *botMapping) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.RequestURI == "*" {
-		if r.ProtoAtLeast(1, 1) {
-			w.Header().Set("Connection", "close")
+func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWriter, request *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "*" {
+			if r.ProtoAtLeast(1, 1) {
+				w.Header().Set("Connection", "close")
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
-	b, ok := m.getBotFromURL(strings.TrimPrefix(r.URL.Path, "/"))
-	if !ok {
-		// If we don't recognise the URL, we return a 404.
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	headerSecret := r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
-	if b.webhookSecret != "" && b.webhookSecret != headerSecret {
-		// Drop any updates from invalid secret tokens.
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	bytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		if m.errFunc != nil {
-			m.errFunc(err)
-		} else {
-			m.logf("Failed to read incoming update contents: %s", err.Error())
+		b, ok := m.getBotFromURL(strings.TrimPrefix(r.URL.Path, prefix))
+		if !ok {
+			// If we don't recognise the URL, we return a 404.
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+
+		headerSecret := r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
+		if b.webhookSecret != "" && b.webhookSecret != headerSecret {
+			// Drop any updates from invalid secret tokens.
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			if m.errFunc != nil {
+				m.errFunc(err)
+			} else {
+				m.logf("Failed to read incoming update contents: %s", err.Error())
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		b.updateChan <- bytes
 	}
-	b.updateChan <- bytes
 }
 
 func (m *botMapping) logf(format string, args ...interface{}) {
