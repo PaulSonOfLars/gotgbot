@@ -312,7 +312,9 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 	return u.StartServer(opts)
 }
 
+// AddWebhookOpts stores any optional parameters for the Updater.AddWebhook method.
 type AddWebhookOpts struct {
+	// The secret token to be used to validate webhook authenticity.
 	SecretToken string
 }
 
