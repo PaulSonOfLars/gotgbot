@@ -25,14 +25,14 @@ func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
 	u := ext.NewUpdater(d, nil)
 
-	err := u.AddWebhook(b, "test", ext.WebhookOpts{})
+	err := u.AddWebhook(b, "test", nil)
 	if err != nil {
 		t.Errorf("failed to add webhook: %v", err)
 		return
 	}
 
 	// Adding a second time should throw an error
-	err = u.AddWebhook(b, "test", ext.WebhookOpts{})
+	err = u.AddWebhook(b, "test", nil)
 	if err == nil {
 		t.Errorf("should have failed to add the same webhook twice, but didnt")
 		return
@@ -49,7 +49,7 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
 	u := ext.NewUpdater(d, nil)
 
-	err := u.AddWebhook(b, "test", ext.WebhookOpts{})
+	err := u.AddWebhook(b, "test", nil)
 	if err != nil {
 		t.Errorf("failed to add webhook: %v", err)
 		return
@@ -62,7 +62,7 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	}
 
 	// Should be able to re-add the bot now
-	err = u.AddWebhook(b, "test", ext.WebhookOpts{})
+	err = u.AddWebhook(b, "test", nil)
 	if err != nil {
 		t.Errorf("Failed to re-add a previously removed bot: %v", err)
 		return
@@ -78,7 +78,7 @@ func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	d := ext.NewDispatcher(&ext.DispatcherOpts{})
 	u := ext.NewUpdater(d, nil)
 
-	err := u.AddWebhook(b, "", ext.WebhookOpts{})
+	err := u.AddWebhook(b, "", nil)
 	if !errors.Is(err, ext.ErrEmptyPath) {
 		t.Errorf("Expected an empty path error trying to add an empty webhook : %v", err)
 		return
@@ -311,13 +311,12 @@ func benchmarkUpdaterWithNBots(b *testing.B, numBot int) {
 		return nil
 	}})
 
-	opts := ext.WebhookOpts{}
 	for i := 0; i < numBot; i++ {
 		token := strconv.Itoa(i)
 		err := u.AddWebhook(&gotgbot.Bot{
 			Token:     token,
 			BotClient: &gotgbot.BaseBotClient{},
-		}, token, opts)
+		}, token, nil)
 		if err != nil {
 			b.Fatalf("failed to add webhook for bot: %s", err.Error())
 		}
