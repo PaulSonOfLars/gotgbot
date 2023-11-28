@@ -20,6 +20,8 @@ import (
 // from the samples/webappBot directory:
 // `URL="<your_url_here>" TOKEN="<your_token_here>" go run .`
 // Then, simply send /start to your bot, and enjoy your webapp demo.
+//
+// This example also demonstrates how to use the updater's handler in a user-provided server.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
