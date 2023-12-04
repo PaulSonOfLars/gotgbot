@@ -85,6 +85,131 @@ func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	}
 }
 
+func TestUpdater_GetHandlerFunc(t *testing.T) {
+	b := &gotgbot.Bot{
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	type args struct {
+		urlPath       string
+		opts          ext.WebhookOpts
+		httpResponse  int
+		handlerPrefix string
+		requestPath   string
+		headers       map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "With simple path",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "With slash prefixed path",
+			args: args{
+				urlPath:       "/123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "With subpath",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/test/",
+				requestPath:   "/test/123:hello",
+			},
+		}, {
+			name: "With unknown path",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusNotFound,
+				handlerPrefix: "/",
+				requestPath:   "/this-path-doesnt-exist",
+			},
+		}, {
+			name: "With missing secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusUnauthorized,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "matching secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+				headers: map[string]string{
+					"X-Telegram-Bot-Api-Secret-Token": "secret",
+				},
+			},
+		}, {
+			name: "invalid secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusUnauthorized,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+				headers: map[string]string{
+					"X-Telegram-Bot-Api-Secret-Token": "wrong",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := ext.NewDispatcher(nil)
+			u := ext.NewUpdater(d, nil)
+
+			if err := u.AddWebhook(b, tt.args.urlPath, tt.args.opts); err != nil {
+				t.Errorf("failed to add webhook: %v", err)
+				return
+			}
+
+			s := httptest.NewServer(u.GetHandlerFunc(tt.args.handlerPrefix))
+			url := s.URL + tt.args.requestPath
+			req, err := http.NewRequest(http.MethodPost, url, nil)
+			if err != nil {
+				t.Errorf("Failed to build request, should have worked: %v", err.Error())
+				return
+			}
+			for k, v := range tt.args.headers {
+				req.Header.Set(k, v)
+			}
+
+			r, err := s.Client().Do(req)
+			if err != nil {
+				t.Fatal()
+			}
+			defer r.Body.Close()
+			if r.StatusCode != tt.args.httpResponse {
+				t.Errorf("Expected code %d, got %d", tt.args.httpResponse, r.StatusCode)
+				return
+			}
+		})
+	}
+}
+
 func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 	server := basicTestServer(t, map[string]string{
 		"getUpdates":    `{}`,
