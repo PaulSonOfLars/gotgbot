@@ -241,6 +241,12 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 		t.Errorf("failed to start long poll on first bot: %v", err)
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
 func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
@@ -290,6 +296,12 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 		t.Errorf("should be able to add two different polling bots")
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
 func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
@@ -330,6 +342,12 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 	})
 	if err == nil {
 		t.Errorf("should have failed to start the same long poll twice, but didnt")
+		return
+	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
 		return
 	}
 }
@@ -375,6 +393,12 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 	})
 	if err != nil {
 		t.Errorf("Failed to re-start a previously removed bot: %v", err)
+		return
+	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
 		return
 	}
 }
