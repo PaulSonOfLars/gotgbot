@@ -1,6 +1,7 @@
 package ext_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -96,7 +97,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 		opts          ext.WebhookOpts
 		httpResponse  int
 		handlerPrefix string
-		requestPath   string
+		requestPath   string // Should start with '/'
 		headers       map[string]string
 	}
 	tests := []struct {
@@ -188,11 +189,13 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 
 			s := httptest.NewServer(u.GetHandlerFunc(tt.args.handlerPrefix))
 			url := s.URL + tt.args.requestPath
-			req, err := http.NewRequest(http.MethodPost, url, nil)
+			// We pass {} to satisfy JSON handling
+			req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, strings.NewReader("{}"))
 			if err != nil {
 				t.Errorf("Failed to build request, should have worked: %v", err.Error())
 				return
 			}
+
 			for k, v := range tt.args.headers {
 				req.Header.Set(k, v)
 			}
@@ -201,6 +204,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 			if err != nil {
 				t.Fatal()
 			}
+
 			defer r.Body.Close()
 			if r.StatusCode != tt.args.httpResponse {
 				t.Errorf("Expected code %d, got %d", tt.args.httpResponse, r.StatusCode)
