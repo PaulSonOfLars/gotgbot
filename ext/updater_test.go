@@ -105,7 +105,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 		args args
 	}{
 		{
-			name: "With simple path",
+			name: "simple path",
 			args: args{
 				urlPath:       "123:hello",
 				httpResponse:  http.StatusOK,
@@ -113,7 +113,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 				requestPath:   "/123:hello",
 			},
 		}, {
-			name: "With slash prefixed path",
+			name: "slash prefixed path",
 			args: args{
 				urlPath:       "/123:hello",
 				httpResponse:  http.StatusOK,
@@ -121,7 +121,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 				requestPath:   "/123:hello",
 			},
 		}, {
-			name: "With subpath",
+			name: "using subpath",
 			args: args{
 				urlPath:       "123:hello",
 				httpResponse:  http.StatusOK,
@@ -129,7 +129,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 				requestPath:   "/test/123:hello",
 			},
 		}, {
-			name: "With unknown path",
+			name: "unknown path",
 			args: args{
 				urlPath:       "123:hello",
 				httpResponse:  http.StatusNotFound,
@@ -137,7 +137,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 				requestPath:   "/this-path-doesnt-exist",
 			},
 		}, {
-			name: "With missing secret token",
+			name: "missing secret token",
 			args: args{
 				urlPath: "123:hello",
 				opts: ext.WebhookOpts{
