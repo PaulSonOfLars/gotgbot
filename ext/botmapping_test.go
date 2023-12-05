@@ -1,7 +1,6 @@
 package ext
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -15,16 +14,11 @@ func Test_botMapping(t *testing.T) {
 		BotClient: &gotgbot.BaseBotClient{},
 	}
 
-	updateChan := make(chan json.RawMessage)
-	pollChan := make(chan struct{})
-
+	var origBdata *botData
 	t.Run("addBot", func(t *testing.T) {
 		// check that bots can be added fine
-		err := bm.addBot(botData{
-			bot:        b,
-			updateChan: updateChan,
-			polling:    pollChan,
-		})
+		var err error
+		origBdata, err = bm.addBot(b, "", "")
 		if err != nil {
 			t.Errorf("expected to be able to add a new bot fine: %s", err.Error())
 			t.FailNow()
@@ -37,11 +31,7 @@ func Test_botMapping(t *testing.T) {
 
 	t.Run("doubleAdd", func(t *testing.T) {
 		// Adding the same bot twice should fail
-		err := bm.addBot(botData{
-			bot:        b,
-			updateChan: updateChan,
-			polling:    pollChan,
-		})
+		_, err := bm.addBot(b, "", "")
 		if err == nil {
 			t.Errorf("adding the same bot twice should throw an error")
 			t.FailNow()
@@ -59,11 +49,11 @@ func Test_botMapping(t *testing.T) {
 			t.Errorf("failed to get bot with token %s", b.Token)
 			t.FailNow()
 		}
-		if bdata.polling != pollChan {
-			t.Errorf("polling channel was not the same")
+		if bdata.stopUpdates != origBdata.stopUpdates {
+			t.Errorf("stopUpdates channel was not the same")
 			t.FailNow()
 		}
-		if bdata.updateChan != updateChan {
+		if bdata.updateChan != origBdata.updateChan {
 			t.Errorf("update channel was not the same")
 			t.FailNow()
 		}
@@ -84,4 +74,29 @@ func Test_botMapping(t *testing.T) {
 		}
 	})
 
+}
+
+func Test_botData_isUpdateChannelStopped(t *testing.T) {
+	bm := botMapping{}
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	bData, err := bm.addBot(b, "", "")
+	if err != nil {
+		t.Errorf("bot with token %s should not have failed to be added", b.Token)
+		return
+	}
+	if bData.isUpdateChannelStopped() {
+		t.Errorf("bot with token %s should not be stopped yet", b.Token)
+		return
+	}
+
+	bData.stop()
+	if !bData.isUpdateChannelStopped() {
+		t.Errorf("bot with token %s should be stopped", b.Token)
+		return
+	}
 }
