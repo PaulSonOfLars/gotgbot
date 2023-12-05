@@ -16,13 +16,19 @@ import (
 type botData struct {
 	// bot represents the bot for which this data is relevant.
 	bot *gotgbot.Bot
+
 	// updateChan represents the incoming updates channel.
 	updateChan chan json.RawMessage
-	// polling allows us to close the polling loop.
-	polling chan struct{}
+	// updateWriterControl is used to count the number of current writers on the update channel.
+	// This is required to ensure that we can safely close the channel, and thus stop processing incoming updates.
+	// While this remains non-zero, it is unsafe to close the update channel.
+	updateWriterControl *sync.WaitGroup
+	// stopUpdates allows us to close the stopUpdates loop.
+	stopUpdates chan struct{}
+
 	// urlPath defines the incoming webhook URL path for this bot.
 	urlPath string
-	// webhookSecret stores the webhook secret for this bot
+	// webhookSecret stores the webhook secret for this bot.
 	webhookSecret string
 }
 
@@ -45,7 +51,8 @@ var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
 var ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapping")
 
 // addBot Adds a new bot to the botMapping structure.
-func (m *botMapping) addBot(bData botData) error {
+// Pass an empty urlPath/webhookSecret if using polling instead of webhooks.
+func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string) (*botData, error) {
 	m.mux.Lock()
 	defer m.mux.Unlock()
 
@@ -56,16 +63,26 @@ func (m *botMapping) addBot(bData botData) error {
 		m.urlMapping = make(map[string]string)
 	}
 
-	if _, ok := m.mapping[bData.bot.Token]; ok {
-		return ErrBotAlreadyExists
+	if _, ok := m.mapping[b.Token]; ok {
+		return nil, ErrBotAlreadyExists
 	}
-	if _, ok := m.urlMapping[bData.urlPath]; bData.urlPath != "" && ok {
-		return ErrBotUrlPathAlreadyExists
+
+	if _, ok := m.urlMapping[urlPath]; urlPath != "" && ok {
+		return nil, ErrBotUrlPathAlreadyExists
+	}
+
+	bData := botData{
+		bot:                 b,
+		updateChan:          make(chan json.RawMessage),
+		stopUpdates:         make(chan struct{}),
+		updateWriterControl: &sync.WaitGroup{},
+		urlPath:             urlPath,
+		webhookSecret:       webhookSecret,
 	}
 
 	m.mapping[bData.bot.Token] = bData
 	m.urlMapping[bData.urlPath] = bData.bot.Token
-	return nil
+	return &bData, nil
 }
 
 func (m *botMapping) removeBot(token string) (botData, bool) {
@@ -143,6 +160,8 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		b.updateWriterControl.Add(1)
+		defer b.updateWriterControl.Done()
 
 		headerSecret := r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
 		if b.webhookSecret != "" && b.webhookSecret != headerSecret {
@@ -161,6 +180,11 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		if b.isUpdateChannelStopped() {
+			return
+		}
+
 		b.updateChan <- bytes
 	}
 }
@@ -170,5 +194,29 @@ func (m *botMapping) logf(format string, args ...interface{}) {
 		m.errorLog.Printf(format, args...)
 	} else {
 		log.Printf(format, args...)
+	}
+}
+
+func (b *botData) stop() {
+	// Close stopUpdates loops first, to ensure any updates currently being polled have the time to be sent to the updateChan.
+	if b.stopUpdates != nil {
+		close(b.stopUpdates)
+	}
+
+	// Wait for all writers to finish writing to the updateChannel
+	b.updateWriterControl.Wait()
+
+	// Then, close the updates channel.
+	close(b.updateChan)
+}
+
+func (b *botData) isUpdateChannelStopped() bool {
+	select {
+	case <-b.stopUpdates:
+		// if anything comes in on the closing channel, we know the channel is closed.
+		return true
+	default:
+		// otherwise, continue as usual
+		return false
 	}
 }

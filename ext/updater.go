@@ -157,37 +157,25 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 		}
 	}
 
-	updateChan := make(chan json.RawMessage)
-	pollChan := make(chan struct{})
-
-	err := u.botMapping.addBot(botData{
-		bot:        b,
-		updateChan: updateChan,
-		polling:    pollChan,
-	})
+	bData, err := u.botMapping.addBot(b, "", "")
 	if err != nil {
 		return fmt.Errorf("failed to add bot with long polling: %w", err)
 	}
 
-	go u.Dispatcher.Start(b, updateChan)
-	go u.pollingLoop(b, reqOpts, pollChan, updateChan, v)
+	go u.Dispatcher.Start(b, bData.updateChan)
+	go u.pollingLoop(bData, reqOpts, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, stopPolling <-chan struct{}, updateChan chan<- json.RawMessage, v map[string]string) {
-	for {
-		select {
-		case <-stopPolling:
-			// if anything comes in, stop polling.
-			return
-		default:
-			// otherwise, continue as usual
-		}
+func (u *Updater) pollingLoop(bData *botData, opts *gotgbot.RequestOpts, v map[string]string) {
+	bData.updateWriterControl.Add(1)
+	defer bData.updateWriterControl.Done()
 
+	for {
 		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
 		// unnecessary reallocation of url.Values in the polling loop.
-		r, err := b.Request("getUpdates", v, nil, opts)
+		r, err := bData.bot.Request("getUpdates", v, nil, opts)
 		if err != nil {
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
@@ -230,9 +218,14 @@ func (u *Updater) pollingLoop(b *gotgbot.Bot, opts *gotgbot.RequestOpts, stopPol
 		}
 
 		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
+
+		if bData.isUpdateChannelStopped() {
+			return
+		}
+
 		for _, updData := range rawUpdates {
 			temp := updData // use new mem address to avoid loop conflicts
-			updateChan <- temp
+			bData.updateChan <- temp
 		}
 	}
 }
@@ -285,17 +278,6 @@ func (u *Updater) StopAllBots() {
 	}
 }
 
-func (data botData) stop() {
-	// Close polling loops first, to ensure any updates currently being polled have the time to be sent to the
-	// updateChan.
-	if data.polling != nil {
-		close(data.polling)
-	}
-
-	// Then, close the updates channel.
-	close(data.updateChan)
-}
-
 // StartWebhook starts the webhook server for a single bot instance.
 // This does NOT set the webhook on telegram - this should be done by the caller.
 // The opts parameter allows for specifying various webhook settings.
@@ -320,20 +302,13 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) e
 		return fmt.Errorf("expected a non-empty url path: %w", ErrEmptyPath)
 	}
 
-	updateChan := make(chan json.RawMessage)
-
-	err := u.botMapping.addBot(botData{
-		bot:           b,
-		updateChan:    updateChan,
-		urlPath:       urlPath,
-		webhookSecret: opts.SecretToken,
-	})
+	bData, err := u.botMapping.addBot(b, urlPath, opts.SecretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
 
 	// Webhook has been added; relevant dispatcher should also be started.
-	go u.Dispatcher.Start(b, updateChan)
+	go u.Dispatcher.Start(b, bData.updateChan)
 	return nil
 }
 
