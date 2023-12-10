@@ -282,10 +282,6 @@ func (u *Updater) StopAllBots() {
 // This does NOT set the webhook on telegram - this should be done by the caller.
 // The opts parameter allows for specifying various webhook settings.
 func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
-	if u.webhookServer != nil {
-		return ErrExpectedEmptyServer
-	}
-
 	err := u.AddWebhook(b, urlPath, opts)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook: %w", err)
@@ -302,7 +298,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) e
 		return fmt.Errorf("expected a non-empty url path: %w", ErrEmptyPath)
 	}
 
-	bData, err := u.botMapping.addBot(b, urlPath, opts.SecretToken)
+  bData, err := u.botMapping.addBot(b, strings.TrimPrefix(urlPath, "/"), opts.SecretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
@@ -348,6 +344,10 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 	ln, err := net.Listen(opts.GetListenNet(), opts.ListenAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
+	}
+
+	if u.webhookServer != nil {
+		return ErrExpectedEmptyServer
 	}
 
 	u.webhookServer = &http.Server{
