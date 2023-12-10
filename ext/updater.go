@@ -298,7 +298,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) e
 		return fmt.Errorf("expected a non-empty url path: %w", ErrEmptyPath)
 	}
 
-  bData, err := u.botMapping.addBot(b, strings.TrimPrefix(urlPath, "/"), opts.SecretToken)
+	bData, err := u.botMapping.addBot(b, strings.TrimPrefix(urlPath, "/"), opts.SecretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
