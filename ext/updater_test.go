@@ -11,9 +11,12 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
 func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
@@ -68,6 +71,78 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 		t.Errorf("Failed to re-add a previously removed bot: %v", err)
 		return
 	}
+}
+
+// This test is a bit strange, as it tries to test concurrency events. Which means it relies on awkward timing
+// situations. To try and mitigate this, we run it multiple times in parallel; hoping this will help catch any issues.
+// The idea is that we want to be able to test getUpdates both BEFORE as well as AFTER the bot has been stopped.
+// Execution flow is:
+// - polling is started
+// - getUpdates receives "stop" message. Keeps running on loop with a 1s delay.
+// - dispatcher processes stop message; calls updater.stopBot, thus closing channels, removing from bot map, and stopping dispatcher.
+// - getUpdates receives message again, 1s later; but updater+dispatcher channels are already closed by then.
+// - IF not concurrently safe; we get a panic. Else, works fine!
+// - Since updater channels are closed, messages should not be processed.
+//
+// NOTE: IF THIS FAILS, IT IS NOT A FLAKE! Investigate!
+func TestUpdaterPollingConcurrency(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		t.Run(fmt.Sprintf("run_%d", i), func(t *testing.T) {
+			concurrentTest(t)
+		})
+	}
+}
+
+func concurrentTest(t *testing.T) {
+	// we run it in parallel so that we get all the perks
+	t.Parallel()
+
+	delay := time.Second
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates":    {delay: delay, reply: `{"ok": true, "result": [{"message": {"text": "stop"}}]}`},
+		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL:  server.URL,
+		Timeout: delay * 2,
+	}
+
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{MaxRoutines: 1})
+	u := ext.NewUpdater(d, nil)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	d.AddHandler(handlers.NewMessage(message.Contains("stop"), func(b *gotgbot.Bot, ctx *ext.Context) error {
+		if !u.StopBot(b.Token) {
+			t.Errorf("Could not stop bot!")
+		}
+		// Make sure we mark this method as having run only once.
+		// (if run twice, we get a panic)
+		wg.Done()
+		return nil
+	}))
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start polling: %v", err)
+		return
+	}
+
+	wg.Wait()
+	time.Sleep(delay * 2)
 }
 
 func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
@@ -215,9 +290,9 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 }
 
 func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates":    `{}`,
-		"deleteWebhook": `{"ok": true, "result": true}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates":    {reply: `{"ok": true}`},
+		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
 	})
 	defer server.Close()
 
@@ -254,8 +329,8 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 }
 
 func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -309,8 +384,8 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 }
 
 func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -357,8 +432,8 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 }
 
 func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -407,7 +482,12 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 	}
 }
 
-func basicTestServer(t *testing.T, methods map[string]string) *httptest.Server {
+type testEndpoint struct {
+	delay time.Duration
+	reply string
+}
+
+func basicTestServer(t *testing.T, methods map[string]testEndpoint) *httptest.Server {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pathItems := strings.Split(r.URL.Path, "/")
 		lastItem := pathItems[len(pathItems)-1]
@@ -415,7 +495,10 @@ func basicTestServer(t *testing.T, methods map[string]string) *httptest.Server {
 
 		out, ok := methods[lastItem]
 		if ok {
-			fmt.Fprint(w, out)
+			if out.delay != 0 {
+				time.Sleep(out.delay)
+			}
+			fmt.Fprint(w, out.reply)
 			return
 		}
 
