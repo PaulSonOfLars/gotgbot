@@ -12,13 +12,13 @@ func All(_ *gotgbot.ShippingQuery) bool {
 }
 
 func FromUserID(id int64) filters.ShippingQuery {
-	return func(p *gotgbot.ShippingQuery) bool {
-		return p.From.Id == id
+	return func(s *gotgbot.ShippingQuery) bool {
+		return s.From.Id == id
 	}
 }
 
 func HasPayloadPrefix(pre string) filters.ShippingQuery {
-	return func(p *gotgbot.ShippingQuery) bool {
-		return strings.HasPrefix(p.InvoicePayload, pre)
+	return func(s *gotgbot.ShippingQuery) bool {
+		return strings.HasPrefix(s.InvoicePayload, pre)
 	}
 }
