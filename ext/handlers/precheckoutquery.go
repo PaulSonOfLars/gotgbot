@@ -21,7 +21,7 @@ func NewPreCheckoutQuery(f filters.PreCheckoutQuery, r Response) PreCheckoutQuer
 }
 
 func (r PreCheckoutQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	if ctx.PollAnswer == nil {
+	if ctx.PreCheckoutQuery == nil {
 		return false
 	}
 	return r.Filter == nil || r.Filter(ctx.PreCheckoutQuery)
