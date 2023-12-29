@@ -4623,21 +4623,21 @@ func unmarshalMaybeInaccessibleMessageArray(d json.RawMessage) ([]MaybeInaccessi
 }
 
 // unmarshalMaybeInaccessibleMessage is a JSON unmarshal helper to marshal the right structs into a MaybeInaccessibleMessage interface
-// based on the Message_id field.
+// based on the MessageId field.
 func unmarshalMaybeInaccessibleMessage(d json.RawMessage) (MaybeInaccessibleMessage, error) {
 	if len(d) == 0 {
 		return nil, nil
 	}
 
 	t := struct {
-		Message_id string
+		MessageId string
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
 		return nil, err
 	}
 
-	switch t.Message_id {
+	switch t.MessageId {
 	case "message":
 		s := Message{}
 		err := json.Unmarshal(d, &s)
@@ -4655,7 +4655,7 @@ func unmarshalMaybeInaccessibleMessage(d json.RawMessage) (MaybeInaccessibleMess
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Message_id %v", t.Message_id)
+	return nil, fmt.Errorf("unknown interface with MessageId %v", t.MessageId)
 }
 
 // MenuButton (https://core.telegram.org/bots/api#menubutton)

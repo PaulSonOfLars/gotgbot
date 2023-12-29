@@ -291,8 +291,8 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	for _, subTypeName := range tgType.Subtypes {
 		shortName := d.Types[subTypeName].getTypeNameFromParent(tgType.Name)
 		cases = append(cases, customStructUnmarshalCaseData{
-			ConstantFieldName: shortName,
-			TypeName:          subTypeName,
+			ConstantFieldValue: shortName,
+			TypeName:           subTypeName,
 		})
 	}
 
@@ -300,7 +300,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	err = customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
 		UnmarshalFuncName: "unmarshal" + tgType.Name,
 		ParentType:        tgType.Name,
-		ConstantFieldName: strings.Title(constantField),
+		ConstantFieldName: snakeToTitle(constantField),
 		CaseStatements:    cases,
 	})
 	if err != nil {
@@ -613,8 +613,8 @@ type customStructUnmarshalData struct {
 }
 
 type customStructUnmarshalCaseData struct {
-	ConstantFieldName string
-	TypeName          string
+	ConstantFieldValue string
+	TypeName           string
 }
 
 const customStructUnmarshal = `
@@ -656,7 +656,7 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 
 		switch t.{{.ConstantFieldName}} {
 		{{-  range $val := .CaseStatements }}
-		case "{{ $val.ConstantFieldName }}":
+		case "{{ $val.ConstantFieldValue }}":
 			s := {{ $val.TypeName }}{}
 			err := json.Unmarshal(d, &s)
 			if err != nil {
