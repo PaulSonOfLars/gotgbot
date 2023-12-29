@@ -668,6 +668,71 @@ func (v MergedChatBoostSource) MergeChatBoostSource() MergedChatBoostSource {
 	return v
 }
 
+// unmarshalChatBoostSourceArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalChatBoostSource.
+func unmarshalChatBoostSourceArray(d json.RawMessage) ([]ChatBoostSource, error) {
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	var vs []ChatBoostSource
+	for _, d := range ds {
+		v, err := unmarshalChatBoostSource(d)
+		if err != nil {
+			return nil, err
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalChatBoostSource is a JSON unmarshal helper to marshal the right structs into a ChatBoostSource interface
+// based on the Source field.
+func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Source string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.Source {
+	case "premium":
+		s := ChatBoostSourcePremium{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "gift_code":
+		s := ChatBoostSourceGiftCode{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "giveaway":
+		s := ChatBoostSourceGiveaway{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface with Source %v", t.Source)
+}
+
 // ChatBoostSourceGiftCode (https://core.telegram.org/bots/api#chatboostsourcegiftcode)
 //
 // The boost was obtained by the creation of Telegram Premium gift codes to boost a chat. Each such code boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.

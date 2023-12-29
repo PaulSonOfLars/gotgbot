@@ -602,7 +602,7 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 			if err != nil {
 				return err
 			}
-			{{- else }}
+		{{- else }}
 			v.{{ $f.Name }} = t.{{ $f.Name }}
 		{{- end }}
 	{{- end }}
