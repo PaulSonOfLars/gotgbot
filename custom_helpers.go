@@ -25,8 +25,8 @@ func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, er
 		opts = &SendMessageOpts{}
 	}
 
-	if opts.ReplyToMessageId == 0 {
-		opts.ReplyToMessageId = m.MessageId
+	if opts.ReplyParameters == nil {
+		opts.ReplyParameters = &ReplyParameters{MessageId: m.MessageId}
 	}
 
 	return b.SendMessage(m.Chat.Id, text, opts)
