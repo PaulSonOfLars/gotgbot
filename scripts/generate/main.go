@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,14 +18,11 @@ const (
 )
 
 func main() {
-	commit, err := getCommit()
+	// If GOTGBOT_UPGRADE set, get latest commit and generate from that.
+	// If GOTGBOT_FROM_FILE is set, read from file instead of HTTP (allows offline dev)
+	apiSpec, err := getAPISpec(os.Getenv("GOTGBOT_UPGRADE") != "", os.Getenv("GOTGBOT_FROM_FILE"))
 	if err != nil {
-		panic(fmt.Errorf("failed to get commit to use for spec: %w", err))
-	}
-
-	apiSpec, err := getAPISpecAtCommit(commit)
-	if err != nil {
-		panic(fmt.Errorf("failed to get API spec at commit %s: %w", commit, err))
+		panic(fmt.Errorf("failed to get API spec: %w", err))
 	}
 
 	err = generate(apiSpec)
@@ -32,9 +31,8 @@ func main() {
 	}
 }
 
-func getCommit() (string, error) {
-	// If GOTGBOT_UPGRADE set, get latest commit and generate from that.
-	if os.Getenv("GOTGBOT_UPGRADE") != "" {
+func getCommit(upgrade bool) (string, error) {
+	if upgrade {
 		commit, err := updatePinnedCommit()
 		if err != nil {
 			return "", fmt.Errorf("failed to update pinned commit: %w", err)
@@ -86,7 +84,29 @@ func updatePinnedCommit() (string, error) {
 	return commit, nil
 }
 
-func getAPISpecAtCommit(commit string) (APIDescription, error) {
+func getAPISpec(shouldUpgrade bool, fromFile string) (APIDescription, error) {
+	if fromFile != "" {
+		if shouldUpgrade {
+			return APIDescription{}, errors.New("upgrade and from_file are mutually exclusive options")
+		}
+
+		bs, err := os.ReadFile(fromFile)
+		if err != nil {
+			return APIDescription{}, fmt.Errorf("failed to read file: %w", err)
+		}
+
+		var d APIDescription
+		if err := json.NewDecoder(bytes.NewReader(bs)).Decode(&d); err != nil {
+			return APIDescription{}, fmt.Errorf("failed to decode API JSON: %w", err)
+		}
+		return d, nil
+	}
+
+	commit, err := getCommit(shouldUpgrade)
+	if err != nil {
+		panic(fmt.Errorf("failed to get commit to use for spec: %w", err))
+	}
+
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, fmt.Sprintf(schemaURL, commit), nil)
 	if err != nil {
 		return APIDescription{}, fmt.Errorf("failed to create request for telegram bot api spec: %w", err)
