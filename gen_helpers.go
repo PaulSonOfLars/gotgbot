@@ -196,6 +196,16 @@ func (c Chat) GetMenuButton(b *Bot, opts *GetChatMenuButtonOpts) (MenuButton, er
 	return b.GetChatMenuButton(opts)
 }
 
+// GetUserBoosts Helper method for Bot.GetUserChatBoosts
+func (c Chat) GetUserBoosts(b *Bot, userId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
+	return b.GetUserChatBoosts(c.Id, userId, opts)
+}
+
+// GetChatBoosts Helper method for Bot.GetUserChatBoosts
+func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
+	return b.GetUserChatBoosts(chatId, u.Id, opts)
+}
+
 // GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
@@ -277,6 +287,11 @@ func (c Chat) SetStickerSet(b *Bot, stickerSetName string, opts *SetChatStickerS
 // SetTitle Helper method for Bot.SetChatTitle
 func (c Chat) SetTitle(b *Bot, title string, opts *SetChatTitleOpts) (bool, error) {
 	return b.SetChatTitle(c.Id, title, opts)
+}
+
+// SetReaction Helper method for Bot.SetMessageReaction
+func (m Message) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
+	return b.SetMessageReaction(m.Chat.Id, m.MessageId, opts)
 }
 
 // StopLiveLocation Helper method for Bot.StopMessageLiveLocation
