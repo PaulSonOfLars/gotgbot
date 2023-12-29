@@ -6155,6 +6155,63 @@ func (v MergedReactionType) MergeReactionType() MergedReactionType {
 	return v
 }
 
+// unmarshalReactionTypeArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalReactionType.
+func unmarshalReactionTypeArray(d json.RawMessage) ([]ReactionType, error) {
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	var vs []ReactionType
+	for _, d := range ds {
+		v, err := unmarshalReactionType(d)
+		if err != nil {
+			return nil, err
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalReactionType is a JSON unmarshal helper to marshal the right structs into a ReactionType interface
+// based on the Type field.
+func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t.Type {
+	case "emoji":
+		s := ReactionTypeEmoji{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	case "custom_emoji":
+		s := ReactionTypeCustomEmoji{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+}
+
 // ReactionTypeCustomEmoji (https://core.telegram.org/bots/api#reactiontypecustomemoji)
 //
 // The reaction is based on a custom emoji.

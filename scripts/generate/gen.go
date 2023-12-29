@@ -39,12 +39,12 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 
 	for _, m := range d.Methods {
 		for _, r := range m.Returns {
-			if r == td.Name {
-				return true
-			}
-
 			if isTgArray(r) {
 				r = strings.TrimPrefix(r, "Array of ")
+			}
+
+			if r == td.Name {
+				return true
 			}
 
 			child, ok := d.Types[r]
@@ -64,6 +64,10 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 func usesChildType(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
 	for _, f := range tgType.Fields {
 		for _, t := range f.Types {
+			if isTgArray(t) {
+				t = strings.TrimPrefix(t, "Array of ")
+			}
+
 			if t == typeName {
 				return true
 			}
