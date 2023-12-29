@@ -286,6 +286,9 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	if err != nil {
 		return "", fmt.Errorf("failed to generate custom unmarshaller for %s: %w", tgType.Name, err)
 	}
+	if constantField == "" {
+		return "", nil
+	}
 
 	var cases []customStructUnmarshalCaseData
 	for _, subTypeName := range tgType.Subtypes {
@@ -337,21 +340,26 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		}
 		bd.WriteString(commonGetMethods)
 
-		mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
-		if err != nil {
-			return "", err
+		// We only generate the merge func if there is a comm
+		if constantField != "" {
+			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
+			if err != nil {
+				return "", err
+			}
+			bd.WriteString(mergeFunc)
 		}
-		bd.WriteString(mergeFunc)
 	}
 
-	err = customMarshalTmpl.Execute(&bd, customMarshalData{
-		Type:                  tgType.Name,
-		ConstantFieldName:     strings.Title(constantField),
-		ConstantJSONFieldName: constantField,
-		ConstantValueName:     shortName,
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+	if constantField != "" {
+		err = customMarshalTmpl.Execute(&bd, customMarshalData{
+			Type:                  tgType.Name,
+			ConstantFieldName:     strings.Title(constantField),
+			ConstantJSONFieldName: constantField,
+			ConstantValueName:     shortName,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
+		}
 	}
 
 	return bd.String(), nil
@@ -377,19 +385,11 @@ func generateAllCommonGetMethods(d APIDescription, typeName string, commonFields
 
 // generateTypeFields generates the field contents of a telegram "struct" by parsing the fields.
 func generateTypeFields(d APIDescription, tgType TypeDescription) (string, error) {
-	parents, err := getTypesByName(d, tgType.SubtypeOf)
-	if err != nil {
-		return "", fmt.Errorf("failed to get parents of %s: %w", tgType.Name, err)
-	}
-
 	var constantFields []string
-	for _, p := range parents {
-		constantField, err := p.getConstantFieldFromParent(d)
-		if err != nil {
-			// if no fields, skip
-			continue
+	for _, f := range tgType.Fields {
+		if f.isConstantField(d, tgType) {
+			constantFields = append(constantFields, f.Name)
 		}
-		constantFields = append(constantFields, constantField)
 	}
 
 	return generateStructFields(d, tgType.Fields, constantFields)
@@ -437,6 +437,11 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 	commonFields := getCommonFields(subtypes)
 
+	constantField, err := getConstantFieldFromCommons(d, commonFields)
+	if err != nil {
+		return "", fmt.Errorf("failed to get constant fields: %w", err)
+	}
+
 	hasInputFile, fieldName, err := containsInputFile(d, subtypes[0], map[string]bool{})
 	if err != nil {
 		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
@@ -464,13 +469,14 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString("\nInputParams(string, map[string]NamedReader) ([]byte, error)")
 	}
 
-	if len(commonFields) > 0 {
+	if len(commonFields) > 0 && constantField != "" {
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
 	bd.WriteString("\n}")
 
-	if len(commonFields) > 0 {
+	if len(commonFields) > 0 && constantField != "" {
+		// TODO: Only generate when constant field
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
 			return "", err

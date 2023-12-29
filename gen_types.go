@@ -1914,13 +1914,15 @@ type GiveawayWinners struct {
 type InaccessibleMessage struct {
 	// Chat the message belonged to
 	Chat Chat `json:"chat"`
+	// Unique message identifier inside the chat
+	MessageId int64 `json:"message_id"`
 	// Always 0. The field can be used to differentiate regular and inaccessible messages.
 	Date int64 `json:"date"`
 }
 
 // GetMessageId is a helper method to easily access the common fields of an interface.
 func (v InaccessibleMessage) GetMessageId() int64 {
-	return "inaccessible_message"
+	return v.MessageId
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -1931,28 +1933,6 @@ func (v InaccessibleMessage) GetDate() int64 {
 // GetChat is a helper method to easily access the common fields of an interface.
 func (v InaccessibleMessage) GetChat() Chat {
 	return v.Chat
-}
-
-// MergeMaybeInaccessibleMessage returns a MergedMaybeInaccessibleMessage struct to simplify working with types in a non-generic world.
-func (v InaccessibleMessage) MergeMaybeInaccessibleMessage() MergedMaybeInaccessibleMessage {
-	return MergedMaybeInaccessibleMessage{
-		Chat:      v.Chat,
-		MessageId: "inaccessible_message",
-		Date:      v.Date,
-	}
-}
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Message_id value.
-func (v InaccessibleMessage) MarshalJSON() ([]byte, error) {
-	type alias InaccessibleMessage
-	a := struct {
-		Message_id string `json:"message_id"`
-		alias
-	}{
-		Message_id: "inaccessible_message",
-		alias:      (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 // InaccessibleMessage.maybeInaccessibleMessage is a dummy method to avoid interface implementation.
@@ -4422,240 +4402,6 @@ type MaybeInaccessibleMessage interface {
 	GetChat() Chat
 	// maybeInaccessibleMessage exists to avoid external types implementing this interface.
 	maybeInaccessibleMessage()
-	// MergeMaybeInaccessibleMessage returns a MergedMaybeInaccessibleMessage struct to simplify working with complex telegram types in a non-generic world.
-	MergeMaybeInaccessibleMessage() MergedMaybeInaccessibleMessage
-}
-
-// MergedMaybeInaccessibleMessage is a helper type to simplify interactions with the various MaybeInaccessibleMessage subtypes.
-type MergedMaybeInaccessibleMessage struct {
-	// Unique message identifier inside this chat
-	MessageId int64 `json:"message_id"`
-	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only (Only for message)
-	MessageThreadId int64 `json:"message_thread_id,omitempty"`
-	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat. (Only for message)
-	From *User `json:"from,omitempty"`
-	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat. (Only for message)
-	SenderChat *Chat `json:"sender_chat,omitempty"`
-	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
-	Date int64 `json:"date"`
-	// Chat the message belongs to
-	Chat Chat `json:"chat"`
-	// Optional. Information about the original message for forwarded messages (Only for message)
-	ForwardOrigin *MessageOrigin `json:"forward_origin,omitempty"`
-	// Optional. True, if the message is sent to a forum topic (Only for message)
-	IsTopicMessage bool `json:"is_topic_message,omitempty"`
-	// Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group (Only for message)
-	IsAutomaticForward bool `json:"is_automatic_forward,omitempty"`
-	// Optional. For replies in the same chat and message thread, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply. (Only for message)
-	ReplyToMessage *Message `json:"reply_to_message,omitempty"`
-	// Optional. Information about the message that is being replied to, which may come from another chat or forum topic (Only for message)
-	ExternalReply *ExternalReplyInfo `json:"external_reply,omitempty"`
-	// Optional. For replies that quote part of the original message, the quoted part of the message (Only for message)
-	Quote *TextQuote `json:"quote,omitempty"`
-	// Optional. Bot through which the message was sent (Only for message)
-	ViaBot *User `json:"via_bot,omitempty"`
-	// Optional. Date the message was last edited in Unix time (Only for message)
-	EditDate int64 `json:"edit_date,omitempty"`
-	// Optional. True, if the message can't be forwarded (Only for message)
-	HasProtectedContent bool `json:"has_protected_content,omitempty"`
-	// Optional. The unique identifier of a media message group this message belongs to (Only for message)
-	MediaGroupId string `json:"media_group_id,omitempty"`
-	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator (Only for message)
-	AuthorSignature string `json:"author_signature,omitempty"`
-	// Optional. For text messages, the actual UTF-8 text of the message (Only for message)
-	Text string `json:"text,omitempty"`
-	// Optional. For text messages, special entities like usernames, URLs, bot commands, etc. that appear in the text (Only for message)
-	Entities []MessageEntity `json:"entities,omitempty"`
-	// Optional. Options used for link preview generation for the message, if it is a text message and link preview options were changed (Only for message)
-	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
-	// Optional. Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set (Only for message)
-	Animation *Animation `json:"animation,omitempty"`
-	// Optional. Message is an audio file, information about the file (Only for message)
-	Audio *Audio `json:"audio,omitempty"`
-	// Optional. Message is a general file, information about the file (Only for message)
-	Document *Document `json:"document,omitempty"`
-	// Optional. Message is a photo, available sizes of the photo (Only for message)
-	Photo []PhotoSize `json:"photo,omitempty"`
-	// Optional. Message is a sticker, information about the sticker (Only for message)
-	Sticker *Sticker `json:"sticker,omitempty"`
-	// Optional. Message is a forwarded story (Only for message)
-	Story *Story `json:"story,omitempty"`
-	// Optional. Message is a video, information about the video (Only for message)
-	Video *Video `json:"video,omitempty"`
-	// Optional. Message is a video note, information about the video message (Only for message)
-	VideoNote *VideoNote `json:"video_note,omitempty"`
-	// Optional. Message is a voice message, information about the file (Only for message)
-	Voice *Voice `json:"voice,omitempty"`
-	// Optional. Caption for the animation, audio, document, photo, video or voice (Only for message)
-	Caption string `json:"caption,omitempty"`
-	// Optional. For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear in the caption (Only for message)
-	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. True, if the message media is covered by a spoiler animation (Only for message)
-	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
-	// Optional. Message is a shared contact, information about the contact (Only for message)
-	Contact *Contact `json:"contact,omitempty"`
-	// Optional. Message is a dice with random value (Only for message)
-	Dice *Dice `json:"dice,omitempty"`
-	// Optional. Message is a game, information about the game. More about games: https://core.telegram.org/bots/api#games (Only for message)
-	Game *Game `json:"game,omitempty"`
-	// Optional. Message is a native poll, information about the poll (Only for message)
-	Poll *Poll `json:"poll,omitempty"`
-	// Optional. Message is a venue, information about the venue. For backward compatibility, when this field is set, the location field will also be set (Only for message)
-	Venue *Venue `json:"venue,omitempty"`
-	// Optional. Message is a shared location, information about the location (Only for message)
-	Location *Location `json:"location,omitempty"`
-	// Optional. New members that were added to the group or supergroup and information about them (the bot itself may be one of these members) (Only for message)
-	NewChatMembers []User `json:"new_chat_members,omitempty"`
-	// Optional. A member was removed from the group, information about them (this member may be the bot itself) (Only for message)
-	LeftChatMember *User `json:"left_chat_member,omitempty"`
-	// Optional. A chat title was changed to this value (Only for message)
-	NewChatTitle string `json:"new_chat_title,omitempty"`
-	// Optional. A chat photo was change to this value (Only for message)
-	NewChatPhoto []PhotoSize `json:"new_chat_photo,omitempty"`
-	// Optional. Service message: the chat photo was deleted (Only for message)
-	DeleteChatPhoto bool `json:"delete_chat_photo,omitempty"`
-	// Optional. Service message: the group has been created (Only for message)
-	GroupChatCreated bool `json:"group_chat_created,omitempty"`
-	// Optional. Service message: the supergroup has been created. This field can't be received in a message coming through updates, because bot can't be a member of a supergroup when it is created. It can only be found in reply_to_message if someone replies to a very first message in a directly created supergroup. (Only for message)
-	SupergroupChatCreated bool `json:"supergroup_chat_created,omitempty"`
-	// Optional. Service message: the channel has been created. This field can't be received in a message coming through updates, because bot can't be a member of a channel when it is created. It can only be found in reply_to_message if someone replies to a very first message in a channel. (Only for message)
-	ChannelChatCreated bool `json:"channel_chat_created,omitempty"`
-	// Optional. Service message: auto-delete timer settings changed in the chat (Only for message)
-	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
-	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier. (Only for message)
-	MigrateToChatId int64 `json:"migrate_to_chat_id,omitempty"`
-	// Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier. (Only for message)
-	MigrateFromChatId int64 `json:"migrate_from_chat_id,omitempty"`
-	// Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply. (Only for message)
-	PinnedMessage *MaybeInaccessibleMessage `json:"pinned_message,omitempty"`
-	// Optional. Message is an invoice for a payment, information about the invoice. More about payments: https://core.telegram.org/bots/api#payments (Only for message)
-	Invoice *Invoice `json:"invoice,omitempty"`
-	// Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments (Only for message)
-	SuccessfulPayment *SuccessfulPayment `json:"successful_payment,omitempty"`
-	// Optional. Service message: users were shared with the bot (Only for message)
-	UsersShared *UsersShared `json:"users_shared,omitempty"`
-	// Optional. Service message: a chat was shared with the bot (Only for message)
-	ChatShared *ChatShared `json:"chat_shared,omitempty"`
-	// Optional. The domain name of the website on which the user has logged in. More about Telegram Login: https://core.telegram.org/widgets/login (Only for message)
-	ConnectedWebsite string `json:"connected_website,omitempty"`
-	// Optional. Service message: the user allowed the bot to write messages after adding it to the attachment or side menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess (Only for message)
-	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
-	// Optional. Telegram Passport data (Only for message)
-	PassportData *PassportData `json:"passport_data,omitempty"`
-	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location. (Only for message)
-	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
-	// Optional. Service message: forum topic created (Only for message)
-	ForumTopicCreated *ForumTopicCreated `json:"forum_topic_created,omitempty"`
-	// Optional. Service message: forum topic edited (Only for message)
-	ForumTopicEdited *ForumTopicEdited `json:"forum_topic_edited,omitempty"`
-	// Optional. Service message: forum topic closed (Only for message)
-	ForumTopicClosed *ForumTopicClosed `json:"forum_topic_closed,omitempty"`
-	// Optional. Service message: forum topic reopened (Only for message)
-	ForumTopicReopened *ForumTopicReopened `json:"forum_topic_reopened,omitempty"`
-	// Optional. Service message: the 'General' forum topic hidden (Only for message)
-	GeneralForumTopicHidden *GeneralForumTopicHidden `json:"general_forum_topic_hidden,omitempty"`
-	// Optional. Service message: the 'General' forum topic unhidden (Only for message)
-	GeneralForumTopicUnhidden *GeneralForumTopicUnhidden `json:"general_forum_topic_unhidden,omitempty"`
-	// Optional. Service message: a scheduled giveaway was created (Only for message)
-	GiveawayCreated *GiveawayCreated `json:"giveaway_created,omitempty"`
-	// Optional. The message is a scheduled giveaway message (Only for message)
-	Giveaway *Giveaway `json:"giveaway,omitempty"`
-	// Optional. A giveaway with public winners was completed (Only for message)
-	GiveawayWinners *GiveawayWinners `json:"giveaway_winners,omitempty"`
-	// Optional. Service message: a giveaway without public winners was completed (Only for message)
-	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed,omitempty"`
-	// Optional. Service message: video chat scheduled (Only for message)
-	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
-	// Optional. Service message: video chat started (Only for message)
-	VideoChatStarted *VideoChatStarted `json:"video_chat_started,omitempty"`
-	// Optional. Service message: video chat ended (Only for message)
-	VideoChatEnded *VideoChatEnded `json:"video_chat_ended,omitempty"`
-	// Optional. Service message: new participants invited to a video chat (Only for message)
-	VideoChatParticipantsInvited *VideoChatParticipantsInvited `json:"video_chat_participants_invited,omitempty"`
-	// Optional. Service message: data sent by a Web App (Only for message)
-	WebAppData *WebAppData `json:"web_app_data,omitempty"`
-	// Optional. Inline keyboard attached to the message. login_url buttons are represented as ordinary url buttons. (Only for message)
-	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-}
-
-// GetMessageId is a helper method to easily access the common fields of an interface.
-func (v MergedMaybeInaccessibleMessage) GetMessageId() int64 {
-	return v.MessageId
-}
-
-// GetDate is a helper method to easily access the common fields of an interface.
-func (v MergedMaybeInaccessibleMessage) GetDate() int64 {
-	return v.Date
-}
-
-// GetChat is a helper method to easily access the common fields of an interface.
-func (v MergedMaybeInaccessibleMessage) GetChat() Chat {
-	return v.Chat
-}
-
-// MergedMaybeInaccessibleMessage.maybeInaccessibleMessage is a dummy method to avoid interface implementation.
-func (v MergedMaybeInaccessibleMessage) maybeInaccessibleMessage() {}
-
-// MergeMaybeInaccessibleMessage returns a MergedMaybeInaccessibleMessage struct to simplify working with types in a non-generic world.
-func (v MergedMaybeInaccessibleMessage) MergeMaybeInaccessibleMessage() MergedMaybeInaccessibleMessage {
-	return v
-}
-
-// unmarshalMaybeInaccessibleMessageArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
-// using unmarshalMaybeInaccessibleMessage.
-func unmarshalMaybeInaccessibleMessageArray(d json.RawMessage) ([]MaybeInaccessibleMessage, error) {
-	var ds []json.RawMessage
-	err := json.Unmarshal(d, &ds)
-	if err != nil {
-		return nil, err
-	}
-
-	var vs []MaybeInaccessibleMessage
-	for _, d := range ds {
-		v, err := unmarshalMaybeInaccessibleMessage(d)
-		if err != nil {
-			return nil, err
-		}
-		vs = append(vs, v)
-	}
-
-	return vs, nil
-}
-
-// unmarshalMaybeInaccessibleMessage is a JSON unmarshal helper to marshal the right structs into a MaybeInaccessibleMessage interface
-// based on the MessageId field.
-func unmarshalMaybeInaccessibleMessage(d json.RawMessage) (MaybeInaccessibleMessage, error) {
-	if len(d) == 0 {
-		return nil, nil
-	}
-
-	t := struct {
-		MessageId string
-	}{}
-	err := json.Unmarshal(d, &t)
-	if err != nil {
-		return nil, err
-	}
-
-	switch t.MessageId {
-	case "message":
-		s := Message{}
-		err := json.Unmarshal(d, &s)
-		if err != nil {
-			return nil, err
-		}
-		return s, nil
-
-	case "inaccessible_message":
-		s := InaccessibleMessage{}
-		err := json.Unmarshal(d, &s)
-		if err != nil {
-			return nil, err
-		}
-		return s, nil
-
-	}
-	return nil, fmt.Errorf("unknown interface with MessageId %v", t.MessageId)
 }
 
 // MenuButton (https://core.telegram.org/bots/api#menubutton)
@@ -4872,6 +4618,8 @@ func (v MenuButtonWebApp) menuButton() {}
 //
 // This object represents a message.
 type Message struct {
+	// Unique message identifier inside this chat
+	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
 	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
@@ -5024,6 +4772,7 @@ type Message struct {
 func (v *Message) UnmarshalJSON(b []byte) error {
 	// All fields in Message, with interface fields as json.RawMessage
 	type tmp struct {
+		MessageId                     int64                          `json:"message_id"`
 		MessageThreadId               int64                          `json:"message_thread_id"`
 		From                          *User                          `json:"from"`
 		SenderChat                    *Chat                          `json:"sender_chat"`
@@ -5104,6 +4853,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
+	v.MessageId = t.MessageId
 	v.MessageThreadId = t.MessageThreadId
 	v.From = t.From
 	v.SenderChat = t.SenderChat
@@ -5183,7 +4933,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 
 // GetMessageId is a helper method to easily access the common fields of an interface.
 func (v Message) GetMessageId() int64 {
-	return "message"
+	return v.MessageId
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -5194,99 +4944,6 @@ func (v Message) GetDate() int64 {
 // GetChat is a helper method to easily access the common fields of an interface.
 func (v Message) GetChat() Chat {
 	return v.Chat
-}
-
-// MergeMaybeInaccessibleMessage returns a MergedMaybeInaccessibleMessage struct to simplify working with types in a non-generic world.
-func (v Message) MergeMaybeInaccessibleMessage() MergedMaybeInaccessibleMessage {
-	return MergedMaybeInaccessibleMessage{
-		MessageId:                     "message",
-		MessageThreadId:               v.MessageThreadId,
-		From:                          v.From,
-		SenderChat:                    v.SenderChat,
-		Date:                          v.Date,
-		Chat:                          v.Chat,
-		ForwardOrigin:                 v.ForwardOrigin,
-		IsTopicMessage:                v.IsTopicMessage,
-		IsAutomaticForward:            v.IsAutomaticForward,
-		ReplyToMessage:                v.ReplyToMessage,
-		ExternalReply:                 v.ExternalReply,
-		Quote:                         v.Quote,
-		ViaBot:                        v.ViaBot,
-		EditDate:                      v.EditDate,
-		HasProtectedContent:           v.HasProtectedContent,
-		MediaGroupId:                  v.MediaGroupId,
-		AuthorSignature:               v.AuthorSignature,
-		Text:                          v.Text,
-		Entities:                      v.Entities,
-		LinkPreviewOptions:            v.LinkPreviewOptions,
-		Animation:                     v.Animation,
-		Audio:                         v.Audio,
-		Document:                      v.Document,
-		Photo:                         v.Photo,
-		Sticker:                       v.Sticker,
-		Story:                         v.Story,
-		Video:                         v.Video,
-		VideoNote:                     v.VideoNote,
-		Voice:                         v.Voice,
-		Caption:                       v.Caption,
-		CaptionEntities:               v.CaptionEntities,
-		HasMediaSpoiler:               v.HasMediaSpoiler,
-		Contact:                       v.Contact,
-		Dice:                          v.Dice,
-		Game:                          v.Game,
-		Poll:                          v.Poll,
-		Venue:                         v.Venue,
-		Location:                      v.Location,
-		NewChatMembers:                v.NewChatMembers,
-		LeftChatMember:                v.LeftChatMember,
-		NewChatTitle:                  v.NewChatTitle,
-		NewChatPhoto:                  v.NewChatPhoto,
-		DeleteChatPhoto:               v.DeleteChatPhoto,
-		GroupChatCreated:              v.GroupChatCreated,
-		SupergroupChatCreated:         v.SupergroupChatCreated,
-		ChannelChatCreated:            v.ChannelChatCreated,
-		MessageAutoDeleteTimerChanged: v.MessageAutoDeleteTimerChanged,
-		MigrateToChatId:               v.MigrateToChatId,
-		MigrateFromChatId:             v.MigrateFromChatId,
-		PinnedMessage:                 v.PinnedMessage,
-		Invoice:                       v.Invoice,
-		SuccessfulPayment:             v.SuccessfulPayment,
-		UsersShared:                   v.UsersShared,
-		ChatShared:                    v.ChatShared,
-		ConnectedWebsite:              v.ConnectedWebsite,
-		WriteAccessAllowed:            v.WriteAccessAllowed,
-		PassportData:                  v.PassportData,
-		ProximityAlertTriggered:       v.ProximityAlertTriggered,
-		ForumTopicCreated:             v.ForumTopicCreated,
-		ForumTopicEdited:              v.ForumTopicEdited,
-		ForumTopicClosed:              v.ForumTopicClosed,
-		ForumTopicReopened:            v.ForumTopicReopened,
-		GeneralForumTopicHidden:       v.GeneralForumTopicHidden,
-		GeneralForumTopicUnhidden:     v.GeneralForumTopicUnhidden,
-		GiveawayCreated:               v.GiveawayCreated,
-		Giveaway:                      v.Giveaway,
-		GiveawayWinners:               v.GiveawayWinners,
-		GiveawayCompleted:             v.GiveawayCompleted,
-		VideoChatScheduled:            v.VideoChatScheduled,
-		VideoChatStarted:              v.VideoChatStarted,
-		VideoChatEnded:                v.VideoChatEnded,
-		VideoChatParticipantsInvited:  v.VideoChatParticipantsInvited,
-		WebAppData:                    v.WebAppData,
-		ReplyMarkup:                   v.ReplyMarkup,
-	}
-}
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Message_id value.
-func (v Message) MarshalJSON() ([]byte, error) {
-	type alias Message
-	a := struct {
-		Message_id string `json:"message_id"`
-		alias
-	}{
-		Message_id: "message",
-		alias:      (alias)(v),
-	}
-	return json.Marshal(a)
 }
 
 // Message.maybeInaccessibleMessage is a dummy method to avoid interface implementation.
