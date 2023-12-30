@@ -39,13 +39,21 @@ func ChatID(id int64) filters.Message {
 
 func ForwardFromUserID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.ForwardFrom != nil && m.ForwardFrom.Id == id
+		if m.ForwardOrigin == nil {
+			return false
+		}
+		u := (*m.ForwardOrigin).MergeMessageOrigin().SenderUser
+		return u != nil && u.Id == id
 	}
 }
 
 func ForwardFromChatID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.ForwardFromChat != nil && m.ForwardFromChat.Id == id
+		if m.ForwardOrigin == nil {
+			return false
+		}
+		c := (*m.ForwardOrigin).MergeMessageOrigin().SenderChat
+		return c != nil && c.Id == id
 	}
 }
 
@@ -91,7 +99,7 @@ func Channel(msg *gotgbot.Message) bool {
 }
 
 func Forwarded(msg *gotgbot.Message) bool {
-	return msg.ForwardDate != 0
+	return msg.ForwardOrigin != nil
 }
 
 func Text(msg *gotgbot.Message) bool {
@@ -266,8 +274,8 @@ func IsAutomaticForward(msg *gotgbot.Message) bool {
 	return msg.IsAutomaticForward
 }
 
-func UserShared(msg *gotgbot.Message) bool {
-	return msg.UserShared != nil
+func UsersShared(msg *gotgbot.Message) bool {
+	return msg.UsersShared != nil
 }
 
 func ChatShared(msg *gotgbot.Message) bool {
