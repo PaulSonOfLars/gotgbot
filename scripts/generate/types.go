@@ -415,7 +415,7 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 			continue
 		}
 
-		if isTgType(d, fieldType) && !f.Required {
+		if isTgType(d, fieldType) && !f.Required && len(d.Types[fieldType].Subtypes) == 0 {
 			fieldType = "*" + fieldType
 		}
 

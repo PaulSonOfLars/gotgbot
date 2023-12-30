@@ -397,7 +397,7 @@ type CallbackQuery struct {
 	// Sender
 	From User `json:"from"`
 	// Optional. Message sent by the bot with the callback button that originated the query
-	Message *MaybeInaccessibleMessage `json:"message,omitempty"`
+	Message MaybeInaccessibleMessage `json:"message,omitempty"`
 	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
 	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
@@ -2110,7 +2110,7 @@ type MergedInlineQueryResult struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the audio (Only for audio, document, gif, mpeg4_gif, photo, sticker, video, voice, article, audio, contact, document, gif, location, mpeg4_gif, photo, venue, video, voice)
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Title for the result (Only for document, gif, mpeg4_gif, photo, video, voice, article, audio, document, gif, location, mpeg4_gif, photo, venue, video, voice)
 	Title string `json:"title,omitempty"`
 	// Optional. A valid file identifier for the file (Only for document)
@@ -2330,7 +2330,7 @@ type InlineQueryResultAudio struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the audio
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2394,7 +2394,7 @@ type InlineQueryResultCachedAudio struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the audio
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2459,7 +2459,7 @@ type InlineQueryResultCachedDocument struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the file
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2523,7 +2523,7 @@ type InlineQueryResultCachedGif struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the GIF animation
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2586,7 +2586,7 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video animation
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2651,7 +2651,7 @@ type InlineQueryResultCachedPhoto struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the photo
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2708,7 +2708,7 @@ type InlineQueryResultCachedSticker struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the sticker
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2769,7 +2769,7 @@ type InlineQueryResultCachedVideo struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2834,7 +2834,7 @@ type InlineQueryResultCachedVoice struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the voice message
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -2896,7 +2896,7 @@ type InlineQueryResultContact struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the contact
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
 	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
@@ -2972,7 +2972,7 @@ type InlineQueryResultDocument struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the file
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. URL of the thumbnail (JPEG only) for the file
 	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
@@ -3105,7 +3105,7 @@ type InlineQueryResultGif struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the GIF animation
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3178,7 +3178,7 @@ type InlineQueryResultLocation struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the location
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
 	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
@@ -3262,7 +3262,7 @@ type InlineQueryResultMpeg4Gif struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video animation
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3338,7 +3338,7 @@ type InlineQueryResultPhoto struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the photo
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3412,7 +3412,7 @@ type InlineQueryResultVenue struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the venue
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 	// Optional. Url of the thumbnail for the result
 	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width
@@ -3499,7 +3499,7 @@ type InlineQueryResultVideo struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video. This field is required if InlineQueryResultVideo is used to send an HTML-page as a result (e.g., a YouTube video).
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -3571,7 +3571,7 @@ type InlineQueryResultVoice struct {
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the voice recording
-	InputMessageContent *InputMessageContent `json:"input_message_content,omitempty"`
+	InputMessageContent InputMessageContent `json:"input_message_content,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -4696,7 +4696,7 @@ type Message struct {
 	// Chat the message belongs to
 	Chat Chat `json:"chat"`
 	// Optional. Information about the original message for forwarded messages
-	ForwardOrigin *MessageOrigin `json:"forward_origin,omitempty"`
+	ForwardOrigin MessageOrigin `json:"forward_origin,omitempty"`
 	// Optional. True, if the message is sent to a forum topic
 	IsTopicMessage bool `json:"is_topic_message,omitempty"`
 	// Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
@@ -4782,7 +4782,7 @@ type Message struct {
 	// Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	MigrateFromChatId int64 `json:"migrate_from_chat_id,omitempty"`
 	// Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
-	PinnedMessage *MaybeInaccessibleMessage `json:"pinned_message,omitempty"`
+	PinnedMessage MaybeInaccessibleMessage `json:"pinned_message,omitempty"`
 	// Optional. Message is an invoice for a payment, information about the invoice. More about payments: https://core.telegram.org/bots/api#payments
 	Invoice *Invoice `json:"invoice,omitempty"`
 	// Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
