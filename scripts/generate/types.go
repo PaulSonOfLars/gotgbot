@@ -218,7 +218,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			continue
 		}
 
-		if isTgType(d, prefType) && !f.Required {
+		if isTgStructType(d, prefType) && !f.Required {
 			prefType = "*" + prefType
 		}
 
@@ -415,7 +415,7 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 			continue
 		}
 
-		if isTgType(d, fieldType) && !f.Required && len(d.Types[fieldType].Subtypes) == 0 {
+		if isTgStructType(d, fieldType) && !f.Required {
 			fieldType = "*" + fieldType
 		}
 
@@ -558,7 +558,7 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 					return "", fmt.Errorf("failed to get preferred type: %w", err)
 				}
 
-				if isTgType(d, fieldType) && f.Required != parentField.Required {
+				if isTgStructType(d, fieldType) && f.Required != parentField.Required {
 					deref = true
 				}
 			}

@@ -412,13 +412,13 @@ type CallbackQuery struct {
 func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 	// All fields in CallbackQuery, with interface fields as json.RawMessage
 	type tmp struct {
-		Id              string                    `json:"id"`
-		From            User                      `json:"from"`
-		Message         *MaybeInaccessibleMessage `json:"message"`
-		InlineMessageId string                    `json:"inline_message_id"`
-		ChatInstance    string                    `json:"chat_instance"`
-		Data            string                    `json:"data"`
-		GameShortName   string                    `json:"game_short_name"`
+		Id              string          `json:"id"`
+		From            User            `json:"from"`
+		Message         json.RawMessage `json:"message"`
+		InlineMessageId string          `json:"inline_message_id"`
+		ChatInstance    string          `json:"chat_instance"`
+		Data            string          `json:"data"`
+		GameShortName   string          `json:"game_short_name"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
@@ -428,7 +428,10 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 
 	v.Id = t.Id
 	v.From = t.From
-	v.Message = t.Message
+	v.Message, err = unmarshalMaybeInaccessibleMessage(t.Message)
+	if err != nil {
+		return err
+	}
 	v.InlineMessageId = t.InlineMessageId
 	v.ChatInstance = t.ChatInstance
 	v.Data = t.Data
@@ -2279,7 +2282,7 @@ func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResu
 		Type:                "article",
 		Id:                  v.Id,
 		Title:               v.Title,
-		InputMessageContent: &v.InputMessageContent,
+		InputMessageContent: v.InputMessageContent,
 		ReplyMarkup:         v.ReplyMarkup,
 		Url:                 v.Url,
 		HideUrl:             v.HideUrl,
@@ -4843,7 +4846,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		SenderChat                    *Chat                          `json:"sender_chat"`
 		Date                          int64                          `json:"date"`
 		Chat                          Chat                           `json:"chat"`
-		ForwardOrigin                 *MessageOrigin                 `json:"forward_origin"`
+		ForwardOrigin                 json.RawMessage                `json:"forward_origin"`
 		IsTopicMessage                bool                           `json:"is_topic_message"`
 		IsAutomaticForward            bool                           `json:"is_automatic_forward"`
 		ReplyToMessage                *Message                       `json:"reply_to_message"`
@@ -4886,7 +4889,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed"`
 		MigrateToChatId               int64                          `json:"migrate_to_chat_id"`
 		MigrateFromChatId             int64                          `json:"migrate_from_chat_id"`
-		PinnedMessage                 *MaybeInaccessibleMessage      `json:"pinned_message"`
+		PinnedMessage                 json.RawMessage                `json:"pinned_message"`
 		Invoice                       *Invoice                       `json:"invoice"`
 		SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`
 		UsersShared                   *UsersShared                   `json:"users_shared"`
@@ -4924,7 +4927,10 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.SenderChat = t.SenderChat
 	v.Date = t.Date
 	v.Chat = t.Chat
-	v.ForwardOrigin = t.ForwardOrigin
+	v.ForwardOrigin, err = unmarshalMessageOrigin(t.ForwardOrigin)
+	if err != nil {
+		return err
+	}
 	v.IsTopicMessage = t.IsTopicMessage
 	v.IsAutomaticForward = t.IsAutomaticForward
 	v.ReplyToMessage = t.ReplyToMessage
@@ -4967,7 +4973,10 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.MessageAutoDeleteTimerChanged = t.MessageAutoDeleteTimerChanged
 	v.MigrateToChatId = t.MigrateToChatId
 	v.MigrateFromChatId = t.MigrateFromChatId
-	v.PinnedMessage = t.PinnedMessage
+	v.PinnedMessage, err = unmarshalMaybeInaccessibleMessage(t.PinnedMessage)
+	if err != nil {
+		return err
+	}
 	v.Invoice = t.Invoice
 	v.SuccessfulPayment = t.SuccessfulPayment
 	v.UsersShared = t.UsersShared

@@ -279,6 +279,15 @@ func isTgType(d APIDescription, goType string) bool {
 	return ok
 }
 
+// isTgStructType returns false if there are subtypes (ie, is NOT an interface)
+func isTgStructType(d APIDescription, goType string) bool {
+	t, ok := d.Types[goType]
+	if !ok {
+		return false
+	}
+	return len(t.Subtypes) == 0
+}
+
 func (f Field) getPreferredType(d APIDescription) (string, error) {
 	if f.Name == "media" {
 		if len(f.Types) == 1 && f.Types[0] == "String" {
