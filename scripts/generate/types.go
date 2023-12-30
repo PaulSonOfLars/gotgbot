@@ -104,6 +104,17 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	return typeDef.String(), nil
 }
 
+func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
+	bd := strings.Builder{}
+	bd.WriteString("\n// Ensure that all subtypes correctly implement the parent interface.")
+	bd.WriteString("\nvar (")
+	for _, v := range subtypes {
+		bd.WriteString("\n_ " + name + " = " + v.Name + "{}")
+	}
+	bd.WriteString("\n)")
+	return bd.String()
+}
+
 // fieldContainsInputFile checks whether the field's type contains any inputfiles, and thus might be used to send data.
 func fieldContainsInputFile(d APIDescription, field Field) (bool, error) {
 	goType, err := field.getPreferredType(d)
@@ -479,6 +490,8 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
 	bd.WriteString("\n}")
+
+	bd.WriteString(enforceTypeAssertion(name, subtypes))
 
 	if len(commonFields) > 0 && constantField != "" {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)

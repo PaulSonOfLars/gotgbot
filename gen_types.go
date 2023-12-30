@@ -14,6 +14,14 @@ type ReplyMarkup interface {
 	replyMarkup()
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ ReplyMarkup = ForceReply{}
+	_ ReplyMarkup = InlineKeyboardMarkup{}
+	_ ReplyMarkup = ReplyKeyboardMarkup{}
+	_ ReplyMarkup = ReplyKeyboardRemove{}
+)
+
 // Animation (https://core.telegram.org/bots/api#animation)
 //
 // This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
@@ -89,6 +97,17 @@ type BotCommandScope interface {
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ BotCommandScope = BotCommandScopeDefault{}
+	_ BotCommandScope = BotCommandScopeAllPrivateChats{}
+	_ BotCommandScope = BotCommandScopeAllGroupChats{}
+	_ BotCommandScope = BotCommandScopeAllChatAdministrators{}
+	_ BotCommandScope = BotCommandScopeChat{}
+	_ BotCommandScope = BotCommandScopeChatAdministrators{}
+	_ BotCommandScope = BotCommandScopeChatMember{}
+)
 
 // MergedBotCommandScope is a helper type to simplify interactions with the various BotCommandScope subtypes.
 type MergedBotCommandScope struct {
@@ -646,6 +665,13 @@ type ChatBoostSource interface {
 	MergeChatBoostSource() MergedChatBoostSource
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ ChatBoostSource = ChatBoostSourcePremium{}
+	_ ChatBoostSource = ChatBoostSourceGiftCode{}
+	_ ChatBoostSource = ChatBoostSourceGiveaway{}
+)
+
 // MergedChatBoostSource is a helper type to simplify interactions with the various ChatBoostSource subtypes.
 type MergedChatBoostSource struct {
 	// Source of the boost
@@ -932,6 +958,16 @@ type ChatMember interface {
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ ChatMember = ChatMemberOwner{}
+	_ ChatMember = ChatMemberAdministrator{}
+	_ ChatMember = ChatMemberMember{}
+	_ ChatMember = ChatMemberRestricted{}
+	_ ChatMember = ChatMemberLeft{}
+	_ ChatMember = ChatMemberBanned{}
+)
 
 // MergedChatMember is a helper type to simplify interactions with the various ChatMember subtypes.
 type MergedChatMember struct {
@@ -2095,6 +2131,30 @@ type InlineQueryResult interface {
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ InlineQueryResult = InlineQueryResultCachedAudio{}
+	_ InlineQueryResult = InlineQueryResultCachedDocument{}
+	_ InlineQueryResult = InlineQueryResultCachedGif{}
+	_ InlineQueryResult = InlineQueryResultCachedMpeg4Gif{}
+	_ InlineQueryResult = InlineQueryResultCachedPhoto{}
+	_ InlineQueryResult = InlineQueryResultCachedSticker{}
+	_ InlineQueryResult = InlineQueryResultCachedVideo{}
+	_ InlineQueryResult = InlineQueryResultCachedVoice{}
+	_ InlineQueryResult = InlineQueryResultArticle{}
+	_ InlineQueryResult = InlineQueryResultAudio{}
+	_ InlineQueryResult = InlineQueryResultContact{}
+	_ InlineQueryResult = InlineQueryResultGame{}
+	_ InlineQueryResult = InlineQueryResultDocument{}
+	_ InlineQueryResult = InlineQueryResultGif{}
+	_ InlineQueryResult = InlineQueryResultLocation{}
+	_ InlineQueryResult = InlineQueryResultMpeg4Gif{}
+	_ InlineQueryResult = InlineQueryResultPhoto{}
+	_ InlineQueryResult = InlineQueryResultVenue{}
+	_ InlineQueryResult = InlineQueryResultVideo{}
+	_ InlineQueryResult = InlineQueryResultVoice{}
+)
 
 // MergedInlineQueryResult is a helper type to simplify interactions with the various InlineQueryResult subtypes.
 type MergedInlineQueryResult struct {
@@ -3742,6 +3802,15 @@ type InputMedia interface {
 	MergeInputMedia() MergedInputMedia
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ InputMedia = InputMediaAnimation{}
+	_ InputMedia = InputMediaDocument{}
+	_ InputMedia = InputMediaAudio{}
+	_ InputMedia = InputMediaPhoto{}
+	_ InputMedia = InputMediaVideo{}
+)
+
 // MergedInputMedia is a helper type to simplify interactions with the various InputMedia subtypes.
 type MergedInputMedia struct {
 	// Type of the result
@@ -4224,6 +4293,15 @@ type InputMessageContent interface {
 	inputMessageContent()
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ InputMessageContent = InputTextMessageContent{}
+	_ InputMessageContent = InputLocationMessageContent{}
+	_ InputMessageContent = InputVenueMessageContent{}
+	_ InputMessageContent = InputContactMessageContent{}
+	_ InputMessageContent = InputInvoiceMessageContent{}
+)
+
 // InputSticker (https://core.telegram.org/bots/api#inputsticker)
 //
 // This object describes a sticker to be added to a sticker set.
@@ -4472,6 +4550,12 @@ type MaybeInaccessibleMessage interface {
 	maybeInaccessibleMessage()
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ MaybeInaccessibleMessage = Message{}
+	_ MaybeInaccessibleMessage = InaccessibleMessage{}
+)
+
 // MenuButton (https://core.telegram.org/bots/api#menubutton)
 //
 // This object describes the bot's menu button in a private chat. It should be one of
@@ -4487,6 +4571,13 @@ type MenuButton interface {
 	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
 	MergeMenuButton() MergedMenuButton
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ MenuButton = MenuButtonCommands{}
+	_ MenuButton = MenuButtonWebApp{}
+	_ MenuButton = MenuButtonDefault{}
+)
 
 // MergedMenuButton is a helper type to simplify interactions with the various MenuButton subtypes.
 type MergedMenuButton struct {
@@ -5075,6 +5166,14 @@ type MessageOrigin interface {
 	MergeMessageOrigin() MergedMessageOrigin
 }
 
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ MessageOrigin = MessageOriginUser{}
+	_ MessageOrigin = MessageOriginHiddenUser{}
+	_ MessageOrigin = MessageOriginChat{}
+	_ MessageOrigin = MessageOriginChannel{}
+)
+
 // MergedMessageOrigin is a helper type to simplify interactions with the various MessageOrigin subtypes.
 type MergedMessageOrigin struct {
 	// Type of the message origin
@@ -5454,6 +5553,19 @@ type PassportElementError interface {
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ PassportElementError = PassportElementErrorDataField{}
+	_ PassportElementError = PassportElementErrorFrontSide{}
+	_ PassportElementError = PassportElementErrorReverseSide{}
+	_ PassportElementError = PassportElementErrorSelfie{}
+	_ PassportElementError = PassportElementErrorFile{}
+	_ PassportElementError = PassportElementErrorFiles{}
+	_ PassportElementError = PassportElementErrorTranslationFile{}
+	_ PassportElementError = PassportElementErrorTranslationFiles{}
+	_ PassportElementError = PassportElementErrorUnspecified{}
+)
 
 // MergedPassportElementError is a helper type to simplify interactions with the various PassportElementError subtypes.
 type MergedPassportElementError struct {
@@ -6140,6 +6252,12 @@ type ReactionType interface {
 	// MergeReactionType returns a MergedReactionType struct to simplify working with complex telegram types in a non-generic world.
 	MergeReactionType() MergedReactionType
 }
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ ReactionType = ReactionTypeEmoji{}
+	_ ReactionType = ReactionTypeCustomEmoji{}
+)
 
 // MergedReactionType is a helper type to simplify interactions with the various ReactionType subtypes.
 type MergedReactionType struct {
