@@ -647,8 +647,8 @@ type ChatBoostSource interface {
 type MergedChatBoostSource struct {
 	// Source of the boost
 	Source string `json:"source"`
-	// User that boosted the chat
-	User User `json:"user"`
+	// Optional. User that provided the boost (may be empty for ChatBoostSourceGiveaway)
+	User *User `json:"user,omitempty"`
 	// Optional. Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
 	GiveawayMessageId int64 `json:"giveaway_message_id,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize (Only for giveaway)
@@ -750,7 +750,7 @@ func (v ChatBoostSourceGiftCode) GetSource() string {
 func (v ChatBoostSourceGiftCode) MergeChatBoostSource() MergedChatBoostSource {
 	return MergedChatBoostSource{
 		Source: "gift_code",
-		User:   v.User,
+		User:   &v.User,
 	}
 }
 
@@ -830,7 +830,7 @@ func (v ChatBoostSourcePremium) GetSource() string {
 func (v ChatBoostSourcePremium) MergeChatBoostSource() MergedChatBoostSource {
 	return MergedChatBoostSource{
 		Source: "premium",
-		User:   v.User,
+		User:   &v.User,
 	}
 }
 

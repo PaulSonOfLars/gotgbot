@@ -455,7 +455,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	for _, f := range commonFields {
 		prefType, err := f.getPreferredType(d)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to get preferred type for %s: %w", f.Name, err)
 		}
 		bd.WriteString(fmt.Sprintf("\nGet%s() %s", snakeToTitle(f.Name), prefType))
 	}
@@ -476,17 +476,16 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	bd.WriteString("\n}")
 
 	if len(commonFields) > 0 && constantField != "" {
-		// TODO: Only generate when constant field
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to generate merged struct: %w", err)
 		}
 
 		bd.WriteString("\n" + mergedStruct)
 
 		commonGetMethods, err := generateAllCommonGetMethods(d, "Merged"+name, commonFields, "", "")
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to generate common get methods: %w", err)
 		}
 
 		bd.WriteString(commonGetMethods)
@@ -502,9 +501,14 @@ func (v Merged%s) Merge%s() Merged%s {
 }
 
 func generateMergedStruct(d APIDescription, name string, subtypes []TypeDescription) (string, error) {
-	fields, err := generateStructFields(d, getAllFields(subtypes, name), nil)
+	allFields, err := getAllFields(d, subtypes, name)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get all fields: %w", err)
+	}
+
+	fields, err := generateStructFields(d, allFields, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate struct fields: %w", err)
 	}
 
 	return fmt.Sprintf(`
@@ -530,7 +534,10 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", typeName, err)
 	}
 
-	allParentFields := getAllFields(subTypes, parentType)
+	allParentFields, err := getAllFields(d, subTypes, parentType)
+	if err != nil {
+		return "", fmt.Errorf("failed to get all fields for %s with parent type %s: %w", typeName, parentType, err)
+	}
 
 	bd := strings.Builder{}
 
