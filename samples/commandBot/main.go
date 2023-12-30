@@ -69,8 +69,10 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	_, err = b.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
-		Caption:          "Here is my source code.",
-		ReplyToMessageId: ctx.EffectiveMessage.MessageId,
+		Caption: "Here is my source code.",
+		ReplyParameters: &gotgbot.ReplyParameters{
+			MessageId: ctx.EffectiveMessage.MessageId,
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send source: %w", err)

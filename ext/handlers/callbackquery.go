@@ -30,11 +30,8 @@ func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 		return false
 	}
 
-	if ctx.CallbackQuery.Message != nil {
-		m, ok := ctx.CallbackQuery.Message.(*gotgbot.Message)
-		if !cb.AllowChannel && ok && m.Chat.Type == "channel" {
-			return false
-		}
+	if !cb.AllowChannel && ctx.CallbackQuery.Message != nil && ctx.CallbackQuery.Message.GetChat().Type == "channel" {
+		return false
 	}
 
 	return cb.Filter == nil || cb.Filter(ctx.CallbackQuery)

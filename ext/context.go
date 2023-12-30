@@ -71,10 +71,13 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 			m, ok := update.CallbackQuery.Message.(*gotgbot.Message)
 			if ok {
 				msg = m
-				chat = &m.Chat
-				// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
-				sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
 			}
+
+			tmpC := update.CallbackQuery.Message.GetChat()
+			chat = &tmpC
+
+			// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
+			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
 		}
 
 	case update.ChosenInlineResult != nil:
