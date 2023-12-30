@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"text/template"
@@ -289,7 +290,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	if constantField == "" {
 		// We cover MaybeInaccessibleMessage manually.
 		if tgType.Name != "MaybeInaccessibleMessage" {
-			fmt.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
+			log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
 		}
 		return "", nil
 	}

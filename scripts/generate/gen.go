@@ -279,7 +279,7 @@ func isTgType(d APIDescription, goType string) bool {
 	return ok
 }
 
-// isTgStructType returns false if there are subtypes (ie, is NOT an interface)
+// isTgStructType returns false if there are subtypes (ie, is NOT an interface).
 func isTgStructType(d APIDescription, goType string) bool {
 	t, ok := d.Types[goType]
 	if !ok {
