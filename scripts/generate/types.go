@@ -287,6 +287,10 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 		return "", fmt.Errorf("failed to generate custom unmarshaller for %s: %w", tgType.Name, err)
 	}
 	if constantField == "" {
+		// We cover MaybeInaccessibleMessage manually.
+		if tgType.Name != "MaybeInaccessibleMessage" {
+			fmt.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
+		}
 		return "", nil
 	}
 
