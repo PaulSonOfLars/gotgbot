@@ -68,10 +68,13 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		user = &update.CallbackQuery.From
 
 		if update.CallbackQuery.Message != nil {
-			msg = update.CallbackQuery.Message
-			chat = &update.CallbackQuery.Message.Chat
-			// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
-			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
+			m, ok := update.CallbackQuery.Message.(*gotgbot.Message)
+			if ok {
+				msg = m
+				chat = &m.Chat
+				// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
+				sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
+			}
 		}
 
 	case update.ChosenInlineResult != nil:
@@ -139,7 +142,10 @@ func (c *Context) Args() []string {
 		msg = c.Update.EditedChannelPost
 
 	case c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil:
-		msg = c.Update.CallbackQuery.Message
+		m, ok := c.Update.CallbackQuery.Message.(*gotgbot.Message)
+		if ok {
+			msg = m
+		}
 	}
 
 	if msg == nil {
