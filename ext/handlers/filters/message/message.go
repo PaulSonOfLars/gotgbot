@@ -42,7 +42,7 @@ func ForwardFromUserID(id int64) filters.Message {
 		if m.ForwardOrigin == nil {
 			return false
 		}
-		u := (*m.ForwardOrigin).MergeMessageOrigin().SenderUser
+		u := m.ForwardOrigin.MergeMessageOrigin().SenderUser
 		return u != nil && u.Id == id
 	}
 }
@@ -52,7 +52,7 @@ func ForwardFromChatID(id int64) filters.Message {
 		if m.ForwardOrigin == nil {
 			return false
 		}
-		c := (*m.ForwardOrigin).MergeMessageOrigin().SenderChat
+		c := m.ForwardOrigin.MergeMessageOrigin().SenderChat
 		return c != nil && c.Id == id
 	}
 }
