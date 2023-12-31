@@ -4398,11 +4398,11 @@ type Invoice struct {
 
 // KeyboardButton (https://core.telegram.org/bots/api#keyboardbutton)
 //
-// This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_user, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
+// This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_users, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
 // Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
 // Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
 // Note: web_app option will only work in Telegram versions released after 16 April, 2022. Older clients will display unsupported message.
-// Note: request_user and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
+// Note: request_users and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
 	Text string `json:"text"`
@@ -6292,7 +6292,7 @@ type MergedReactionType struct {
 	// Optional. Reaction emoji. Currently, it can be one of "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡" (Only for emoji)
 	Emoji string `json:"emoji,omitempty"`
 	// Optional. Custom emoji identifier (Only for custom_emoji)
-	CustomEmoji string `json:"custom_emoji,omitempty"`
+	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6370,7 +6370,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 // The reaction is based on a custom emoji.
 type ReactionTypeCustomEmoji struct {
 	// Custom emoji identifier
-	CustomEmoji string `json:"custom_emoji"`
+	CustomEmojiId string `json:"custom_emoji_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6381,8 +6381,8 @@ func (v ReactionTypeCustomEmoji) GetType() string {
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
 func (v ReactionTypeCustomEmoji) MergeReactionType() MergedReactionType {
 	return MergedReactionType{
-		Type:        "custom_emoji",
-		CustomEmoji: v.CustomEmoji,
+		Type:          "custom_emoji",
+		CustomEmojiId: v.CustomEmojiId,
 	}
 }
 

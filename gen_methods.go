@@ -4872,9 +4872,9 @@ type SetMessageReactionOpts struct {
 
 // SetMessageReaction (https://core.telegram.org/bots/api#setmessagereaction)
 //
-// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. In albums, bots must react to the first message. Returns True on success.
+// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-//   - messageId (type int64): Identifier of the target message
+//   - messageId (type int64): Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
 //   - opts (type SetMessageReactionOpts): All optional parameters.
 func (bot *Bot) SetMessageReaction(chatId int64, messageId int64, opts *SetMessageReactionOpts) (bool, error) {
 	v := map[string]string{}
