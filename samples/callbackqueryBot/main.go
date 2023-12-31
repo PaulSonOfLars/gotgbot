@@ -89,10 +89,7 @@ func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	_, _, err = b.EditMessageText("You edited the start message.", &gotgbot.EditMessageTextOpts{
-		ChatId:    cb.Message.GetChat().Id,
-		MessageId: cb.Message.GetMessageId(),
-	})
+	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
 	if err != nil {
 		return fmt.Errorf("failed to edit start message text: %w", err)
 	}
