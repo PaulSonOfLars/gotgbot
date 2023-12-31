@@ -242,7 +242,7 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 	case "text_link":
 		return prevText + pre + "[" + cleanCntnt + "](" + ent.Url + ")" + post
 	case "blockquote":
-		return prevText + pre + ">" + strings.Join(strings.Split(cleanCntnt, "\n"), "\n>") + "\n" + post
+		return prevText + pre + ">" + strings.Join(strings.Split(cleanCntnt, "\n"), "\n>") + post
 	default:
 		return prevText + cntnt
 	}
