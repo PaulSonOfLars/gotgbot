@@ -45,7 +45,7 @@ type helperData struct {
 }
 
 func (d helperData) docs() string {
-	return "\n// " + d.newName + " Helper method for Bot." + strings.Title(d.method.Name)
+	return "\n// " + d.newName + " Helper method for Bot." + strings.Title(d.method.Name) + "."
 }
 
 func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helperData, error) {

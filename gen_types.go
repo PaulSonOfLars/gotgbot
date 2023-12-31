@@ -4550,29 +4550,29 @@ type MaybeInaccessibleMessage interface {
 	maybeInaccessibleMessage()
 
 	// Helper methods shared across all subtypes of this interface.
-	// Copy Helper method for Bot.CopyMessage
+	// Copy Helper method for Bot.CopyMessage.
 	Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error)
-	// Delete Helper method for Bot.DeleteMessage
+	// Delete Helper method for Bot.DeleteMessage.
 	Delete(b *Bot, opts *DeleteMessageOpts) (bool, error)
-	// EditCaption Helper method for Bot.EditMessageCaption
+	// EditCaption Helper method for Bot.EditMessageCaption.
 	EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error)
-	// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
+	// EditLiveLocation Helper method for Bot.EditMessageLiveLocation.
 	EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error)
-	// EditMedia Helper method for Bot.EditMessageMedia
+	// EditMedia Helper method for Bot.EditMessageMedia.
 	EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error)
-	// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
+	// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup.
 	EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error)
-	// EditText Helper method for Bot.EditMessageText
+	// EditText Helper method for Bot.EditMessageText.
 	EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error)
-	// Forward Helper method for Bot.ForwardMessage
+	// Forward Helper method for Bot.ForwardMessage.
 	Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error)
-	// Pin Helper method for Bot.PinChatMessage
+	// Pin Helper method for Bot.PinChatMessage.
 	Pin(b *Bot, opts *PinChatMessageOpts) (bool, error)
-	// SetReaction Helper method for Bot.SetMessageReaction
+	// SetReaction Helper method for Bot.SetMessageReaction.
 	SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error)
-	// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
+	// StopLiveLocation Helper method for Bot.StopMessageLiveLocation.
 	StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error)
-	// Unpin Helper method for Bot.UnpinChatMessage
+	// Unpin Helper method for Bot.UnpinChatMessage.
 	Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error)
 }
 
