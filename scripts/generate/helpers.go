@@ -51,23 +51,24 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 		}
 
 		tgType := d.Types[typeName]
-
-		newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
-		if newMethodName == tgMethod.Name {
+		if len(tgType.Subtypes) != 0 {
+			// Interfaces can't have methods on them
 			continue
 		}
 
-		fields := getMethodFieldsTypeMatches(tgMethod, typeName)
+		// Get list of fields which match
+		fields := getMethodFieldsTypeMatches(tgMethod, tgType)
 		if len(fields) == 0 {
 			continue
 		}
 
-		newMethodName, err := getMethodFieldsSubtypeMatches(d, tgMethod, tgType, newMethodName, hasFromChat, fields)
+		newMethodName, ok, err := getMethodFieldsSubtypeMatches(d, tgMethod, tgType, hasFromChat, fields)
 		if err != nil {
 			return "", err
 		}
-
-		newMethodName = strings.Title(newMethodName)
+		if !ok {
+			continue
+		}
 
 		ret, err := tgMethod.GetReturnTypes(d)
 		if err != nil {
@@ -150,7 +151,9 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 	return funcCallArgList, funcDefArgList, optsContent.String(), nil
 }
 
-func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, repl string, hasFromChat bool, fields map[string]string) (string, error) {
+func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, hasFromChat bool, fields map[string]string) (string, bool, error) {
+	newMethodName := strings.Replace(tgMethod.Name, tgType.Name, "", 1)
+
 	for _, f := range tgType.Fields {
 		if f.Name == "reply_to_message" {
 			// this subfield just causes confusion; we always want the message_id
@@ -160,11 +163,11 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 		for _, mf := range tgMethod.Fields {
 			prefType, err := f.getPreferredType(d)
 			if err != nil {
-				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
+				return "", false, fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 			}
 
 			if isTgType(d, prefType) && f.Name+"_id" == mf.Name {
-				repl = strings.ReplaceAll(repl, prefType, "")
+				newMethodName = strings.ReplaceAll(newMethodName, prefType, "")
 
 				if hasFromChat && mf.Name == "chat_id" {
 					fields["from_chat_id"] = f.Name + ".Id"
@@ -174,25 +177,29 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 			}
 		}
 	}
-	return repl, nil
+	return strings.Title(newMethodName), newMethodName != tgMethod.Name, nil
 }
 
-func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string) map[string]string {
+func getMethodFieldsTypeMatches(tgMethod MethodDescription, tgType TypeDescription) map[string]string {
 	fields := map[string]string{}
+	snakeTypeNameId := titleToSnake(tgType.Name) + "_id"
+
 	for _, f := range tgMethod.Fields {
-		if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
-			idField := "id"
-
-			if typeName == tgTypeMessage {
-				idField = "message_id"
-			} else if typeName == tgTypeFile {
-				idField = "file_id"
-			}
-
-			fields[titleToSnake(typeName)+"_id"] = idField
+		if f.Name == snakeTypeNameId || f.Name == "id" {
+			fields[snakeTypeNameId] = findIdField(tgType, f.Name)
 		}
 	}
 	return fields
+}
+
+func findIdField(tgType TypeDescription, methodFieldName string) string {
+	// And iterate over all the type fields, to see if any match the method field name.
+	for _, f := range tgType.Fields {
+		if methodFieldName == f.Name {
+			return methodFieldName
+		}
+	}
+	return "id" // we default to "id" if nothing else matches
 }
 
 var helperFuncTmpl = template.Must(template.New("helperFunc").Parse(helperFunc))
