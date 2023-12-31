@@ -475,11 +475,6 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		}
 		bd.WriteString(fmt.Sprintf("\nGet%s() %s", snakeToTitle(f.Name), prefType))
 	}
-
-	// create a dummy func to avoid external types implementing this interface
-	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
-	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
-
 	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
 		bd.WriteString("\nInputParams(string, map[string]NamedReader) ([]byte, error)")
@@ -489,6 +484,26 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
+
+	// create a dummy func to avoid external types implementing this interface
+	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
+	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
+
+	// Only need to check type 0 as they all have the same fields
+	helpers, err := getHelpers(d, subtypes[0].Name, commonFields)
+	if err != nil {
+		return "", fmt.Errorf("failed to get helpers for %s: %w", name, err)
+	}
+
+	if len(helpers) != 0 {
+		bd.WriteString("\n\n// Helper methods shared across all subtypes of this interface.")
+		for _, h := range helpers {
+			bd.WriteString(h.docs())
+			bd.WriteString(fmt.Sprintf("\n%s(%s) (%s, error)", h.newName, strings.Join(h.defArgList, ", "), strings.Join(h.returnTypes, ", ")))
+		}
+	}
+
+	// Close interface
 	bd.WriteString("\n}")
 
 	bd.WriteString(enforceTypeAssertion(name, subtypes))

@@ -24,8 +24,12 @@ type TypeDescription struct {
 }
 
 func (td TypeDescription) receiverName() string {
+	return receiver(td.Name)
+}
+
+func receiver(n string) string {
 	var rs []rune
-	for _, r := range td.Name {
+	for _, r := range n {
 		if unicode.IsUpper(r) {
 			rs = append(rs, r)
 		}

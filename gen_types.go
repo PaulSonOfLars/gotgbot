@@ -92,10 +92,10 @@ type BotCommand struct {
 //   - BotCommandScopeChatMember
 type BotCommandScope interface {
 	GetType() string
-	// botCommandScope exists to avoid external types implementing this interface.
-	botCommandScope()
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
+	// botCommandScope exists to avoid external types implementing this interface.
+	botCommandScope()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -659,10 +659,10 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 //   - ChatBoostSourceGiveaway
 type ChatBoostSource interface {
 	GetSource() string
-	// chatBoostSource exists to avoid external types implementing this interface.
-	chatBoostSource()
 	// MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatBoostSource() MergedChatBoostSource
+	// chatBoostSource exists to avoid external types implementing this interface.
+	chatBoostSource()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -953,10 +953,10 @@ type ChatLocation struct {
 type ChatMember interface {
 	GetStatus() string
 	GetUser() User
-	// chatMember exists to avoid external types implementing this interface.
-	chatMember()
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
+	// chatMember exists to avoid external types implementing this interface.
+	chatMember()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -2126,10 +2126,10 @@ type InlineQuery struct {
 type InlineQueryResult interface {
 	GetType() string
 	GetId() string
-	// inlineQueryResult exists to avoid external types implementing this interface.
-	inlineQueryResult()
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
+	// inlineQueryResult exists to avoid external types implementing this interface.
+	inlineQueryResult()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -3794,12 +3794,12 @@ func (v InputLocationMessageContent) inputMessageContent() {}
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFile
-	// inputMedia exists to avoid external types implementing this interface.
-	inputMedia()
 	// InputParams allows for uploading attachments with files.
 	InputParams(string, map[string]NamedReader) ([]byte, error)
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
+	// inputMedia exists to avoid external types implementing this interface.
+	inputMedia()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -4548,6 +4548,32 @@ type MaybeInaccessibleMessage interface {
 	GetChat() Chat
 	// maybeInaccessibleMessage exists to avoid external types implementing this interface.
 	maybeInaccessibleMessage()
+
+	// Helper methods shared across all subtypes of this interface.
+	// Copy Helper method for Bot.CopyMessage
+	Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error)
+	// Delete Helper method for Bot.DeleteMessage
+	Delete(b *Bot, opts *DeleteMessageOpts) (bool, error)
+	// EditCaption Helper method for Bot.EditMessageCaption
+	EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error)
+	// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
+	EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error)
+	// EditMedia Helper method for Bot.EditMessageMedia
+	EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error)
+	// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
+	EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error)
+	// EditText Helper method for Bot.EditMessageText
+	EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error)
+	// Forward Helper method for Bot.ForwardMessage
+	Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error)
+	// Pin Helper method for Bot.PinChatMessage
+	Pin(b *Bot, opts *PinChatMessageOpts) (bool, error)
+	// SetReaction Helper method for Bot.SetMessageReaction
+	SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error)
+	// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
+	StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error)
+	// Unpin Helper method for Bot.UnpinChatMessage
+	Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error)
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -4566,10 +4592,10 @@ var (
 // If a menu button other than MenuButtonDefault is set for a private chat, then it is applied in the chat. Otherwise the default menu button is applied. By default, the menu button opens the list of bot commands.
 type MenuButton interface {
 	GetType() string
-	// menuButton exists to avoid external types implementing this interface.
-	menuButton()
 	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
 	MergeMenuButton() MergedMenuButton
+	// menuButton exists to avoid external types implementing this interface.
+	menuButton()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -5160,10 +5186,10 @@ type MessageId struct {
 type MessageOrigin interface {
 	GetType() string
 	GetDate() int64
-	// messageOrigin exists to avoid external types implementing this interface.
-	messageOrigin()
 	// MergeMessageOrigin returns a MergedMessageOrigin struct to simplify working with complex telegram types in a non-generic world.
 	MergeMessageOrigin() MergedMessageOrigin
+	// messageOrigin exists to avoid external types implementing this interface.
+	messageOrigin()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -5548,10 +5574,10 @@ type PassportElementError interface {
 	GetSource() string
 	GetType() string
 	GetMessage() string
-	// passportElementError exists to avoid external types implementing this interface.
-	passportElementError()
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError
+	// passportElementError exists to avoid external types implementing this interface.
+	passportElementError()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -6247,10 +6273,10 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 //   - ReactionTypeCustomEmoji
 type ReactionType interface {
 	GetType() string
-	// reactionType exists to avoid external types implementing this interface.
-	reactionType()
 	// MergeReactionType returns a MergedReactionType struct to simplify working with complex telegram types in a non-generic world.
 	MergeReactionType() MergedReactionType
+	// reactionType exists to avoid external types implementing this interface.
+	reactionType()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
