@@ -16,12 +16,12 @@ package gotgbot
 
 `)
 
-	for _, tgMethodName := range orderedMethods(d) {
-		tgMethod := d.Methods[tgMethodName]
+	for _, tgTypeName := range orderedTgTypes(d) {
+		tgType := d.Types[tgTypeName]
 
-		helper, err := generateHelperDef(d, tgMethod)
+		helper, err := generateHelperDef(d, tgType)
 		if err != nil {
-			return fmt.Errorf("failed to generate helpers for %s: %w", tgMethodName, err)
+			return fmt.Errorf("failed to generate helpers for %s: %w", tgType.Name, err)
 		}
 
 		if helper == "" {
@@ -34,8 +34,94 @@ package gotgbot
 	return writeGenToFile(helpers, "gen_helpers.go")
 }
 
-func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, error) {
+type helperData struct {
+	newName string
+	method  MethodDescription
+	fields  map[string]string
+}
+
+func (td TypeDescription) getHelpers(d APIDescription) ([]helperData, error) {
+	var methods []helperData
+	for _, methodName := range orderedMethods(d) {
+
+		tgMethod := d.Methods[methodName]
+
+		// Get list of fields which match
+		fields := getMethodFieldsTypeMatches(tgMethod, td)
+		if len(fields) == 0 {
+			continue
+		}
+
+		newMethodName, ok, err := getMethodFieldsSubtypeMatches(d, tgMethod, td, fields)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			continue
+		}
+		methods = append(methods, helperData{
+			newName: newMethodName,
+			method:  tgMethod,
+			fields:  fields,
+		})
+	}
+
+	return methods, nil
+}
+
+func generateHelperDef(d APIDescription, tgType TypeDescription) (string, error) {
+	if tgType.Name == tgTypeFile {
+		return "", nil
+	}
+	if len(tgType.Subtypes) != 0 {
+		// TODO: Generate common list of methods for all the child types
+		return "", nil
+	}
+
+	helpers, err := tgType.getHelpers(d)
+	if err != nil {
+		return "", err
+	}
+
 	helperDef := strings.Builder{}
+	for _, helper := range helpers {
+		ret, err := helper.method.GetReturnTypes(d)
+		if err != nil {
+			return "", fmt.Errorf("failed to get return type for %s: %w", helper.method.Name, err)
+		}
+
+		receiverName := tgType.receiverName()
+
+		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(d, helper.method, receiverName, helper.fields)
+		if err != nil {
+			return "", err
+		}
+
+		funcDefArgs := strings.Join(funcDefArgList, ", ")
+		funcCallArgs := strings.Join(funcCallArgList, ", ")
+
+		helperDef.WriteString("\n// " + helper.newName + " Helper method for Bot." + strings.Title(helper.method.Name))
+
+		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
+			Receiver:     receiverName,
+			TypeName:     tgType.Name,
+			HelperName:   helper.newName,
+			ReturnType:   strings.Join(ret, ", "),
+			FuncDefArgs:  funcDefArgs,
+			Contents:     optsContent,
+			OptsName:     helper.method.optsName(),
+			MethodName:   strings.Title(helper.method.Name),
+			FuncCallArgs: funcCallArgs,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", helper.newName, tgType.Name, err)
+		}
+	}
+
+	return helperDef.String(), nil
+}
+
+func hasFromChat(tgMethod MethodDescription) bool {
 	hasFromChat := false
 
 	for _, x := range tgMethod.Fields {
@@ -44,66 +130,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			break
 		}
 	}
-
-	for _, typeName := range orderedTgTypes(d) {
-		if typeName == tgTypeFile {
-			continue
-		}
-
-		tgType := d.Types[typeName]
-		if len(tgType.Subtypes) != 0 {
-			// Interfaces can't have methods on them
-			continue
-		}
-
-		// Get list of fields which match
-		fields := getMethodFieldsTypeMatches(tgMethod, tgType)
-		if len(fields) == 0 {
-			continue
-		}
-
-		newMethodName, ok, err := getMethodFieldsSubtypeMatches(d, tgMethod, tgType, hasFromChat, fields)
-		if err != nil {
-			return "", err
-		}
-		if !ok {
-			continue
-		}
-
-		ret, err := tgMethod.GetReturnTypes(d)
-		if err != nil {
-			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
-		}
-
-		receiverName := tgType.receiverName()
-
-		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(d, tgMethod, receiverName, fields)
-		if err != nil {
-			return "", err
-		}
-
-		funcDefArgs := strings.Join(funcDefArgList, ", ")
-		funcCallArgs := strings.Join(funcCallArgList, ", ")
-
-		helperDef.WriteString("\n// " + newMethodName + " Helper method for Bot." + strings.Title(tgMethod.Name))
-
-		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
-			Receiver:     receiverName,
-			TypeName:     typeName,
-			HelperName:   newMethodName,
-			ReturnType:   strings.Join(ret, ", "),
-			FuncDefArgs:  funcDefArgs,
-			Contents:     optsContent,
-			OptsName:     tgMethod.optsName(),
-			MethodName:   strings.Title(tgMethod.Name),
-			FuncCallArgs: funcCallArgs,
-		})
-		if err != nil {
-			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", newMethodName, typeName, err)
-		}
-	}
-
-	return helperDef.String(), nil
+	return hasFromChat
 }
 
 func generateHelperArguments(d APIDescription, tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
@@ -151,12 +178,13 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 	return funcCallArgList, funcDefArgList, optsContent.String(), nil
 }
 
-func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, hasFromChat bool, fields map[string]string) (string, bool, error) {
+func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, fields map[string]string) (string, bool, error) {
 	typeName := tgType.Name
 	if typeName == "InaccessibleMessage" {
 		typeName = "Message"
 	}
 	newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
+	fromChat := hasFromChat(tgMethod)
 
 	for _, f := range tgType.Fields {
 		if f.Name == "reply_to_message" {
@@ -173,7 +201,7 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 			if isTgType(d, prefType) && f.Name+"_id" == mf.Name {
 				newMethodName = strings.ReplaceAll(newMethodName, prefType, "")
 
-				if hasFromChat && mf.Name == "chat_id" {
+				if fromChat && mf.Name == "chat_id" {
 					fields["from_chat_id"] = f.Name + ".Id"
 				} else {
 					fields[mf.Name] = f.Name + ".Id" // Note: maybe not just assume ID field exists?

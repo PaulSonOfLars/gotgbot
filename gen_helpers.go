@@ -8,21 +8,6 @@ func (cq CallbackQuery) Answer(b *Bot, opts *AnswerCallbackQueryOpts) (bool, err
 	return b.AnswerCallbackQuery(cq.Id, opts)
 }
 
-// Answer Helper method for Bot.AnswerInlineQuery
-func (iq InlineQuery) Answer(b *Bot, results []InlineQueryResult, opts *AnswerInlineQueryOpts) (bool, error) {
-	return b.AnswerInlineQuery(iq.Id, results, opts)
-}
-
-// Answer Helper method for Bot.AnswerPreCheckoutQuery
-func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
-	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
-}
-
-// Answer Helper method for Bot.AnswerShippingQuery
-func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
-	return b.AnswerShippingQuery(sq.Id, ok, opts)
-}
-
 // ApproveJoinRequest Helper method for Bot.ApproveChatJoinRequest
 func (c Chat) ApproveJoinRequest(b *Bot, userId int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	return b.ApproveChatJoinRequest(c.Id, userId, opts)
@@ -36,16 +21,6 @@ func (c Chat) BanMember(b *Bot, userId int64, opts *BanChatMemberOpts) (bool, er
 // BanSenderChat Helper method for Bot.BanChatSenderChat
 func (c Chat) BanSenderChat(b *Bot, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
 	return b.BanChatSenderChat(c.Id, senderChatId, opts)
-}
-
-// Copy Helper method for Bot.CopyMessage
-func (im InaccessibleMessage) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
-	return b.CopyMessage(chatId, im.Chat.Id, im.MessageId, opts)
-}
-
-// Copy Helper method for Bot.CopyMessage
-func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
-	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
 }
 
 // CreateInviteLink Helper method for Bot.CreateChatInviteLink
@@ -68,194 +43,14 @@ func (c Chat) DeleteStickerSet(b *Bot, opts *DeleteChatStickerSetOpts) (bool, er
 	return b.DeleteChatStickerSet(c.Id, opts)
 }
 
-// Delete Helper method for Bot.DeleteMessage
-func (im InaccessibleMessage) Delete(b *Bot, opts *DeleteMessageOpts) (bool, error) {
-	return b.DeleteMessage(im.Chat.Id, im.MessageId, opts)
-}
-
-// Delete Helper method for Bot.DeleteMessage
-func (m Message) Delete(b *Bot, opts *DeleteMessageOpts) (bool, error) {
-	return b.DeleteMessage(m.Chat.Id, m.MessageId, opts)
-}
-
 // EditInviteLink Helper method for Bot.EditChatInviteLink
 func (c Chat) EditInviteLink(b *Bot, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	return b.EditChatInviteLink(c.Id, inviteLink, opts)
 }
 
-// EditCaption Helper method for Bot.EditMessageCaption
-func (im InaccessibleMessage) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageCaptionOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.EditMessageCaption(opts)
-}
-
-// EditCaption Helper method for Bot.EditMessageCaption
-func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageCaptionOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.EditMessageCaption(opts)
-}
-
-// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
-func (im InaccessibleMessage) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageLiveLocationOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.EditMessageLiveLocation(latitude, longitude, opts)
-}
-
-// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
-func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageLiveLocationOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.EditMessageLiveLocation(latitude, longitude, opts)
-}
-
-// EditMedia Helper method for Bot.EditMessageMedia
-func (im InaccessibleMessage) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageMediaOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.EditMessageMedia(media, opts)
-}
-
-// EditMedia Helper method for Bot.EditMessageMedia
-func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageMediaOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.EditMessageMedia(media, opts)
-}
-
-// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
-func (im InaccessibleMessage) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageReplyMarkupOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.EditMessageReplyMarkup(opts)
-}
-
-// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
-func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageReplyMarkupOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.EditMessageReplyMarkup(opts)
-}
-
-// EditText Helper method for Bot.EditMessageText
-func (im InaccessibleMessage) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageTextOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.EditMessageText(text, opts)
-}
-
-// EditText Helper method for Bot.EditMessageText
-func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &EditMessageTextOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.EditMessageText(text, opts)
-}
-
 // ExportInviteLink Helper method for Bot.ExportChatInviteLink
 func (c Chat) ExportInviteLink(b *Bot, opts *ExportChatInviteLinkOpts) (string, error) {
 	return b.ExportChatInviteLink(c.Id, opts)
-}
-
-// Forward Helper method for Bot.ForwardMessage
-func (im InaccessibleMessage) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
-	return b.ForwardMessage(chatId, im.Chat.Id, im.MessageId, opts)
-}
-
-// Forward Helper method for Bot.ForwardMessage
-func (m Message) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
-	return b.ForwardMessage(chatId, m.Chat.Id, m.MessageId, opts)
 }
 
 // Get Helper method for Bot.GetChat
@@ -296,16 +91,6 @@ func (c Chat) GetUserBoosts(b *Bot, userId int64, opts *GetUserChatBoostsOpts) (
 	return b.GetUserChatBoosts(c.Id, userId, opts)
 }
 
-// GetChatBoosts Helper method for Bot.GetUserChatBoosts
-func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
-	return b.GetUserChatBoosts(chatId, u.Id, opts)
-}
-
-// GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
-func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
-	return b.GetUserProfilePhotos(u.Id, opts)
-}
-
 // Leave Helper method for Bot.LeaveChat
 func (c Chat) Leave(b *Bot, opts *LeaveChatOpts) (bool, error) {
 	return b.LeaveChat(c.Id, opts)
@@ -314,16 +99,6 @@ func (c Chat) Leave(b *Bot, opts *LeaveChatOpts) (bool, error) {
 // PinMessage Helper method for Bot.PinChatMessage
 func (c Chat) PinMessage(b *Bot, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	return b.PinChatMessage(c.Id, messageId, opts)
-}
-
-// Pin Helper method for Bot.PinChatMessage
-func (im InaccessibleMessage) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
-	return b.PinChatMessage(im.Chat.Id, im.MessageId, opts)
-}
-
-// Pin Helper method for Bot.PinChatMessage
-func (m Message) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
-	return b.PinChatMessage(m.Chat.Id, m.MessageId, opts)
 }
 
 // PromoteMember Helper method for Bot.PromoteChatMember
@@ -389,48 +164,6 @@ func (c Chat) SetTitle(b *Bot, title string, opts *SetChatTitleOpts) (bool, erro
 	return b.SetChatTitle(c.Id, title, opts)
 }
 
-// SetReaction Helper method for Bot.SetMessageReaction
-func (im InaccessibleMessage) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
-	return b.SetMessageReaction(im.Chat.Id, im.MessageId, opts)
-}
-
-// SetReaction Helper method for Bot.SetMessageReaction
-func (m Message) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
-	return b.SetMessageReaction(m.Chat.Id, m.MessageId, opts)
-}
-
-// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
-func (im InaccessibleMessage) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &StopMessageLiveLocationOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = im.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = im.MessageId
-	}
-
-	return b.StopMessageLiveLocation(opts)
-}
-
-// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
-func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
-	if opts == nil {
-		opts = &StopMessageLiveLocationOpts{}
-	}
-
-	if opts.ChatId == 0 {
-		opts.ChatId = m.Chat.Id
-	}
-	if opts.MessageId == 0 {
-		opts.MessageId = m.MessageId
-	}
-
-	return b.StopMessageLiveLocation(opts)
-}
-
 // UnbanMember Helper method for Bot.UnbanChatMember
 func (c Chat) UnbanMember(b *Bot, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	return b.UnbanChatMember(c.Id, userId, opts)
@@ -451,6 +184,127 @@ func (c Chat) UnpinMessage(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	return b.UnpinChatMessage(c.Id, opts)
 }
 
+// Copy Helper method for Bot.CopyMessage
+func (im InaccessibleMessage) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
+	return b.CopyMessage(chatId, im.Chat.Id, im.MessageId, opts)
+}
+
+// Delete Helper method for Bot.DeleteMessage
+func (im InaccessibleMessage) Delete(b *Bot, opts *DeleteMessageOpts) (bool, error) {
+	return b.DeleteMessage(im.Chat.Id, im.MessageId, opts)
+}
+
+// EditCaption Helper method for Bot.EditMessageCaption
+func (im InaccessibleMessage) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageCaptionOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageCaption(opts)
+}
+
+// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
+func (im InaccessibleMessage) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageLiveLocationOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageLiveLocation(latitude, longitude, opts)
+}
+
+// EditMedia Helper method for Bot.EditMessageMedia
+func (im InaccessibleMessage) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageMediaOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageMedia(media, opts)
+}
+
+// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
+func (im InaccessibleMessage) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageReplyMarkupOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageReplyMarkup(opts)
+}
+
+// EditText Helper method for Bot.EditMessageText
+func (im InaccessibleMessage) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageTextOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageText(text, opts)
+}
+
+// Forward Helper method for Bot.ForwardMessage
+func (im InaccessibleMessage) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
+	return b.ForwardMessage(chatId, im.Chat.Id, im.MessageId, opts)
+}
+
+// Pin Helper method for Bot.PinChatMessage
+func (im InaccessibleMessage) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
+	return b.PinChatMessage(im.Chat.Id, im.MessageId, opts)
+}
+
+// SetReaction Helper method for Bot.SetMessageReaction
+func (im InaccessibleMessage) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
+	return b.SetMessageReaction(im.Chat.Id, im.MessageId, opts)
+}
+
+// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
+func (im InaccessibleMessage) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &StopMessageLiveLocationOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.StopMessageLiveLocation(opts)
+}
+
 // Unpin Helper method for Bot.UnpinChatMessage
 func (im InaccessibleMessage) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	if opts == nil {
@@ -464,6 +318,132 @@ func (im InaccessibleMessage) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, e
 	return b.UnpinChatMessage(im.Chat.Id, opts)
 }
 
+// Answer Helper method for Bot.AnswerInlineQuery
+func (iq InlineQuery) Answer(b *Bot, results []InlineQueryResult, opts *AnswerInlineQueryOpts) (bool, error) {
+	return b.AnswerInlineQuery(iq.Id, results, opts)
+}
+
+// Copy Helper method for Bot.CopyMessage
+func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
+	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)
+}
+
+// Delete Helper method for Bot.DeleteMessage
+func (m Message) Delete(b *Bot, opts *DeleteMessageOpts) (bool, error) {
+	return b.DeleteMessage(m.Chat.Id, m.MessageId, opts)
+}
+
+// EditCaption Helper method for Bot.EditMessageCaption
+func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageCaptionOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageCaption(opts)
+}
+
+// EditLiveLocation Helper method for Bot.EditMessageLiveLocation
+func (m Message) EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageLiveLocationOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageLiveLocation(latitude, longitude, opts)
+}
+
+// EditMedia Helper method for Bot.EditMessageMedia
+func (m Message) EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageMediaOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageMedia(media, opts)
+}
+
+// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup
+func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageReplyMarkupOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageReplyMarkup(opts)
+}
+
+// EditText Helper method for Bot.EditMessageText
+func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &EditMessageTextOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageText(text, opts)
+}
+
+// Forward Helper method for Bot.ForwardMessage
+func (m Message) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
+	return b.ForwardMessage(chatId, m.Chat.Id, m.MessageId, opts)
+}
+
+// Pin Helper method for Bot.PinChatMessage
+func (m Message) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
+	return b.PinChatMessage(m.Chat.Id, m.MessageId, opts)
+}
+
+// SetReaction Helper method for Bot.SetMessageReaction
+func (m Message) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
+	return b.SetMessageReaction(m.Chat.Id, m.MessageId, opts)
+}
+
+// StopLiveLocation Helper method for Bot.StopMessageLiveLocation
+func (m Message) StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
+	if opts == nil {
+		opts = &StopMessageLiveLocationOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.StopMessageLiveLocation(opts)
+}
+
 // Unpin Helper method for Bot.UnpinChatMessage
 func (m Message) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	if opts == nil {
@@ -475,4 +455,24 @@ func (m Message) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	}
 
 	return b.UnpinChatMessage(m.Chat.Id, opts)
+}
+
+// Answer Helper method for Bot.AnswerPreCheckoutQuery
+func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
+	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
+}
+
+// Answer Helper method for Bot.AnswerShippingQuery
+func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
+	return b.AnswerShippingQuery(sq.Id, ok, opts)
+}
+
+// GetChatBoosts Helper method for Bot.GetUserChatBoosts
+func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
+	return b.GetUserChatBoosts(chatId, u.Id, opts)
+}
+
+// GetProfilePhotos Helper method for Bot.GetUserProfilePhotos
+func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
+	return b.GetUserProfilePhotos(u.Id, opts)
 }
