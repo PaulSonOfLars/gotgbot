@@ -152,7 +152,11 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 }
 
 func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, hasFromChat bool, fields map[string]string) (string, bool, error) {
-	newMethodName := strings.Replace(tgMethod.Name, tgType.Name, "", 1)
+	typeName := tgType.Name
+	if typeName == "InaccessibleMessage" {
+		typeName = "Message"
+	}
+	newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
 
 	for _, f := range tgType.Fields {
 		if f.Name == "reply_to_message" {
@@ -182,7 +186,11 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 
 func getMethodFieldsTypeMatches(tgMethod MethodDescription, tgType TypeDescription) map[string]string {
 	fields := map[string]string{}
-	snakeTypeNameId := titleToSnake(tgType.Name) + "_id"
+	typeName := tgType.Name
+	if typeName == "InaccessibleMessage" {
+		typeName = "Message"
+	}
+	snakeTypeNameId := titleToSnake(typeName) + "_id"
 
 	for _, f := range tgMethod.Fields {
 		if f.Name == snakeTypeNameId || f.Name == "id" {
