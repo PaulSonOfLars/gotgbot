@@ -64,6 +64,9 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	case update.InlineQuery != nil:
 		user = &update.InlineQuery.From
 
+	case update.ChosenInlineResult != nil:
+		user = &update.ChosenInlineResult.From
+
 	case update.CallbackQuery != nil:
 		user = &update.CallbackQuery.From
 
@@ -81,14 +84,15 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
 		}
 
-	case update.ChosenInlineResult != nil:
-		user = &update.ChosenInlineResult.From
-
 	case update.ShippingQuery != nil:
 		user = &update.ShippingQuery.From
 
 	case update.PreCheckoutQuery != nil:
 		user = &update.PreCheckoutQuery.From
+
+	case update.PollAnswer != nil:
+		user = update.PollAnswer.User
+		sender = &gotgbot.Sender{User: update.PollAnswer.User, Chat: update.PollAnswer.VoterChat}
 
 	case update.MyChatMember != nil:
 		user = &update.MyChatMember.From
