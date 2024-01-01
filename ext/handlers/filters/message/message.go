@@ -52,7 +52,7 @@ func ForwardFromChatID(id int64) filters.Message {
 		if m.ForwardOrigin == nil {
 			return false
 		}
-		c := m.ForwardOrigin.MergeMessageOrigin().SenderChat
+		c := m.ForwardOrigin.MergeMessageOrigin().Chat
 		return c != nil && c.Id == id
 	}
 }
