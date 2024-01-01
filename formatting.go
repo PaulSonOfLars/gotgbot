@@ -22,6 +22,7 @@ var mdV2Map = map[string]string{
 	"underline":     "__",
 	"strikethrough": "~",
 	"spoiler":       "||",
+	"blockquote":    ">",
 }
 
 var htmlMap = map[string]string{
@@ -32,6 +33,7 @@ var htmlMap = map[string]string{
 	"underline":     "u",
 	"strikethrough": "s",
 	"spoiler":       "span class=\"tg-spoiler\"",
+	"blockquote":    "blockquote",
 }
 
 // OriginalMD gets the original markdown formatting of a message text.
@@ -205,6 +207,8 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int64, cntnt string)
 		return prevText + `<a href="tg://user?id=` + strconv.FormatInt(ent.User.Id, 10) + `">` + cntnt + "</a>"
 	case "text_link":
 		return prevText + `<a href="` + ent.Url + `">` + cntnt + "</a>"
+	case "blockquote":
+		return prevText + `<blockquote>` + cntnt + "</blockquote>"
 	default:
 		return prevText + cntnt
 	}
@@ -226,9 +230,9 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 		return prevText + pre + mdV2Map[ent.Type] + cleanCntnt + mdV2Map[ent.Type] + post
 	case "pre":
 		if ent.Language == "" {
-			return prevText + pre + mdV2Map[ent.Type] + "\n" + cleanCntnt + mdV2Map[ent.Type] + post
+			return prevText + pre + "```\n" + cleanCntnt + "```" + post
 		}
-		return prevText + pre + mdV2Map[ent.Type] + ent.Language + "\n" + cleanCntnt + mdV2Map[ent.Type] + post
+		return prevText + pre + "```" + ent.Language + "\n" + cleanCntnt + "```" + post
 	case "custom_emoji":
 		// Yes, custom emoji have a weird little ! at the front
 		// https://core.telegram.org/bots/api#markdownv2-style
@@ -237,6 +241,8 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post
 	case "text_link":
 		return prevText + pre + "[" + cleanCntnt + "](" + ent.Url + ")" + post
+	case "blockquote":
+		return prevText + pre + ">" + strings.Join(strings.Split(cleanCntnt, "\n"), "\n>") + post
 	default:
 		return prevText + cntnt
 	}

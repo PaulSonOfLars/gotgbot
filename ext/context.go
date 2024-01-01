@@ -15,7 +15,7 @@ type Context struct {
 	// such as admin checks.
 	Data map[string]interface{}
 
-	// EffectiveMessage is the message which triggered the update, if possible.
+	// EffectiveMessage is the message which triggered the update, if available (eg: update contains an accessible message).
 	EffectiveMessage *gotgbot.Message
 	// EffectiveChat is the chat the update was triggered in, if possible.
 	EffectiveChat *gotgbot.Chat
@@ -71,8 +71,15 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		user = &update.CallbackQuery.From
 
 		if update.CallbackQuery.Message != nil {
-			msg = update.CallbackQuery.Message
-			chat = &update.CallbackQuery.Message.Chat
+			// Note: This check means that we do not populate the EffectiveMessage field in the case of an inacessible message.
+			m, ok := update.CallbackQuery.Message.(*gotgbot.Message)
+			if ok {
+				msg = m
+			}
+
+			tmpC := update.CallbackQuery.Message.GetChat()
+			chat = &tmpC
+
 			// Note: the sender is the sender of the CallbackQuery; not the sender of the CallbackQuery.Message.
 			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
 		}
@@ -143,7 +150,10 @@ func (c *Context) Args() []string {
 		msg = c.Update.EditedChannelPost
 
 	case c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil:
-		msg = c.Update.CallbackQuery.Message
+		m, ok := c.Update.CallbackQuery.Message.(*gotgbot.Message)
+		if ok {
+			msg = m
+		}
 	}
 
 	if msg == nil {
