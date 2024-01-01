@@ -1,6 +1,7 @@
 package ext_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,9 +11,12 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 )
 
 func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
@@ -69,6 +73,78 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	}
 }
 
+// This test is a bit strange, as it tries to test concurrency events. Which means it relies on awkward timing
+// situations. To try and mitigate this, we run it multiple times in parallel; hoping this will help catch any issues.
+// The idea is that we want to be able to test getUpdates both BEFORE as well as AFTER the bot has been stopped.
+// Execution flow is:
+// - polling is started
+// - getUpdates receives "stop" message. Keeps running on loop with a 1s delay.
+// - dispatcher processes stop message; calls updater.stopBot, thus closing channels, removing from bot map, and stopping dispatcher.
+// - getUpdates receives message again, 1s later; but updater+dispatcher channels are already closed by then.
+// - IF not concurrently safe; we get a panic. Else, works fine!
+// - Since updater channels are closed, messages should not be processed.
+//
+// NOTE: IF THIS FAILS, IT IS NOT A FLAKE! Investigate!
+func TestUpdaterPollingConcurrency(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		t.Run(fmt.Sprintf("run_%d", i), func(t *testing.T) {
+			concurrentTest(t)
+		})
+	}
+}
+
+func concurrentTest(t *testing.T) {
+	// we run it in parallel so that we get all the perks
+	t.Parallel()
+
+	delay := time.Second
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates":    {delay: delay, reply: `{"ok": true, "result": [{"message": {"text": "stop"}}]}`},
+		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL:  server.URL,
+		Timeout: delay * 2,
+	}
+
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{MaxRoutines: 1})
+	u := ext.NewUpdater(d, nil)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	d.AddHandler(handlers.NewMessage(message.Contains("stop"), func(b *gotgbot.Bot, ctx *ext.Context) error {
+		if !u.StopBot(b.Token) {
+			t.Errorf("Could not stop bot!")
+		}
+		// Make sure we mark this method as having run only once.
+		// (if run twice, we get a panic)
+		wg.Done()
+		return nil
+	}))
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start polling: %v", err)
+		return
+	}
+
+	wg.Wait()
+	time.Sleep(delay * 2)
+}
+
 func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	b := &gotgbot.Bot{
 		Token:     "SOME_TOKEN",
@@ -85,10 +161,138 @@ func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	}
 }
 
+func TestUpdater_GetHandlerFunc(t *testing.T) {
+	b := &gotgbot.Bot{
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	type args struct {
+		urlPath       string
+		opts          ext.WebhookOpts
+		httpResponse  int
+		handlerPrefix string
+		requestPath   string // Should start with '/'
+		headers       map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "simple path",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "slash prefixed path",
+			args: args{
+				urlPath:       "/123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "using subpath",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/test/",
+				requestPath:   "/test/123:hello",
+			},
+		}, {
+			name: "unknown path",
+			args: args{
+				urlPath:       "123:hello",
+				httpResponse:  http.StatusNotFound,
+				handlerPrefix: "/",
+				requestPath:   "/this-path-doesnt-exist",
+			},
+		}, {
+			name: "missing secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusUnauthorized,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+			},
+		}, {
+			name: "matching secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusOK,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+				headers: map[string]string{
+					"X-Telegram-Bot-Api-Secret-Token": "secret",
+				},
+			},
+		}, {
+			name: "invalid secret token",
+			args: args{
+				urlPath: "123:hello",
+				opts: ext.WebhookOpts{
+					SecretToken: "secret",
+				},
+				httpResponse:  http.StatusUnauthorized,
+				handlerPrefix: "/",
+				requestPath:   "/123:hello",
+				headers: map[string]string{
+					"X-Telegram-Bot-Api-Secret-Token": "wrong",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := ext.NewDispatcher(nil)
+			u := ext.NewUpdater(d, nil)
+
+			if err := u.AddWebhook(b, tt.args.urlPath, tt.args.opts); err != nil {
+				t.Errorf("failed to add webhook: %v", err)
+				return
+			}
+
+			s := httptest.NewServer(u.GetHandlerFunc(tt.args.handlerPrefix))
+			url := s.URL + tt.args.requestPath
+			// We pass {} to satisfy JSON handling
+			req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, strings.NewReader("{}"))
+			if err != nil {
+				t.Errorf("Failed to build request, should have worked: %v", err.Error())
+				return
+			}
+
+			for k, v := range tt.args.headers {
+				req.Header.Set(k, v)
+			}
+
+			r, err := s.Client().Do(req)
+			if err != nil {
+				t.Fatal()
+			}
+
+			defer r.Body.Close()
+			if r.StatusCode != tt.args.httpResponse {
+				t.Errorf("Expected code %d, got %d", tt.args.httpResponse, r.StatusCode)
+				return
+			}
+		})
+	}
+}
+
 func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates":    `{}`,
-		"deleteWebhook": `{"ok": true, "result": true}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates":    {reply: `{"ok": true}`},
+		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
 	})
 	defer server.Close()
 
@@ -116,11 +320,17 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 		t.Errorf("failed to start long poll on first bot: %v", err)
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
 func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -165,11 +375,17 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 		t.Errorf("should be able to add two different polling bots")
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
 func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -207,11 +423,17 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 		t.Errorf("should have failed to start the same long poll twice, but didnt")
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
 func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
-	server := basicTestServer(t, map[string]string{
-		"getUpdates": `{"ok": true, "result": []}`,
+	server := basicTestServer(t, map[string]testEndpoint{
+		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
 
@@ -252,9 +474,20 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 		t.Errorf("Failed to re-start a previously removed bot: %v", err)
 		return
 	}
+
+	err = u.Stop()
+	if err != nil {
+		t.Errorf("failed to stop updater: %v", err)
+		return
+	}
 }
 
-func basicTestServer(t *testing.T, methods map[string]string) *httptest.Server {
+type testEndpoint struct {
+	delay time.Duration
+	reply string
+}
+
+func basicTestServer(t *testing.T, methods map[string]testEndpoint) *httptest.Server {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pathItems := strings.Split(r.URL.Path, "/")
 		lastItem := pathItems[len(pathItems)-1]
@@ -262,7 +495,10 @@ func basicTestServer(t *testing.T, methods map[string]string) *httptest.Server {
 
 		out, ok := methods[lastItem]
 		if ok {
-			fmt.Fprint(w, out)
+			if out.delay != 0 {
+				time.Sleep(out.delay)
+			}
+			fmt.Fprint(w, out.reply)
 			return
 		}
 

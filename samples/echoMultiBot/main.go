@@ -42,11 +42,15 @@ func main() {
 	})
 	updater := ext.NewUpdater(dispatcher, nil)
 
-	// Add stop handler to stop all bots gracefully.
+	// Add stop handler to stop the current bot gracefully.
 	dispatcher.AddHandler(handlers.NewCommand("stop", func(b *gotgbot.Bot, ctx *ext.Context) error {
 		// Using an anonymous function here can be a nice way of passing additional parameters into bot methods.
 		// In this case we pass the updater - this will allow us to stop it and exit the program.
 		return stop(b, ctx, updater)
+	}))
+	// Add stopall handler to stop ALL bots.
+	dispatcher.AddHandler(handlers.NewCommand("stopall", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		return stopAll(b, ctx, updater)
 	}))
 	// Add echo handler to reply to all other text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
@@ -76,13 +80,13 @@ func main() {
 		}
 	}
 
-	// Idle, to keep updates coming in, and thus avoid our bots from stopping.
+	// Idle, to keep updates coming in, and thus avoid bots from stopping.
 	log.Println("Idling to keep main thread active while incoming updates are handled.")
 	updater.Idle()
 
 	// If we get here, the updater.Idle() has ended.
-	// This means the bots have been gracefully stopped via updater.Stop()
-	log.Println("All bots have been gracefully stopped.")
+	// This means that updater.Stop() has been called, stopping all bots gracefully.
+	log.Println("Updater is no longer idling; all bots have been stopped gracefully.")
 }
 
 // startLongPollingBots demonstrates how to start multiple bots with long-polling.
@@ -150,6 +154,21 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // echo replies to a messages with its own contents.
 func stop(b *gotgbot.Bot, ctx *ext.Context, updater *ext.Updater) error {
+	_, err := ctx.EffectiveMessage.Reply(b, "Stopping current bot...", nil)
+	if err != nil {
+		return fmt.Errorf("failed to echo message: %w", err)
+	}
+
+	if !updater.StopBot(b.Token) {
+		ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Unable to find bot %d; was it already stopped?", b.Id), nil)
+		return nil
+	}
+
+	return nil
+}
+
+// echo replies to a messages with its own contents.
+func stopAll(b *gotgbot.Bot, ctx *ext.Context, updater *ext.Updater) error {
 	_, err := ctx.EffectiveMessage.Reply(b, "Stopping all bots...", nil)
 	if err != nil {
 		return fmt.Errorf("failed to echo message: %w", err)

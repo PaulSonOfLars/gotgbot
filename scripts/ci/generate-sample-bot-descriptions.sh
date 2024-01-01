@@ -29,7 +29,7 @@ for d in "${SAMPLES_DIR}"/*; do
   echo "$intro" >>"${README_FILE}"
 
   # Extract all comments before the main function, and dump them in the readme file.
-  description="$(sed -n -e '/package/,/func main/ p' "${d}/main.go" | (grep -E "^//" || true) | sed -e 's:// ::g')"
+  description="$(sed -n -e '/package/,/func main/ p' "${d}/main.go" | (grep -E "^//" || true) | sed -E 's:^// ?::g')"
   if [[ -z "${description}" ]]; then
     echo "!!! no doc comments for ${d} - please add some first."
     exit 1
