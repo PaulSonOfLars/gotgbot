@@ -66,7 +66,7 @@ func main() {
 	}))
 
 	// We add the bot webhook to our updater, such that we can populate the updater's http.Handler.
-	err = updater.AddWebhook(b, b.Token, ext.WebhookOpts{SecretToken: webhookSecret})
+	err = updater.AddWebhook(b, b.Token, &ext.AddWebhookOpts{SecretToken: webhookSecret})
 	if err != nil {
 		panic("Failed to add bot webhooks to updater: " + err.Error())
 	}

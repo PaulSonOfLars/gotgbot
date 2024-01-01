@@ -169,7 +169,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 
 	type args struct {
 		urlPath       string
-		opts          ext.WebhookOpts
+		opts          *ext.AddWebhookOpts
 		httpResponse  int
 		handlerPrefix string
 		requestPath   string // Should start with '/'
@@ -215,7 +215,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 			name: "missing secret token",
 			args: args{
 				urlPath: "123:hello",
-				opts: ext.WebhookOpts{
+				opts: &ext.AddWebhookOpts{
 					SecretToken: "secret",
 				},
 				httpResponse:  http.StatusUnauthorized,
@@ -226,7 +226,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 			name: "matching secret token",
 			args: args{
 				urlPath: "123:hello",
-				opts: ext.WebhookOpts{
+				opts: &ext.AddWebhookOpts{
 					SecretToken: "secret",
 				},
 				httpResponse:  http.StatusOK,
@@ -240,7 +240,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 			name: "invalid secret token",
 			args: args{
 				urlPath: "123:hello",
-				opts: ext.WebhookOpts{
+				opts: &ext.AddWebhookOpts{
 					SecretToken: "secret",
 				},
 				httpResponse:  http.StatusUnauthorized,
