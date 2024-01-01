@@ -53,6 +53,9 @@ var ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapp
 // addBot Adds a new bot to the botMapping structure.
 // Pass an empty urlPath/webhookSecret if using polling instead of webhooks.
 func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string) (*botData, error) {
+	// Clean up the URLPath such that it remains consistent.
+	urlPath = strings.TrimPrefix(urlPath, "/")
+
 	m.mux.Lock()
 	defer m.mux.Unlock()
 

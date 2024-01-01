@@ -282,7 +282,11 @@ func (u *Updater) StopAllBots() {
 // This does NOT set the webhook on telegram - this should be done by the caller.
 // The opts parameter allows for specifying various webhook settings.
 func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
-	err := u.AddWebhook(b, urlPath, opts)
+	if u.webhookServer != nil {
+		return ErrExpectedEmptyServer
+	}
+
+	err := u.AddWebhook(b, urlPath, &AddWebhookOpts{SecretToken: opts.SecretToken})
 	if err != nil {
 		return fmt.Errorf("failed to add webhook: %w", err)
 	}
@@ -290,15 +294,26 @@ func (u *Updater) StartWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts)
 	return u.StartServer(opts)
 }
 
+// AddWebhookOpts stores any optional parameters for the Updater.AddWebhook method.
+type AddWebhookOpts struct {
+	// The secret token to be used to validate webhook authenticity.
+	SecretToken string
+}
+
 // AddWebhook prepares the webhook server to receive webhook updates for one bot, on a specific path.
-func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts WebhookOpts) error {
+func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *AddWebhookOpts) error {
 	// We expect webhooks to use unique URL paths; otherwise, we wouldnt be able to differentiate them from polling, or
 	// from each other.
 	if urlPath == "" {
 		return fmt.Errorf("expected a non-empty url path: %w", ErrEmptyPath)
 	}
 
-	bData, err := u.botMapping.addBot(b, strings.TrimPrefix(urlPath, "/"), opts.SecretToken)
+	secretToken := ""
+	if opts != nil {
+		secretToken = opts.SecretToken
+	}
+
+	bData, err := u.botMapping.addBot(b, urlPath, secretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}
