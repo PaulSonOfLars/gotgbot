@@ -24,8 +24,12 @@ type TypeDescription struct {
 }
 
 func (td TypeDescription) receiverName() string {
+	return receiver(td.Name)
+}
+
+func receiver(n string) string {
 	var rs []rune
-	for _, r := range td.Name {
+	for _, r := range n {
 		if unicode.IsUpper(r) {
 			rs = append(rs, r)
 		}
@@ -39,6 +43,10 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 
 	for _, m := range d.Methods {
 		for _, r := range m.Returns {
+			if isTgArray(r) {
+				r = strings.TrimPrefix(r, "Array of ")
+			}
+
 			if r == td.Name {
 				return true
 			}
@@ -48,7 +56,7 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 				continue
 			}
 
-			if CheckChildTypes(d, child, td.Name, []string{td.Name}) {
+			if usesChildType(d, child, td.Name, []string{td.Name}) {
 				return true
 			}
 			checked[r] = true
@@ -57,9 +65,13 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 	return false
 }
 
-func CheckChildTypes(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
+func usesChildType(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
 	for _, f := range tgType.Fields {
 		for _, t := range f.Types {
+			if isTgArray(t) {
+				t = strings.TrimPrefix(t, "Array of ")
+			}
+
 			if t == typeName {
 				return true
 			}
@@ -69,7 +81,7 @@ func CheckChildTypes(d APIDescription, tgType TypeDescription, typeName string, 
 			}
 
 			if child, ok := d.Types[t]; ok && t != tgType.Name {
-				if CheckChildTypes(d, child, typeName, append(skip, tgType.Name)) {
+				if usesChildType(d, child, typeName, append(skip, tgType.Name)) {
 					return true
 				}
 			}
@@ -106,7 +118,22 @@ func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, 
 	if len(common) == 0 {
 		return "", fmt.Errorf("no common fields for parenttype %s", td.Name)
 	}
-	return common[0].Name, nil
+
+	return getConstantFieldFromCommons(d, common)
+}
+
+func getConstantFieldFromCommons(d APIDescription, common []Field) (string, error) {
+	for _, v := range common {
+		s, err := v.getPreferredType(d)
+		if err != nil {
+			return "", err
+		}
+		// These may be better as hand-picked fields by name (type/status/source) rather than type
+		if s == "string" {
+			return v.Name, nil
+		}
+	}
+	return "", nil
 }
 
 func (m MethodDescription) docs() string {
@@ -152,7 +179,7 @@ type Field struct {
 func (f Field) isConstantField(d APIDescription, tgType TypeDescription) bool {
 	for _, parent := range tgType.SubtypeOf {
 		constantField, err := d.Types[parent].getConstantFieldFromParent(d)
-		if err != nil {
+		if err != nil || constantField == "" {
 			continue
 		}
 		if constantField == f.Name {
@@ -254,6 +281,15 @@ func orderedMethods(d APIDescription) []string {
 func isTgType(d APIDescription, goType string) bool {
 	_, ok := d.Types[goType]
 	return ok
+}
+
+// isTgStructType returns false if there are subtypes (ie, is NOT an interface).
+func isTgStructType(d APIDescription, goType string) bool {
+	t, ok := d.Types[goType]
+	if !ok {
+		return false
+	}
+	return len(t.Subtypes) == 0
 }
 
 func (f Field) getPreferredType(d APIDescription) (string, error) {

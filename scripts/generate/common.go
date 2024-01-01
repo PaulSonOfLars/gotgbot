@@ -149,18 +149,19 @@ func goTypeStringer(t string) string {
 }
 
 // getAllFields merges all the fields from list of types.
-func getAllFields(types []TypeDescription, parentType string) []Field {
+func getAllFields(d APIDescription, types []TypeDescription, parentType string) ([]Field, error) {
 	if len(types) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	var fields []Field
-	isOK := map[string][]string{}
+	var fieldNames []string            // Ordered, unique list of names for all fields across all types
+	presentIn := map[string][]string{} // Map of fields -> list of types which use it
+	fields := map[string]Field{}       // Map of fieldnames -> fields to use (using correct pointers)
 
 	for _, t := range types {
 		for _, f := range t.Fields {
 			typeName := t.getTypeNameFromParent(parentType)
-			isOK[f.Name] = append(isOK[f.Name], typeName)
+			presentIn[f.Name] = append(presentIn[f.Name], typeName)
 
 			// Some fields need to be cleaned up to be agnostic across all fields.
 			// eg: 	The BotCommandScopeDefault has a "Type" field saying 'Scope type, must be default'
@@ -172,28 +173,58 @@ func getAllFields(types []TypeDescription, parentType string) []Field {
 				f.Description = strings.Replace(f.Description, replace, "", 1)
 			}
 
-			if len(isOK[f.Name]) == 1 {
-				fields = append(fields, f)
+			// If this is the first time a field is found, add it to the list of field names
+			if len(presentIn[f.Name]) == 1 {
+				fieldNames = append(fieldNames, f.Name)
+				fields[f.Name] = f
+			}
+
+			// Check the current type info for this field, to handle cases where one is a pointer
+			// (eg "User" and "*User" in ChatBoostSourceGiveaway)
+			currField := fields[f.Name]
+			newType, err := f.getPreferredType(d)
+			if err != nil {
+				return nil, err
+			}
+
+			currType, err := currField.getPreferredType(d)
+			if err != nil {
+				return nil, err
+			}
+
+			if currType != newType {
+				if isPointer(newType) {
+					fields[f.Name] = f
+				}
 			}
 		}
 	}
 
-	for idx, f := range fields {
-		typesUsingField := isOK[f.Name]
-		if len(typesUsingField) == len(types) {
-			continue
+	var retField []Field
+	for _, n := range fieldNames {
+		f, ok := fields[n]
+		if !ok {
+			return nil, errors.New("missing types for " + n)
 		}
 
-		// If not all subtypes use it, then its optional; update description.
-		if f.Required {
-			f.Description = "Optional. " + f.Description
+		typesUsingField := presentIn[f.Name]
+		if len(typesUsingField) != len(types) {
+			// If not all subtypes use it, then its optional; update description.
+			if f.Required {
+				f.Description = "Optional. " + f.Description
+			}
+
+			f.Required = false
+			f.Description = fmt.Sprintf("%s (Only for %s)", f.Description, strings.Join(typesUsingField, ", "))
+		} else if parentType == "ChatBoostSource" && f.Name == "user" {
+			// Special edge case for odd typing situation
+			f.Description = "Optional. User that provided the boost (may be empty for ChatBoostSourceGiveaway)"
 		}
 
-		fields[idx].Required = false
-		fields[idx].Description = fmt.Sprintf("%s (Only for %s)", f.Description, strings.Join(typesUsingField, ", "))
+		retField = append(retField, f)
 	}
 
-	return fields
+	return retField, nil
 }
 
 func getCommonFields(types []TypeDescription) []Field {

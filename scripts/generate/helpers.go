@@ -16,12 +16,12 @@ package gotgbot
 
 `)
 
-	for _, tgMethodName := range orderedMethods(d) {
-		tgMethod := d.Methods[tgMethodName]
+	for _, tgTypeName := range orderedTgTypes(d) {
+		tgType := d.Types[tgTypeName]
 
-		helper, err := generateHelperDef(d, tgMethod)
+		helper, err := generateHelperDef(d, tgType)
 		if err != nil {
-			return fmt.Errorf("failed to generate helpers for %s: %w", tgMethodName, err)
+			return fmt.Errorf("failed to generate helpers for %s: %w", tgType.Name, err)
 		}
 
 		if helper == "" {
@@ -34,8 +34,107 @@ package gotgbot
 	return writeGenToFile(helpers, "gen_helpers.go")
 }
 
-func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, error) {
+type helperData struct {
+	newName     string
+	method      MethodDescription
+	fields      map[string]string
+	returnTypes []string
+	defArgList  []string
+	callArgList []string
+	opts        string
+}
+
+func (d helperData) docs() string {
+	return "\n// " + d.newName + " Helper method for Bot." + strings.Title(d.method.Name) + "."
+}
+
+func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helperData, error) {
+	receiver := receiver(typeName)
+	if typeName == "InaccessibleMessage" {
+		typeName = "Message"
+	}
+
+	var methods []helperData
+	for _, methodName := range orderedMethods(d) {
+
+		tgMethod := d.Methods[methodName]
+
+		// Get list of fields which match the method types
+		fieldMatches := getFieldsTypeMatches(typeName, typeFields, tgMethod.Fields)
+		if len(fieldMatches) == 0 {
+			continue
+		}
+
+		newMethodName, ok, err := getMethodFieldsSubtypeMatches(d, typeName, typeFields, tgMethod, fieldMatches)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			continue
+		}
+
+		ret, err := tgMethod.GetReturnTypes(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
+		}
+
+		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(d, tgMethod, receiver, fieldMatches)
+		if err != nil {
+			return nil, err
+		}
+
+		methods = append(methods, helperData{
+			newName:     newMethodName,
+			method:      tgMethod,
+			fields:      fieldMatches,
+			returnTypes: ret,
+			callArgList: funcCallArgList,
+			defArgList:  funcDefArgList,
+			opts:        optsContent,
+		})
+	}
+
+	return methods, nil
+}
+
+func generateHelperDef(d APIDescription, tgType TypeDescription) (string, error) {
+	if tgType.Name == tgTypeFile {
+		return "", nil
+	}
+	if len(tgType.Subtypes) != 0 {
+		// TODO: Generate common list of methods for all the child types
+		return "", nil
+	}
+
+	helpers, err := getHelpers(d, tgType.Name, tgType.Fields)
+	if err != nil {
+		return "", err
+	}
+
 	helperDef := strings.Builder{}
+	for _, helper := range helpers {
+		helperDef.WriteString(helper.docs())
+
+		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
+			Receiver:     tgType.receiverName(),
+			TypeName:     tgType.Name,
+			HelperName:   helper.newName,
+			ReturnType:   strings.Join(helper.returnTypes, ", "),
+			FuncDefArgs:  strings.Join(helper.defArgList, ", "),
+			Contents:     helper.opts,
+			OptsName:     helper.method.optsName(),
+			MethodName:   strings.Title(helper.method.Name),
+			FuncCallArgs: strings.Join(helper.callArgList, ", "),
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", helper.newName, tgType.Name, err)
+		}
+	}
+
+	return helperDef.String(), nil
+}
+
+func hasFromChat(tgMethod MethodDescription) bool {
 	hasFromChat := false
 
 	for _, x := range tgMethod.Fields {
@@ -44,65 +143,7 @@ func generateHelperDef(d APIDescription, tgMethod MethodDescription) (string, er
 			break
 		}
 	}
-
-	for _, typeName := range orderedTgTypes(d) {
-		if typeName == tgTypeFile {
-			continue
-		}
-
-		tgType := d.Types[typeName]
-
-		newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
-		if newMethodName == tgMethod.Name {
-			continue
-		}
-
-		fields := getMethodFieldsTypeMatches(tgMethod, typeName)
-		if len(fields) == 0 {
-			continue
-		}
-
-		newMethodName, err := getMethodFieldsSubtypeMatches(d, tgMethod, tgType, newMethodName, hasFromChat, fields)
-		if err != nil {
-			return "", err
-		}
-
-		newMethodName = strings.Title(newMethodName)
-
-		ret, err := tgMethod.GetReturnTypes(d)
-		if err != nil {
-			return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
-		}
-
-		receiverName := tgType.receiverName()
-
-		funcCallArgList, funcDefArgList, optsContent, err := generateHelperArguments(d, tgMethod, receiverName, fields)
-		if err != nil {
-			return "", err
-		}
-
-		funcDefArgs := strings.Join(funcDefArgList, ", ")
-		funcCallArgs := strings.Join(funcCallArgList, ", ")
-
-		helperDef.WriteString("\n// " + newMethodName + " Helper method for Bot." + strings.Title(tgMethod.Name))
-
-		err = helperFuncTmpl.Execute(&helperDef, helperFuncData{
-			Receiver:     receiverName,
-			TypeName:     typeName,
-			HelperName:   newMethodName,
-			ReturnType:   strings.Join(ret, ", "),
-			FuncDefArgs:  funcDefArgs,
-			Contents:     optsContent,
-			OptsName:     tgMethod.optsName(),
-			MethodName:   strings.Title(tgMethod.Name),
-			FuncCallArgs: funcCallArgs,
-		})
-		if err != nil {
-			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", newMethodName, typeName, err)
-		}
-	}
-
-	return helperDef.String(), nil
+	return hasFromChat
 }
 
 func generateHelperArguments(d APIDescription, tgMethod MethodDescription, receiverName string, fields map[string]string) ([]string, []string, string, error) {
@@ -150,8 +191,11 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 	return funcCallArgList, funcDefArgList, optsContent.String(), nil
 }
 
-func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription, tgType TypeDescription, repl string, hasFromChat bool, fields map[string]string) (string, error) {
-	for _, f := range tgType.Fields {
+func getMethodFieldsSubtypeMatches(d APIDescription, typeName string, typeFields []Field, tgMethod MethodDescription, fields map[string]string) (string, bool, error) {
+	newMethodName := strings.Replace(tgMethod.Name, typeName, "", 1)
+	fromChat := hasFromChat(tgMethod)
+
+	for _, f := range typeFields {
 		if f.Name == "reply_to_message" {
 			// this subfield just causes confusion; we always want the message_id
 			continue
@@ -160,13 +204,13 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 		for _, mf := range tgMethod.Fields {
 			prefType, err := f.getPreferredType(d)
 			if err != nil {
-				return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
+				return "", false, fmt.Errorf("failed to get preferred type for field %s of %s: %w", mf.Name, tgMethod.Name, err)
 			}
 
 			if isTgType(d, prefType) && f.Name+"_id" == mf.Name {
-				repl = strings.ReplaceAll(repl, prefType, "")
+				newMethodName = strings.ReplaceAll(newMethodName, prefType, "")
 
-				if hasFromChat && mf.Name == "chat_id" {
+				if fromChat && mf.Name == "chat_id" {
 					fields["from_chat_id"] = f.Name + ".Id"
 				} else {
 					fields[mf.Name] = f.Name + ".Id" // Note: maybe not just assume ID field exists?
@@ -174,25 +218,29 @@ func getMethodFieldsSubtypeMatches(d APIDescription, tgMethod MethodDescription,
 			}
 		}
 	}
-	return repl, nil
+	return strings.Title(newMethodName), newMethodName != tgMethod.Name, nil
 }
 
-func getMethodFieldsTypeMatches(tgMethod MethodDescription, typeName string) map[string]string {
+func getFieldsTypeMatches(typeName string, typeFields []Field, methodFields []Field) map[string]string {
 	fields := map[string]string{}
-	for _, f := range tgMethod.Fields {
-		if f.Name == titleToSnake(typeName)+"_id" || f.Name == "id" {
-			idField := "id"
+	snakeTypeNameId := titleToSnake(typeName) + "_id"
 
-			if typeName == tgTypeMessage {
-				idField = "message_id"
-			} else if typeName == tgTypeFile {
-				idField = "file_id"
-			}
-
-			fields[titleToSnake(typeName)+"_id"] = idField
+	for _, f := range methodFields {
+		if f.Name == snakeTypeNameId || f.Name == "id" {
+			fields[snakeTypeNameId] = findIdField(typeFields, f.Name)
 		}
 	}
 	return fields
+}
+
+func findIdField(typeFields []Field, methodFieldName string) string {
+	// And iterate over all the type fields, to see if any match the method field name.
+	for _, f := range typeFields {
+		if methodFieldName == f.Name {
+			return methodFieldName
+		}
+	}
+	return "id" // we default to "id" if nothing else matches
 }
 
 var helperFuncTmpl = template.Must(template.New("helperFunc").Parse(helperFunc))
