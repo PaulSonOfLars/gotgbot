@@ -24,6 +24,16 @@ func NewMessage(f filters.Message, r Response) Message {
 	}
 }
 
+func (m Message) SetAllowEdited(allow bool) Message {
+	m.AllowEdited = allow
+	return m
+}
+
+func (m Message) SetAllowChannel(allow bool) Message {
+	m.AllowChannel = allow
+	return m
+}
+
 func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.Message != nil {
 		return m.Filter == nil || m.Filter(ctx.Message)

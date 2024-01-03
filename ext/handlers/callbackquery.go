@@ -21,6 +21,11 @@ func NewCallback(filter filters.CallbackQuery, r Response) CallbackQuery {
 	}
 }
 
+func (cb CallbackQuery) SetAllowChannel(allow bool) CallbackQuery {
+	cb.AllowChannel = allow
+	return cb
+}
+
 func (cb CallbackQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	return cb.Response(b, ctx)
 }
