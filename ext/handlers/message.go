@@ -24,11 +24,13 @@ func NewMessage(f filters.Message, r Response) Message {
 	}
 }
 
+// SetAllowEdited Enables edited messages for this handler.
 func (m Message) SetAllowEdited(allow bool) Message {
 	m.AllowEdited = allow
 	return m
 }
 
+// SetAllowChannel Enables channel messages for this handler.
 func (m Message) SetAllowChannel(allow bool) Message {
 	m.AllowChannel = allow
 	return m

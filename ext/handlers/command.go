@@ -26,11 +26,13 @@ func NewCommand(c string, r Response) Command {
 	}
 }
 
+// SetAllowEdited Enables edited messages for this handler.
 func (c Command) SetAllowEdited(allow bool) Command {
 	c.AllowEdited = allow
 	return c
 }
 
+// SetAllowChannel Enables channel messages for this handler.
 func (c Command) SetAllowChannel(allow bool) Command {
 	c.AllowChannel = allow
 	return c
