@@ -72,9 +72,9 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 
 		if update.CallbackQuery.Message != nil {
 			// Note: This check means that we do not populate the EffectiveMessage field in the case of an inacessible message.
-			m, ok := update.CallbackQuery.Message.(*gotgbot.Message)
+			m, ok := update.CallbackQuery.Message.(gotgbot.Message)
 			if ok {
-				msg = m
+				msg = &m
 			}
 
 			tmpC := update.CallbackQuery.Message.GetChat()
@@ -150,9 +150,9 @@ func (c *Context) Args() []string {
 		msg = c.Update.EditedChannelPost
 
 	case c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil:
-		m, ok := c.Update.CallbackQuery.Message.(*gotgbot.Message)
+		m, ok := c.Update.CallbackQuery.Message.(gotgbot.Message)
 		if ok {
-			msg = m
+			msg = &m
 		}
 	}
 
