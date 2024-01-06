@@ -20,8 +20,21 @@ func (m Message) GetLink() string {
 	return fmt.Sprintf("https://t.me/c/%s/%d", rawChatId, m.MessageId)
 }
 
-// Reply is a helper function to easily call Bot.SendMessage as a reply to an existing message.
+// Reply is a helper function to easily call Bot.SendMessage as a reply to an existing Message.
 func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendMessageOpts{}
+	}
+
+	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
+		opts.ReplyParameters = &ReplyParameters{MessageId: m.MessageId}
+	}
+
+	return b.SendMessage(m.Chat.Id, text, opts)
+}
+
+// Reply is a helper function to easily call Bot.SendMessage as a reply to an existing InaccessibleMessage.
+func (m InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	if opts == nil {
 		opts = &SendMessageOpts{}
 	}
