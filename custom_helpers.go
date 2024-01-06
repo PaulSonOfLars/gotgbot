@@ -34,16 +34,16 @@ func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, er
 }
 
 // Reply is a helper function to easily call Bot.SendMessage as a reply to an existing InaccessibleMessage.
-func (m InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
+func (im InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	if opts == nil {
 		opts = &SendMessageOpts{}
 	}
 
 	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
-		opts.ReplyParameters = &ReplyParameters{MessageId: m.MessageId}
+		opts.ReplyParameters = &ReplyParameters{MessageId: im.MessageId}
 	}
 
-	return b.SendMessage(m.Chat.Id, text, opts)
+	return b.SendMessage(im.Chat.Id, text, opts)
 }
 
 // SendMessage is a helper function to easily call Bot.SendMessage in a chat.
