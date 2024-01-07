@@ -672,6 +672,10 @@ const customStructUnmarshal = `
 // {{.UnmarshalFuncName}}Array is a JSON unmarshalling helper which allows unmarshalling an array of interfaces 
 // using {{.UnmarshalFuncName}}.
 func {{.UnmarshalFuncName}}Array(d json.RawMessage) ([]{{.ParentType}}, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {

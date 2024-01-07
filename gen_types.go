@@ -788,6 +788,10 @@ func (v MergedChatBoostSource) MergeChatBoostSource() MergedChatBoostSource {
 // unmarshalChatBoostSourceArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatBoostSource.
 func unmarshalChatBoostSourceArray(d json.RawMessage) ([]ChatBoostSource, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
@@ -1144,6 +1148,10 @@ func (v MergedChatMember) MergeChatMember() MergedChatMember {
 // unmarshalChatMemberArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatMember.
 func unmarshalChatMemberArray(d json.RawMessage) ([]ChatMember, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
@@ -4719,6 +4727,10 @@ func (v MergedMenuButton) MergeMenuButton() MergedMenuButton {
 // unmarshalMenuButtonArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMenuButton.
 func unmarshalMenuButtonArray(d json.RawMessage) ([]MenuButton, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
@@ -5329,6 +5341,10 @@ func (v MergedMessageOrigin) MergeMessageOrigin() MergedMessageOrigin {
 // unmarshalMessageOriginArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMessageOrigin.
 func unmarshalMessageOriginArray(d json.RawMessage) ([]MessageOrigin, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
@@ -6434,6 +6450,10 @@ func (v MergedReactionType) MergeReactionType() MergedReactionType {
 // unmarshalReactionTypeArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalReactionType.
 func unmarshalReactionTypeArray(d json.RawMessage) ([]ReactionType, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
