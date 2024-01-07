@@ -645,7 +645,7 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 		{{- if $f.Custom}}
 			v.{{ $f.Name }}, err = unmarshal{{ if eq $f.Type $f.ArrayType }}{{ $f.Type }}{{ else }}{{ $f.ArrayType }}Array{{ end }}(t.{{$f.Name}})
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to unmarshal custom JSON field {{$f.Name}}: %w", err)
 			}
 		{{- else }}
 			v.{{ $f.Name }} = t.{{ $f.Name }}

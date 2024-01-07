@@ -449,7 +449,7 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 	v.From = t.From
 	v.Message, err = unmarshalMaybeInaccessibleMessage(t.Message)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Message: %w", err)
 	}
 	v.InlineMessageId = t.InlineMessageId
 	v.ChatInstance = t.ChatInstance
@@ -592,7 +592,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	v.ActiveUsernames = t.ActiveUsernames
 	v.AvailableReactions, err = unmarshalReactionTypeArray(t.AvailableReactions)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field AvailableReactions: %w", err)
 	}
 	v.AccentColorId = t.AccentColorId
 	v.BackgroundCustomEmojiId = t.BackgroundCustomEmojiId
@@ -693,7 +693,7 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	v.ExpirationDate = t.ExpirationDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Source: %w", err)
 	}
 
 	return nil
@@ -733,7 +733,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	v.RemoveDate = t.RemoveDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Source: %w", err)
 	}
 
 	return nil
@@ -1633,11 +1633,11 @@ func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 	v.Date = t.Date
 	v.OldChatMember, err = unmarshalChatMember(t.OldChatMember)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field OldChatMember: %w", err)
 	}
 	v.NewChatMember, err = unmarshalChatMember(t.NewChatMember)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field NewChatMember: %w", err)
 	}
 	v.InviteLink = t.InviteLink
 	v.ViaChatFolderInviteLink = t.ViaChatFolderInviteLink
@@ -1890,7 +1890,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 
 	v.Origin, err = unmarshalMessageOrigin(t.Origin)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Origin: %w", err)
 	}
 	v.Chat = t.Chat
 	v.MessageId = t.MessageId
@@ -5134,7 +5134,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.Chat = t.Chat
 	v.ForwardOrigin, err = unmarshalMessageOrigin(t.ForwardOrigin)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field ForwardOrigin: %w", err)
 	}
 	v.IsTopicMessage = t.IsTopicMessage
 	v.IsAutomaticForward = t.IsAutomaticForward
@@ -5180,7 +5180,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.MigrateFromChatId = t.MigrateFromChatId
 	v.PinnedMessage, err = unmarshalMaybeInaccessibleMessage(t.PinnedMessage)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field PinnedMessage: %w", err)
 	}
 	v.Invoice = t.Invoice
 	v.SuccessfulPayment = t.SuccessfulPayment
@@ -5647,11 +5647,11 @@ func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
 	v.Date = t.Date
 	v.OldReaction, err = unmarshalReactionTypeArray(t.OldReaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field OldReaction: %w", err)
 	}
 	v.NewReaction, err = unmarshalReactionTypeArray(t.NewReaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field NewReaction: %w", err)
 	}
 
 	return nil
@@ -6382,7 +6382,7 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 
 	v.Type, err = unmarshalReactionType(t.Type)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Type: %w", err)
 	}
 	v.TotalCount = t.TotalCount
 
