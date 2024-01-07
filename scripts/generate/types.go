@@ -639,7 +639,7 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal {{.Type}} JSON into tmp struct: %w", err)
 	}
 	{{ range $f := .Fields }}
 		{{- if $f.Custom}}

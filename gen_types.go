@@ -442,7 +442,7 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal CallbackQuery JSON into tmp struct: %w", err)
 	}
 
 	v.Id = t.Id
@@ -578,7 +578,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal Chat JSON into tmp struct: %w", err)
 	}
 
 	v.Id = t.Id
@@ -685,7 +685,7 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatBoost JSON into tmp struct: %w", err)
 	}
 
 	v.BoostId = t.BoostId
@@ -725,7 +725,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatBoostRemoved JSON into tmp struct: %w", err)
 	}
 
 	v.Chat = t.Chat
@@ -1633,7 +1633,7 @@ func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatMemberUpdated JSON into tmp struct: %w", err)
 	}
 
 	v.Chat = t.Chat
@@ -1893,7 +1893,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ExternalReplyInfo JSON into tmp struct: %w", err)
 	}
 
 	v.Origin, err = unmarshalMessageOrigin(t.Origin)
@@ -5135,7 +5135,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal Message JSON into tmp struct: %w", err)
 	}
 
 	v.MessageId = t.MessageId
@@ -5653,7 +5653,7 @@ func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal MessageReactionUpdated JSON into tmp struct: %w", err)
 	}
 
 	v.Chat = t.Chat
@@ -6393,7 +6393,7 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ReactionCount JSON into tmp struct: %w", err)
 	}
 
 	v.Type, err = unmarshalReactionType(t.Type)
