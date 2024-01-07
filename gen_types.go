@@ -795,14 +795,14 @@ func unmarshalChatBoostSourceArray(d json.RawMessage) ([]ChatBoostSource, error)
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ChatBoostSource JSON into an array: %w", err)
 	}
 
 	var vs []ChatBoostSource
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalChatBoostSource(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -822,7 +822,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for constant field 'Source': %w", err)
 	}
 
 	switch t.Source {
@@ -830,7 +830,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourcePremium{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'premium': %w", err)
 		}
 		return s, nil
 
@@ -838,7 +838,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourceGiftCode{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'gift_code': %w", err)
 		}
 		return s, nil
 
@@ -846,12 +846,12 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourceGiveaway{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'giveaway': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Source %v", t.Source)
+	return nil, fmt.Errorf("unknown interface for ChatBoostSource with Source %v", t.Source)
 }
 
 // ChatBoostSourceGiftCode (https://core.telegram.org/bots/api#chatboostsourcegiftcode)
@@ -1155,14 +1155,14 @@ func unmarshalChatMemberArray(d json.RawMessage) ([]ChatMember, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ChatMember JSON into an array: %w", err)
 	}
 
 	var vs []ChatMember
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalChatMember(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -1182,7 +1182,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ChatMember for constant field 'Status': %w", err)
 	}
 
 	switch t.Status {
@@ -1190,7 +1190,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberOwner{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'creator': %w", err)
 		}
 		return s, nil
 
@@ -1198,7 +1198,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberAdministrator{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'administrator': %w", err)
 		}
 		return s, nil
 
@@ -1206,7 +1206,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberMember{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'member': %w", err)
 		}
 		return s, nil
 
@@ -1214,7 +1214,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberRestricted{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'restricted': %w", err)
 		}
 		return s, nil
 
@@ -1222,7 +1222,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberLeft{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'left': %w", err)
 		}
 		return s, nil
 
@@ -1230,12 +1230,12 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberBanned{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'kicked': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Status %v", t.Status)
+	return nil, fmt.Errorf("unknown interface for ChatMember with Status %v", t.Status)
 }
 
 // ChatMemberAdministrator (https://core.telegram.org/bots/api#chatmemberadministrator)
@@ -4734,14 +4734,14 @@ func unmarshalMenuButtonArray(d json.RawMessage) ([]MenuButton, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial MenuButton JSON into an array: %w", err)
 	}
 
 	var vs []MenuButton
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalMenuButton(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -4761,7 +4761,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal MenuButton for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -4769,7 +4769,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonCommands{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'commands': %w", err)
 		}
 		return s, nil
 
@@ -4777,7 +4777,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonWebApp{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'web_app': %w", err)
 		}
 		return s, nil
 
@@ -4785,12 +4785,12 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonDefault{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'default': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for MenuButton with Type %v", t.Type)
 }
 
 // MenuButtonCommands (https://core.telegram.org/bots/api#menubuttoncommands)
@@ -5348,14 +5348,14 @@ func unmarshalMessageOriginArray(d json.RawMessage) ([]MessageOrigin, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial MessageOrigin JSON into an array: %w", err)
 	}
 
 	var vs []MessageOrigin
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalMessageOrigin(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -5375,7 +5375,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal MessageOrigin for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -5383,7 +5383,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginUser{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'user': %w", err)
 		}
 		return s, nil
 
@@ -5391,7 +5391,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginHiddenUser{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'hidden_user': %w", err)
 		}
 		return s, nil
 
@@ -5399,7 +5399,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginChat{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'chat': %w", err)
 		}
 		return s, nil
 
@@ -5407,12 +5407,12 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginChannel{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'channel': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for MessageOrigin with Type %v", t.Type)
 }
 
 // MessageOriginChannel (https://core.telegram.org/bots/api#messageoriginchannel)
@@ -6457,14 +6457,14 @@ func unmarshalReactionTypeArray(d json.RawMessage) ([]ReactionType, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ReactionType JSON into an array: %w", err)
 	}
 
 	var vs []ReactionType
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalReactionType(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -6484,7 +6484,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ReactionType for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -6492,7 +6492,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		s := ReactionTypeEmoji{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'emoji': %w", err)
 		}
 		return s, nil
 
@@ -6500,12 +6500,12 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		s := ReactionTypeCustomEmoji{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'custom_emoji': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for ReactionType with Type %v", t.Type)
 }
 
 // ReactionTypeCustomEmoji (https://core.telegram.org/bots/api#reactiontypecustomemoji)

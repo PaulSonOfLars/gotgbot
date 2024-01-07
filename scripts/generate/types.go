@@ -679,14 +679,14 @@ func {{.UnmarshalFuncName}}Array(d json.RawMessage) ([]{{.ParentType}}, error) {
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial {{.ParentType}} JSON into an array: %w", err)
 	}
 
 	var vs []{{.ParentType}}
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := {{.UnmarshalFuncName}}(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -706,7 +706,7 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		}{}
 		err := json.Unmarshal(d, &t)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} for constant field '{{.ConstantFieldName}}': %w", err)
 		}
 
 		switch t.{{.ConstantFieldName}} {
@@ -715,12 +715,12 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 			s := {{ $val.TypeName }}{}
 			err := json.Unmarshal(d, &s)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to unmarshal {{$.ParentType}} for value '{{ $val.ConstantFieldValue }}': %w", err)
 			}
 			return s, nil
 		{{ end }}
 		}
-		return nil, fmt.Errorf("unknown interface with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
+		return nil, fmt.Errorf("unknown interface for {{.ParentType}} with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
 }`
 
 type customMarshalData struct {
