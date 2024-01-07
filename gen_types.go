@@ -535,6 +535,94 @@ type Chat struct {
 	Location *ChatLocation `json:"location,omitempty"`
 }
 
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *Chat) UnmarshalJSON(b []byte) error {
+	// All fields in Chat, with interface fields as json.RawMessage
+	type tmp struct {
+		Id                                 int64            `json:"id"`
+		Type                               string           `json:"type"`
+		Title                              string           `json:"title"`
+		Username                           string           `json:"username"`
+		FirstName                          string           `json:"first_name"`
+		LastName                           string           `json:"last_name"`
+		IsForum                            bool             `json:"is_forum"`
+		Photo                              *ChatPhoto       `json:"photo"`
+		ActiveUsernames                    []string         `json:"active_usernames"`
+		AvailableReactions                 json.RawMessage  `json:"available_reactions"`
+		AccentColorId                      int64            `json:"accent_color_id"`
+		BackgroundCustomEmojiId            string           `json:"background_custom_emoji_id"`
+		ProfileAccentColorId               int64            `json:"profile_accent_color_id"`
+		ProfileBackgroundCustomEmojiId     string           `json:"profile_background_custom_emoji_id"`
+		EmojiStatusCustomEmojiId           string           `json:"emoji_status_custom_emoji_id"`
+		EmojiStatusExpirationDate          int64            `json:"emoji_status_expiration_date"`
+		Bio                                string           `json:"bio"`
+		HasPrivateForwards                 bool             `json:"has_private_forwards"`
+		HasRestrictedVoiceAndVideoMessages bool             `json:"has_restricted_voice_and_video_messages"`
+		JoinToSendMessages                 bool             `json:"join_to_send_messages"`
+		JoinByRequest                      bool             `json:"join_by_request"`
+		Description                        string           `json:"description"`
+		InviteLink                         string           `json:"invite_link"`
+		PinnedMessage                      *Message         `json:"pinned_message"`
+		Permissions                        *ChatPermissions `json:"permissions"`
+		SlowModeDelay                      int64            `json:"slow_mode_delay"`
+		MessageAutoDeleteTime              int64            `json:"message_auto_delete_time"`
+		HasAggressiveAntiSpamEnabled       bool             `json:"has_aggressive_anti_spam_enabled"`
+		HasHiddenMembers                   bool             `json:"has_hidden_members"`
+		HasProtectedContent                bool             `json:"has_protected_content"`
+		HasVisibleHistory                  bool             `json:"has_visible_history"`
+		StickerSetName                     string           `json:"sticker_set_name"`
+		CanSetStickerSet                   bool             `json:"can_set_sticker_set"`
+		LinkedChatId                       int64            `json:"linked_chat_id"`
+		Location                           *ChatLocation    `json:"location"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	v.Id = t.Id
+	v.Type = t.Type
+	v.Title = t.Title
+	v.Username = t.Username
+	v.FirstName = t.FirstName
+	v.LastName = t.LastName
+	v.IsForum = t.IsForum
+	v.Photo = t.Photo
+	v.ActiveUsernames = t.ActiveUsernames
+	v.AvailableReactions, err = unmarshalReactionTypeArray(t.AvailableReactions)
+	if err != nil {
+		return err
+	}
+	v.AccentColorId = t.AccentColorId
+	v.BackgroundCustomEmojiId = t.BackgroundCustomEmojiId
+	v.ProfileAccentColorId = t.ProfileAccentColorId
+	v.ProfileBackgroundCustomEmojiId = t.ProfileBackgroundCustomEmojiId
+	v.EmojiStatusCustomEmojiId = t.EmojiStatusCustomEmojiId
+	v.EmojiStatusExpirationDate = t.EmojiStatusExpirationDate
+	v.Bio = t.Bio
+	v.HasPrivateForwards = t.HasPrivateForwards
+	v.HasRestrictedVoiceAndVideoMessages = t.HasRestrictedVoiceAndVideoMessages
+	v.JoinToSendMessages = t.JoinToSendMessages
+	v.JoinByRequest = t.JoinByRequest
+	v.Description = t.Description
+	v.InviteLink = t.InviteLink
+	v.PinnedMessage = t.PinnedMessage
+	v.Permissions = t.Permissions
+	v.SlowModeDelay = t.SlowModeDelay
+	v.MessageAutoDeleteTime = t.MessageAutoDeleteTime
+	v.HasAggressiveAntiSpamEnabled = t.HasAggressiveAntiSpamEnabled
+	v.HasHiddenMembers = t.HasHiddenMembers
+	v.HasProtectedContent = t.HasProtectedContent
+	v.HasVisibleHistory = t.HasVisibleHistory
+	v.StickerSetName = t.StickerSetName
+	v.CanSetStickerSet = t.CanSetStickerSet
+	v.LinkedChatId = t.LinkedChatId
+	v.Location = t.Location
+
+	return nil
+}
+
 // ChatAdministratorRights (https://core.telegram.org/bots/api#chatadministratorrights)
 //
 // Represents the rights of an administrator in a chat.
@@ -5532,6 +5620,41 @@ type MessageReactionUpdated struct {
 	OldReaction []ReactionType `json:"old_reaction,omitempty"`
 	// New list of reaction types that have been set by the user
 	NewReaction []ReactionType `json:"new_reaction,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
+	// All fields in MessageReactionUpdated, with interface fields as json.RawMessage
+	type tmp struct {
+		Chat        Chat            `json:"chat"`
+		MessageId   int64           `json:"message_id"`
+		User        *User           `json:"user"`
+		ActorChat   *Chat           `json:"actor_chat"`
+		Date        int64           `json:"date"`
+		OldReaction json.RawMessage `json:"old_reaction"`
+		NewReaction json.RawMessage `json:"new_reaction"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	v.Chat = t.Chat
+	v.MessageId = t.MessageId
+	v.User = t.User
+	v.ActorChat = t.ActorChat
+	v.Date = t.Date
+	v.OldReaction, err = unmarshalReactionTypeArray(t.OldReaction)
+	if err != nil {
+		return err
+	}
+	v.NewReaction, err = unmarshalReactionTypeArray(t.NewReaction)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // OrderInfo (https://core.telegram.org/bots/api#orderinfo)

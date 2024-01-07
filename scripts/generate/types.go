@@ -209,10 +209,18 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			return "", err
 		}
 
-		if isTgType(d, prefType) {
-			fieldType, err := getTypeByName(d, prefType)
+		fieldData := customUnmarshalFieldData{
+			Name:      snakeToTitle(f.Name),
+			Custom:    len(d.Types[prefType].Subtypes) > 0,
+			ArrayType: strings.TrimPrefix(prefType, "[]"),
+			Type:      prefType,
+			JSONTag:   fmt.Sprintf("`json:\"%s\"`", f.Name),
+		}
+
+		if coreType := strings.TrimPrefix(prefType, "[]"); isTgType(d, coreType) {
+			fieldType, err := getTypeByName(d, coreType)
 			if err != nil {
-				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", prefType, tgType.Name, err)
+				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", coreType, tgType.Name, err)
 			}
 
 			if len(fieldType.Subtypes) > 0 {
@@ -222,6 +230,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 				}
 				if len(getCommonFields(subtypes)) > 0 {
 					generateCustomMarshal = true
+					fieldData.Custom = true
 				}
 			}
 		}
@@ -231,15 +240,10 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 		}
 
 		if isTgStructType(d, prefType) && !f.Required {
-			prefType = "*" + prefType
+			fieldData.Type = "*" + prefType
 		}
 
-		fields = append(fields, customUnmarshalFieldData{
-			Name:    snakeToTitle(f.Name),
-			Custom:  len(d.Types[prefType].Subtypes) > 0,
-			Type:    prefType,
-			JSONTag: fmt.Sprintf("`json:\"%s\"`", f.Name),
-		})
+		fields = append(fields, fieldData)
 	}
 
 	if !generateCustomMarshal {
@@ -611,10 +615,11 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 }
 
 type customUnmarshalFieldData struct {
-	Name    string
-	Custom  bool
-	Type    string
-	JSONTag string
+	Name      string
+	Custom    bool
+	Type      string
+	ArrayType string
+	JSONTag   string
 }
 
 type customUnmarshalData struct {
@@ -638,7 +643,7 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 	}
 	{{ range $f := .Fields }}
 		{{- if $f.Custom}}
-			v.{{ $f.Name }}, err = unmarshal{{ $f.Type }}(t.{{$f.Name}})
+			v.{{ $f.Name }}, err = unmarshal{{ if eq $f.Type $f.ArrayType }}{{ $f.Type }}{{ else }}{{ $f.ArrayType }}Array{{ end }}(t.{{$f.Name}})
 			if err != nil {
 				return err
 			}
