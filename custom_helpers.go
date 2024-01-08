@@ -27,7 +27,10 @@ func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, er
 	}
 
 	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
-		opts.ReplyParameters = &ReplyParameters{MessageId: m.MessageId}
+		if opts.ReplyParameters == nil {
+			opts.ReplyParameters = &ReplyParameters{}
+		}
+		opts.ReplyParameters.MessageId = m.MessageId
 	}
 
 	return b.SendMessage(m.Chat.Id, text, opts)
@@ -40,7 +43,10 @@ func (im InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) 
 	}
 
 	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
-		opts.ReplyParameters = &ReplyParameters{MessageId: im.MessageId}
+		if opts.ReplyParameters == nil {
+			opts.ReplyParameters = &ReplyParameters{}
+		}
+		opts.ReplyParameters.MessageId = im.MessageId
 	}
 
 	return b.SendMessage(im.Chat.Id, text, opts)
