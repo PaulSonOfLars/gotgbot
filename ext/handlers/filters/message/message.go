@@ -285,3 +285,24 @@ func ChatShared(msg *gotgbot.Message) bool {
 func Story(msg *gotgbot.Message) bool {
 	return msg.Story != nil
 }
+
+func TopicEdited(msg *gotgbot.Message) bool {
+	return msg.ForumTopicEdited != nil
+}
+
+func TopicCreated(msg *gotgbot.Message) bool {
+	return msg.ForumTopicCreated != nil
+}
+
+func TopicClosed(msg *gotgbot.Message) bool {
+	return msg.ForumTopicClosed != nil
+}
+
+func TopicReopened(msg *gotgbot.Message) bool {
+	return msg.ForumTopicReopened != nil
+}
+
+func TopicAction(msg *gotgbot.Message) bool {
+	return TopicEdited(msg) || TopicCreated(msg) ||
+		TopicClosed(msg) || TopicReopened(msg)
+}
