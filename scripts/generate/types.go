@@ -209,10 +209,18 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			return "", err
 		}
 
-		if isTgType(d, prefType) {
-			fieldType, err := getTypeByName(d, prefType)
+		fieldData := customUnmarshalFieldData{
+			Name:      snakeToTitle(f.Name),
+			Custom:    len(d.Types[prefType].Subtypes) > 0,
+			ArrayType: strings.TrimPrefix(prefType, "[]"),
+			Type:      prefType,
+			JSONTag:   fmt.Sprintf("`json:\"%s\"`", f.Name),
+		}
+
+		if coreType := strings.TrimPrefix(prefType, "[]"); isTgType(d, coreType) {
+			fieldType, err := getTypeByName(d, coreType)
 			if err != nil {
-				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", prefType, tgType.Name, err)
+				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", coreType, tgType.Name, err)
 			}
 
 			if len(fieldType.Subtypes) > 0 {
@@ -222,6 +230,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 				}
 				if len(getCommonFields(subtypes)) > 0 {
 					generateCustomMarshal = true
+					fieldData.Custom = true
 				}
 			}
 		}
@@ -231,15 +240,10 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 		}
 
 		if isTgStructType(d, prefType) && !f.Required {
-			prefType = "*" + prefType
+			fieldData.Type = "*" + prefType
 		}
 
-		fields = append(fields, customUnmarshalFieldData{
-			Name:    snakeToTitle(f.Name),
-			Custom:  len(d.Types[prefType].Subtypes) > 0,
-			Type:    prefType,
-			JSONTag: fmt.Sprintf("`json:\"%s\"`", f.Name),
-		})
+		fields = append(fields, fieldData)
 	}
 
 	if !generateCustomMarshal {
@@ -611,10 +615,11 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 }
 
 type customUnmarshalFieldData struct {
-	Name    string
-	Custom  bool
-	Type    string
-	JSONTag string
+	Name      string
+	Custom    bool
+	Type      string
+	ArrayType string
+	JSONTag   string
 }
 
 type customUnmarshalData struct {
@@ -634,13 +639,13 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal {{.Type}} JSON into tmp struct: %w", err)
 	}
 	{{ range $f := .Fields }}
 		{{- if $f.Custom}}
-			v.{{ $f.Name }}, err = unmarshal{{ $f.Type }}(t.{{$f.Name}})
+			v.{{ $f.Name }}, err = unmarshal{{ if eq $f.Type $f.ArrayType }}{{ $f.Type }}{{ else }}{{ $f.ArrayType }}Array{{ end }}(t.{{$f.Name}})
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to unmarshal custom JSON field {{$f.Name}}: %w", err)
 			}
 		{{- else }}
 			v.{{ $f.Name }} = t.{{ $f.Name }}
@@ -667,17 +672,21 @@ const customStructUnmarshal = `
 // {{.UnmarshalFuncName}}Array is a JSON unmarshalling helper which allows unmarshalling an array of interfaces 
 // using {{.UnmarshalFuncName}}.
 func {{.UnmarshalFuncName}}Array(d json.RawMessage) ([]{{.ParentType}}, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial {{.ParentType}} JSON into an array: %w", err)
 	}
 
 	var vs []{{.ParentType}}
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := {{.UnmarshalFuncName}}(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -697,7 +706,7 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		}{}
 		err := json.Unmarshal(d, &t)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} for constant field '{{.ConstantFieldName}}': %w", err)
 		}
 
 		switch t.{{.ConstantFieldName}} {
@@ -706,12 +715,12 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 			s := {{ $val.TypeName }}{}
 			err := json.Unmarshal(d, &s)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to unmarshal {{$.ParentType}} for value '{{ $val.ConstantFieldValue }}': %w", err)
 			}
 			return s, nil
 		{{ end }}
 		}
-		return nil, fmt.Errorf("unknown interface with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
+		return nil, fmt.Errorf("unknown interface for {{.ParentType}} with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
 }`
 
 type customMarshalData struct {
