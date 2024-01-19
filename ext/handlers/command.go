@@ -26,6 +26,18 @@ func NewCommand(c string, r Response) Command {
 	}
 }
 
+// SetAllowEdited Enables edited messages for this handler.
+func (c Command) SetAllowEdited(allow bool) Command {
+	c.AllowEdited = allow
+	return c
+}
+
+// SetAllowChannel Enables channel messages for this handler.
+func (c Command) SetAllowChannel(allow bool) Command {
+	c.AllowChannel = allow
+	return c
+}
+
 func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.Message != nil {
 		if ctx.Message.Text == "" && ctx.Message.Caption == "" {
