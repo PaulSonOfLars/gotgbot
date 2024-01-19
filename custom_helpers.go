@@ -52,6 +52,16 @@ func (im InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) 
 	return b.SendMessage(im.Chat.Id, text, opts)
 }
 
+// ToMessage is a helper function to simplify dealing with telegram's message nonsense.
+// It populates a standard message object with all of InaccessibleMessage's shared fields.
+func (im InaccessibleMessage) ToMessage() *Message {
+	return &Message{
+		MessageId: im.MessageId,
+		Date:      im.Date,
+		Chat:      im.Chat,
+	}
+}
+
 // SendMessage is a helper function to easily call Bot.SendMessage in a chat.
 func (c Chat) SendMessage(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	return b.SendMessage(c.Id, text, opts)
