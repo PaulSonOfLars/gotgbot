@@ -13,4 +13,5 @@ type (
 	PollAnswer         func(pa *gotgbot.PollAnswer) bool
 	PreCheckoutQuery   func(pcq *gotgbot.PreCheckoutQuery) bool
 	ShippingQuery      func(sq *gotgbot.ShippingQuery) bool
+	Reaction           func(mra *gotgbot.MessageReactionUpdated) bool
 )
