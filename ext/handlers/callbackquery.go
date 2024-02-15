@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -11,27 +12,31 @@ import (
 type CallbackQuery struct {
 	AllowChannel bool
 	Filter       filters.CallbackQuery
-	Response     Response
+	Response     func(b *gotgbot.Bot, ctx *ext.Context) error
 }
 
-func NewCallback(filter filters.CallbackQuery, r Response) CallbackQuery {
-	return CallbackQuery{
+func NewCallback(filter filters.CallbackQuery, response func(b *gotgbot.Bot, ctx *ext.Context) error) *CallbackQuery {
+	return &CallbackQuery{
 		Filter:   filter,
-		Response: r,
+		Response: response,
 	}
 }
 
-// SetAllowChannel Enables channel messages for this handler.
-func (cb CallbackQuery) SetAllowChannel(allow bool) CallbackQuery {
+// SetAllowChannel enables channel messages for this handler.
+func (cb *CallbackQuery) SetAllowChannel(allow bool) *CallbackQuery {
 	cb.AllowChannel = allow
 	return cb
 }
 
-func (cb CallbackQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
-	return cb.Response(b, ctx)
+func (cb *CallbackQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	err := cb.Response(b, ctx)
+	if err != nil {
+		log.Printf("Error handling callback query: %v", err)
+	}
+	return err
 }
 
-func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+func (cb *CallbackQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.CallbackQuery == nil {
 		return false
 	}
@@ -43,6 +48,6 @@ func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	return cb.Filter == nil || cb.Filter(ctx.CallbackQuery)
 }
 
-func (cb CallbackQuery) Name() string {
-	return fmt.Sprintf("inlinequery_%p", cb.Response)
+func (cb *CallbackQuery) Name() string {
+	return fmt.Sprintf("callback_query_handler_%p", cb.Response)
 }
