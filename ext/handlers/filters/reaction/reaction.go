@@ -9,18 +9,12 @@ func All(_ *gotgbot.MessageReactionUpdated) bool {
 	return true
 }
 
-func FromUserID(id int64) filters.Reaction {
+func FromPeer(id int64) filters.Reaction {
 	return func(mru *gotgbot.MessageReactionUpdated) bool {
 		if mru.User != nil {
 			return mru.User.Id == id
 		}
 
-		return false
-	}
-}
-
-func FromAnonymousChatID(id int64) filters.Reaction {
-	return func(mru *gotgbot.MessageReactionUpdated) bool {
 		if mru.ActorChat != nil {
 			return mru.ActorChat.Id == id
 		}
@@ -29,13 +23,13 @@ func FromAnonymousChatID(id int64) filters.Reaction {
 	}
 }
 
-func FromChatID(id int64) filters.Reaction {
+func ChatID(id int64) filters.Reaction {
 	return func(mru *gotgbot.MessageReactionUpdated) bool {
 		return mru.Chat.Id == id
 	}
 }
 
-func NewReactionIn(reaction string) filters.Reaction {
+func NewReactionEmoji(reaction string) filters.Reaction {
 	return func(mru *gotgbot.MessageReactionUpdated) bool {
 		for _, r := range mru.NewReaction {
 			if r.MergeReactionType().Emoji == reaction {
@@ -47,7 +41,7 @@ func NewReactionIn(reaction string) filters.Reaction {
 	}
 }
 
-func OldReactionIn(reaction string) filters.Reaction {
+func OldReactionEmoji(reaction string) filters.Reaction {
 	return func(mru *gotgbot.MessageReactionUpdated) bool {
 		for _, r := range mru.OldReaction {
 			if r.MergeReactionType().Emoji == reaction {
