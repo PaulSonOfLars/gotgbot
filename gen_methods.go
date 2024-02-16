@@ -2556,7 +2556,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 type PromoteChatMemberOpts struct {
 	// Pass True if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// Pass True if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
 	CanManageChat bool
 	// Pass True if the administrator can delete messages of other users
 	CanDeleteMessages bool
@@ -2570,18 +2570,18 @@ type PromoteChatMemberOpts struct {
 	CanChangeInfo bool
 	// Pass True if the administrator can invite new users to the chat
 	CanInviteUsers bool
+	// Pass True if the administrator can post stories to the chat
+	CanPostStories bool
+	// Pass True if the administrator can edit stories posted by other users
+	CanEditStories bool
+	// Pass True if the administrator can delete stories posted by other users
+	CanDeleteStories bool
 	// Pass True if the administrator can post messages in the channel, or access channel statistics; channels only
 	CanPostMessages bool
 	// Pass True if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool
 	// Pass True if the administrator can pin messages, supergroups only
 	CanPinMessages bool
-	// Pass True if the administrator can post stories in the channel; channels only
-	CanPostStories bool
-	// Pass True if the administrator can edit stories posted by other users; channels only
-	CanEditStories bool
-	// Pass True if the administrator can delete stories posted by other users; channels only
-	CanDeleteStories bool
 	// Pass True if the user is allowed to create, rename, close, and reopen forum topics, supergroups only
 	CanManageTopics bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2607,12 +2607,12 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 		v["can_promote_members"] = strconv.FormatBool(opts.CanPromoteMembers)
 		v["can_change_info"] = strconv.FormatBool(opts.CanChangeInfo)
 		v["can_invite_users"] = strconv.FormatBool(opts.CanInviteUsers)
-		v["can_post_messages"] = strconv.FormatBool(opts.CanPostMessages)
-		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
-		v["can_pin_messages"] = strconv.FormatBool(opts.CanPinMessages)
 		v["can_post_stories"] = strconv.FormatBool(opts.CanPostStories)
 		v["can_edit_stories"] = strconv.FormatBool(opts.CanEditStories)
 		v["can_delete_stories"] = strconv.FormatBool(opts.CanDeleteStories)
+		v["can_post_messages"] = strconv.FormatBool(opts.CanPostMessages)
+		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
+		v["can_pin_messages"] = strconv.FormatBool(opts.CanPinMessages)
 		v["can_manage_topics"] = strconv.FormatBool(opts.CanManageTopics)
 	}
 
