@@ -43,6 +43,5 @@ func (cb CallbackQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	return cb.Filter == nil || cb.Filter(ctx.CallbackQuery)
 }
 
-func (cb CallbackQuery) Name() string {
-	return fmt.Sprintf("inlinequery_%p", cb.Response)
-}
+func (cb *CallbackQuery) Name() string {
+	return fmt.Sprintf("callback_query_handler_%p", cb.Response)
