@@ -513,8 +513,10 @@ type Chat struct {
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
 	// Optional. Default chat member permissions, for groups and supergroups. Returned only in getChat.
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
-	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unpriviledged user; in seconds. Returned only in getChat.
+	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unprivileged user; in seconds. Returned only in getChat.
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
+	// Optional. For supergroups, the minimum number of boosts that a non-administrator user needs to add in order to ignore slow mode and chat permissions. Returned only in getChat.
+	UnrestrictBoostCount int64 `json:"unrestrict_boost_count,omitempty"`
 	// Optional. The time after which all messages sent to the chat will be automatically deleted; in seconds. Returned only in getChat.
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
 	// Optional. True, if aggressive anti-spam checks are enabled in the supergroup. The field is only available to chat administrators. Returned only in getChat.
@@ -529,6 +531,8 @@ type Chat struct {
 	StickerSetName string `json:"sticker_set_name,omitempty"`
 	// Optional. True, if the bot can change the group sticker set. Returned only in getChat.
 	CanSetStickerSet bool `json:"can_set_sticker_set,omitempty"`
+	// Optional. For supergroups, the name of the group's custom emoji sticker set. Custom emoji from this set can be used by all users and bots in the group. Returned only in getChat.
+	CustomEmojiStickerSetName string `json:"custom_emoji_sticker_set_name,omitempty"`
 	// Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier. Returned only in getChat.
 	LinkedChatId int64 `json:"linked_chat_id,omitempty"`
 	// Optional. For supergroups, the location to which the supergroup is connected. Returned only in getChat.
@@ -565,6 +569,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 		PinnedMessage                      *Message         `json:"pinned_message"`
 		Permissions                        *ChatPermissions `json:"permissions"`
 		SlowModeDelay                      int64            `json:"slow_mode_delay"`
+		UnrestrictBoostCount               int64            `json:"unrestrict_boost_count"`
 		MessageAutoDeleteTime              int64            `json:"message_auto_delete_time"`
 		HasAggressiveAntiSpamEnabled       bool             `json:"has_aggressive_anti_spam_enabled"`
 		HasHiddenMembers                   bool             `json:"has_hidden_members"`
@@ -572,6 +577,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 		HasVisibleHistory                  bool             `json:"has_visible_history"`
 		StickerSetName                     string           `json:"sticker_set_name"`
 		CanSetStickerSet                   bool             `json:"can_set_sticker_set"`
+		CustomEmojiStickerSetName          string           `json:"custom_emoji_sticker_set_name"`
 		LinkedChatId                       int64            `json:"linked_chat_id"`
 		Location                           *ChatLocation    `json:"location"`
 	}
@@ -610,6 +616,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	v.PinnedMessage = t.PinnedMessage
 	v.Permissions = t.Permissions
 	v.SlowModeDelay = t.SlowModeDelay
+	v.UnrestrictBoostCount = t.UnrestrictBoostCount
 	v.MessageAutoDeleteTime = t.MessageAutoDeleteTime
 	v.HasAggressiveAntiSpamEnabled = t.HasAggressiveAntiSpamEnabled
 	v.HasHiddenMembers = t.HasHiddenMembers
@@ -617,6 +624,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	v.HasVisibleHistory = t.HasVisibleHistory
 	v.StickerSetName = t.StickerSetName
 	v.CanSetStickerSet = t.CanSetStickerSet
+	v.CustomEmojiStickerSetName = t.CustomEmojiStickerSetName
 	v.LinkedChatId = t.LinkedChatId
 	v.Location = t.Location
 
@@ -629,7 +637,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 type ChatAdministratorRights struct {
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous"`
-	// True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
 	CanManageChat bool `json:"can_manage_chat"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages"`
@@ -643,18 +651,18 @@ type ChatAdministratorRights struct {
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users"`
+	// True, if the administrator can post stories to the chat
+	CanPostStories bool `json:"can_post_stories"`
+	// True, if the administrator can edit stories posted by other users
+	CanEditStories bool `json:"can_edit_stories"`
+	// True, if the administrator can delete stories posted by other users
+	CanDeleteStories bool `json:"can_delete_stories"`
 	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
 	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only
-	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only
-	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only
-	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 }
@@ -697,6 +705,14 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
+}
+
+// ChatBoostAdded (https://core.telegram.org/bots/api#chatboostadded)
+//
+// This object represents a service message about a user boosting a chat.
+type ChatBoostAdded struct {
+	// Number of boosts added by the user
+	BoostCount int64 `json:"boost_count"`
 }
 
 // ChatBoostRemoved (https://core.telegram.org/bots/api#chatboostremoved)
@@ -977,7 +993,7 @@ func (v ChatBoostSourcePremium) chatBoostSource() {}
 type ChatBoostUpdated struct {
 	// Chat which was boosted
 	Chat Chat `json:"chat"`
-	// Infomation about the chat boost
+	// Information about the chat boost
 	Boost ChatBoost `json:"boost"`
 }
 
@@ -1073,7 +1089,7 @@ type MergedChatMember struct {
 	CustomTitle string `json:"custom_title,omitempty"`
 	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Optional. True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege (Only for administrator)
+	// Optional. True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege. (Only for administrator)
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
 	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
@@ -1087,18 +1103,18 @@ type MergedChatMember struct {
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat (Only for administrator, restricted)
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
+	// Optional. True, if the administrator can post stories to the chat (Only for administrator)
+	CanPostStories bool `json:"can_post_stories,omitempty"`
+	// Optional. True, if the administrator can edit stories posted by other users (Only for administrator)
+	CanEditStories bool `json:"can_edit_stories,omitempty"`
+	// Optional. True, if the administrator can delete stories posted by other users (Only for administrator)
+	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only (Only for administrator)
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
 	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only (Only for administrator)
-	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only (Only for administrator)
-	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only (Only for administrator)
-	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
@@ -1248,7 +1264,7 @@ type ChatMemberAdministrator struct {
 	CanBeEdited bool `json:"can_be_edited"`
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous"`
-	// True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
 	CanManageChat bool `json:"can_manage_chat"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages"`
@@ -1262,18 +1278,18 @@ type ChatMemberAdministrator struct {
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users"`
+	// True, if the administrator can post stories to the chat
+	CanPostStories bool `json:"can_post_stories"`
+	// True, if the administrator can edit stories posted by other users
+	CanEditStories bool `json:"can_edit_stories"`
+	// True, if the administrator can delete stories posted by other users
+	CanDeleteStories bool `json:"can_delete_stories"`
 	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
 	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
 	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only
-	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only
-	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only
-	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. Custom title for this user
@@ -1304,12 +1320,12 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		CanPromoteMembers:   v.CanPromoteMembers,
 		CanChangeInfo:       v.CanChangeInfo,
 		CanInviteUsers:      v.CanInviteUsers,
-		CanPostMessages:     v.CanPostMessages,
-		CanEditMessages:     v.CanEditMessages,
-		CanPinMessages:      v.CanPinMessages,
 		CanPostStories:      v.CanPostStories,
 		CanEditStories:      v.CanEditStories,
 		CanDeleteStories:    v.CanDeleteStories,
+		CanPostMessages:     v.CanPostMessages,
+		CanEditMessages:     v.CanEditMessages,
+		CanPinMessages:      v.CanPinMessages,
 		CanManageTopics:     v.CanManageTopics,
 		CustomTitle:         v.CustomTitle,
 	}
@@ -1948,7 +1964,7 @@ type ForceReply struct {
 	ForceReply bool `json:"force_reply"`
 	// Optional. The placeholder to be shown in the input field when the reply is active; 1-64 characters
 	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
-	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
+	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -2086,7 +2102,7 @@ type GiveawayCreated struct{}
 type GiveawayWinners struct {
 	// The chat that created the giveaway
 	Chat Chat `json:"chat"`
-	// Identifier of the messsage with the giveaway in the chat
+	// Identifier of the message with the giveaway in the chat
 	GiveawayMessageId int64 `json:"giveaway_message_id"`
 	// Point in time (Unix timestamp) when winners of the giveaway were selected
 	WinnersSelectionDate int64 `json:"winners_selection_date"`
@@ -2144,7 +2160,7 @@ func (v InaccessibleMessage) maybeInaccessibleMessage() {}
 type InlineKeyboardButton struct {
 	// Label text on the button
 	Text string `json:"text"`
-	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
+	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
 	// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
 	CallbackData string `json:"callback_data,omitempty"`
@@ -2167,7 +2183,6 @@ type InlineKeyboardButton struct {
 // InlineKeyboardMarkup (https://core.telegram.org/bots/api#inlinekeyboardmarkup)
 //
 // This object represents an inline keyboard that appears right next to the message it belongs to.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
 type InlineKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of InlineKeyboardButton objects
 	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
@@ -2468,7 +2483,6 @@ func (v InlineQueryResultArticle) inlineQueryResult() {}
 // InlineQueryResultAudio (https://core.telegram.org/bots/api#inlinequeryresultaudio)
 //
 // Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultAudio struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -2538,7 +2552,6 @@ func (v InlineQueryResultAudio) inlineQueryResult() {}
 // InlineQueryResultCachedAudio (https://core.telegram.org/bots/api#inlinequeryresultcachedaudio)
 //
 // Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedAudio struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -2599,7 +2612,6 @@ func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 // InlineQueryResultCachedDocument (https://core.telegram.org/bots/api#inlinequeryresultcacheddocument)
 //
 // Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedDocument struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -2858,7 +2870,6 @@ func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 // InlineQueryResultCachedSticker (https://core.telegram.org/bots/api#inlinequeryresultcachedsticker)
 //
 // Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
-// Note: This will only work in Telegram versions released after 9 April, 2016 for static stickers and after 06 July, 2019 for animated stickers. Older clients will ignore them.
 type InlineQueryResultCachedSticker struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -2976,7 +2987,6 @@ func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 // InlineQueryResultCachedVoice (https://core.telegram.org/bots/api#inlinequeryresultcachedvoice)
 //
 // Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedVoice struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -3040,7 +3050,6 @@ func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 // InlineQueryResultContact (https://core.telegram.org/bots/api#inlinequeryresultcontact)
 //
 // Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultContact struct {
 	// Unique identifier for this result, 1-64 Bytes
 	Id string `json:"id"`
@@ -3110,7 +3119,6 @@ func (v InlineQueryResultContact) inlineQueryResult() {}
 // InlineQueryResultDocument (https://core.telegram.org/bots/api#inlinequeryresultdocument)
 //
 // Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultDocument struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -3189,7 +3197,6 @@ func (v InlineQueryResultDocument) inlineQueryResult() {}
 // InlineQueryResultGame (https://core.telegram.org/bots/api#inlinequeryresultgame)
 //
 // Represents a Game.
-// Note: This will only work in Telegram versions released after October 1, 2016. Older clients will not display any inline results if a game result is among them.
 type InlineQueryResultGame struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -3316,7 +3323,6 @@ func (v InlineQueryResultGif) inlineQueryResult() {}
 // InlineQueryResultLocation (https://core.telegram.org/bots/api#inlinequeryresultlocation)
 //
 // Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultLocation struct {
 	// Unique identifier for this result, 1-64 Bytes
 	Id string `json:"id"`
@@ -3548,7 +3554,6 @@ func (v InlineQueryResultPhoto) inlineQueryResult() {}
 // InlineQueryResultVenue (https://core.telegram.org/bots/api#inlinequeryresultvenue)
 //
 // Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultVenue struct {
 	// Unique identifier for this result, 1-64 Bytes
 	Id string `json:"id"`
@@ -3711,7 +3716,6 @@ func (v InlineQueryResultVideo) inlineQueryResult() {}
 // InlineQueryResultVoice (https://core.telegram.org/bots/api#inlinequeryresultvoice)
 //
 // Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultVoice struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
@@ -4495,9 +4499,6 @@ type Invoice struct {
 // KeyboardButton (https://core.telegram.org/bots/api#keyboardbutton)
 //
 // This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_users, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
-// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
-// Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
-// Note: web_app option will only work in Telegram versions released after 16 April, 2022. Older clients will display unsupported message.
 // Note: request_users and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
@@ -4578,9 +4579,9 @@ type LinkPreviewOptions struct {
 	IsDisabled bool `json:"is_disabled,omitempty"`
 	// Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used
 	Url string `json:"url,omitempty"`
-	// Optional. True, if the media in the link preview is suppposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
+	// Optional. True, if the media in the link preview is supposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferSmallMedia bool `json:"prefer_small_media,omitempty"`
-	// Optional. True, if the media in the link preview is suppposed to be enlarged; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
+	// Optional. True, if the media in the link preview is supposed to be enlarged; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferLargeMedia bool `json:"prefer_large_media,omitempty"`
 	// Optional. True, if the link preview must be shown above the message text; otherwise, the link preview will be shown below the message text
 	ShowAboveText bool `json:"show_above_text,omitempty"`
@@ -4911,6 +4912,8 @@ type Message struct {
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
+	// Optional. If the sender of the message boosted the chat, the number of boosts added by the user
+	SenderBoostCount int64 `json:"sender_boost_count,omitempty"`
 	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	Date int64 `json:"date"`
 	// Chat the message belongs to
@@ -4927,6 +4930,8 @@ type Message struct {
 	ExternalReply *ExternalReplyInfo `json:"external_reply,omitempty"`
 	// Optional. For replies that quote part of the original message, the quoted part of the message
 	Quote *TextQuote `json:"quote,omitempty"`
+	// Optional. For replies to a story, the original story
+	ReplyToStory *Story `json:"reply_to_story,omitempty"`
 	// Optional. Bot through which the message was sent
 	ViaBot *User `json:"via_bot,omitempty"`
 	// Optional. Date the message was last edited in Unix time
@@ -5019,6 +5024,8 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	// Optional. Service message: user boosted the chat
+	BoostAdded *ChatBoostAdded `json:"boost_added,omitempty"`
 	// Optional. Service message: forum topic created
 	ForumTopicCreated *ForumTopicCreated `json:"forum_topic_created,omitempty"`
 	// Optional. Service message: forum topic edited
@@ -5061,6 +5068,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		MessageThreadId               int64                          `json:"message_thread_id"`
 		From                          *User                          `json:"from"`
 		SenderChat                    *Chat                          `json:"sender_chat"`
+		SenderBoostCount              int64                          `json:"sender_boost_count"`
 		Date                          int64                          `json:"date"`
 		Chat                          Chat                           `json:"chat"`
 		ForwardOrigin                 json.RawMessage                `json:"forward_origin"`
@@ -5069,6 +5077,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		ReplyToMessage                *Message                       `json:"reply_to_message"`
 		ExternalReply                 *ExternalReplyInfo             `json:"external_reply"`
 		Quote                         *TextQuote                     `json:"quote"`
+		ReplyToStory                  *Story                         `json:"reply_to_story"`
 		ViaBot                        *User                          `json:"via_bot"`
 		EditDate                      int64                          `json:"edit_date"`
 		HasProtectedContent           bool                           `json:"has_protected_content"`
@@ -5115,6 +5124,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		WriteAccessAllowed            *WriteAccessAllowed            `json:"write_access_allowed"`
 		PassportData                  *PassportData                  `json:"passport_data"`
 		ProximityAlertTriggered       *ProximityAlertTriggered       `json:"proximity_alert_triggered"`
+		BoostAdded                    *ChatBoostAdded                `json:"boost_added"`
 		ForumTopicCreated             *ForumTopicCreated             `json:"forum_topic_created"`
 		ForumTopicEdited              *ForumTopicEdited              `json:"forum_topic_edited"`
 		ForumTopicClosed              *ForumTopicClosed              `json:"forum_topic_closed"`
@@ -5142,6 +5152,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.MessageThreadId = t.MessageThreadId
 	v.From = t.From
 	v.SenderChat = t.SenderChat
+	v.SenderBoostCount = t.SenderBoostCount
 	v.Date = t.Date
 	v.Chat = t.Chat
 	v.ForwardOrigin, err = unmarshalMessageOrigin(t.ForwardOrigin)
@@ -5153,6 +5164,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.ReplyToMessage = t.ReplyToMessage
 	v.ExternalReply = t.ExternalReply
 	v.Quote = t.Quote
+	v.ReplyToStory = t.ReplyToStory
 	v.ViaBot = t.ViaBot
 	v.EditDate = t.EditDate
 	v.HasProtectedContent = t.HasProtectedContent
@@ -5202,6 +5214,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.WriteAccessAllowed = t.WriteAccessAllowed
 	v.PassportData = t.PassportData
 	v.ProximityAlertTriggered = t.ProximityAlertTriggered
+	v.BoostAdded = t.BoostAdded
 	v.ForumTopicCreated = t.ForumTopicCreated
 	v.ForumTopicEdited = t.ForumTopicEdited
 	v.ForumTopicClosed = t.ForumTopicClosed
@@ -6596,7 +6609,7 @@ type ReplyKeyboardMarkup struct {
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 	// Optional. The placeholder to be shown in the input field when the keyboard is active; 1-64 characters
 	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
-	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message. Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
+	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message. Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -6609,7 +6622,7 @@ func (v ReplyKeyboardMarkup) replyMarkup() {}
 type ReplyKeyboardRemove struct {
 	// Requests clients to remove the custom keyboard (user will not be able to summon this keyboard; if you want to hide the keyboard from sight but keep it accessible, use one_time_keyboard in ReplyKeyboardMarkup)
 	RemoveKeyboard bool `json:"remove_keyboard"`
-	// Optional. Use this parameter if you want to remove the keyboard for specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message. Example: A user votes in a poll, bot returns confirmation message in reply to the vote and removes the keyboard for that user, while still showing the keyboard with poll options to users who haven't voted yet.
+	// Optional. Use this parameter if you want to remove the keyboard for specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message. Example: A user votes in a poll, bot returns confirmation message in reply to the vote and removes the keyboard for that user, while still showing the keyboard with poll options to users who haven't voted yet.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -6756,8 +6769,13 @@ type StickerSet struct {
 
 // Story (https://core.telegram.org/bots/api#story)
 //
-// This object represents a message about a forwarded story in the chat. Currently holds no information.
-type Story struct{}
+// This object represents a story.
+type Story struct {
+	// Chat that posted the story
+	Chat Chat `json:"chat"`
+	// Unique identifier for the story in the chat
+	Id int64 `json:"id"`
+}
 
 // SuccessfulPayment (https://core.telegram.org/bots/api#successfulpayment)
 //
@@ -6814,19 +6832,19 @@ type TextQuote struct {
 // This object represents an incoming update.
 // At most one of the optional parameters can be present in any given update.
 type Update struct {
-	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
+	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This identifier becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
 	UpdateId int64 `json:"update_id"`
 	// Optional. New incoming message of any kind - text, photo, sticker, etc.
 	Message *Message `json:"message,omitempty"`
-	// Optional. New version of a message that is known to the bot and was edited
+	// Optional. New version of a message that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
 	EditedMessage *Message `json:"edited_message,omitempty"`
 	// Optional. New incoming channel post of any kind - text, photo, sticker, etc.
 	ChannelPost *Message `json:"channel_post,omitempty"`
-	// Optional. New version of a channel post that is known to the bot and was edited
+	// Optional. New version of a channel post that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
 	EditedChannelPost *Message `json:"edited_channel_post,omitempty"`
 	// Optional. A reaction to a message was changed by a user. The bot must be an administrator in the chat and must explicitly specify "message_reaction" in the list of allowed_updates to receive these updates. The update isn't received for reactions set by bots.
 	MessageReaction *MessageReactionUpdated `json:"message_reaction,omitempty"`
-	// Optional. Reactions to a message with anonymous reactions were changed. The bot must be an administrator in the chat and must explicitly specify "message_reaction_count" in the list of allowed_updates to receive these updates.
+	// Optional. Reactions to a message with anonymous reactions were changed. The bot must be an administrator in the chat and must explicitly specify "message_reaction_count" in the list of allowed_updates to receive these updates. The updates are grouped and can be sent with delay up to a few minutes.
 	MessageReactionCount *MessageReactionCountUpdated `json:"message_reaction_count,omitempty"`
 	// Optional. New incoming inline query
 	InlineQuery *InlineQuery `json:"inline_query,omitempty"`
@@ -6838,7 +6856,7 @@ type Update struct {
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
 	// Optional. New incoming pre-checkout query. Contains full information about checkout
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
-	// Optional. New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
+	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
 	PollAnswer *PollAnswer `json:"poll_answer,omitempty"`
