@@ -306,3 +306,22 @@ func TopicAction(msg *gotgbot.Message) bool {
 	return TopicEdited(msg) || TopicCreated(msg) ||
 		TopicClosed(msg) || TopicReopened(msg)
 }
+
+func MessageEntityPre(offset int, length int, language string) func(*gotgbot.Message) bool {
+	return func(msg *gotgbot.Message) bool {
+		var entities []*gotgbot.MessageEntity
+		if msg.Text != nil {
+			entities = msg.Entities
+		} else if msg.CaptionEntities != nil {
+			entities = msg.CaptionEntities
+		} else {
+			return false // Neither text nor caption entities are present
+		}
+		for _, entity := range entities {
+			if entity.Offset == offset && entity.Length == length && entity.Language == language {
+				return true
+			}
+		}
+		return false
+	}
+}
