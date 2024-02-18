@@ -62,6 +62,18 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 		msg = update.EditedChannelPost
 		chat = &update.EditedChannelPost.Chat
 
+	case update.MessageReaction != nil:
+		user = update.MessageReaction.User
+		chat = &update.MessageReaction.Chat
+		sender = &gotgbot.Sender{
+			User:   update.MessageReaction.User,
+			Chat:   update.MessageReaction.ActorChat,
+			ChatId: update.MessageReaction.Chat.Id,
+		}
+
+	case update.MessageReactionCount != nil:
+		chat = &update.MessageReactionCount.Chat
+
 	case update.InlineQuery != nil:
 		user = &update.InlineQuery.From
 
@@ -93,6 +105,9 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	case update.PreCheckoutQuery != nil:
 		user = &update.PreCheckoutQuery.From
 
+	case update.Poll != nil:
+		// no data
+
 	case update.PollAnswer != nil:
 		user = update.PollAnswer.User
 		sender = &gotgbot.Sender{User: update.PollAnswer.User, Chat: update.PollAnswer.VoterChat}
@@ -108,6 +123,14 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	case update.ChatJoinRequest != nil:
 		user = &update.ChatJoinRequest.From
 		chat = &update.ChatJoinRequest.Chat
+
+	case update.ChatBoost != nil:
+		chat = &update.ChatBoost.Chat
+		user = update.ChatBoost.Boost.Source.MergeChatBoostSource().User
+
+	case update.RemovedChatBoost != nil:
+		chat = &update.RemovedChatBoost.Chat
+		user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
 	}
 
 	if data == nil {
