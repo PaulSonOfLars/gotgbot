@@ -306,3 +306,15 @@ func TopicAction(msg *gotgbot.Message) bool {
 	return TopicEdited(msg) || TopicCreated(msg) ||
 		TopicClosed(msg) || TopicReopened(msg)
 }
+
+func MessageEntityPre(offset int, length int, language string) filters.Filter {
+	return func(ctx *gotgbot.CallbackContext) bool {
+		entities := ctx.Message.Entities
+		for _, entity := range entities {
+			if entity.Offset == offset && entity.Length == length && entity.Language == language {
+				return true
+			}
+		}
+		return false
+	}
+}
