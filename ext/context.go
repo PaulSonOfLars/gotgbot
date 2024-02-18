@@ -65,11 +65,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 	case update.MessageReaction != nil:
 		user = update.MessageReaction.User
 		chat = &update.MessageReaction.Chat
-		sender = &gotgbot.Sender{
-			User:   update.MessageReaction.User,
-			Chat:   update.MessageReaction.ActorChat,
-			ChatId: update.MessageReaction.Chat.Id,
-		}
+		sender = update.MessageReaction.GetSender()
 
 	case update.MessageReactionCount != nil:
 		chat = &update.MessageReactionCount.Chat
@@ -110,7 +106,7 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 
 	case update.PollAnswer != nil:
 		user = update.PollAnswer.User
-		sender = &gotgbot.Sender{User: update.PollAnswer.User, Chat: update.PollAnswer.VoterChat}
+		sender = update.PollAnswer.GetSender()
 
 	case update.MyChatMember != nil:
 		user = &update.MyChatMember.From

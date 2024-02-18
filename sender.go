@@ -28,6 +28,23 @@ func (m Message) GetSender() *Sender {
 	}
 }
 
+// GetSender populates the relevant fields of a Sender struct given a reaction.
+func (mru MessageReactionUpdated) GetSender() *Sender {
+	return &Sender{
+		User:   mru.User,
+		Chat:   mru.ActorChat,
+		ChatId: mru.Chat.Id,
+	}
+}
+
+// GetSender populates the relevant fields of a Sender struct given a poll answer.
+func (pa PollAnswer) GetSender() *Sender {
+	return &Sender{
+		User: pa.User,
+		Chat: pa.VoterChat,
+	}
+}
+
 // Id determines the sender ID.
 // When a message is being sent by a chat/channel, telegram usually populates the User field with dummy values.
 // For this reason, we prefer to return the Chat.Id if it is available, rather than a dummy User.Id.
