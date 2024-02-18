@@ -307,12 +307,12 @@ func TopicAction(msg *gotgbot.Message) bool {
 		TopicClosed(msg) || TopicReopened(msg)
 }
 
-func MessageEntityPre(offset int, length int, language string) func(*gotgbot.Message) bool {
+func MessageEntityPre(offset int64, length int64, language string) func(*gotgbot.Message) bool {
 	return func(msg *gotgbot.Message) bool {
 		var entities []*gotgbot.MessageEntity
-		if msg.Text != nil {
+		if msg.Text != "" {
 			entities = msg.Entities
-		} else if msg.CaptionEntities != nil {
+		} else if msg.Caption != "" {
 			entities = msg.CaptionEntities
 		} else {
 			return false // Neither text nor caption entities are present
