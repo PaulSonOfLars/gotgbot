@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -98,8 +99,14 @@ func concurrentTest(t *testing.T) {
 	t.Parallel()
 
 	delay := time.Second
-	server := basicTestServer(t, map[string]testEndpoint{
-		"getUpdates":    {delay: delay, reply: `{"ok": true, "result": [{"message": {"text": "stop"}}]}`},
+	server := basicTestServer(t, map[string]*testEndpoint{
+		"getUpdates": {
+			delay: delay,
+			replies: []string{
+				`{"ok": true, "result": [{"message": {"text": "stop"}}]}`,
+			},
+			reply: `{"ok": true, "result": []}`,
+		},
 		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
 	})
 	defer server.Close()
@@ -290,7 +297,7 @@ func TestUpdater_GetHandlerFunc(t *testing.T) {
 }
 
 func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
-	server := basicTestServer(t, map[string]testEndpoint{
+	server := basicTestServer(t, map[string]*testEndpoint{
 		"getUpdates":    {reply: `{"ok": true}`},
 		"deleteWebhook": {reply: `{"ok": true, "result": true}`},
 	})
@@ -329,7 +336,7 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 }
 
 func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
-	server := basicTestServer(t, map[string]testEndpoint{
+	server := basicTestServer(t, map[string]*testEndpoint{
 		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
@@ -384,7 +391,7 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 }
 
 func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
-	server := basicTestServer(t, map[string]testEndpoint{
+	server := basicTestServer(t, map[string]*testEndpoint{
 		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
@@ -432,7 +439,7 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 }
 
 func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
-	server := basicTestServer(t, map[string]testEndpoint{
+	server := basicTestServer(t, map[string]*testEndpoint{
 		"getUpdates": {reply: `{"ok": true, "result": []}`},
 	})
 	defer server.Close()
@@ -484,10 +491,14 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 
 type testEndpoint struct {
 	delay time.Duration
+	// Will reply these until we run out of replies, at which point we repeat "reply"
+	replies []string
+	idx     atomic.Int32
+	// default reply
 	reply string
 }
 
-func basicTestServer(t *testing.T, methods map[string]testEndpoint) *httptest.Server {
+func basicTestServer(t *testing.T, methods map[string]*testEndpoint) *httptest.Server {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pathItems := strings.Split(r.URL.Path, "/")
 		lastItem := pathItems[len(pathItems)-1]
@@ -498,7 +509,12 @@ func basicTestServer(t *testing.T, methods map[string]testEndpoint) *httptest.Se
 			if out.delay != 0 {
 				time.Sleep(out.delay)
 			}
-			fmt.Fprint(w, out.reply)
+			count := int(out.idx.Add(1) - 1)
+			if len(out.replies) != 0 && len(out.replies) > count {
+				fmt.Fprint(w, out.replies[count])
+			} else {
+				fmt.Fprint(w, out.reply)
+			}
 			return
 		}
 

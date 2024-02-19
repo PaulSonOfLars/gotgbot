@@ -173,6 +173,11 @@ func (u *Updater) pollingLoop(bData *botData, opts *gotgbot.RequestOpts, v map[s
 	defer bData.updateWriterControl.Done()
 
 	for {
+		// Check if updater loop has been terminated.
+		if bData.shouldStopUpdates() {
+			return
+		}
+
 		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
 		// unnecessary reallocation of url.Values in the polling loop.
 		r, err := bData.bot.Request("getUpdates", v, nil, opts)
@@ -219,10 +224,6 @@ func (u *Updater) pollingLoop(bData *botData, opts *gotgbot.RequestOpts, v map[s
 
 		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
 
-		if bData.isUpdateChannelStopped() {
-			return
-		}
-
 		for _, updData := range rawUpdates {
 			temp := updData // use new mem address to avoid loop conflicts
 			bData.updateChan <- temp
@@ -240,6 +241,9 @@ func (u *Updater) Idle() {
 }
 
 // Stop stops the current updater and dispatcher instances.
+//
+// When using long polling, Stop() will wait for the getUpdates call to return, which may cause a delay due to the
+// request timeout.
 func (u *Updater) Stop() error {
 	// Stop any running servers.
 	if u.webhookServer != nil {
