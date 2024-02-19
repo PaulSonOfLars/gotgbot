@@ -163,8 +163,14 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+
 		b.updateWriterControl.Add(1)
 		defer b.updateWriterControl.Done()
+
+		if b.shouldStopUpdates() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
 
 		headerSecret := r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
 		if b.webhookSecret != "" && b.webhookSecret != headerSecret {
@@ -181,10 +187,6 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 				m.logf("Failed to read incoming update contents: %s", err.Error())
 			}
 			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if b.isUpdateChannelStopped() {
 			return
 		}
 
@@ -213,7 +215,7 @@ func (b *botData) stop() {
 	close(b.updateChan)
 }
 
-func (b *botData) isUpdateChannelStopped() bool {
+func (b *botData) shouldStopUpdates() bool {
 	select {
 	case <-b.stopUpdates:
 		// if anything comes in on the closing channel, we know the channel is closed.

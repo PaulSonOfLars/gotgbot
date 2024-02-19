@@ -89,13 +89,13 @@ func Test_botData_isUpdateChannelStopped(t *testing.T) {
 		t.Errorf("bot with token %s should not have failed to be added", b.Token)
 		return
 	}
-	if bData.isUpdateChannelStopped() {
+	if bData.shouldStopUpdates() {
 		t.Errorf("bot with token %s should not be stopped yet", b.Token)
 		return
 	}
 
 	bData.stop()
-	if !bData.isUpdateChannelStopped() {
+	if !bData.shouldStopUpdates() {
 		t.Errorf("bot with token %s should be stopped", b.Token)
 		return
 	}

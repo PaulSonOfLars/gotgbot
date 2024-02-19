@@ -86,7 +86,10 @@ func main() {
 
 	// If we get here, the updater.Idle() has ended.
 	// This means that updater.Stop() has been called, stopping all bots gracefully.
-	log.Println("Updater is no longer idling; all bots have been stopped gracefully.")
+	log.Println("Updater is no longer idling; all bots have been stopped gracefully. Exiting in 1s.")
+
+	// We sleep one last second to allow for the "stopall" goroutine to send the shutdown message.
+	time.Sleep(time.Second)
 }
 
 // startLongPollingBots demonstrates how to start multiple bots with long-polling.
@@ -159,11 +162,14 @@ func stop(b *gotgbot.Bot, ctx *ext.Context, updater *ext.Updater) error {
 		return fmt.Errorf("failed to echo message: %w", err)
 	}
 
-	if !updater.StopBot(b.Token) {
-		ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Unable to find bot %d; was it already stopped?", b.Id), nil)
-		return nil
-	}
+	go func() {
+		if !updater.StopBot(b.Token) {
+			ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Unable to find bot %d; was it already stopped?", b.Id), nil)
+			return
+		}
 
+		ctx.EffectiveMessage.Reply(b, "Stopped @"+b.Username, nil)
+	}()
 	return nil
 }
 
@@ -181,6 +187,7 @@ func stopAll(b *gotgbot.Bot, ctx *ext.Context, updater *ext.Updater) error {
 			ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Failed to stop updater: %s", err.Error()), nil)
 			return
 		}
+		ctx.EffectiveMessage.Reply(b, "All bots have been stopped.", nil)
 	}()
 
 	return nil
