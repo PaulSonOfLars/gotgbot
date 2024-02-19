@@ -45,17 +45,35 @@ func generateUpdateTypeConsts(d APIDescription) (string, error) {
 		return "", errors.New("missing 'Update' type data")
 	}
 	out := strings.Builder{}
-	out.WriteString("// The consts listed below represent all the update types that can be requested from telegram.\n")
-	out.WriteString("const (\n")
+	// First we generate the consts
+	out.WriteString("\n// The consts listed below represent all the update types that can be requested from telegram.")
+	out.WriteString("\nconst (")
 	for _, f := range updType.Fields {
 		if f.Required {
 			// All the update types are optional, so skip required values.
 			continue
 		}
-		constName := "UpdateType" + snakeToTitle(f.Name)
-		out.WriteString(writeConst(constName, f.Name))
+		out.WriteString(writeConst("UpdateType"+snakeToTitle(f.Name), f.Name))
 	}
-	out.WriteString(")\n\n")
+	out.WriteString(")\n")
+
+	// Then we generate the helper for the update kind logic
+	out.WriteString("\n// GetType is a helper method to easily identify the type of update that is being received.")
+	out.WriteString("\nfunc (u Update) GetType() string {")
+	out.WriteString("\nswitch {")
+	for _, f := range updType.Fields {
+		if f.Required {
+			// All the update types are optional, so skip required values.
+			continue
+		}
+		out.WriteString(fmt.Sprintf("\ncase u.%s != nil:", snakeToTitle(f.Name)))
+		out.WriteString("\nreturn UpdateType" + snakeToTitle(f.Name) + "\n")
+
+	}
+	out.WriteString("\ndefault:")
+	out.WriteString("\nreturn \"unknown\"")
+	out.WriteString("\n}")
+	out.WriteString("\n}")
 	return out.String(), nil
 }
 
@@ -65,8 +83,8 @@ func generateTypeConsts(d APIDescription, typeName string) (string, error) {
 		return "", errors.New("missing '" + typeName + "' type data")
 	}
 	out := strings.Builder{}
-	out.WriteString("// The consts listed below represent all the " + strings.ToLower(typeName) + " types that can be obtained from telegram.\n")
-	out.WriteString("const (\n")
+	out.WriteString("\n// The consts listed below represent all the " + strings.ToLower(typeName) + " types that can be obtained from telegram.")
+	out.WriteString("\nconst (")
 	for _, f := range updType.Fields {
 		if f.Name != "type" {
 			// the field we want to look at is called "type", ignore all others.
@@ -77,8 +95,7 @@ func generateTypeConsts(d APIDescription, typeName string) (string, error) {
 			return "", fmt.Errorf("failed to get quoted types: %w", err)
 		}
 		for _, t := range types {
-			constName := typeName + "Type" + snakeToTitle(t)
-			out.WriteString(writeConst(constName, t))
+			out.WriteString(writeConst(typeName+"Type"+snakeToTitle(t), t))
 		}
 	}
 	out.WriteString(")\n\n")
@@ -90,8 +107,8 @@ func generateParseModeConsts() string {
 	formattingTypes := []string{"HTML", "MarkdownV2", "Markdown", "None"}
 
 	out := strings.Builder{}
-	out.WriteString("// The consts listed below represent all the parse_mode options that can be sent to telegram.\n")
-	out.WriteString("const (\n")
+	out.WriteString("\n// The consts listed below represent all the parse_mode options that can be sent to telegram.")
+	out.WriteString("\nconst (")
 	for _, t := range formattingTypes {
 		constName := "ParseMode" + t
 		if t == "None" {
@@ -106,5 +123,5 @@ func generateParseModeConsts() string {
 }
 
 func writeConst(name string, value string) string {
-	return fmt.Sprintf("%s = \"%s\"\n", name, value)
+	return fmt.Sprintf("\n%s = \"%s\"", name, value)
 }
