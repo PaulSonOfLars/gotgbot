@@ -25,6 +25,68 @@ const (
 	UpdateTypeRemovedChatBoost     = "removed_chat_boost"
 )
 
+// GetType is a helper method to easily identify the type of update that is being received.
+func (u Update) GetType() string {
+	switch {
+	case u.Message != nil:
+		return UpdateTypeMessage
+
+	case u.EditedMessage != nil:
+		return UpdateTypeEditedMessage
+
+	case u.ChannelPost != nil:
+		return UpdateTypeChannelPost
+
+	case u.EditedChannelPost != nil:
+		return UpdateTypeEditedChannelPost
+
+	case u.MessageReaction != nil:
+		return UpdateTypeMessageReaction
+
+	case u.MessageReactionCount != nil:
+		return UpdateTypeMessageReactionCount
+
+	case u.InlineQuery != nil:
+		return UpdateTypeInlineQuery
+
+	case u.ChosenInlineResult != nil:
+		return UpdateTypeChosenInlineResult
+
+	case u.CallbackQuery != nil:
+		return UpdateTypeCallbackQuery
+
+	case u.ShippingQuery != nil:
+		return UpdateTypeShippingQuery
+
+	case u.PreCheckoutQuery != nil:
+		return UpdateTypePreCheckoutQuery
+
+	case u.Poll != nil:
+		return UpdateTypePoll
+
+	case u.PollAnswer != nil:
+		return UpdateTypePollAnswer
+
+	case u.MyChatMember != nil:
+		return UpdateTypeMyChatMember
+
+	case u.ChatMember != nil:
+		return UpdateTypeChatMember
+
+	case u.ChatJoinRequest != nil:
+		return UpdateTypeChatJoinRequest
+
+	case u.ChatBoost != nil:
+		return UpdateTypeChatBoost
+
+	case u.RemovedChatBoost != nil:
+		return UpdateTypeRemovedChatBoost
+
+	default:
+		return "unknown"
+	}
+}
+
 // The consts listed below represent all the parse_mode options that can be sent to telegram.
 const (
 	ParseModeHTML       = "HTML"
