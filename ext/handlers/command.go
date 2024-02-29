@@ -53,7 +53,7 @@ func (c Command) SetTriggers(triggers []rune) Command {
 
 func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.Message != nil {
-		if ctx.Message.Text == "" && ctx.Message.Caption == "" {
+		if ctx.Message.GetText() == "" {
 			return false
 		}
 		return c.checkMessage(b, ctx.Message)
@@ -61,21 +61,21 @@ func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 	// if no edits and message is edited
 	if c.AllowEdited && ctx.EditedMessage != nil {
-		if ctx.EditedMessage.Text == "" && ctx.EditedMessage.Caption == "" {
+		if ctx.EditedMessage.GetText() == "" {
 			return false
 		}
 		return c.checkMessage(b, ctx.EditedMessage)
 	}
 	// if no channel and message is channel message
 	if c.AllowChannel && ctx.ChannelPost != nil {
-		if ctx.ChannelPost.Text == "" && ctx.ChannelPost.Caption == "" {
+		if ctx.ChannelPost.GetText() == "" {
 			return false
 		}
 		return c.checkMessage(b, ctx.ChannelPost)
 	}
 	// if no channel, no edits, and post is edited
 	if c.AllowChannel && c.AllowEdited && ctx.EditedChannelPost != nil {
-		if ctx.EditedChannelPost.Text == "" && ctx.EditedChannelPost.Caption == "" {
+		if ctx.EditedChannelPost.GetText() == "" {
 			return false
 		}
 		return c.checkMessage(b, ctx.EditedChannelPost)
@@ -93,10 +93,7 @@ func (c Command) Name() string {
 }
 
 func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
-	text := msg.Text
-	if msg.Caption != "" {
-		text = msg.Caption
-	}
+	text := msg.GetText()
 
 	var cmd string
 	for _, t := range c.Triggers {
@@ -115,7 +112,8 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 		return false
 	}
 
-	if len(msg.Entities) != 0 && msg.Entities[0].Offset == 0 && msg.Entities[0].Type != "bot_command" {
+	ents := msg.GetEntities()
+	if len(ents) != 0 && ents[0].Offset == 0 && ents[0].Type != "bot_command" {
 		return false
 	}
 

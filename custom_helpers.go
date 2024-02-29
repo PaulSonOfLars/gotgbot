@@ -20,6 +20,22 @@ func (m Message) GetLink() string {
 	return fmt.Sprintf("https://t.me/c/%s/%d", rawChatId, m.MessageId)
 }
 
+// GetText returns the message text, for both text messages and media messages. (Why is this not the telegram default!)
+func (m Message) GetText() string {
+	if m.Caption != "" {
+		return m.Caption
+	}
+	return m.Text
+}
+
+// GetEntities returns the message entities, for both text messages and media messages. (Why is this not the telegram default!)
+func (m Message) GetEntities() []MessageEntity {
+	if len(m.CaptionEntities) > 0 {
+		return m.CaptionEntities
+	}
+	return m.Entities
+}
+
 // Reply is a helper function to easily call Bot.SendMessage as a reply to an existing Message.
 func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	if opts == nil {
