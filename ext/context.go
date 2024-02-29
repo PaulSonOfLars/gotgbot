@@ -182,11 +182,5 @@ func (c *Context) Args() []string {
 		return nil
 	}
 
-	if msg.Text != "" {
-		return strings.Fields(msg.Text)
-	} else if msg.Caption != "" {
-		return strings.Fields(msg.Caption)
-	}
-
-	return nil
+	return strings.Fields(msg.GetText())
 }
