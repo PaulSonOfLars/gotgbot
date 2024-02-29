@@ -156,31 +156,9 @@ func NewContext(update *gotgbot.Update, data map[string]interface{}) *Context {
 
 // Args gets the list of whitespace-separated arguments of the message text.
 func (c *Context) Args() []string {
-	var msg *gotgbot.Message
-
-	switch {
-	case c.Update.Message != nil:
-		msg = c.Update.Message
-
-	case c.Update.EditedMessage != nil:
-		msg = c.Update.EditedMessage
-
-	case c.Update.ChannelPost != nil:
-		msg = c.Update.ChannelPost
-
-	case c.Update.EditedChannelPost != nil:
-		msg = c.Update.EditedChannelPost
-
-	case c.Update.CallbackQuery != nil && c.Update.CallbackQuery.Message != nil:
-		m, ok := c.Update.CallbackQuery.Message.(gotgbot.Message)
-		if ok {
-			msg = &m
-		}
-	}
-
-	if msg == nil {
+	if c.EffectiveMessage == nil {
 		return nil
 	}
 
-	return strings.Fields(msg.GetText())
+	return strings.Fields(c.EffectiveMessage.GetText())
 }
