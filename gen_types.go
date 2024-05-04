@@ -456,7 +456,7 @@ type BusinessMessagesDeleted struct {
 	BusinessConnectionId string `json:"business_connection_id"`
 	// Information about a chat in the business account. The bot may not have access to the chat or the corresponding user.
 	Chat Chat `json:"chat"`
-	// A JSON-serialized list of identifiers of deleted messages in the chat of the business account
+	// The list of identifiers of deleted messages in the chat of the business account
 	MessageIds []int64 `json:"message_ids,omitempty"`
 }
 
@@ -470,9 +470,9 @@ type BusinessOpeningHours struct {
 
 // BusinessOpeningHoursInterval (https://core.telegram.org/bots/api#businessopeninghoursinterval)
 type BusinessOpeningHoursInterval struct {
-	// The minute's sequence number in a week, starting on Monday, marking the start of the time interval during which the business is open; 0 - 7 24 60
+	// The minute's sequence number in a week, starting on Monday, marking the start of the time interval during which the business is open; 0 - 7 * 24 * 60
 	OpeningMinute int64 `json:"opening_minute"`
-	// The minute's sequence number in a week, starting on Monday, marking the end of the time interval during which the business is open; 0 - 8 24 60
+	// The minute's sequence number in a week, starting on Monday, marking the end of the time interval during which the business is open; 0 - 8 * 24 * 60
 	ClosingMinute int64 `json:"closing_minute"`
 }
 
@@ -4629,7 +4629,7 @@ type KeyboardButtonPollType struct {
 
 // KeyboardButtonRequestChat (https://core.telegram.org/bots/api#keyboardbuttonrequestchat)
 //
-// This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the сhat if appropriate More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection
+// This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the chat if appropriate. More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection.
 type KeyboardButtonRequestChat struct {
 	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
 	RequestId int64 `json:"request_id"`
@@ -4667,11 +4667,11 @@ type KeyboardButtonRequestUsers struct {
 	UserIsPremium *bool `json:"user_is_premium,omitempty"`
 	// Optional. The maximum number of users to be selected; 1-10. Defaults to 1.
 	MaxQuantity int64 `json:"max_quantity,omitempty"`
-	// Optional. Pass True to request the users' first and last name
+	// Optional. Pass True to request the users' first and last names
 	RequestName bool `json:"request_name,omitempty"`
-	// Optional. Pass True to request the users' username
+	// Optional. Pass True to request the users' usernames
 	RequestUsername bool `json:"request_username,omitempty"`
-	// Optional. Pass True to request the users' photo
+	// Optional. Pass True to request the users' photos
 	RequestPhoto bool `json:"request_photo,omitempty"`
 }
 
@@ -6795,7 +6795,7 @@ type SentWebAppMessage struct {
 
 // SharedUser (https://core.telegram.org/bots/api#shareduser)
 //
-// This object contains information about a user that was shared with the bot using a KeyboardButtonRequestUser button.
+// This object contains information about a user that was shared with the bot using a KeyboardButtonRequestUsers button.
 type SharedUser struct {
 	// Identifier of the shared user. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so 64-bit integers or double-precision float types are safe for storing these identifiers. The bot may not have access to the user and could be unable to use this identifier, unless the user is already known to the bot by some other means.
 	UserId int64 `json:"user_id"`
