@@ -47,7 +47,6 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	// Large timeout on the initial GetMe request as this can sometimes be slow.
 	getMeReqOpts := &RequestOpts{
 		Timeout: 10 * time.Second,
-		APIURL:  DefaultAPIURL,
 	}
 
 	checkTokenValidity := true

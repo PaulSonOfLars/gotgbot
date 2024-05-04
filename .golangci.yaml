@@ -12,7 +12,8 @@ run:
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
   # default is "colored-line-number"
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
 
   # print lines of code with issue, default is true
   print-issued-lines: true
@@ -47,7 +48,7 @@ linters:
     - forbidigo
     - forcetypeassert
     - godot
-    - goerr113
+    - err113
     - gofmt
     - goimports
     - gomoddirectives
@@ -81,7 +82,7 @@ issues:
     - path: scripts/generate/
       linters:
         - prealloc
-        - goerr113
+        - err113
     # Exclude some `staticcheck` messages.
     - linters:
         - staticcheck
