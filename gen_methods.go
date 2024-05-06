@@ -476,7 +476,7 @@ type CopyMessageOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1373,6 +1373,8 @@ type EditMessageLiveLocationOpts struct {
 	MessageId int64
 	// Required if chat_id and message_id are not specified. Identifier of the inline message
 	InlineMessageId string
+	// New period in seconds during which the location can be updated, starting from the message send date. If 0x7FFFFFFF is specified, then the location can be updated forever. Otherwise, the new value must not exceed the current live_period by more than a day, and the live location expiration date must remain within the next 90 days. If not specified, then live_period remains unchanged
+	LivePeriod *int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
 	// Direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
@@ -1403,6 +1405,9 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 			v["message_id"] = strconv.FormatInt(opts.MessageId, 10)
 		}
 		v["inline_message_id"] = opts.InlineMessageId
+		if opts.LivePeriod != nil {
+			v["live_period"] = strconv.FormatInt(*opts.LivePeriod, 10)
+		}
 		if opts.HorizontalAccuracy != 0.0 {
 			v["horizontal_accuracy"] = strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64)
 		}
@@ -1806,10 +1811,10 @@ type GetChatOpts struct {
 
 // GetChat (https://core.telegram.org/bots/api#getchat)
 //
-// Use this method to get up to date information about the chat. Returns a Chat object on success.
+// Use this method to get up-to-date information about the chat. Returns a ChatFullInfo object on success.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 //   - opts (type GetChatOpts): All optional parameters.
-func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*Chat, error) {
+func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*ChatFullInfo, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 
@@ -1823,7 +1828,7 @@ func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*Chat, error) {
 		return nil, err
 	}
 
-	var c Chat
+	var c ChatFullInfo
 	return &c, json.Unmarshal(r, &c)
 }
 
@@ -2599,7 +2604,7 @@ type PromoteChatMemberOpts struct {
 	CanInviteUsers bool
 	// Pass True if the administrator can post stories to the chat
 	CanPostStories bool
-	// Pass True if the administrator can edit stories posted by other users
+	// Pass True if the administrator can edit stories posted by other users, post stories to the chat page, pin chat stories, and access the chat's story archive
 	CanEditStories bool
 	// Pass True if the administrator can delete stories posted by other users
 	CanDeleteStories bool
@@ -2863,7 +2868,7 @@ type SendAnimationOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3003,7 +3008,7 @@ type SendAudioOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3171,7 +3176,7 @@ type SendContactOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3242,7 +3247,7 @@ type SendDiceOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3316,7 +3321,7 @@ type SendDocumentOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3433,7 +3438,7 @@ type SendGameOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game. Not supported for messages sent on behalf of a business account.
+	// A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game.
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3627,7 +3632,7 @@ type SendLocationOpts struct {
 	MessageThreadId int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
-	// Period in seconds for which the location will be updated (see Live Locations, should be between 60 and 86400.
+	// Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
 	LivePeriod int64
 	// For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
 	Heading int64
@@ -3639,7 +3644,7 @@ type SendLocationOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3795,7 +3800,7 @@ type SendMessageOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3883,7 +3888,7 @@ type SendPhotoOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3973,6 +3978,10 @@ type SendPollOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
+	QuestionParseMode string
+	// A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
+	QuestionEntities []MessageEntity
 	// True, if the poll needs to be anonymous, defaults to True
 	IsAnonymous bool
 	// Poll type, "quiz" or "regular", defaults to "regular"
@@ -3985,7 +3994,7 @@ type SendPollOpts struct {
 	Explanation string
 	// Mode for parsing entities in the explanation. See formatting options for more details.
 	ExplanationParseMode string
-	// A JSON-serialized list of special entities that appear in the poll explanation, which can be specified instead of parse_mode
+	// A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode
 	ExplanationEntities []MessageEntity
 	// Amount of time in seconds the poll will be active after creation, 5-600. Can't be used together with close_date.
 	OpenPeriod int64
@@ -3999,7 +4008,7 @@ type SendPollOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4010,9 +4019,9 @@ type SendPollOpts struct {
 // Use this method to send a native poll. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 //   - question (type string): Poll question, 1-300 characters
-//   - options (type []string): A JSON-serialized list of answer options, 2-10 strings 1-100 characters each
+//   - options (type []InputPollOption): A JSON-serialized list of 2-10 answer options
 //   - opts (type SendPollOpts): All optional parameters.
-func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *SendPollOpts) (*Message, error) {
+func (bot *Bot) SendPoll(chatId int64, question string, options []InputPollOption, opts *SendPollOpts) (*Message, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["question"] = question
@@ -4027,6 +4036,14 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []string, opts *
 		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		v["question_parse_mode"] = opts.QuestionParseMode
+		if opts.QuestionEntities != nil {
+			bs, err := json.Marshal(opts.QuestionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field question_entities: %w", err)
+			}
+			v["question_entities"] = string(bs)
 		}
 		v["is_anonymous"] = strconv.FormatBool(opts.IsAnonymous)
 		v["type"] = opts.Type
@@ -4097,7 +4114,7 @@ type SendStickerOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4192,7 +4209,7 @@ type SendVenueOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4285,7 +4302,7 @@ type SendVideoOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4418,7 +4435,7 @@ type SendVideoNoteOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4539,7 +4556,7 @@ type SendVoiceOpts struct {
 	ProtectContent bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user. Not supported for messages sent on behalf of a business account.
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4547,7 +4564,7 @@ type SendVoiceOpts struct {
 
 // SendVoice (https://core.telegram.org/bots/api#sendvoice)
 //
-// Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
+// Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 //   - voice (type InputFile): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVoiceOpts): All optional parameters.

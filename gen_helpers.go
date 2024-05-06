@@ -59,7 +59,7 @@ func (c Chat) ExportInviteLink(b *Bot, opts *ExportChatInviteLinkOpts) (string, 
 }
 
 // Get Helper method for Bot.GetChat.
-func (c Chat) Get(b *Bot, opts *GetChatOpts) (*Chat, error) {
+func (c Chat) Get(b *Bot, opts *GetChatOpts) (*ChatFullInfo, error) {
 	return b.GetChat(c.Id, opts)
 }
 
