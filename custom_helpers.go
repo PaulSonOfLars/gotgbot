@@ -78,6 +78,19 @@ func (im InaccessibleMessage) ToMessage() *Message {
 	}
 }
 
+// ToChat is a helper function to turn a ChatFullInfo struct into a Chat.
+func (c ChatFullInfo) ToChat() Chat {
+	return Chat{
+		Id:        c.Id,
+		Type:      c.Type,
+		Title:     c.Title,
+		Username:  c.Username,
+		FirstName: c.FirstName,
+		LastName:  c.LastName,
+		IsForum:   c.IsForum,
+	}
+}
+
 // SendMessage is a helper function to easily call Bot.SendMessage in a chat.
 func (c Chat) SendMessage(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
 	return b.SendMessage(c.Id, text, opts)
