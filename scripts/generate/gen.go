@@ -56,7 +56,7 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 				continue
 			}
 
-			if usesChildType(d, child, td.Name, []string{td.Name}) {
+			if child.usesChildType(d, td.Name, []string{td.Name}) {
 				return true
 			}
 			checked[r] = true
@@ -65,26 +65,39 @@ func (td TypeDescription) sentByAPI(d APIDescription) bool {
 	return false
 }
 
-func usesChildType(d APIDescription, tgType TypeDescription, typeName string, skip []string) bool {
-	for _, f := range tgType.Fields {
+func (td TypeDescription) usesChildType(d APIDescription, typeName string, skip []string) bool {
+	for _, f := range td.Fields {
 		for _, t := range f.Types {
 			if isTgArray(t) {
 				t = strings.TrimPrefix(t, "Array of ")
 			}
 
-			if t == typeName {
+			if td.isChildType(d, t, typeName, skip) {
 				return true
 			}
+		}
+	}
 
-			if contains(t, skip) {
-				continue
-			}
+	for _, t := range td.Subtypes {
+		if td.isChildType(d, t, typeName, skip) {
+			return true
+		}
+	}
+	return false
+}
 
-			if child, ok := d.Types[t]; ok && t != tgType.Name {
-				if usesChildType(d, child, typeName, append(skip, tgType.Name)) {
-					return true
-				}
-			}
+func (td TypeDescription) isChildType(d APIDescription, t string, typeName string, skip []string) bool {
+	if t == typeName {
+		return true
+	}
+
+	if contains(t, skip) {
+		return false
+	}
+
+	if child, ok := d.Types[t]; ok && t != td.Name {
+		if child.usesChildType(d, typeName, append(skip, td.Name)) {
+			return true
 		}
 	}
 	return false

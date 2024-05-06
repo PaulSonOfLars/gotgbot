@@ -120,6 +120,75 @@ func (v MergedBackgroundFill) MergeBackgroundFill() MergedBackgroundFill {
 	return v
 }
 
+// unmarshalBackgroundFillArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalBackgroundFill.
+func unmarshalBackgroundFillArray(d json.RawMessage) ([]BackgroundFill, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal initial BackgroundFill JSON into an array: %w", err)
+	}
+
+	var vs []BackgroundFill
+	for idx, d := range ds {
+		v, err := unmarshalBackgroundFill(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal BackgroundFill on array item %d: %w", idx, err)
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalBackgroundFill is a JSON unmarshal helper to marshal the right structs into a BackgroundFill interface
+// based on the Type field.
+func unmarshalBackgroundFill(d json.RawMessage) (BackgroundFill, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal BackgroundFill for constant field 'Type': %w", err)
+	}
+
+	switch t.Type {
+	case "solid":
+		s := BackgroundFillSolid{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal BackgroundFill for value 'solid': %w", err)
+		}
+		return s, nil
+
+	case "gradient":
+		s := BackgroundFillGradient{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal BackgroundFill for value 'gradient': %w", err)
+		}
+		return s, nil
+
+	case "freeform_gradient":
+		s := BackgroundFillFreeformGradient{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal BackgroundFill for value 'freeform_gradient': %w", err)
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface for BackgroundFill with Type %v", t.Type)
+}
+
 // BackgroundFillFreeformGradient (https://core.telegram.org/bots/api#backgroundfillfreeformgradient)
 //
 // The background is a freeform gradient that rotates after every message in the chat.
