@@ -1606,7 +1606,7 @@ type ChatFullInfo struct {
 	HasRestrictedVoiceAndVideoMessages bool `json:"has_restricted_voice_and_video_messages,omitempty"`
 	// Optional. True, if users need to join the supergroup before they can send messages
 	JoinToSendMessages bool `json:"join_to_send_messages,omitempty"`
-	// Optional. True, if all users directly joining the supergroup need to be approved by supergroup administrators
+	// Optional. True, if all users directly joining the supergroup without using an invite link need to be approved by supergroup administrators
 	JoinByRequest bool `json:"join_by_request,omitempty"`
 	// Optional. Description, for groups, supergroups and channel chats
 	Description string `json:"description,omitempty"`
@@ -2379,7 +2379,7 @@ type ChatMemberUpdated struct {
 	NewChatMember ChatMember `json:"new_chat_member"`
 	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
-	// Optional. True, if the user joined the chat after sending a direct join request and being approved by an administrator
+	// Optional. True, if the user joined the chat after sending a direct join request without using an invite link and being approved by an administrator
 	ViaJoinRequest bool `json:"via_join_request,omitempty"`
 	// Optional. True, if the user joined the chat via a chat folder invite link
 	ViaChatFolderInviteLink bool `json:"via_chat_folder_invite_link,omitempty"`
@@ -7661,7 +7661,7 @@ type Update struct {
 	EditedChannelPost *Message `json:"edited_channel_post,omitempty"`
 	// Optional. The bot was connected to or disconnected from a business account, or a user edited an existing connection with the bot
 	BusinessConnection *BusinessConnection `json:"business_connection,omitempty"`
-	// Optional. New non-service message from a connected business account
+	// Optional. New message from a connected business account
 	BusinessMessage *Message `json:"business_message,omitempty"`
 	// Optional. New version of a message from a connected business account
 	EditedBusinessMessage *Message `json:"edited_business_message,omitempty"`
