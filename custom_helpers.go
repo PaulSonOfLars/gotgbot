@@ -111,6 +111,11 @@ func (f File) URL(b *Bot, opts *RequestOpts) string {
 	return b.FileURL(b.Token, f.FilePath, opts)
 }
 
+// IsJoinRequest returns true if ChatMemberUpdated originated from a join request; either from a direct join, or from an invitelink.
+func (cm ChatMemberUpdated) IsJoinRequest() bool {
+	return cm.ViaJoinRequest || (cm.InviteLink != nil && cm.InviteLink.CreatesJoinRequest)
+}
+
 // unmarshalMaybeInaccessibleMessage is a JSON unmarshal helper to marshal the right structs into a
 // MaybeInaccessibleMessage interface based on the Date field.
 // This method is manually maintained due to special-case handling on the Date field rather than a specific type field.
