@@ -123,7 +123,7 @@ var (
 type MergedBotCommandScope struct {
 	// Scope type
 	Type string `json:"type"`
-	// Optional. Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername) (Only for chat, chat_administrators, chat_member)
+	// Optional. Unique identifier for the target chat (Only for chat, chat_administrators, chat_member)
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Unique identifier of the target user (Only for chat_member)
 	UserId int64 `json:"user_id,omitempty"`
@@ -245,7 +245,7 @@ func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering a specific chat.
 type BotCommandScopeChat struct {
-	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	// Unique identifier for the target chat
 	ChatId int64 `json:"chat_id"`
 }
 
@@ -282,7 +282,7 @@ func (v BotCommandScopeChat) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
 type BotCommandScopeChatAdministrators struct {
-	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	// Unique identifier for the target chat
 	ChatId int64 `json:"chat_id"`
 }
 
@@ -319,7 +319,7 @@ func (v BotCommandScopeChatAdministrators) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
 type BotCommandScopeChatMember struct {
-	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	// Unique identifier for the target chat
 	ChatId int64 `json:"chat_id"`
 	// Unique identifier of the target user
 	UserId int64 `json:"user_id"`
@@ -6761,7 +6761,7 @@ func (v ReplyKeyboardRemove) replyMarkup() {}
 type ReplyParameters struct {
 	// Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
 	MessageId int64 `json:"message_id"`
-	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the channel (in the format @channelusername). Not supported for messages sent on behalf of a business account.
+	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat. Not supported for messages sent on behalf of a business account.
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic. Always True for messages sent on behalf of a business account.
 	AllowSendingWithoutReply bool `json:"allow_sending_without_reply,omitempty"`

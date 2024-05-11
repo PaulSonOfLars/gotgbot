@@ -184,7 +184,7 @@ func (m MethodDescription) description(d APIDescription) (string, error) {
 			return "", err
 		}
 
-		description.WriteString("\n//  - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.Description)
+		description.WriteString("\n//  - " + snakeToCamel(f.Name) + " (type " + prefType + "): " + f.GetDescription())
 	}
 
 	// All methods have the optional `RequestOpts`
@@ -382,7 +382,7 @@ func (m MethodDescription) getArgs(d APIDescription) (string, string, error) {
 			continue
 		}
 
-		optionals.WriteString("\n// " + f.Description)
+		optionals.WriteString("\n// " + f.GetDescription())
 		optionals.WriteString("\n" + fmt.Sprintf("%s %s", snakeToTitle(f.Name), fieldType))
 	}
 

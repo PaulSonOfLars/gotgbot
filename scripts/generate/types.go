@@ -439,7 +439,7 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 			fieldType = "*" + fieldType
 		}
 
-		typeFields.WriteString("\n// " + f.Description)
+		typeFields.WriteString("\n// " + f.GetDescription())
 		if f.Required && !isArray(fieldType) {
 			typeFields.WriteString("\n" + snakeToTitle(f.Name) + " " + fieldType + " `json:\"" + f.Name + "\"`")
 		} else {
