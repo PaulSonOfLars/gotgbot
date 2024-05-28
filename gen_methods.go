@@ -686,7 +686,9 @@ func (bot *Bot) CreateForumTopic(chatId int64, name string, opts *CreateForumTop
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink.
 type CreateInvoiceLinkOpts struct {
-	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
+	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
+	ProviderToken string
+	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	SuggestedTipAmounts []int64
@@ -700,19 +702,19 @@ type CreateInvoiceLinkOpts struct {
 	PhotoWidth int64
 	// Photo height
 	PhotoHeight int64
-	// Pass True if you require the user's full name to complete the order
+	// Pass True if you require the user's full name to complete the order. Ignored for payments in Telegram Stars.
 	NeedName bool
-	// Pass True if you require the user's phone number to complete the order
+	// Pass True if you require the user's phone number to complete the order. Ignored for payments in Telegram Stars.
 	NeedPhoneNumber bool
-	// Pass True if you require the user's email address to complete the order
+	// Pass True if you require the user's email address to complete the order. Ignored for payments in Telegram Stars.
 	NeedEmail bool
-	// Pass True if you require the user's shipping address to complete the order
+	// Pass True if you require the user's shipping address to complete the order. Ignored for payments in Telegram Stars.
 	NeedShippingAddress bool
-	// Pass True if the user's phone number should be sent to the provider
+	// Pass True if the user's phone number should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendPhoneNumberToProvider bool
-	// Pass True if the user's email address should be sent to the provider
+	// Pass True if the user's email address should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendEmailToProvider bool
-	// Pass True if the final price depends on the shipping method
+	// Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
 	IsFlexible bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -724,16 +726,14 @@ type CreateInvoiceLinkOpts struct {
 //   - title (type string): Product name, 1-32 characters
 //   - description (type string): Product description, 1-255 characters
 //   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
-//   - providerToken (type string): Payment provider token, obtained via BotFather
-//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
-//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
+//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
 //   - opts (type CreateInvoiceLinkOpts): All optional parameters.
-func (bot *Bot) CreateInvoiceLink(title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *CreateInvoiceLinkOpts) (string, error) {
+func (bot *Bot) CreateInvoiceLink(title string, description string, payload string, currency string, prices []LabeledPrice, opts *CreateInvoiceLinkOpts) (string, error) {
 	v := map[string]string{}
 	v["title"] = title
 	v["description"] = description
 	v["payload"] = payload
-	v["provider_token"] = providerToken
 	v["currency"] = currency
 	if prices != nil {
 		bs, err := json.Marshal(prices)
@@ -743,6 +743,7 @@ func (bot *Bot) CreateInvoiceLink(title string, description string, payload stri
 		v["prices"] = string(bs)
 	}
 	if opts != nil {
+		v["provider_token"] = opts.ProviderToken
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
@@ -1307,6 +1308,8 @@ type EditMessageCaptionOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media. Supported only for animation, photo and video messages.
+	ShowCaptionAboveMedia bool
 	// A JSON-serialized object for an inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1336,6 +1339,7 @@ func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to marshal field reply_markup: %w", err)
@@ -2662,6 +2666,37 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 	return b, json.Unmarshal(r, &b)
 }
 
+// RefundStarPaymentOpts is the set of optional fields for Bot.RefundStarPayment.
+type RefundStarPaymentOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RefundStarPayment (https://core.telegram.org/bots/api#refundstarpayment)
+//
+// Refunds a successful payment in Telegram Stars. Returns True on success.
+//   - userId (type int64): Identifier of the user whose payment will be refunded
+//   - telegramPaymentChargeId (type string): Telegram payment identifier
+//   - opts (type RefundStarPaymentOpts): All optional parameters.
+func (bot *Bot) RefundStarPayment(userId int64, telegramPaymentChargeId string, opts *RefundStarPaymentOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["telegram_payment_charge_id"] = telegramPaymentChargeId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("refundStarPayment", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // ReopenForumTopicOpts is the set of optional fields for Bot.ReopenForumTopic.
 type ReopenForumTopicOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2860,12 +2895,16 @@ type SendAnimationOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool
 	// Pass True if the animation needs to be covered with a spoiler animation
 	HasSpoiler bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -2949,9 +2988,11 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFile, opts *SendAnima
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3006,6 +3047,8 @@ type SendAudioOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3088,6 +3131,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFile, opts *SendAudioOpts) (*
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3174,6 +3218,8 @@ type SendContactOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3203,6 +3249,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3245,6 +3292,8 @@ type SendDiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3269,6 +3318,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3319,6 +3369,8 @@ type SendDocumentOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3396,6 +3448,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFile, opts *SendDocumen
 		v["disable_content_type_detection"] = strconv.FormatBool(opts.DisableContentTypeDetection)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3436,6 +3489,8 @@ type SendGameOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game.
@@ -3461,6 +3516,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3493,7 +3549,9 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 type SendInvoiceOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
-	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
+	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
+	ProviderToken string
+	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	SuggestedTipAmounts []int64
@@ -3509,24 +3567,26 @@ type SendInvoiceOpts struct {
 	PhotoWidth int64
 	// Photo height
 	PhotoHeight int64
-	// Pass True if you require the user's full name to complete the order
+	// Pass True if you require the user's full name to complete the order. Ignored for payments in Telegram Stars.
 	NeedName bool
-	// Pass True if you require the user's phone number to complete the order
+	// Pass True if you require the user's phone number to complete the order. Ignored for payments in Telegram Stars.
 	NeedPhoneNumber bool
-	// Pass True if you require the user's email address to complete the order
+	// Pass True if you require the user's email address to complete the order. Ignored for payments in Telegram Stars.
 	NeedEmail bool
-	// Pass True if you require the user's shipping address to complete the order
+	// Pass True if you require the user's shipping address to complete the order. Ignored for payments in Telegram Stars.
 	NeedShippingAddress bool
-	// Pass True if the user's phone number should be sent to provider
+	// Pass True if the user's phone number should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendPhoneNumberToProvider bool
-	// Pass True if the user's email address should be sent to provider
+	// Pass True if the user's email address should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendEmailToProvider bool
-	// Pass True if the final price depends on the shipping method
+	// Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
 	IsFlexible bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
@@ -3542,17 +3602,15 @@ type SendInvoiceOpts struct {
 //   - title (type string): Product name, 1-32 characters
 //   - description (type string): Product description, 1-255 characters
 //   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
-//   - providerToken (type string): Payment provider token, obtained via @BotFather
-//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies
-//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+//   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
+//   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
 //   - opts (type SendInvoiceOpts): All optional parameters.
-func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
+func (bot *Bot) SendInvoice(chatId int64, title string, description string, payload string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["title"] = title
 	v["description"] = description
 	v["payload"] = payload
-	v["provider_token"] = providerToken
 	v["currency"] = currency
 	if prices != nil {
 		bs, err := json.Marshal(prices)
@@ -3565,6 +3623,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		v["provider_token"] = opts.ProviderToken
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
@@ -3596,6 +3655,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 		v["is_flexible"] = strconv.FormatBool(opts.IsFlexible)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3642,6 +3702,8 @@ type SendLocationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3681,6 +3743,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3721,6 +3784,8 @@ type SendMediaGroupOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -3759,6 +3824,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3798,6 +3864,8 @@ type SendMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3838,6 +3906,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3880,12 +3949,16 @@ type SendPhotoOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool
 	// Pass True if the photo needs to be covered with a spoiler animation
 	HasSpoiler bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3939,9 +4012,11 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFile, opts *SendPhotoOpts) (*
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4006,6 +4081,8 @@ type SendPollOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4070,6 +4147,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []InputPollOptio
 		v["is_closed"] = strconv.FormatBool(opts.IsClosed)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4112,6 +4190,8 @@ type SendStickerOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4159,6 +4239,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFile, opts *SendStickerOp
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4207,6 +4288,8 @@ type SendVenueOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4242,6 +4325,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 		v["google_place_type"] = opts.GooglePlaceType
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4292,6 +4376,8 @@ type SendVideoOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool
 	// Pass True if the video needs to be covered with a spoiler animation
 	HasSpoiler bool
 	// Pass True if the uploaded video is suitable for streaming
@@ -4300,6 +4386,8 @@ type SendVideoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4383,10 +4471,12 @@ func (bot *Bot) SendVideo(chatId int64, video InputFile, opts *SendVideoOpts) (*
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["supports_streaming"] = strconv.FormatBool(opts.SupportsStreaming)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4433,6 +4523,8 @@ type SendVideoNoteOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4506,6 +4598,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFile, opts *SendVideo
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4554,6 +4647,8 @@ type SendVoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4612,6 +4707,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFile, opts *SendVoiceOpts) (*
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {

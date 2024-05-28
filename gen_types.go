@@ -2915,7 +2915,7 @@ func (v InaccessibleMessage) maybeInaccessibleMessage() {}
 
 // InlineKeyboardButton (https://core.telegram.org/bots/api#inlinekeyboardbutton)
 //
-// This object represents one button of an inline keyboard. You must use exactly one of the optional fields.
+// This object represents one button of an inline keyboard. Exactly one of the optional fields must be used to specify type of the button.
 type InlineKeyboardButton struct {
 	// Label text on the button
 	Text string `json:"text"`
@@ -2935,7 +2935,7 @@ type InlineKeyboardButton struct {
 	SwitchInlineQueryChosenChat *SwitchInlineQueryChosenChat `json:"switch_inline_query_chosen_chat,omitempty"`
 	// Optional. Description of the game that will be launched when the user presses the button. NOTE: This type of button must always be the first button in the first row.
 	CallbackGame *CallbackGame `json:"callback_game,omitempty"`
-	// Optional. Specify True, to send a Pay button. NOTE: This type of button must always be the first button in the first row and can only be used in invoice messages.
+	// Optional. Specify True, to send a Pay button. Substrings "⭐" and "XTR" in the buttons's text will be replaced with a Telegram Star icon. NOTE: This type of button must always be the first button in the first row and can only be used in invoice messages.
 	Pay bool `json:"pay,omitempty"`
 }
 
@@ -3052,6 +3052,8 @@ type MergedInlineQueryResult struct {
 	Description string `json:"description,omitempty"`
 	// Optional. A valid file identifier for the GIF file (Only for gif)
 	GifFileId string `json:"gif_file_id,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media (Only for gif, mpeg4_gif, photo, video, gif, mpeg4_gif, photo, video)
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. A valid file identifier for the MPEG4 file (Only for mpeg4_gif)
 	Mpeg4FileId string `json:"mpeg4_file_id,omitempty"`
 	// Optional. A valid file identifier of the photo (Only for photo)
@@ -3450,6 +3452,8 @@ type InlineQueryResultCachedGif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the GIF animation
@@ -3469,15 +3473,16 @@ func (v InlineQueryResultCachedGif) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "gif",
-		Id:                  v.Id,
-		GifFileId:           v.GifFileId,
-		Title:               v.Title,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "gif",
+		Id:                    v.Id,
+		GifFileId:             v.GifFileId,
+		Title:                 v.Title,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -3513,6 +3518,8 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video animation
@@ -3532,15 +3539,16 @@ func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "mpeg4_gif",
-		Id:                  v.Id,
-		Mpeg4FileId:         v.Mpeg4FileId,
-		Title:               v.Title,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "mpeg4_gif",
+		Id:                    v.Id,
+		Mpeg4FileId:           v.Mpeg4FileId,
+		Title:                 v.Title,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -3578,6 +3586,8 @@ type InlineQueryResultCachedPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the photo
@@ -3597,16 +3607,17 @@ func (v InlineQueryResultCachedPhoto) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "photo",
-		Id:                  v.Id,
-		PhotoFileId:         v.PhotoFileId,
-		Title:               v.Title,
-		Description:         v.Description,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "photo",
+		Id:                    v.Id,
+		PhotoFileId:           v.PhotoFileId,
+		Title:                 v.Title,
+		Description:           v.Description,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -3695,6 +3706,8 @@ type InlineQueryResultCachedVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video
@@ -3714,16 +3727,17 @@ func (v InlineQueryResultCachedVideo) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "video",
-		Id:                  v.Id,
-		VideoFileId:         v.VideoFileId,
-		Title:               v.Title,
-		Description:         v.Description,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "video",
+		Id:                    v.Id,
+		VideoFileId:           v.VideoFileId,
+		Title:                 v.Title,
+		Description:           v.Description,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -4027,6 +4041,8 @@ type InlineQueryResultGif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the GIF animation
@@ -4046,20 +4062,21 @@ func (v InlineQueryResultGif) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "gif",
-		Id:                  v.Id,
-		GifUrl:              v.GifUrl,
-		GifWidth:            v.GifWidth,
-		GifHeight:           v.GifHeight,
-		GifDuration:         v.GifDuration,
-		ThumbnailUrl:        v.ThumbnailUrl,
-		ThumbnailMimeType:   v.ThumbnailMimeType,
-		Title:               v.Title,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "gif",
+		Id:                    v.Id,
+		GifUrl:                v.GifUrl,
+		GifWidth:              v.GifWidth,
+		GifHeight:             v.GifHeight,
+		GifDuration:           v.GifDuration,
+		ThumbnailUrl:          v.ThumbnailUrl,
+		ThumbnailMimeType:     v.ThumbnailMimeType,
+		Title:                 v.Title,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -4183,6 +4200,8 @@ type InlineQueryResultMpeg4Gif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the video animation
@@ -4202,20 +4221,21 @@ func (v InlineQueryResultMpeg4Gif) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "mpeg4_gif",
-		Id:                  v.Id,
-		Mpeg4Url:            v.Mpeg4Url,
-		Mpeg4Width:          v.Mpeg4Width,
-		Mpeg4Height:         v.Mpeg4Height,
-		Mpeg4Duration:       v.Mpeg4Duration,
-		ThumbnailUrl:        v.ThumbnailUrl,
-		ThumbnailMimeType:   v.ThumbnailMimeType,
-		Title:               v.Title,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "mpeg4_gif",
+		Id:                    v.Id,
+		Mpeg4Url:              v.Mpeg4Url,
+		Mpeg4Width:            v.Mpeg4Width,
+		Mpeg4Height:           v.Mpeg4Height,
+		Mpeg4Duration:         v.Mpeg4Duration,
+		ThumbnailUrl:          v.ThumbnailUrl,
+		ThumbnailMimeType:     v.ThumbnailMimeType,
+		Title:                 v.Title,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -4259,6 +4279,8 @@ type InlineQueryResultPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the photo
@@ -4278,19 +4300,20 @@ func (v InlineQueryResultPhoto) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "photo",
-		Id:                  v.Id,
-		PhotoUrl:            v.PhotoUrl,
-		ThumbnailUrl:        v.ThumbnailUrl,
-		PhotoWidth:          v.PhotoWidth,
-		PhotoHeight:         v.PhotoHeight,
-		Title:               v.Title,
-		Description:         v.Description,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "photo",
+		Id:                    v.Id,
+		PhotoUrl:              v.PhotoUrl,
+		ThumbnailUrl:          v.ThumbnailUrl,
+		PhotoWidth:            v.PhotoWidth,
+		PhotoHeight:           v.PhotoHeight,
+		Title:                 v.Title,
+		Description:           v.Description,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -4411,6 +4434,8 @@ type InlineQueryResultVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Video width
 	VideoWidth int64 `json:"video_width,omitempty"`
 	// Optional. Video height
@@ -4438,21 +4463,22 @@ func (v InlineQueryResultVideo) GetId() string {
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
-		Type:                "video",
-		Id:                  v.Id,
-		VideoUrl:            v.VideoUrl,
-		MimeType:            v.MimeType,
-		ThumbnailUrl:        v.ThumbnailUrl,
-		Title:               v.Title,
-		Caption:             v.Caption,
-		ParseMode:           v.ParseMode,
-		CaptionEntities:     v.CaptionEntities,
-		VideoWidth:          v.VideoWidth,
-		VideoHeight:         v.VideoHeight,
-		VideoDuration:       v.VideoDuration,
-		Description:         v.Description,
-		ReplyMarkup:         v.ReplyMarkup,
-		InputMessageContent: v.InputMessageContent,
+		Type:                  "video",
+		Id:                    v.Id,
+		VideoUrl:              v.VideoUrl,
+		MimeType:              v.MimeType,
+		ThumbnailUrl:          v.ThumbnailUrl,
+		Title:                 v.Title,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		VideoWidth:            v.VideoWidth,
+		VideoHeight:           v.VideoHeight,
+		VideoDuration:         v.VideoDuration,
+		Description:           v.Description,
+		ReplyMarkup:           v.ReplyMarkup,
+		InputMessageContent:   v.InputMessageContent,
 	}
 }
 
@@ -4582,13 +4608,13 @@ type InputInvoiceMessageContent struct {
 	Description string `json:"description"`
 	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
 	Payload string `json:"payload"`
-	// Payment provider token, obtained via @BotFather
-	ProviderToken string `json:"provider_token"`
-	// Three-letter ISO 4217 currency code, see more on currencies
+	// Optional. Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
+	ProviderToken string `json:"provider_token,omitempty"`
+	// Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
 	Currency string `json:"currency"`
-	// Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.)
+	// Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
 	Prices []LabeledPrice `json:"prices,omitempty"`
-	// Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0
+	// Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64 `json:"max_tip_amount,omitempty"`
 	// Optional. A JSON-serialized array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	SuggestedTipAmounts []int64 `json:"suggested_tip_amounts,omitempty"`
@@ -4602,19 +4628,19 @@ type InputInvoiceMessageContent struct {
 	PhotoWidth int64 `json:"photo_width,omitempty"`
 	// Optional. Photo height
 	PhotoHeight int64 `json:"photo_height,omitempty"`
-	// Optional. Pass True if you require the user's full name to complete the order
+	// Optional. Pass True if you require the user's full name to complete the order. Ignored for payments in Telegram Stars.
 	NeedName bool `json:"need_name,omitempty"`
-	// Optional. Pass True if you require the user's phone number to complete the order
+	// Optional. Pass True if you require the user's phone number to complete the order. Ignored for payments in Telegram Stars.
 	NeedPhoneNumber bool `json:"need_phone_number,omitempty"`
-	// Optional. Pass True if you require the user's email address to complete the order
+	// Optional. Pass True if you require the user's email address to complete the order. Ignored for payments in Telegram Stars.
 	NeedEmail bool `json:"need_email,omitempty"`
-	// Optional. Pass True if you require the user's shipping address to complete the order
+	// Optional. Pass True if you require the user's shipping address to complete the order. Ignored for payments in Telegram Stars.
 	NeedShippingAddress bool `json:"need_shipping_address,omitempty"`
-	// Optional. Pass True if the user's phone number should be sent to provider
+	// Optional. Pass True if the user's phone number should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendPhoneNumberToProvider bool `json:"send_phone_number_to_provider,omitempty"`
-	// Optional. Pass True if the user's email address should be sent to provider
+	// Optional. Pass True if the user's email address should be sent to the provider. Ignored for payments in Telegram Stars.
 	SendEmailToProvider bool `json:"send_email_to_provider,omitempty"`
-	// Optional. Pass True if the final price depends on the shipping method
+	// Optional. Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
 	IsFlexible bool `json:"is_flexible,omitempty"`
 }
 
@@ -4684,6 +4710,8 @@ type MergedInputMedia struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media (Only for animation, photo, video)
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Animation width (Only for animation, video)
 	Width int64 `json:"width,omitempty"`
 	// Optional. Animation height (Only for animation, video)
@@ -4734,6 +4762,8 @@ type InputMediaAnimation struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Animation width
 	Width int64 `json:"width,omitempty"`
 	// Optional. Animation height
@@ -4757,16 +4787,17 @@ func (v InputMediaAnimation) GetMedia() InputFile {
 // MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaAnimation) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
-		Type:            "animation",
-		Media:           v.Media,
-		Thumbnail:       v.Thumbnail,
-		Caption:         v.Caption,
-		ParseMode:       v.ParseMode,
-		CaptionEntities: v.CaptionEntities,
-		Width:           v.Width,
-		Height:          v.Height,
-		Duration:        v.Duration,
-		HasSpoiler:      v.HasSpoiler,
+		Type:                  "animation",
+		Media:                 v.Media,
+		Thumbnail:             v.Thumbnail,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		Width:                 v.Width,
+		Height:                v.Height,
+		Duration:              v.Duration,
+		HasSpoiler:            v.HasSpoiler,
 	}
 }
 
@@ -4984,6 +5015,8 @@ type InputMediaPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Pass True if the photo needs to be covered with a spoiler animation
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
 }
@@ -5001,12 +5034,13 @@ func (v InputMediaPhoto) GetMedia() InputFile {
 // MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaPhoto) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
-		Type:            "photo",
-		Media:           v.Media,
-		Caption:         v.Caption,
-		ParseMode:       v.ParseMode,
-		CaptionEntities: v.CaptionEntities,
-		HasSpoiler:      v.HasSpoiler,
+		Type:                  "photo",
+		Media:                 v.Media,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		HasSpoiler:            v.HasSpoiler,
 	}
 }
 
@@ -5062,6 +5096,8 @@ type InputMediaVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Video width
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height
@@ -5087,17 +5123,18 @@ func (v InputMediaVideo) GetMedia() InputFile {
 // MergeInputMedia returns a MergedInputMedia struct to simplify working with types in a non-generic world.
 func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 	return MergedInputMedia{
-		Type:              "video",
-		Media:             v.Media,
-		Thumbnail:         v.Thumbnail,
-		Caption:           v.Caption,
-		ParseMode:         v.ParseMode,
-		CaptionEntities:   v.CaptionEntities,
-		Width:             v.Width,
-		Height:            v.Height,
-		Duration:          v.Duration,
-		SupportsStreaming: v.SupportsStreaming,
-		HasSpoiler:        v.HasSpoiler,
+		Type:                  "video",
+		Media:                 v.Media,
+		Thumbnail:             v.Thumbnail,
+		Caption:               v.Caption,
+		ParseMode:             v.ParseMode,
+		CaptionEntities:       v.CaptionEntities,
+		ShowCaptionAboveMedia: v.ShowCaptionAboveMedia,
+		Width:                 v.Width,
+		Height:                v.Height,
+		Duration:              v.Duration,
+		SupportsStreaming:     v.SupportsStreaming,
+		HasSpoiler:            v.HasSpoiler,
 	}
 }
 
@@ -5263,7 +5300,7 @@ type Invoice struct {
 	Description string `json:"description"`
 	// Unique bot deep-linking parameter that can be used to generate this invoice
 	StartParameter string `json:"start_parameter"`
-	// Three-letter ISO 4217 currency code
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars
 	Currency string `json:"currency"`
 	// Total price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
@@ -5271,7 +5308,7 @@ type Invoice struct {
 
 // KeyboardButton (https://core.telegram.org/bots/api#keyboardbutton)
 //
-// This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_users, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
+// This object represents one button of the reply keyboard. At most one of the optional fields must be used to specify type of the button. For simple text buttons, String can be used instead of this object to specify the button text.
 // Note: request_users and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
@@ -5739,6 +5776,8 @@ type Message struct {
 	Entities []MessageEntity `json:"entities,omitempty"`
 	// Optional. Options used for link preview generation for the message, if it is a text message and link preview options were changed
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
+	// Optional. Unique identifier of the message effect added to the message
+	EffectId string `json:"effect_id,omitempty"`
 	// Optional. Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set
 	Animation *Animation `json:"animation,omitempty"`
 	// Optional. Message is an audio file, information about the file
@@ -5761,6 +5800,8 @@ type Message struct {
 	Caption string `json:"caption,omitempty"`
 	// Optional. For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear in the caption
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. True, if the message media is covered by a spoiler animation
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
 	// Optional. Message is a shared contact, information about the contact
@@ -5882,6 +5923,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		Text                          string                         `json:"text"`
 		Entities                      []MessageEntity                `json:"entities"`
 		LinkPreviewOptions            *LinkPreviewOptions            `json:"link_preview_options"`
+		EffectId                      string                         `json:"effect_id"`
 		Animation                     *Animation                     `json:"animation"`
 		Audio                         *Audio                         `json:"audio"`
 		Document                      *Document                      `json:"document"`
@@ -5893,6 +5935,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		Voice                         *Voice                         `json:"voice"`
 		Caption                       string                         `json:"caption"`
 		CaptionEntities               []MessageEntity                `json:"caption_entities"`
+		ShowCaptionAboveMedia         bool                           `json:"show_caption_above_media"`
 		HasMediaSpoiler               bool                           `json:"has_media_spoiler"`
 		Contact                       *Contact                       `json:"contact"`
 		Dice                          *Dice                          `json:"dice"`
@@ -5973,6 +6016,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.Text = t.Text
 	v.Entities = t.Entities
 	v.LinkPreviewOptions = t.LinkPreviewOptions
+	v.EffectId = t.EffectId
 	v.Animation = t.Animation
 	v.Audio = t.Audio
 	v.Document = t.Document
@@ -5984,6 +6028,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.Voice = t.Voice
 	v.Caption = t.Caption
 	v.CaptionEntities = t.CaptionEntities
+	v.ShowCaptionAboveMedia = t.ShowCaptionAboveMedia
 	v.HasMediaSpoiler = t.HasMediaSpoiler
 	v.Contact = t.Contact
 	v.Dice = t.Dice
@@ -6066,7 +6111,7 @@ type MessageAutoDeleteTimerChanged struct {
 //
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 type MessageEntity struct {
-	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
+	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
 	Type string `json:"type"`
 	// Offset in UTF-16 code units to the start of the entity
 	Offset int64 `json:"offset"`
@@ -7167,7 +7212,7 @@ type PreCheckoutQuery struct {
 	Id string `json:"id"`
 	// User who sent the query
 	From User `json:"from"`
-	// Three-letter ISO 4217 currency code
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars
 	Currency string `json:"currency"`
 	// Total price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
@@ -7598,7 +7643,7 @@ type Story struct {
 //
 // This object contains basic information about a successful payment.
 type SuccessfulPayment struct {
-	// Three-letter ISO 4217 currency code
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars
 	Currency string `json:"currency"`
 	// Total price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
