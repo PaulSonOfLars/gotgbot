@@ -470,6 +470,8 @@ type CopyMessageOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media. Ignored if a new caption isn't specified.
+	ShowCaptionAboveMedia bool
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -509,6 +511,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 			}
 			v["caption_entities"] = string(bs)
 		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		if opts.ReplyParameters != nil {
@@ -2903,7 +2906,7 @@ type SendAnimationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3047,7 +3050,7 @@ type SendAudioOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3218,7 +3221,7 @@ type SendContactOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3292,7 +3295,7 @@ type SendDiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3369,7 +3372,7 @@ type SendDocumentOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3489,7 +3492,7 @@ type SendGameOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3585,7 +3588,7 @@ type SendInvoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3702,7 +3705,7 @@ type SendLocationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3784,7 +3787,7 @@ type SendMediaGroupOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3864,7 +3867,7 @@ type SendMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -3957,7 +3960,7 @@ type SendPhotoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4081,7 +4084,7 @@ type SendPollOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4190,7 +4193,7 @@ type SendStickerOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4288,7 +4291,7 @@ type SendVenueOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4386,7 +4389,7 @@ type SendVideoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4523,7 +4526,7 @@ type SendVideoNoteOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
@@ -4647,7 +4650,7 @@ type SendVoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
-	// Unique identifier of the message effect to be added to the message
+	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
