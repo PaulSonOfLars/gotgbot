@@ -4816,12 +4816,10 @@ func (v InputMediaAnimation) inputMedia() {}
 
 func (v InputMediaAnimation) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		key, err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Media = FileString{Value: key}
 	}
 
 	return json.Marshal(v)
@@ -4892,12 +4890,10 @@ func (v InputMediaAudio) inputMedia() {}
 
 func (v InputMediaAudio) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		key, err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Media = FileString{Value: key}
 	}
 
 	return json.Marshal(v)
@@ -4962,12 +4958,10 @@ func (v InputMediaDocument) inputMedia() {}
 
 func (v InputMediaDocument) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		key, err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Media = FileString{Value: key}
 	}
 
 	return json.Marshal(v)
@@ -5032,12 +5026,10 @@ func (v InputMediaPhoto) inputMedia() {}
 
 func (v InputMediaPhoto) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		key, err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Media = FileString{Value: key}
 	}
 
 	return json.Marshal(v)
@@ -5117,12 +5109,10 @@ func (v InputMediaVideo) inputMedia() {}
 
 func (v InputMediaVideo) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		key, err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Media = FileString{Value: key}
 	}
 
 	return json.Marshal(v)
@@ -5180,12 +5170,10 @@ type InputSticker struct {
 
 func (v InputSticker) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Sticker != nil {
-		key, err := v.Sticker.Attach(mediaName, data)
+		err := v.Sticker.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.Sticker = FileString{Value: key}
 	}
 
 	return json.Marshal(v)

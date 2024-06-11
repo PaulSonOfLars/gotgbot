@@ -400,11 +400,11 @@ type readerBranchesData struct {
 // TODO: Make sure this doesn't allow strings, ONLY readers!
 const inputFileBranch = `
 if {{.GoParam}} != nil {
-	key, err := {{.GoParam}}.Attach("{{.Name}}", data)
+	err := {{.GoParam}}.Attach("{{.Name}}", data)
 	if err != nil {
 		return {{.DefaultReturn}}, err
 	}
-	v["{{.Name}}"] = key
+	v["{{.Name}}"] = {{.GoParam}}.getValue()
 }`
 
 const inputParamsBranch = `

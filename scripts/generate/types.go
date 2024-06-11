@@ -91,6 +91,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		return "", fmt.Errorf("failed to check if type requires special handling: %w", err)
 	}
 	if ok {
+		// TODO: Investigate if thumbnails need special handling too.
 		err = inputParamsTmpl.Execute(&typeDef, inputParamsMethodData{
 			Type:  tgType.Name,
 			Field: snakeToTitle(fieldName),
@@ -758,12 +759,10 @@ type inputParamsMethodData struct {
 const inputParamsMethod = `
 func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.{{.Field}} != nil {
-		key, err := v.{{.Field}}.Attach(mediaName, data)
+		err := v.{{.Field}}.Attach(mediaName, data)
 		if err != nil {
 			return nil, err
 		}
-		// Now that we've attached the file as a piece of data, we can pass in its file reference.
-		v.{{.Field}} = FileString{Value: key}
 	} 
 	
 	return json.Marshal(v)

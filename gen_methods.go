@@ -2925,11 +2925,11 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if animation != nil {
-		key, err := animation.Attach("animation", data)
+		err := animation.Attach("animation", data)
 		if err != nil {
 			return nil, err
 		}
-		v["animation"] = key
+		v["animation"] = animation.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -2946,11 +2946,11 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return nil, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -3042,11 +3042,11 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if audio != nil {
-		key, err := audio.Attach("audio", data)
+		err := audio.Attach("audio", data)
 		if err != nil {
 			return nil, err
 		}
-		v["audio"] = key
+		v["audio"] = audio.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -3068,11 +3068,11 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return nil, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -3335,11 +3335,11 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if document != nil {
-		key, err := document.Attach("document", data)
+		err := document.Attach("document", data)
 		if err != nil {
 			return nil, err
 		}
-		v["document"] = key
+		v["document"] = document.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -3347,11 +3347,11 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return nil, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -3895,11 +3895,11 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
-		key, err := photo.Attach("photo", data)
+		err := photo.Attach("photo", data)
 		if err != nil {
 			return nil, err
 		}
-		v["photo"] = key
+		v["photo"] = photo.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -4114,11 +4114,11 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if sticker != nil {
-		key, err := sticker.Attach("sticker", data)
+		err := sticker.Attach("sticker", data)
 		if err != nil {
 			return nil, err
 		}
-		v["sticker"] = key
+		v["sticker"] = sticker.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -4296,11 +4296,11 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if video != nil {
-		key, err := video.Attach("video", data)
+		err := video.Attach("video", data)
 		if err != nil {
 			return nil, err
 		}
-		v["video"] = key
+		v["video"] = video.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -4317,11 +4317,11 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 			v["height"] = strconv.FormatInt(opts.Height, 10)
 		}
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return nil, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -4405,11 +4405,11 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if videoNote != nil {
-		key, err := videoNote.Attach("video_note", data)
+		err := videoNote.Attach("video_note", data)
 		if err != nil {
 			return nil, err
 		}
-		v["video_note"] = key
+		v["video_note"] = videoNote.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -4423,11 +4423,11 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 			v["length"] = strconv.FormatInt(opts.Length, 10)
 		}
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return nil, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -4501,11 +4501,11 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if voice != nil {
-		key, err := voice.Attach("voice", data)
+		err := voice.Attach("voice", data)
 		if err != nil {
 			return nil, err
 		}
-		v["voice"] = key
+		v["voice"] = voice.getValue()
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -4722,11 +4722,11 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if photo != nil {
-		key, err := photo.Attach("photo", data)
+		err := photo.Attach("photo", data)
 		if err != nil {
 			return false, err
 		}
-		v["photo"] = key
+		v["photo"] = photo.getValue()
 	}
 
 	var reqOpts *RequestOpts
@@ -5346,11 +5346,11 @@ func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, format string,
 	v["format"] = format
 	if opts != nil {
 		if opts.Thumbnail != nil {
-			key, err := opts.Thumbnail.Attach("thumbnail", data)
+			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
 				return false, err
 			}
-			v["thumbnail"] = key
+			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
 	}
 
@@ -5429,11 +5429,11 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 	v["url"] = url
 	if opts != nil {
 		if opts.Certificate != nil {
-			key, err := opts.Certificate.Attach("certificate", data)
+			err := opts.Certificate.Attach("certificate", data)
 			if err != nil {
 				return false, err
 			}
-			v["certificate"] = key
+			v["certificate"] = opts.Certificate.getValue()
 		}
 		v["ip_address"] = opts.IpAddress
 		if opts.MaxConnections != 0 {
@@ -5800,11 +5800,11 @@ func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat
 	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	if sticker != nil {
-		key, err := sticker.Attach("sticker", data)
+		err := sticker.Attach("sticker", data)
 		if err != nil {
 			return nil, err
 		}
-		v["sticker"] = key
+		v["sticker"] = sticker.getValue()
 	}
 	v["sticker_format"] = stickerFormat
 
