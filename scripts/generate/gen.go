@@ -316,7 +316,7 @@ func isTgStructType(d APIDescription, goType string) bool {
 	if !ok {
 		return false
 	}
-	return len(t.Subtypes) == 0
+	return len(t.Fields) != 0 && len(t.Subtypes) == 0
 }
 
 func (f Field) getPreferredType(d APIDescription) (string, error) {
@@ -394,6 +394,11 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 
 	if len(f.Types) == 2 {
 		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
+			if f.Name == "thumbnail" {
+				// thumbnails don't support URLs or file_ids; only directly uploaded data: https://t.me/tdlibchat/146804
+				return tgTypeInputFile, nil
+			}
+
 			return typeInputFileOrString, nil
 		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
 			return toGoType(f.Types[0]), nil

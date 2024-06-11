@@ -70,7 +70,7 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	m, err := b.SendDocument(ctx.EffectiveChat.Id,
-		gotgbot.InputFileReader("source.go", f),
+		gotgbot.InputFileByReader("source.go", f),
 		&gotgbot.SendDocumentOpts{
 			Caption: "Here is my source code, by file handle.",
 			ReplyParameters: &gotgbot.ReplyParameters{
@@ -83,7 +83,7 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	// Or sending a file by file ID
 	_, err = b.SendDocument(ctx.EffectiveChat.Id,
-		gotgbot.InputFileID(m.Document.FileId),
+		gotgbot.InputFileByID(m.Document.FileId),
 		&gotgbot.SendDocumentOpts{
 			Caption: "Here is my source code, sent by file id.",
 			ReplyParameters: &gotgbot.ReplyParameters{

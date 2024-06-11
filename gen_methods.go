@@ -2889,7 +2889,7 @@ type SendAnimationOpts struct {
 	// Animation height
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the animation caption. See formatting options for more details.
@@ -3015,7 +3015,7 @@ type SendAudioOpts struct {
 	// Track name
 	Title string
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -3301,7 +3301,7 @@ type SendDocumentOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the document caption. See formatting options for more details.
@@ -4258,7 +4258,7 @@ type SendVideoOpts struct {
 	// Video height
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
@@ -4379,7 +4379,7 @@ type SendVideoNoteOpts struct {
 	// Video width and height, i.e. diameter of the video message
 	Length int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -5326,7 +5326,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *Se
 // SetStickerSetThumbnailOpts is the set of optional fields for Bot.SetStickerSetThumbnail.
 type SetStickerSetThumbnailOpts struct {
 	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements), or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
-	Thumbnail InputFileOrString
+	Thumbnail InputFile
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }

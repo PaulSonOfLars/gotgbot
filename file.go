@@ -70,17 +70,18 @@ func (f FileReader) Attach(key string, data map[string]FileReader) (string, erro
 
 func (f FileReader) justFiles() {}
 
-// InputFileURL is used to send a file on the internet via a publicly accessible HTTP URL.
-func InputFileURL(url string) InputFileOrString {
+// InputFileByURL is used to send a file on the internet via a publicly accessible HTTP URL.
+func InputFileByURL(url string) InputFileOrString {
 	return FileString{Value: url}
 }
 
-// InputFileID is used to send a file that is already present on telegram's servers, using its telegram file_id.
-func InputFileID(fileID string) InputFileOrString {
+// InputFileByID is used to send a file that is already present on telegram's servers, using its telegram file_id.
+func InputFileByID(fileID string) InputFileOrString {
 	return FileString{Value: fileID}
 }
 
-// InputFileReader is used to send a file by a reader interface; such as a filehandle from os.Open().
+// InputFileByReader is used to send a file by a reader interface; such as a filehandle from os.Open(), or from a byte
+// buffer.
 //
 // For example:
 //
@@ -89,7 +90,11 @@ func InputFileID(fileID string) InputFileOrString {
 //		return fmt.Errorf("failed to open file: %w", err)
 //	}
 //
-//	m, err := b.SendDocument(<chat_id>, gotgbot.InputFileReader("source.go", f), <opts>)
-func InputFileReader(name string, r io.Reader) InputFile {
+//	m, err := b.SendDocument(<chat_id>, gotgbot.InputFileByReader("source.go", f), nil)
+//
+// Or
+//
+//	m, err := b.SendDocument(<chat_id>, gotgbot.InputFileByReader("file.txt", strings.NewReader("Some file contents")), nil)
+func InputFileByReader(name string, r io.Reader) InputFile {
 	return FileReader{Name: name, Data: r}
 }
