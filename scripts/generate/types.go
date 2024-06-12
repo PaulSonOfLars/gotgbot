@@ -93,8 +93,9 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	if ok {
 		// TODO: Investigate if thumbnails need special handling too.
 		err = inputParamsTmpl.Execute(&typeDef, inputParamsMethodData{
-			Type:  tgType.Name,
-			Field: snakeToTitle(fieldName),
+			Type:      tgType.Name,
+			Field:     snakeToTitle(fieldName),
+			Thumbnail: containsThumbnail(tgType),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate %s inputparam methods: %w", tgType.Name, err)
@@ -166,6 +167,15 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 		}
 	}
 	return false, "", nil
+}
+
+func containsThumbnail(tgType TypeDescription) bool {
+	for _, f := range tgType.Fields {
+		if f.Name == "thumbnail" {
+			return true
+		}
+	}
+	return false
 }
 
 func generateParentType(d APIDescription, tgType TypeDescription) (string, error) {
@@ -752,8 +762,9 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 `
 
 type inputParamsMethodData struct {
-	Type  string
-	Field string
+	Type      string
+	Field     string
+	Thumbnail bool
 }
 
 const inputParamsMethod = `
@@ -761,10 +772,18 @@ func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) ([]
 	if v.{{.Field}} != nil {
 		err := v.{{.Field}}.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
-	} 
-	
+	}
+	{{ if .Thumbnail }}
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
+		}
+	}
+	{{- end }}
+
 	return json.Marshal(v)
 }
 `

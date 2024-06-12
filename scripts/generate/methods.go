@@ -402,7 +402,7 @@ const inputFileBranch = `
 if {{.GoParam}} != nil {
 	err := {{.GoParam}}.Attach("{{.Name}}", data)
 	if err != nil {
-		return {{.DefaultReturn}}, err
+		return {{.DefaultReturn}}, fmt.Errorf("failed to attach '{{.Name}}' input file: %w", err)
 	}
 	v["{{.Name}}"] = {{.GoParam}}.getValue()
 }`

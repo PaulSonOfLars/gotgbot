@@ -4818,7 +4818,14 @@ func (v InputMediaAnimation) InputParams(mediaName string, data map[string]FileR
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -4892,7 +4899,14 @@ func (v InputMediaAudio) InputParams(mediaName string, data map[string]FileReade
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -4960,7 +4974,14 @@ func (v InputMediaDocument) InputParams(mediaName string, data map[string]FileRe
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -5028,7 +5049,7 @@ func (v InputMediaPhoto) InputParams(mediaName string, data map[string]FileReade
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -5111,7 +5132,14 @@ func (v InputMediaVideo) InputParams(mediaName string, data map[string]FileReade
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -5172,7 +5200,7 @@ func (v InputSticker) InputParams(mediaName string, data map[string]FileReader) 
 	if v.Sticker != nil {
 		err := v.Sticker.Attach(mediaName, data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 

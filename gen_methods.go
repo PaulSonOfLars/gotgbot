@@ -2927,7 +2927,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 	if animation != nil {
 		err := animation.Attach("animation", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'animation' input file: %w", err)
 		}
 		v["animation"] = animation.getValue()
 	}
@@ -2948,7 +2948,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -3044,7 +3044,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 	if audio != nil {
 		err := audio.Attach("audio", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'audio' input file: %w", err)
 		}
 		v["audio"] = audio.getValue()
 	}
@@ -3070,7 +3070,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -3337,7 +3337,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 	if document != nil {
 		err := document.Attach("document", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'document' input file: %w", err)
 		}
 		v["document"] = document.getValue()
 	}
@@ -3349,7 +3349,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -3897,7 +3897,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 	if photo != nil {
 		err := photo.Attach("photo", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'photo' input file: %w", err)
 		}
 		v["photo"] = photo.getValue()
 	}
@@ -4116,7 +4116,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 	if sticker != nil {
 		err := sticker.Attach("sticker", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
 		}
 		v["sticker"] = sticker.getValue()
 	}
@@ -4298,7 +4298,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 	if video != nil {
 		err := video.Attach("video", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'video' input file: %w", err)
 		}
 		v["video"] = video.getValue()
 	}
@@ -4319,7 +4319,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -4407,7 +4407,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 	if videoNote != nil {
 		err := videoNote.Attach("video_note", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'video_note' input file: %w", err)
 		}
 		v["video_note"] = videoNote.getValue()
 	}
@@ -4425,7 +4425,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -4503,7 +4503,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 	if voice != nil {
 		err := voice.Attach("voice", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'voice' input file: %w", err)
 		}
 		v["voice"] = voice.getValue()
 	}
@@ -4724,7 +4724,7 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 	if photo != nil {
 		err := photo.Attach("photo", data)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("failed to attach 'photo' input file: %w", err)
 		}
 		v["photo"] = photo.getValue()
 	}
@@ -5348,7 +5348,7 @@ func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, format string,
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
-				return false, err
+				return false, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
 		}
@@ -5431,7 +5431,7 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 		if opts.Certificate != nil {
 			err := opts.Certificate.Attach("certificate", data)
 			if err != nil {
-				return false, err
+				return false, fmt.Errorf("failed to attach 'certificate' input file: %w", err)
 			}
 			v["certificate"] = opts.Certificate.getValue()
 		}
@@ -5802,7 +5802,7 @@ func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat
 	if sticker != nil {
 		err := sticker.Attach("sticker", data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
 		}
 		v["sticker"] = sticker.getValue()
 	}
