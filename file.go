@@ -15,14 +15,6 @@ type InputFile interface {
 	justFiles()
 }
 
-// InputString (https://core.telegram.org/bots/api#inputfile)
-//
-// This object represents a publicly accessible URL to be reused, or a file_id already available on telegram servers.
-type InputString interface {
-	InputFileOrString
-	justStrings()
-}
-
 // InputFileOrString (https://core.telegram.org/bots/api#inputfile)
 //
 // This object represents the contents of a file to be uploaded, or a publicly accessible URL to be reused.
@@ -33,30 +25,9 @@ type InputFileOrString interface {
 }
 
 var (
-	_ InputFileOrString = &FileString{}
-	_ InputString       = &FileString{}
-
 	_ InputFileOrString = &FileReader{}
 	_ InputFile         = &FileReader{}
 )
-
-type FileString struct {
-	Value string
-}
-
-func (f *FileString) justStrings() {}
-
-func (f *FileString) MarshalJSON() ([]byte, error) {
-	return json.Marshal(f.getValue())
-}
-
-func (f *FileString) Attach(_ string, _ map[string]FileReader) error {
-	return nil
-}
-
-func (f *FileString) getValue() string {
-	return f.Value
-}
 
 type FileReader struct {
 	Name string
@@ -74,28 +45,33 @@ var ErrAttachmentKeyAlreadyExists = errors.New("key already exists")
 func (f *FileReader) justFiles() {}
 
 func (f *FileReader) Attach(key string, data map[string]FileReader) error {
+	if f.Data == nil {
+		// if no data, this must be a string; nothing to "attach".
+		return nil
+	}
+
 	if _, ok := data[key]; ok {
 		return ErrAttachmentKeyAlreadyExists
 	}
-	f.value = key
+	f.value = "attach://" + key
 	data[key] = *f
 	return nil
 }
 
 // getValue returns the file attach reference for the relevant multipart form.
-// Calling getValue is only valid after having called Attach on this struct.
+// Make sure to only call getValue after having called Attach(), to ensure any files have been included.
 func (f *FileReader) getValue() string {
-	return "attach://" + f.value
+	return f.value
 }
 
 // InputFileByURL is used to send a file on the internet via a publicly accessible HTTP URL.
 func InputFileByURL(url string) InputFileOrString {
-	return &FileString{Value: url}
+	return &FileReader{value: url}
 }
 
 // InputFileByID is used to send a file that is already present on telegram's servers, using its telegram file_id.
 func InputFileByID(fileID string) InputFileOrString {
-	return &FileString{Value: fileID}
+	return &FileReader{value: fileID}
 }
 
 // InputFileByReader is used to send a file by a reader interface; such as a filehandle from os.Open(), or from a byte
