@@ -2921,7 +2921,7 @@ type InlineKeyboardButton struct {
 	Text string `json:"text"`
 	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
-	// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes. Not supported for messages sent on behalf of a Telegram Business account.
+	// Optional. Data to be sent in a callback query to the bot when the button is pressed, 1-64 bytes
 	CallbackData string `json:"callback_data,omitempty"`
 	// Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Available only in private chats between a user and the bot. Not supported for messages sent on behalf of a Telegram Business account.
 	WebApp *WebAppInfo `json:"web_app,omitempty"`
@@ -7509,6 +7509,225 @@ type ResponseParameters struct {
 	RetryAfter int64 `json:"retry_after,omitempty"`
 }
 
+// RevenueWithdrawalState (https://core.telegram.org/bots/api#revenuewithdrawalstate)
+//
+// This object describes the state of a revenue withdrawal operation. Currently, it can be one of
+//   - RevenueWithdrawalStatePending
+//   - RevenueWithdrawalStateSucceeded
+//   - RevenueWithdrawalStateFailed
+type RevenueWithdrawalState interface {
+	GetType() string
+	// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with complex telegram types in a non-generic world.
+	MergeRevenueWithdrawalState() MergedRevenueWithdrawalState
+	// revenueWithdrawalState exists to avoid external types implementing this interface.
+	revenueWithdrawalState()
+}
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ RevenueWithdrawalState = RevenueWithdrawalStatePending{}
+	_ RevenueWithdrawalState = RevenueWithdrawalStateSucceeded{}
+	_ RevenueWithdrawalState = RevenueWithdrawalStateFailed{}
+)
+
+// MergedRevenueWithdrawalState is a helper type to simplify interactions with the various RevenueWithdrawalState subtypes.
+type MergedRevenueWithdrawalState struct {
+	// Type of the state
+	Type string `json:"type"`
+	// Optional. Date the withdrawal was completed in Unix time (Only for succeeded)
+	Date int64 `json:"date,omitempty"`
+	// Optional. An HTTPS URL that can be used to see transaction details (Only for succeeded)
+	Url string `json:"url,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedRevenueWithdrawalState) GetType() string {
+	return v.Type
+}
+
+// MergedRevenueWithdrawalState.revenueWithdrawalState is a dummy method to avoid interface implementation.
+func (v MergedRevenueWithdrawalState) revenueWithdrawalState() {}
+
+// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+func (v MergedRevenueWithdrawalState) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
+	return v
+}
+
+// unmarshalRevenueWithdrawalStateArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalRevenueWithdrawalState.
+func unmarshalRevenueWithdrawalStateArray(d json.RawMessage) ([]RevenueWithdrawalState, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal initial RevenueWithdrawalState JSON into an array: %w", err)
+	}
+
+	var vs []RevenueWithdrawalState
+	for idx, d := range ds {
+		v, err := unmarshalRevenueWithdrawalState(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RevenueWithdrawalState on array item %d: %w", idx, err)
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalRevenueWithdrawalState is a JSON unmarshal helper to marshal the right structs into a RevenueWithdrawalState interface
+// based on the Type field.
+func unmarshalRevenueWithdrawalState(d json.RawMessage) (RevenueWithdrawalState, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal RevenueWithdrawalState for constant field 'Type': %w", err)
+	}
+
+	switch t.Type {
+	case "pending":
+		s := RevenueWithdrawalStatePending{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RevenueWithdrawalState for value 'pending': %w", err)
+		}
+		return s, nil
+
+	case "succeeded":
+		s := RevenueWithdrawalStateSucceeded{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RevenueWithdrawalState for value 'succeeded': %w", err)
+		}
+		return s, nil
+
+	case "failed":
+		s := RevenueWithdrawalStateFailed{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RevenueWithdrawalState for value 'failed': %w", err)
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface for RevenueWithdrawalState with Type %v", t.Type)
+}
+
+// RevenueWithdrawalStateFailed (https://core.telegram.org/bots/api#revenuewithdrawalstatefailed)
+//
+// The withdrawal failed and the transaction was refunded.
+type RevenueWithdrawalStateFailed struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RevenueWithdrawalStateFailed) GetType() string {
+	return "failed"
+}
+
+// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+func (v RevenueWithdrawalStateFailed) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
+	return MergedRevenueWithdrawalState{
+		Type: "failed",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RevenueWithdrawalStateFailed) MarshalJSON() ([]byte, error) {
+	type alias RevenueWithdrawalStateFailed
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "failed",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RevenueWithdrawalStateFailed.revenueWithdrawalState is a dummy method to avoid interface implementation.
+func (v RevenueWithdrawalStateFailed) revenueWithdrawalState() {}
+
+// RevenueWithdrawalStatePending (https://core.telegram.org/bots/api#revenuewithdrawalstatepending)
+//
+// The withdrawal is in progress.
+type RevenueWithdrawalStatePending struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RevenueWithdrawalStatePending) GetType() string {
+	return "pending"
+}
+
+// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+func (v RevenueWithdrawalStatePending) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
+	return MergedRevenueWithdrawalState{
+		Type: "pending",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RevenueWithdrawalStatePending) MarshalJSON() ([]byte, error) {
+	type alias RevenueWithdrawalStatePending
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "pending",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RevenueWithdrawalStatePending.revenueWithdrawalState is a dummy method to avoid interface implementation.
+func (v RevenueWithdrawalStatePending) revenueWithdrawalState() {}
+
+// RevenueWithdrawalStateSucceeded (https://core.telegram.org/bots/api#revenuewithdrawalstatesucceeded)
+//
+// The withdrawal succeeded.
+type RevenueWithdrawalStateSucceeded struct {
+	// Date the withdrawal was completed in Unix time
+	Date int64 `json:"date"`
+	// An HTTPS URL that can be used to see transaction details
+	Url string `json:"url"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RevenueWithdrawalStateSucceeded) GetType() string {
+	return "succeeded"
+}
+
+// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+func (v RevenueWithdrawalStateSucceeded) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
+	return MergedRevenueWithdrawalState{
+		Type: "succeeded",
+		Date: v.Date,
+		Url:  v.Url,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RevenueWithdrawalStateSucceeded) MarshalJSON() ([]byte, error) {
+	type alias RevenueWithdrawalStateSucceeded
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "succeeded",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RevenueWithdrawalStateSucceeded.revenueWithdrawalState is a dummy method to avoid interface implementation.
+func (v RevenueWithdrawalStateSucceeded) revenueWithdrawalState() {}
+
 // SentWebAppMessage (https://core.telegram.org/bots/api#sentwebappmessage)
 //
 // Describes an inline message sent by a Web App on behalf of a user.
@@ -7575,6 +7794,61 @@ type ShippingQuery struct {
 	InvoicePayload string `json:"invoice_payload"`
 	// User specified shipping address
 	ShippingAddress ShippingAddress `json:"shipping_address"`
+}
+
+// StarTransaction (https://core.telegram.org/bots/api#startransaction)
+//
+// Describes a Telegram Star transaction.
+type StarTransaction struct {
+	// Unique identifier of the transaction. Coincides with the identifer of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
+	Id string `json:"id"`
+	// Number of Telegram Stars transferred by the transaction
+	Amount int64 `json:"amount"`
+	// Date the transaction was created in Unix time
+	Date int64 `json:"date"`
+	// Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions
+	Source TransactionPartner `json:"source,omitempty"`
+	// Optional. Receiver of an outgoing transaction (e.g., a user for a purchase refund, Fragment for a withdrawal). Only for outgoing transactions
+	Receiver TransactionPartner `json:"receiver,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *StarTransaction) UnmarshalJSON(b []byte) error {
+	// All fields in StarTransaction, with interface fields as json.RawMessage
+	type tmp struct {
+		Id       string          `json:"id"`
+		Amount   int64           `json:"amount"`
+		Date     int64           `json:"date"`
+		Source   json.RawMessage `json:"source"`
+		Receiver json.RawMessage `json:"receiver"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal StarTransaction JSON into tmp struct: %w", err)
+	}
+
+	v.Id = t.Id
+	v.Amount = t.Amount
+	v.Date = t.Date
+	v.Source, err = unmarshalTransactionPartner(t.Source)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field Source: %w", err)
+	}
+	v.Receiver, err = unmarshalTransactionPartner(t.Receiver)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field Receiver: %w", err)
+	}
+
+	return nil
+}
+
+// StarTransactions (https://core.telegram.org/bots/api#startransactions)
+//
+// Contains a list of Telegram Star transactions.
+type StarTransactions struct {
+	// The list of transactions
+	Transactions []StarTransaction `json:"transactions,omitempty"`
 }
 
 // Sticker (https://core.telegram.org/bots/api#sticker)
@@ -7688,6 +7962,246 @@ type TextQuote struct {
 	// Optional. True, if the quote was chosen manually by the message sender. Otherwise, the quote was added automatically by the server.
 	IsManual bool `json:"is_manual,omitempty"`
 }
+
+// TransactionPartner (https://core.telegram.org/bots/api#transactionpartner)
+//
+// This object describes the source of a transaction, or its recipient for outgoing transactions. Currently, it can be one of
+//   - TransactionPartnerFragment
+//   - TransactionPartnerUser
+//   - TransactionPartnerOther
+type TransactionPartner interface {
+	GetType() string
+	// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with complex telegram types in a non-generic world.
+	MergeTransactionPartner() MergedTransactionPartner
+	// transactionPartner exists to avoid external types implementing this interface.
+	transactionPartner()
+}
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ TransactionPartner = TransactionPartnerFragment{}
+	_ TransactionPartner = TransactionPartnerUser{}
+	_ TransactionPartner = TransactionPartnerOther{}
+)
+
+// MergedTransactionPartner is a helper type to simplify interactions with the various TransactionPartner subtypes.
+type MergedTransactionPartner struct {
+	// Type of the transaction partner
+	Type string `json:"type"`
+	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
+	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
+	// Optional. Information about the user (Only for user)
+	User *User `json:"user,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedTransactionPartner) GetType() string {
+	return v.Type
+}
+
+// MergedTransactionPartner.transactionPartner is a dummy method to avoid interface implementation.
+func (v MergedTransactionPartner) transactionPartner() {}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v MergedTransactionPartner) MergeTransactionPartner() MergedTransactionPartner {
+	return v
+}
+
+// unmarshalTransactionPartnerArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalTransactionPartner.
+func unmarshalTransactionPartnerArray(d json.RawMessage) ([]TransactionPartner, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal initial TransactionPartner JSON into an array: %w", err)
+	}
+
+	var vs []TransactionPartner
+	for idx, d := range ds {
+		v, err := unmarshalTransactionPartner(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner on array item %d: %w", idx, err)
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalTransactionPartner is a JSON unmarshal helper to marshal the right structs into a TransactionPartner interface
+// based on the Type field.
+func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal TransactionPartner for constant field 'Type': %w", err)
+	}
+
+	switch t.Type {
+	case "fragment":
+		s := TransactionPartnerFragment{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'fragment': %w", err)
+		}
+		return s, nil
+
+	case "user":
+		s := TransactionPartnerUser{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'user': %w", err)
+		}
+		return s, nil
+
+	case "other":
+		s := TransactionPartnerOther{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'other': %w", err)
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface for TransactionPartner with Type %v", t.Type)
+}
+
+// TransactionPartnerFragment (https://core.telegram.org/bots/api#transactionpartnerfragment)
+//
+// Describes a withdrawal transaction with Fragment.
+type TransactionPartnerFragment struct {
+	// Optional. State of the transaction if the transaction is outgoing
+	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *TransactionPartnerFragment) UnmarshalJSON(b []byte) error {
+	// All fields in TransactionPartnerFragment, with interface fields as json.RawMessage
+	type tmp struct {
+		WithdrawalState json.RawMessage `json:"withdrawal_state"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal TransactionPartnerFragment JSON into tmp struct: %w", err)
+	}
+
+	v.WithdrawalState, err = unmarshalRevenueWithdrawalState(t.WithdrawalState)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field WithdrawalState: %w", err)
+	}
+
+	return nil
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerFragment) GetType() string {
+	return "fragment"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerFragment) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type:            "fragment",
+		WithdrawalState: v.WithdrawalState,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerFragment) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerFragment
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "fragment",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerFragment.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerFragment) transactionPartner() {}
+
+// TransactionPartnerOther (https://core.telegram.org/bots/api#transactionpartnerother)
+//
+// Describes a transaction with an unknown source or recipient.
+type TransactionPartnerOther struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerOther) GetType() string {
+	return "other"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerOther) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type: "other",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerOther) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerOther
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "other",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerOther.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerOther) transactionPartner() {}
+
+// TransactionPartnerUser (https://core.telegram.org/bots/api#transactionpartneruser)
+//
+// Describes a transaction with a user.
+type TransactionPartnerUser struct {
+	// Information about the user
+	User User `json:"user"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerUser) GetType() string {
+	return "user"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type: "user",
+		User: &v.User,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerUser) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerUser
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "user",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerUser.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerUser) transactionPartner() {}
 
 // Update (https://core.telegram.org/bots/api#update)
 //

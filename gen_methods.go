@@ -1299,6 +1299,8 @@ func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGener
 
 // EditMessageCaptionOpts is the set of optional fields for Bot.EditMessageCaption.
 type EditMessageCaptionOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1321,11 +1323,12 @@ type EditMessageCaptionOpts struct {
 
 // EditMessageCaption (https://core.telegram.org/bots/api#editmessagecaption)
 //
-// Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - opts (type EditMessageCaptionOpts): All optional parameters.
 func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1374,6 +1377,8 @@ func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool
 
 // EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation.
 type EditMessageLiveLocationOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1405,6 +1410,7 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1455,6 +1461,8 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 
 // EditMessageMediaOpts is the set of optional fields for Bot.EditMessageMedia.
 type EditMessageMediaOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1469,7 +1477,7 @@ type EditMessageMediaOpts struct {
 
 // EditMessageMedia (https://core.telegram.org/bots/api#editmessagemedia)
 //
-// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - media (type InputMedia): A JSON-serialized object for a new media content of the message
 //   - opts (type EditMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
@@ -1481,6 +1489,7 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 	}
 	v["media"] = string(inputBs)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1519,6 +1528,8 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 
 // EditMessageReplyMarkupOpts is the set of optional fields for Bot.EditMessageReplyMarkup.
 type EditMessageReplyMarkupOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1533,11 +1544,12 @@ type EditMessageReplyMarkupOpts struct {
 
 // EditMessageReplyMarkup (https://core.telegram.org/bots/api#editmessagereplymarkup)
 //
-// Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - opts (type EditMessageReplyMarkupOpts): All optional parameters.
 func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1576,6 +1588,8 @@ func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Messa
 
 // EditMessageTextOpts is the set of optional fields for Bot.EditMessageText.
 type EditMessageTextOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1596,13 +1610,14 @@ type EditMessageTextOpts struct {
 
 // EditMessageText (https://core.telegram.org/bots/api#editmessagetext)
 //
-// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - text (type string): New text of the message, 1-4096 characters after entities parsing
 //   - opts (type EditMessageTextOpts): All optional parameters.
 func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	v["text"] = text
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -2287,6 +2302,45 @@ func (bot *Bot) GetMyShortDescription(opts *GetMyShortDescriptionOpts) (*BotShor
 
 	var b BotShortDescription
 	return &b, json.Unmarshal(r, &b)
+}
+
+// GetStarTransactionsOpts is the set of optional fields for Bot.GetStarTransactions.
+type GetStarTransactionsOpts struct {
+	// Number of transactions to skip in the response
+	Offset int64
+	// The maximum number of transactions to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetStarTransactions (https://core.telegram.org/bots/api#getstartransactions)
+//
+// Returns the bot's Telegram Star transactions in chronological order. On success, returns a StarTransactions object.
+//   - opts (type GetStarTransactionsOpts): All optional parameters.
+func (bot *Bot) GetStarTransactions(opts *GetStarTransactionsOpts) (*StarTransactions, error) {
+	v := map[string]string{}
+	if opts != nil {
+		if opts.Offset != 0 {
+			v["offset"] = strconv.FormatInt(opts.Offset, 10)
+		}
+		if opts.Limit != 0 {
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getStarTransactions", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s StarTransactions
+	return &s, json.Unmarshal(r, &s)
 }
 
 // GetStickerSetOpts is the set of optional fields for Bot.GetStickerSet.
@@ -5686,6 +5740,8 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 
 // StopMessageLiveLocationOpts is the set of optional fields for Bot.StopMessageLiveLocation.
 type StopMessageLiveLocationOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message with live location to stop
@@ -5705,6 +5761,7 @@ type StopMessageLiveLocationOpts struct {
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -5743,6 +5800,8 @@ func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Mes
 
 // StopPollOpts is the set of optional fields for Bot.StopPoll.
 type StopPollOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// A JSON-serialized object for a new message inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -5760,6 +5819,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Po
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
