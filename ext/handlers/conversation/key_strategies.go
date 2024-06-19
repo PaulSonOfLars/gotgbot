@@ -13,7 +13,7 @@ var ErrEmptyKey = errors.New("empty conversation key")
 type KeyStrategy func(ctx *ext.Context) (string, error)
 
 var (
-	// Ensure typechecks
+	// Ensure key strategy methods match the function signatures.
 	_ KeyStrategy = KeyStrategyChat
 	_ KeyStrategy = KeyStrategySender
 	_ KeyStrategy = KeyStrategySenderAndChat
@@ -43,7 +43,7 @@ func KeyStrategyChat(ctx *ext.Context) (string, error) {
 	return strconv.FormatInt(ctx.EffectiveChat.Id, 10), nil
 }
 
-// StateKey provides a sane default for handling incoming updates
+// StateKey provides a sane default for handling incoming updates.
 func StateKey(ctx *ext.Context, strategy KeyStrategy) (string, error) {
 	if strategy == nil {
 		return KeyStrategySenderAndChat(ctx)
