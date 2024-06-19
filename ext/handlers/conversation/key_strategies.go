@@ -10,6 +10,9 @@ import (
 
 var ErrEmptyKey = errors.New("empty conversation key")
 
+// KeyStrategy is the function used to obtain the current key in the ongoing conversation.
+//
+// Use one of the existing keys, or define your own if you need external data (eg a DB or other state).
 type KeyStrategy func(ctx *ext.Context) (string, error)
 
 var (
