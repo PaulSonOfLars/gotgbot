@@ -7,7 +7,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
-var KeyNotFound = errors.New("conversation key not found")
+var ErrKeyNotFound = errors.New("conversation key not found")
 
 // InMemoryStorage is a thread-safe in-memory implementation of the Storage interface.
 type InMemoryStorage struct {
@@ -28,24 +28,30 @@ func NewInMemoryStorage(strategy KeyStrategy) *InMemoryStorage {
 }
 
 func (c *InMemoryStorage) Get(ctx *ext.Context) (*State, error) {
-	key := StateKey(ctx, c.keyStrategy)
+	key, err := StateKey(ctx, c.keyStrategy)
+	if err != nil {
+		return nil, err
+	}
 
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
 	if c.conversations == nil {
-		return nil, KeyNotFound
+		return nil, ErrKeyNotFound
 	}
 
 	s, ok := c.conversations[key]
 	if !ok {
-		return nil, KeyNotFound
+		return nil, ErrKeyNotFound
 	}
 	return &s, nil
 }
 
 func (c *InMemoryStorage) Set(ctx *ext.Context, state State) error {
-	key := StateKey(ctx, c.keyStrategy)
+	key, err := StateKey(ctx, c.keyStrategy)
+	if err != nil {
+		return err
+	}
 
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -59,7 +65,10 @@ func (c *InMemoryStorage) Set(ctx *ext.Context, state State) error {
 }
 
 func (c *InMemoryStorage) Delete(ctx *ext.Context) error {
-	key := StateKey(ctx, c.keyStrategy)
+	key, err := StateKey(ctx, c.keyStrategy)
+	if err != nil {
+		return err
+	}
 
 	c.lock.Lock()
 	defer c.lock.Unlock()

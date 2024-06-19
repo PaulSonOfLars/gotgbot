@@ -336,7 +336,7 @@ func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, m
 func checkExpectedState(t *testing.T, conv *handlers.Conversation, message *ext.Context, nextState string) {
 	currentState, err := conv.StateStorage.Get(message)
 	if nextState == "" {
-		if !errors.Is(err, conversation.KeyNotFound) {
+		if !errors.Is(err, conversation.ErrKeyNotFound) {
 			t.Fatalf("expected not to have a conversation, but got currentState: %s", currentState)
 		}
 	} else if err != nil {

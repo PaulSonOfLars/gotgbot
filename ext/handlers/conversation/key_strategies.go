@@ -1,13 +1,52 @@
 package conversation
 
-type KeyStrategy int64
+import (
+	"errors"
+	"fmt"
+	"strconv"
 
-// Note: If you add a new keystrategy here, make sure to add it to the getStateKey method!
-const (
-	// KeyStrategySenderAndChat ensures that each sender get a unique conversation in each chats.
-	KeyStrategySenderAndChat KeyStrategy = iota
-	// KeyStrategySender gives a unique conversation to each sender, but that conversation is available in all chats.
-	KeyStrategySender
-	// KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together.
-	KeyStrategyChat
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
+
+var ErrEmptyKey = errors.New("empty conversation key")
+
+type KeyStrategy func(ctx *ext.Context) (string, error)
+
+var (
+	// Ensure typechecks
+	_ KeyStrategy = KeyStrategyChat
+	_ KeyStrategy = KeyStrategySender
+	_ KeyStrategy = KeyStrategySenderAndChat
+)
+
+// KeyStrategySenderAndChat ensures that each sender get a unique conversation, even in different chats.
+func KeyStrategySenderAndChat(ctx *ext.Context) (string, error) {
+	if ctx.EffectiveSender == nil || ctx.EffectiveChat == nil {
+		return "", fmt.Errorf("missing sender or chat fields: %w", ErrEmptyKey)
+	}
+	return fmt.Sprintf("%d/%d", ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id), nil
+}
+
+// KeyStrategySender gives a unique conversation to each sender, and that single conversation is available in all chats.
+func KeyStrategySender(ctx *ext.Context) (string, error) {
+	if ctx.EffectiveSender == nil {
+		return "", fmt.Errorf("missing sender field: %w", ErrEmptyKey)
+	}
+	return strconv.FormatInt(ctx.EffectiveSender.Id(), 10), nil
+}
+
+// KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together.
+func KeyStrategyChat(ctx *ext.Context) (string, error) {
+	if ctx.EffectiveChat == nil {
+		return "", fmt.Errorf("missing chat field: %w", ErrEmptyKey)
+	}
+	return strconv.FormatInt(ctx.EffectiveChat.Id, 10), nil
+}
+
+// StateKey provides a sane default for handling incoming updates
+func StateKey(ctx *ext.Context, strategy KeyStrategy) (string, error) {
+	if strategy == nil {
+		return KeyStrategySenderAndChat(ctx)
+	}
+	return strategy(ctx)
+}
