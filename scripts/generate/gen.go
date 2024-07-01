@@ -218,13 +218,18 @@ const (
 	tgTypeBoolean = "Boolean"
 	tgTypeFloat   = "Float"
 	tgTypeInteger = "Integer"
-	// These are all custom telegram types.
-	tgTypeMessage    = "Message"
-	tgTypeFile       = "File"
-	tgTypeInputFile  = "InputFile"
-	tgTypeInputMedia = "InputMedia"
-	// This is actually a custom type.
-	tgTypeReplyMarkup = "ReplyMarkup"
+
+	// Telegram types which might need special handling.
+	tgTypeMessage        = "Message"
+	tgTypeFile           = "File"
+	tgTypeInputFile      = "InputFile"
+	tgTypeInputMedia     = "InputMedia"
+	tgTypeInputPaidMedia = "InputPaidMedia"
+
+	// Custom types for this lib.
+	typeReplyMarkup       = "ReplyMarkup"
+	typeInputFileOrString = "InputFileOrString"
+	typeInputString       = "InputString"
 )
 
 func generate(d APIDescription) error {
@@ -312,29 +317,34 @@ func isTgStructType(d APIDescription, goType string) bool {
 	if !ok {
 		return false
 	}
-	return len(t.Subtypes) == 0
+	return len(t.Fields) != 0 && len(t.Subtypes) == 0
 }
 
 func (f Field) getPreferredType(d APIDescription) (string, error) {
 	if f.Name == "media" {
 		if len(f.Types) == 1 && f.Types[0] == "String" {
-			return tgTypeInputFile, nil
+			return typeInputFileOrString, nil
 		}
 		var arrayType bool
+		mediaType := tgTypeInputMedia
 		// TODO: check against API description type
 		for _, t := range f.Types {
 			arrayType = arrayType || isTgArray(t)
 
-			if !strings.Contains(t, tgTypeInputMedia) {
-				return "", fmt.Errorf("mediatype %s is not of kind InputMedia for field %s", t, f.Name)
+			if strings.Contains(t, tgTypeInputMedia) {
+				mediaType = tgTypeInputMedia
+			} else if strings.Contains(t, tgTypeInputPaidMedia) {
+				mediaType = tgTypeInputPaidMedia
+			} else {
+				return "", fmt.Errorf("mediatype %s is not of kind InputMedia/InputPaidMedia for field %s", t, f.Name)
 			}
 		}
 
 		if arrayType {
-			return "[]" + tgTypeInputMedia, nil
+			return "[]" + mediaType, nil
 		}
 
-		return tgTypeInputMedia, nil
+		return mediaType, nil
 	}
 
 	if f.Name == "reply_markup" {
@@ -345,7 +355,7 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 			// ReplyKeyboardMarkup
 			// ReplyKeyboardRemove
 			// ForceReply
-			return tgTypeReplyMarkup, nil
+			return typeReplyMarkup, nil
 
 		} else if len(f.Types) == 1 {
 			return toGoType(f.Types[0]), nil
@@ -390,7 +400,12 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 
 	if len(f.Types) == 2 {
 		if f.Types[0] == tgTypeInputFile && f.Types[1] == tgTypeString {
-			return toGoType(f.Types[0]), nil
+			if f.Name == "thumbnail" {
+				// thumbnails don't support URLs or file_ids; only directly uploaded data: https://t.me/tdlibchat/146804
+				return tgTypeInputFile, nil
+			}
+
+			return typeInputFileOrString, nil
 		} else if f.Types[0] == tgTypeInteger && f.Types[1] == tgTypeString {
 			return toGoType(f.Types[0]), nil
 		}

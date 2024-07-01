@@ -67,7 +67,7 @@ type metricsBotClient struct {
 
 // Define wrapper around existing RequestWithContext method.
 // Note: this is the only method that needs redefining.
-func (b metricsBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.NamedReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b metricsBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.FileReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	totalRequests.WithLabelValues(method).Inc()
 	timer := prometheus.NewTimer(requestDuration.With(prometheus.Labels{
 		"api_method": method,

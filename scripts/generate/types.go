@@ -27,12 +27,11 @@ package gotgbot
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 )
 `)
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	replyMarkupInterface, err := generateGenericInterfaceType(d, tgTypeReplyMarkup, getReplyMarkupTypes(d))
+	replyMarkupInterface, err := generateGenericInterfaceType(d, typeReplyMarkup, getReplyMarkupTypes(d))
 	if err != nil {
 		return fmt.Errorf("failed to generate reply_markup interface: %w", err)
 	}
@@ -92,9 +91,11 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		return "", fmt.Errorf("failed to check if type requires special handling: %w", err)
 	}
 	if ok {
+		// TODO: Investigate if thumbnails need special handling too.
 		err = inputParamsTmpl.Execute(&typeDef, inputParamsMethodData{
-			Type:  tgType.Name,
-			Field: snakeToTitle(fieldName),
+			Type:      tgType.Name,
+			Field:     snakeToTitle(fieldName),
+			Thumbnail: containsThumbnail(tgType),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate %s inputparam methods: %w", tgType.Name, err)
@@ -140,7 +141,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 	}
 	checked[tgType.Name] = true
 
-	if tgType.Name == tgTypeInputMedia {
+	if tgType.Name == tgTypeInputMedia || tgType.Name == tgTypeInputPaidMedia {
 		return true, "media", nil
 	}
 
@@ -150,7 +151,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 			return false, "", err
 		}
 
-		if goType == tgTypeInputFile {
+		if goType == tgTypeInputFile || goType == typeInputFileOrString || goType == typeInputString {
 			return true, f.Name, nil
 		}
 
@@ -166,6 +167,15 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 		}
 	}
 	return false, "", nil
+}
+
+func containsThumbnail(tgType TypeDescription) bool {
+	for _, f := range tgType.Fields {
+		if f.Name == "thumbnail" {
+			return true
+		}
+	}
+	return false
 }
 
 func generateParentType(d APIDescription, tgType TypeDescription) (string, error) {
@@ -281,7 +291,7 @@ func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (strin
 
 	for _, t := range getReplyMarkupTypes(d) {
 		if tgType.Name == t.Name {
-			typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, tgTypeReplyMarkup))
+			typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, typeReplyMarkup))
 			break
 		}
 	}
@@ -451,6 +461,11 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 }
 
 func generateGenericInterfaceType(d APIDescription, name string, subtypes []TypeDescription) (string, error) {
+	// We handle inputfiles manually
+	if name == tgTypeInputFile {
+		return "", nil
+	}
+
 	if len(subtypes) == 0 {
 		return "\ntype " + name + " interface{}", nil
 	}
@@ -481,7 +496,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
-		bd.WriteString("\nInputParams(string, map[string]NamedReader) ([]byte, error)")
+		bd.WriteString("\nInputParams(string, map[string]FileReader) ([]byte, error)")
 	}
 
 	if len(commonFields) > 0 && constantField != "" {
@@ -747,30 +762,28 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 `
 
 type inputParamsMethodData struct {
-	Type  string
-	Field string
+	Type      string
+	Field     string
+	Thumbnail bool
 }
 
 const inputParamsMethod = `
-func (v {{.Type}}) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.{{.Field}} != nil {
-		switch m := v.{{.Field}}.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.{{.Field}} = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.{{.Field}} = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type: %T", v.{{.Field}})
+		err := v.{{.Field}}.Attach(mediaName, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
-	
+	{{ if .Thumbnail }}
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
+		}
+	}
+	{{- end }}
+
 	return json.Marshal(v)
 }
 `

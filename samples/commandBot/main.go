@@ -63,64 +63,36 @@ func main() {
 }
 
 func source(b *gotgbot.Bot, ctx *ext.Context) error {
+	// Sending a file by file handle
 	f, err := os.Open("samples/commandBot/main.go")
 	if err != nil {
 		return fmt.Errorf("failed to open source: %w", err)
 	}
 
-	_, err = b.SendDocument(ctx.EffectiveChat.Id, f, &gotgbot.SendDocumentOpts{
-		Caption: "Here is my source code.",
-		ReplyParameters: &gotgbot.ReplyParameters{
-			MessageId: ctx.EffectiveMessage.MessageId,
-		},
-	})
+	m, err := b.SendDocument(ctx.EffectiveChat.Id,
+		gotgbot.InputFileByReader("source.go", f),
+		&gotgbot.SendDocumentOpts{
+			Caption: "Here is my source code, by file handle.",
+			ReplyParameters: &gotgbot.ReplyParameters{
+				MessageId: ctx.EffectiveMessage.MessageId,
+			},
+		})
 	if err != nil {
 		return fmt.Errorf("failed to send source: %w", err)
 	}
 
-	// Alternative file sending solutions:
-
-	// --- By file_id:
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, "file_id", &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	// }
-
-	// --- By []byte:
-	// bs, err := ioutil.ReadFile("samples/commandBot/main.go")
-	// if err != nil {
-	//	return fmt.Errorf("failed to open source: %w", err)
-	// }
-	//
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, bs, &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	// }
-
-	// --- By custom name:
-	// f2, err := os.Open("samples/commandBot/main.go")
-	// if err != nil {
-	//	return fmt.Errorf("failed to open source: %w", err)
-	//	return err
-	// }
-	//
-	// _, err = ctx.Bot.SendDocument(ctx.EffectiveChat.Id, gotgbot.NamedFile{
-	//	File:     f2,
-	//	FileName: "NewFileName",
-	// }, &gotgbot.SendDocumentOpts{
-	//	Caption:          "Here is my source code.",
-	//	ReplyToMessageId: ctx.EffectiveMessage.MessageId,
-	// })
-	// if err != nil {
-	//	return fmt.Errorf("failed to send source: %w", err)
-	//	return err
-	// }
+	// Or sending a file by file ID
+	_, err = b.SendDocument(ctx.EffectiveChat.Id,
+		gotgbot.InputFileByID(m.Document.FileId),
+		&gotgbot.SendDocumentOpts{
+			Caption: "Here is my source code, sent by file id.",
+			ReplyParameters: &gotgbot.ReplyParameters{
+				MessageId: ctx.EffectiveMessage.MessageId,
+			},
+		})
+	if err != nil {
+		return fmt.Errorf("failed to send source: %w", err)
+	}
 
 	return nil
 }

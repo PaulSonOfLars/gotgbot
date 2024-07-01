@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	readerBranchTmpl           = template.Must(template.New("readerBranch").Parse(readerBranch))
-	stringOrReaderBranchTmpl   = template.Must(template.New("stringOrReaderBranch").Parse(stringOrReaderBranch))
+	inputFileBranchTmpl        = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
 	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
 	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
 )
@@ -22,10 +21,8 @@ func generateMethods(d APIDescription) error {
 package gotgbot
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 )
 `)
@@ -229,7 +226,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string, def
 	}
 
 	if hasData {
-		return "\ndata := map[string]NamedReader{}" + bd.String(), true, nil
+		return "\ndata := map[string]FileReader{}" + bd.String(), true, nil
 	}
 
 	return bd.String(), false, nil
@@ -284,7 +281,7 @@ if %s != nil {
 		return "", false, err
 	}
 
-	if isPointer(fieldType) || isArray(fieldType) || fieldType == tgTypeReplyMarkup {
+	if isPointer(fieldType) || isArray(fieldType) || fieldType == typeReplyMarkup {
 		return fmt.Sprintf(`
 if %s != nil {
 %s
@@ -300,14 +297,8 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 	bd := strings.Builder{}
 
 	// Special case for InputFiles.
-	if fieldType == tgTypeInputFile {
-		t := stringOrReaderBranchTmpl
-		if len(f.Types) == 1 {
-			// This is actually just an inputfile, not "InputFile or String", so don't support string
-			t = readerBranchTmpl
-		}
-
-		err := t.Execute(&bd, readerBranchesData{
+	if fieldType == tgTypeInputFile || fieldType == typeInputFileOrString {
+		err := inputFileBranchTmpl.Execute(&bd, readerBranchesData{
 			GoParam:       goParam,
 			DefaultReturn: defaultRetVal,
 			Name:          f.Name,
@@ -406,47 +397,14 @@ type readerBranchesData struct {
 	Name          string
 }
 
-const readerBranch = `
+// TODO: Make sure this doesn't allow strings, ONLY readers!
+const inputFileBranch = `
 if {{.GoParam}} != nil {
-	switch m := {{.GoParam}}.(type) {
-	case NamedReader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = m
-
-	case io.Reader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: m}
-
-	case []byte:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
-
-	default:
-		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
+	err := {{.GoParam}}.Attach("{{.Name}}", data)
+	if err != nil {
+		return {{.DefaultReturn}}, fmt.Errorf("failed to attach '{{.Name}}' input file: %w", err)
 	}
-}`
-
-const stringOrReaderBranch = `
-if {{.GoParam}} != nil {
-	switch m := {{.GoParam}}.(type) {
-	case string:
-		v["{{.Name}}"] = m
-
-	case NamedReader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = m
-
-	case io.Reader:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: m}
-
-	case []byte:
-		v["{{.Name}}"] = "attach://{{.Name}}"
-		data["{{.Name}}"] = NamedFile{File: bytes.NewReader(m)}
-
-	default:
-		return {{.DefaultReturn}}, fmt.Errorf("unknown type for InputFile: %T",{{.GoParam}})
-	}
+	v["{{.Name}}"] = {{.GoParam}}.getValue()
 }`
 
 const inputParamsBranch = `

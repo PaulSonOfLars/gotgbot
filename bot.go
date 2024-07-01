@@ -90,7 +90,7 @@ func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 
 var ErrNilBotClient = errors.New("nil BotClient")
 
-func (bot *Bot) Request(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *Bot) Request(method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
 	if bot.BotClient == nil {
 		return nil, ErrNilBotClient
 	}
