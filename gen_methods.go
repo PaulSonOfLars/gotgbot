@@ -484,7 +484,7 @@ type CopyMessageOpts struct {
 
 // CopyMessage (https://core.telegram.org/bots/api#copymessage)
 //
-// Use this method to copy messages of any kind. Service messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - fromChatId (type int64): Unique identifier for the chat where the original message was sent
 //   - messageId (type int64): Message identifier in the chat specified in from_chat_id
@@ -558,7 +558,7 @@ type CopyMessagesOpts struct {
 
 // CopyMessages (https://core.telegram.org/bots/api#copymessages)
 //
-// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
+// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - fromChatId (type int64): Unique identifier for the chat where the original messages were sent
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
@@ -1297,6 +1297,8 @@ func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGener
 
 // EditMessageCaptionOpts is the set of optional fields for Bot.EditMessageCaption.
 type EditMessageCaptionOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1319,11 +1321,12 @@ type EditMessageCaptionOpts struct {
 
 // EditMessageCaption (https://core.telegram.org/bots/api#editmessagecaption)
 //
-// Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - opts (type EditMessageCaptionOpts): All optional parameters.
 func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1372,6 +1375,8 @@ func (bot *Bot) EditMessageCaption(opts *EditMessageCaptionOpts) (*Message, bool
 
 // EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation.
 type EditMessageLiveLocationOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1403,6 +1408,7 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1453,6 +1459,8 @@ func (bot *Bot) EditMessageLiveLocation(latitude float64, longitude float64, opt
 
 // EditMessageMediaOpts is the set of optional fields for Bot.EditMessageMedia.
 type EditMessageMediaOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1467,7 +1475,7 @@ type EditMessageMediaOpts struct {
 
 // EditMessageMedia (https://core.telegram.org/bots/api#editmessagemedia)
 //
-// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - media (type InputMedia): A JSON-serialized object for a new media content of the message
 //   - opts (type EditMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
@@ -1479,6 +1487,7 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 	}
 	v["media"] = string(inputBs)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1517,6 +1526,8 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 
 // EditMessageReplyMarkupOpts is the set of optional fields for Bot.EditMessageReplyMarkup.
 type EditMessageReplyMarkupOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1531,11 +1542,12 @@ type EditMessageReplyMarkupOpts struct {
 
 // EditMessageReplyMarkup (https://core.telegram.org/bots/api#editmessagereplymarkup)
 //
-// Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - opts (type EditMessageReplyMarkupOpts): All optional parameters.
 func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -1574,6 +1586,8 @@ func (bot *Bot) EditMessageReplyMarkup(opts *EditMessageReplyMarkupOpts) (*Messa
 
 // EditMessageTextOpts is the set of optional fields for Bot.EditMessageText.
 type EditMessageTextOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit
@@ -1594,13 +1608,14 @@ type EditMessageTextOpts struct {
 
 // EditMessageText (https://core.telegram.org/bots/api#editmessagetext)
 //
-// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
+// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - text (type string): New text of the message, 1-4096 characters after entities parsing
 //   - opts (type EditMessageTextOpts): All optional parameters.
 func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	v["text"] = text
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -2285,6 +2300,45 @@ func (bot *Bot) GetMyShortDescription(opts *GetMyShortDescriptionOpts) (*BotShor
 
 	var b BotShortDescription
 	return &b, json.Unmarshal(r, &b)
+}
+
+// GetStarTransactionsOpts is the set of optional fields for Bot.GetStarTransactions.
+type GetStarTransactionsOpts struct {
+	// Number of transactions to skip in the response
+	Offset int64
+	// The maximum number of transactions to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetStarTransactions (https://core.telegram.org/bots/api#getstartransactions)
+//
+// Returns the bot's Telegram Star transactions in chronological order. On success, returns a StarTransactions object.
+//   - opts (type GetStarTransactionsOpts): All optional parameters.
+func (bot *Bot) GetStarTransactions(opts *GetStarTransactionsOpts) (*StarTransactions, error) {
+	v := map[string]string{}
+	if opts != nil {
+		if opts.Offset != 0 {
+			v["offset"] = strconv.FormatInt(opts.Offset, 10)
+		}
+		if opts.Limit != 0 {
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getStarTransactions", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s StarTransactions
+	return &s, json.Unmarshal(r, &s)
 }
 
 // GetStickerSetOpts is the set of optional fields for Bot.GetStickerSet.
@@ -3846,6 +3900,98 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 	}
 
 	r, err := bot.Request("sendMessage", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m Message
+	return &m, json.Unmarshal(r, &m)
+}
+
+// SendPaidMediaOpts is the set of optional fields for Bot.SendPaidMedia.
+type SendPaidMediaOpts struct {
+	// Media caption, 0-1024 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the media caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	ReplyMarkup ReplyMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendPaidMedia (https://core.telegram.org/bots/api#sendpaidmedia)
+//
+// Use this method to send paid media to channel chats. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media
+//   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
+//   - opts (type SendPaidMediaOpts): All optional parameters.
+func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
+	v := map[string]string{}
+	data := map[string]NamedReader{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+	if media != nil {
+		var rawList []json.RawMessage
+		for idx, im := range media {
+			inputBs, err := im.InputParams("media"+strconv.Itoa(idx), data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal list item %d for field media: %w", idx, err)
+			}
+			rawList = append(rawList, inputBs)
+		}
+		bs, err := json.Marshal(rawList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal raw json list for field: media %w", err)
+		}
+		v["media"] = string(bs)
+	}
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		if opts.ReplyParameters != nil {
+			bs, err := json.Marshal(opts.ReplyParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field reply_parameters: %w", err)
+			}
+			v["reply_parameters"] = string(bs)
+		}
+		if opts.ReplyMarkup != nil {
+			bs, err := json.Marshal(opts.ReplyMarkup)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			}
+			v["reply_markup"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("sendPaidMedia", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5466,6 +5612,8 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 
 // StopMessageLiveLocationOpts is the set of optional fields for Bot.StopMessageLiveLocation.
 type StopMessageLiveLocationOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message with live location to stop
@@ -5485,6 +5633,7 @@ type StopMessageLiveLocationOpts struct {
 func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.ChatId != 0 {
 			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
 		}
@@ -5523,6 +5672,8 @@ func (bot *Bot) StopMessageLiveLocation(opts *StopMessageLiveLocationOpts) (*Mes
 
 // StopPollOpts is the set of optional fields for Bot.StopPoll.
 type StopPollOpts struct {
+	// Unique identifier of the business connection on behalf of which the message to be edited was sent
+	BusinessConnectionId string
 	// A JSON-serialized object for a new message inline keyboard.
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -5540,6 +5691,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Po
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		bs, err := json.Marshal(opts.ReplyMarkup)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
