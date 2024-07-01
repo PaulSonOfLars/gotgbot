@@ -140,7 +140,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 	}
 	checked[tgType.Name] = true
 
-	if tgType.Name == tgTypeInputMedia {
+	if tgType.Name == tgTypeInputMedia || tgType.Name == tgTypeInputPaidMedia {
 		return true, "media", nil
 	}
 

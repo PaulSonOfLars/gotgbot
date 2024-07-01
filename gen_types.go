@@ -30,17 +30,17 @@ type Animation struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Video width as defined by sender
+	// Video width as defined by the sender
 	Width int64 `json:"width"`
-	// Video height as defined by sender
+	// Video height as defined by the sender
 	Height int64 `json:"height"`
-	// Duration of the video in seconds as defined by sender
+	// Duration of the video in seconds as defined by the sender
 	Duration int64 `json:"duration"`
-	// Optional. Animation thumbnail as defined by sender
+	// Optional. Animation thumbnail as defined by the sender
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
-	// Optional. Original animation filename as defined by sender
+	// Optional. Original animation filename as defined by the sender
 	FileName string `json:"file_name,omitempty"`
-	// Optional. MIME type of the file as defined by sender
+	// Optional. MIME type of the file as defined by the sender
 	MimeType string `json:"mime_type,omitempty"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
@@ -54,15 +54,15 @@ type Audio struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Duration of the audio in seconds as defined by sender
+	// Duration of the audio in seconds as defined by the sender
 	Duration int64 `json:"duration"`
-	// Optional. Performer of the audio as defined by sender or by audio tags
+	// Optional. Performer of the audio as defined by the sender or by audio tags
 	Performer string `json:"performer,omitempty"`
-	// Optional. Title of the audio as defined by sender or by audio tags
+	// Optional. Title of the audio as defined by the sender or by audio tags
 	Title string `json:"title,omitempty"`
-	// Optional. Original filename as defined by sender
+	// Optional. Original filename as defined by the sender
 	FileName string `json:"file_name,omitempty"`
-	// Optional. MIME type of the file as defined by sender
+	// Optional. MIME type of the file as defined by the sender
 	MimeType string `json:"mime_type,omitempty"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
@@ -1616,6 +1616,8 @@ type ChatFullInfo struct {
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
 	// Optional. Default chat member permissions, for groups and supergroups
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
+	// Optional. True, if paid media messages can be sent or forwarded to the channel chat. The field is available only for channel chats.
+	CanSendPaidMedia bool `json:"can_send_paid_media,omitempty"`
 	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unprivileged user; in seconds
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
 	// Optional. For supergroups, the minimum number of boosts that a non-administrator user needs to add in order to ignore slow mode and chat permissions
@@ -1677,6 +1679,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 		InviteLink                         string                `json:"invite_link"`
 		PinnedMessage                      *Message              `json:"pinned_message"`
 		Permissions                        *ChatPermissions      `json:"permissions"`
+		CanSendPaidMedia                   bool                  `json:"can_send_paid_media"`
 		SlowModeDelay                      int64                 `json:"slow_mode_delay"`
 		UnrestrictBoostCount               int64                 `json:"unrestrict_boost_count"`
 		MessageAutoDeleteTime              int64                 `json:"message_auto_delete_time"`
@@ -1730,6 +1733,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 	v.InviteLink = t.InviteLink
 	v.PinnedMessage = t.PinnedMessage
 	v.Permissions = t.Permissions
+	v.CanSendPaidMedia = t.CanSendPaidMedia
 	v.SlowModeDelay = t.SlowModeDelay
 	v.UnrestrictBoostCount = t.UnrestrictBoostCount
 	v.MessageAutoDeleteTime = t.MessageAutoDeleteTime
@@ -2537,11 +2541,11 @@ type Document struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Optional. Document thumbnail as defined by sender
+	// Optional. Document thumbnail as defined by the sender
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
-	// Optional. Original filename as defined by sender
+	// Optional. Original filename as defined by the sender
 	FileName string `json:"file_name,omitempty"`
-	// Optional. MIME type of the file as defined by sender
+	// Optional. MIME type of the file as defined by the sender
 	MimeType string `json:"mime_type,omitempty"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
@@ -2603,6 +2607,8 @@ type ExternalReplyInfo struct {
 	Audio *Audio `json:"audio,omitempty"`
 	// Optional. Message is a general file, information about the file
 	Document *Document `json:"document,omitempty"`
+	// Optional. Message contains paid media; information about the paid media
+	PaidMedia *PaidMediaInfo `json:"paid_media,omitempty"`
 	// Optional. Message is a photo, available sizes of the photo
 	Photo []PhotoSize `json:"photo,omitempty"`
 	// Optional. Message is a sticker, information about the sticker
@@ -2648,6 +2654,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 		Animation          *Animation          `json:"animation"`
 		Audio              *Audio              `json:"audio"`
 		Document           *Document           `json:"document"`
+		PaidMedia          *PaidMediaInfo      `json:"paid_media"`
 		Photo              []PhotoSize         `json:"photo"`
 		Sticker            *Sticker            `json:"sticker"`
 		Story              *Story              `json:"story"`
@@ -2681,6 +2688,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 	v.Animation = t.Animation
 	v.Audio = t.Audio
 	v.Document = t.Document
+	v.PaidMedia = t.PaidMedia
 	v.Photo = t.Photo
 	v.Sticker = t.Sticker
 	v.Story = t.Story
@@ -5198,9 +5206,210 @@ var (
 	_ InputMessageContent = InputInvoiceMessageContent{}
 )
 
+// InputPaidMedia (https://core.telegram.org/bots/api#inputpaidmedia)
+//
+// This object describes the paid media to be sent. Currently, it can be one of
+//   - InputPaidMediaPhoto
+//   - InputPaidMediaVideo
+type InputPaidMedia interface {
+	GetType() string
+	GetMedia() InputFile
+	// InputParams allows for uploading attachments with files.
+	InputParams(string, map[string]NamedReader) ([]byte, error)
+	// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with complex telegram types in a non-generic world.
+	MergeInputPaidMedia() MergedInputPaidMedia
+	// inputPaidMedia exists to avoid external types implementing this interface.
+	inputPaidMedia()
+}
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ InputPaidMedia = InputPaidMediaPhoto{}
+	_ InputPaidMedia = InputPaidMediaVideo{}
+)
+
+// MergedInputPaidMedia is a helper type to simplify interactions with the various InputPaidMedia subtypes.
+type MergedInputPaidMedia struct {
+	// Type of the media
+	Type string `json:"type"`
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for video)
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	// Optional. Video width (Only for video)
+	Width int64 `json:"width,omitempty"`
+	// Optional. Video height (Only for video)
+	Height int64 `json:"height,omitempty"`
+	// Optional. Video duration in seconds (Only for video)
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. Pass True if the uploaded video is suitable for streaming (Only for video)
+	SupportsStreaming bool `json:"supports_streaming,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedInputPaidMedia) GetType() string {
+	return v.Type
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v MergedInputPaidMedia) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergedInputPaidMedia.inputPaidMedia is a dummy method to avoid interface implementation.
+func (v MergedInputPaidMedia) inputPaidMedia() {}
+
+// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with types in a non-generic world.
+func (v MergedInputPaidMedia) MergeInputPaidMedia() MergedInputPaidMedia {
+	return v
+}
+
+// InputPaidMediaPhoto (https://core.telegram.org/bots/api#inputpaidmediaphoto)
+//
+// The paid media to send is a photo.
+type InputPaidMediaPhoto struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputPaidMediaPhoto) GetType() string {
+	return "photo"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputPaidMediaPhoto) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with types in a non-generic world.
+func (v InputPaidMediaPhoto) MergeInputPaidMedia() MergedInputPaidMedia {
+	return MergedInputPaidMedia{
+		Type:  "photo",
+		Media: v.Media,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputPaidMediaPhoto) MarshalJSON() ([]byte, error) {
+	type alias InputPaidMediaPhoto
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "photo",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputPaidMediaPhoto.inputPaidMedia is a dummy method to avoid interface implementation.
+func (v InputPaidMediaPhoto) inputPaidMedia() {}
+
+func (v InputPaidMediaPhoto) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
+// InputPaidMediaVideo (https://core.telegram.org/bots/api#inputpaidmediavideo)
+//
+// The paid media to send is a video.
+type InputPaidMediaVideo struct {
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFile `json:"media"`
+	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	// Optional. Video width
+	Width int64 `json:"width,omitempty"`
+	// Optional. Video height
+	Height int64 `json:"height,omitempty"`
+	// Optional. Video duration in seconds
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. Pass True if the uploaded video is suitable for streaming
+	SupportsStreaming bool `json:"supports_streaming,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputPaidMediaVideo) GetType() string {
+	return "video"
+}
+
+// GetMedia is a helper method to easily access the common fields of an interface.
+func (v InputPaidMediaVideo) GetMedia() InputFile {
+	return v.Media
+}
+
+// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with types in a non-generic world.
+func (v InputPaidMediaVideo) MergeInputPaidMedia() MergedInputPaidMedia {
+	return MergedInputPaidMedia{
+		Type:              "video",
+		Media:             v.Media,
+		Thumbnail:         v.Thumbnail,
+		Width:             v.Width,
+		Height:            v.Height,
+		Duration:          v.Duration,
+		SupportsStreaming: v.SupportsStreaming,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputPaidMediaVideo) MarshalJSON() ([]byte, error) {
+	type alias InputPaidMediaVideo
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "video",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputPaidMediaVideo.inputPaidMedia is a dummy method to avoid interface implementation.
+func (v InputPaidMediaVideo) inputPaidMedia() {}
+
+func (v InputPaidMediaVideo) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+	if v.Media != nil {
+		switch m := v.Media.(type) {
+		case string:
+			// ok, noop
+
+		case NamedReader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = m
+
+		case io.Reader:
+			v.Media = "attach://" + mediaName
+			data[mediaName] = NamedFile{File: m}
+
+		default:
+			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		}
+	}
+
+	return json.Marshal(v)
+}
+
 // InputPollOption (https://core.telegram.org/bots/api#inputpolloption)
 //
-// This object contains information about one answer option in a poll to send.
+// This object contains information about one answer option in a poll to be sent.
 type InputPollOption struct {
 	// Option text, 1-100 characters
 	Text string `json:"text"`
@@ -5413,9 +5622,9 @@ type LinkPreviewOptions struct {
 //
 // This object represents a point on the map.
 type Location struct {
-	// Latitude as defined by sender
+	// Latitude as defined by the sender
 	Latitude float64 `json:"latitude"`
-	// Longitude as defined by sender
+	// Longitude as defined by the sender
 	Longitude float64 `json:"longitude"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
@@ -5530,7 +5739,7 @@ type MergedMenuButton struct {
 	Type string `json:"type"`
 	// Optional. Text on the button (Only for web_app)
 	Text string `json:"text,omitempty"`
-	// Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. (Only for web_app)
+	// Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Alternatively, a t.me link to a Web App of the bot can be specified in the object instead of the Web App's URL, in which case the Web App will be opened as if the user pressed the link. (Only for web_app)
 	WebApp *WebAppInfo `json:"web_app,omitempty"`
 }
 
@@ -5688,7 +5897,7 @@ func (v MenuButtonDefault) menuButton() {}
 type MenuButtonWebApp struct {
 	// Text on the button
 	Text string `json:"text"`
-	// Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery.
+	// Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Alternatively, a t.me link to a Web App of the bot can be specified in the object instead of the Web App's URL, in which case the Web App will be opened as if the user pressed the link.
 	WebApp WebAppInfo `json:"web_app"`
 }
 
@@ -5784,6 +5993,8 @@ type Message struct {
 	Audio *Audio `json:"audio,omitempty"`
 	// Optional. Message is a general file, information about the file
 	Document *Document `json:"document,omitempty"`
+	// Optional. Message contains paid media; information about the paid media
+	PaidMedia *PaidMediaInfo `json:"paid_media,omitempty"`
 	// Optional. Message is a photo, available sizes of the photo
 	Photo []PhotoSize `json:"photo,omitempty"`
 	// Optional. Message is a sticker, information about the sticker
@@ -5796,7 +6007,7 @@ type Message struct {
 	VideoNote *VideoNote `json:"video_note,omitempty"`
 	// Optional. Message is a voice message, information about the file
 	Voice *Voice `json:"voice,omitempty"`
-	// Optional. Caption for the animation, audio, document, photo, video or voice
+	// Optional. Caption for the animation, audio, document, paid media, photo, video or voice
 	Caption string `json:"caption,omitempty"`
 	// Optional. For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear in the caption
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
@@ -5927,6 +6138,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		Animation                     *Animation                     `json:"animation"`
 		Audio                         *Audio                         `json:"audio"`
 		Document                      *Document                      `json:"document"`
+		PaidMedia                     *PaidMediaInfo                 `json:"paid_media"`
 		Photo                         []PhotoSize                    `json:"photo"`
 		Sticker                       *Sticker                       `json:"sticker"`
 		Story                         *Story                         `json:"story"`
@@ -6020,6 +6232,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.Animation = t.Animation
 	v.Audio = t.Audio
 	v.Document = t.Document
+	v.PaidMedia = t.PaidMedia
 	v.Photo = t.Photo
 	v.Sticker = t.Sticker
 	v.Story = t.Story
@@ -6545,6 +6758,274 @@ type OrderInfo struct {
 	// Optional. User shipping address
 	ShippingAddress *ShippingAddress `json:"shipping_address,omitempty"`
 }
+
+// PaidMedia (https://core.telegram.org/bots/api#paidmedia)
+//
+// This object describes paid media. Currently, it can be one of
+//   - PaidMediaPreview
+//   - PaidMediaPhoto
+//   - PaidMediaVideo
+type PaidMedia interface {
+	GetType() string
+	// MergePaidMedia returns a MergedPaidMedia struct to simplify working with complex telegram types in a non-generic world.
+	MergePaidMedia() MergedPaidMedia
+	// paidMedia exists to avoid external types implementing this interface.
+	paidMedia()
+}
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ PaidMedia = PaidMediaPreview{}
+	_ PaidMedia = PaidMediaPhoto{}
+	_ PaidMedia = PaidMediaVideo{}
+)
+
+// MergedPaidMedia is a helper type to simplify interactions with the various PaidMedia subtypes.
+type MergedPaidMedia struct {
+	// Type of the paid media
+	Type string `json:"type"`
+	// Optional. Media width as defined by the sender (Only for preview)
+	Width int64 `json:"width,omitempty"`
+	// Optional. Media height as defined by the sender (Only for preview)
+	Height int64 `json:"height,omitempty"`
+	// Optional. Duration of the media in seconds as defined by the sender (Only for preview)
+	Duration int64 `json:"duration,omitempty"`
+	// Optional. The photo (Only for photo)
+	Photo []PhotoSize `json:"photo,omitempty"`
+	// Optional. The video (Only for video)
+	Video *Video `json:"video,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MergedPaidMedia) GetType() string {
+	return v.Type
+}
+
+// MergedPaidMedia.paidMedia is a dummy method to avoid interface implementation.
+func (v MergedPaidMedia) paidMedia() {}
+
+// MergePaidMedia returns a MergedPaidMedia struct to simplify working with types in a non-generic world.
+func (v MergedPaidMedia) MergePaidMedia() MergedPaidMedia {
+	return v
+}
+
+// unmarshalPaidMediaArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
+// using unmarshalPaidMedia.
+func unmarshalPaidMediaArray(d json.RawMessage) ([]PaidMedia, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	var ds []json.RawMessage
+	err := json.Unmarshal(d, &ds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal initial PaidMedia JSON into an array: %w", err)
+	}
+
+	var vs []PaidMedia
+	for idx, d := range ds {
+		v, err := unmarshalPaidMedia(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal PaidMedia on array item %d: %w", idx, err)
+		}
+		vs = append(vs, v)
+	}
+
+	return vs, nil
+}
+
+// unmarshalPaidMedia is a JSON unmarshal helper to marshal the right structs into a PaidMedia interface
+// based on the Type field.
+func unmarshalPaidMedia(d json.RawMessage) (PaidMedia, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
+	t := struct {
+		Type string
+	}{}
+	err := json.Unmarshal(d, &t)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal PaidMedia for constant field 'Type': %w", err)
+	}
+
+	switch t.Type {
+	case "preview":
+		s := PaidMediaPreview{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal PaidMedia for value 'preview': %w", err)
+		}
+		return s, nil
+
+	case "photo":
+		s := PaidMediaPhoto{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal PaidMedia for value 'photo': %w", err)
+		}
+		return s, nil
+
+	case "video":
+		s := PaidMediaVideo{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal PaidMedia for value 'video': %w", err)
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("unknown interface for PaidMedia with Type %v", t.Type)
+}
+
+// PaidMediaInfo (https://core.telegram.org/bots/api#paidmediainfo)
+//
+// Describes the paid media added to a message.
+type PaidMediaInfo struct {
+	// The number of Telegram Stars that must be paid to buy access to the media
+	StarCount int64 `json:"star_count"`
+	// Information about the paid media
+	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *PaidMediaInfo) UnmarshalJSON(b []byte) error {
+	// All fields in PaidMediaInfo, with interface fields as json.RawMessage
+	type tmp struct {
+		StarCount int64           `json:"star_count"`
+		PaidMedia json.RawMessage `json:"paid_media"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal PaidMediaInfo JSON into tmp struct: %w", err)
+	}
+
+	v.StarCount = t.StarCount
+	v.PaidMedia, err = unmarshalPaidMediaArray(t.PaidMedia)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field PaidMedia: %w", err)
+	}
+
+	return nil
+}
+
+// PaidMediaPhoto (https://core.telegram.org/bots/api#paidmediaphoto)
+//
+// The paid media is a photo.
+type PaidMediaPhoto struct {
+	// The photo
+	Photo []PhotoSize `json:"photo,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PaidMediaPhoto) GetType() string {
+	return "photo"
+}
+
+// MergePaidMedia returns a MergedPaidMedia struct to simplify working with types in a non-generic world.
+func (v PaidMediaPhoto) MergePaidMedia() MergedPaidMedia {
+	return MergedPaidMedia{
+		Type:  "photo",
+		Photo: v.Photo,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v PaidMediaPhoto) MarshalJSON() ([]byte, error) {
+	type alias PaidMediaPhoto
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "photo",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PaidMediaPhoto.paidMedia is a dummy method to avoid interface implementation.
+func (v PaidMediaPhoto) paidMedia() {}
+
+// PaidMediaPreview (https://core.telegram.org/bots/api#paidmediapreview)
+//
+// The paid media isn't available before the payment.
+type PaidMediaPreview struct {
+	// Optional. Media width as defined by the sender
+	Width int64 `json:"width,omitempty"`
+	// Optional. Media height as defined by the sender
+	Height int64 `json:"height,omitempty"`
+	// Optional. Duration of the media in seconds as defined by the sender
+	Duration int64 `json:"duration,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PaidMediaPreview) GetType() string {
+	return "preview"
+}
+
+// MergePaidMedia returns a MergedPaidMedia struct to simplify working with types in a non-generic world.
+func (v PaidMediaPreview) MergePaidMedia() MergedPaidMedia {
+	return MergedPaidMedia{
+		Type:     "preview",
+		Width:    v.Width,
+		Height:   v.Height,
+		Duration: v.Duration,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v PaidMediaPreview) MarshalJSON() ([]byte, error) {
+	type alias PaidMediaPreview
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "preview",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PaidMediaPreview.paidMedia is a dummy method to avoid interface implementation.
+func (v PaidMediaPreview) paidMedia() {}
+
+// PaidMediaVideo (https://core.telegram.org/bots/api#paidmediavideo)
+//
+// The paid media is a video.
+type PaidMediaVideo struct {
+	// The video
+	Video Video `json:"video"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PaidMediaVideo) GetType() string {
+	return "video"
+}
+
+// MergePaidMedia returns a MergedPaidMedia struct to simplify working with types in a non-generic world.
+func (v PaidMediaVideo) MergePaidMedia() MergedPaidMedia {
+	return MergedPaidMedia{
+		Type:  "video",
+		Video: &v.Video,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v PaidMediaVideo) MarshalJSON() ([]byte, error) {
+	type alias PaidMediaVideo
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "video",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PaidMediaVideo.paidMedia is a dummy method to avoid interface implementation.
+func (v PaidMediaVideo) paidMedia() {}
 
 // PassportData (https://core.telegram.org/bots/api#passportdata)
 //
@@ -7216,7 +7697,7 @@ type PreCheckoutQuery struct {
 	Currency string `json:"currency"`
 	// Total price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
-	// Bot specified invoice payload
+	// Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
 	// Optional. Identifier of the shipping option chosen by the user
 	ShippingOptionId string `json:"shipping_option_id,omitempty"`
@@ -7790,7 +8271,7 @@ type ShippingQuery struct {
 	Id string `json:"id"`
 	// User who sent the query
 	From User `json:"from"`
-	// Bot specified invoice payload
+	// Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
 	// User specified shipping address
 	ShippingAddress ShippingAddress `json:"shipping_address"`
@@ -7921,7 +8402,7 @@ type SuccessfulPayment struct {
 	Currency string `json:"currency"`
 	// Total price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
-	// Bot specified invoice payload
+	// Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
 	// Optional. Identifier of the shipping option chosen by the user
 	ShippingOptionId string `json:"shipping_option_id,omitempty"`
@@ -7966,8 +8447,9 @@ type TextQuote struct {
 // TransactionPartner (https://core.telegram.org/bots/api#transactionpartner)
 //
 // This object describes the source of a transaction, or its recipient for outgoing transactions. Currently, it can be one of
-//   - TransactionPartnerFragment
 //   - TransactionPartnerUser
+//   - TransactionPartnerFragment
+//   - TransactionPartnerTelegramAds
 //   - TransactionPartnerOther
 type TransactionPartner interface {
 	GetType() string
@@ -7979,8 +8461,9 @@ type TransactionPartner interface {
 
 // Ensure that all subtypes correctly implement the parent interface.
 var (
-	_ TransactionPartner = TransactionPartnerFragment{}
 	_ TransactionPartner = TransactionPartnerUser{}
+	_ TransactionPartner = TransactionPartnerFragment{}
+	_ TransactionPartner = TransactionPartnerTelegramAds{}
 	_ TransactionPartner = TransactionPartnerOther{}
 )
 
@@ -7988,10 +8471,12 @@ var (
 type MergedTransactionPartner struct {
 	// Type of the transaction partner
 	Type string `json:"type"`
-	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
-	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 	// Optional. Information about the user (Only for user)
 	User *User `json:"user,omitempty"`
+	// Optional. Bot-specified invoice payload (Only for user)
+	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
+	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8048,6 +8533,14 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 	}
 
 	switch t.Type {
+	case "user":
+		s := TransactionPartnerUser{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'user': %w", err)
+		}
+		return s, nil
+
 	case "fragment":
 		s := TransactionPartnerFragment{}
 		err := json.Unmarshal(d, &s)
@@ -8056,11 +8549,11 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 		}
 		return s, nil
 
-	case "user":
-		s := TransactionPartnerUser{}
+	case "telegram_ads":
+		s := TransactionPartnerTelegramAds{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'user': %w", err)
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'telegram_ads': %w", err)
 		}
 		return s, nil
 
@@ -8166,12 +8659,47 @@ func (v TransactionPartnerOther) MarshalJSON() ([]byte, error) {
 // TransactionPartnerOther.transactionPartner is a dummy method to avoid interface implementation.
 func (v TransactionPartnerOther) transactionPartner() {}
 
+// TransactionPartnerTelegramAds (https://core.telegram.org/bots/api#transactionpartnertelegramads)
+//
+// Describes a withdrawal transaction to the Telegram Ads platform.
+type TransactionPartnerTelegramAds struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerTelegramAds) GetType() string {
+	return "telegram_ads"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerTelegramAds) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type: "telegram_ads",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerTelegramAds) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerTelegramAds
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "telegram_ads",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerTelegramAds.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerTelegramAds) transactionPartner() {}
+
 // TransactionPartnerUser (https://core.telegram.org/bots/api#transactionpartneruser)
 //
 // Describes a transaction with a user.
 type TransactionPartnerUser struct {
 	// Information about the user
 	User User `json:"user"`
+	// Optional. Bot-specified invoice payload
+	InvoicePayload string `json:"invoice_payload,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8182,8 +8710,9 @@ func (v TransactionPartnerUser) GetType() string {
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
 func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartner {
 	return MergedTransactionPartner{
-		Type: "user",
-		User: &v.User,
+		Type:           "user",
+		User:           &v.User,
+		InvoicePayload: v.InvoicePayload,
 	}
 }
 
@@ -8342,17 +8871,17 @@ type Video struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Video width as defined by sender
+	// Video width as defined by the sender
 	Width int64 `json:"width"`
-	// Video height as defined by sender
+	// Video height as defined by the sender
 	Height int64 `json:"height"`
-	// Duration of the video in seconds as defined by sender
+	// Duration of the video in seconds as defined by the sender
 	Duration int64 `json:"duration"`
 	// Optional. Video thumbnail
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
-	// Optional. Original filename as defined by sender
+	// Optional. Original filename as defined by the sender
 	FileName string `json:"file_name,omitempty"`
-	// Optional. MIME type of the file as defined by sender
+	// Optional. MIME type of the file as defined by the sender
 	MimeType string `json:"mime_type,omitempty"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
@@ -8395,9 +8924,9 @@ type VideoNote struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Video width and height (diameter of the video message) as defined by sender
+	// Video width and height (diameter of the video message) as defined by the sender
 	Length int64 `json:"length"`
-	// Duration of the video in seconds as defined by sender
+	// Duration of the video in seconds as defined by the sender
 	Duration int64 `json:"duration"`
 	// Optional. Video thumbnail
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
@@ -8413,9 +8942,9 @@ type Voice struct {
 	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueId string `json:"file_unique_id"`
-	// Duration of the audio in seconds as defined by sender
+	// Duration of the audio in seconds as defined by the sender
 	Duration int64 `json:"duration"`
-	// Optional. MIME type of the file as defined by sender
+	// Optional. MIME type of the file as defined by the sender
 	MimeType string `json:"mime_type,omitempty"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`

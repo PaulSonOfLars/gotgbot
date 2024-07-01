@@ -219,10 +219,11 @@ const (
 	tgTypeFloat   = "Float"
 	tgTypeInteger = "Integer"
 	// These are all custom telegram types.
-	tgTypeMessage    = "Message"
-	tgTypeFile       = "File"
-	tgTypeInputFile  = "InputFile"
-	tgTypeInputMedia = "InputMedia"
+	tgTypeMessage        = "Message"
+	tgTypeFile           = "File"
+	tgTypeInputFile      = "InputFile"
+	tgTypeInputMedia     = "InputMedia"
+	tgTypeInputPaidMedia = "InputPaidMedia"
 	// This is actually a custom type.
 	tgTypeReplyMarkup = "ReplyMarkup"
 )
@@ -321,20 +322,25 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 			return tgTypeInputFile, nil
 		}
 		var arrayType bool
+		mediaType := tgTypeInputMedia
 		// TODO: check against API description type
 		for _, t := range f.Types {
 			arrayType = arrayType || isTgArray(t)
 
-			if !strings.Contains(t, tgTypeInputMedia) {
-				return "", fmt.Errorf("mediatype %s is not of kind InputMedia for field %s", t, f.Name)
+			if strings.Contains(t, tgTypeInputMedia) {
+				mediaType = tgTypeInputMedia
+			} else if strings.Contains(t, tgTypeInputPaidMedia) {
+				mediaType = tgTypeInputPaidMedia
+			} else {
+				return "", fmt.Errorf("mediatype %s is not of kind InputMedia/InputPaidMedia for field %s", t, f.Name)
 			}
 		}
 
 		if arrayType {
-			return "[]" + tgTypeInputMedia, nil
+			return "[]" + mediaType, nil
 		}
 
-		return tgTypeInputMedia, nil
+		return mediaType, nil
 	}
 
 	if f.Name == "reply_markup" {

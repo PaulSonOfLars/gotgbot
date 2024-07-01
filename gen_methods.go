@@ -486,7 +486,7 @@ type CopyMessageOpts struct {
 
 // CopyMessage (https://core.telegram.org/bots/api#copymessage)
 //
-// Use this method to copy messages of any kind. Service messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - fromChatId (type int64): Unique identifier for the chat where the original message was sent
 //   - messageId (type int64): Message identifier in the chat specified in from_chat_id
@@ -560,7 +560,7 @@ type CopyMessagesOpts struct {
 
 // CopyMessages (https://core.telegram.org/bots/api#copymessages)
 //
-// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
+// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - fromChatId (type int64): Unique identifier for the chat where the original messages were sent
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
@@ -3986,6 +3986,98 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 	}
 
 	r, err := bot.Request("sendMessage", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m Message
+	return &m, json.Unmarshal(r, &m)
+}
+
+// SendPaidMediaOpts is the set of optional fields for Bot.SendPaidMedia.
+type SendPaidMediaOpts struct {
+	// Media caption, 0-1024 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the media caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// Pass True, if the caption must be shown above the message media
+	ShowCaptionAboveMedia bool
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	ReplyMarkup ReplyMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendPaidMedia (https://core.telegram.org/bots/api#sendpaidmedia)
+//
+// Use this method to send paid media to channel chats. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media
+//   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
+//   - opts (type SendPaidMediaOpts): All optional parameters.
+func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
+	v := map[string]string{}
+	data := map[string]NamedReader{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+	if media != nil {
+		var rawList []json.RawMessage
+		for idx, im := range media {
+			inputBs, err := im.InputParams("media"+strconv.Itoa(idx), data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal list item %d for field media: %w", idx, err)
+			}
+			rawList = append(rawList, inputBs)
+		}
+		bs, err := json.Marshal(rawList)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal raw json list for field: media %w", err)
+		}
+		v["media"] = string(bs)
+	}
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		if opts.ReplyParameters != nil {
+			bs, err := json.Marshal(opts.ReplyParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field reply_parameters: %w", err)
+			}
+			v["reply_parameters"] = string(bs)
+		}
+		if opts.ReplyMarkup != nil {
+			bs, err := json.Marshal(opts.ReplyMarkup)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+			}
+			v["reply_markup"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("sendPaidMedia", v, data, reqOpts)
 	if err != nil {
 		return nil, err
 	}
