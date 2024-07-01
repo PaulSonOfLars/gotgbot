@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"errors"
+	"math/rand"
 	"testing"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -312,6 +313,39 @@ func TestNestedConversation(t *testing.T) {
 	checkExpectedState(t, &conv, textMessage, "")
 }
 
+func TestEmptyKeyConversation(t *testing.T) {
+	b := NewTestBot()
+
+	// Dummy conversation; not important.
+	conv := handlers.NewConversation(
+		[]ext.Handler{handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+			return handlers.NextConversationState("next")
+		})},
+		map[string][]ext.Handler{},
+		&handlers.ConversationOpts{
+			// This strategy will fail when we don't have a chat/user; eg, a poll update, which has neither.
+			StateStorage: conversation.NewInMemoryStorage(conversation.KeyStrategySenderAndChat),
+		},
+	)
+
+	// Run an empty
+	pollUpd := ext.NewContext(&gotgbot.Update{
+		UpdateId: rand.Int63(), // should this be consistent?
+		Poll: &gotgbot.Poll{
+			Id:                    "some_id",
+			Question:              "Some question",
+			Type:                  "quiz",
+			AllowsMultipleAnswers: false,
+			CorrectOptionId:       0,
+			Explanation:           "",
+		},
+	}, nil)
+
+	if err := conv.HandleUpdate(b, pollUpd); !errors.Is(err, conversation.ErrEmptyKey) {
+		t.Fatal("poll update should have caused an error in the conversation handler")
+	}
+}
+
 // runHandler ensures that the incoming update will trigger the conversation.
 func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, currentState string, nextState string) {
 	willRunHandler(t, b, conv, message, currentState)
@@ -335,12 +369,12 @@ func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, m
 
 func checkExpectedState(t *testing.T, conv *handlers.Conversation, message *ext.Context, nextState string) {
 	currentState, err := conv.StateStorage.Get(message)
-	if nextState == "" {
-		if !errors.Is(err, conversation.ErrKeyNotFound) {
-			t.Fatalf("expected not to have a conversation, but got currentState: %s", currentState)
+	if err != nil {
+		if nextState == "" && errors.Is(err, conversation.ErrKeyNotFound) {
+			// Success! No next state, because we don't have a "next" key.
+			return
 		}
-	} else if err != nil {
-		t.Fatalf("unexpected error while checking the current currentState of the conversation")
+		t.Fatalf("unexpected error while checking the current currentState of the conversation: %s", err.Error())
 	} else if currentState == nil || currentState.Key != nextState {
 		t.Fatalf("expected the conversation to be at '%s', was '%s'", nextState, currentState)
 	}
