@@ -344,6 +344,16 @@ func TestEmptyKeyConversation(t *testing.T) {
 	if err := conv.HandleUpdate(b, pollUpd); !errors.Is(err, conversation.ErrEmptyKey) {
 		t.Fatal("poll update should have caused an error in the conversation handler")
 	}
+
+	conv.Filter = func(ctx *ext.Context) bool {
+		// These are prerequisites for the SenderAndChat strategy; if we dont have them, skip!
+		return ctx.EffectiveChat != nil && ctx.EffectiveSender != nil
+	}
+
+	if err := conv.HandleUpdate(b, pollUpd); err != nil {
+		t.Fatal("poll update should NOT have caused an error, as it is now filtered out")
+	}
+
 }
 
 // runHandler ensures that the incoming update will trigger the conversation.
