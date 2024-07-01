@@ -12,6 +12,10 @@ import (
 // TODO: Add a "block" option to force linear processing. Also a "waiting" state to handle blocked handlers.
 // TODO: Allow for timeouts (and a "timeout" state to handle that)
 
+// ConversationFilter is much wider than regular filters, because it allows for any kind of update; we may want
+// messages, commands, callbacks, etc.
+type ConversationFilter func(ctx *ext.Context) bool
+
 // The Conversation handler is an advanced handler which allows for running a sequence of commands in a stateful manner.
 // An example of this flow can be found at t.me/Botfather; upon receiving the "/newbot" command, the user is asked for
 // the name of their bot, which is sent as a separate message.
@@ -33,6 +37,10 @@ type Conversation struct {
 	Fallbacks []ext.Handler
 	// If True, a user can restart the conversation by hitting one of the entry points.
 	AllowReEntry bool
+	// Filter allows users to set a conversation-wide filter to any incoming updates. This can be useful to only target
+	// one specific chat, or to avoid unwanted updates which may interfere with the conversation key strategy
+	// (eg polls).
+	Filter ConversationFilter
 }
 
 type ConversationOpts struct {
@@ -45,6 +53,10 @@ type ConversationOpts struct {
 	AllowReEntry bool
 	// StateStorage is responsible for storing all running conversations.
 	StateStorage conversation.Storage
+	// Filter allows users to set a conversation-wide filter to any incoming updates. This can be useful to only target
+	// one specific chat, or to avoid unwanted updates which may interfere with the conversation key strategy
+	// (eg polls).
+	Filter ConversationFilter
 }
 
 func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler, opts *ConversationOpts) Conversation {
@@ -59,6 +71,7 @@ func NewConversation(entryPoints []ext.Handler, states map[string][]ext.Handler,
 		c.Exits = opts.Exits
 		c.Fallbacks = opts.Fallbacks
 		c.AllowReEntry = opts.AllowReEntry
+		c.Filter = opts.Filter
 
 		// If no StateStorage is specified, we should keep the default.
 		if opts.StateStorage != nil {
@@ -169,6 +182,12 @@ func (c Conversation) Name() string {
 // getNextHandler goes through all the handlers in the conversation, until it finds a handler that matches.
 // If no matching handler is found, returns nil.
 func (c Conversation) getNextHandler(b *gotgbot.Bot, ctx *ext.Context) (ext.Handler, error) {
+	// If the user has defined a filter, and this filter does NOT return true, then we do NOT want to consider this
+	// update for the conversation.
+	if c.Filter != nil && !c.Filter(ctx) {
+		return nil, nil
+	}
+
 	// Check if a conversation has already started for this user.
 	currState, err := c.StateStorage.Get(ctx)
 	if err != nil {
