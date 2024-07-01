@@ -3939,7 +3939,7 @@ type SendPaidMediaOpts struct {
 //   - opts (type SendPaidMediaOpts): All optional parameters.
 func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
 	v := map[string]string{}
-	data := map[string]NamedReader{}
+	data := map[string]FileReader{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["star_count"] = strconv.FormatInt(starCount, 10)
 	if media != nil {

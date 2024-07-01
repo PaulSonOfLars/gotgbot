@@ -5183,9 +5183,9 @@ var (
 //   - InputPaidMediaVideo
 type InputPaidMedia interface {
 	GetType() string
-	GetMedia() InputFile
+	GetMedia() InputFileOrString
 	// InputParams allows for uploading attachments with files.
-	InputParams(string, map[string]NamedReader) ([]byte, error)
+	InputParams(string, map[string]FileReader) ([]byte, error)
 	// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputPaidMedia() MergedInputPaidMedia
 	// inputPaidMedia exists to avoid external types implementing this interface.
@@ -5203,9 +5203,9 @@ type MergedInputPaidMedia struct {
 	// Type of the media
 	Type string `json:"type"`
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
+	Media InputFileOrString `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for video)
-	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	Thumbnail InputFile `json:"thumbnail,omitempty"`
 	// Optional. Video width (Only for video)
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height (Only for video)
@@ -5222,7 +5222,7 @@ func (v MergedInputPaidMedia) GetType() string {
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
-func (v MergedInputPaidMedia) GetMedia() InputFile {
+func (v MergedInputPaidMedia) GetMedia() InputFileOrString {
 	return v.Media
 }
 
@@ -5239,7 +5239,7 @@ func (v MergedInputPaidMedia) MergeInputPaidMedia() MergedInputPaidMedia {
 // The paid media to send is a photo.
 type InputPaidMediaPhoto struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
+	Media InputFileOrString `json:"media"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -5248,7 +5248,7 @@ func (v InputPaidMediaPhoto) GetType() string {
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
-func (v InputPaidMediaPhoto) GetMedia() InputFile {
+func (v InputPaidMediaPhoto) GetMedia() InputFileOrString {
 	return v.Media
 }
 
@@ -5276,22 +5276,11 @@ func (v InputPaidMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputPaidMediaPhoto.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaPhoto) inputPaidMedia() {}
 
-func (v InputPaidMediaPhoto) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputPaidMediaPhoto) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
-
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type: %T", v.Media)
+		err := v.Media.Attach(mediaName, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -5303,9 +5292,9 @@ func (v InputPaidMediaPhoto) InputParams(mediaName string, data map[string]Named
 // The paid media to send is a video.
 type InputPaidMediaVideo struct {
 	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Media InputFile `json:"media"`
+	Media InputFileOrString `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail *InputFile `json:"thumbnail,omitempty"`
+	Thumbnail InputFile `json:"thumbnail,omitempty"`
 	// Optional. Video width
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height
@@ -5322,7 +5311,7 @@ func (v InputPaidMediaVideo) GetType() string {
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
-func (v InputPaidMediaVideo) GetMedia() InputFile {
+func (v InputPaidMediaVideo) GetMedia() InputFileOrString {
 	return v.Media
 }
 
@@ -5355,22 +5344,18 @@ func (v InputPaidMediaVideo) MarshalJSON() ([]byte, error) {
 // InputPaidMediaVideo.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaVideo) inputPaidMedia() {}
 
-func (v InputPaidMediaVideo) InputParams(mediaName string, data map[string]NamedReader) ([]byte, error) {
+func (v InputPaidMediaVideo) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
 	if v.Media != nil {
-		switch m := v.Media.(type) {
-		case string:
-			// ok, noop
+		err := v.Media.Attach(mediaName, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
 
-		case NamedReader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = m
-
-		case io.Reader:
-			v.Media = "attach://" + mediaName
-			data[mediaName] = NamedFile{File: m}
-
-		default:
-			return nil, fmt.Errorf("unknown type: %T", v.Media)
+	if v.Thumbnail != nil {
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 
