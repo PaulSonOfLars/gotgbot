@@ -172,7 +172,7 @@ func (c Conversation) getNextHandler(b *gotgbot.Bot, ctx *ext.Context) (ext.Hand
 	// Check if a conversation has already started for this user.
 	currState, err := c.StateStorage.Get(ctx)
 	if err != nil {
-		if errors.Is(err, conversation.ErrKeyNotFound) || errors.Is(err, conversation.ErrEmptyKey) {
+		if errors.Is(err, conversation.ErrKeyNotFound) {
 			// If this is an unknown conversation key, then we know this is a new conversation, so we check all
 			// entrypoints.
 			return checkHandlerList(c.EntryPoints, b, ctx), nil
