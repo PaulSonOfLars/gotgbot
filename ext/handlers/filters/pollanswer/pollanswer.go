@@ -1,4 +1,4 @@
-package poll
+package pollanswer
 
 import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
