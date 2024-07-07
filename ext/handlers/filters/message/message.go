@@ -301,3 +301,23 @@ func TopicAction(msg *gotgbot.Message) bool {
 	return TopicEdited(msg) || TopicCreated(msg) ||
 		TopicClosed(msg) || TopicReopened(msg)
 }
+
+func SuccessfulPayment(msg *gotgbot.Message) bool {
+	return msg.SuccessfulPayment != nil
+}
+
+func SuccessfulPaymentInvoicePrefix(pref string) func(msg *gotgbot.Message) bool {
+	return func(msg *gotgbot.Message) bool {
+		return msg.SuccessfulPayment != nil && strings.HasPrefix(msg.SuccessfulPayment.InvoicePayload, pref)
+	}
+}
+
+func RefundedPayment(msg *gotgbot.Message) bool {
+	return msg.RefundedPayment != nil
+}
+
+func RefundedPaymentInvoicePrefix(pref string) func(msg *gotgbot.Message) bool {
+	return func(msg *gotgbot.Message) bool {
+		return msg.RefundedPayment != nil && strings.HasPrefix(msg.RefundedPayment.InvoicePayload, pref)
+	}
+}
