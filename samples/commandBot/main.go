@@ -99,8 +99,8 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // start introduces the bot.
 func start(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
-		ParseMode: "html",
+	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nI am a sample bot to demonstrate how file sending works.\n\nTry the /source command!", b.User.Username), &gotgbot.SendMessageOpts{
+		ParseMode: "HTML",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
