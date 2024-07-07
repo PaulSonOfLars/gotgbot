@@ -1,4 +1,4 @@
-package shippingquery
+package precheckoutquery
 
 import (
 	"strings"

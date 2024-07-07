@@ -1,4 +1,4 @@
-package message
+package businessconnection
 
 import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
