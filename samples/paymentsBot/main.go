@@ -115,17 +115,26 @@ func preCheckout(b *gotgbot.Bot, ctx *ext.Context) error {
 	// is checking out; but this would require storage, so isn't shown here.
 
 	// Answer true once checks have passed.
-	ctx.PreCheckoutQuery.Answer(b, true, nil)
+	_, err := ctx.PreCheckoutQuery.Answer(b, true, nil)
+	if err != nil {
+		return fmt.Errorf("failed to answer precheckout query: %w", err)
+	}
 	return nil
 }
 
 func paymentComplete(b *gotgbot.Bot, ctx *ext.Context) error {
 	// Payment has been received; a real bot would now provide the user with the product.
-	ctx.EffectiveMessage.Reply(b, "Payment complete - in a real bot, this is where you would provision the product that has been paid for.", nil)
+	_, err := ctx.EffectiveMessage.Reply(b, "Payment complete - in a real bot, this is where you would provision the product that has been paid for.", nil)
+	if err != nil {
+		return fmt.Errorf("failed to send payment complete message: %w", err)
+	}
 	return nil
 }
 
 func paySupport(b *gotgbot.Bot, ctx *ext.Context) error {
-	ctx.EffectiveMessage.Reply(b, "Explain your refund process here.", nil)
+	_, err := ctx.EffectiveMessage.Reply(b, "Explain your refund process here.", nil)
+	if err != nil {
+		return fmt.Errorf("failed to describe refund process: %w", err)
+	}
 	return nil
 }
