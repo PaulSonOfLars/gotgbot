@@ -5999,6 +5999,8 @@ type Message struct {
 	Invoice *Invoice `json:"invoice,omitempty"`
 	// Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
 	SuccessfulPayment *SuccessfulPayment `json:"successful_payment,omitempty"`
+	// Optional. Message is a service message about a refunded payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
+	RefundedPayment *RefundedPayment `json:"refunded_payment,omitempty"`
 	// Optional. Service message: users were shared with the bot
 	UsersShared *UsersShared `json:"users_shared,omitempty"`
 	// Optional. Service message: a chat was shared with the bot
@@ -6113,6 +6115,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		PinnedMessage                 json.RawMessage                `json:"pinned_message"`
 		Invoice                       *Invoice                       `json:"invoice"`
 		SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`
+		RefundedPayment               *RefundedPayment               `json:"refunded_payment"`
 		UsersShared                   *UsersShared                   `json:"users_shared"`
 		ChatShared                    *ChatShared                    `json:"chat_shared"`
 		ConnectedWebsite              string                         `json:"connected_website"`
@@ -6210,6 +6213,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	}
 	v.Invoice = t.Invoice
 	v.SuccessfulPayment = t.SuccessfulPayment
+	v.RefundedPayment = t.RefundedPayment
 	v.UsersShared = t.UsersShared
 	v.ChatShared = t.ChatShared
 	v.ConnectedWebsite = t.ConnectedWebsite
@@ -7869,6 +7873,22 @@ func (v ReactionTypeEmoji) MarshalJSON() ([]byte, error) {
 
 // ReactionTypeEmoji.reactionType is a dummy method to avoid interface implementation.
 func (v ReactionTypeEmoji) reactionType() {}
+
+// RefundedPayment (https://core.telegram.org/bots/api#refundedpayment)
+//
+// This object contains basic information about a refunded payment.
+type RefundedPayment struct {
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars. Currently, always "XTR"
+	Currency string `json:"currency"`
+	// Total refunded price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45, total_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
+	TotalAmount int64 `json:"total_amount"`
+	// Bot-specified invoice payload
+	InvoicePayload string `json:"invoice_payload"`
+	// Telegram payment identifier
+	TelegramPaymentChargeId string `json:"telegram_payment_charge_id"`
+	// Optional. Provider payment identifier
+	ProviderPaymentChargeId string `json:"provider_payment_charge_id,omitempty"`
+}
 
 // ReplyKeyboardMarkup (https://core.telegram.org/bots/api#replykeyboardmarkup)
 //
