@@ -15,9 +15,10 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/precheckoutquery"
 )
 
-// This bot demonstrates some example interactions with commands on telegram.
-// It has a basic start command with a bot intro.
-// It also has a source command, which sends the bot sourcecode, as a file.
+// This bot demonstrates how to provide invoices, checkouts, and successful payments through telegram's in-app purchase
+// methods.
+// Use this if you want an example of how to sell things through telegram. The example targets Telegram Stars, which
+// allows bot developers to sell digital products through Telegram.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
@@ -44,9 +45,13 @@ func main() {
 
 	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
-	// PreCheckout to handle the step right before payment. Must be handled within 10s, as
+	// PreCheckout to handle the step right before payment. Must be handled within 10s, or the checkout will be abandoned by telegram.
 	dispatcher.AddHandler(handlers.NewPreCheckoutQuery(precheckoutquery.All, preCheckout))
+	// Payment received; send/provide product to customer.
 	dispatcher.AddHandler(handlers.NewMessage(message.SuccessfulPayment, paymentComplete))
+	// Bots selling on telegram must be able to provide refunds; do so through the paysupport command, as mentioned in
+	// the TOS: https://telegram.org/tos/stars#3-1-disputing-purchases
+	dispatcher.AddHandler(handlers.NewCommand("paysupport", paySupport))
 
 	// Start receiving updates.
 	err = updater.StartPolling(b, &ext.PollingOpts{
@@ -117,5 +122,10 @@ func preCheckout(b *gotgbot.Bot, ctx *ext.Context) error {
 func paymentComplete(b *gotgbot.Bot, ctx *ext.Context) error {
 	// Payment has been received; a real bot would now provide the user with the product.
 	ctx.EffectiveMessage.Reply(b, "Payment complete - in a real bot, this is where you would provision the product that has been paid for.", nil)
+	return nil
+}
+
+func paySupport(b *gotgbot.Bot, ctx *ext.Context) error {
+	ctx.EffectiveMessage.Reply(b, "Explain your refund process here.", nil)
 	return nil
 }

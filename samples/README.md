@@ -59,6 +59,13 @@ could be collected.
 This bot shows how to effectively use middlewares to modify and intercept HTTP requests to the bot API server.
 In this example, the middleware sets the allow_sending_without_reply to certain methods, as well as make sure to log all error messages.
 
+## samples/paymentsBot
+
+This bot demonstrates how to provide invoices, checkouts, and successful payments through telegram's in-app purchase
+methods.
+Use this if you want an example of how to sell things through telegram. The example targets Telegram Stars, which
+allows bot developers to sell digital products through Telegram.
+
 ## samples/statefulClientBot
 
 This bot demonstrates how to pass around variables to all handlers without changing any function signatures.
