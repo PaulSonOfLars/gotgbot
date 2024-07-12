@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -23,7 +24,12 @@ package gotgbot
 	consts.WriteString(updateConsts)
 
 	consts.WriteString(generateParseModeConsts())
-	consts.WriteString(generateChatActionConsts())
+
+	chatActions, err := generateChatActionConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
+	}
+	consts.WriteString(chatActions)
 
 	stickerTypeConsts, err := generateTypeConsts(d, "Sticker")
 	if err != nil {
@@ -123,19 +129,37 @@ func generateParseModeConsts() string {
 	return out.String()
 }
 
-func generateChatActionConsts() string {
-	chatActions := []string{
-		"typing",
-		"upload_photo",
-		"record_video",
-		"upload_video",
-		"record_voice",
-		"upload_voice",
-		"upload_document",
-		"choose_sticker",
-		"find_location",
-		"record_video_note",
-		"upload_video_note",
+func generateChatActionConsts(d APIDescription) (string, error) {
+	methodName := "sendChatAction"
+	fieldName := "action"
+
+	sendChatActionMethod, ok := d.Methods[methodName]
+	if !ok {
+		return "", errors.New("missing '" + methodName + "' method data")
+	}
+
+	var description string
+
+	for _, field := range sendChatActionMethod.Fields {
+		if field.Name == fieldName {
+			description = field.Description
+
+			break
+		}
+	}
+
+	if description == "" {
+		return "", errors.New("missing '" + fieldName + "' method field")
+	}
+
+	// Parse chat action from the description
+	var chatActions []string
+
+	re := regexp.MustCompile(`(?P<action>[a-z_]+) f?or`)
+	results := re.FindAllStringSubmatch(description, -1)
+
+	for _, result := range results {
+		chatActions = append(chatActions, result[1])
 	}
 
 	out := strings.Builder{}
@@ -149,7 +173,7 @@ func generateChatActionConsts() string {
 
 	out.WriteString(")\n\n")
 
-	return out.String()
+	return out.String(), nil
 }
 
 func writeConst(name string, value string) string {
