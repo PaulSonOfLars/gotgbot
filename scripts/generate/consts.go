@@ -23,6 +23,7 @@ package gotgbot
 	consts.WriteString(updateConsts)
 
 	consts.WriteString(generateParseModeConsts())
+	consts.WriteString(generateChatActionConsts())
 
 	stickerTypeConsts, err := generateTypeConsts(d, "Sticker")
 	if err != nil {
@@ -119,6 +120,35 @@ func generateParseModeConsts() string {
 		out.WriteString(writeConst(constName, t))
 	}
 	out.WriteString(")\n\n")
+	return out.String()
+}
+
+func generateChatActionConsts() string {
+	chatActions := []string{
+		"typing",
+		"upload_photo",
+		"record_video",
+		"upload_video",
+		"record_voice",
+		"upload_voice",
+		"upload_document",
+		"choose_sticker",
+		"find_location",
+		"record_video_note",
+		"upload_video_note",
+	}
+
+	out := strings.Builder{}
+	out.WriteString("\n// The consts listed below represent all the chat action options that can be sent to telegram.")
+	out.WriteString("\nconst (")
+
+	for _, a := range chatActions {
+		constName := "ChatAction" + snakeToTitle(a)
+		out.WriteString(writeConst(constName, a))
+	}
+
+	out.WriteString(")\n\n")
+
 	return out.String()
 }
 
