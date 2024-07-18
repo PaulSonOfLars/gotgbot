@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/forPelevin/gomoji"
 )
 
 func generateConsts(d APIDescription) error {
@@ -25,12 +27,6 @@ package gotgbot
 
 	consts.WriteString(generateParseModeConsts())
 
-	chatActions, err := generateChatActionConsts(d)
-	if err != nil {
-		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
-	}
-	consts.WriteString(chatActions)
-
 	stickerTypeConsts, err := generateTypeConsts(d, "Sticker")
 	if err != nil {
 		return fmt.Errorf("failed to generate consts for sticker types: %w", err)
@@ -42,6 +38,18 @@ package gotgbot
 		return fmt.Errorf("failed to generate consts for chat types: %w", err)
 	}
 	consts.WriteString(chatTypeConsts)
+
+	chatActions, err := generateChatActionConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
+	}
+	consts.WriteString(chatActions)
+
+	reactions, err := generateReactionConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for reactions: %w", err)
+	}
+	consts.WriteString(reactions)
 
 	return writeGenToFile(consts, "gen_consts.go")
 }
@@ -169,6 +177,63 @@ func generateChatActionConsts(d APIDescription) (string, error) {
 	for _, a := range chatActions {
 		constName := "ChatAction" + snakeToTitle(a)
 		out.WriteString(writeConst(constName, a))
+	}
+
+	out.WriteString(")\n\n")
+
+	return out.String(), nil
+}
+
+func generateReactionConsts(d APIDescription) (string, error) {
+	typeName := "ReactionTypeEmoji"
+	fieldName := "emoji"
+
+	reactionEmojiType, ok := d.Types[typeName]
+	if !ok {
+		return "", errors.New("missing '" + typeName + "' type data")
+	}
+
+	var description string
+
+	for _, field := range reactionEmojiType.Fields {
+		if field.Name == fieldName {
+			description = field.Description
+
+			break
+		}
+	}
+
+	if description == "" {
+		return "", errors.New("missing '" + fieldName + "' type field")
+	}
+
+	// Parse emojis from the description
+	var emojis []string
+
+	re := regexp.MustCompile(`"(.+)"`)
+	for _, s := range strings.Split(description, ",") {
+		result := re.FindStringSubmatch(s)
+		if len(result) < 2 {
+			continue
+		}
+
+		e := result[1]
+
+		emojis = append(emojis, e)
+	}
+
+	out := strings.Builder{}
+	out.WriteString("\n// The consts listed below represent all the reaction options that can be sent to telegram as ReactionTypeEmoji.")
+	out.WriteString("\nconst (")
+
+	for _, e := range emojis {
+		emoji, err := gomoji.GetInfo(e)
+		if err != nil {
+			return "", fmt.Errorf("failed to get emoji info for %q: %w", e, err)
+		}
+
+		constName := "Reaction" + snakeToTitle(strings.ReplaceAll(emoji.Slug, "-", "_"))
+		out.WriteString(writeConst(constName, e))
 	}
 
 	out.WriteString(")\n\n")

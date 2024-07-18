@@ -111,6 +111,21 @@ const (
 	ParseModeNone       = ""
 )
 
+// The consts listed below represent all the sticker types that can be obtained from telegram.
+const (
+	StickerTypeRegular     = "regular"
+	StickerTypeMask        = "mask"
+	StickerTypeCustomEmoji = "custom_emoji"
+)
+
+// The consts listed below represent all the chat types that can be obtained from telegram.
+const (
+	ChatTypePrivate    = "private"
+	ChatTypeGroup      = "group"
+	ChatTypeSupergroup = "supergroup"
+	ChatTypeChannel    = "channel"
+)
+
 // The consts listed below represent all the chat action options that can be sent to telegram.
 const (
 	ChatActionTyping          = "typing"
@@ -126,17 +141,79 @@ const (
 	ChatActionUploadVideoNote = "upload_video_note"
 )
 
-// The consts listed below represent all the sticker types that can be obtained from telegram.
+// The consts listed below represent all the reaction options that can be sent to telegram as ReactionTypeEmoji.
 const (
-	StickerTypeRegular     = "regular"
-	StickerTypeMask        = "mask"
-	StickerTypeCustomEmoji = "custom_emoji"
-)
-
-// The consts listed below represent all the chat types that can be obtained from telegram.
-const (
-	ChatTypePrivate    = "private"
-	ChatTypeGroup      = "group"
-	ChatTypeSupergroup = "supergroup"
-	ChatTypeChannel    = "channel"
+	ReactionThumbsUp                   = "👍"
+	ReactionThumbsDown                 = "👎"
+	ReactionRedHeart                   = "❤"
+	ReactionFire                       = "🔥"
+	ReactionSmilingFaceWithHearts      = "🥰"
+	ReactionClappingHands              = "👏"
+	ReactionBeamingFaceWithSmilingEyes = "😁"
+	ReactionThinkingFace               = "🤔"
+	ReactionExplodingHead              = "🤯"
+	ReactionFaceScreamingInFear        = "😱"
+	ReactionFaceWithSymbolsOnMouth     = "🤬"
+	ReactionCryingFace                 = "😢"
+	ReactionPartyPopper                = "🎉"
+	ReactionStarStruck                 = "🤩"
+	ReactionFaceVomiting               = "🤮"
+	ReactionPileOfPoo                  = "💩"
+	ReactionFoldedHands                = "🙏"
+	ReactionOkHand                     = "👌"
+	ReactionDove                       = "🕊"
+	ReactionClownFace                  = "🤡"
+	ReactionYawningFace                = "🥱"
+	ReactionWoozyFace                  = "🥴"
+	ReactionSmilingFaceWithHeartEyes   = "😍"
+	ReactionSpoutingWhale              = "🐳"
+	ReactionHeartOnFire                = "❤‍🔥"
+	ReactionNewMoonFace                = "🌚"
+	ReactionHotDog                     = "🌭"
+	ReactionHundredPoints              = "💯"
+	ReactionRollingOnTheFloorLaughing  = "🤣"
+	ReactionHighVoltage                = "⚡"
+	ReactionBanana                     = "🍌"
+	ReactionTrophy                     = "🏆"
+	ReactionBrokenHeart                = "💔"
+	ReactionFaceWithRaisedEyebrow      = "🤨"
+	ReactionNeutralFace                = "😐"
+	ReactionStrawberry                 = "🍓"
+	ReactionBottleWithPoppingCork      = "🍾"
+	ReactionKissMark                   = "💋"
+	ReactionMiddleFinger               = "🖕"
+	ReactionSmilingFaceWithHorns       = "😈"
+	ReactionSleepingFace               = "😴"
+	ReactionLoudlyCryingFace           = "😭"
+	ReactionNerdFace                   = "🤓"
+	ReactionGhost                      = "👻"
+	ReactionManTechnologist            = "👨‍💻"
+	ReactionEyes                       = "👀"
+	ReactionJackOLantern               = "🎃"
+	ReactionSeeNoEvilMonkey            = "🙈"
+	ReactionSmilingFaceWithHalo        = "😇"
+	ReactionFearfulFace                = "😨"
+	ReactionHandshake                  = "🤝"
+	ReactionWritingHand                = "✍"
+	ReactionSmilingFaceWithOpenHands   = "🤗"
+	ReactionSalutingFace               = "🫡"
+	ReactionSantaClaus                 = "🎅"
+	ReactionChristmasTree              = "🎄"
+	ReactionSnowman                    = "☃"
+	ReactionNailPolish                 = "💅"
+	ReactionZanyFace                   = "🤪"
+	ReactionMoai                       = "🗿"
+	ReactionCoolButton                 = "🆒"
+	ReactionHeartWithArrow             = "💘"
+	ReactionHearNoEvilMonkey           = "🙉"
+	ReactionUnicorn                    = "🦄"
+	ReactionFaceBlowingAKiss           = "😘"
+	ReactionPill                       = "💊"
+	ReactionSpeakNoEvilMonkey          = "🙊"
+	ReactionSmilingFaceWithSunglasses  = "😎"
+	ReactionAlienMonster               = "👾"
+	ReactionManShrugging               = "🤷‍♂"
+	ReactionPersonShrugging            = "🤷"
+	ReactionWomanShrugging             = "🤷‍♀"
+	ReactionEnragedFace                = "😡"
 )
