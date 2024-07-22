@@ -93,6 +93,11 @@ func (c Command) Name() string {
 }
 
 func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
+	ents := msg.GetEntities()
+	if len(ents) != 0 && ents[0].Offset == 0 && ents[0].Type != "bot_command" {
+		return false
+	}
+
 	text := msg.GetText()
 
 	var cmd string
@@ -109,11 +114,6 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 		break
 	}
 	if cmd == "" {
-		return false
-	}
-
-	ents := msg.GetEntities()
-	if len(ents) != 0 && ents[0].Offset == 0 && ents[0].Type != "bot_command" {
 		return false
 	}
 
