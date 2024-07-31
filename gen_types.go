@@ -8777,6 +8777,8 @@ type User struct {
 	SupportsInlineQueries bool `json:"supports_inline_queries,omitempty"`
 	// Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
 	CanConnectToBusiness bool `json:"can_connect_to_business,omitempty"`
+	// Optional. True, if the bot has a main Web App. Returned only in getMe.
+	HasMainWebApp bool `json:"has_main_web_app,omitempty"`
 }
 
 // UserChatBoosts (https://core.telegram.org/bots/api#userchatboosts)
