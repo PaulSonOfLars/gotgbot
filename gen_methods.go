@@ -2609,6 +2609,8 @@ func (bot *Bot) LogOut(opts *LogOutOpts) (bool, error) {
 
 // PinChatMessageOpts is the set of optional fields for Bot.PinChatMessage.
 type PinChatMessageOpts struct {
+	// Unique identifier of the business connection on behalf of which the message will be pinned
+	BusinessConnectionId string
 	// Pass True if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
 	DisableNotification bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2626,6 +2628,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	v["message_id"] = strconv.FormatInt(messageId, 10)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 	}
 
@@ -5471,7 +5474,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *Se
 
 // SetStickerSetThumbnailOpts is the set of optional fields for Bot.SetStickerSetThumbnail.
 type SetStickerSetThumbnailOpts struct {
-	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animated-sticker-requirements for animated sticker technical requirements), or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-sticker-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
+	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animation-requirements for animated sticker technical requirements), or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
 	Thumbnail InputFile
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5900,7 +5903,9 @@ func (bot *Bot) UnpinAllGeneralForumTopicMessages(chatId int64, opts *UnpinAllGe
 
 // UnpinChatMessageOpts is the set of optional fields for Bot.UnpinChatMessage.
 type UnpinChatMessageOpts struct {
-	// Identifier of a message to unpin. If not specified, the most recent pinned message (by sending date) will be unpinned.
+	// Unique identifier of the business connection on behalf of which the message will be unpinned
+	BusinessConnectionId string
+	// Identifier of the message to unpin. Required if business_connection_id is specified. If not specified, the most recent pinned message (by sending date) will be unpinned.
 	MessageId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5915,6 +5920,7 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 	v := map[string]string{}
 	v["chat_id"] = strconv.FormatInt(chatId, 10)
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.MessageId != nil {
 			v["message_id"] = strconv.FormatInt(*opts.MessageId, 10)
 		}

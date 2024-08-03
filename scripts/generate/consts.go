@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -23,6 +24,12 @@ package gotgbot
 	consts.WriteString(updateConsts)
 
 	consts.WriteString(generateParseModeConsts())
+
+	chatActions, err := generateChatActionConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
+	}
+	consts.WriteString(chatActions)
 
 	stickerTypeConsts, err := generateTypeConsts(d, "Sticker")
 	if err != nil {
@@ -120,6 +127,53 @@ func generateParseModeConsts() string {
 	}
 	out.WriteString(")\n\n")
 	return out.String()
+}
+
+func generateChatActionConsts(d APIDescription) (string, error) {
+	methodName := "sendChatAction"
+	fieldName := "action"
+
+	sendChatActionMethod, ok := d.Methods[methodName]
+	if !ok {
+		return "", errors.New("missing '" + methodName + "' method data")
+	}
+
+	var description string
+
+	for _, field := range sendChatActionMethod.Fields {
+		if field.Name == fieldName {
+			description = field.Description
+
+			break
+		}
+	}
+
+	if description == "" {
+		return "", errors.New("missing '" + fieldName + "' method field")
+	}
+
+	// Parse chat action from the description
+	var chatActions []string
+
+	re := regexp.MustCompile(`(?P<action>[a-z_]+) f?or`)
+	results := re.FindAllStringSubmatch(description, -1)
+
+	for _, result := range results {
+		chatActions = append(chatActions, result[1])
+	}
+
+	out := strings.Builder{}
+	out.WriteString("\n// The consts listed below represent all the chat action options that can be sent to telegram.")
+	out.WriteString("\nconst (")
+
+	for _, a := range chatActions {
+		constName := "ChatAction" + snakeToTitle(a)
+		out.WriteString(writeConst(constName, a))
+	}
+
+	out.WriteString(")\n\n")
+
+	return out.String(), nil
 }
 
 func writeConst(name string, value string) string {
