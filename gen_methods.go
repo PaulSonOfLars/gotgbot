@@ -644,6 +644,44 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 	return &c, json.Unmarshal(r, &c)
 }
 
+// CreateChatSubscriptionInviteLinkOpts is the set of optional fields for Bot.CreateChatSubscriptionInviteLink.
+type CreateChatSubscriptionInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// CreateChatSubscriptionInviteLink (https://core.telegram.org/bots/api#createchatsubscriptioninvitelink)
+//
+// Use this method to create a subscription invite link for a channel chat. The bot must have the can_invite_users administrator rights. The link can be edited using the method editChatSubscriptionInviteLink or revoked using the method revokeChatInviteLink. Returns the new invite link as a ChatInviteLink object.
+//   - chatId (type int64): Unique identifier for the target channel chat
+//   - subscriptionPeriod (type int64): The number of seconds the subscription will be active for before the next payment. Currently, it must always be 2592000 (30 days).
+//   - subscriptionPrice (type int64): The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
+//   - opts (type CreateChatSubscriptionInviteLinkOpts): All optional parameters.
+func (bot *Bot) CreateChatSubscriptionInviteLink(chatId int64, subscriptionPeriod int64, subscriptionPrice int64, opts *CreateChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["subscription_period"] = strconv.FormatInt(subscriptionPeriod, 10)
+	v["subscription_price"] = strconv.FormatInt(subscriptionPrice, 10)
+	if opts != nil {
+		v["name"] = opts.Name
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("createChatSubscriptionInviteLink", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatInviteLink
+	return &c, json.Unmarshal(r, &c)
+}
+
 // CreateForumTopicOpts is the set of optional fields for Bot.CreateForumTopic.
 type CreateForumTopicOpts struct {
 	// Color of the topic icon in RGB format. Currently, must be one of 7322096 (0x6FB9F0), 16766590 (0xFFD67E), 13338331 (0xCB86DB), 9367192 (0x8EEE98), 16749490 (0xFF93B2), or 16478047 (0xFB6F5F)
@@ -1223,6 +1261,42 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 	return &c, json.Unmarshal(r, &c)
 }
 
+// EditChatSubscriptionInviteLinkOpts is the set of optional fields for Bot.EditChatSubscriptionInviteLink.
+type EditChatSubscriptionInviteLinkOpts struct {
+	// Invite link name; 0-32 characters
+	Name string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditChatSubscriptionInviteLink (https://core.telegram.org/bots/api#editchatsubscriptioninvitelink)
+//
+// Use this method to edit a subscription invite link created by the bot. The bot must have the can_invite_users administrator rights. Returns the edited invite link as a ChatInviteLink object.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - inviteLink (type string): The invite link to edit
+//   - opts (type EditChatSubscriptionInviteLinkOpts): All optional parameters.
+func (bot *Bot) EditChatSubscriptionInviteLink(chatId int64, inviteLink string, opts *EditChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["invite_link"] = inviteLink
+	if opts != nil {
+		v["name"] = opts.Name
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("editChatSubscriptionInviteLink", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatInviteLink
+	return &c, json.Unmarshal(r, &c)
+}
+
 // EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic.
 type EditForumTopicOpts struct {
 	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
@@ -1235,7 +1309,7 @@ type EditForumTopicOpts struct {
 
 // EditForumTopic (https://core.telegram.org/bots/api#editforumtopic)
 //
-// Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
 //   - opts (type EditForumTopicOpts): All optional parameters.
@@ -1272,7 +1346,7 @@ type EditGeneralForumTopicOpts struct {
 
 // EditGeneralForumTopic (https://core.telegram.org/bots/api#editgeneralforumtopic)
 //
-// Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have can_manage_topics administrator rights. Returns True on success.
+// Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - name (type string): New topic name, 1-128 characters
 //   - opts (type EditGeneralForumTopicOpts): All optional parameters.
@@ -3913,6 +3987,8 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 
 // SendPaidMediaOpts is the set of optional fields for Bot.SendPaidMedia.
 type SendPaidMediaOpts struct {
+	// Unique identifier of the business connection on behalf of which the message will be sent
+	BusinessConnectionId string
 	// Media caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the media caption. See formatting options for more details.
@@ -3935,8 +4011,8 @@ type SendPaidMediaOpts struct {
 
 // SendPaidMedia (https://core.telegram.org/bots/api#sendpaidmedia)
 //
-// Use this method to send paid media to channel chats. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat
+// Use this method to send paid media. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
 //   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
@@ -3961,6 +4037,7 @@ func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMe
 		v["media"] = string(bs)
 	}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -5050,7 +5127,7 @@ func (bot *Bot) SetGameScore(userId int64, score int64, opts *SetGameScoreOpts) 
 
 // SetMessageReactionOpts is the set of optional fields for Bot.SetMessageReaction.
 type SetMessageReactionOpts struct {
-	// A JSON-serialized list of reaction types to set on the message. Currently, as non-premium users, bots can set up to one reaction per message. A custom emoji reaction can be used if it is either already present on the message or explicitly allowed by chat administrators.
+	// A JSON-serialized list of reaction types to set on the message. Currently, as non-premium users, bots can set up to one reaction per message. A custom emoji reaction can be used if it is either already present on the message or explicitly allowed by chat administrators. Paid reactions can't be used by bots.
 	Reaction []ReactionType
 	// Pass True to set the reaction with a big animation
 	IsBig bool
@@ -5060,7 +5137,7 @@ type SetMessageReactionOpts struct {
 
 // SetMessageReaction (https://core.telegram.org/bots/api#setmessagereaction)
 //
-// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Returns True on success.
+// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageId (type int64): Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
 //   - opts (type SetMessageReactionOpts): All optional parameters.

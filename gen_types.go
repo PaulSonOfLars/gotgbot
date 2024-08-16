@@ -1869,6 +1869,8 @@ type MergedChatMember struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	// Optional. Date when the user's subscription will expire; Unix time (Only for member, restricted, kicked)
+	UntilDate int64 `json:"until_date,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
 	// Optional. True, if the user is allowed to send text messages, contacts, giveaways, giveaway winners, invoices, locations and venues (Only for restricted)
@@ -1891,8 +1893,6 @@ type MergedChatMember struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Date when restrictions will be lifted for this user; Unix time. If 0, then the user is restricted forever (Only for restricted, kicked)
-	UntilDate int64 `json:"until_date,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -2192,6 +2192,8 @@ func (v ChatMemberLeft) chatMember() {}
 type ChatMemberMember struct {
 	// Information about the user
 	User User `json:"user"`
+	// Optional. Date when the user's subscription will expire; Unix time
+	UntilDate int64 `json:"until_date,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -2207,8 +2209,9 @@ func (v ChatMemberMember) GetUser() User {
 // MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
-		Status: "member",
-		User:   v.User,
+		Status:    "member",
+		User:      v.User,
+		UntilDate: v.UntilDate,
 	}
 }
 
@@ -5883,9 +5886,9 @@ type Message struct {
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
-	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+	// Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats
 	From *User `json:"from,omitempty"`
-	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+	// Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
 	// Optional. If the sender of the message boosted the chat, the number of boosts added by the user
 	SenderBoostCount int64 `json:"sender_boost_count,omitempty"`
@@ -7702,6 +7705,7 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 // This object describes the type of a reaction. Currently, it can be one of
 //   - ReactionTypeEmoji
 //   - ReactionTypeCustomEmoji
+//   - ReactionTypePaid
 type ReactionType interface {
 	GetType() string
 	// MergeReactionType returns a MergedReactionType struct to simplify working with complex telegram types in a non-generic world.
@@ -7714,6 +7718,7 @@ type ReactionType interface {
 var (
 	_ ReactionType = ReactionTypeEmoji{}
 	_ ReactionType = ReactionTypeCustomEmoji{}
+	_ ReactionType = ReactionTypePaid{}
 )
 
 // MergedReactionType is a helper type to simplify interactions with the various ReactionType subtypes.
@@ -7796,6 +7801,14 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		}
 		return s, nil
 
+	case "paid":
+		s := ReactionTypePaid{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'paid': %w", err)
+		}
+		return s, nil
+
 	}
 	return nil, fmt.Errorf("unknown interface for ReactionType with Type %v", t.Type)
 }
@@ -7873,6 +7886,39 @@ func (v ReactionTypeEmoji) MarshalJSON() ([]byte, error) {
 
 // ReactionTypeEmoji.reactionType is a dummy method to avoid interface implementation.
 func (v ReactionTypeEmoji) reactionType() {}
+
+// ReactionTypePaid (https://core.telegram.org/bots/api#reactiontypepaid)
+//
+// The reaction is paid.
+type ReactionTypePaid struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v ReactionTypePaid) GetType() string {
+	return "paid"
+}
+
+// MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
+func (v ReactionTypePaid) MergeReactionType() MergedReactionType {
+	return MergedReactionType{
+		Type: "paid",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v ReactionTypePaid) MarshalJSON() ([]byte, error) {
+	type alias ReactionTypePaid
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "paid",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ReactionTypePaid.reactionType is a dummy method to avoid interface implementation.
+func (v ReactionTypePaid) reactionType() {}
 
 // RefundedPayment (https://core.telegram.org/bots/api#refundedpayment)
 //
@@ -8439,6 +8485,8 @@ type MergedTransactionPartner struct {
 	User *User `json:"user,omitempty"`
 	// Optional. Bot-specified invoice payload (Only for user)
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. Information about the paid media bought by the user (Only for user)
+	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 }
@@ -8664,6 +8712,32 @@ type TransactionPartnerUser struct {
 	User User `json:"user"`
 	// Optional. Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. Information about the paid media bought by the user
+	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
+	// All fields in TransactionPartnerUser, with interface fields as json.RawMessage
+	type tmp struct {
+		User           User            `json:"user"`
+		InvoicePayload string          `json:"invoice_payload"`
+		PaidMedia      json.RawMessage `json:"paid_media"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal TransactionPartnerUser JSON into tmp struct: %w", err)
+	}
+
+	v.User = t.User
+	v.InvoicePayload = t.InvoicePayload
+	v.PaidMedia, err = unmarshalPaidMediaArray(t.PaidMedia)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field PaidMedia: %w", err)
+	}
+
+	return nil
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8677,6 +8751,7 @@ func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartn
 		Type:           "user",
 		User:           &v.User,
 		InvoicePayload: v.InvoicePayload,
+		PaidMedia:      v.PaidMedia,
 	}
 }
 
