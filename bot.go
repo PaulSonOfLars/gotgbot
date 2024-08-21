@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,6 +98,14 @@ func (bot *Bot) Request(method string, params map[string]string, data map[string
 
 	ctx, cancel := bot.BotClient.TimeoutContext(opts)
 	defer cancel()
+
+	return bot.BotClient.RequestWithContext(ctx, bot.Token, method, params, data, opts)
+}
+
+func (bot *Bot) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+	if bot.BotClient == nil {
+		return nil, ErrNilBotClient
+	}
 
 	return bot.BotClient.RequestWithContext(ctx, bot.Token, method, params, data, opts)
 }
