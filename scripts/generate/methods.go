@@ -45,9 +45,20 @@ import (
 func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, error) {
 	method := strings.Builder{}
 
-	args, retTypes, optionalsStruct, err := generateMethodSignature(d, tgMethod)
+	req := tgMethod.getRequiredFields()
+	reqArgs, err := req.getFunctionArgs(d)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get required arguments for %s: %w", tgMethod.Name, err)
+	}
+
+	optionalsStruct, err := tgMethod.getOptionalsStruct(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get optionals for method %s: %w", tgMethod.Name, err)
+	}
+
+	retTypes, err := tgMethod.GetReturnTypes(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
 	}
 
 	if optionalsStruct != "" {
@@ -75,21 +86,16 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate return values: %w", err)
 	}
 
-	methodSignature := strings.Title(tgMethod.Name) + "(" + strings.Join(args, ", ") + ") (" + strings.Join(retTypes, ", ") + ", error)"
+	joinedArgs := strings.Join(reqArgs, ", ")
+	joinedRetTypes := strings.Join(retTypes, ", ")
+
 	method.WriteString(desc)
-	method.WriteString(genMethodSig(methodSignature, valueGen, hasData, false, tgMethod, defaultRetVals, returnGen))
+	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + joinedArgs + ") (" + joinedRetTypes + ", error) {")
+	method.WriteString("\n\treturn bot." + strings.Title(tgMethod.Name) + "WithContext(context.Background(), " + strings.Join(req.getNames(), ", ") + ")")
+	method.WriteString("\n}")
 
-	methodSignatureWithCtx := strings.Title(tgMethod.Name) + "WithContext(ctx context.Context, " + strings.Join(args, ", ") + ") (" + strings.Join(retTypes, ", ") + ", error)"
-	method.WriteString(fmt.Sprintf("\n// %sWithContext is the same as %s, but with a context.Context parameter.", strings.Title(tgMethod.Name), strings.Title(tgMethod.Name)))
-	method.WriteString(genMethodSig(methodSignatureWithCtx, valueGen, hasData, true, tgMethod, defaultRetVals, returnGen))
-
-	return method.String(), nil
-}
-
-func genMethodSig(methodSignature string, valueGen string, hasData bool, withContext bool, tgMethod MethodDescription, defaultRetVals string, returnGen string) string {
-	method := strings.Builder{}
-
-	method.WriteString("\nfunc (bot *Bot) " + methodSignature + " {")
+	method.WriteString("\n// " + strings.Title(tgMethod.Name) + "WithContext is the same as Bot." + strings.Title(tgMethod.Name) + ", but with a context.Context parameter")
+	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "WithContext(ctx context.Context, " + joinedArgs + ") (" + joinedRetTypes + ", error) {")
 	method.WriteString("\n	v := map[string]string{}")
 	method.WriteString(valueGen)
 	method.WriteString("\n")
@@ -102,17 +108,9 @@ func genMethodSig(methodSignature string, valueGen string, hasData bool, withCon
 
 	// If sending data, we need to do it over POST
 	if hasData {
-		if withContext {
-			method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, data, reqOpts)")
-		} else {
-			method.WriteString("\nr, err := bot.Request(\"" + tgMethod.Name + "\", v, data, reqOpts)")
-		}
+		method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, data, reqOpts)")
 	} else {
-		if withContext {
-			method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, nil, reqOpts)")
-		} else {
-			method.WriteString("\nr, err := bot.Request(\"" + tgMethod.Name + "\", v, nil, reqOpts)")
-		}
+		method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, nil, reqOpts)")
 	}
 
 	method.WriteString("\n	if err != nil {")
@@ -123,21 +121,7 @@ func genMethodSig(methodSignature string, valueGen string, hasData bool, withCon
 	method.WriteString(returnGen)
 	method.WriteString("\n}")
 
-	return method.String()
-}
-
-func generateMethodSignature(d APIDescription, tgMethod MethodDescription) ([]string, []string, string, error) {
-	retTypes, err := tgMethod.GetReturnTypes(d)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("failed to get return for %s: %w", tgMethod.Name, err)
-	}
-
-	args, optionalsStruct, err := tgMethod.getArgs(d)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("failed to get args for method %s: %w", tgMethod.Name, err)
-	}
-
-	return args, retTypes, optionalsStruct, nil
+	return method.String(), nil
 }
 
 func returnValues(d APIDescription, retTypes []string) (string, error) {
@@ -379,19 +363,60 @@ func getRetVarName(retType string) string {
 	return strings.ToLower(retType[:1])
 }
 
-func (m MethodDescription) getArgs(d APIDescription) ([]string, string, error) {
-	var requiredArgs []string
+type Fields []Field
+
+func (m MethodDescription) getRequiredFields() Fields {
+	var req []Field
+	for _, f := range m.Fields {
+		if f.Required {
+			req = append(req, f)
+		}
+	}
+	req = append(req, Field{
+		Name:        "opts",
+		Types:       []string{"*" + m.optsName()},
+		Required:    true,
+		Description: "All optional parameters.",
+	})
+	return req
+}
+
+func (fs Fields) getNames() []string {
+	var names []string
+	for _, f := range fs {
+		names = append(names, snakeToCamel(f.Name))
+	}
+	return names
+}
+
+func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
+	var args []string
+	for _, f := range fs {
+		if !f.Required {
+			continue
+		}
+
+		fieldType, err := f.getPreferredType(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get preferred type: %w", err)
+		}
+
+		args = append(args, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))
+	}
+	return args, nil
+}
+
+func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) {
 	optionals := strings.Builder{}
 
 	for _, f := range m.Fields {
-		fieldType, err := f.getPreferredType(d)
-		if err != nil {
-			return nil, "", fmt.Errorf("failed to get preferred type: %w", err)
+		if f.Required {
+			continue
 		}
 
-		if f.Required {
-			requiredArgs = append(requiredArgs, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))
-			continue
+		fieldType, err := f.getPreferredType(d)
+		if err != nil {
+			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
 		optionals.WriteString("\n// " + f.GetDescription())
@@ -400,16 +425,14 @@ func (m MethodDescription) getArgs(d APIDescription) ([]string, string, error) {
 
 	optionalsName := m.optsName()
 	optionalsStructBuilder := strings.Builder{}
-	optionalsStructBuilder.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s.", optionalsName, strings.Title(m.Name)))
+	optionalsStructBuilder.WriteString(fmt.Sprintf("\n// %s is the set of optional fields for Bot.%s and Bot.%sWithContext.", optionalsName, strings.Title(m.Name), strings.Title(m.Name)))
 	optionalsStructBuilder.WriteString("\ntype " + optionalsName + " struct {")
 	optionalsStructBuilder.WriteString(optionals.String())
 	optionalsStructBuilder.WriteString("\n// RequestOpts are an additional optional field to configure timeouts for individual requests")
 	optionalsStructBuilder.WriteString("\nRequestOpts *RequestOpts")
 	optionalsStructBuilder.WriteString("\n}")
 
-	requiredArgs = append(requiredArgs, fmt.Sprintf("opts *%s", optionalsName))
-
-	return requiredArgs, optionalsStructBuilder.String(), nil
+	return optionalsStructBuilder.String(), nil
 }
 
 type readerBranchesData struct {
