@@ -1771,6 +1771,10 @@ type ChatInviteLink struct {
 	MemberLimit int64 `json:"member_limit,omitempty"`
 	// Optional. Number of pending join requests created using this link
 	PendingJoinRequestCount int64 `json:"pending_join_request_count,omitempty"`
+	// Optional. The number of seconds the subscription will be active for before the next payment
+	SubscriptionPeriod int64 `json:"subscription_period,omitempty"`
+	// Optional. The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat using the link
+	SubscriptionPrice int64 `json:"subscription_price,omitempty"`
 }
 
 // ChatJoinRequest (https://core.telegram.org/bots/api#chatjoinrequest)
@@ -4614,7 +4618,7 @@ type InputInvoiceMessageContent struct {
 	Title string `json:"title"`
 	// Product description, 1-255 characters
 	Description string `json:"description"`
-	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
 	Payload string `json:"payload"`
 	// Optional. Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string `json:"provider_token,omitempty"`

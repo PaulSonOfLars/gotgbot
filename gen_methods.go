@@ -764,7 +764,7 @@ type CreateInvoiceLinkOpts struct {
 // Use this method to create a link for an invoice. Returns the created invoice link as String on success.
 //   - title (type string): Product name, 1-32 characters
 //   - description (type string): Product description, 1-255 characters
-//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
 //   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
 //   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
 //   - opts (type CreateInvoiceLinkOpts): All optional parameters.
@@ -3649,7 +3649,7 @@ type SendInvoiceOpts struct {
 //   - chatId (type int64): Unique identifier for the target chat
 //   - title (type string): Product name, 1-32 characters
 //   - description (type string): Product description, 1-255 characters
-//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+//   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
 //   - currency (type string): Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
 //   - prices (type []LabeledPrice): Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
 //   - opts (type SendInvoiceOpts): All optional parameters.
