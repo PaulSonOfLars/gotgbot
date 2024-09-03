@@ -95,13 +95,10 @@ func (bot *Bot) Request(method string, params map[string]string, data map[string
 	return bot.RequestWithContext(context.Background(), method, params, data, opts)
 }
 
-func (bot *Bot) RequestWithContext(parentCtx context.Context, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *Bot) RequestWithContext(ctx context.Context, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
 	if bot.BotClient == nil {
 		return nil, ErrNilBotClient
 	}
 
-	childCtx, cancel := bot.BotClient.TimeoutContext(parentCtx, opts)
-	defer cancel()
-
-	return bot.BotClient.RequestWithContext(childCtx, bot.Token, method, params, data, opts)
+	return bot.BotClient.RequestWithContext(ctx, bot.Token, method, params, data, opts)
 }

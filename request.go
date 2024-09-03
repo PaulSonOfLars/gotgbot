@@ -22,8 +22,6 @@ const (
 type BotClient interface {
 	// RequestWithContext submits a POST HTTP request a bot API instance.
 	RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error)
-	// TimeoutContext wraps the existing context with the timeout from the provided RequestOpts, or any default opts defined by the BotClient.
-	TimeoutContext(ctx context.Context, opts *RequestOpts) (context.Context, context.CancelFunc)
 	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
 	GetAPIURL(opts *RequestOpts) string
 	// FileURL gets the URL of a file at the API address that the bot is interacting with.
@@ -82,8 +80,8 @@ type RequestOpts struct {
 	APIURL string
 }
 
-// TimeoutContext returns the appropriate context for the current settings.
-func (bot *BaseBotClient) TimeoutContext(parentCtx context.Context, opts *RequestOpts) (context.Context, context.CancelFunc) {
+// getTimeoutContext returns the appropriate context for the current settings.
+func (bot *BaseBotClient) getTimeoutContext(parentCtx context.Context, opts *RequestOpts) (context.Context, context.CancelFunc) {
 	if parentCtx == nil {
 		parentCtx = context.Background()
 	}
@@ -102,7 +100,7 @@ func (bot *BaseBotClient) TimeoutContext(parentCtx context.Context, opts *Reques
 		}
 	}
 
-	return context.WithTimeout(context.Background(), DefaultTimeout)
+	return context.WithTimeout(parentCtx, DefaultTimeout)
 }
 
 func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Context, context.CancelFunc) {
@@ -131,9 +129,11 @@ func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Cont
 //   - method: the telegram API method to call.
 //   - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 //   - data: map of any files to be sending to the telegram API.
-//   - opts: request opts to use. Note: Timeout opts are ignored when used in RequestWithContext. Timeout handling is the
-//     responsibility of the caller/context owner.
-func (bot *BaseBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+//   - opts: request opts to use.
+func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
+	defer cancel()
+
 	b := &bytes.Buffer{}
 
 	var contentType string
