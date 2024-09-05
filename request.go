@@ -134,25 +134,30 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
 
-	b := &bytes.Buffer{}
+	var requestBody io.Reader
 
 	var contentType string
 	// Check if there are any files to upload. If yes, use multipart; else, use JSON.
 	if len(data) > 0 {
-		var err error
-		contentType, err = fillBuffer(b, params, data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fill buffer with parameters and file data: %w", err)
-		}
+		pr, pw := io.Pipe()
+		defer pr.Close() // avoid writer goroutine leak
+		mw := multipart.NewWriter(pw)
+		go func() { // write the request data asynchronously from another goroutine
+			writerError := fillBufferAsync(mw, params, data)
+			_ = pw.CloseWithError(writerError) // close the writer with error of multipart writer
+		}()
+		contentType = mw.FormDataContentType()
+		requestBody = pr
 	} else {
 		contentType = "application/json"
-		err := json.NewEncoder(b).Encode(params)
+		bodyBytes, err := json.Marshal(params)
 		if err != nil {
 			return nil, fmt.Errorf("failed to encode parameters as JSON: %w", err)
 		}
+		requestBody = bytes.NewReader(bodyBytes)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), b)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
@@ -183,13 +188,11 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	return r.Result, nil
 }
 
-func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]FileReader) (string, error) {
-	w := multipart.NewWriter(b)
-
+func fillBufferAsync(w *multipart.Writer, params map[string]string, data map[string]FileReader) error {
 	for k, v := range params {
 		err := w.WriteField(k, v)
 		if err != nil {
-			return "", fmt.Errorf("failed to write multipart field %s with value %s: %w", k, v, err)
+			return fmt.Errorf("failed to write multipart field %s with value %s: %w", k, v, err)
 		}
 	}
 
@@ -201,20 +204,20 @@ func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]FileR
 
 		part, err := w.CreateFormFile(field, fileName)
 		if err != nil {
-			return "", fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
+			return fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
 		}
 
 		_, err = io.Copy(part, file.Data)
 		if err != nil {
-			return "", fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
+			return fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
 		}
 	}
 
 	if err := w.Close(); err != nil {
-		return "", fmt.Errorf("failed to close multipart form writer: %w", err)
+		return fmt.Errorf("failed to close multipart form writer: %w", err)
 	}
 
-	return w.FormDataContentType(), nil
+	return nil
 }
 
 // GetAPIURL returns the currently used API endpoint.
