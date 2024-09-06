@@ -193,7 +193,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	return r.Result, nil
 }
 
-// Fill the buffer of multipart.Writer with data which is going to be sent
+// Fill the buffer of multipart.Writer with data which is going to be sent.
 func fillBuffer(w *multipart.Writer, params map[string]string, data map[string]FileReader) error {
 	for k, v := range params {
 		err := w.WriteField(k, v)
