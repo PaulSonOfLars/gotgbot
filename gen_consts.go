@@ -20,6 +20,7 @@ const (
 	UpdateTypeCallbackQuery           = "callback_query"
 	UpdateTypeShippingQuery           = "shipping_query"
 	UpdateTypePreCheckoutQuery        = "pre_checkout_query"
+	UpdateTypePurchasedPaidMedia      = "purchased_paid_media"
 	UpdateTypePoll                    = "poll"
 	UpdateTypePollAnswer              = "poll_answer"
 	UpdateTypeMyChatMember            = "my_chat_member"
@@ -76,6 +77,9 @@ func (u Update) GetType() string {
 
 	case u.PreCheckoutQuery != nil:
 		return UpdateTypePreCheckoutQuery
+
+	case u.PurchasedPaidMedia != nil:
+		return UpdateTypePurchasedPaidMedia
 
 	case u.Poll != nil:
 		return UpdateTypePoll
