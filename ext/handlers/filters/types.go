@@ -15,4 +15,5 @@ type (
 	ShippingQuery      func(sq *gotgbot.ShippingQuery) bool
 	Reaction           func(mru *gotgbot.MessageReactionUpdated) bool
 	BusinessConnection func(bc *gotgbot.BusinessConnection) bool
+	PurchasedPaidMedia func(pm *gotgbot.PaidMediaPurchased) bool
 )
