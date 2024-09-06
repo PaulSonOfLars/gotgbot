@@ -142,12 +142,17 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 		pr, pw := io.Pipe()
 		defer pr.Close() // avoid writer goroutine leak
 		mw := multipart.NewWriter(pw)
-		go func() { // write the request data asynchronously from another goroutine
-			writerError := fillBufferAsync(mw, params, data)
-			_ = pw.CloseWithError(writerError) // close the writer with error of multipart writer
-		}()
 		contentType = mw.FormDataContentType()
 		requestBody = pr
+		// Write the request data asynchronously from another goroutine
+		// to the multipart.Writer which will be piped into the pipe reader
+		// which is tied to the request to be sent
+		go func() {
+			writerError := fillBuffer(mw, params, data)
+			// Close the writer with error of multipart writer.
+			// If the error is nil, this will act just like pw.Close()
+			_ = pw.CloseWithError(writerError)
+		}()
 	} else {
 		contentType = "application/json"
 		bodyBytes, err := json.Marshal(params)
@@ -188,7 +193,8 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	return r.Result, nil
 }
 
-func fillBufferAsync(w *multipart.Writer, params map[string]string, data map[string]FileReader) error {
+// Fill the buffer of multipart.Writer with data which is going to be sent
+func fillBuffer(w *multipart.Writer, params map[string]string, data map[string]FileReader) error {
 	for k, v := range params {
 		err := w.WriteField(k, v)
 		if err != nil {
