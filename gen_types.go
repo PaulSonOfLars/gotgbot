@@ -1336,6 +1336,8 @@ type MergedChatBoostSource struct {
 	User *User `json:"user,omitempty"`
 	// Optional. Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
 	GiveawayMessageId int64 `json:"giveaway_message_id,omitempty"`
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only (Only for giveaway)
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize (Only for giveaway)
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
 }
@@ -1461,12 +1463,14 @@ func (v ChatBoostSourceGiftCode) chatBoostSource() {}
 
 // ChatBoostSourceGiveaway (https://core.telegram.org/bots/api#chatboostsourcegiveaway)
 //
-// The boost was obtained by the creation of a Telegram Premium giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.
+// The boost was obtained by the creation of a Telegram Premium or a Telegram Star giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription for Telegram Premium giveaways and prize_star_count / 500 times for one year for Telegram Star giveaways.
 type ChatBoostSourceGiveaway struct {
 	// Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
 	GiveawayMessageId int64 `json:"giveaway_message_id"`
-	// Optional. User that won the prize in the giveaway if any
+	// Optional. User that won the prize in the giveaway if any; for Telegram Premium giveaways only
 	User *User `json:"user,omitempty"`
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
 }
@@ -1482,6 +1486,7 @@ func (v ChatBoostSourceGiveaway) MergeChatBoostSource() MergedChatBoostSource {
 		Source:            "giveaway",
 		GiveawayMessageId: v.GiveawayMessageId,
 		User:              v.User,
+		PrizeStarCount:    v.PrizeStarCount,
 		IsUnclaimed:       v.IsUnclaimed,
 	}
 }
@@ -2848,7 +2853,9 @@ type Giveaway struct {
 	PrizeDescription string `json:"prize_description,omitempty"`
 	// Optional. A list of two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which eligible users for the giveaway must come. If empty, then all users can participate in the giveaway. Users with a phone number that was bought on Fragment can always participate in giveaways.
 	CountryCodes []string `json:"country_codes,omitempty"`
-	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for; for Telegram Premium giveaways only
 	PremiumSubscriptionMonthCount int64 `json:"premium_subscription_month_count,omitempty"`
 }
 
@@ -2862,12 +2869,17 @@ type GiveawayCompleted struct {
 	UnclaimedPrizeCount int64 `json:"unclaimed_prize_count,omitempty"`
 	// Optional. Message with the giveaway that was completed, if it wasn't deleted
 	GiveawayMessage *Message `json:"giveaway_message,omitempty"`
+	// Optional. True, if the giveaway is a Telegram Star giveaway. Otherwise, currently, the giveaway is a Telegram Premium giveaway.
+	IsStarGiveaway bool `json:"is_star_giveaway,omitempty"`
 }
 
 // GiveawayCreated (https://core.telegram.org/bots/api#giveawaycreated)
 //
-// This object represents a service message about the creation of a scheduled giveaway. Currently holds no information.
-type GiveawayCreated struct{}
+// This object represents a service message about the creation of a scheduled giveaway.
+type GiveawayCreated struct {
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+}
 
 // GiveawayWinners (https://core.telegram.org/bots/api#giveawaywinners)
 //
@@ -2885,7 +2897,9 @@ type GiveawayWinners struct {
 	Winners []User `json:"winners,omitempty"`
 	// Optional. The number of other chats the user had to join in order to be eligible for the giveaway
 	AdditionalChatCount int64 `json:"additional_chat_count,omitempty"`
-	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for
+	// Optional. The number of Telegram Stars that were split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for; for Telegram Premium giveaways only
 	PremiumSubscriptionMonthCount int64 `json:"premium_subscription_month_count,omitempty"`
 	// Optional. Number of undistributed prizes
 	UnclaimedPrizeCount int64 `json:"unclaimed_prize_count,omitempty"`
@@ -6945,6 +6959,16 @@ func (v PaidMediaPreview) MarshalJSON() ([]byte, error) {
 // PaidMediaPreview.paidMedia is a dummy method to avoid interface implementation.
 func (v PaidMediaPreview) paidMedia() {}
 
+// PaidMediaPurchased (https://core.telegram.org/bots/api#paidmediapurchased)
+//
+// This object contains information about a paid media purchase.
+type PaidMediaPurchased struct {
+	// User who purchased the media
+	From User `json:"from"`
+	// Bot-specified paid media payload
+	PaidMediaPayload string `json:"paid_media_payload"`
+}
+
 // PaidMediaVideo (https://core.telegram.org/bots/api#paidmediavideo)
 //
 // The paid media is a video.
@@ -8491,6 +8515,8 @@ type MergedTransactionPartner struct {
 	InvoicePayload string `json:"invoice_payload,omitempty"`
 	// Optional. Information about the paid media bought by the user (Only for user)
 	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+	// Optional. Bot-specified paid media payload (Only for user)
+	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 }
@@ -8718,15 +8744,18 @@ type TransactionPartnerUser struct {
 	InvoicePayload string `json:"invoice_payload,omitempty"`
 	// Optional. Information about the paid media bought by the user
 	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+	// Optional. Bot-specified paid media payload
+	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 }
 
 // UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
 func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 	// All fields in TransactionPartnerUser, with interface fields as json.RawMessage
 	type tmp struct {
-		User           User            `json:"user"`
-		InvoicePayload string          `json:"invoice_payload"`
-		PaidMedia      json.RawMessage `json:"paid_media"`
+		User             User            `json:"user"`
+		InvoicePayload   string          `json:"invoice_payload"`
+		PaidMedia        json.RawMessage `json:"paid_media"`
+		PaidMediaPayload string          `json:"paid_media_payload"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
@@ -8740,6 +8769,7 @@ func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field PaidMedia: %w", err)
 	}
+	v.PaidMediaPayload = t.PaidMediaPayload
 
 	return nil
 }
@@ -8752,10 +8782,11 @@ func (v TransactionPartnerUser) GetType() string {
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
 func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartner {
 	return MergedTransactionPartner{
-		Type:           "user",
-		User:           &v.User,
-		InvoicePayload: v.InvoicePayload,
-		PaidMedia:      v.PaidMedia,
+		Type:             "user",
+		User:             &v.User,
+		InvoicePayload:   v.InvoicePayload,
+		PaidMedia:        v.PaidMedia,
+		PaidMediaPayload: v.PaidMediaPayload,
 	}
 }
 
@@ -8812,6 +8843,8 @@ type Update struct {
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
 	// Optional. New incoming pre-checkout query. Contains full information about checkout
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
+	// Optional. A user purchased paid media with a non-empty payload sent by the bot in a non-channel chat
+	PurchasedPaidMedia *PaidMediaPurchased `json:"purchased_paid_media,omitempty"`
 	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.

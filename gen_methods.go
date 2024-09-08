@@ -4415,6 +4415,8 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 type SendPaidMediaOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
+	// Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
+	Payload string
 	// Media caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the media caption. See formatting options for more details.
@@ -4439,7 +4441,7 @@ type SendPaidMediaOpts struct {
 //
 // Use this method to send paid media. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-2500
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
 func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
@@ -4469,6 +4471,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
+		v["payload"] = opts.Payload
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
