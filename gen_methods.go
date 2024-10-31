@@ -535,6 +535,8 @@ type CopyMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -578,6 +580,7 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -1725,7 +1728,7 @@ type EditMessageMediaOpts struct {
 
 // EditMessageMedia (https://core.telegram.org/bots/api#editmessagemedia)
 //
-// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
+// Use this method to edit animation, audio, document, photo, or video messages, or to add media to text messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - media (type InputMedia): A JSON-serialized object for a new media content of the message
 //   - opts (type EditMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
@@ -3406,6 +3409,8 @@ type SendAnimationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3472,6 +3477,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3527,6 +3533,8 @@ type SendAudioOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3588,6 +3596,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3680,6 +3689,8 @@ type SendContactOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3716,6 +3727,7 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3759,6 +3771,8 @@ type SendDiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3790,6 +3804,7 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3841,6 +3856,8 @@ type SendDocumentOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3897,6 +3914,7 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		v["disable_content_type_detection"] = strconv.FormatBool(opts.DisableContentTypeDetection)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3938,6 +3956,8 @@ type SendGameOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3970,6 +3990,7 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4039,6 +4060,8 @@ type SendInvoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4114,6 +4137,7 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		v["is_flexible"] = strconv.FormatBool(opts.IsFlexible)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4161,6 +4185,8 @@ type SendLocationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4207,6 +4233,7 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4248,6 +4275,8 @@ type SendMediaGroupOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4293,6 +4322,7 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4333,6 +4363,8 @@ type SendMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4380,6 +4412,7 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4429,6 +4462,8 @@ type SendPaidMediaOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4484,6 +4519,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4534,6 +4570,8 @@ type SendPhotoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4584,6 +4622,7 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4649,6 +4688,8 @@ type SendPollOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4720,6 +4761,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		v["is_closed"] = strconv.FormatBool(opts.IsClosed)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4763,6 +4805,8 @@ type SendStickerOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4803,6 +4847,7 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4852,6 +4897,8 @@ type SendVenueOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4894,6 +4941,7 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		v["google_place_type"] = opts.GooglePlaceType
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4955,6 +5003,8 @@ type SendVideoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5022,6 +5072,7 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		v["supports_streaming"] = strconv.FormatBool(opts.SupportsStreaming)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -5069,6 +5120,8 @@ type SendVideoNoteOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5121,6 +5174,7 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -5170,6 +5224,8 @@ type SendVoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5221,6 +5277,7 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)

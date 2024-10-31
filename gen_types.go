@@ -2534,6 +2534,14 @@ type Contact struct {
 	Vcard string `json:"vcard,omitempty"`
 }
 
+// CopyTextButton (https://core.telegram.org/bots/api#copytextbutton)
+//
+// This object represents an inline keyboard button that copies specified text to the clipboard.
+type CopyTextButton struct {
+	// The text to be copied to the clipboard; 1-256 characters
+	Text string `json:"text"`
+}
+
 // Dice (https://core.telegram.org/bots/api#dice)
 //
 // This object represents an animated emoji that displays a random value.
@@ -2961,6 +2969,8 @@ type InlineKeyboardButton struct {
 	SwitchInlineQueryCurrentChat *string `json:"switch_inline_query_current_chat,omitempty"`
 	// Optional. If set, pressing the button will prompt the user to select one of their chats of the specified type, open that chat and insert the bot's username and the specified inline query in the input field. Not supported for messages sent on behalf of a Telegram Business account.
 	SwitchInlineQueryChosenChat *SwitchInlineQueryChosenChat `json:"switch_inline_query_chosen_chat,omitempty"`
+	// Optional. Description of the button that copies the specified text to the clipboard.
+	CopyText *CopyTextButton `json:"copy_text,omitempty"`
 	// Optional. Description of the game that will be launched when the user presses the button. NOTE: This type of button must always be the first button in the first row.
 	CallbackGame *CallbackGame `json:"callback_game,omitempty"`
 	// Optional. Specify True, to send a Pay button. Substrings "⭐" and "XTR" in the buttons's text will be replaced with a Telegram Star icon. NOTE: This type of button must always be the first button in the first row and can only be used in invoice messages.
@@ -5900,7 +5910,7 @@ func (v MenuButtonWebApp) menuButton() {}
 //
 // This object represents a message.
 type Message struct {
-	// Unique message identifier inside this chat
+	// Unique message identifier inside this chat. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
@@ -6293,7 +6303,7 @@ type MessageAutoDeleteTimerChanged struct {
 //
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 type MessageEntity struct {
-	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag), "cashtag" ($USD), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
+	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
 	Type string `json:"type"`
 	// Offset in UTF-16 code units to the start of the entity
 	Offset int64 `json:"offset"`
@@ -6313,7 +6323,7 @@ type MessageEntity struct {
 //
 // This object represents a unique message identifier.
 type MessageId struct {
-	// Unique message identifier
+	// Unique message identifier. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
 	MessageId int64 `json:"message_id"`
 }
 
@@ -8319,7 +8329,7 @@ type ShippingQuery struct {
 //
 // Describes a Telegram Star transaction.
 type StarTransaction struct {
-	// Unique identifier of the transaction. Coincides with the identifer of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
+	// Unique identifier of the transaction. Coincides with the identifier of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
 	Id string `json:"id"`
 	// Number of Telegram Stars transferred by the transaction
 	Amount int64 `json:"amount"`
@@ -8488,6 +8498,7 @@ type TextQuote struct {
 //   - TransactionPartnerUser
 //   - TransactionPartnerFragment
 //   - TransactionPartnerTelegramAds
+//   - TransactionPartnerTelegramApi
 //   - TransactionPartnerOther
 type TransactionPartner interface {
 	GetType() string
@@ -8502,6 +8513,7 @@ var (
 	_ TransactionPartner = TransactionPartnerUser{}
 	_ TransactionPartner = TransactionPartnerFragment{}
 	_ TransactionPartner = TransactionPartnerTelegramAds{}
+	_ TransactionPartner = TransactionPartnerTelegramApi{}
 	_ TransactionPartner = TransactionPartnerOther{}
 )
 
@@ -8519,6 +8531,8 @@ type MergedTransactionPartner struct {
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
+	// Optional. The number of successful requests that exceeded regular limits and were therefore billed (Only for telegram_api)
+	RequestCount int64 `json:"request_count,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8596,6 +8610,14 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 		err := json.Unmarshal(d, &s)
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'telegram_ads': %w", err)
+		}
+		return s, nil
+
+	case "telegram_api":
+		s := TransactionPartnerTelegramApi{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'telegram_api': %w", err)
 		}
 		return s, nil
 
@@ -8733,6 +8755,43 @@ func (v TransactionPartnerTelegramAds) MarshalJSON() ([]byte, error) {
 
 // TransactionPartnerTelegramAds.transactionPartner is a dummy method to avoid interface implementation.
 func (v TransactionPartnerTelegramAds) transactionPartner() {}
+
+// TransactionPartnerTelegramApi (https://core.telegram.org/bots/api#transactionpartnertelegramapi)
+//
+// Describes a transaction with payment for paid broadcasting.
+type TransactionPartnerTelegramApi struct {
+	// The number of successful requests that exceeded regular limits and were therefore billed
+	RequestCount int64 `json:"request_count"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerTelegramApi) GetType() string {
+	return "telegram_api"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerTelegramApi) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type:         "telegram_api",
+		RequestCount: v.RequestCount,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerTelegramApi) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerTelegramApi
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "telegram_api",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerTelegramApi.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerTelegramApi) transactionPartner() {}
 
 // TransactionPartnerUser (https://core.telegram.org/bots/api#transactionpartneruser)
 //
