@@ -4,7 +4,7 @@ set -euo pipefail
 SAMPLES_DIR="samples"
 
 REPO="github.com/PaulSonOfLars/gotgbot" # Current library import path
-GO_VERSION="1.19"                       # Go version we expect our samples to be using
+GO_VERSION="1.21"                       # Go version we expect our samples to be using
 V_MAJOR="v2"                            # Current major version for the library
 V_DUMMY="v2.99.99"                      # dummy version for the library
 
