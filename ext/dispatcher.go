@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -74,11 +75,11 @@ type Dispatcher struct {
 	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
 	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
 	// dispatcher actions.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// Logger specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	Logger *slog.Logger
 
 	// handlers represents all available handlers.
 	handlers handlerMapping
@@ -101,18 +102,18 @@ type DispatcherOpts struct {
 	// More info at Dispatcher.Error.
 	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
-	// If no panic handlers are defined, the stack is logged to ErrorLog.
+	// If no panic handlers are defined, the stack is logged to the logger.
 	// More info at Dispatcher.Panic.
 	Panic DispatcherPanicHandler
 
 	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
 	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
 	// dispatcher actions.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// logger specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	Logger *slog.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
 	// This defines how many updates can be processed at the same time.
@@ -127,7 +128,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errHandler DispatcherErrorHandler
 	var panicHandler DispatcherPanicHandler
 	var unhandledErrFunc ErrorFunc
-	var errLog *log.Logger
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 	maxRoutines := DefaultMaxRoutines
 	processor := Processor(BaseProcessor{})
@@ -143,7 +144,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 		errHandler = opts.Error
 		panicHandler = opts.Panic
 		unhandledErrFunc = opts.UnhandledErrFunc
-		errLog = opts.ErrorLog
+		logger = opts.Logger
 	}
 
 	var limiter chan struct{}
@@ -157,22 +158,14 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	}
 
 	return &Dispatcher{
+		Logger:           logger,
 		Processor:        processor,
 		Error:            errHandler,
 		Panic:            panicHandler,
 		UnhandledErrFunc: unhandledErrFunc,
-		ErrorLog:         errLog,
 		handlers:         handlerMapping{},
 		limiter:          limiter,
 		waitGroup:        sync.WaitGroup{},
-	}
-}
-
-func (d *Dispatcher) logf(format string, args ...interface{}) {
-	if d.ErrorLog != nil {
-		d.ErrorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
 	}
 }
 
@@ -215,7 +208,7 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates <-chan json.RawMessage) {
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
 				} else {
-					d.logf("Failed to process update: %s", err.Error())
+					logError(d.Logger, "failed to process update", err)
 				}
 			}
 

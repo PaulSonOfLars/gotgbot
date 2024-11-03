@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
@@ -46,8 +46,8 @@ type botMapping struct {
 
 	// errFunc fills the same purpose as Updater.UnhandledErrFunc.
 	errFunc ErrorFunc
-	// errorLog fills the same purpose as Updater.ErrorLog.
-	errorLog *log.Logger
+	// logger fills the same purpose as Updater.Logger.
+	logger *slog.Logger
 }
 
 var (
@@ -198,21 +198,13 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 			if m.errFunc != nil {
 				m.errFunc(err)
 			} else {
-				m.logf("Failed to read incoming update contents: %s", err.Error())
+				logError(m.logger, "failed to read incoming update contents", err)
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		b.updateChan <- bytes
-	}
-}
-
-func (m *botMapping) logf(format string, args ...interface{}) {
-	if m.errorLog != nil {
-		m.errorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
 	}
 }
 

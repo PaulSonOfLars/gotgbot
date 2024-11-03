@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -32,11 +33,11 @@ type Updater struct {
 
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// Logger specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	Logger *slog.Logger
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
 	stopIdling chan struct{}
@@ -51,39 +52,31 @@ type Updater struct {
 type UpdaterOpts struct {
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
+	// Logger specifies an optional logger for unexpected behavior from handlers.
 	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	Logger *slog.Logger
 }
 
 // NewUpdater Creates a new Updater, as well as a Dispatcher and any optional updater configurations (via UpdaterOpts).
 func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
-	var errLog *log.Logger
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 	if opts != nil {
 		unhandledErrFunc = opts.UnhandledErrFunc
-		errLog = opts.ErrorLog
+		logger = opts.Logger
 	}
 
 	return &Updater{
 		Dispatcher:       dispatcher,
 		UnhandledErrFunc: unhandledErrFunc,
-		ErrorLog:         errLog,
+		Logger:           logger,
 		botMapping: botMapping{
-			errFunc:  unhandledErrFunc,
-			errorLog: errLog,
+			errFunc: unhandledErrFunc,
+			logger:  logger,
 		},
-	}
-}
-
-func (u *Updater) logf(format string, args ...interface{}) {
-	if u.ErrorLog != nil {
-		u.ErrorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
 	}
 }
 
@@ -196,7 +189,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to get updates; sleeping 1s: %s", err.Error())
+				logError(u.Logger, "failed to get updates; sleeping 1s", err)
 				time.Sleep(time.Second)
 			}
 			continue
@@ -210,7 +203,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to unmarshal updates: %s", err.Error())
+				logError(u.Logger, "failed to unmarshal updates", err)
 			}
 			continue
 		}
@@ -228,7 +221,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to unmarshal last update: %s", err.Error())
+				logError(u.Logger, "failed to unmarshal last update", err)
 			}
 			continue
 		}
