@@ -10,9 +10,9 @@ import (
 type Context struct {
 	// gotgbot.Update is inlined so that we can access all fields immediately if necessary.
 	*gotgbot.Update
-	// BotID represents the ID of the Bot that received this update, so we can keep track of update ownership.
-	// We do not store more, as we may not have that data (eg, in the cases of token validation being disabled).
-	BotId int64
+	// Bot represents gotgbot.User behind the Bot that received this update, so we can keep track of update ownership.
+	// Note: this information may be incomplete in the case where token validation is disabled.
+	Bot gotgbot.User
 	// Data represents update-local storage.
 	// This can be used to pass data across handlers - for example, to cache operations relevant to the current update,
 	// such as admin checks.
@@ -165,7 +165,7 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interfac
 
 	return &Context{
 		Update:           update,
-		BotId:            b.User.Id,
+		Bot:              b.User,
 		Data:             data,
 		EffectiveMessage: msg,
 		EffectiveChat:    chat,

@@ -94,7 +94,13 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse bot ID from token: %w", err)
 		}
-		b.User.Id = id
+		b.User = User{
+			Id:    id,
+			IsBot: true,
+			// We mark these fields as missing so we can know why they're not available
+			FirstName: "<missing>",
+			Username:  "<missing>",
+		}
 	}
 
 	return &b, nil

@@ -26,7 +26,7 @@ func KeyStrategySenderAndChat(ctx *ext.Context) (string, error) {
 	if ctx.EffectiveSender == nil || ctx.EffectiveChat == nil {
 		return "", fmt.Errorf("missing sender or chat fields: %w", ErrEmptyKey)
 	}
-	return fmt.Sprintf("%d/%d/%d", ctx.BotId, ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id), nil
+	return fmt.Sprintf("%d/%d/%d", ctx.Bot.Id, ctx.EffectiveSender.Id(), ctx.EffectiveChat.Id), nil
 }
 
 // KeyStrategySender gives a unique conversation to each sender, and that single conversation is available in all chats.
@@ -34,7 +34,7 @@ func KeyStrategySender(ctx *ext.Context) (string, error) {
 	if ctx.EffectiveSender == nil {
 		return "", fmt.Errorf("missing sender field: %w", ErrEmptyKey)
 	}
-	return fmt.Sprintf("%d/%d", ctx.BotId, ctx.EffectiveSender.Id()), nil
+	return fmt.Sprintf("%d/%d", ctx.Bot.Id, ctx.EffectiveSender.Id()), nil
 }
 
 // KeyStrategyChat gives a unique conversation to each chat, which all senders can interact in together.
@@ -42,7 +42,7 @@ func KeyStrategyChat(ctx *ext.Context) (string, error) {
 	if ctx.EffectiveChat == nil {
 		return "", fmt.Errorf("missing chat field: %w", ErrEmptyKey)
 	}
-	return fmt.Sprintf("%d/%d", ctx.BotId, ctx.EffectiveChat.Id), nil
+	return fmt.Sprintf("%d/%d", ctx.Bot.Id, ctx.EffectiveChat.Id), nil
 }
 
 // StateKey provides a sane default for handling incoming updates.

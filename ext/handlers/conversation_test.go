@@ -89,6 +89,11 @@ func TestBasicKeyedConversation(t *testing.T) {
 
 	// But user two doesnt exist
 	checkExpectedState(t, &conv, messageFromTwo, "")
+
+	b2 := NewTestBot()
+	messageTo2 := NewMessage(b2, userIdOne, chatId, "message")
+	// And bot two hasn't changed either
+	checkExpectedState(t, &conv, messageTo2, "")
 }
 
 func TestBasicConversationExit(t *testing.T) {
@@ -358,6 +363,8 @@ func TestEmptyKeyConversation(t *testing.T) {
 
 // runHandler ensures that the incoming update will trigger the conversation.
 func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, currentState string, nextState string) {
+	t.Helper()
+
 	willRunHandler(t, b, conv, message, currentState)
 	if err := conv.HandleUpdate(b, message); err != nil {
 		t.Fatalf("unexpected error from handler: %s", err.Error())
@@ -368,6 +375,8 @@ func runHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, messa
 
 // willRunHandler ensures that the incoming update will trigger the conversation.
 func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, message *ext.Context, expectedState string) {
+	t.Helper()
+
 	t.Logf("conv %p: checking message for %d in %d with text: %s", conv, message.EffectiveSender.Id(), message.EffectiveChat.Id, message.Message.Text)
 
 	checkExpectedState(t, conv, message, expectedState)
@@ -378,6 +387,8 @@ func willRunHandler(t *testing.T, b *gotgbot.Bot, conv *handlers.Conversation, m
 }
 
 func checkExpectedState(t *testing.T, conv *handlers.Conversation, message *ext.Context, nextState string) {
+	t.Helper()
+
 	currentState, err := conv.StateStorage.Get(message)
 	if err != nil {
 		if nextState == "" && errors.Is(err, conversation.ErrKeyNotFound) {

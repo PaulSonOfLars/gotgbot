@@ -17,7 +17,7 @@ func NewTestBot() *gotgbot.Bot {
 	return &gotgbot.Bot{
 		Token: "use-me",
 		User: gotgbot.User{
-			Id:        0,
+			Id:        rand.Int63(),
 			IsBot:     false,
 			FirstName: "gobot",
 			LastName:  "",
