@@ -199,6 +199,11 @@ func (c Chat) UnpinMessage(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	return b.UnpinChatMessage(c.Id, opts)
 }
 
+// Send Helper method for Bot.SendGift.
+func (g Gift) Send(b *Bot, userId int64, opts *SendGiftOpts) (bool, error) {
+	return b.SendGift(userId, g.Id, opts)
+}
+
 // Copy Helper method for Bot.CopyMessage.
 func (im InaccessibleMessage) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	return b.CopyMessage(chatId, im.Chat.Id, im.MessageId, opts)
@@ -482,6 +487,11 @@ func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
 }
 
+// EditStarSubscription Helper method for Bot.EditUserStarSubscription.
+func (u User) EditStarSubscription(b *Bot, telegramPaymentChargeId string, isCanceled bool, opts *EditUserStarSubscriptionOpts) (bool, error) {
+	return b.EditUserStarSubscription(u.Id, telegramPaymentChargeId, isCanceled, opts)
+}
+
 // GetChatBoosts Helper method for Bot.GetUserChatBoosts.
 func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
 	return b.GetUserChatBoosts(chatId, u.Id, opts)
@@ -490,4 +500,9 @@ func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (
 // GetProfilePhotos Helper method for Bot.GetUserProfilePhotos.
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
+}
+
+// SetEmojiStatus Helper method for Bot.SetUserEmojiStatus.
+func (u User) SetEmojiStatus(b *Bot, opts *SetUserEmojiStatusOpts) (bool, error) {
+	return b.SetUserEmojiStatus(u.Id, opts)
 }

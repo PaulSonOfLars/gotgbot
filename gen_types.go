@@ -2843,6 +2843,30 @@ type GeneralForumTopicHidden struct{}
 // This object represents a service message about General forum topic unhidden in the chat. Currently holds no information.
 type GeneralForumTopicUnhidden struct{}
 
+// Gift (https://core.telegram.org/bots/api#gift)
+//
+// This object represents a gift that can be sent by the bot.
+type Gift struct {
+	// Unique identifier of the gift
+	Id string `json:"id"`
+	// The sticker that represents the gift
+	Sticker Sticker `json:"sticker"`
+	// The number of Telegram Stars that must be paid to send the sticker
+	StarCount int64 `json:"star_count"`
+	// Optional. The total number of the gifts of this type that can be sent; for limited gifts only
+	TotalCount int64 `json:"total_count,omitempty"`
+	// Optional. The number of remaining gifts of this type that can be sent; for limited gifts only
+	RemainingCount int64 `json:"remaining_count,omitempty"`
+}
+
+// Gifts (https://core.telegram.org/bots/api#gifts)
+//
+// This object represent a list of gifts.
+type Gifts struct {
+	// The list of gifts
+	Gifts []Gift `json:"gifts,omitempty"`
+}
+
 // Giveaway (https://core.telegram.org/bots/api#giveaway)
 //
 // This object represents a message about a scheduled giveaway.
@@ -7694,6 +7718,16 @@ type PreCheckoutQuery struct {
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
 }
 
+// PreparedInlineMessage (https://core.telegram.org/bots/api#preparedinlinemessage)
+//
+// Describes an inline message to be sent by a user of a Mini App.
+type PreparedInlineMessage struct {
+	// Unique identifier of the prepared message
+	Id string `json:"id"`
+	// Expiration date of the prepared message, in Unix time. Expired prepared messages can no longer be used
+	ExpirationDate int64 `json:"expiration_date"`
+}
+
 // ProximityAlertTriggered (https://core.telegram.org/bots/api#proximityalerttriggered)
 //
 // This object represents the content of a service message, sent whenever a user in the chat triggers a proximity alert set by another user.
@@ -8452,6 +8486,12 @@ type SuccessfulPayment struct {
 	TotalAmount int64 `json:"total_amount"`
 	// Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
+	// Optional. Expiration date of the subscription, in Unix time; for recurring payments only
+	SubscriptionExpirationDate int64 `json:"subscription_expiration_date,omitempty"`
+	// Optional. True, if the payment is a recurring payment for a subscription
+	IsRecurring bool `json:"is_recurring,omitempty"`
+	// Optional. True, if the payment is the first payment for a subscription
+	IsFirstRecurring bool `json:"is_first_recurring,omitempty"`
 	// Optional. Identifier of the shipping option chosen by the user
 	ShippingOptionId string `json:"shipping_option_id,omitempty"`
 	// Optional. Order information provided by the user
@@ -8525,10 +8565,14 @@ type MergedTransactionPartner struct {
 	User *User `json:"user,omitempty"`
 	// Optional. Bot-specified invoice payload (Only for user)
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. The duration of the paid subscription (Only for user)
+	SubscriptionPeriod int64 `json:"subscription_period,omitempty"`
 	// Optional. Information about the paid media bought by the user (Only for user)
 	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
 	// Optional. Bot-specified paid media payload (Only for user)
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
+	// Optional. The gift sent to the user by the bot (Only for user)
+	Gift string `json:"gift,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 	// Optional. The number of successful requests that exceeded regular limits and were therefore billed (Only for telegram_api)
@@ -8801,20 +8845,26 @@ type TransactionPartnerUser struct {
 	User User `json:"user"`
 	// Optional. Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. The duration of the paid subscription
+	SubscriptionPeriod int64 `json:"subscription_period,omitempty"`
 	// Optional. Information about the paid media bought by the user
 	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
 	// Optional. Bot-specified paid media payload
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
+	// Optional. The gift sent to the user by the bot
+	Gift string `json:"gift,omitempty"`
 }
 
 // UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
 func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 	// All fields in TransactionPartnerUser, with interface fields as json.RawMessage
 	type tmp struct {
-		User             User            `json:"user"`
-		InvoicePayload   string          `json:"invoice_payload"`
-		PaidMedia        json.RawMessage `json:"paid_media"`
-		PaidMediaPayload string          `json:"paid_media_payload"`
+		User               User            `json:"user"`
+		InvoicePayload     string          `json:"invoice_payload"`
+		SubscriptionPeriod int64           `json:"subscription_period"`
+		PaidMedia          json.RawMessage `json:"paid_media"`
+		PaidMediaPayload   string          `json:"paid_media_payload"`
+		Gift               string          `json:"gift"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
@@ -8824,11 +8874,13 @@ func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 
 	v.User = t.User
 	v.InvoicePayload = t.InvoicePayload
+	v.SubscriptionPeriod = t.SubscriptionPeriod
 	v.PaidMedia, err = unmarshalPaidMediaArray(t.PaidMedia)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field PaidMedia: %w", err)
 	}
 	v.PaidMediaPayload = t.PaidMediaPayload
+	v.Gift = t.Gift
 
 	return nil
 }
@@ -8841,11 +8893,13 @@ func (v TransactionPartnerUser) GetType() string {
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
 func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartner {
 	return MergedTransactionPartner{
-		Type:             "user",
-		User:             &v.User,
-		InvoicePayload:   v.InvoicePayload,
-		PaidMedia:        v.PaidMedia,
-		PaidMediaPayload: v.PaidMediaPayload,
+		Type:               "user",
+		User:               &v.User,
+		InvoicePayload:     v.InvoicePayload,
+		SubscriptionPeriod: v.SubscriptionPeriod,
+		PaidMedia:          v.PaidMedia,
+		PaidMediaPayload:   v.PaidMediaPayload,
+		Gift:               v.Gift,
 	}
 }
 
