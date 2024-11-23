@@ -8572,7 +8572,7 @@ type MergedTransactionPartner struct {
 	// Optional. Bot-specified paid media payload (Only for user)
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. The gift sent to the user by the bot (Only for user)
-	Gift string `json:"gift,omitempty"`
+	Gift *Gift `json:"gift,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 	// Optional. The number of successful requests that exceeded regular limits and were therefore billed (Only for telegram_api)
@@ -8852,7 +8852,7 @@ type TransactionPartnerUser struct {
 	// Optional. Bot-specified paid media payload
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. The gift sent to the user by the bot
-	Gift string `json:"gift,omitempty"`
+	Gift *Gift `json:"gift,omitempty"`
 }
 
 // UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
@@ -8864,7 +8864,7 @@ func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 		SubscriptionPeriod int64           `json:"subscription_period"`
 		PaidMedia          json.RawMessage `json:"paid_media"`
 		PaidMediaPayload   string          `json:"paid_media_payload"`
-		Gift               string          `json:"gift"`
+		Gift               *Gift           `json:"gift"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)

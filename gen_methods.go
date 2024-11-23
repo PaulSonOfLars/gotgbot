@@ -814,11 +814,11 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink and Bot.CreateInvoiceLinkWithContext.
 type CreateInvoiceLinkOpts struct {
-	// Unique identifier of the business connection on behalf of which the link will be created
+	// Unique identifier of the business connection on behalf of which the link will be created. For payments in Telegram Stars only.
 	BusinessConnectionId string
 	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string
-	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified.
+	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user.
 	SubscriptionPeriod int64
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
