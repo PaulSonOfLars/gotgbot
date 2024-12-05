@@ -21,6 +21,22 @@ var (
 	_ ReplyMarkup = ReplyKeyboardRemove{}
 )
 
+// AffiliateInfo (https://core.telegram.org/bots/api#affiliateinfo)
+//
+// Contains information about the affiliate that received a commission via this transaction.
+type AffiliateInfo struct {
+	// Optional. The bot or the user that received an affiliate commission if it was received by a bot or a user
+	AffiliateUser *User `json:"affiliate_user,omitempty"`
+	// Optional. The chat that received an affiliate commission if it was received by a chat
+	AffiliateChat *Chat `json:"affiliate_chat,omitempty"`
+	// The number of Telegram Stars received by the affiliate for each 1000 Telegram Stars received by the bot from referred users
+	CommissionPerMille int64 `json:"commission_per_mille"`
+	// Integer amount of Telegram Stars received by the affiliate from the transaction, rounded to 0; can be negative for refunds
+	Amount int64 `json:"amount"`
+	// Optional. The number of 1/1000000000 shares of Telegram Stars received by the affiliate; from -999999999 to 999999999; can be negative for refunds
+	NanostarAmount int64 `json:"nanostar_amount,omitempty"`
+}
+
 // Animation (https://core.telegram.org/bots/api#animation)
 //
 // This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
@@ -8365,8 +8381,10 @@ type ShippingQuery struct {
 type StarTransaction struct {
 	// Unique identifier of the transaction. Coincides with the identifier of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
 	Id string `json:"id"`
-	// Number of Telegram Stars transferred by the transaction
+	// Integer amount of Telegram Stars transferred by the transaction
 	Amount int64 `json:"amount"`
+	// Optional. The number of 1/1000000000 shares of Telegram Stars transferred by the transaction; from 0 to 999999999
+	NanostarAmount int64 `json:"nanostar_amount,omitempty"`
 	// Date the transaction was created in Unix time
 	Date int64 `json:"date"`
 	// Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions
@@ -8379,11 +8397,12 @@ type StarTransaction struct {
 func (v *StarTransaction) UnmarshalJSON(b []byte) error {
 	// All fields in StarTransaction, with interface fields as json.RawMessage
 	type tmp struct {
-		Id       string          `json:"id"`
-		Amount   int64           `json:"amount"`
-		Date     int64           `json:"date"`
-		Source   json.RawMessage `json:"source"`
-		Receiver json.RawMessage `json:"receiver"`
+		Id             string          `json:"id"`
+		Amount         int64           `json:"amount"`
+		NanostarAmount int64           `json:"nanostar_amount"`
+		Date           int64           `json:"date"`
+		Source         json.RawMessage `json:"source"`
+		Receiver       json.RawMessage `json:"receiver"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
@@ -8393,6 +8412,7 @@ func (v *StarTransaction) UnmarshalJSON(b []byte) error {
 
 	v.Id = t.Id
 	v.Amount = t.Amount
+	v.NanostarAmount = t.NanostarAmount
 	v.Date = t.Date
 	v.Source, err = unmarshalTransactionPartner(t.Source)
 	if err != nil {
@@ -8536,6 +8556,7 @@ type TextQuote struct {
 //
 // This object describes the source of a transaction, or its recipient for outgoing transactions. Currently, it can be one of
 //   - TransactionPartnerUser
+//   - TransactionPartnerAffiliateProgram
 //   - TransactionPartnerFragment
 //   - TransactionPartnerTelegramAds
 //   - TransactionPartnerTelegramApi
@@ -8551,6 +8572,7 @@ type TransactionPartner interface {
 // Ensure that all subtypes correctly implement the parent interface.
 var (
 	_ TransactionPartner = TransactionPartnerUser{}
+	_ TransactionPartner = TransactionPartnerAffiliateProgram{}
 	_ TransactionPartner = TransactionPartnerFragment{}
 	_ TransactionPartner = TransactionPartnerTelegramAds{}
 	_ TransactionPartner = TransactionPartnerTelegramApi{}
@@ -8563,6 +8585,8 @@ type MergedTransactionPartner struct {
 	Type string `json:"type"`
 	// Optional. Information about the user (Only for user)
 	User *User `json:"user,omitempty"`
+	// Optional. Information about the affiliate that received a commission via this transaction (Only for user)
+	Affiliate *AffiliateInfo `json:"affiliate,omitempty"`
 	// Optional. Bot-specified invoice payload (Only for user)
 	InvoicePayload string `json:"invoice_payload,omitempty"`
 	// Optional. The duration of the paid subscription (Only for user)
@@ -8573,6 +8597,10 @@ type MergedTransactionPartner struct {
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. The gift sent to the user by the bot (Only for user)
 	Gift *Gift `json:"gift,omitempty"`
+	// Optional. Information about the bot that sponsored the affiliate program (Only for affiliate_program)
+	SponsorUser *User `json:"sponsor_user,omitempty"`
+	// Optional. The number of Telegram Stars received by the bot for each 1000 Telegram Stars received by the affiliate program sponsor from referred users (Only for affiliate_program)
+	CommissionPerMille int64 `json:"commission_per_mille,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 	// Optional. The number of successful requests that exceeded regular limits and were therefore billed (Only for telegram_api)
@@ -8641,6 +8669,14 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 		}
 		return s, nil
 
+	case "affiliate_program":
+		s := TransactionPartnerAffiliateProgram{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'affiliate_program': %w", err)
+		}
+		return s, nil
+
 	case "fragment":
 		s := TransactionPartnerFragment{}
 		err := json.Unmarshal(d, &s)
@@ -8676,6 +8712,46 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 	}
 	return nil, fmt.Errorf("unknown interface for TransactionPartner with Type %v", t.Type)
 }
+
+// TransactionPartnerAffiliateProgram (https://core.telegram.org/bots/api#transactionpartneraffiliateprogram)
+//
+// Describes the affiliate program that issued the affiliate commission received via this transaction.
+type TransactionPartnerAffiliateProgram struct {
+	// Optional. Information about the bot that sponsored the affiliate program
+	SponsorUser *User `json:"sponsor_user,omitempty"`
+	// The number of Telegram Stars received by the bot for each 1000 Telegram Stars received by the affiliate program sponsor from referred users
+	CommissionPerMille int64 `json:"commission_per_mille"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerAffiliateProgram) GetType() string {
+	return "affiliate_program"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerAffiliateProgram) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type:               "affiliate_program",
+		SponsorUser:        v.SponsorUser,
+		CommissionPerMille: v.CommissionPerMille,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerAffiliateProgram) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerAffiliateProgram
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "affiliate_program",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerAffiliateProgram.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerAffiliateProgram) transactionPartner() {}
 
 // TransactionPartnerFragment (https://core.telegram.org/bots/api#transactionpartnerfragment)
 //
@@ -8843,6 +8919,8 @@ func (v TransactionPartnerTelegramApi) transactionPartner() {}
 type TransactionPartnerUser struct {
 	// Information about the user
 	User User `json:"user"`
+	// Optional. Information about the affiliate that received a commission via this transaction
+	Affiliate *AffiliateInfo `json:"affiliate,omitempty"`
 	// Optional. Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload,omitempty"`
 	// Optional. The duration of the paid subscription
@@ -8860,6 +8938,7 @@ func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 	// All fields in TransactionPartnerUser, with interface fields as json.RawMessage
 	type tmp struct {
 		User               User            `json:"user"`
+		Affiliate          *AffiliateInfo  `json:"affiliate"`
 		InvoicePayload     string          `json:"invoice_payload"`
 		SubscriptionPeriod int64           `json:"subscription_period"`
 		PaidMedia          json.RawMessage `json:"paid_media"`
@@ -8873,6 +8952,7 @@ func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
 	}
 
 	v.User = t.User
+	v.Affiliate = t.Affiliate
 	v.InvoicePayload = t.InvoicePayload
 	v.SubscriptionPeriod = t.SubscriptionPeriod
 	v.PaidMedia, err = unmarshalPaidMediaArray(t.PaidMedia)
@@ -8895,6 +8975,7 @@ func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartn
 	return MergedTransactionPartner{
 		Type:               "user",
 		User:               &v.User,
+		Affiliate:          v.Affiliate,
 		InvoicePayload:     v.InvoicePayload,
 		SubscriptionPeriod: v.SubscriptionPeriod,
 		PaidMedia:          v.PaidMedia,
