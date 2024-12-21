@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -128,7 +127,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errHandler DispatcherErrorHandler
 	var panicHandler DispatcherPanicHandler
 	var unhandledErrFunc ErrorFunc
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	logger := slog.Default()
 
 	maxRoutines := DefaultMaxRoutines
 	processor := Processor(BaseProcessor{})

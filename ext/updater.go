@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -62,7 +61,7 @@ type UpdaterOpts struct {
 // NewUpdater Creates a new Updater, as well as a Dispatcher and any optional updater configurations (via UpdaterOpts).
 func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	logger := slog.Default()
 
 	if opts != nil {
 		unhandledErrFunc = opts.UnhandledErrFunc
