@@ -157,18 +157,20 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 		}
 	}
 
-	bData, err := u.botMapping.addBot(b, "", "")
+	ctx, closeFn := context.WithCancel(context.Background())
+
+	bData, err := u.botMapping.addPollingBot(b, closeFn)
 	if err != nil {
 		return fmt.Errorf("failed to add bot with long polling: %w", err)
 	}
 
 	go u.Dispatcher.Start(b, bData.updateChan)
-	go u.pollingLoop(bData, reqOpts, v)
+	go u.pollingLoop(ctx, bData, reqOpts, v)
 
 	return nil
 }
 
-func (u *Updater) pollingLoop(bData *botData, opts *gotgbot.RequestOpts, v map[string]string) {
+func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot.RequestOpts, v map[string]string) {
 	bData.updateWriterControl.Add(1)
 	defer bData.updateWriterControl.Done()
 
@@ -180,8 +182,13 @@ func (u *Updater) pollingLoop(bData *botData, opts *gotgbot.RequestOpts, v map[s
 
 		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
 		// unnecessary reallocation of url.Values in the polling loop.
-		r, err := bData.bot.Request("getUpdates", v, nil, opts)
+		r, err := bData.bot.RequestWithContext(ctx, "getUpdates", v, nil, opts)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				// context cancelled; means the bot was stopped gracefully through Updater.StopBot
+				return
+			}
+
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
@@ -317,7 +324,7 @@ func (u *Updater) AddWebhook(b *gotgbot.Bot, urlPath string, opts *AddWebhookOpt
 		secretToken = opts.SecretToken
 	}
 
-	bData, err := u.botMapping.addBot(b, urlPath, secretToken)
+	bData, err := u.botMapping.addWebhookBot(b, urlPath, secretToken)
 	if err != nil {
 		return fmt.Errorf("failed to add webhook for bot: %w", err)
 	}

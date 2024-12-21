@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -19,6 +20,8 @@ type botData struct {
 
 	// updateChan represents the incoming updates channel.
 	updateChan chan json.RawMessage
+	// pollingContextCloser allows one to stop polling instantly without waiting for the return
+	pollingContextCloser context.CancelFunc
 	// updateWriterControl is used to count the number of current writers on the update channel.
 	// This is required to ensure that we can safely close the channel, and thus stop processing incoming updates.
 	// While this remains non-zero, it is unsafe to close the update channel.
@@ -47,12 +50,22 @@ type botMapping struct {
 	errorLog *log.Logger
 }
 
-var ErrBotAlreadyExists = errors.New("bot already exists in bot mapping")
-var ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapping")
+var (
+	ErrBotAlreadyExists        = errors.New("bot already exists in bot mapping")
+	ErrBotUrlPathAlreadyExists = errors.New("url path already exists in bot mapping")
+)
+
+func (m *botMapping) addWebhookBot(b *gotgbot.Bot, urlPath string, webhookSecret string) (*botData, error) {
+	return m.addBot(b, urlPath, webhookSecret, nil)
+}
+
+func (m *botMapping) addPollingBot(b *gotgbot.Bot, ctxClose context.CancelFunc) (*botData, error) {
+	return m.addBot(b, "", "", ctxClose)
+}
 
 // addBot Adds a new bot to the botMapping structure.
 // Pass an empty urlPath/webhookSecret if using polling instead of webhooks.
-func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string) (*botData, error) {
+func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string, ctxClose context.CancelFunc) (*botData, error) {
 	// Clean up the URLPath such that it remains consistent.
 	urlPath = strings.TrimPrefix(urlPath, "/")
 
@@ -75,12 +88,13 @@ func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string
 	}
 
 	bData := botData{
-		bot:                 b,
-		updateChan:          make(chan json.RawMessage),
-		stopUpdates:         make(chan struct{}),
-		updateWriterControl: &sync.WaitGroup{},
-		urlPath:             urlPath,
-		webhookSecret:       webhookSecret,
+		bot:                  b,
+		updateChan:           make(chan json.RawMessage),
+		pollingContextCloser: ctxClose,
+		stopUpdates:          make(chan struct{}),
+		updateWriterControl:  &sync.WaitGroup{},
+		urlPath:              urlPath,
+		webhookSecret:        webhookSecret,
 	}
 
 	m.mapping[bData.bot.Token] = bData
@@ -206,6 +220,11 @@ func (b *botData) stop() {
 	// Close stopUpdates loops first, to ensure any updates currently being polled have the time to be sent to the updateChan.
 	if b.stopUpdates != nil {
 		close(b.stopUpdates)
+	}
+
+	// If we have a context to close, close it. This will stop polling immediately.
+	if b.pollingContextCloser != nil {
+		b.pollingContextCloser()
 	}
 
 	// Wait for all writers to finish writing to the updateChannel
