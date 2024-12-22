@@ -165,15 +165,17 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	}
 
 	go u.Dispatcher.Start(b, bData.updateChan)
-	go u.pollingLoop(ctx, bData, reqOpts, v)
+
+	bData.updateWriterControl.Add(1)
+	go func() {
+		u.pollingLoop(ctx, bData, reqOpts, v)
+		defer bData.updateWriterControl.Done()
+	}()
 
 	return nil
 }
 
 func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot.RequestOpts, v map[string]string) {
-	bData.updateWriterControl.Add(1)
-	defer bData.updateWriterControl.Done()
-
 	for {
 		// Check if updater loop has been terminated.
 		if bData.shouldStopUpdates() {
@@ -266,7 +268,7 @@ func (u *Updater) Stop() error {
 	// Stop the dispatcher from processing any further updates.
 	u.Dispatcher.Stop()
 
-	// Finally, atop idling.
+	// Finally, stop idling.
 	if u.stopIdling != nil {
 		close(u.stopIdling)
 	}

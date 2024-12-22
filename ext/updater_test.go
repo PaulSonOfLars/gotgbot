@@ -396,7 +396,6 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 	b1 := &gotgbot.Bot{
 		Token: "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{
-
 			DefaultRequestOpts: reqOpts,
 		},
 	}
