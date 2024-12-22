@@ -62,8 +62,8 @@ func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	logger := slog.Default()
 
 	if opts != nil {
+		logger = iftrue(opts.Logger == nil, logger, opts.Logger)
 		unhandledErrFunc = opts.UnhandledErrFunc
-		logger = opts.Logger
 	}
 
 	return &Updater{

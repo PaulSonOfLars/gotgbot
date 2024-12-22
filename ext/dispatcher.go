@@ -131,17 +131,13 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	processor := Processor(BaseProcessor{})
 
 	if opts != nil {
-		if opts.MaxRoutines != 0 {
-			maxRoutines = opts.MaxRoutines
-		}
-		if opts.Processor != nil {
-			processor = opts.Processor
-		}
+		maxRoutines = iftrue(opts.MaxRoutines != 0, opts.MaxRoutines, maxRoutines)
+		processor = iftrue(opts.Processor != nil, opts.Processor, processor)
+		logger = iftrue(opts.Logger != nil, opts.Logger, logger)
 
 		errHandler = opts.Error
 		panicHandler = opts.Panic
 		unhandledErrFunc = opts.UnhandledErrFunc
-		logger = opts.Logger
 	}
 
 	var limiter chan struct{}
