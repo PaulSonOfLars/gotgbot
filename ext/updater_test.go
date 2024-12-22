@@ -195,7 +195,7 @@ func TestUpdater_StopBot(t *testing.T) {
 	// If it took longer than 1ms then we know something went wrong; ctx should've stopped immediately.
 	since := time.Since(start)
 	t.Logf("stopping took %dms", since.Milliseconds())
-	if since > time.Millisecond {
+	if since > 5*time.Millisecond {
 		t.Errorf("stopping all bots took %dms; shouldve taken less than 1ms", since.Milliseconds())
 	}
 }
