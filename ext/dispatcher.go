@@ -77,7 +77,6 @@ type Dispatcher struct {
 	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
 	// Logger specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
 	Logger *slog.Logger
 
 	// handlers represents all available handlers.
@@ -110,8 +109,7 @@ type DispatcherOpts struct {
 	// dispatcher actions.
 	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// logger specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
+	// Logger specifies an optional logger for unexpected behavior from handlers.
 	Logger *slog.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
@@ -157,7 +155,7 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	}
 
 	return &Dispatcher{
-		Logger:           logger,
+		Logger:           logger.With("component", "dispatcher"),
 		Processor:        processor,
 		Error:            errHandler,
 		Panic:            panicHandler,

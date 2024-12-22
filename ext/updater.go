@@ -35,7 +35,6 @@ type Updater struct {
 	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
 	// Logger specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
 	Logger *slog.Logger
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
@@ -54,7 +53,6 @@ type UpdaterOpts struct {
 	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
 	// Logger specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
 	Logger *slog.Logger
 }
 
@@ -71,10 +69,10 @@ func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	return &Updater{
 		Dispatcher:       dispatcher,
 		UnhandledErrFunc: unhandledErrFunc,
-		Logger:           logger,
+		Logger:           logger.With("component", "updater"),
 		botMapping: botMapping{
 			errFunc: unhandledErrFunc,
-			logger:  logger,
+			logger:  logger.With("component", "botmapping"),
 		},
 	}
 }
