@@ -168,8 +168,10 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 
 	bData.updateWriterControl.Add(1)
 	go func() {
-		u.pollingLoop(ctx, bData, reqOpts, v)
+		// defer, so it gets called even in case of panics.
 		defer bData.updateWriterControl.Done()
+
+		u.pollingLoop(ctx, bData, reqOpts, v)
 	}()
 
 	return nil
