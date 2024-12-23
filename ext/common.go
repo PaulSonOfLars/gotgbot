@@ -7,10 +7,18 @@ import (
 
 func logError(l *slog.Logger, text string, err error) {
 	if l == nil {
-		log.Printf("ERROR: %s: %s", text, err)
+		log.Printf("ERROR: %s: %s", text, err.Error())
 		return
 	}
-	l.Error(text, "error", err)
+	l.Error(text, "error", err.Error())
+}
+
+func logDebug(l *slog.Logger, text string, args ...any) {
+	if l == nil {
+		// No logger? No debug.
+		return
+	}
+	l.Error(text, args...)
 }
 
 // ternary operator approximation.

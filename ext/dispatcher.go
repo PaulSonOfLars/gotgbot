@@ -285,8 +285,12 @@ func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) erro
 				continue
 			}
 
+			logDebug(d.Logger, "Matched handler on update", "handler", handler.Name())
+
 			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
+				logDebug(d.Logger, "Update handling returned error", "handler", handler.Name(), "error", err.Error())
+
 				if errors.Is(err, ContinueGroups) {
 					// Continue handling current group.
 					continue
