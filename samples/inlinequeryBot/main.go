@@ -68,10 +68,9 @@ func main() {
 // source is a very boring inline query handler that always just responds with a link to the library.
 func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.InlineQuery.Answer(b, []gotgbot.InlineQueryResult{gotgbot.InlineQueryResultArticle{
-		Id:      strconv.Itoa(rand.Int()),
-		Title:   "Bot Library",
-		Url:     "github.com/PaulSonOfLars/gotgbot",
-		HideUrl: true,
+		Id:    strconv.Itoa(rand.Int()),
+		Title: "Bot Library",
+		Url:   "github.com/PaulSonOfLars/gotgbot",
 		InputMessageContent: gotgbot.InputTextMessageContent{
 			MessageText: "Bot library source code:\ngithub.com/PaulSonOfLars/gotgbot",
 		},
