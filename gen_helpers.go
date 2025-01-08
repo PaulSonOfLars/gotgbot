@@ -487,6 +487,196 @@ func (m Message) Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error) {
 	return b.UnpinChatMessage(m.Chat.Id, opts)
 }
 
+func (m Message) ReplyCopyMessage(b *Bot, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
+	if opts == nil {
+		opts = &CopyMessageOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.CopyMessage(m.Chat.Id, fromChatId, messageId, opts)
+}
+
+func (m Message) ReplyAnimation(b *Bot, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendAnimationOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendAnimation(m.Chat.Id, animation, opts)
+}
+
+func (m Message) ReplyAudio(b *Bot, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendAudioOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendAudio(m.Chat.Id, audio, opts)
+}
+
+func (m Message) ReplyContact(b *Bot, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendContactOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendContact(m.Chat.Id, phoneNumber, firstName, opts)
+}
+
+func (m Message) ReplyDice(b *Bot, opts *SendDiceOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendDiceOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendDice(m.Chat.Id, opts)
+}
+
+func (m Message) ReplyDocument(b *Bot, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendDocumentOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendDocument(m.Chat.Id, document, opts)
+}
+
+func (m Message) ReplyGame(b *Bot, gameShortName string, opts *SendGameOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendGameOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendGame(m.Chat.Id, gameShortName, opts)
+}
+
+func (m Message) ReplyInvoice(b *Bot, title string, description string, payload string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendInvoiceOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendInvoice(m.Chat.Id, title, description, payload, currency, prices, opts)
+}
+
+func (m Message) ReplyLocation(b *Bot, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendLocationOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendLocation(m.Chat.Id, latitude, longitude, opts)
+}
+
+func (m Message) ReplyMediaGroup(b *Bot, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
+	if opts == nil {
+		opts = &SendMediaGroupOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendMediaGroup(m.Chat.Id, media, opts)
+}
+
+func (m Message) ReplyMessage(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendMessageOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendMessage(m.Chat.Id, text, opts)
+}
+
+func (m Message) ReplyPaidMedia(b *Bot, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendPaidMediaOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendPaidMedia(m.Chat.Id, starCount, media, opts)
+}
+
+func (m Message) ReplyPhoto(b *Bot, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendPhotoOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendPhoto(m.Chat.Id, photo, opts)
+}
+
+func (m Message) ReplyPoll(b *Bot, question string, options []InputPollOption, opts *SendPollOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendPollOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendPoll(m.Chat.Id, question, options, opts)
+}
+
+func (m Message) ReplySticker(b *Bot, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendStickerOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendSticker(m.Chat.Id, sticker, opts)
+}
+
+func (m Message) ReplyVenue(b *Bot, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendVenueOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendVenue(m.Chat.Id, latitude, longitude, title, address, opts)
+}
+
+func (m Message) ReplyVideo(b *Bot, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendVideoOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendVideo(m.Chat.Id, video, opts)
+}
+
+func (m Message) ReplyVideoNote(b *Bot, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendVideoNoteOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendVideoNote(m.Chat.Id, videoNote, opts)
+}
+
+func (m Message) ReplyVoice(b *Bot, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendVoiceOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendVoice(m.Chat.Id, voice, opts)
+}
+
 // Answer Helper method for Bot.AnswerPreCheckoutQuery.
 func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
 	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
