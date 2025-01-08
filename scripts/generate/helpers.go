@@ -45,7 +45,7 @@ type helperData struct {
 }
 
 func (d helperData) docs() string {
-	return "\n// " + d.newName + " Helper method for Bot." + strings.Title(d.method.Name) + "."
+	return "\n// " + d.newName + " is a helper method for Bot." + strings.Title(d.method.Name) + "."
 }
 
 func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helperData, error) {
@@ -315,6 +315,7 @@ type helperReplyFuncData struct {
 }
 
 const helperReplyFunc = `
+// {{.HelperName}} is a shortcut to reply to the current message with a specific message type.
 func ({{.ReceiverName}} Message) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnType}}, error) {
 	if opts == nil {
 		opts = &{{.OptsName}}{}
