@@ -14,6 +14,7 @@ import (
 )
 
 // This bot is as basic as it gets - it simply repeats everything you say.
+// The main_test.go file contains example code to demonstrate how to implement the gotgbot.BotClient interface for it to be used in tests.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")

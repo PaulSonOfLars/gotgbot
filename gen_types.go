@@ -557,7 +557,7 @@ func (v BackgroundTypeFill) backgroundType() {}
 
 // BackgroundTypePattern (https://core.telegram.org/bots/api#backgroundtypepattern)
 //
-// The background is a PNG or TGV (gzipped subset of SVG with MIME type "application/x-tgwallpattern") pattern to be combined with the background fill chosen by the user.
+// The background is a .PNG or .TGV (gzipped subset of SVG with MIME type "application/x-tgwallpattern") pattern to be combined with the background fill chosen by the user.
 type BackgroundTypePattern struct {
 	// Document with the pattern
 	Document Document `json:"document"`
@@ -2869,6 +2869,8 @@ type Gift struct {
 	Sticker Sticker `json:"sticker"`
 	// The number of Telegram Stars that must be paid to send the sticker
 	StarCount int64 `json:"star_count"`
+	// Optional. The number of Telegram Stars that must be paid to upgrade the gift to a unique one
+	UpgradeStarCount int64 `json:"upgrade_star_count,omitempty"`
 	// Optional. The total number of the gifts of this type that can be sent; for limited gifts only
 	TotalCount int64 `json:"total_count,omitempty"`
 	// Optional. The number of remaining gifts of this type that can be sent; for limited gifts only
@@ -3144,8 +3146,6 @@ type MergedInlineQueryResult struct {
 	VoiceFileId string `json:"voice_file_id,omitempty"`
 	// Optional. URL of the result (Only for article)
 	Url string `json:"url,omitempty"`
-	// Optional. Pass True if you don't want the URL to be shown in the message (Only for article)
-	HideUrl bool `json:"hide_url,omitempty"`
 	// Optional. Url of the thumbnail for the result (Only for article, contact, document, gif, location, mpeg4_gif, photo, venue, video)
 	ThumbnailUrl string `json:"thumbnail_url,omitempty"`
 	// Optional. Thumbnail width (Only for article, contact, document, location, venue)
@@ -3172,7 +3172,7 @@ type MergedInlineQueryResult struct {
 	DocumentUrl string `json:"document_url,omitempty"`
 	// Optional. MIME type of the content of the file, either "application/pdf" or "application/zip" (Only for document, video)
 	MimeType string `json:"mime_type,omitempty"`
-	// Optional. A valid URL for the GIF file. File size must not exceed 1MB (Only for gif)
+	// Optional. A valid URL for the GIF file (Only for gif)
 	GifUrl string `json:"gif_url,omitempty"`
 	// Optional. Width of the GIF (Only for gif)
 	GifWidth int64 `json:"gif_width,omitempty"`
@@ -3194,7 +3194,7 @@ type MergedInlineQueryResult struct {
 	Heading int64 `json:"heading,omitempty"`
 	// Optional. For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified. (Only for location)
 	ProximityAlertRadius int64 `json:"proximity_alert_radius,omitempty"`
-	// Optional. A valid URL for the MPEG4 file. File size must not exceed 1MB (Only for mpeg4_gif)
+	// Optional. A valid URL for the MPEG4 file (Only for mpeg4_gif)
 	Mpeg4Url string `json:"mpeg4_url,omitempty"`
 	// Optional. Video width (Only for mpeg4_gif)
 	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
@@ -3264,8 +3264,6 @@ type InlineQueryResultArticle struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. URL of the result
 	Url string `json:"url,omitempty"`
-	// Optional. Pass True if you don't want the URL to be shown in the message
-	HideUrl bool `json:"hide_url,omitempty"`
 	// Optional. Short description of the result
 	Description string `json:"description,omitempty"`
 	// Optional. Url of the thumbnail for the result
@@ -3295,7 +3293,6 @@ func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResu
 		InputMessageContent: v.InputMessageContent,
 		ReplyMarkup:         v.ReplyMarkup,
 		Url:                 v.Url,
-		HideUrl:             v.HideUrl,
 		Description:         v.Description,
 		ThumbnailUrl:        v.ThumbnailUrl,
 		ThumbnailWidth:      v.ThumbnailWidth,
@@ -4099,7 +4096,7 @@ func (v InlineQueryResultGame) inlineQueryResult() {}
 type InlineQueryResultGif struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
-	// A valid URL for the GIF file. File size must not exceed 1MB
+	// A valid URL for the GIF file
 	GifUrl string `json:"gif_url"`
 	// Optional. Width of the GIF
 	GifWidth int64 `json:"gif_width,omitempty"`
@@ -4258,7 +4255,7 @@ func (v InlineQueryResultLocation) inlineQueryResult() {}
 type InlineQueryResultMpeg4Gif struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
-	// A valid URL for the MPEG4 file. File size must not exceed 1MB
+	// A valid URL for the MPEG4 file
 	Mpeg4Url string `json:"mpeg4_url"`
 	// Optional. Video width
 	Mpeg4Width int64 `json:"mpeg4_width,omitempty"`
@@ -5451,7 +5448,7 @@ type InputPollOption struct {
 type InputSticker struct {
 	// The added sticker. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, upload a new one using multipart/form-data, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. Animated and video stickers can't be uploaded via HTTP URL. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Sticker InputFileOrString `json:"sticker"`
-	// Format of the added sticker, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, "video" for a WEBM video
+	// Format of the added sticker, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, "video" for a .WEBM video
 	Format string `json:"format"`
 	// List of 1-20 emoji associated with the sticker
 	EmojiList []string `json:"emoji_list,omitempty"`
