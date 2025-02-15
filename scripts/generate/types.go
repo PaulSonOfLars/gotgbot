@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -162,7 +161,7 @@ func containsInputFile(d APIDescription, tgType TypeDescription, checked map[str
 			}
 			if ok {
 				// We return an error, because we can't actually handle this case yet.
-				return false, "", errors.New("no support for recursive checks of inputfiles yet")
+				return false, "", fmt.Errorf("no support for recursive checks of inputfiles yet for type %s with field %s", tgType.Name, f.Name)
 			}
 		}
 	}

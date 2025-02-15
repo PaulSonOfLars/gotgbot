@@ -347,6 +347,10 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 		return mediaType, nil
 	}
 
+	if f.Name == "thumbnail" && len(f.Types) == 1 && f.Types[0] == "String" {
+		return tgTypeInputFile, nil
+	}
+
 	if f.Name == "reply_markup" {
 		if len(f.Types) == 4 {
 			// TODO: this should check if the values are replymarkup children, instead of checking length

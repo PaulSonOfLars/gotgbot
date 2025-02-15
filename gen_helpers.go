@@ -210,8 +210,8 @@ func (c Chat) Verify(b *Bot, opts *VerifyChatOpts) (bool, error) {
 }
 
 // Send Helper method for Bot.SendGift.
-func (g Gift) Send(b *Bot, userId int64, opts *SendGiftOpts) (bool, error) {
-	return b.SendGift(userId, g.Id, opts)
+func (g Gift) Send(b *Bot, opts *SendGiftOpts) (bool, error) {
+	return b.SendGift(g.Id, opts)
 }
 
 // Copy Helper method for Bot.CopyMessage.

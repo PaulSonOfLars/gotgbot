@@ -213,7 +213,7 @@ func (bot *Bot) AnswerPreCheckoutQueryWithContext(ctx context.Context, preChecko
 type AnswerShippingQueryOpts struct {
 	// Required if ok is True. A JSON-serialized array of available shipping options.
 	ShippingOptions []ShippingOption
-	// Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable'). Telegram will display this message to the user.
+	// Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable"). Telegram will display this message to the user.
 	ErrorMessage string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -523,6 +523,8 @@ func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId in
 type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// New start timestamp for the copied video in the message
+	VideoStartTimestamp int64
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
 	Caption *string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
@@ -565,6 +567,9 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 	if opts != nil {
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = strconv.FormatInt(opts.VideoStartTimestamp, 10)
 		}
 		if opts.Caption != nil {
 			v["caption"] = *opts.Caption
@@ -2019,6 +2024,8 @@ func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int6
 type ForwardMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// New start timestamp for the forwarded video in the message
+	VideoStartTimestamp int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the forwarded message from forwarding and saving
@@ -2047,6 +2054,9 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 	if opts != nil {
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = strconv.FormatInt(opts.VideoStartTimestamp, 10)
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -2131,7 +2141,7 @@ type GetAvailableGiftsOpts struct {
 
 // GetAvailableGifts (https://core.telegram.org/bots/api#getavailablegifts)
 //
-// Returns the list of gifts that can be sent by the bot to users. Requires no parameters. Returns a Gifts object.
+// Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a Gifts object.
 //   - opts (type GetAvailableGiftsOpts): All optional parameters.
 func (bot *Bot) GetAvailableGifts(opts *GetAvailableGiftsOpts) (*Gifts, error) {
 	return bot.GetAvailableGiftsWithContext(context.Background(), opts)
@@ -4222,9 +4232,13 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 
 // SendGiftOpts is the set of optional fields for Bot.SendGift and Bot.SendGiftWithContext.
 type SendGiftOpts struct {
+	// Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
+	UserId int64
+	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift.
+	ChatId int64
 	// Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
 	PayForUpgrade bool
-	// Text that will be shown along with the gift; 0-255 characters
+	// Text that will be shown along with the gift; 0-128 characters
 	Text string
 	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
 	TextParseMode string
@@ -4236,20 +4250,24 @@ type SendGiftOpts struct {
 
 // SendGift (https://core.telegram.org/bots/api#sendgift)
 //
-// Sends a gift to the given user. The gift can't be converted to Telegram Stars by the user. Returns True on success.
-//   - userId (type int64): Unique identifier of the target user that will receive the gift
+// Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
 //   - giftId (type string): Identifier of the gift
 //   - opts (type SendGiftOpts): All optional parameters.
-func (bot *Bot) SendGift(userId int64, giftId string, opts *SendGiftOpts) (bool, error) {
-	return bot.SendGiftWithContext(context.Background(), userId, giftId, opts)
+func (bot *Bot) SendGift(giftId string, opts *SendGiftOpts) (bool, error) {
+	return bot.SendGiftWithContext(context.Background(), giftId, opts)
 }
 
 // SendGiftWithContext is the same as Bot.SendGift, but with a context.Context parameter
-func (bot *Bot) SendGiftWithContext(ctx context.Context, userId int64, giftId string, opts *SendGiftOpts) (bool, error) {
+func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *SendGiftOpts) (bool, error) {
 	v := map[string]string{}
-	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["gift_id"] = giftId
 	if opts != nil {
+		if opts.UserId != 0 {
+			v["user_id"] = strconv.FormatInt(opts.UserId, 10)
+		}
+		if opts.ChatId != 0 {
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		}
 		v["pay_for_upgrade"] = strconv.FormatBool(opts.PayForUpgrade)
 		v["text"] = opts.Text
 		v["text_parse_mode"] = opts.TextParseMode
@@ -5243,6 +5261,10 @@ type SendVideoOpts struct {
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile
+	// Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover InputFileOrString
+	// Start timestamp for the video in the message
+	StartTimestamp int64
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
@@ -5313,6 +5335,16 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
+		}
+		if opts.Cover != nil {
+			err := opts.Cover.Attach("cover", data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach 'cover' input file: %w", err)
+			}
+			v["cover"] = opts.Cover.getValue()
+		}
+		if opts.StartTimestamp != 0 {
+			v["start_timestamp"] = strconv.FormatInt(opts.StartTimestamp, 10)
 		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -5964,7 +5996,7 @@ type SetMessageReactionOpts struct {
 
 // SetMessageReaction (https://core.telegram.org/bots/api#setmessagereaction)
 //
-// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
+// Use this method to change the chosen reactions on a message. Service messages of some types can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageId (type int64): Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
 //   - opts (type SetMessageReactionOpts): All optional parameters.

@@ -1636,6 +1636,8 @@ type ChatFullInfo struct {
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
 	// Optional. Default chat member permissions, for groups and supergroups
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
+	// Optional. True, if gifts can be sent to the chat
+	CanSendGift bool `json:"can_send_gift,omitempty"`
 	// Optional. True, if paid media messages can be sent or forwarded to the channel chat. The field is available only for channel chats.
 	CanSendPaidMedia bool `json:"can_send_paid_media,omitempty"`
 	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unprivileged user; in seconds
@@ -1699,6 +1701,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 		InviteLink                         string                `json:"invite_link"`
 		PinnedMessage                      *Message              `json:"pinned_message"`
 		Permissions                        *ChatPermissions      `json:"permissions"`
+		CanSendGift                        bool                  `json:"can_send_gift"`
 		CanSendPaidMedia                   bool                  `json:"can_send_paid_media"`
 		SlowModeDelay                      int64                 `json:"slow_mode_delay"`
 		UnrestrictBoostCount               int64                 `json:"unrestrict_boost_count"`
@@ -1753,6 +1756,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 	v.InviteLink = t.InviteLink
 	v.PinnedMessage = t.PinnedMessage
 	v.Permissions = t.Permissions
+	v.CanSendGift = t.CanSendGift
 	v.CanSendPaidMedia = t.CanSendPaidMedia
 	v.SlowModeDelay = t.SlowModeDelay
 	v.UnrestrictBoostCount = t.UnrestrictBoostCount
@@ -4799,6 +4803,10 @@ type MergedInputMedia struct {
 	Performer string `json:"performer,omitempty"`
 	// Optional. Title of the audio (Only for audio)
 	Title string `json:"title,omitempty"`
+	// Optional. Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for video)
+	Cover string `json:"cover,omitempty"`
+	// Optional. Start timestamp for the video in the message (Only for video)
+	StartTimestamp int64 `json:"start_timestamp,omitempty"`
 	// Optional. Pass True if the uploaded video is suitable for streaming (Only for video)
 	SupportsStreaming bool `json:"supports_streaming,omitempty"`
 }
@@ -5140,6 +5148,10 @@ type InputMediaVideo struct {
 	Media InputFileOrString `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile `json:"thumbnail,omitempty"`
+	// Optional. Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover string `json:"cover,omitempty"`
+	// Optional. Start timestamp for the video in the message
+	StartTimestamp int64 `json:"start_timestamp,omitempty"`
 	// Optional. Caption of the video to be sent, 0-1024 characters after entities parsing
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the video caption. See formatting options for more details.
@@ -5176,6 +5188,8 @@ func (v InputMediaVideo) MergeInputMedia() MergedInputMedia {
 		Type:                  "video",
 		Media:                 v.Media,
 		Thumbnail:             v.Thumbnail,
+		Cover:                 v.Cover,
+		StartTimestamp:        v.StartTimestamp,
 		Caption:               v.Caption,
 		ParseMode:             v.ParseMode,
 		CaptionEntities:       v.CaptionEntities,
@@ -5274,6 +5288,10 @@ type MergedInputPaidMedia struct {
 	Media InputFileOrString `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for video)
 	Thumbnail InputFile `json:"thumbnail,omitempty"`
+	// Optional. Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files (Only for video)
+	Cover string `json:"cover,omitempty"`
+	// Optional. Start timestamp for the video in the message (Only for video)
+	StartTimestamp int64 `json:"start_timestamp,omitempty"`
 	// Optional. Video width (Only for video)
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height (Only for video)
@@ -5363,6 +5381,10 @@ type InputPaidMediaVideo struct {
 	Media InputFileOrString `json:"media"`
 	// Optional. Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile `json:"thumbnail,omitempty"`
+	// Optional. Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover string `json:"cover,omitempty"`
+	// Optional. Start timestamp for the video in the message
+	StartTimestamp int64 `json:"start_timestamp,omitempty"`
 	// Optional. Video width
 	Width int64 `json:"width,omitempty"`
 	// Optional. Video height
@@ -5389,6 +5411,8 @@ func (v InputPaidMediaVideo) MergeInputPaidMedia() MergedInputPaidMedia {
 		Type:              "video",
 		Media:             v.Media,
 		Thumbnail:         v.Thumbnail,
+		Cover:             v.Cover,
+		StartTimestamp:    v.StartTimestamp,
 		Width:             v.Width,
 		Height:            v.Height,
 		Duration:          v.Duration,
@@ -8374,7 +8398,7 @@ type ShippingQuery struct {
 
 // StarTransaction (https://core.telegram.org/bots/api#startransaction)
 //
-// Describes a Telegram Star transaction.
+// Describes a Telegram Star transaction. Note that if the buyer initiates a chargeback with the payment provider from whom they acquired Stars (e.g., Apple, Google) following this transaction, the refunded Stars will be deducted from the bot's balance. This is outside of Telegram's control.
 type StarTransaction struct {
 	// Unique identifier of the transaction. Coincides with the identifier of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
 	Id string `json:"id"`
@@ -8495,7 +8519,7 @@ type Story struct {
 
 // SuccessfulPayment (https://core.telegram.org/bots/api#successfulpayment)
 //
-// This object contains basic information about a successful payment.
+// This object contains basic information about a successful payment. Note that if the buyer initiates a chargeback with the relevant payment provider following this transaction, the funds may be debited from your balance. This is outside of Telegram's control.
 type SuccessfulPayment struct {
 	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars
 	Currency string `json:"currency"`
@@ -8553,6 +8577,7 @@ type TextQuote struct {
 //
 // This object describes the source of a transaction, or its recipient for outgoing transactions. Currently, it can be one of
 //   - TransactionPartnerUser
+//   - TransactionPartnerChat
 //   - TransactionPartnerAffiliateProgram
 //   - TransactionPartnerFragment
 //   - TransactionPartnerTelegramAds
@@ -8569,6 +8594,7 @@ type TransactionPartner interface {
 // Ensure that all subtypes correctly implement the parent interface.
 var (
 	_ TransactionPartner = TransactionPartnerUser{}
+	_ TransactionPartner = TransactionPartnerChat{}
 	_ TransactionPartner = TransactionPartnerAffiliateProgram{}
 	_ TransactionPartner = TransactionPartnerFragment{}
 	_ TransactionPartner = TransactionPartnerTelegramAds{}
@@ -8592,8 +8618,10 @@ type MergedTransactionPartner struct {
 	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
 	// Optional. Bot-specified paid media payload (Only for user)
 	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
-	// Optional. The gift sent to the user by the bot (Only for user)
+	// Optional. The gift sent to the user by the bot (Only for user, chat)
 	Gift *Gift `json:"gift,omitempty"`
+	// Optional. Information about the chat (Only for chat)
+	Chat *Chat `json:"chat,omitempty"`
 	// Optional. Information about the bot that sponsored the affiliate program (Only for affiliate_program)
 	SponsorUser *User `json:"sponsor_user,omitempty"`
 	// Optional. The number of Telegram Stars received by the bot for each 1000 Telegram Stars received by the affiliate program sponsor from referred users (Only for affiliate_program)
@@ -8663,6 +8691,14 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 		err := json.Unmarshal(d, &s)
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'user': %w", err)
+		}
+		return s, nil
+
+	case "chat":
+		s := TransactionPartnerChat{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal TransactionPartner for value 'chat': %w", err)
 		}
 		return s, nil
 
@@ -8749,6 +8785,46 @@ func (v TransactionPartnerAffiliateProgram) MarshalJSON() ([]byte, error) {
 
 // TransactionPartnerAffiliateProgram.transactionPartner is a dummy method to avoid interface implementation.
 func (v TransactionPartnerAffiliateProgram) transactionPartner() {}
+
+// TransactionPartnerChat (https://core.telegram.org/bots/api#transactionpartnerchat)
+//
+// Describes a transaction with a chat.
+type TransactionPartnerChat struct {
+	// Information about the chat
+	Chat Chat `json:"chat"`
+	// Optional. The gift sent to the chat by the bot
+	Gift *Gift `json:"gift,omitempty"`
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerChat) GetType() string {
+	return "chat"
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerChat) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{
+		Type: "chat",
+		Chat: &v.Chat,
+		Gift: v.Gift,
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerChat) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerChat
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "chat",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerChat.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerChat) transactionPartner() {}
 
 // TransactionPartnerFragment (https://core.telegram.org/bots/api#transactionpartnerfragment)
 //
@@ -9148,6 +9224,10 @@ type Video struct {
 	Duration int64 `json:"duration"`
 	// Optional. Video thumbnail
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
+	// Optional. Available sizes of the cover of the video in the message
+	Cover []PhotoSize `json:"cover,omitempty"`
+	// Optional. Timestamp in seconds from which the video will play in the message
+	StartTimestamp int64 `json:"start_timestamp,omitempty"`
 	// Optional. Original filename as defined by the sender
 	FileName string `json:"file_name,omitempty"`
 	// Optional. MIME type of the file as defined by the sender
