@@ -78,14 +78,10 @@ func TestDispatcher(t *testing.T) {
 			numMatches: 2,
 		},
 	} {
-		name, testParams := name, testParams
-
 		t.Run(name, func(t *testing.T) {
 			d := ext.NewDispatcher(nil)
 			var events []int
 			for idx, h := range testParams.handlers {
-				idx, h := idx, h
-
 				t.Logf("Loading handler %d in group %d", idx, h.group)
 				d.AddHandlerToGroup(handlers.NewMessage(message.All, func(b *gotgbot.Bot, ctx *ext.Context) error {
 					if !h.shouldRun {
