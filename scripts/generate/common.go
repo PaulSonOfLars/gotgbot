@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -233,6 +234,7 @@ func getCommonFields(types []TypeDescription) []Field {
 	}
 
 	count := map[string]int{}
+	fieldTypes := map[string]Field{}
 
 	for _, t := range types {
 		for _, f := range t.Fields {
@@ -241,6 +243,13 @@ func getCommonFields(types []TypeDescription) []Field {
 			}
 
 			count[f.Name]++
+
+			if other, ok := fieldTypes[f.Name]; !ok {
+				fieldTypes[f.Name] = f
+			} else if !slices.Equal(f.Types, other.Types) {
+				// if not equal, make sure to just set the count to a silly value
+				count[f.Name] += len(types)
+			}
 		}
 	}
 
@@ -337,4 +346,35 @@ func extractQuotedValues(in string) ([]string, error) {
 		}
 	}
 	return out, nil
+}
+
+func checkAllChildrenFieldTypes(d APIDescription, parentType string, subtypes []TypeDescription) bool {
+	for _, t := range subtypes {
+		if !childFieldTypesMatch(d, parentType, t.Fields) {
+			return false
+		}
+	}
+	return true
+}
+
+func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) bool {
+	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
+	if err != nil {
+		return false
+	}
+
+	allParentFields, err := getAllFields(d, subTypes, parentType)
+	if err != nil {
+		return false
+	}
+
+	for _, f := range fields {
+		for _, parentField := range allParentFields {
+			if parentField.Name == f.Name && !slices.Equal(f.Types, parentField.Types) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

@@ -7149,10 +7149,7 @@ type OrderInfo struct {
 //   - OwnedGiftUnique
 type OwnedGift interface {
 	GetType() string
-	GetGift() Gift
 	GetSendDate() int64
-	// MergeOwnedGift returns a MergedOwnedGift struct to simplify working with complex telegram types in a non-generic world.
-	MergeOwnedGift() MergedOwnedGift
 	// ownedGift exists to avoid external types implementing this interface.
 	ownedGift()
 }
@@ -7162,63 +7159,6 @@ var (
 	_ OwnedGift = OwnedGiftRegular{}
 	_ OwnedGift = OwnedGiftUnique{}
 )
-
-// MergedOwnedGift is a helper type to simplify interactions with the various OwnedGift subtypes.
-type MergedOwnedGift struct {
-	// Type of the gift
-	Type string `json:"type"`
-	// Information about the regular gift
-	Gift Gift `json:"gift"`
-	// Optional. Unique identifier of the gift for the bot; for gifts received on behalf of business accounts only
-	OwnedGiftId string `json:"owned_gift_id,omitempty"`
-	// Optional. Sender of the gift if it is a known user
-	SenderUser *User `json:"sender_user,omitempty"`
-	// Date the gift was sent in Unix time
-	SendDate int64 `json:"send_date"`
-	// Optional. Text of the message that was added to the gift (Only for regular)
-	Text string `json:"text,omitempty"`
-	// Optional. Special entities that appear in the text (Only for regular)
-	Entities []MessageEntity `json:"entities,omitempty"`
-	// Optional. True, if the sender and gift text are shown only to the gift receiver; otherwise, everyone will be able to see them (Only for regular)
-	IsPrivate bool `json:"is_private,omitempty"`
-	// Optional. True, if the gift is displayed on the account's profile page; for gifts received on behalf of business accounts only
-	IsSaved bool `json:"is_saved,omitempty"`
-	// Optional. True, if the gift can be upgraded to a unique gift; for gifts received on behalf of business accounts only (Only for regular)
-	CanBeUpgraded bool `json:"can_be_upgraded,omitempty"`
-	// Optional. True, if the gift was refunded and isn't available anymore (Only for regular)
-	WasRefunded bool `json:"was_refunded,omitempty"`
-	// Optional. Number of Telegram Stars that can be claimed by the receiver instead of the gift; omitted if the gift cannot be converted to Telegram Stars (Only for regular)
-	ConvertStarCount int64 `json:"convert_star_count,omitempty"`
-	// Optional. Number of Telegram Stars that were paid by the sender for the ability to upgrade the gift (Only for regular)
-	PrepaidUpgradeStarCount int64 `json:"prepaid_upgrade_star_count,omitempty"`
-	// Optional. True, if the gift can be transferred to another owner; for gifts received on behalf of business accounts only (Only for unique)
-	CanBeTransferred bool `json:"can_be_transferred,omitempty"`
-	// Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift (Only for unique)
-	TransferStarCount int64 `json:"transfer_star_count,omitempty"`
-}
-
-// GetType is a helper method to easily access the common fields of an interface.
-func (v MergedOwnedGift) GetType() string {
-	return v.Type
-}
-
-// GetGift is a helper method to easily access the common fields of an interface.
-func (v MergedOwnedGift) GetGift() Gift {
-	return v.Gift
-}
-
-// GetSendDate is a helper method to easily access the common fields of an interface.
-func (v MergedOwnedGift) GetSendDate() int64 {
-	return v.SendDate
-}
-
-// MergedOwnedGift.ownedGift is a dummy method to avoid interface implementation.
-func (v MergedOwnedGift) ownedGift() {}
-
-// MergeOwnedGift returns a MergedOwnedGift struct to simplify working with types in a non-generic world.
-func (v MergedOwnedGift) MergeOwnedGift() MergedOwnedGift {
-	return v
-}
 
 // unmarshalOwnedGiftArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalOwnedGift.
@@ -7316,33 +7256,9 @@ func (v OwnedGiftRegular) GetType() string {
 	return "regular"
 }
 
-// GetGift is a helper method to easily access the common fields of an interface.
-func (v OwnedGiftRegular) GetGift() Gift {
-	return v.Gift
-}
-
 // GetSendDate is a helper method to easily access the common fields of an interface.
 func (v OwnedGiftRegular) GetSendDate() int64 {
 	return v.SendDate
-}
-
-// MergeOwnedGift returns a MergedOwnedGift struct to simplify working with types in a non-generic world.
-func (v OwnedGiftRegular) MergeOwnedGift() MergedOwnedGift {
-	return MergedOwnedGift{
-		Type:                    "regular",
-		Gift:                    v.Gift,
-		OwnedGiftId:             v.OwnedGiftId,
-		SenderUser:              v.SenderUser,
-		SendDate:                v.SendDate,
-		Text:                    v.Text,
-		Entities:                v.Entities,
-		IsPrivate:               v.IsPrivate,
-		IsSaved:                 v.IsSaved,
-		CanBeUpgraded:           v.CanBeUpgraded,
-		WasRefunded:             v.WasRefunded,
-		ConvertStarCount:        v.ConvertStarCount,
-		PrepaidUpgradeStarCount: v.PrepaidUpgradeStarCount,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -7386,28 +7302,9 @@ func (v OwnedGiftUnique) GetType() string {
 	return "unique"
 }
 
-// GetGift is a helper method to easily access the common fields of an interface.
-func (v OwnedGiftUnique) GetGift() Gift {
-	return v.Gift
-}
-
 // GetSendDate is a helper method to easily access the common fields of an interface.
 func (v OwnedGiftUnique) GetSendDate() int64 {
 	return v.SendDate
-}
-
-// MergeOwnedGift returns a MergedOwnedGift struct to simplify working with types in a non-generic world.
-func (v OwnedGiftUnique) MergeOwnedGift() MergedOwnedGift {
-	return MergedOwnedGift{
-		Type:              "unique",
-		Gift:              v.Gift,
-		OwnedGiftId:       v.OwnedGiftId,
-		SenderUser:        v.SenderUser,
-		SendDate:          v.SendDate,
-		IsSaved:           v.IsSaved,
-		CanBeTransferred:  v.CanBeTransferred,
-		TransferStarCount: v.TransferStarCount,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.

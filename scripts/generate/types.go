@@ -369,8 +369,9 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		}
 		bd.WriteString(commonGetMethods)
 
-		// We only generate the merge func if there is a comm
-		if constantField != "" {
+		// We only generate the merge func if there is a common field, and if the types match across all children.
+		// If they didn't match, then compilation would fail.
+		if constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) {
 			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
 			if err != nil {
 				return "", err
@@ -498,7 +499,8 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString("\nInputParams(string, map[string]FileReader) ([]byte, error)")
 	}
 
-	if len(commonFields) > 0 && constantField != "" {
+	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
+	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) {
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
@@ -526,7 +528,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 	bd.WriteString(enforceTypeAssertion(name, subtypes))
 
-	if len(commonFields) > 0 && constantField != "" {
+	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate merged struct: %w", err)
