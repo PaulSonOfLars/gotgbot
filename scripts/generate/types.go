@@ -73,11 +73,13 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		typeDef.WriteString("\n}")
 	}
 
-	customUnmarshalDef, err := setupCustomUnmarshal(d, tgType)
-	if err != nil {
-		return "", fmt.Errorf("failed to setup custom unmarshal for %s: %w", tgType.Name, err)
+	if tgType.sentByAPI(d) {
+		customUnmarshalDef, err := setupCustomUnmarshal(d, tgType)
+		if err != nil {
+			return "", fmt.Errorf("failed to setup custom unmarshal for %s: %w", tgType.Name, err)
+		}
+		typeDef.WriteString(customUnmarshalDef)
 	}
-	typeDef.WriteString(customUnmarshalDef)
 
 	interfaces, err := fulfilParentTypeInterfaces(d, tgType)
 	if err != nil {
@@ -237,6 +239,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 				if err != nil {
 					return "", fmt.Errorf("failed to get subtypes from %s: %w", fieldType.Name, err)
 				}
+
 				if len(getCommonFields(subtypes)) > 0 {
 					generateCustomMarshal = true
 					fieldData.Custom = true

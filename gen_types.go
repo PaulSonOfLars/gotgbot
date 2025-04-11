@@ -9105,28 +9105,6 @@ type StoryArea struct {
 	Type StoryAreaType `json:"type"`
 }
 
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *StoryArea) UnmarshalJSON(b []byte) error {
-	// All fields in StoryArea, with interface fields as json.RawMessage
-	type tmp struct {
-		Position StoryAreaPosition `json:"position"`
-		Type     json.RawMessage   `json:"type"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal StoryArea JSON into tmp struct: %w", err)
-	}
-
-	v.Position = t.Position
-	v.Type, err = unmarshalStoryAreaType(t.Type)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Type: %w", err)
-	}
-
-	return nil
-}
-
 // StoryAreaPosition (https://core.telegram.org/bots/api#storyareaposition)
 //
 // Describes the position of a clickable area within a story.
@@ -9301,30 +9279,6 @@ type StoryAreaTypeSuggestedReaction struct {
 	IsDark bool `json:"is_dark,omitempty"`
 	// Optional. Pass True if reaction area corner is flipped
 	IsFlipped bool `json:"is_flipped,omitempty"`
-}
-
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *StoryAreaTypeSuggestedReaction) UnmarshalJSON(b []byte) error {
-	// All fields in StoryAreaTypeSuggestedReaction, with interface fields as json.RawMessage
-	type tmp struct {
-		ReactionType json.RawMessage `json:"reaction_type"`
-		IsDark       bool            `json:"is_dark"`
-		IsFlipped    bool            `json:"is_flipped"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal StoryAreaTypeSuggestedReaction JSON into tmp struct: %w", err)
-	}
-
-	v.ReactionType, err = unmarshalReactionType(t.ReactionType)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field ReactionType: %w", err)
-	}
-	v.IsDark = t.IsDark
-	v.IsFlipped = t.IsFlipped
-
-	return nil
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
