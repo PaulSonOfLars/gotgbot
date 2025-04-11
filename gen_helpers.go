@@ -314,6 +314,11 @@ func (im InaccessibleMessage) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error
 	return b.PinChatMessage(im.Chat.Id, im.MessageId, opts)
 }
 
+// ReadBusiness Helper method for Bot.ReadBusinessMessage.
+func (im InaccessibleMessage) ReadBusiness(b *Bot, businessConnectionId string, opts *ReadBusinessMessageOpts) (bool, error) {
+	return b.ReadBusinessMessage(businessConnectionId, im.Chat.Id, im.MessageId, opts)
+}
+
 // SetReaction Helper method for Bot.SetMessageReaction.
 func (im InaccessibleMessage) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
 	return b.SetMessageReaction(im.Chat.Id, im.MessageId, opts)
@@ -453,6 +458,11 @@ func (m Message) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
 	return b.PinChatMessage(m.Chat.Id, m.MessageId, opts)
 }
 
+// ReadBusiness Helper method for Bot.ReadBusinessMessage.
+func (m Message) ReadBusiness(b *Bot, businessConnectionId string, opts *ReadBusinessMessageOpts) (bool, error) {
+	return b.ReadBusinessMessage(businessConnectionId, m.Chat.Id, m.MessageId, opts)
+}
+
 // SetReaction Helper method for Bot.SetMessageReaction.
 func (m Message) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
 	return b.SetMessageReaction(m.Chat.Id, m.MessageId, opts)
@@ -495,6 +505,16 @@ func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQuery
 // Answer Helper method for Bot.AnswerShippingQuery.
 func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
+}
+
+// Delete Helper method for Bot.DeleteStory.
+func (s Story) Delete(b *Bot, businessConnectionId string, opts *DeleteStoryOpts) (bool, error) {
+	return b.DeleteStory(businessConnectionId, s.Id, opts)
+}
+
+// Edit Helper method for Bot.EditStory.
+func (s Story) Edit(b *Bot, businessConnectionId string, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	return b.EditStory(businessConnectionId, s.Id, content, opts)
 }
 
 // EditStarSubscription Helper method for Bot.EditUserStarSubscription.

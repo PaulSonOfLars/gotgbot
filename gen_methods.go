@@ -30,21 +30,20 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker,
 // AddStickerToSetWithContext is the same as Bot.AddStickerToSet, but with a context.Context parameter
 func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]string{}
-	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
-	inputBs, err := sticker.InputParams("sticker", data)
+	bs, err := json.Marshal(sticker)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(inputBs)
+	v["sticker"] = string(bs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -519,6 +518,42 @@ func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId in
 	return b, json.Unmarshal(r, &b)
 }
 
+// ConvertGiftToStarsOpts is the set of optional fields for Bot.ConvertGiftToStars and Bot.ConvertGiftToStarsWithContext.
+type ConvertGiftToStarsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ConvertGiftToStars (https://core.telegram.org/bots/api#convertgifttostars)
+//
+// Converts a given regular gift to Telegram Stars. Requires the can_convert_gifts_to_stars business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be converted to Telegram Stars
+//   - opts (type ConvertGiftToStarsOpts): All optional parameters.
+func (bot *Bot) ConvertGiftToStars(businessConnectionId string, ownedGiftId string, opts *ConvertGiftToStarsOpts) (bool, error) {
+	return bot.ConvertGiftToStarsWithContext(context.Background(), businessConnectionId, ownedGiftId, opts)
+}
+
+// ConvertGiftToStarsWithContext is the same as Bot.ConvertGiftToStars, but with a context.Context parameter
+func (bot *Bot) ConvertGiftToStarsWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, opts *ConvertGiftToStarsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "convertGiftToStars", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // CopyMessageOpts is the set of optional fields for Bot.CopyMessage and Bot.CopyMessageWithContext.
 type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -741,7 +776,7 @@ type CreateChatSubscriptionInviteLinkOpts struct {
 // Use this method to create a subscription invite link for a channel chat. The bot must have the can_invite_users administrator rights. The link can be edited using the method editChatSubscriptionInviteLink or revoked using the method revokeChatInviteLink. Returns the new invite link as a ChatInviteLink object.
 //   - chatId (type int64): Unique identifier for the target channel chat
 //   - subscriptionPeriod (type int64): The number of seconds the subscription will be active for before the next payment. Currently, it must always be 2592000 (30 days).
-//   - subscriptionPrice (type int64): The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
+//   - subscriptionPrice (type int64): The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-10000
 //   - opts (type CreateChatSubscriptionInviteLinkOpts): All optional parameters.
 func (bot *Bot) CreateChatSubscriptionInviteLink(chatId int64, subscriptionPeriod int64, subscriptionPrice int64, opts *CreateChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	return bot.CreateChatSubscriptionInviteLinkWithContext(context.Background(), chatId, subscriptionPeriod, subscriptionPrice, opts)
@@ -823,7 +858,7 @@ type CreateInvoiceLinkOpts struct {
 	BusinessConnectionId string
 	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string
-	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 2500 Telegram Stars.
+	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 10000 Telegram Stars.
 	SubscriptionPeriod int64
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
@@ -959,22 +994,13 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, sti
 // CreateNewStickerSetWithContext is the same as Bot.CreateNewStickerSet, but with a context.Context parameter
 func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64, name string, title string, stickers []InputSticker, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]string{}
-	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["title"] = title
 	if stickers != nil {
-		var rawList []json.RawMessage
-		for idx, im := range stickers {
-			inputBs, err := im.InputParams("stickers"+strconv.Itoa(idx), data)
-			if err != nil {
-				return false, fmt.Errorf("failed to marshal list item %d for field stickers: %w", idx, err)
-			}
-			rawList = append(rawList, inputBs)
-		}
-		bs, err := json.Marshal(rawList)
+		bs, err := json.Marshal(stickers)
 		if err != nil {
-			return false, fmt.Errorf("failed to marshal raw json list for field: stickers %w", err)
+			return false, fmt.Errorf("failed to marshal field stickers: %w", err)
 		}
 		v["stickers"] = string(bs)
 	}
@@ -988,7 +1014,7 @@ func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1025,6 +1051,48 @@ func (bot *Bot) DeclineChatJoinRequestWithContext(ctx context.Context, chatId in
 	}
 
 	r, err := bot.RequestWithContext(ctx, "declineChatJoinRequest", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteBusinessMessagesOpts is the set of optional fields for Bot.DeleteBusinessMessages and Bot.DeleteBusinessMessagesWithContext.
+type DeleteBusinessMessagesOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteBusinessMessages (https://core.telegram.org/bots/api#deletebusinessmessages)
+//
+// Delete messages on behalf of a business account. Requires the can_delete_outgoing_messages business bot right to delete messages sent by the bot itself, or the can_delete_all_messages business bot right to delete any message. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which to delete the messages
+//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. All messages must be from the same chat. See deleteMessage for limitations on which messages can be deleted
+//   - opts (type DeleteBusinessMessagesOpts): All optional parameters.
+func (bot *Bot) DeleteBusinessMessages(businessConnectionId string, messageIds []int64, opts *DeleteBusinessMessagesOpts) (bool, error) {
+	return bot.DeleteBusinessMessagesWithContext(context.Background(), businessConnectionId, messageIds, opts)
+}
+
+// DeleteBusinessMessagesWithContext is the same as Bot.DeleteBusinessMessages, but with a context.Context parameter
+func (bot *Bot) DeleteBusinessMessagesWithContext(ctx context.Context, businessConnectionId string, messageIds []int64, opts *DeleteBusinessMessagesOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if messageIds != nil {
+		bs, err := json.Marshal(messageIds)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field message_ids: %w", err)
+		}
+		v["message_ids"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "deleteBusinessMessages", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1329,6 +1397,42 @@ func (bot *Bot) DeleteStickerSetWithContext(ctx context.Context, name string, op
 	}
 
 	r, err := bot.RequestWithContext(ctx, "deleteStickerSet", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteStoryOpts is the set of optional fields for Bot.DeleteStory and Bot.DeleteStoryWithContext.
+type DeleteStoryOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteStory (https://core.telegram.org/bots/api#deletestory)
+//
+// Deletes a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - storyId (type int64): Unique identifier of the story to delete
+//   - opts (type DeleteStoryOpts): All optional parameters.
+func (bot *Bot) DeleteStory(businessConnectionId string, storyId int64, opts *DeleteStoryOpts) (bool, error) {
+	return bot.DeleteStoryWithContext(context.Background(), businessConnectionId, storyId, opts)
+}
+
+// DeleteStoryWithContext is the same as Bot.DeleteStory, but with a context.Context parameter
+func (bot *Bot) DeleteStoryWithContext(ctx context.Context, businessConnectionId string, storyId int64, opts *DeleteStoryOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["story_id"] = strconv.FormatInt(storyId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "deleteStory", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1948,6 +2052,74 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opt
 
 }
 
+// EditStoryOpts is the set of optional fields for Bot.EditStory and Bot.EditStoryWithContext.
+type EditStoryOpts struct {
+	// Caption of the story, 0-2048 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the story caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// A JSON-serialized list of clickable areas to be shown on the story
+	Areas []StoryArea
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditStory (https://core.telegram.org/bots/api#editstory)
+//
+// Edits a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - storyId (type int64): Unique identifier of the story to edit
+//   - content (type InputStoryContent): Content of the story
+//   - opts (type EditStoryOpts): All optional parameters.
+func (bot *Bot) EditStory(businessConnectionId string, storyId int64, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	return bot.EditStoryWithContext(context.Background(), businessConnectionId, storyId, content, opts)
+}
+
+// EditStoryWithContext is the same as Bot.EditStory, but with a context.Context parameter
+func (bot *Bot) EditStoryWithContext(ctx context.Context, businessConnectionId string, storyId int64, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["story_id"] = strconv.FormatInt(storyId, 10)
+	bs, err := json.Marshal(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field content: %w", err)
+	}
+	v["content"] = string(bs)
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		if opts.Areas != nil {
+			bs, err := json.Marshal(opts.Areas)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field areas: %w", err)
+			}
+			v["areas"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editStory", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s Story
+	return &s, json.Unmarshal(r, &s)
+}
+
 // EditUserStarSubscriptionOpts is the set of optional fields for Bot.EditUserStarSubscription and Bot.EditUserStarSubscriptionWithContext.
 type EditUserStarSubscriptionOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2163,6 +2335,102 @@ func (bot *Bot) GetAvailableGiftsWithContext(ctx context.Context, opts *GetAvail
 
 	var g Gifts
 	return &g, json.Unmarshal(r, &g)
+}
+
+// GetBusinessAccountGiftsOpts is the set of optional fields for Bot.GetBusinessAccountGifts and Bot.GetBusinessAccountGiftsWithContext.
+type GetBusinessAccountGiftsOpts struct {
+	// Pass True to exclude gifts that aren't saved to the account's profile page
+	ExcludeUnsaved bool
+	// Pass True to exclude gifts that are saved to the account's profile page
+	ExcludeSaved bool
+	// Pass True to exclude gifts that can be purchased an unlimited number of times
+	ExcludeUnlimited bool
+	// Pass True to exclude gifts that can be purchased a limited number of times
+	ExcludeLimited bool
+	// Pass True to exclude unique gifts
+	ExcludeUnique bool
+	// Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
+	SortByPrice bool
+	// Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
+	Offset string
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetBusinessAccountGifts (https://core.telegram.org/bots/api#getbusinessaccountgifts)
+//
+// Returns the gifts received and owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns OwnedGifts on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type GetBusinessAccountGiftsOpts): All optional parameters.
+func (bot *Bot) GetBusinessAccountGifts(businessConnectionId string, opts *GetBusinessAccountGiftsOpts) (*OwnedGifts, error) {
+	return bot.GetBusinessAccountGiftsWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// GetBusinessAccountGiftsWithContext is the same as Bot.GetBusinessAccountGifts, but with a context.Context parameter
+func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, businessConnectionId string, opts *GetBusinessAccountGiftsOpts) (*OwnedGifts, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["exclude_unsaved"] = strconv.FormatBool(opts.ExcludeUnsaved)
+		v["exclude_saved"] = strconv.FormatBool(opts.ExcludeSaved)
+		v["exclude_unlimited"] = strconv.FormatBool(opts.ExcludeUnlimited)
+		v["exclude_limited"] = strconv.FormatBool(opts.ExcludeLimited)
+		v["exclude_unique"] = strconv.FormatBool(opts.ExcludeUnique)
+		v["sort_by_price"] = strconv.FormatBool(opts.SortByPrice)
+		v["offset"] = opts.Offset
+		if opts.Limit != 0 {
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountGifts", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var o OwnedGifts
+	return &o, json.Unmarshal(r, &o)
+}
+
+// GetBusinessAccountStarBalanceOpts is the set of optional fields for Bot.GetBusinessAccountStarBalance and Bot.GetBusinessAccountStarBalanceWithContext.
+type GetBusinessAccountStarBalanceOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetBusinessAccountStarBalance (https://core.telegram.org/bots/api#getbusinessaccountstarbalance)
+//
+// Returns the amount of Telegram Stars owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns StarAmount on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type GetBusinessAccountStarBalanceOpts): All optional parameters.
+func (bot *Bot) GetBusinessAccountStarBalance(businessConnectionId string, opts *GetBusinessAccountStarBalanceOpts) (*StarAmount, error) {
+	return bot.GetBusinessAccountStarBalanceWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// GetBusinessAccountStarBalanceWithContext is the same as Bot.GetBusinessAccountStarBalance, but with a context.Context parameter
+func (bot *Bot) GetBusinessAccountStarBalanceWithContext(ctx context.Context, businessConnectionId string, opts *GetBusinessAccountStarBalanceOpts) (*StarAmount, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountStarBalance", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s StarAmount
+	return &s, json.Unmarshal(r, &s)
 }
 
 // GetBusinessConnectionOpts is the set of optional fields for Bot.GetBusinessConnection and Bot.GetBusinessConnectionWithContext.
@@ -3003,6 +3271,61 @@ func (bot *Bot) GetWebhookInfoWithContext(ctx context.Context, opts *GetWebhookI
 	return &w, json.Unmarshal(r, &w)
 }
 
+// GiftPremiumSubscriptionOpts is the set of optional fields for Bot.GiftPremiumSubscription and Bot.GiftPremiumSubscriptionWithContext.
+type GiftPremiumSubscriptionOpts struct {
+	// Text that will be shown along with the service message about the subscription; 0-128 characters
+	Text string
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextParseMode string
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities []MessageEntity
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GiftPremiumSubscription (https://core.telegram.org/bots/api#giftpremiumsubscription)
+//
+// Gifts a Telegram Premium subscription to the given user. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user who will receive a Telegram Premium subscription
+//   - monthCount (type int64): Number of months the Telegram Premium subscription will be active for the user; must be one of 3, 6, or 12
+//   - starCount (type int64): Number of Telegram Stars to pay for the Telegram Premium subscription; must be 1000 for 3 months, 1500 for 6 months, and 2500 for 12 months
+//   - opts (type GiftPremiumSubscriptionOpts): All optional parameters.
+func (bot *Bot) GiftPremiumSubscription(userId int64, monthCount int64, starCount int64, opts *GiftPremiumSubscriptionOpts) (bool, error) {
+	return bot.GiftPremiumSubscriptionWithContext(context.Background(), userId, monthCount, starCount, opts)
+}
+
+// GiftPremiumSubscriptionWithContext is the same as Bot.GiftPremiumSubscription, but with a context.Context parameter
+func (bot *Bot) GiftPremiumSubscriptionWithContext(ctx context.Context, userId int64, monthCount int64, starCount int64, opts *GiftPremiumSubscriptionOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["month_count"] = strconv.FormatInt(monthCount, 10)
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+	if opts != nil {
+		v["text"] = opts.Text
+		v["text_parse_mode"] = opts.TextParseMode
+		if opts.TextEntities != nil {
+			bs, err := json.Marshal(opts.TextEntities)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field text_entities: %w", err)
+			}
+			v["text_entities"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "giftPremiumSubscription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // HideGeneralForumTopicOpts is the set of optional fields for Bot.HideGeneralForumTopic and Bot.HideGeneralForumTopicWithContext.
 type HideGeneralForumTopicOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -3147,6 +3470,80 @@ func (bot *Bot) PinChatMessageWithContext(ctx context.Context, chatId int64, mes
 	return b, json.Unmarshal(r, &b)
 }
 
+// PostStoryOpts is the set of optional fields for Bot.PostStory and Bot.PostStoryWithContext.
+type PostStoryOpts struct {
+	// Caption of the story, 0-2048 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the story caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// A JSON-serialized list of clickable areas to be shown on the story
+	Areas []StoryArea
+	// Pass True to keep the story accessible after it expires
+	PostToChatPage bool
+	// Pass True if the content of the story must be protected from forwarding and screenshotting
+	ProtectContent bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// PostStory (https://core.telegram.org/bots/api#poststory)
+//
+// Posts a story on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - content (type InputStoryContent): Content of the story
+//   - activePeriod (type int64): Period after which the story is moved to the archive, in seconds; must be one of 6 * 3600, 12 * 3600, 86400, or 2 * 86400
+//   - opts (type PostStoryOpts): All optional parameters.
+func (bot *Bot) PostStory(businessConnectionId string, content InputStoryContent, activePeriod int64, opts *PostStoryOpts) (*Story, error) {
+	return bot.PostStoryWithContext(context.Background(), businessConnectionId, content, activePeriod, opts)
+}
+
+// PostStoryWithContext is the same as Bot.PostStory, but with a context.Context parameter
+func (bot *Bot) PostStoryWithContext(ctx context.Context, businessConnectionId string, content InputStoryContent, activePeriod int64, opts *PostStoryOpts) (*Story, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	bs, err := json.Marshal(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field content: %w", err)
+	}
+	v["content"] = string(bs)
+	v["active_period"] = strconv.FormatInt(activePeriod, 10)
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		if opts.Areas != nil {
+			bs, err := json.Marshal(opts.Areas)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field areas: %w", err)
+			}
+			v["areas"] = string(bs)
+		}
+		v["post_to_chat_page"] = strconv.FormatBool(opts.PostToChatPage)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "postStory", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s Story
+	return &s, json.Unmarshal(r, &s)
+}
+
 // PromoteChatMemberOpts is the set of optional fields for Bot.PromoteChatMember and Bot.PromoteChatMemberWithContext.
 type PromoteChatMemberOpts struct {
 	// Pass True if the administrator's presence in the chat is hidden
@@ -3230,6 +3627,44 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 	return b, json.Unmarshal(r, &b)
 }
 
+// ReadBusinessMessageOpts is the set of optional fields for Bot.ReadBusinessMessage and Bot.ReadBusinessMessageWithContext.
+type ReadBusinessMessageOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ReadBusinessMessage (https://core.telegram.org/bots/api#readbusinessmessage)
+//
+// Marks incoming message as read on behalf of a business account. Requires the can_read_messages business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which to read the message
+//   - chatId (type int64): Unique identifier of the chat in which the message was received. The chat must have been active in the last 24 hours.
+//   - messageId (type int64): Unique identifier of the message to mark as read
+//   - opts (type ReadBusinessMessageOpts): All optional parameters.
+func (bot *Bot) ReadBusinessMessage(businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
+	return bot.ReadBusinessMessageWithContext(context.Background(), businessConnectionId, chatId, messageId, opts)
+}
+
+// ReadBusinessMessageWithContext is the same as Bot.ReadBusinessMessage, but with a context.Context parameter
+func (bot *Bot) ReadBusinessMessageWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "readBusinessMessage", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // RefundStarPaymentOpts is the set of optional fields for Bot.RefundStarPayment and Bot.RefundStarPaymentWithContext.
 type RefundStarPaymentOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -3258,6 +3693,45 @@ func (bot *Bot) RefundStarPaymentWithContext(ctx context.Context, userId int64, 
 	}
 
 	r, err := bot.RequestWithContext(ctx, "refundStarPayment", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// RemoveBusinessAccountProfilePhotoOpts is the set of optional fields for Bot.RemoveBusinessAccountProfilePhoto and Bot.RemoveBusinessAccountProfilePhotoWithContext.
+type RemoveBusinessAccountProfilePhotoOpts struct {
+	// Pass True to remove the public photo, which is visible even if the main photo is hidden by the business account's privacy settings. After the main photo is removed, the previous profile photo (if present) becomes the main photo.
+	IsPublic bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RemoveBusinessAccountProfilePhoto (https://core.telegram.org/bots/api#removebusinessaccountprofilephoto)
+//
+// Removes the current profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type RemoveBusinessAccountProfilePhotoOpts): All optional parameters.
+func (bot *Bot) RemoveBusinessAccountProfilePhoto(businessConnectionId string, opts *RemoveBusinessAccountProfilePhotoOpts) (bool, error) {
+	return bot.RemoveBusinessAccountProfilePhotoWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// RemoveBusinessAccountProfilePhotoWithContext is the same as Bot.RemoveBusinessAccountProfilePhoto, but with a context.Context parameter
+func (bot *Bot) RemoveBusinessAccountProfilePhotoWithContext(ctx context.Context, businessConnectionId string, opts *RemoveBusinessAccountProfilePhotoOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["is_public"] = strconv.FormatBool(opts.IsPublic)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "removeBusinessAccountProfilePhoto", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3425,22 +3899,21 @@ func (bot *Bot) ReplaceStickerInSet(userId int64, name string, oldSticker string
 // ReplaceStickerInSetWithContext is the same as Bot.ReplaceStickerInSet, but with a context.Context parameter
 func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64, name string, oldSticker string, sticker InputSticker, opts *ReplaceStickerInSetOpts) (bool, error) {
 	v := map[string]string{}
-	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["old_sticker"] = oldSticker
-	inputBs, err := sticker.InputParams("sticker", data)
+	bs, err := json.Marshal(sticker)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(inputBs)
+	v["sticker"] = string(bs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4750,7 +5223,7 @@ type SendPaidMediaOpts struct {
 //
 // Use this method to send paid media. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-2500
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-10000
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
 func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
@@ -5595,6 +6068,212 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 
 	var m Message
 	return &m, json.Unmarshal(r, &m)
+}
+
+// SetBusinessAccountBioOpts is the set of optional fields for Bot.SetBusinessAccountBio and Bot.SetBusinessAccountBioWithContext.
+type SetBusinessAccountBioOpts struct {
+	// The new value of the bio for the business account; 0-140 characters
+	Bio string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountBio (https://core.telegram.org/bots/api#setbusinessaccountbio)
+//
+// Changes the bio of a managed business account. Requires the can_change_bio business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type SetBusinessAccountBioOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountBio(businessConnectionId string, opts *SetBusinessAccountBioOpts) (bool, error) {
+	return bot.SetBusinessAccountBioWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// SetBusinessAccountBioWithContext is the same as Bot.SetBusinessAccountBio, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountBioWithContext(ctx context.Context, businessConnectionId string, opts *SetBusinessAccountBioOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["bio"] = opts.Bio
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountBio", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountGiftSettingsOpts is the set of optional fields for Bot.SetBusinessAccountGiftSettings and Bot.SetBusinessAccountGiftSettingsWithContext.
+type SetBusinessAccountGiftSettingsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountGiftSettings (https://core.telegram.org/bots/api#setbusinessaccountgiftsettings)
+//
+// Changes the privacy settings pertaining to incoming gifts in a managed business account. Requires the can_change_gift_settings business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - showGiftButton (type bool): Pass True, if a button for sending a gift to the user or by the business account must always be shown in the input field
+//   - acceptedGiftTypes (type AcceptedGiftTypes): Types of gifts accepted by the business account
+//   - opts (type SetBusinessAccountGiftSettingsOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountGiftSettings(businessConnectionId string, showGiftButton bool, acceptedGiftTypes AcceptedGiftTypes, opts *SetBusinessAccountGiftSettingsOpts) (bool, error) {
+	return bot.SetBusinessAccountGiftSettingsWithContext(context.Background(), businessConnectionId, showGiftButton, acceptedGiftTypes, opts)
+}
+
+// SetBusinessAccountGiftSettingsWithContext is the same as Bot.SetBusinessAccountGiftSettings, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountGiftSettingsWithContext(ctx context.Context, businessConnectionId string, showGiftButton bool, acceptedGiftTypes AcceptedGiftTypes, opts *SetBusinessAccountGiftSettingsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["show_gift_button"] = strconv.FormatBool(showGiftButton)
+	bs, err := json.Marshal(acceptedGiftTypes)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal field accepted_gift_types: %w", err)
+	}
+	v["accepted_gift_types"] = string(bs)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountGiftSettings", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountNameOpts is the set of optional fields for Bot.SetBusinessAccountName and Bot.SetBusinessAccountNameWithContext.
+type SetBusinessAccountNameOpts struct {
+	// The new value of the last name for the business account; 0-64 characters
+	LastName string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountName (https://core.telegram.org/bots/api#setbusinessaccountname)
+//
+// Changes the first and last name of a managed business account. Requires the can_change_name business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - firstName (type string): The new value of the first name for the business account; 1-64 characters
+//   - opts (type SetBusinessAccountNameOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountName(businessConnectionId string, firstName string, opts *SetBusinessAccountNameOpts) (bool, error) {
+	return bot.SetBusinessAccountNameWithContext(context.Background(), businessConnectionId, firstName, opts)
+}
+
+// SetBusinessAccountNameWithContext is the same as Bot.SetBusinessAccountName, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountNameWithContext(ctx context.Context, businessConnectionId string, firstName string, opts *SetBusinessAccountNameOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["first_name"] = firstName
+	if opts != nil {
+		v["last_name"] = opts.LastName
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountName", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountProfilePhotoOpts is the set of optional fields for Bot.SetBusinessAccountProfilePhoto and Bot.SetBusinessAccountProfilePhotoWithContext.
+type SetBusinessAccountProfilePhotoOpts struct {
+	// Pass True to set the public photo, which will be visible even if the main photo is hidden by the business account's privacy settings. An account can have only one public photo.
+	IsPublic bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountProfilePhoto (https://core.telegram.org/bots/api#setbusinessaccountprofilephoto)
+//
+// Changes the profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - photo (type InputProfilePhoto): The new profile photo to set
+//   - opts (type SetBusinessAccountProfilePhotoOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountProfilePhoto(businessConnectionId string, photo InputProfilePhoto, opts *SetBusinessAccountProfilePhotoOpts) (bool, error) {
+	return bot.SetBusinessAccountProfilePhotoWithContext(context.Background(), businessConnectionId, photo, opts)
+}
+
+// SetBusinessAccountProfilePhotoWithContext is the same as Bot.SetBusinessAccountProfilePhoto, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountProfilePhotoWithContext(ctx context.Context, businessConnectionId string, photo InputProfilePhoto, opts *SetBusinessAccountProfilePhotoOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	bs, err := json.Marshal(photo)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal field photo: %w", err)
+	}
+	v["photo"] = string(bs)
+	if opts != nil {
+		v["is_public"] = strconv.FormatBool(opts.IsPublic)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountProfilePhoto", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountUsernameOpts is the set of optional fields for Bot.SetBusinessAccountUsername and Bot.SetBusinessAccountUsernameWithContext.
+type SetBusinessAccountUsernameOpts struct {
+	// The new value of the username for the business account; 0-32 characters
+	Username string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountUsername (https://core.telegram.org/bots/api#setbusinessaccountusername)
+//
+// Changes the username of a managed business account. Requires the can_change_username business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type SetBusinessAccountUsernameOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountUsername(businessConnectionId string, opts *SetBusinessAccountUsernameOpts) (bool, error) {
+	return bot.SetBusinessAccountUsernameWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// SetBusinessAccountUsernameWithContext is the same as Bot.SetBusinessAccountUsername, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountUsernameWithContext(ctx context.Context, businessConnectionId string, opts *SetBusinessAccountUsernameOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["username"] = opts.Username
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountUsername", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // SetChatAdministratorCustomTitleOpts is the set of optional fields for Bot.SetChatAdministratorCustomTitle and Bot.SetChatAdministratorCustomTitleWithContext.
@@ -6776,6 +7455,87 @@ func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId
 	return &p, json.Unmarshal(r, &p)
 }
 
+// TransferBusinessAccountStarsOpts is the set of optional fields for Bot.TransferBusinessAccountStars and Bot.TransferBusinessAccountStarsWithContext.
+type TransferBusinessAccountStarsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// TransferBusinessAccountStars (https://core.telegram.org/bots/api#transferbusinessaccountstars)
+//
+// Transfers Telegram Stars from the business account balance to the bot's balance. Requires the can_transfer_stars business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - starCount (type int64): Number of Telegram Stars to transfer; 1-10000
+//   - opts (type TransferBusinessAccountStarsOpts): All optional parameters.
+func (bot *Bot) TransferBusinessAccountStars(businessConnectionId string, starCount int64, opts *TransferBusinessAccountStarsOpts) (bool, error) {
+	return bot.TransferBusinessAccountStarsWithContext(context.Background(), businessConnectionId, starCount, opts)
+}
+
+// TransferBusinessAccountStarsWithContext is the same as Bot.TransferBusinessAccountStars, but with a context.Context parameter
+func (bot *Bot) TransferBusinessAccountStarsWithContext(ctx context.Context, businessConnectionId string, starCount int64, opts *TransferBusinessAccountStarsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "transferBusinessAccountStars", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// TransferGiftOpts is the set of optional fields for Bot.TransferGift and Bot.TransferGiftWithContext.
+type TransferGiftOpts struct {
+	// The amount of Telegram Stars that will be paid for the transfer from the business account balance. If positive, then the can_transfer_stars business bot right is required.
+	StarCount int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// TransferGift (https://core.telegram.org/bots/api#transfergift)
+//
+// Transfers an owned unique gift to another user. Requires the can_transfer_and_upgrade_gifts business bot right. Requires can_transfer_stars business bot right if the transfer is paid. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be transferred
+//   - newOwnerChatId (type int64): Unique identifier of the chat which will own the gift. The chat must be active in the last 24 hours.
+//   - opts (type TransferGiftOpts): All optional parameters.
+func (bot *Bot) TransferGift(businessConnectionId string, ownedGiftId string, newOwnerChatId int64, opts *TransferGiftOpts) (bool, error) {
+	return bot.TransferGiftWithContext(context.Background(), businessConnectionId, ownedGiftId, newOwnerChatId, opts)
+}
+
+// TransferGiftWithContext is the same as Bot.TransferGift, but with a context.Context parameter
+func (bot *Bot) TransferGiftWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, newOwnerChatId int64, opts *TransferGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+	v["new_owner_chat_id"] = strconv.FormatInt(newOwnerChatId, 10)
+	if opts != nil {
+		if opts.StarCount != 0 {
+			v["star_count"] = strconv.FormatInt(opts.StarCount, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "transferGift", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // UnbanChatMemberOpts is the set of optional fields for Bot.UnbanChatMember and Bot.UnbanChatMemberWithContext.
 type UnbanChatMemberOpts struct {
 	// Do nothing if the user is not banned
@@ -7027,6 +7787,52 @@ func (bot *Bot) UnpinChatMessageWithContext(ctx context.Context, chatId int64, o
 	}
 
 	r, err := bot.RequestWithContext(ctx, "unpinChatMessage", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// UpgradeGiftOpts is the set of optional fields for Bot.UpgradeGift and Bot.UpgradeGiftWithContext.
+type UpgradeGiftOpts struct {
+	// Pass True to keep the original gift text, sender and receiver in the upgraded gift
+	KeepOriginalDetails bool
+	// The amount of Telegram Stars that will be paid for the upgrade from the business account balance. If gift.prepaid_upgrade_star_count > 0, then pass 0, otherwise, the can_transfer_stars business bot right is required and gift.upgrade_star_count must be passed.
+	StarCount int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// UpgradeGift (https://core.telegram.org/bots/api#upgradegift)
+//
+// Upgrades a given regular gift to a unique gift. Requires the can_transfer_and_upgrade_gifts business bot right. Additionally requires the can_transfer_stars business bot right if the upgrade is paid. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be upgraded to a unique one
+//   - opts (type UpgradeGiftOpts): All optional parameters.
+func (bot *Bot) UpgradeGift(businessConnectionId string, ownedGiftId string, opts *UpgradeGiftOpts) (bool, error) {
+	return bot.UpgradeGiftWithContext(context.Background(), businessConnectionId, ownedGiftId, opts)
+}
+
+// UpgradeGiftWithContext is the same as Bot.UpgradeGift, but with a context.Context parameter
+func (bot *Bot) UpgradeGiftWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, opts *UpgradeGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+	if opts != nil {
+		v["keep_original_details"] = strconv.FormatBool(opts.KeepOriginalDetails)
+		if opts.StarCount != 0 {
+			v["star_count"] = strconv.FormatInt(opts.StarCount, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "upgradeGift", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
