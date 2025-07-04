@@ -321,3 +321,19 @@ func RefundedPaymentInvoicePrefix(pref string) func(msg *gotgbot.Message) bool {
 		return msg.RefundedPayment != nil && strings.HasPrefix(msg.RefundedPayment.InvoicePayload, pref)
 	}
 }
+
+func Checklist(msg *gotgbot.Message) bool {
+	return msg.Checklist != nil
+}
+
+func ChecklistTitleContains(s string) func(msg *gotgbot.Message) bool {
+	return func(msg *gotgbot.Message) bool {
+		return msg.Checklist != nil && strings.Contains(msg.Checklist.Title, s)
+	}
+}
+
+func ChecklistTitleEquals(s string) func(msg *gotgbot.Message) bool {
+	return func(msg *gotgbot.Message) bool {
+		return msg.Checklist != nil && msg.Checklist.Title == s
+	}
+}
