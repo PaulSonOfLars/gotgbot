@@ -7414,7 +7414,7 @@ type OwnedGiftUnique struct {
 	// Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
 	TransferStarCount int64 `json:"transfer_star_count,omitempty"`
 	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
-	NextTransferDate string `json:"next_transfer_date,omitempty"`
+	NextTransferDate int64 `json:"next_transfer_date,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -10141,7 +10141,7 @@ type UniqueGiftInfo struct {
 	// Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
 	TransferStarCount int64 `json:"transfer_star_count,omitempty"`
 	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
-	NextTransferDate string `json:"next_transfer_date,omitempty"`
+	NextTransferDate int64 `json:"next_transfer_date,omitempty"`
 }
 
 // UniqueGiftModel (https://core.telegram.org/bots/api#uniquegiftmodel)
