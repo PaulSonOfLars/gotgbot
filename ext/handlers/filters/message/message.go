@@ -215,10 +215,12 @@ func ViaBot(msg *gotgbot.Message) bool {
 	return msg.ViaBot != nil
 }
 
+// Entities returns true if there are any text entities in the message. To check gifts/polls etc, use AnyEntities.
 func Entities(m *gotgbot.Message) bool {
 	return len(m.Entities) > 0
 }
 
+// Entity returns true if a specific entity is present in the message's text entities. To check gifts/polls etc, use AnyEntity.
 func Entity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
 		for _, ent := range m.Entities {
@@ -230,10 +232,12 @@ func Entity(entType string) filters.Message {
 	}
 }
 
+// CaptionEntities returns true if there are any caption entities in the message. To check gifts/polls etc, use AnyEntities.
 func CaptionEntities(m *gotgbot.Message) bool {
 	return len(m.CaptionEntities) > 0
 }
 
+// CaptionEntity returns true if a specific entity is present in the message's caption entities. To check gifts/polls etc, use AnyEntity.
 func CaptionEntity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
 		for _, ent := range m.CaptionEntities {
@@ -242,6 +246,18 @@ func CaptionEntity(entType string) filters.Message {
 			}
 		}
 		return false
+	}
+}
+
+// AnyEntities returns true if there are any message entities present (including gifts, polls, etc)
+func AnyEntities(m *gotgbot.Message) bool {
+	return len(m.ParseAnyEntities()) > 0
+}
+
+// AnyEntity returns true if a specific entity type is present anywhere in the message (including gifts, polls, etc)
+func AnyEntity(entType string) filters.Message {
+	return func(m *gotgbot.Message) bool {
+		return len(m.ParseAnyEntityTypes(map[string]struct{}{entType: {}})) > 0
 	}
 }
 
