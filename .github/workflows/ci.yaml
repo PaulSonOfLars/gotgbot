@@ -18,7 +18,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: latest
-          args: --config=${{ github.workspace }}/.golangci.yml
+          args: --config=${{ github.workspace }}/.golangci.yaml
           # skip cache to avoid flakes (and avoid using gh-action storage)
           skip-cache: true
           skip-save-cache: true
