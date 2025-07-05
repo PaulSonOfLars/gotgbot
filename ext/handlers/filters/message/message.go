@@ -249,12 +249,12 @@ func CaptionEntity(entType string) filters.Message {
 	}
 }
 
-// AnyEntities returns true if there are any message entities present (including gifts, polls, etc)
+// AnyEntities returns true if there are any message entities present (including gifts, polls, etc).
 func AnyEntities(m *gotgbot.Message) bool {
 	return len(m.ParseAnyEntities()) > 0
 }
 
-// AnyEntity returns true if a specific entity type is present anywhere in the message (including gifts, polls, etc)
+// AnyEntity returns true if a specific entity type is present anywhere in the message (including gifts, polls, etc).
 func AnyEntity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
 		return len(m.ParseAnyEntityTypes(map[string]struct{}{entType: {}})) > 0
