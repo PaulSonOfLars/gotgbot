@@ -76,9 +76,7 @@ func (m Message) ParseAnyEntityTypes(accepted map[string]struct{}) (out []Parsed
 			out = append(out, ParseEntityTypes(o.Text, o.TextEntities, accepted)...)
 		}
 	}
-	if m.Quote != nil {
-		out = append(out, ParseEntityTypes(m.Quote.Text, m.Quote.Entities, accepted)...)
-	}
+	// We do not check m.Quote, as this is not technically the current message, but the reply
 	return out
 }
 
