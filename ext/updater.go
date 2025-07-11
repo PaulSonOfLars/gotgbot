@@ -121,18 +121,6 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	var reqOpts *gotgbot.RequestOpts
 
 	if opts != nil {
-		if opts.EnableWebhookDeletion || opts.DropPendingUpdates {
-			// For polling to work, we want to make sure we don't have an existing webhook.
-			// Extra perk - we can also use this to drop pending updates!
-			_, err := b.DeleteWebhook(&gotgbot.DeleteWebhookOpts{
-				DropPendingUpdates: opts.DropPendingUpdates,
-				RequestOpts:        reqOpts,
-			})
-			if err != nil {
-				return fmt.Errorf("failed to delete webhook: %w", err)
-			}
-		}
-
 		if updateOpts := opts.GetUpdatesOpts; updateOpts != nil {
 			if updateOpts.RequestOpts != nil {
 				reqOpts = updateOpts.RequestOpts
@@ -153,6 +141,18 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 					return fmt.Errorf("failed to marshal field allowed_updates: %w", err)
 				}
 				v["allowed_updates"] = string(bs)
+			}
+		}
+		
+		if opts.EnableWebhookDeletion || opts.DropPendingUpdates {
+			// For polling to work, we want to make sure we don't have an existing webhook.
+			// Extra perk - we can also use this to drop pending updates!
+			_, err := b.DeleteWebhook(&gotgbot.DeleteWebhookOpts{
+				DropPendingUpdates: opts.DropPendingUpdates,
+				RequestOpts:        reqOpts,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to delete webhook: %w", err)
 			}
 		}
 	}
