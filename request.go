@@ -176,13 +176,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
-		var urlErr *url.Error
-		if errors.As(err, &urlErr) {
-			urlErr.URL = urlCleanupRegexp.ReplaceAllString(urlErr.URL, "/***/")
-			return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, urlErr)
-		}
-
-		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, err)
+		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, sanitizeError(err))
 	}
 	defer resp.Body.Close()
 
@@ -202,6 +196,17 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	}
 
 	return r.Result, nil
+}
+
+// Sanitize the error to avoid token leak.
+func sanitizeError(err error) error {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		urlErr.URL = urlCleanupRegexp.ReplaceAllString(urlErr.URL, "/***/")
+		return urlErr
+	}
+
+	return err
 }
 
 // Fill the buffer of multipart.Writer with data which is going to be sent.
