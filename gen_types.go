@@ -5762,7 +5762,7 @@ func (v InputProfilePhotoStatic) inputProfilePhoto() {}
 // This object describes a sticker to be added to a sticker set.
 type InputSticker struct {
 	// The added sticker. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new file using multipart/form-data under <file_attach_name> name. Animated and video stickers can't be uploaded via HTTP URL. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Sticker string `json:"sticker"`
+	Sticker InputFileOrString `json:"sticker"`
 	// Format of the added sticker, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, "video" for a .WEBM video
 	Format string `json:"format"`
 	// List of 1-20 emoji associated with the sticker
@@ -5771,6 +5771,17 @@ type InputSticker struct {
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 	// Optional. List of 0-20 search keywords for the sticker with total length of up to 64 characters. For "regular" and "custom_emoji" stickers only.
 	Keywords []string `json:"keywords,omitempty"`
+}
+
+func (v InputSticker) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
+	if v.Sticker != nil {
+		err := v.Sticker.Attach(mediaName, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	return json.Marshal(v)
 }
 
 // InputStoryContent (https://core.telegram.org/bots/api#inputstorycontent)

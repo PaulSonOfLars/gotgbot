@@ -30,20 +30,21 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker,
 // AddStickerToSetWithContext is the same as Bot.AddStickerToSet, but with a context.Context parameter
 func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]string{}
+	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
-	bs, err := json.Marshal(sticker)
+	inputBs, err := sticker.InputParams("sticker", data)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(bs)
+	v["sticker"] = string(inputBs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -994,13 +995,22 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, sti
 // CreateNewStickerSetWithContext is the same as Bot.CreateNewStickerSet, but with a context.Context parameter
 func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64, name string, title string, stickers []InputSticker, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]string{}
+	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["title"] = title
 	if stickers != nil {
-		bs, err := json.Marshal(stickers)
+		var rawList []json.RawMessage
+		for idx, im := range stickers {
+			inputBs, err := im.InputParams("stickers"+strconv.Itoa(idx), data)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal list item %d for field stickers: %w", idx, err)
+			}
+			rawList = append(rawList, inputBs)
+		}
+		bs, err := json.Marshal(rawList)
 		if err != nil {
-			return false, fmt.Errorf("failed to marshal field stickers: %w", err)
+			return false, fmt.Errorf("failed to marshal raw json list for field: stickers %w", err)
 		}
 		v["stickers"] = string(bs)
 	}
@@ -1014,7 +1024,7 @@ func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1346,23 +1356,30 @@ type DeleteStickerFromSetOpts struct {
 // DeleteStickerFromSet (https://core.telegram.org/bots/api#deletestickerfromset)
 //
 // Use this method to delete a sticker from a set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type DeleteStickerFromSetOpts): All optional parameters.
-func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
+func (bot *Bot) DeleteStickerFromSet(sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	return bot.DeleteStickerFromSetWithContext(context.Background(), sticker, opts)
 }
 
 // DeleteStickerFromSetWithContext is the same as Bot.DeleteStickerFromSet, but with a context.Context parameter
-func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
+func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3984,21 +4001,22 @@ func (bot *Bot) ReplaceStickerInSet(userId int64, name string, oldSticker string
 // ReplaceStickerInSetWithContext is the same as Bot.ReplaceStickerInSet, but with a context.Context parameter
 func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64, name string, oldSticker string, sticker InputSticker, opts *ReplaceStickerInSetOpts) (bool, error) {
 	v := map[string]string{}
+	data := map[string]FileReader{}
 	v["user_id"] = strconv.FormatInt(userId, 10)
 	v["name"] = name
 	v["old_sticker"] = oldSticker
-	bs, err := json.Marshal(sticker)
+	inputBs, err := sticker.InputParams("sticker", data)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(bs)
+	v["sticker"] = string(inputBs)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7137,17 +7155,24 @@ type SetStickerEmojiListOpts struct {
 // SetStickerEmojiList (https://core.telegram.org/bots/api#setstickeremojilist)
 //
 // Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - emojiList (type []string): A JSON-serialized list of 1-20 emoji associated with the sticker
 //   - opts (type SetStickerEmojiListOpts): All optional parameters.
-func (bot *Bot) SetStickerEmojiList(sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
+func (bot *Bot) SetStickerEmojiList(sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	return bot.SetStickerEmojiListWithContext(context.Background(), sticker, emojiList, opts)
 }
 
 // SetStickerEmojiListWithContext is the same as Bot.SetStickerEmojiList, but with a context.Context parameter
-func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
+func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if emojiList != nil {
 		bs, err := json.Marshal(emojiList)
 		if err != nil {
@@ -7161,7 +7186,7 @@ func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker stri
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7181,16 +7206,23 @@ type SetStickerKeywordsOpts struct {
 // SetStickerKeywords (https://core.telegram.org/bots/api#setstickerkeywords)
 //
 // Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type SetStickerKeywordsOpts): All optional parameters.
-func (bot *Bot) SetStickerKeywords(sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
+func (bot *Bot) SetStickerKeywords(sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	return bot.SetStickerKeywordsWithContext(context.Background(), sticker, opts)
 }
 
 // SetStickerKeywordsWithContext is the same as Bot.SetStickerKeywords, but with a context.Context parameter
-func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
+func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if opts != nil {
 		if opts.Keywords != nil {
 			bs, err := json.Marshal(opts.Keywords)
@@ -7206,7 +7238,7 @@ func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker strin
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7226,16 +7258,23 @@ type SetStickerMaskPositionOpts struct {
 // SetStickerMaskPosition (https://core.telegram.org/bots/api#setstickermaskposition)
 //
 // Use this method to change the mask position of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type SetStickerMaskPositionOpts): All optional parameters.
-func (bot *Bot) SetStickerMaskPosition(sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
+func (bot *Bot) SetStickerMaskPosition(sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	return bot.SetStickerMaskPositionWithContext(context.Background(), sticker, opts)
 }
 
 // SetStickerMaskPositionWithContext is the same as Bot.SetStickerMaskPosition, but with a context.Context parameter
-func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
+func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if opts != nil {
 		if opts.MaskPosition != nil {
 			bs, err := json.Marshal(opts.MaskPosition)
@@ -7251,7 +7290,7 @@ func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker s
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7269,17 +7308,24 @@ type SetStickerPositionInSetOpts struct {
 // SetStickerPositionInSet (https://core.telegram.org/bots/api#setstickerpositioninset)
 //
 // Use this method to move a sticker in a set created by the bot to a specific position. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - position (type int64): New sticker position in the set, zero-based
 //   - opts (type SetStickerPositionInSetOpts): All optional parameters.
-func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
+func (bot *Bot) SetStickerPositionInSet(sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	return bot.SetStickerPositionInSetWithContext(context.Background(), sticker, position, opts)
 }
 
 // SetStickerPositionInSetWithContext is the same as Bot.SetStickerPositionInSet, but with a context.Context parameter
-func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
+func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	v["position"] = strconv.FormatInt(position, 10)
 
 	var reqOpts *RequestOpts
@@ -7287,7 +7333,7 @@ func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
