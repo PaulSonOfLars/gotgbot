@@ -144,3 +144,13 @@ const (
 	ChatTypeSupergroup = "supergroup"
 	ChatTypeChannel    = "channel"
 )
+
+// The consts below represent possible status values for a ChatMember.
+const (
+	ChatMemberStatusOwner         = "creator"
+	ChatMemberStatusAdministrator = "administrator"
+	ChatMemberStatusMember        = "member"
+	ChatMemberStatusRestricted    = "restricted"
+	ChatMemberStatusLeft          = "left"
+	ChatMemberStatusBanned        = "kicked"
+)
