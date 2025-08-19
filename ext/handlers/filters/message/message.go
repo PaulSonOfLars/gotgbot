@@ -353,3 +353,15 @@ func ChecklistTitleEquals(s string) func(msg *gotgbot.Message) bool {
 		return msg.Checklist != nil && msg.Checklist.Title == s
 	}
 }
+
+func DirectMessageTopic(msg *gotgbot.Message) bool {
+	return msg.DirectMessagesTopic != nil
+}
+
+func PaidPost(msg *gotgbot.Message) bool {
+	return msg.IsPaidPost
+}
+
+func SuggestedPostInfo(msg *gotgbot.Message) bool {
+	return msg.SuggestedPostInfo != nil
+}
