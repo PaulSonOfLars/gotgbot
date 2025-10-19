@@ -435,8 +435,8 @@ if {{.GoParam}} != nil {
 }`
 
 const inputParamsBranch = `
-inputBs, err := {{.GoParam}}.InputParams("{{.Name}}" , data)
+err := {{.GoParam}}.InputParams("{{.Name}}" , data)
 if err != nil {
 	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
 }
-v["{{.Name}}"] = string(inputBs)`
+v["{{.Name}}"] = {{.GoParam}}`

@@ -32,11 +32,11 @@ func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, na
 	data := map[string]FileReader{}
 	v["user_id"] = userId
 	v["name"] = name
-	inputBs, err := sticker.InputParams("sticker", data)
+	err := sticker.InputParams("sticker", data)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(inputBs)
+	v["sticker"] = sticker
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1889,11 +1889,11 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]any{}
 	data := map[string]FileReader{}
-	inputBs, err := media.InputParams("media", data)
+	err := media.InputParams("media", data)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
 	}
-	v["media"] = string(inputBs)
+	v["media"] = media
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["chat_id"] = opts.ChatId
@@ -3880,11 +3880,11 @@ func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64
 	v["user_id"] = userId
 	v["name"] = name
 	v["old_sticker"] = oldSticker
-	inputBs, err := sticker.InputParams("sticker", data)
+	err := sticker.InputParams("sticker", data)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
 	}
-	v["sticker"] = string(inputBs)
+	v["sticker"] = sticker
 
 	var reqOpts *RequestOpts
 	if opts != nil {

@@ -499,7 +499,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
-		bd.WriteString("\nInputParams(string, map[string]FileReader) ([]byte, error)")
+		bd.WriteString("\nInputParams(string, map[string]FileReader) error")
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
@@ -772,22 +772,22 @@ type inputParamsMethodData struct {
 }
 
 const inputParamsMethod = `
-func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
+func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) error {
 	if v.{{.Field}} != nil {
 		err := v.{{.Field}}.Attach(mediaName, data)
 		if err != nil {
-			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 	{{ if .Thumbnail }}
 	if v.Thumbnail != nil {
 		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
 		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
+			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 	{{- end }}
 
-	return json.Marshal(v)
+	return nil
 }
 `
