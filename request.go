@@ -21,7 +21,7 @@ const (
 
 type BotClient interface {
 	// RequestWithContext submits a POST HTTP request a bot API instance.
-	RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error)
+	RequestWithContext(ctx context.Context, token string, method string, params map[string]any, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error)
 	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
 	GetAPIURL(opts *RequestOpts) string
 	// FileURL gets the URL of a file at the API address that the bot is interacting with.
@@ -59,7 +59,7 @@ type TelegramError struct {
 	// The telegram method which raised the error.
 	Method string
 	// The HTTP parameters which raised the error.
-	Params map[string]string
+	Params map[string]any
 	// The error code returned by telegram.
 	Code int
 	// The error description returned by telegram.
@@ -130,32 +130,16 @@ func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Cont
 //   - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 //   - data: map of any files to be sending to the telegram API.
 //   - opts: request opts to use.
-func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]any, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
 
-	var bodyData []byte
-	var contentType string
-	var err error
-
-	// Check if there are any files to upload. If yes, use multipart; else, use JSON.
-	if len(data) > 0 {
-		// For multipart, we need to buffer the entire body for retries
-		var buf bytes.Buffer
-		contentType, err = fillBuffer(&buf, params, data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to write multipart data: %w", err)
-		}
-
-		bodyData = buf.Bytes()
-
-	} else {
-		contentType = "application/json"
-		bodyData, err = json.Marshal(params)
-		if err != nil {
-			return nil, fmt.Errorf("failed to encode parameters as JSON: %w", err)
-		}
+	buf := bytes.NewBuffer(nil)
+	contentType, err := fillBuffer(buf, params, data)
+	if err != nil {
+		return nil, err
 	}
+	bodyData := buf.Bytes()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), bytes.NewReader(bodyData))
 	if err != nil {
@@ -193,14 +177,34 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	return r.Result, nil
 }
 
-// fillBuffer fills a byte buffer with data which is going to be sent.
-func fillBuffer(buf *bytes.Buffer, params map[string]string, data map[string]FileReader) (string, error) {
+// fillBuffer fills a buffer with the multipart writer data which is going to be sent.
+func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileReader) (string, error) {
 	w := multipart.NewWriter(buf)
 
+	if err := w.WriteField("_empty", ""); err != nil {
+		return "", fmt.Errorf("failed to write empty multipart field: %w", err)
+	}
+
 	for k, v := range params {
-		err := w.WriteField(k, v)
-		if err != nil {
-			return "", fmt.Errorf("failed to write multipart field %s with value %s: %w", k, v, err)
+		var strValue string
+
+		// Check if the value is a simple type that can be converted directly
+		switch val := v.(type) {
+		case string:
+			strValue = val
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+			strValue = fmt.Sprint(val)
+		default:
+			// For complex types (structs, maps, slices, etc.), marshal as JSON
+			jsonBytes, err := json.Marshal(val)
+			if err != nil {
+				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+			}
+			strValue = string(jsonBytes)
+		}
+
+		if err := w.WriteField(k, strValue); err != nil {
+			return "", fmt.Errorf("failed to write multipart field %s with value %v: %w", k, v, err)
 		}
 	}
 

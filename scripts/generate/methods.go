@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	inputFileBranchTmpl        = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
-	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
-	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
+	inputFileBranchTmpl   = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
+	inputParamsBranchTmpl = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -23,7 +22,6 @@ package gotgbot
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"context"
 )
 `)
@@ -96,7 +94,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 	method.WriteString("\n// " + strings.Title(tgMethod.Name) + "WithContext is the same as Bot." + strings.Title(tgMethod.Name) + ", but with a context.Context parameter")
 	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "WithContext(ctx context.Context, " + joinedArgs + ") (" + joinedRetTypes + ", error) {")
-	method.WriteString("\n	v := map[string]string{}")
+	method.WriteString("\n	v := map[string]any{}")
 	method.WriteString(valueGen)
 	method.WriteString("\n")
 
@@ -260,25 +258,21 @@ func generateValue(d APIDescription, methodName string, f Field, goParam string,
 if opts.Type == "quiz" {
 	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
 	%s
-}`, addURLParam(f, stringer, goParam)), false, nil
+}`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), false, nil
 				}
 
-				// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
-				return fmt.Sprintf(`
-if %s != %s {
-	%s
-}`, goParam, getDefaultTypeVal(d, fieldType), addURLParam(f, stringer, goParam)), false, nil
+				return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), false, nil
 			}
 
 			if isPointer(fieldType) {
 				return fmt.Sprintf(`
 if %s != nil {
 	v["%s"] = %s
-}`, goParam, f.Name, fmt.Sprintf(goTypeStringer(fieldType), goParam)), false, nil
+}`, goParam, f.Name, goParam), false, nil
 			}
 		}
 
-		return "\n" + addURLParam(f, stringer, goParam), false, nil
+		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), false, nil
 	}
 
 	complexString, hasData, err := stringComplexField(d, f, fieldType, goParam, defaultRetVal)
@@ -322,14 +316,7 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 		// If the field contains data, it cannot be simply json marshalled, so we our own methods to include it.
 		// We need to do this slightly differently if we are dealing with arrays or not.
 		if isArray(fieldType) {
-			err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
-			}
+			bd.WriteString(fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam))
 		} else {
 			err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
 				GoParam:       goParam,
@@ -344,11 +331,7 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 	}
 
 	// If we aren't sending data, then we can just do it regularly.
-	bd.WriteString("\n	bs, err := json.Marshal(" + goParam + ")")
-	bd.WriteString("\n	if err != nil {")
-	bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-	bd.WriteString("\n	}")
-	bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
+	bd.WriteString("\n	v[\"" + f.Name + "\"] = " + goParam)
 
 	return bd.String(), false, nil
 }
@@ -457,18 +440,3 @@ if err != nil {
 	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
 }
 v["{{.Name}}"] = string(inputBs)`
-
-const inputArrayParamsBranch = `
-var rawList []json.RawMessage
-for idx, im := range {{.GoParam}} {
-	inputBs, err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
-	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal list item %d for field {{.Name}}: %w", idx, err)
-	}
-	rawList = append(rawList, inputBs)
-}
-bs, err := json.Marshal(rawList)
-if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list for field: {{.Name}} %w", err)
-}
-v["{{.Name}}"] = string(bs)`

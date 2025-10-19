@@ -64,7 +64,7 @@ func main() {
 
 func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	// Sending a file by file handle
-	f, err := os.Open("samples/commandBot/main.go")
+	f, err := os.Open("main.go")
 	if err != nil {
 		return fmt.Errorf("failed to open source: %w", err)
 	}
