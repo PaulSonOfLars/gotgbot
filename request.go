@@ -78,6 +78,8 @@ type RequestOpts struct {
 	Timeout time.Duration
 	// Custom API URL to use for requests.
 	APIURL string
+	// ExtraParams represents additional params to be injected to request contents.
+	ExtraParams map[string]string
 }
 
 // getTimeoutContext returns the appropriate context for the current settings.
@@ -133,6 +135,12 @@ func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Cont
 func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
+
+	if opts != nil {
+		for k, v := range opts.ExtraParams {
+			params[k] = v
+		}
+	}
 
 	var bodyData []byte
 	var contentType string
