@@ -181,8 +181,10 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileReader) (string, error) {
 	w := multipart.NewWriter(buf)
 
-	if err := w.WriteField("_empty", ""); err != nil {
-		return "", fmt.Errorf("failed to write empty multipart field: %w", err)
+	if len(params) == 0 {
+		if err := w.WriteField("_empty", ""); err != nil {
+			return "", fmt.Errorf("failed to write empty multipart field: %w", err)
+		}
 	}
 
 	for k, v := range params {
