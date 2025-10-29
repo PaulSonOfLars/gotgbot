@@ -134,40 +134,40 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
 
-	var requestBody io.Reader
-
+	var bodyData []byte
 	var contentType string
+	var err error
+
 	// Check if there are any files to upload. If yes, use multipart; else, use JSON.
 	if len(data) > 0 {
-		pr, pw := io.Pipe()
-		defer pr.Close() // avoid writer goroutine leak
-		mw := multipart.NewWriter(pw)
-		contentType = mw.FormDataContentType()
-		requestBody = pr
-		// Write the request data asynchronously from another goroutine
-		// to the multipart.Writer which will be piped into the pipe reader
-		// which is tied to the request to be sent
-		go func() {
-			writerError := fillBuffer(mw, params, data)
-			// Close the writer with error of multipart writer.
-			// If the error is nil, this will act just like pw.Close()
-			_ = pw.CloseWithError(writerError)
-		}()
+		// For multipart, we need to buffer the entire body for retries
+		var buf bytes.Buffer
+		contentType, err = fillBuffer(&buf, params, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to write multipart data: %w", err)
+		}
+
+		bodyData = buf.Bytes()
+
 	} else {
 		contentType = "application/json"
-		bodyBytes, err := json.Marshal(params)
+		bodyData, err = json.Marshal(params)
 		if err != nil {
 			return nil, fmt.Errorf("failed to encode parameters as JSON: %w", err)
 		}
-		requestBody = bytes.NewReader(bodyBytes)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), requestBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), bytes.NewReader(bodyData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
 	}
 
 	req.Header.Set("Content-Type", contentType)
+	// Setup GetBody such that the request can be replayed and automatically retried by the HTTP client if necessary.
+	// This should handle HTTP2 GO_AWAY errors.
+	req.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(bodyData)), nil
+	}
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
@@ -193,12 +193,14 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	return r.Result, nil
 }
 
-// Fill the buffer of multipart.Writer with data which is going to be sent.
-func fillBuffer(w *multipart.Writer, params map[string]string, data map[string]FileReader) error {
+// fillBuffer fills a byte buffer with data which is going to be sent.
+func fillBuffer(buf *bytes.Buffer, params map[string]string, data map[string]FileReader) (string, error) {
+	w := multipart.NewWriter(buf)
+
 	for k, v := range params {
 		err := w.WriteField(k, v)
 		if err != nil {
-			return fmt.Errorf("failed to write multipart field %s with value %s: %w", k, v, err)
+			return "", fmt.Errorf("failed to write multipart field %s with value %s: %w", k, v, err)
 		}
 	}
 
@@ -210,20 +212,20 @@ func fillBuffer(w *multipart.Writer, params map[string]string, data map[string]F
 
 		part, err := w.CreateFormFile(field, fileName)
 		if err != nil {
-			return fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
+			return "", fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
 		}
 
 		_, err = io.Copy(part, file.Data)
 		if err != nil {
-			return fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
+			return "", fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
 		}
 	}
 
 	if err := w.Close(); err != nil {
-		return fmt.Errorf("failed to close multipart form writer: %w", err)
+		return "", fmt.Errorf("failed to close multipart form writer: %w", err)
 	}
 
-	return nil
+	return w.FormDataContentType(), nil
 }
 
 // GetAPIURL returns the currently used API endpoint.
