@@ -236,8 +236,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
 
 		for _, updData := range rawUpdates {
-			temp := updData // use new mem address to avoid loop conflicts
-			bData.updateChan <- temp
+			bData.updateChan <- updData
 		}
 	}
 }
