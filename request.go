@@ -78,8 +78,8 @@ type RequestOpts struct {
 	Timeout time.Duration
 	// Custom API URL to use for requests.
 	APIURL string
-	// ExtraParams represents additional params to be injected to request contents.
-	ExtraParams map[string]string
+	// OverrideParams can be used to override existing parameters, or override existing ones.
+	OverrideParams map[string]string
 }
 
 // getTimeoutContext returns the appropriate context for the current settings.
@@ -137,7 +137,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	defer cancel()
 
 	if opts != nil {
-		for k, v := range opts.ExtraParams {
+		for k, v := range opts.OverrideParams {
 			params[k] = v
 		}
 	}
