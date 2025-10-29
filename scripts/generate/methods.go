@@ -336,10 +336,6 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 	return bd.String(), false, nil
 }
 
-func addURLParam(f Field, stringer string, goParam string) string {
-	return fmt.Sprintf(`v["%s"] = %s`, f.Name, fmt.Sprintf(stringer, goParam))
-}
-
 func getRetVarName(retType string) string {
 	retType = stripPointersAndArrays(retType)
 
