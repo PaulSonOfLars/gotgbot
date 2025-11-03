@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -179,7 +181,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, err)
+		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, sanitizeError(token, err))
 	}
 	defer resp.Body.Close()
 
@@ -199,6 +201,17 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	}
 
 	return r.Result, nil
+}
+
+// Sanitize the error to avoid token leak.
+func sanitizeError(token string, err error) error {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		urlErr.URL = strings.ReplaceAll(urlErr.URL, token, "<TOKEN>")
+		return urlErr
+	}
+
+	return err
 }
 
 // fillBuffer fills a byte buffer with data which is going to be sent.
