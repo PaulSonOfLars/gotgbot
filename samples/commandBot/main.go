@@ -68,6 +68,7 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to open source: %w", err)
 	}
+	defer f.Close()
 
 	m, err := b.SendDocument(ctx.EffectiveChat.Id,
 		gotgbot.InputFileByReader("source.go", f),

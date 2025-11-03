@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet and Bot.AddStickerToSetWithContext.
@@ -34,7 +35,7 @@ func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, na
 	v["name"] = name
 	err := sticker.InputParams("sticker", data)
 	if err != nil {
-		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
+		return false, fmt.Errorf("failed to attach input file sticker: %w", err)
 	}
 	v["sticker"] = sticker
 
@@ -983,6 +984,12 @@ func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64
 	v["name"] = name
 	v["title"] = title
 	if stickers != nil {
+		for idx, im := range stickers {
+			err := im.InputParams("stickers"+strconv.Itoa(idx), data)
+			if err != nil {
+				return false, fmt.Errorf("failed to attach input field for list item %d stickers: %w", idx, err)
+			}
+		}
 		v["stickers"] = stickers
 	}
 	if opts != nil {
@@ -1891,7 +1898,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 	data := map[string]FileReader{}
 	err := media.InputParams("media", data)
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to marshal field media: %w", err)
+		return nil, false, fmt.Errorf("failed to attach input file media: %w", err)
 	}
 	v["media"] = media
 	if opts != nil {
@@ -3882,7 +3889,7 @@ func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64
 	v["old_sticker"] = oldSticker
 	err := sticker.InputParams("sticker", data)
 	if err != nil {
-		return false, fmt.Errorf("failed to marshal field sticker: %w", err)
+		return false, fmt.Errorf("failed to attach input file sticker: %w", err)
 	}
 	v["sticker"] = sticker
 
@@ -4997,6 +5004,12 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 	data := map[string]FileReader{}
 	v["chat_id"] = chatId
 	if media != nil {
+		for idx, im := range media {
+			err := im.InputParams("media"+strconv.Itoa(idx), data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach input field for list item %d media: %w", idx, err)
+			}
+		}
 		v["media"] = media
 	}
 	if opts != nil {
@@ -5165,6 +5178,12 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 	v["chat_id"] = chatId
 	v["star_count"] = starCount
 	if media != nil {
+		for idx, im := range media {
+			err := im.InputParams("media"+strconv.Itoa(idx), data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach input field for list item %d media: %w", idx, err)
+			}
+		}
 		v["media"] = media
 	}
 	if opts != nil {

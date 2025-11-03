@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	inputFileBranchTmpl   = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
-	inputParamsBranchTmpl = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
+	inputFileBranchTmpl        = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
+	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
+	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -20,9 +21,10 @@ func generateMethods(d APIDescription) error {
 package gotgbot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"context"
+	"strconv"
 )
 `)
 
@@ -316,7 +318,14 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 		// If the field contains data, it cannot be simply json marshalled, so we our own methods to include it.
 		// We need to do this slightly differently if we are dealing with arrays or not.
 		if isArray(fieldType) {
-			bd.WriteString(fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam))
+			err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
+				GoParam:       goParam,
+				DefaultReturn: defaultRetVal,
+				Name:          f.Name,
+			})
+			if err != nil {
+				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
+			}
 		} else {
 			err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
 				GoParam:       goParam,
@@ -433,6 +442,15 @@ if {{.GoParam}} != nil {
 const inputParamsBranch = `
 err := {{.GoParam}}.InputParams("{{.Name}}" , data)
 if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
+	return {{.DefaultReturn}}, fmt.Errorf("failed to attach input file {{.Name}}: %w", err)
+}
+v["{{.Name}}"] = {{.GoParam}}`
+
+const inputArrayParamsBranch = `
+for idx, im := range {{.GoParam}} {
+	err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
+	if err != nil {
+		return {{.DefaultReturn}}, fmt.Errorf("failed to attach input field for list item %d {{.Name}}: %w", idx, err)
+	}
 }
 v["{{.Name}}"] = {{.GoParam}}`
