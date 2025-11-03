@@ -6,7 +6,6 @@ package gotgbot
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 )
 
 // AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet and Bot.AddStickerToSetWithContext.
@@ -38,7 +37,7 @@ func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, na
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -86,7 +85,7 @@ func (bot *Bot) AnswerCallbackQueryWithContext(ctx context.Context, callbackQuer
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "answerCallbackQuery", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "answerCallbackQuery", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -141,7 +140,7 @@ func (bot *Bot) AnswerInlineQueryWithContext(ctx context.Context, inlineQueryId 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "answerInlineQuery", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "answerInlineQuery", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -182,7 +181,7 @@ func (bot *Bot) AnswerPreCheckoutQueryWithContext(ctx context.Context, preChecko
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "answerPreCheckoutQuery", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "answerPreCheckoutQuery", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -228,7 +227,7 @@ func (bot *Bot) AnswerShippingQueryWithContext(ctx context.Context, shippingQuer
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "answerShippingQuery", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "answerShippingQuery", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -264,7 +263,7 @@ func (bot *Bot) AnswerWebAppQueryWithContext(ctx context.Context, webAppQueryId 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "answerWebAppQuery", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "answerWebAppQuery", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +299,7 @@ func (bot *Bot) ApproveChatJoinRequestWithContext(ctx context.Context, chatId in
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "approveChatJoinRequest", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "approveChatJoinRequest", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -341,7 +340,7 @@ func (bot *Bot) ApproveSuggestedPostWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "approveSuggestedPost", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "approveSuggestedPost", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -385,7 +384,7 @@ func (bot *Bot) BanChatMemberWithContext(ctx context.Context, chatId int64, user
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "banChatMember", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "banChatMember", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -421,7 +420,7 @@ func (bot *Bot) BanChatSenderChatWithContext(ctx context.Context, chatId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "banChatSenderChat", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "banChatSenderChat", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -453,7 +452,7 @@ func (bot *Bot) CloseWithContext(ctx context.Context, opts *CloseOpts) (bool, er
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "close", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "close", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -489,7 +488,7 @@ func (bot *Bot) CloseForumTopicWithContext(ctx context.Context, chatId int64, me
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "closeForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "closeForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -523,7 +522,7 @@ func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId in
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "closeGeneralForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "closeGeneralForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -559,7 +558,7 @@ func (bot *Bot) ConvertGiftToStarsWithContext(ctx context.Context, businessConne
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "convertGiftToStars", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "convertGiftToStars", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -648,7 +647,7 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "copyMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "copyMessage", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -705,7 +704,7 @@ func (bot *Bot) CopyMessagesWithContext(ctx context.Context, chatId int64, fromC
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "copyMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "copyMessages", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -753,7 +752,7 @@ func (bot *Bot) CreateChatInviteLinkWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createChatInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createChatInviteLink", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -796,7 +795,7 @@ func (bot *Bot) CreateChatSubscriptionInviteLinkWithContext(ctx context.Context,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createChatSubscriptionInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createChatSubscriptionInviteLink", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -840,7 +839,7 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createForumTopic", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -939,7 +938,7 @@ func (bot *Bot) CreateInvoiceLinkWithContext(ctx context.Context, title string, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createInvoiceLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createInvoiceLink", v, reqOpts)
 	if err != nil {
 		return "", err
 	}
@@ -989,7 +988,7 @@ func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1025,7 +1024,7 @@ func (bot *Bot) DeclineChatJoinRequestWithContext(ctx context.Context, chatId in
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "declineChatJoinRequest", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "declineChatJoinRequest", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1066,7 +1065,7 @@ func (bot *Bot) DeclineSuggestedPostWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "declineSuggestedPost", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "declineSuggestedPost", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1104,7 +1103,7 @@ func (bot *Bot) DeleteBusinessMessagesWithContext(ctx context.Context, businessC
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteBusinessMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteBusinessMessages", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1138,7 +1137,7 @@ func (bot *Bot) DeleteChatPhotoWithContext(ctx context.Context, chatId int64, op
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteChatPhoto", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteChatPhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1172,7 +1171,7 @@ func (bot *Bot) DeleteChatStickerSetWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteChatStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteChatStickerSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1208,7 +1207,7 @@ func (bot *Bot) DeleteForumTopicWithContext(ctx context.Context, chatId int64, m
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1255,7 +1254,7 @@ func (bot *Bot) DeleteMessageWithContext(ctx context.Context, chatId int64, mess
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteMessage", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1293,7 +1292,7 @@ func (bot *Bot) DeleteMessagesWithContext(ctx context.Context, chatId int64, mes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteMessages", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1333,7 +1332,7 @@ func (bot *Bot) DeleteMyCommandsWithContext(ctx context.Context, opts *DeleteMyC
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteMyCommands", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteMyCommands", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1360,21 +1359,14 @@ func (bot *Bot) DeleteStickerFromSet(sticker InputFileOrString, opts *DeleteStic
 // DeleteStickerFromSetWithContext is the same as Bot.DeleteStickerFromSet, but with a context.Context parameter
 func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1408,7 +1400,7 @@ func (bot *Bot) DeleteStickerSetWithContext(ctx context.Context, name string, op
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteStickerSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1444,7 +1436,7 @@ func (bot *Bot) DeleteStoryWithContext(ctx context.Context, businessConnectionId
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteStory", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteStory", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1481,7 +1473,7 @@ func (bot *Bot) DeleteWebhookWithContext(ctx context.Context, opts *DeleteWebhoo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteWebhook", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteWebhook", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1531,7 +1523,7 @@ func (bot *Bot) EditChatInviteLinkWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editChatInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editChatInviteLink", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1572,7 +1564,7 @@ func (bot *Bot) EditChatSubscriptionInviteLinkWithContext(ctx context.Context, c
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editChatSubscriptionInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editChatSubscriptionInviteLink", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1618,7 +1610,7 @@ func (bot *Bot) EditForumTopicWithContext(ctx context.Context, chatId int64, mes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1654,7 +1646,7 @@ func (bot *Bot) EditGeneralForumTopicWithContext(ctx context.Context, chatId int
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editGeneralForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editGeneralForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1717,7 +1709,7 @@ func (bot *Bot) EditMessageCaptionWithContext(ctx context.Context, opts *EditMes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageCaption", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageCaption", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1770,7 +1762,7 @@ func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessCon
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageChecklist", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageChecklist", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -1837,7 +1829,7 @@ func (bot *Bot) EditMessageLiveLocationWithContext(ctx context.Context, latitude
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageLiveLocation", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageLiveLocation", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1896,7 +1888,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageMedia", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageMedia", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1953,7 +1945,7 @@ func (bot *Bot) EditMessageReplyMarkupWithContext(ctx context.Context, opts *Edi
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageReplyMarkup", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageReplyMarkup", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -2025,7 +2017,7 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opt
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageText", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageText", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -2089,7 +2081,7 @@ func (bot *Bot) EditStoryWithContext(ctx context.Context, businessConnectionId s
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editStory", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editStory", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2127,7 +2119,7 @@ func (bot *Bot) EditUserStarSubscriptionWithContext(ctx context.Context, userId 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editUserStarSubscription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editUserStarSubscription", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -2161,7 +2153,7 @@ func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "exportChatInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "exportChatInviteLink", v, reqOpts)
 	if err != nil {
 		return "", err
 	}
@@ -2221,7 +2213,7 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "forwardMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "forwardMessage", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2275,7 +2267,7 @@ func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fr
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "forwardMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "forwardMessages", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2307,7 +2299,7 @@ func (bot *Bot) GetAvailableGiftsWithContext(ctx context.Context, opts *GetAvail
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getAvailableGifts", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getAvailableGifts", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2367,7 +2359,7 @@ func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, business
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getBusinessAccountGifts", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountGifts", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2401,7 +2393,7 @@ func (bot *Bot) GetBusinessAccountStarBalanceWithContext(ctx context.Context, bu
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getBusinessAccountStarBalance", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountStarBalance", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2435,7 +2427,7 @@ func (bot *Bot) GetBusinessConnectionWithContext(ctx context.Context, businessCo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getBusinessConnection", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getBusinessConnection", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2469,7 +2461,7 @@ func (bot *Bot) GetChatWithContext(ctx context.Context, chatId int64, opts *GetC
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getChat", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getChat", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2503,7 +2495,7 @@ func (bot *Bot) GetChatAdministratorsWithContext(ctx context.Context, chatId int
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getChatAdministrators", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getChatAdministrators", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2538,7 +2530,7 @@ func (bot *Bot) GetChatMemberWithContext(ctx context.Context, chatId int64, user
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getChatMember", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getChatMember", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2571,7 +2563,7 @@ func (bot *Bot) GetChatMemberCountWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getChatMemberCount", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getChatMemberCount", v, reqOpts)
 	if err != nil {
 		return 0, err
 	}
@@ -2610,7 +2602,7 @@ func (bot *Bot) GetChatMenuButtonWithContext(ctx context.Context, opts *GetChatM
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getChatMenuButton", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getChatMenuButton", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2645,7 +2637,7 @@ func (bot *Bot) GetCustomEmojiStickersWithContext(ctx context.Context, customEmo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getCustomEmojiStickers", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getCustomEmojiStickers", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2680,7 +2672,7 @@ func (bot *Bot) GetFileWithContext(ctx context.Context, fileId string, opts *Get
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getFile", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getFile", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2712,7 +2704,7 @@ func (bot *Bot) GetForumTopicIconStickersWithContext(ctx context.Context, opts *
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getForumTopicIconStickers", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getForumTopicIconStickers", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2757,7 +2749,7 @@ func (bot *Bot) GetGameHighScoresWithContext(ctx context.Context, userId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getGameHighScores", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getGameHighScores", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2789,7 +2781,7 @@ func (bot *Bot) GetMeWithContext(ctx context.Context, opts *GetMeOpts) (*User, e
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMe", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMe", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2829,7 +2821,7 @@ func (bot *Bot) GetMyCommandsWithContext(ctx context.Context, opts *GetMyCommand
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyCommands", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyCommands", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2866,7 +2858,7 @@ func (bot *Bot) GetMyDefaultAdministratorRightsWithContext(ctx context.Context, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyDefaultAdministratorRights", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyDefaultAdministratorRights", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2903,7 +2895,7 @@ func (bot *Bot) GetMyDescriptionWithContext(ctx context.Context, opts *GetMyDesc
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyDescription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyDescription", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2940,7 +2932,7 @@ func (bot *Bot) GetMyNameWithContext(ctx context.Context, opts *GetMyNameOpts) (
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyName", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyName", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -2977,7 +2969,7 @@ func (bot *Bot) GetMyShortDescriptionWithContext(ctx context.Context, opts *GetM
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyShortDescription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyShortDescription", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3009,7 +3001,7 @@ func (bot *Bot) GetMyStarBalanceWithContext(ctx context.Context, opts *GetMyStar
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getMyStarBalance", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getMyStarBalance", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3049,7 +3041,7 @@ func (bot *Bot) GetStarTransactionsWithContext(ctx context.Context, opts *GetSta
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getStarTransactions", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getStarTransactions", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3083,7 +3075,7 @@ func (bot *Bot) GetStickerSetWithContext(ctx context.Context, name string, opts 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getStickerSet", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3131,7 +3123,7 @@ func (bot *Bot) GetUpdatesWithContext(ctx context.Context, opts *GetUpdatesOpts)
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getUpdates", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getUpdates", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3167,7 +3159,7 @@ func (bot *Bot) GetUserChatBoostsWithContext(ctx context.Context, chatId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getUserChatBoosts", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getUserChatBoosts", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3209,7 +3201,7 @@ func (bot *Bot) GetUserProfilePhotosWithContext(ctx context.Context, userId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getUserProfilePhotos", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getUserProfilePhotos", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3241,7 +3233,7 @@ func (bot *Bot) GetWebhookInfoWithContext(ctx context.Context, opts *GetWebhookI
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "getWebhookInfo", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "getWebhookInfo", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3292,7 +3284,7 @@ func (bot *Bot) GiftPremiumSubscriptionWithContext(ctx context.Context, userId i
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "giftPremiumSubscription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "giftPremiumSubscription", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3326,7 +3318,7 @@ func (bot *Bot) HideGeneralForumTopicWithContext(ctx context.Context, chatId int
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "hideGeneralForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "hideGeneralForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3360,7 +3352,7 @@ func (bot *Bot) LeaveChatWithContext(ctx context.Context, chatId int64, opts *Le
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "leaveChat", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "leaveChat", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3392,7 +3384,7 @@ func (bot *Bot) LogOutWithContext(ctx context.Context, opts *LogOutOpts) (bool, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "logOut", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "logOut", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3436,7 +3428,7 @@ func (bot *Bot) PinChatMessageWithContext(ctx context.Context, chatId int64, mes
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "pinChatMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "pinChatMessage", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3498,7 +3490,7 @@ func (bot *Bot) PostStoryWithContext(ctx context.Context, businessConnectionId s
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "postStory", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "postStory", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -3584,7 +3576,7 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "promoteChatMember", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "promoteChatMember", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3622,7 +3614,7 @@ func (bot *Bot) ReadBusinessMessageWithContext(ctx context.Context, businessConn
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "readBusinessMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "readBusinessMessage", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3658,7 +3650,7 @@ func (bot *Bot) RefundStarPaymentWithContext(ctx context.Context, userId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "refundStarPayment", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "refundStarPayment", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3697,7 +3689,7 @@ func (bot *Bot) RemoveBusinessAccountProfilePhotoWithContext(ctx context.Context
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "removeBusinessAccountProfilePhoto", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "removeBusinessAccountProfilePhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3731,7 +3723,7 @@ func (bot *Bot) RemoveChatVerificationWithContext(ctx context.Context, chatId in
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "removeChatVerification", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "removeChatVerification", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3765,7 +3757,7 @@ func (bot *Bot) RemoveUserVerificationWithContext(ctx context.Context, userId in
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "removeUserVerification", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "removeUserVerification", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3801,7 +3793,7 @@ func (bot *Bot) ReopenForumTopicWithContext(ctx context.Context, chatId int64, m
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "reopenForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "reopenForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3835,7 +3827,7 @@ func (bot *Bot) ReopenGeneralForumTopicWithContext(ctx context.Context, chatId i
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "reopenGeneralForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "reopenGeneralForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3875,7 +3867,7 @@ func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3921,7 +3913,7 @@ func (bot *Bot) RestrictChatMemberWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "restrictChatMember", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "restrictChatMember", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3957,7 +3949,7 @@ func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "revokeChatInviteLink", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "revokeChatInviteLink", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4007,7 +3999,7 @@ func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "savePreparedInlineMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "savePreparedInlineMessage", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4073,15 +4065,8 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 // SendAnimationWithContext is the same as Bot.SendAnimation, but with a context.Context parameter
 func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if animation != nil {
-		err := animation.Attach("animation", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'animation' input file: %w", err)
-		}
-		v["animation"] = animation.getValue()
-	}
+	v["animation"] = animation
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -4089,13 +4074,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		v["duration"] = opts.Duration
 		v["width"] = opts.Width
 		v["height"] = opts.Height
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -4123,7 +4102,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendAnimation", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendAnimation", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4186,15 +4165,8 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 // SendAudioWithContext is the same as Bot.SendAudio, but with a context.Context parameter
 func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if audio != nil {
-		err := audio.Attach("audio", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'audio' input file: %w", err)
-		}
-		v["audio"] = audio.getValue()
-	}
+	v["audio"] = audio
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -4207,13 +4179,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		v["duration"] = opts.Duration
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -4234,7 +4200,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendAudio", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendAudio", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4279,7 +4245,7 @@ func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, act
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendChatAction", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendChatAction", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4336,7 +4302,7 @@ func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnection
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendChecklist", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendChecklist", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4418,7 +4384,7 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendContact", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendContact", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4493,7 +4459,7 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendDice", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendDice", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4551,26 +4517,13 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 // SendDocumentWithContext is the same as Bot.SendDocument, but with a context.Context parameter
 func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if document != nil {
-		err := document.Attach("document", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'document' input file: %w", err)
-		}
-		v["document"] = document.getValue()
-	}
+	v["document"] = document
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
 		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -4597,7 +4550,7 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendDocument", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendDocument", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4661,7 +4614,7 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendGame", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendGame", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4717,7 +4670,7 @@ func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *Se
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendGift", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendGift", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -4846,7 +4799,7 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendInvoice", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendInvoice", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -4934,7 +4887,7 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendLocation", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendLocation", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5000,7 +4953,7 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendMediaGroup", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendMediaGroup", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5087,7 +5040,7 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendMessage", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5179,7 +5132,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendPaidMedia", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendPaidMedia", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5237,15 +5190,8 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 // SendPhotoWithContext is the same as Bot.SendPhoto, but with a context.Context parameter
 func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if photo != nil {
-		err := photo.Attach("photo", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'photo' input file: %w", err)
-		}
-		v["photo"] = photo.getValue()
-	}
+	v["photo"] = photo
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5277,7 +5223,7 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendPhoto", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendPhoto", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5390,7 +5336,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendPoll", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendPoll", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5440,15 +5386,8 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 // SendStickerWithContext is the same as Bot.SendSticker, but with a context.Context parameter
 func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5474,7 +5413,7 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendSticker", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendSticker", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5566,7 +5505,7 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendVenue", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendVenue", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5638,15 +5577,8 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 // SendVideoWithContext is the same as Bot.SendVideo, but with a context.Context parameter
 func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if video != nil {
-		err := video.Attach("video", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'video' input file: %w", err)
-		}
-		v["video"] = video.getValue()
-	}
+	v["video"] = video
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5654,20 +5586,8 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		v["duration"] = opts.Duration
 		v["width"] = opts.Width
 		v["height"] = opts.Height
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
-		if opts.Cover != nil {
-			err := opts.Cover.Attach("cover", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'cover' input file: %w", err)
-			}
-			v["cover"] = opts.Cover.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
+		v["cover"] = opts.Cover
 		v["start_timestamp"] = opts.StartTimestamp
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -5697,7 +5617,7 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendVideo", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendVideo", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5751,28 +5671,15 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 // SendVideoNoteWithContext is the same as Bot.SendVideoNote, but with a context.Context parameter
 func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if videoNote != nil {
-		err := videoNote.Attach("video_note", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'video_note' input file: %w", err)
-		}
-		v["video_note"] = videoNote.getValue()
-	}
+	v["video_note"] = videoNote
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
 		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
 		v["duration"] = opts.Duration
 		v["length"] = opts.Length
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -5793,7 +5700,7 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendVideoNote", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendVideoNote", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5849,15 +5756,8 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 // SendVoiceWithContext is the same as Bot.SendVoice, but with a context.Context parameter
 func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if voice != nil {
-		err := voice.Attach("voice", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'voice' input file: %w", err)
-		}
-		v["voice"] = voice.getValue()
-	}
+	v["voice"] = voice
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5888,7 +5788,7 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendVoice", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendVoice", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5927,7 +5827,7 @@ func (bot *Bot) SetBusinessAccountBioWithContext(ctx context.Context, businessCo
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setBusinessAccountBio", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountBio", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -5965,7 +5865,7 @@ func (bot *Bot) SetBusinessAccountGiftSettingsWithContext(ctx context.Context, b
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setBusinessAccountGiftSettings", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountGiftSettings", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6006,7 +5906,7 @@ func (bot *Bot) SetBusinessAccountNameWithContext(ctx context.Context, businessC
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setBusinessAccountName", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountName", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6047,7 +5947,7 @@ func (bot *Bot) SetBusinessAccountProfilePhotoWithContext(ctx context.Context, b
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setBusinessAccountProfilePhoto", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountProfilePhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6086,7 +5986,7 @@ func (bot *Bot) SetBusinessAccountUsernameWithContext(ctx context.Context, busin
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setBusinessAccountUsername", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountUsername", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6124,7 +6024,7 @@ func (bot *Bot) SetChatAdministratorCustomTitleWithContext(ctx context.Context, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatAdministratorCustomTitle", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatAdministratorCustomTitle", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6163,7 +6063,7 @@ func (bot *Bot) SetChatDescriptionWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatDescription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatDescription", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6205,7 +6105,7 @@ func (bot *Bot) SetChatMenuButtonWithContext(ctx context.Context, opts *SetChatM
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatMenuButton", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatMenuButton", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6246,7 +6146,7 @@ func (bot *Bot) SetChatPermissionsWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatPermissions", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatPermissions", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6274,22 +6174,15 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 // SetChatPhotoWithContext is the same as Bot.SetChatPhoto, but with a context.Context parameter
 func (bot *Bot) SetChatPhotoWithContext(ctx context.Context, chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
-	if photo != nil {
-		err := photo.Attach("photo", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'photo' input file: %w", err)
-		}
-		v["photo"] = photo.getValue()
-	}
+	v["photo"] = photo
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatPhoto", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatPhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6325,7 +6218,7 @@ func (bot *Bot) SetChatStickerSetWithContext(ctx context.Context, chatId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatStickerSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatStickerSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6361,7 +6254,7 @@ func (bot *Bot) SetChatTitleWithContext(ctx context.Context, chatId int64, title
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setChatTitle", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setChatTitle", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6400,7 +6293,7 @@ func (bot *Bot) SetCustomEmojiStickerSetThumbnailWithContext(ctx context.Context
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setCustomEmojiStickerSetThumbnail", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setCustomEmojiStickerSetThumbnail", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6453,7 +6346,7 @@ func (bot *Bot) SetGameScoreWithContext(ctx context.Context, userId int64, score
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setGameScore", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setGameScore", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -6507,7 +6400,7 @@ func (bot *Bot) SetMessageReactionWithContext(ctx context.Context, chatId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMessageReaction", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMessageReaction", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6551,7 +6444,7 @@ func (bot *Bot) SetMyCommandsWithContext(ctx context.Context, commands []BotComm
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMyCommands", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMyCommands", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6593,7 +6486,7 @@ func (bot *Bot) SetMyDefaultAdministratorRightsWithContext(ctx context.Context, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMyDefaultAdministratorRights", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMyDefaultAdministratorRights", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6633,7 +6526,7 @@ func (bot *Bot) SetMyDescriptionWithContext(ctx context.Context, opts *SetMyDesc
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMyDescription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMyDescription", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6673,7 +6566,7 @@ func (bot *Bot) SetMyNameWithContext(ctx context.Context, opts *SetMyNameOpts) (
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMyName", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMyName", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6713,7 +6606,7 @@ func (bot *Bot) SetMyShortDescriptionWithContext(ctx context.Context, opts *SetM
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setMyShortDescription", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setMyShortDescription", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6752,7 +6645,7 @@ func (bot *Bot) SetPassportDataErrorsWithContext(ctx context.Context, userId int
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setPassportDataErrors", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setPassportDataErrors", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6780,14 +6673,7 @@ func (bot *Bot) SetStickerEmojiList(sticker InputFileOrString, emojiList []strin
 // SetStickerEmojiListWithContext is the same as Bot.SetStickerEmojiList, but with a context.Context parameter
 func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	if emojiList != nil {
 		v["emoji_list"] = emojiList
 	}
@@ -6797,7 +6683,7 @@ func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker Inpu
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6826,14 +6712,7 @@ func (bot *Bot) SetStickerKeywords(sticker InputFileOrString, opts *SetStickerKe
 // SetStickerKeywordsWithContext is the same as Bot.SetStickerKeywords, but with a context.Context parameter
 func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	if opts != nil {
 		if opts.Keywords != nil {
 			v["keywords"] = opts.Keywords
@@ -6845,7 +6724,7 @@ func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker Input
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6874,14 +6753,7 @@ func (bot *Bot) SetStickerMaskPosition(sticker InputFileOrString, opts *SetStick
 // SetStickerMaskPositionWithContext is the same as Bot.SetStickerMaskPosition, but with a context.Context parameter
 func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	if opts != nil {
 		if opts.MaskPosition != nil {
 			v["mask_position"] = opts.MaskPosition
@@ -6893,7 +6765,7 @@ func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker I
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6921,14 +6793,7 @@ func (bot *Bot) SetStickerPositionInSet(sticker InputFileOrString, position int6
 // SetStickerPositionInSetWithContext is the same as Bot.SetStickerPositionInSet, but with a context.Context parameter
 func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	v["position"] = position
 
 	var reqOpts *RequestOpts
@@ -6936,7 +6801,7 @@ func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6967,18 +6832,11 @@ func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, format string,
 // SetStickerSetThumbnailWithContext is the same as Bot.SetStickerSetThumbnail, but with a context.Context parameter
 func (bot *Bot) SetStickerSetThumbnailWithContext(ctx context.Context, name string, userId int64, format string, opts *SetStickerSetThumbnailOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["name"] = name
 	v["user_id"] = userId
 	v["format"] = format
 	if opts != nil {
-		if opts.Thumbnail != nil {
-			err := opts.Thumbnail.Attach("thumbnail", data)
-			if err != nil {
-				return false, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
-			}
-			v["thumbnail"] = opts.Thumbnail.getValue()
-		}
+		v["thumbnail"] = opts.Thumbnail
 	}
 
 	var reqOpts *RequestOpts
@@ -6986,7 +6844,7 @@ func (bot *Bot) SetStickerSetThumbnailWithContext(ctx context.Context, name stri
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerSetThumbnail", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerSetThumbnail", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7022,7 +6880,7 @@ func (bot *Bot) SetStickerSetTitleWithContext(ctx context.Context, name string, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerSetTitle", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerSetTitle", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7064,7 +6922,7 @@ func (bot *Bot) SetUserEmojiStatusWithContext(ctx context.Context, userId int64,
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setUserEmojiStatus", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setUserEmojiStatus", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7104,16 +6962,9 @@ func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 // SetWebhookWithContext is the same as Bot.SetWebhook, but with a context.Context parameter
 func (bot *Bot) SetWebhookWithContext(ctx context.Context, url string, opts *SetWebhookOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["url"] = url
 	if opts != nil {
-		if opts.Certificate != nil {
-			err := opts.Certificate.Attach("certificate", data)
-			if err != nil {
-				return false, fmt.Errorf("failed to attach 'certificate' input file: %w", err)
-			}
-			v["certificate"] = opts.Certificate.getValue()
-		}
+		v["certificate"] = opts.Certificate
 		v["ip_address"] = opts.IpAddress
 		v["max_connections"] = opts.MaxConnections
 		if opts.AllowedUpdates != nil {
@@ -7128,7 +6979,7 @@ func (bot *Bot) SetWebhookWithContext(ctx context.Context, url string, opts *Set
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setWebhook", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setWebhook", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7177,7 +7028,7 @@ func (bot *Bot) StopMessageLiveLocationWithContext(ctx context.Context, opts *St
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "stopMessageLiveLocation", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "stopMessageLiveLocation", v, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -7229,7 +7080,7 @@ func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "stopPoll", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "stopPoll", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -7265,7 +7116,7 @@ func (bot *Bot) TransferBusinessAccountStarsWithContext(ctx context.Context, bus
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "transferBusinessAccountStars", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "transferBusinessAccountStars", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7308,7 +7159,7 @@ func (bot *Bot) TransferGiftWithContext(ctx context.Context, businessConnectionI
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "transferGift", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "transferGift", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7349,7 +7200,7 @@ func (bot *Bot) UnbanChatMemberWithContext(ctx context.Context, chatId int64, us
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unbanChatMember", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unbanChatMember", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7385,7 +7236,7 @@ func (bot *Bot) UnbanChatSenderChatWithContext(ctx context.Context, chatId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unbanChatSenderChat", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unbanChatSenderChat", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7419,7 +7270,7 @@ func (bot *Bot) UnhideGeneralForumTopicWithContext(ctx context.Context, chatId i
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unhideGeneralForumTopic", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unhideGeneralForumTopic", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7453,7 +7304,7 @@ func (bot *Bot) UnpinAllChatMessagesWithContext(ctx context.Context, chatId int6
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unpinAllChatMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unpinAllChatMessages", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7489,7 +7340,7 @@ func (bot *Bot) UnpinAllForumTopicMessagesWithContext(ctx context.Context, chatI
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unpinAllForumTopicMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unpinAllForumTopicMessages", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7523,7 +7374,7 @@ func (bot *Bot) UnpinAllGeneralForumTopicMessagesWithContext(ctx context.Context
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unpinAllGeneralForumTopicMessages", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unpinAllGeneralForumTopicMessages", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7567,7 +7418,7 @@ func (bot *Bot) UnpinChatMessageWithContext(ctx context.Context, chatId int64, o
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "unpinChatMessage", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "unpinChatMessage", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7611,7 +7462,7 @@ func (bot *Bot) UpgradeGiftWithContext(ctx context.Context, businessConnectionId
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "upgradeGift", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "upgradeGift", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7640,15 +7491,8 @@ func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat
 // UploadStickerFileWithContext is the same as Bot.UploadStickerFile, but with a context.Context parameter
 func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, sticker InputFile, stickerFormat string, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["user_id"] = userId
-	if sticker != nil {
-		err := sticker.Attach("sticker", data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
-		}
-		v["sticker"] = sticker.getValue()
-	}
+	v["sticker"] = sticker
 	v["sticker_format"] = stickerFormat
 
 	var reqOpts *RequestOpts
@@ -7656,7 +7500,7 @@ func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "uploadStickerFile", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "uploadStickerFile", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -7695,7 +7539,7 @@ func (bot *Bot) VerifyChatWithContext(ctx context.Context, chatId int64, opts *V
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "verifyChat", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "verifyChat", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -7734,7 +7578,7 @@ func (bot *Bot) VerifyUserWithContext(ctx context.Context, userId int64, opts *V
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "verifyUser", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "verifyUser", v, reqOpts)
 	if err != nil {
 		return false, err
 	}

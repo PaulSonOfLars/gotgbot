@@ -22,7 +22,7 @@ const (
 
 type BotClient interface {
 	// RequestWithContext submits a POST HTTP request a bot API instance.
-	RequestWithContext(ctx context.Context, token string, method string, params map[string]any, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error)
+	RequestWithContext(ctx context.Context, token string, method string, params map[string]any, opts *RequestOpts) (json.RawMessage, error)
 	// GetAPIURL gets the URL of the API either in use by the bot or defined in the request opts.
 	GetAPIURL(opts *RequestOpts) string
 	// FileURL gets the URL of a file at the API address that the bot is interacting with.
@@ -133,7 +133,7 @@ func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Cont
 //   - params: map of parameters to be sending to the telegram API. eg: chat_id, user_id, etc.
 //   - data: map of any files to be sending to the telegram API.
 //   - opts: request opts to use.
-func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]any, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token string, method string, params map[string]any, opts *RequestOpts) (json.RawMessage, error) {
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
 
@@ -144,7 +144,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	}
 
 	buf := bytes.NewBuffer(nil)
-	contentType, err := fillBuffer(buf, params, data)
+	contentType, err := fillBuffer(buf, params)
 	if err != nil {
 		return nil, err
 	}
@@ -187,11 +187,8 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 }
 
 // fillBuffer fills a buffer with the multipart writer data which is going to be sent.
-func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileReader) (string, error) {
-	if data == nil {
-		data = map[string]FileReader{}
-	}
-
+func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
+	data := map[string]FileReader{}
 	w := multipart.NewWriter(buf)
 
 	if len(params) == 0 {
@@ -234,6 +231,17 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileRe
 				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
 			}
 			strValue = string(bs)
+
+		case InputFile:
+			err := val.Attach(k, data)
+			if err != nil {
+				return "", fmt.Errorf("failed to attach field %s: %w", k, err)
+			}
+
+			err = w.WriteField(k, val.getValue())
+			if err != nil {
+				return "", fmt.Errorf("failed to write field %s to multipart field: %w", k, err)
+			}
 
 		default:
 			// For complex types (structs, maps, slices, etc.), marshal as JSON

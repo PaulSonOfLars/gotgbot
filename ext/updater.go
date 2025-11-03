@@ -186,7 +186,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 
 		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
 		// unnecessary reallocation of url.Values in the polling loop.
-		r, err := bData.bot.RequestWithContext(ctx, "getUpdates", v, nil, opts)
+		r, err := bData.bot.RequestWithContext(ctx, "getUpdates", v, opts)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				// context cancelled; means the bot was stopped gracefully through Updater.StopBot
