@@ -747,7 +747,7 @@ var (
 type MergedBotCommandScope struct {
 	// Scope type
 	Type string `json:"type"`
-	// Optional. Unique identifier for the target chat (Only for chat, chat_administrators, chat_member)
+	// Optional. Unique identifier for the target chat. Channel direct messages chats and channel chats aren't supported. (Only for chat, chat_administrators, chat_member)
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Unique identifier of the target user (Only for chat_member)
 	UserId int64 `json:"user_id,omitempty"`
@@ -869,7 +869,7 @@ func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering a specific chat.
 type BotCommandScopeChat struct {
-	// Unique identifier for the target chat
+	// Unique identifier for the target chat. Channel direct messages chats and channel chats aren't supported.
 	ChatId int64 `json:"chat_id"`
 }
 
@@ -906,7 +906,7 @@ func (v BotCommandScopeChat) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
 type BotCommandScopeChatAdministrators struct {
-	// Unique identifier for the target chat
+	// Unique identifier for the target chat. Channel direct messages chats and channel chats aren't supported.
 	ChatId int64 `json:"chat_id"`
 }
 
@@ -943,7 +943,7 @@ func (v BotCommandScopeChatAdministrators) botCommandScope() {}
 //
 // Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
 type BotCommandScopeChatMember struct {
-	// Unique identifier for the target chat
+	// Unique identifier for the target chat. Channel direct messages chats and channel chats aren't supported.
 	ChatId int64 `json:"chat_id"`
 	// Unique identifier of the target user
 	UserId int64 `json:"user_id"`
@@ -1217,6 +1217,8 @@ type Chat struct {
 	LastName string `json:"last_name,omitempty"`
 	// Optional. True, if the supergroup chat is a forum (has topics enabled)
 	IsForum bool `json:"is_forum,omitempty"`
+	// Optional. True, if the chat is the direct messages chat of a channel
+	IsDirectMessages bool `json:"is_direct_messages,omitempty"`
 }
 
 // ChatAdministratorRights (https://core.telegram.org/bots/api#chatadministratorrights)
@@ -1253,6 +1255,8 @@ type ChatAdministratorRights struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
+	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 }
 
 // ChatBackground (https://core.telegram.org/bots/api#chatbackground)
@@ -1636,6 +1640,8 @@ type ChatFullInfo struct {
 	LastName string `json:"last_name,omitempty"`
 	// Optional. True, if the supergroup chat is a forum (has topics enabled)
 	IsForum bool `json:"is_forum,omitempty"`
+	// Optional. True, if the chat is the direct messages chat of a channel
+	IsDirectMessages bool `json:"is_direct_messages,omitempty"`
 	// Identifier of the accent color for the chat name and backgrounds of the chat photo, reply header, and link preview. See accent colors for more details.
 	AccentColorId int64 `json:"accent_color_id"`
 	// The maximum number of reactions that can be set on a message in the chat
@@ -1654,6 +1660,8 @@ type ChatFullInfo struct {
 	BusinessOpeningHours *BusinessOpeningHours `json:"business_opening_hours,omitempty"`
 	// Optional. For private chats, the personal channel of the user
 	PersonalChat *Chat `json:"personal_chat,omitempty"`
+	// Optional. Information about the corresponding channel chat; for direct messages chats only
+	ParentChat *Chat `json:"parent_chat,omitempty"`
 	// Optional. List of available reactions allowed in the chat. If omitted, then all emoji reactions are allowed.
 	AvailableReactions []ReactionType `json:"available_reactions,omitempty"`
 	// Optional. Custom emoji identifier of the emoji chosen by the chat for the reply header and link preview background
@@ -1725,6 +1733,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 		FirstName                          string                `json:"first_name"`
 		LastName                           string                `json:"last_name"`
 		IsForum                            bool                  `json:"is_forum"`
+		IsDirectMessages                   bool                  `json:"is_direct_messages"`
 		AccentColorId                      int64                 `json:"accent_color_id"`
 		MaxReactionCount                   int64                 `json:"max_reaction_count"`
 		Photo                              *ChatPhoto            `json:"photo"`
@@ -1734,6 +1743,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 		BusinessLocation                   *BusinessLocation     `json:"business_location"`
 		BusinessOpeningHours               *BusinessOpeningHours `json:"business_opening_hours"`
 		PersonalChat                       *Chat                 `json:"personal_chat"`
+		ParentChat                         *Chat                 `json:"parent_chat"`
 		AvailableReactions                 json.RawMessage       `json:"available_reactions"`
 		BackgroundCustomEmojiId            string                `json:"background_custom_emoji_id"`
 		ProfileAccentColorId               int64                 `json:"profile_accent_color_id"`
@@ -1777,6 +1787,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 	v.FirstName = t.FirstName
 	v.LastName = t.LastName
 	v.IsForum = t.IsForum
+	v.IsDirectMessages = t.IsDirectMessages
 	v.AccentColorId = t.AccentColorId
 	v.MaxReactionCount = t.MaxReactionCount
 	v.Photo = t.Photo
@@ -1786,6 +1797,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 	v.BusinessLocation = t.BusinessLocation
 	v.BusinessOpeningHours = t.BusinessOpeningHours
 	v.PersonalChat = t.PersonalChat
+	v.ParentChat = t.ParentChat
 	v.AvailableReactions, err = unmarshalReactionTypeArray(t.AvailableReactions)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field AvailableReactions: %w", err)
@@ -1946,6 +1958,8 @@ type MergedChatMember struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only (Only for administrator)
+	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 	// Optional. Date when the user's subscription will expire; Unix time (Only for member, restricted, kicked)
 	UntilDate int64 `json:"until_date,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
@@ -2121,6 +2135,8 @@ type ChatMemberAdministrator struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
+	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
 }
@@ -2138,25 +2154,26 @@ func (v ChatMemberAdministrator) GetUser() User {
 // MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
-		Status:              "administrator",
-		User:                v.User,
-		CanBeEdited:         v.CanBeEdited,
-		IsAnonymous:         v.IsAnonymous,
-		CanManageChat:       v.CanManageChat,
-		CanDeleteMessages:   v.CanDeleteMessages,
-		CanManageVideoChats: v.CanManageVideoChats,
-		CanRestrictMembers:  v.CanRestrictMembers,
-		CanPromoteMembers:   v.CanPromoteMembers,
-		CanChangeInfo:       v.CanChangeInfo,
-		CanInviteUsers:      v.CanInviteUsers,
-		CanPostStories:      v.CanPostStories,
-		CanEditStories:      v.CanEditStories,
-		CanDeleteStories:    v.CanDeleteStories,
-		CanPostMessages:     v.CanPostMessages,
-		CanEditMessages:     v.CanEditMessages,
-		CanPinMessages:      v.CanPinMessages,
-		CanManageTopics:     v.CanManageTopics,
-		CustomTitle:         v.CustomTitle,
+		Status:                  "administrator",
+		User:                    v.User,
+		CanBeEdited:             v.CanBeEdited,
+		IsAnonymous:             v.IsAnonymous,
+		CanManageChat:           v.CanManageChat,
+		CanDeleteMessages:       v.CanDeleteMessages,
+		CanManageVideoChats:     v.CanManageVideoChats,
+		CanRestrictMembers:      v.CanRestrictMembers,
+		CanPromoteMembers:       v.CanPromoteMembers,
+		CanChangeInfo:           v.CanChangeInfo,
+		CanInviteUsers:          v.CanInviteUsers,
+		CanPostStories:          v.CanPostStories,
+		CanEditStories:          v.CanEditStories,
+		CanDeleteStories:        v.CanDeleteStories,
+		CanPostMessages:         v.CanPostMessages,
+		CanEditMessages:         v.CanEditMessages,
+		CanPinMessages:          v.CanPinMessages,
+		CanManageTopics:         v.CanManageTopics,
+		CanManageDirectMessages: v.CanManageDirectMessages,
+		CustomTitle:             v.CustomTitle,
 	}
 }
 
@@ -2684,6 +2701,16 @@ type DirectMessagePriceChanged struct {
 	DirectMessageStarCount int64 `json:"direct_message_star_count,omitempty"`
 }
 
+// DirectMessagesTopic (https://core.telegram.org/bots/api#directmessagestopic)
+//
+// Describes a topic of a direct messages chat.
+type DirectMessagesTopic struct {
+	// Unique identifier of the topic
+	TopicId int64 `json:"topic_id"`
+	// Optional. Information about the user that created the topic. Currently, it is always present
+	User *User `json:"user,omitempty"`
+}
+
 // Document (https://core.telegram.org/bots/api#document)
 //
 // This object represents a general file (as opposed to photos, voice messages and audio files).
@@ -2995,6 +3022,8 @@ type Gift struct {
 	TotalCount int64 `json:"total_count,omitempty"`
 	// Optional. The number of remaining gifts of this type that can be sent; for limited gifts only
 	RemainingCount int64 `json:"remaining_count,omitempty"`
+	// Optional. Information about the chat that published the gift
+	PublisherChat *Chat `json:"publisher_chat,omitempty"`
 }
 
 // GiftInfo (https://core.telegram.org/bots/api#giftinfo)
@@ -3147,11 +3176,11 @@ type InlineKeyboardButton struct {
 	WebApp *WebAppInfo `json:"web_app,omitempty"`
 	// Optional. An HTTPS URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
 	LoginUrl *LoginUrl `json:"login_url,omitempty"`
-	// Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. May be empty, in which case just the bot's username will be inserted. Not supported for messages sent on behalf of a Telegram Business account.
+	// Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. May be empty, in which case just the bot's username will be inserted. Not supported for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
 	SwitchInlineQuery *string `json:"switch_inline_query,omitempty"`
-	// Optional. If set, pressing the button will insert the bot's username and the specified inline query in the current chat's input field. May be empty, in which case only the bot's username will be inserted. This offers a quick way for the user to open your bot in inline mode in the same chat - good for selecting something from multiple options. Not supported in channels and for messages sent on behalf of a Telegram Business account.
+	// Optional. If set, pressing the button will insert the bot's username and the specified inline query in the current chat's input field. May be empty, in which case only the bot's username will be inserted. This offers a quick way for the user to open your bot in inline mode in the same chat - good for selecting something from multiple options. Not supported in channels and for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
 	SwitchInlineQueryCurrentChat *string `json:"switch_inline_query_current_chat,omitempty"`
-	// Optional. If set, pressing the button will prompt the user to select one of their chats of the specified type, open that chat and insert the bot's username and the specified inline query in the input field. Not supported for messages sent on behalf of a Telegram Business account.
+	// Optional. If set, pressing the button will prompt the user to select one of their chats of the specified type, open that chat and insert the bot's username and the specified inline query in the input field. Not supported for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
 	SwitchInlineQueryChosenChat *SwitchInlineQueryChosenChat `json:"switch_inline_query_chosen_chat,omitempty"`
 	// Optional. Description of the button that copies the specified text to the clipboard.
 	CopyText *CopyTextButton `json:"copy_text,omitempty"`
@@ -5762,7 +5791,7 @@ func (v InputProfilePhotoStatic) inputProfilePhoto() {}
 // This object describes a sticker to be added to a sticker set.
 type InputSticker struct {
 	// The added sticker. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new file using multipart/form-data under <file_attach_name> name. Animated and video stickers can't be uploaded via HTTP URL. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Sticker string `json:"sticker"`
+	Sticker InputFileOrString `json:"sticker"`
 	// Format of the added sticker, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, "video" for a .WEBM video
 	Format string `json:"format"`
 	// List of 1-20 emoji associated with the sticker
@@ -5771,6 +5800,17 @@ type InputSticker struct {
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 	// Optional. List of 0-20 search keywords for the sticker with total length of up to 64 characters. For "regular" and "custom_emoji" stickers only.
 	Keywords []string `json:"keywords,omitempty"`
+}
+
+func (v InputSticker) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
+	if v.Sticker != nil {
+		err := v.Sticker.Attach(mediaName, data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	return json.Marshal(v)
 }
 
 // InputStoryContent (https://core.telegram.org/bots/api#inputstorycontent)
@@ -6404,6 +6444,8 @@ type Message struct {
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
+	// Optional. Information about the direct messages chat topic that contains the message
+	DirectMessagesTopic *DirectMessagesTopic `json:"direct_messages_topic,omitempty"`
 	// Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
@@ -6432,6 +6474,8 @@ type Message struct {
 	Quote *TextQuote `json:"quote,omitempty"`
 	// Optional. For replies to a story, the original story
 	ReplyToStory *Story `json:"reply_to_story,omitempty"`
+	// Optional. Identifier of the specific checklist task that is being replied to
+	ReplyToChecklistTaskId int64 `json:"reply_to_checklist_task_id,omitempty"`
 	// Optional. Bot through which the message was sent
 	ViaBot *User `json:"via_bot,omitempty"`
 	// Optional. Date the message was last edited in Unix time
@@ -6440,6 +6484,8 @@ type Message struct {
 	HasProtectedContent bool `json:"has_protected_content,omitempty"`
 	// Optional. True, if the message was sent by an implicit action, for example, as an away or a greeting business message, or as a scheduled message
 	IsFromOffline bool `json:"is_from_offline,omitempty"`
+	// Optional. True, if the message is a paid post. Note that such posts must not be deleted for 24 hours to receive the payment and can't be edited.
+	IsPaidPost bool `json:"is_paid_post,omitempty"`
 	// Optional. The unique identifier of a media message group this message belongs to
 	MediaGroupId string `json:"media_group_id,omitempty"`
 	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
@@ -6452,6 +6498,8 @@ type Message struct {
 	Entities []MessageEntity `json:"entities,omitempty"`
 	// Optional. Options used for link preview generation for the message, if it is a text message and link preview options were changed
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
+	// Optional. Information about suggested post parameters if the message is a suggested post in a channel direct messages chat. If the message is an approved or declined suggested post, then it can't be edited.
+	SuggestedPostInfo *SuggestedPostInfo `json:"suggested_post_info,omitempty"`
 	// Optional. Unique identifier of the message effect added to the message
 	EffectId string `json:"effect_id,omitempty"`
 	// Optional. Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set
@@ -6574,6 +6622,16 @@ type Message struct {
 	GiveawayCompleted *GiveawayCompleted `json:"giveaway_completed,omitempty"`
 	// Optional. Service message: the price for paid messages has changed in the chat
 	PaidMessagePriceChanged *PaidMessagePriceChanged `json:"paid_message_price_changed,omitempty"`
+	// Optional. Service message: a suggested post was approved
+	SuggestedPostApproved *SuggestedPostApproved `json:"suggested_post_approved,omitempty"`
+	// Optional. Service message: approval of a suggested post has failed
+	SuggestedPostApprovalFailed *SuggestedPostApprovalFailed `json:"suggested_post_approval_failed,omitempty"`
+	// Optional. Service message: a suggested post was declined
+	SuggestedPostDeclined *SuggestedPostDeclined `json:"suggested_post_declined,omitempty"`
+	// Optional. Service message: payment for a suggested post was received
+	SuggestedPostPaid *SuggestedPostPaid `json:"suggested_post_paid,omitempty"`
+	// Optional. Service message: payment for a suggested post was refunded
+	SuggestedPostRefunded *SuggestedPostRefunded `json:"suggested_post_refunded,omitempty"`
 	// Optional. Service message: video chat scheduled
 	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
 	// Optional. Service message: video chat started
@@ -6594,6 +6652,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	type tmp struct {
 		MessageId                     int64                          `json:"message_id"`
 		MessageThreadId               int64                          `json:"message_thread_id"`
+		DirectMessagesTopic           *DirectMessagesTopic           `json:"direct_messages_topic"`
 		From                          *User                          `json:"from"`
 		SenderChat                    *Chat                          `json:"sender_chat"`
 		SenderBoostCount              int64                          `json:"sender_boost_count"`
@@ -6608,16 +6667,19 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		ExternalReply                 *ExternalReplyInfo             `json:"external_reply"`
 		Quote                         *TextQuote                     `json:"quote"`
 		ReplyToStory                  *Story                         `json:"reply_to_story"`
+		ReplyToChecklistTaskId        int64                          `json:"reply_to_checklist_task_id"`
 		ViaBot                        *User                          `json:"via_bot"`
 		EditDate                      int64                          `json:"edit_date"`
 		HasProtectedContent           bool                           `json:"has_protected_content"`
 		IsFromOffline                 bool                           `json:"is_from_offline"`
+		IsPaidPost                    bool                           `json:"is_paid_post"`
 		MediaGroupId                  string                         `json:"media_group_id"`
 		AuthorSignature               string                         `json:"author_signature"`
 		PaidStarCount                 int64                          `json:"paid_star_count"`
 		Text                          string                         `json:"text"`
 		Entities                      []MessageEntity                `json:"entities"`
 		LinkPreviewOptions            *LinkPreviewOptions            `json:"link_preview_options"`
+		SuggestedPostInfo             *SuggestedPostInfo             `json:"suggested_post_info"`
 		EffectId                      string                         `json:"effect_id"`
 		Animation                     *Animation                     `json:"animation"`
 		Audio                         *Audio                         `json:"audio"`
@@ -6679,6 +6741,11 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		GiveawayWinners               *GiveawayWinners               `json:"giveaway_winners"`
 		GiveawayCompleted             *GiveawayCompleted             `json:"giveaway_completed"`
 		PaidMessagePriceChanged       *PaidMessagePriceChanged       `json:"paid_message_price_changed"`
+		SuggestedPostApproved         *SuggestedPostApproved         `json:"suggested_post_approved"`
+		SuggestedPostApprovalFailed   *SuggestedPostApprovalFailed   `json:"suggested_post_approval_failed"`
+		SuggestedPostDeclined         *SuggestedPostDeclined         `json:"suggested_post_declined"`
+		SuggestedPostPaid             *SuggestedPostPaid             `json:"suggested_post_paid"`
+		SuggestedPostRefunded         *SuggestedPostRefunded         `json:"suggested_post_refunded"`
 		VideoChatScheduled            *VideoChatScheduled            `json:"video_chat_scheduled"`
 		VideoChatStarted              *VideoChatStarted              `json:"video_chat_started"`
 		VideoChatEnded                *VideoChatEnded                `json:"video_chat_ended"`
@@ -6694,6 +6761,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 
 	v.MessageId = t.MessageId
 	v.MessageThreadId = t.MessageThreadId
+	v.DirectMessagesTopic = t.DirectMessagesTopic
 	v.From = t.From
 	v.SenderChat = t.SenderChat
 	v.SenderBoostCount = t.SenderBoostCount
@@ -6711,16 +6779,19 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.ExternalReply = t.ExternalReply
 	v.Quote = t.Quote
 	v.ReplyToStory = t.ReplyToStory
+	v.ReplyToChecklistTaskId = t.ReplyToChecklistTaskId
 	v.ViaBot = t.ViaBot
 	v.EditDate = t.EditDate
 	v.HasProtectedContent = t.HasProtectedContent
 	v.IsFromOffline = t.IsFromOffline
+	v.IsPaidPost = t.IsPaidPost
 	v.MediaGroupId = t.MediaGroupId
 	v.AuthorSignature = t.AuthorSignature
 	v.PaidStarCount = t.PaidStarCount
 	v.Text = t.Text
 	v.Entities = t.Entities
 	v.LinkPreviewOptions = t.LinkPreviewOptions
+	v.SuggestedPostInfo = t.SuggestedPostInfo
 	v.EffectId = t.EffectId
 	v.Animation = t.Animation
 	v.Audio = t.Audio
@@ -6785,6 +6856,11 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.GiveawayWinners = t.GiveawayWinners
 	v.GiveawayCompleted = t.GiveawayCompleted
 	v.PaidMessagePriceChanged = t.PaidMessagePriceChanged
+	v.SuggestedPostApproved = t.SuggestedPostApproved
+	v.SuggestedPostApprovalFailed = t.SuggestedPostApprovalFailed
+	v.SuggestedPostDeclined = t.SuggestedPostDeclined
+	v.SuggestedPostPaid = t.SuggestedPostPaid
+	v.SuggestedPostRefunded = t.SuggestedPostRefunded
 	v.VideoChatScheduled = t.VideoChatScheduled
 	v.VideoChatStarted = t.VideoChatStarted
 	v.VideoChatEnded = t.VideoChatEnded
@@ -8773,7 +8849,7 @@ func (v ReplyKeyboardRemove) replyMarkup() {}
 type ReplyParameters struct {
 	// Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
 	MessageId int64 `json:"message_id"`
-	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat. Not supported for messages sent on behalf of a business account.
+	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat. Not supported for messages sent on behalf of a business account and messages from channel direct messages chats.
 	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic. Always True for messages sent on behalf of a business account.
 	AllowSendingWithoutReply bool `json:"allow_sending_without_reply,omitempty"`
@@ -8785,6 +8861,8 @@ type ReplyParameters struct {
 	QuoteEntities []MessageEntity `json:"quote_entities,omitempty"`
 	// Optional. Position of the quote in the original message in UTF-16 code units
 	QuotePosition int64 `json:"quote_position,omitempty"`
+	// Optional. Identifier of the specific checklist task to be replied to
+	ChecklistTaskId int64 `json:"checklist_task_id,omitempty"`
 }
 
 // ResponseParameters (https://core.telegram.org/bots/api#responseparameters)
@@ -9538,6 +9616,94 @@ type SuccessfulPayment struct {
 	ProviderPaymentChargeId string `json:"provider_payment_charge_id"`
 }
 
+// SuggestedPostApprovalFailed (https://core.telegram.org/bots/api#suggestedpostapprovalfailed)
+//
+// Describes a service message about the failed approval of a suggested post. Currently, only caused by insufficient user funds at the time of approval.
+type SuggestedPostApprovalFailed struct {
+	// Optional. Message containing the suggested post whose approval has failed. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
+	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
+	// Expected price of the post
+	Price SuggestedPostPrice `json:"price"`
+}
+
+// SuggestedPostApproved (https://core.telegram.org/bots/api#suggestedpostapproved)
+//
+// Describes a service message about the approval of a suggested post.
+type SuggestedPostApproved struct {
+	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
+	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
+	// Optional. Amount paid for the post
+	Price *SuggestedPostPrice `json:"price,omitempty"`
+	// Date when the post will be published
+	SendDate int64 `json:"send_date"`
+}
+
+// SuggestedPostDeclined (https://core.telegram.org/bots/api#suggestedpostdeclined)
+//
+// Describes a service message about the rejection of a suggested post.
+type SuggestedPostDeclined struct {
+	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
+	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
+	// Optional. Comment with which the post was declined
+	Comment string `json:"comment,omitempty"`
+}
+
+// SuggestedPostInfo (https://core.telegram.org/bots/api#suggestedpostinfo)
+//
+// Contains information about a suggested post.
+type SuggestedPostInfo struct {
+	// State of the suggested post. Currently, it can be one of "pending", "approved", "declined".
+	State string `json:"state"`
+	// Optional. Proposed price of the post. If the field is omitted, then the post is unpaid.
+	Price *SuggestedPostPrice `json:"price,omitempty"`
+	// Optional. Proposed send date of the post. If the field is omitted, then the post can be published at any time within 30 days at the sole discretion of the user or administrator who approves it.
+	SendDate int64 `json:"send_date,omitempty"`
+}
+
+// SuggestedPostPaid (https://core.telegram.org/bots/api#suggestedpostpaid)
+//
+// Describes a service message about a successful payment for a suggested post.
+type SuggestedPostPaid struct {
+	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
+	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
+	// Currency in which the payment was made. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins
+	Currency string `json:"currency"`
+	// Optional. The amount of the currency that was received by the channel in nanotoncoins; for payments in toncoins only
+	Amount int64 `json:"amount,omitempty"`
+	// Optional. The amount of Telegram Stars that was received by the channel; for payments in Telegram Stars only
+	StarAmount *StarAmount `json:"star_amount,omitempty"`
+}
+
+// SuggestedPostParameters (https://core.telegram.org/bots/api#suggestedpostparameters)
+//
+// Contains parameters of a post that is being suggested by the bot.
+type SuggestedPostParameters struct {
+	// Optional. Proposed price for the post. If the field is omitted, then the post is unpaid.
+	Price *SuggestedPostPrice `json:"price,omitempty"`
+	// Optional. Proposed send date of the post. If specified, then the date must be between 300 second and 2678400 seconds (30 days) in the future. If the field is omitted, then the post can be published at any time within 30 days at the sole discretion of the user who approves it.
+	SendDate int64 `json:"send_date,omitempty"`
+}
+
+// SuggestedPostPrice (https://core.telegram.org/bots/api#suggestedpostprice)
+//
+// Desribes price of a suggested post.
+type SuggestedPostPrice struct {
+	// Currency in which the post will be paid. Currently, must be one of "XTR" for Telegram Stars or "TON" for toncoins
+	Currency string `json:"currency"`
+	// The amount of the currency that will be paid for the post in the smallest units of the currency, i.e. Telegram Stars or nanotoncoins. Currently, price in Telegram Stars must be between 5 and 100000, and price in nanotoncoins must be between 10000000 and 10000000000000.
+	Amount int64 `json:"amount"`
+}
+
+// SuggestedPostRefunded (https://core.telegram.org/bots/api#suggestedpostrefunded)
+//
+// Describes a service message about a payment refund for a suggested post.
+type SuggestedPostRefunded struct {
+	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
+	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
+	// Reason for the refund. Currently, one of "post_deleted" if the post was deleted within 24 hours of being posted or removed from scheduled messages without being posted, or "payment_refunded" if the payer refunded their payment.
+	Reason string `json:"reason"`
+}
+
 // SwitchInlineQueryChosenChat (https://core.telegram.org/bots/api#switchinlinequerychosenchat)
 //
 // This object represents an inline button that switches the current user to inline mode in a chosen chat, with an optional default inline query.
@@ -10098,6 +10264,8 @@ type UniqueGift struct {
 	Symbol UniqueGiftSymbol `json:"symbol"`
 	// Backdrop of the gift
 	Backdrop UniqueGiftBackdrop `json:"backdrop"`
+	// Optional. Information about the chat that published the gift
+	PublisherChat *Chat `json:"publisher_chat,omitempty"`
 }
 
 // UniqueGiftBackdrop (https://core.telegram.org/bots/api#uniquegiftbackdrop)
