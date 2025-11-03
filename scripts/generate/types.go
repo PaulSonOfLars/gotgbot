@@ -26,6 +26,7 @@ package gotgbot
 import (
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 )
 `)
 
@@ -483,7 +484,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
-		bd.WriteString("\nInputParams(string, map[string]FileReader) error")
+		bd.WriteString("\nInputParams(string, *multipart.Writer) error")
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
@@ -756,16 +757,16 @@ type inputParamsMethodData struct {
 }
 
 const inputParamsMethod = `
-func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) error {
+func (v {{.Type}}) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.{{.Field}} != nil {
-		err := v.{{.Field}}.Attach(mediaName, data)
+		err := v.{{.Field}}.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 	{{ if .Thumbnail }}
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}

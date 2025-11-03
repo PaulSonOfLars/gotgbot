@@ -6,6 +6,7 @@ package gotgbot
 import (
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 )
 
 type ReplyMarkup interface {
@@ -4956,7 +4957,7 @@ type InputMedia interface {
 	GetType() string
 	GetMedia() InputFileOrString
 	// InputParams allows for uploading attachments with files.
-	InputParams(string, map[string]FileReader) error
+	InputParams(string, *multipart.Writer) error
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
 	// inputMedia exists to avoid external types implementing this interface.
@@ -5097,16 +5098,16 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 // InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAnimation) inputMedia() {}
 
-func (v InputMediaAnimation) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputMediaAnimation) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
@@ -5178,16 +5179,16 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 // InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAudio) inputMedia() {}
 
-func (v InputMediaAudio) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputMediaAudio) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
@@ -5253,16 +5254,16 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 // InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaDocument) inputMedia() {}
 
-func (v InputMediaDocument) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputMediaDocument) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
@@ -5328,9 +5329,9 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaPhoto) inputMedia() {}
 
-func (v InputMediaPhoto) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputMediaPhoto) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
@@ -5417,16 +5418,16 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 // InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaVideo) inputMedia() {}
 
-func (v InputMediaVideo) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputMediaVideo) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
@@ -5466,7 +5467,7 @@ type InputPaidMedia interface {
 	GetType() string
 	GetMedia() InputFileOrString
 	// InputParams allows for uploading attachments with files.
-	InputParams(string, map[string]FileReader) error
+	InputParams(string, *multipart.Writer) error
 	// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputPaidMedia() MergedInputPaidMedia
 	// inputPaidMedia exists to avoid external types implementing this interface.
@@ -5561,9 +5562,9 @@ func (v InputPaidMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputPaidMediaPhoto.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaPhoto) inputPaidMedia() {}
 
-func (v InputPaidMediaPhoto) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputPaidMediaPhoto) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
@@ -5635,16 +5636,16 @@ func (v InputPaidMediaVideo) MarshalJSON() ([]byte, error) {
 // InputPaidMediaVideo.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaVideo) inputPaidMedia() {}
 
-func (v InputPaidMediaVideo) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputPaidMediaVideo) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
-		err := v.Media.Attach(mediaName, data)
+		err := v.Media.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
@@ -5802,9 +5803,9 @@ type InputSticker struct {
 	Keywords []string `json:"keywords,omitempty"`
 }
 
-func (v InputSticker) InputParams(mediaName string, data map[string]FileReader) error {
+func (v InputSticker) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.Sticker != nil {
-		err := v.Sticker.Attach(mediaName, data)
+		err := v.Sticker.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}

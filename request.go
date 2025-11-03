@@ -188,7 +188,6 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 // fillBuffer fills a buffer with the multipart writer data which is going to be sent.
 func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
-	data := map[string]FileReader{}
 	w := multipart.NewWriter(buf)
 
 	if len(params) == 0 {
@@ -207,7 +206,7 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
 			strValue = fmt.Sprint(val)
 		case InputMedia:
-			err := val.InputParams(k, data)
+			err := val.InputParams(k, w)
 			if err != nil {
 				return "", fmt.Errorf("failed to read input multipart field: %w", err)
 			}
@@ -220,7 +219,7 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 
 		case []InputMedia:
 			for idx, item := range val {
-				err := item.InputParams(k+"_"+strconv.Itoa(idx), data)
+				err := item.InputParams(k+"_"+strconv.Itoa(idx), w)
 				if err != nil {
 					return "", fmt.Errorf("failed to read input multipart field: %w", err)
 				}
@@ -233,7 +232,7 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 			strValue = string(bs)
 
 		case InputFile:
-			err := val.Attach(k, data)
+			err := val.Attach(k, w)
 			if err != nil {
 				return "", fmt.Errorf("failed to attach field %s: %w", k, err)
 			}
@@ -254,23 +253,6 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 
 		if err := w.WriteField(k, strValue); err != nil {
 			return "", fmt.Errorf("failed to write multipart field %s with value %v: %w", k, v, err)
-		}
-	}
-
-	for field, file := range data {
-		fileName := file.Name
-		if fileName == "" {
-			fileName = field
-		}
-
-		part, err := w.CreateFormFile(field, fileName)
-		if err != nil {
-			return "", fmt.Errorf("failed to create form file for field %s and fileName %s: %w", field, fileName, err)
-		}
-
-		_, err = io.Copy(part, file.Data)
-		if err != nil {
-			return "", fmt.Errorf("failed to copy file contents of field %s to form: %w", field, err)
 		}
 	}
 
