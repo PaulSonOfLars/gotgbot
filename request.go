@@ -79,7 +79,7 @@ type RequestOpts struct {
 	// Custom API URL to use for requests.
 	APIURL string
 	// OverrideParams can be used to override existing parameters, or override existing ones.
-	OverrideParams map[string]string
+	OverrideParams map[string]any
 }
 
 // getTimeoutContext returns the appropriate context for the current settings.
