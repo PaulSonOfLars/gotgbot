@@ -62,6 +62,10 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          - staticcheck
+        text: "ST1012:" # Error naming (for EndGroups/ContinueGroups)
+        path: ext/dispatcher.go
+      - linters:
           - gomoddirectives # We allow replace directives in the samples/ directory as we want to keep up to date
           - gosec # We don't use rand for security reasons here
         path: samples/
@@ -73,16 +77,23 @@ linters:
           - staticcheck
         text: 'SA1019:'
       - linters:
+          - staticcheck
+        text: 'QF1008:' # Embedded field lint
+      - linters:
+          - staticcheck
+        text: 'QF1001:' # DeMorgan lint
+        path: scripts/generate
+      - linters:
+          - staticcheck
+        text: 'QF1003:' # Switch lint
+        path: scripts/generate
+      - linters:
           - gosec
         path: \w*_test.go
         text: 'G404:'
       - linters:
           - staticcheck
         text: 'S1023:'
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
 issues:
   max-same-issues: 0
   uniq-by-line: true
