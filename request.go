@@ -10,7 +10,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -21,8 +20,6 @@ const (
 	// DefaultTimeout is the default timeout to be set for all requests.
 	DefaultTimeout = time.Second * 5
 )
-
-var urlCleanupRegexp = regexp.MustCompile(`(?m)/(\w+:\w+)/`)
 
 type BotClient interface {
 	// RequestWithContext submits a POST HTTP request a bot API instance.
@@ -176,7 +173,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, sanitizeError(err))
+		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, sanitizeError(token, err))
 	}
 	defer resp.Body.Close()
 
@@ -199,10 +196,10 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 }
 
 // Sanitize the error to avoid token leak.
-func sanitizeError(err error) error {
+func sanitizeError(token string, err error) error {
 	var urlErr *url.Error
 	if errors.As(err, &urlErr) {
-		urlErr.URL = urlCleanupRegexp.ReplaceAllString(urlErr.URL, "/***/")
+		urlErr.URL = strings.ReplaceAll(urlErr.URL, token, "<TOKEN>")
 		return urlErr
 	}
 
