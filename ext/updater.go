@@ -370,7 +370,9 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		return ErrMissingCertOrKeyFile
 	}
 
-	ln, err := net.Listen(opts.GetListenNet(), opts.ListenAddr)
+	var lc net.ListenConfig
+	// TODO: Expose Listen context
+	ln, err := lc.Listen(context.Background(), opts.GetListenNet(), opts.ListenAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
 	}
