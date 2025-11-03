@@ -11,7 +11,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
-type RequestFunc func(ctx context.Context, token string, method string, params map[string]string, opts *gotgbot.RequestOpts) (json.RawMessage, error)
+type RequestFunc func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error)
 
 // We define a TestBotClient which allows us to overwrite a single method on a per-test basis; meaning each test can verify specific behaviour.
 type TestBotClient struct {
@@ -29,7 +29,7 @@ func (b TestBotClient) FileURL(token string, tgFilePath string, opts *gotgbot.Re
 }
 
 // Define wrapper around existing RequestWithContext method.
-func (b TestBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b TestBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	if b.RequestFunc == nil {
 		panic("no requestfunc provided for test")
 	}
@@ -46,7 +46,7 @@ func Test_echo(t *testing.T) {
 	const echoMessage = "Hello"
 	sendMessageCount := 0
 
-	b := testBot(func(ctx context.Context, token string, method string, params map[string]string, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+	b := testBot(func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 		if method != "sendMessage" {
 			t.Fatalf("Only expected API calls to sendMessage, got %s", method)
 		}
@@ -59,7 +59,7 @@ func Test_echo(t *testing.T) {
 		sendMessageCount++
 		return json.Marshal(gotgbot.Message{
 			MessageId: rand.Int63(),
-			Text:      sentText,
+			Text:      sentText.(string),
 		})
 	})
 
