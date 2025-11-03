@@ -62,11 +62,8 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
-	// Generate list of default return values (for error handling).
-	defaultRetVals := strings.Join(getDefaultReturnVals(d, retTypes), ", ")
-
 	// Generate method contents, setting up values in expected format
-	valueGen, err := tgMethod.argsToValues(d, tgMethod.Name, defaultRetVals)
+	valueGen, err := tgMethod.argsToValues(d, tgMethod.Name)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
@@ -100,7 +97,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	// If sending data, we need to do it over POST
 	method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, reqOpts)")
 	method.WriteString("\nif err != nil {")
-	method.WriteString("\n	return " + defaultRetVals + ", err")
+	method.WriteString("\n	return " + strings.Join(getDefaultReturnVals(d, retTypes), ", ") + ", err")
 	method.WriteString("\n}")
 	method.WriteString("\n")
 
@@ -181,7 +178,7 @@ func (m MethodDescription) description(d APIDescription) (string, error) {
 	return description.String(), nil
 }
 
-func (m MethodDescription) argsToValues(d APIDescription, methodName string, defaultRetVal string) (string, error) {
+func (m MethodDescription) argsToValues(d APIDescription, methodName string) (string, error) {
 	bd := strings.Builder{}
 
 	var optionals []Field
