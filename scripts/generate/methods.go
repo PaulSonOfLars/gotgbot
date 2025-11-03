@@ -7,9 +7,7 @@ import (
 )
 
 var (
-	inputFileBranchTmpl        = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
-	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
-	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
+	inputFileBranchTmpl = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -24,7 +22,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 )
 `)
 
@@ -310,35 +307,6 @@ func stringComplexField(d APIDescription, f Field, fieldType string, goParam str
 		return bd.String(), true, nil
 	}
 
-	hasData, err := fieldContainsInputFile(d, f)
-	if err != nil {
-		return "", false, fmt.Errorf("failed to check if field %s contains inputfiles: %w", f.Name, err)
-	}
-	if hasData {
-		// If the field contains data, it cannot be simply json marshalled, so we our own methods to include it.
-		// We need to do this slightly differently if we are dealing with arrays or not.
-		if isArray(fieldType) {
-			err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
-			}
-		} else {
-			err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker branch template: %w", err)
-			}
-		}
-		return bd.String(), true, nil
-	}
-
 	// If we aren't sending data, then we can just do it regularly.
 	bd.WriteString("\n	v[\"" + f.Name + "\"] = " + goParam)
 
@@ -438,19 +406,3 @@ if {{.GoParam}} != nil {
 	}
 	v["{{.Name}}"] = {{.GoParam}}.getValue()
 }`
-
-const inputParamsBranch = `
-err := {{.GoParam}}.InputParams("{{.Name}}" , data)
-if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to attach input file {{.Name}}: %w", err)
-}
-v["{{.Name}}"] = {{.GoParam}}`
-
-const inputArrayParamsBranch = `
-for idx, im := range {{.GoParam}} {
-	err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
-	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to attach input field for list item %d {{.Name}}: %w", idx, err)
-	}
-}
-v["{{.Name}}"] = {{.GoParam}}`

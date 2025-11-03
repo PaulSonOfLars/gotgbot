@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -187,6 +188,10 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 // fillBuffer fills a buffer with the multipart writer data which is going to be sent.
 func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileReader) (string, error) {
+	if data == nil {
+		data = map[string]FileReader{}
+	}
+
 	w := multipart.NewWriter(buf)
 
 	if len(params) == 0 {
@@ -204,13 +209,39 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any, data map[string]FileRe
 			strValue = val
 		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
 			strValue = fmt.Sprint(val)
-		default:
-			// For complex types (structs, maps, slices, etc.), marshal as JSON
-			jsonBytes, err := json.Marshal(val)
+		case InputMedia:
+			err := val.InputParams(k, data)
+			if err != nil {
+				return "", fmt.Errorf("failed to read input multipart field: %w", err)
+			}
+
+			bs, err := json.Marshal(val)
 			if err != nil {
 				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
 			}
-			strValue = string(jsonBytes)
+			strValue = string(bs)
+
+		case []InputMedia:
+			for idx, item := range val {
+				err := item.InputParams(k+"_"+strconv.Itoa(idx), data)
+				if err != nil {
+					return "", fmt.Errorf("failed to read input multipart field: %w", err)
+				}
+			}
+
+			bs, err := json.Marshal(val)
+			if err != nil {
+				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+			}
+			strValue = string(bs)
+
+		default:
+			// For complex types (structs, maps, slices, etc.), marshal as JSON
+			bs, err := json.Marshal(val)
+			if err != nil {
+				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+			}
+			strValue = string(bs)
 		}
 
 		if err := w.WriteField(k, strValue); err != nil {

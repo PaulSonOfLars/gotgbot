@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 )
 
 // AddStickerToSetOpts is the set of optional fields for Bot.AddStickerToSet and Bot.AddStickerToSetWithContext.
@@ -30,13 +29,8 @@ func (bot *Bot) AddStickerToSet(userId int64, name string, sticker InputSticker,
 // AddStickerToSetWithContext is the same as Bot.AddStickerToSet, but with a context.Context parameter
 func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, name string, sticker InputSticker, opts *AddStickerToSetOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["user_id"] = userId
 	v["name"] = name
-	err := sticker.InputParams("sticker", data)
-	if err != nil {
-		return false, fmt.Errorf("failed to attach input file sticker: %w", err)
-	}
 	v["sticker"] = sticker
 
 	var reqOpts *RequestOpts
@@ -44,7 +38,7 @@ func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, na
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "addStickerToSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -979,17 +973,10 @@ func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, sti
 // CreateNewStickerSetWithContext is the same as Bot.CreateNewStickerSet, but with a context.Context parameter
 func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64, name string, title string, stickers []InputSticker, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["user_id"] = userId
 	v["name"] = name
 	v["title"] = title
 	if stickers != nil {
-		for idx, im := range stickers {
-			err := im.InputParams("stickers"+strconv.Itoa(idx), data)
-			if err != nil {
-				return false, fmt.Errorf("failed to attach input field for list item %d stickers: %w", idx, err)
-			}
-		}
 		v["stickers"] = stickers
 	}
 	if opts != nil {
@@ -1002,7 +989,7 @@ func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "createNewStickerSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1895,11 +1882,6 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 // EditMessageMediaWithContext is the same as Bot.EditMessageMedia, but with a context.Context parameter
 func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
-	err := media.InputParams("media", data)
-	if err != nil {
-		return nil, false, fmt.Errorf("failed to attach input file media: %w", err)
-	}
 	v["media"] = media
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
@@ -1914,7 +1896,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "editMessageMedia", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "editMessageMedia", v, nil, reqOpts)
 	if err != nil {
 		return nil, false, err
 	}
@@ -3883,14 +3865,9 @@ func (bot *Bot) ReplaceStickerInSet(userId int64, name string, oldSticker string
 // ReplaceStickerInSetWithContext is the same as Bot.ReplaceStickerInSet, but with a context.Context parameter
 func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64, name string, oldSticker string, sticker InputSticker, opts *ReplaceStickerInSetOpts) (bool, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["user_id"] = userId
 	v["name"] = name
 	v["old_sticker"] = oldSticker
-	err := sticker.InputParams("sticker", data)
-	if err != nil {
-		return false, fmt.Errorf("failed to attach input file sticker: %w", err)
-	}
 	v["sticker"] = sticker
 
 	var reqOpts *RequestOpts
@@ -3898,7 +3875,7 @@ func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "replaceStickerInSet", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -5001,15 +4978,8 @@ func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMedia
 // SendMediaGroupWithContext is the same as Bot.SendMediaGroup, but with a context.Context parameter
 func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
 	if media != nil {
-		for idx, im := range media {
-			err := im.InputParams("media"+strconv.Itoa(idx), data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach input field for list item %d media: %w", idx, err)
-			}
-		}
 		v["media"] = media
 	}
 	if opts != nil {
@@ -5030,7 +5000,7 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendMediaGroup", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendMediaGroup", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -5174,16 +5144,9 @@ func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMe
 // SendPaidMediaWithContext is the same as Bot.SendPaidMedia, but with a context.Context parameter
 func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
 	v := map[string]any{}
-	data := map[string]FileReader{}
 	v["chat_id"] = chatId
 	v["star_count"] = starCount
 	if media != nil {
-		for idx, im := range media {
-			err := im.InputParams("media"+strconv.Itoa(idx), data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to attach input field for list item %d media: %w", idx, err)
-			}
-		}
 		v["media"] = media
 	}
 	if opts != nil {
@@ -5216,7 +5179,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "sendPaidMedia", v, data, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "sendPaidMedia", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}

@@ -117,22 +117,6 @@ func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
 	return bd.String()
 }
 
-// fieldContainsInputFile checks whether the field's type contains any inputfiles, and thus might be used to send data.
-func fieldContainsInputFile(d APIDescription, field Field) (bool, error) {
-	goType, err := field.getPreferredType(d)
-	if err != nil {
-		return false, err
-	}
-	cleanName := strings.TrimPrefix(goType, "[]")
-	tgType, ok := d.Types[cleanName]
-	if !ok {
-		return false, nil
-	}
-
-	ok, _, err = containsInputFile(d, tgType, map[string]bool{})
-	return ok, err
-}
-
 // containsInputFile returns a boolean to indicate whether or not tgType contains an InputFile.
 // If true, it also returns the field name of that inputfile.
 func containsInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (bool, string, error) {
