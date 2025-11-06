@@ -193,7 +193,7 @@ func (m *botMapping) getHandlerFunc(logger *slog.Logger, errFunc ErrorFunc, pref
 			if errFunc != nil {
 				errFunc(err)
 			} else {
-				logger.Error("failed to read getUpdates body", "error", err)
+				logger.Error("Failed to read incoming update contents", "error", err)
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
