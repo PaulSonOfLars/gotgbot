@@ -226,8 +226,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
 
 		for _, updData := range rawUpdates {
-			temp := updData // use new mem address to avoid loop conflicts
-			bData.updateChan <- temp
+			bData.updateChan <- updData
 		}
 	}
 }
@@ -361,7 +360,9 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		return ErrMissingCertOrKeyFile
 	}
 
-	ln, err := net.Listen(opts.GetListenNet(), opts.ListenAddr)
+	var lc net.ListenConfig
+	// TODO: Expose Listen context
+	ln, err := lc.Listen(context.Background(), opts.GetListenNet(), opts.ListenAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
 	}

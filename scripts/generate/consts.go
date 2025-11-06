@@ -43,6 +43,12 @@ package gotgbot
 	}
 	consts.WriteString(chatTypeConsts)
 
+	chatMemberStatuses, err := generateChatMemberStatusConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for chat member statuses: %w", err)
+	}
+	consts.WriteString(chatMemberStatuses)
+
 	return writeGenToFile(consts, "gen_consts.go")
 }
 
@@ -173,6 +179,50 @@ func generateChatActionConsts(d APIDescription) (string, error) {
 
 	out.WriteString(")\n\n")
 
+	return out.String(), nil
+}
+
+func generateChatMemberStatusConsts(d APIDescription) (string, error) {
+	chatMemberType, ok := d.Types["ChatMember"]
+	if !ok {
+		return "", errors.New("missing 'ChatMember' type data")
+	}
+
+	out := strings.Builder{}
+	out.WriteString("\n// The consts below represent possible status values for a ChatMember.\n")
+	out.WriteString("const (")
+
+	for _, subtypeName := range chatMemberType.Subtypes {
+		subtype, ok := d.Types[subtypeName]
+		if !ok {
+			continue
+		}
+
+		var statusValue string
+		for _, field := range subtype.Fields {
+			if field.Name != "status" {
+				continue
+			}
+			values, err := extractQuotedValues(field.Description)
+			if err != nil {
+				return "", fmt.Errorf("failed to extract status from %s: %w", subtypeName, err)
+			}
+			if len(values) != 1 {
+				return "", fmt.Errorf("unexpected multiple status values in %s", subtypeName)
+			}
+			statusValue = values[0]
+			break
+		}
+
+		if statusValue == "" {
+			continue // no valid status found
+		}
+
+		constName := "ChatMemberStatus" + strings.TrimPrefix(subtypeName, "ChatMember")
+		out.WriteString(writeConst(constName, statusValue))
+	}
+
+	out.WriteString("\n)\n\n")
 	return out.String(), nil
 }
 
