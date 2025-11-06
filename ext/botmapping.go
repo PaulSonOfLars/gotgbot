@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
@@ -43,11 +43,6 @@ type botMapping struct {
 	mux sync.RWMutex
 	// urlMapping allows us to keep track of the webhook urls that are in use.
 	urlMapping map[string]string
-
-	// errFunc fills the same purpose as Updater.UnhandledErrFunc.
-	errFunc ErrorFunc
-	// errorLog fills the same purpose as Updater.ErrorLog.
-	errorLog *log.Logger
 }
 
 var (
@@ -161,7 +156,7 @@ func (m *botMapping) getBotFromURL(urlPath string) (botData, bool) {
 	return bData, ok
 }
 
-func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWriter, request *http.Request) {
+func (m *botMapping) getHandlerFunc(logger *slog.Logger, errFunc ErrorFunc, prefix string) func(writer http.ResponseWriter, request *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == "*" {
 			if r.ProtoAtLeast(1, 1) {
@@ -195,24 +190,16 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			if m.errFunc != nil {
-				m.errFunc(err)
+			if errFunc != nil {
+				errFunc(err)
 			} else {
-				m.logf("Failed to read incoming update contents: %s", err.Error())
+				logger.Error("Failed to read incoming update contents", "error", err)
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		b.updateChan <- bytes
-	}
-}
-
-func (m *botMapping) logf(format string, args ...interface{}) {
-	if m.errorLog != nil {
-		m.errorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
 	}
 }
 
