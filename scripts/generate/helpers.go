@@ -19,9 +19,9 @@ package gotgbot
 	for _, tgTypeName := range orderedTgTypes(d) {
 		tgType := d.Types[tgTypeName]
 
-		helper, err := generateHelperDef(d, tgType)
+		helper, err := generateTypeHelperDef(d, tgType)
 		if err != nil {
-			return fmt.Errorf("failed to generate helpers for %s: %w", tgType.Name, err)
+			return fmt.Errorf("failed to generate type helpers for %s: %w", tgType.Name, err)
 		}
 
 		if helper == "" {
@@ -45,7 +45,7 @@ type helperData struct {
 }
 
 func (d helperData) docs() string {
-	return "\n// " + d.newName + " Helper method for Bot." + strings.Title(d.method.Name) + "."
+	return "\n// " + d.newName + " is a helper method for Bot." + strings.Title(d.method.Name) + "."
 }
 
 func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helperData, error) {
@@ -97,7 +97,7 @@ func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helper
 	return methods, nil
 }
 
-func generateHelperDef(d APIDescription, tgType TypeDescription) (string, error) {
+func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, error) {
 	if tgType.Name == tgTypeFile {
 		return "", nil
 	}
@@ -128,6 +128,38 @@ func generateHelperDef(d APIDescription, tgType TypeDescription) (string, error)
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", helper.newName, tgType.Name, err)
+		}
+	}
+
+	if tgType.Name == "Message" {
+		// Implement reply helpers for all message types
+		for _, method := range orderedMethods(d) {
+			tgMethod := d.Methods[method]
+
+			if tgMethod.hasField("reply_parameters") {
+				returns, err := tgMethod.GetReturnTypes(d)
+				if err != nil {
+					return "", fmt.Errorf("failed to get return type for %s: %w", tgMethod.Name, err)
+				}
+
+				funcCall, funcDef, _, err := generateHelperArguments(d, tgMethod, tgType.receiverName(), map[string]string{"chat_id": "chat.Id"})
+				if err != nil {
+					return "", fmt.Errorf("failed to generate helper arguments for %s: %w", tgMethod.Name, err)
+				}
+
+				err = helperReplyFuncTmpl.Execute(&helperDef, helperReplyFuncData{
+					ReceiverName: tgType.receiverName(),
+					HelperName:   "Reply" + strings.Title(strings.ReplaceAll(method, "send", "")),
+					ReturnType:   strings.Join(returns, ", "),
+					FuncDefArgs:  strings.Join(funcDef, ", "),
+					OptsName:     tgMethod.optsName(),
+					MethodName:   strings.Title(tgMethod.Name),
+					FuncCallArgs: strings.Join(funcCall, ", "),
+				})
+				if err != nil {
+					return "", fmt.Errorf("failed to execute template to generate %s helper method on %s: %w", method, tgType.Name, err)
+				}
+			}
 		}
 	}
 
@@ -266,6 +298,31 @@ func ({{.Receiver}} {{.TypeName}}) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnT
 		{{.Contents}}
 
 	{{end}}
+	return b.{{.MethodName}}({{.FuncCallArgs}})
+}
+`
+
+var helperReplyFuncTmpl = template.Must(template.New("helperReplyFunc").Parse(helperReplyFunc))
+
+type helperReplyFuncData struct {
+	ReceiverName string
+	HelperName   string
+	ReturnType   string
+	FuncDefArgs  string
+	OptsName     string
+	MethodName   string
+	FuncCallArgs string
+}
+
+const helperReplyFunc = `
+// {{.HelperName}} is a shortcut to reply to the current message with a specific message type.
+func ({{.ReceiverName}} Message) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnType}}, error) {
+	if opts == nil {
+		opts = &{{.OptsName}}{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo({{.ReceiverName}})
+
 	return b.{{.MethodName}}({{.FuncCallArgs}})
 }
 `
