@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"strconv"
@@ -32,11 +32,10 @@ type Updater struct {
 
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	// Logger specifies an optional logger for unexpected behavior from handlers.
+	Logger *slog.Logger
 
 	// stopIdling is the channel that blocks the main thread from exiting, to keep the bots running.
 	stopIdling chan struct{}
@@ -51,39 +50,27 @@ type Updater struct {
 type UpdaterOpts struct {
 	// UnhandledErrFunc provides more flexibility for dealing with previously unhandled errors, such as failures to get
 	// updates (when long-polling), or failures to unmarshal.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	// Logger specifies an optional logger for unexpected behavior from handlers.
+	Logger *slog.Logger
 }
 
 // NewUpdater Creates a new Updater, as well as a Dispatcher and any optional updater configurations (via UpdaterOpts).
 func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 	var unhandledErrFunc ErrorFunc
-	var errLog *log.Logger
+	logger := slog.Default()
 
 	if opts != nil {
+		logger = iftrue(opts.Logger == nil, logger, opts.Logger)
 		unhandledErrFunc = opts.UnhandledErrFunc
-		errLog = opts.ErrorLog
 	}
 
 	return &Updater{
 		Dispatcher:       dispatcher,
 		UnhandledErrFunc: unhandledErrFunc,
-		ErrorLog:         errLog,
-		botMapping: botMapping{
-			errFunc:  unhandledErrFunc,
-			errorLog: errLog,
-		},
-	}
-}
-
-func (u *Updater) logf(format string, args ...interface{}) {
-	if u.ErrorLog != nil {
-		u.ErrorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
+		Logger:           logger.With("component", "updater"),
+		botMapping:       botMapping{},
 	}
 }
 
@@ -196,7 +183,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to get updates; sleeping 1s: %s", err.Error())
+				u.Logger.Error("failed to get updates; sleeping 1s", "error", err)
 				time.Sleep(time.Second)
 			}
 			continue
@@ -210,7 +197,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to unmarshal updates: %s", err.Error())
+				u.Logger.Error("failed to unmarshal updates", "error", err)
 			}
 			continue
 		}
@@ -228,7 +215,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				u.logf("Failed to unmarshal last update: %s", err.Error())
+				u.Logger.Error("failed to unmarshal last update", "error", err)
 			}
 			continue
 		}
@@ -236,8 +223,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 		v["offset"] = strconv.FormatInt(lastUpdate.UpdateId+1, 10)
 
 		for _, updData := range rawUpdates {
-			temp := updData // use new mem address to avoid loop conflicts
-			bData.updateChan <- temp
+			bData.updateChan <- updData
 		}
 	}
 }
@@ -354,7 +340,7 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 // GetHandlerFunc returns the http.HandlerFunc responsible for processing incoming webhook updates.
 // It is provided to allow for an alternative to the StartServer method using a user-defined http server.
 func (u *Updater) GetHandlerFunc(pathPrefix string) http.HandlerFunc {
-	return u.botMapping.getHandlerFunc(pathPrefix)
+	return u.botMapping.getHandlerFunc(u.Logger, u.UnhandledErrFunc, pathPrefix)
 }
 
 // StartServer starts the webhook server for all the bots added via AddWebhook.
@@ -371,7 +357,9 @@ func (u *Updater) StartServer(opts WebhookOpts) error {
 		return ErrMissingCertOrKeyFile
 	}
 
-	ln, err := net.Listen(opts.GetListenNet(), opts.ListenAddr)
+	var lc net.ListenConfig
+	// TODO: Expose Listen context
+	ln, err := lc.Listen(context.Background(), opts.GetListenNet(), opts.ListenAddr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s:%s: %w", opts.ListenNet, opts.ListenAddr, err)
 	}

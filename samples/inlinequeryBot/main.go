@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"math/rand"
 	"os"
 	"strconv"
@@ -32,6 +33,8 @@ func main() {
 		panic("bot does not support inline queries - enable them in botfather first!")
 	}
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	// Create updater and dispatcher.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
 		// If an error is returned by a handler, log it and continue going.
@@ -40,8 +43,9 @@ func main() {
 			return ext.DispatcherActionNoop
 		},
 		MaxRoutines: ext.DefaultMaxRoutines,
+		Logger:      logger,
 	})
-	updater := ext.NewUpdater(dispatcher, nil)
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{Logger: logger})
 
 	// Create an inline query handler to reply to all inline queries
 	dispatcher.AddHandler(handlers.NewInlineQuery(inlinequery.All, source))
@@ -59,7 +63,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()

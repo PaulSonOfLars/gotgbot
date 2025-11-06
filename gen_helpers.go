@@ -210,8 +210,8 @@ func (c Chat) Verify(b *Bot, opts *VerifyChatOpts) (bool, error) {
 }
 
 // Send is a helper method for Bot.SendGift.
-func (g Gift) Send(b *Bot, userId int64, opts *SendGiftOpts) (bool, error) {
-	return b.SendGift(userId, g.Id, opts)
+func (g Gift) Send(b *Bot, opts *SendGiftOpts) (bool, error) {
+	return b.SendGift(g.Id, opts)
 }
 
 // Copy is a helper method for Bot.CopyMessage.
@@ -238,6 +238,11 @@ func (im InaccessibleMessage) EditCaption(b *Bot, opts *EditMessageCaptionOpts) 
 	}
 
 	return b.EditMessageCaption(opts)
+}
+
+// EditChecklist is a helper method for Bot.EditMessageChecklist.
+func (im InaccessibleMessage) EditChecklist(b *Bot, businessConnectionId string, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
+	return b.EditMessageChecklist(businessConnectionId, im.Chat.Id, im.MessageId, checklist, opts)
 }
 
 // EditLiveLocation is a helper method for Bot.EditMessageLiveLocation.
@@ -314,6 +319,11 @@ func (im InaccessibleMessage) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error
 	return b.PinChatMessage(im.Chat.Id, im.MessageId, opts)
 }
 
+// ReadBusiness is a helper method for Bot.ReadBusinessMessage.
+func (im InaccessibleMessage) ReadBusiness(b *Bot, businessConnectionId string, opts *ReadBusinessMessageOpts) (bool, error) {
+	return b.ReadBusinessMessage(businessConnectionId, im.Chat.Id, im.MessageId, opts)
+}
+
 // SetReaction is a helper method for Bot.SetMessageReaction.
 func (im InaccessibleMessage) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
 	return b.SetMessageReaction(im.Chat.Id, im.MessageId, opts)
@@ -377,6 +387,11 @@ func (m Message) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bo
 	}
 
 	return b.EditMessageCaption(opts)
+}
+
+// EditChecklist is a helper method for Bot.EditMessageChecklist.
+func (m Message) EditChecklist(b *Bot, businessConnectionId string, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
+	return b.EditMessageChecklist(businessConnectionId, m.Chat.Id, m.MessageId, checklist, opts)
 }
 
 // EditLiveLocation is a helper method for Bot.EditMessageLiveLocation.
@@ -453,6 +468,11 @@ func (m Message) Pin(b *Bot, opts *PinChatMessageOpts) (bool, error) {
 	return b.PinChatMessage(m.Chat.Id, m.MessageId, opts)
 }
 
+// ReadBusiness is a helper method for Bot.ReadBusinessMessage.
+func (m Message) ReadBusiness(b *Bot, businessConnectionId string, opts *ReadBusinessMessageOpts) (bool, error) {
+	return b.ReadBusinessMessage(businessConnectionId, m.Chat.Id, m.MessageId, opts)
+}
+
 // SetReaction is a helper method for Bot.SetMessageReaction.
 func (m Message) SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error) {
 	return b.SetMessageReaction(m.Chat.Id, m.MessageId, opts)
@@ -518,6 +538,17 @@ func (m Message) ReplyAudio(b *Bot, audio InputFileOrString, opts *SendAudioOpts
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
 	return b.SendAudio(m.Chat.Id, audio, opts)
+}
+
+// ReplyChecklist is a shortcut to reply to the current message with a specific message type.
+func (m Message) ReplyChecklist(b *Bot, businessConnectionId string, checklist InputChecklist, opts *SendChecklistOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendChecklistOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendChecklist(businessConnectionId, m.Chat.Id, checklist, opts)
 }
 
 // ReplyContact is a shortcut to reply to the current message with a specific message type.
@@ -704,6 +735,16 @@ func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQuery
 // Answer is a helper method for Bot.AnswerShippingQuery.
 func (sq ShippingQuery) Answer(b *Bot, ok bool, opts *AnswerShippingQueryOpts) (bool, error) {
 	return b.AnswerShippingQuery(sq.Id, ok, opts)
+}
+
+// Delete is a helper method for Bot.DeleteStory.
+func (s Story) Delete(b *Bot, businessConnectionId string, opts *DeleteStoryOpts) (bool, error) {
+	return b.DeleteStory(businessConnectionId, s.Id, opts)
+}
+
+// Edit is a helper method for Bot.EditStory.
+func (s Story) Edit(b *Bot, businessConnectionId string, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	return b.EditStory(businessConnectionId, s.Id, content, opts)
 }
 
 // EditStarSubscription is a helper method for Bot.EditUserStarSubscription.

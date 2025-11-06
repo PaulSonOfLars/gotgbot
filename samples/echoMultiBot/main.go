@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -31,6 +32,8 @@ func main() {
 	// Get the webhook secret from the environment variable.
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	// Create updater and dispatcher.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
 		// If an error is returned by a handler, log it and continue going.
@@ -39,8 +42,9 @@ func main() {
 			return ext.DispatcherActionNoop
 		},
 		MaxRoutines: ext.DefaultMaxRoutines,
+		Logger:      logger,
 	})
-	updater := ext.NewUpdater(dispatcher, nil)
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{Logger: logger})
 
 	// Add stop handler to stop the current bot gracefully.
 	dispatcher.AddHandler(handlers.NewCommand("stop", func(b *gotgbot.Bot, ctx *ext.Context) error {
