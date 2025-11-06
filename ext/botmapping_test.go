@@ -18,7 +18,7 @@ func Test_botMapping(t *testing.T) {
 	t.Run("addBot", func(t *testing.T) {
 		// check that bots can be added fine
 		var err error
-		origBdata, err = bm.addBot(b, "", "")
+		origBdata, err = bm.addPollingBot(b, nil)
 		if err != nil {
 			t.Errorf("expected to be able to add a new bot fine: %s", err.Error())
 			t.FailNow()
@@ -31,7 +31,7 @@ func Test_botMapping(t *testing.T) {
 
 	t.Run("doubleAdd", func(t *testing.T) {
 		// Adding the same bot twice should fail
-		_, err := bm.addBot(b, "", "")
+		_, err := bm.addPollingBot(b, nil)
 		if err == nil {
 			t.Errorf("adding the same bot twice should throw an error")
 			t.FailNow()
@@ -84,7 +84,10 @@ func Test_botData_isUpdateChannelStopped(t *testing.T) {
 		BotClient: &gotgbot.BaseBotClient{},
 	}
 
-	bData, err := bm.addBot(b, "", "")
+	ctxCancelled := false
+	bData, err := bm.addPollingBot(b, func() {
+		ctxCancelled = true
+	})
 	if err != nil {
 		t.Errorf("bot with token %s should not have failed to be added", b.Token)
 		return
@@ -98,5 +101,8 @@ func Test_botData_isUpdateChannelStopped(t *testing.T) {
 	if !bData.shouldStopUpdates() {
 		t.Errorf("bot with token %s should be stopped", b.Token)
 		return
+	}
+	if !ctxCancelled {
+		t.Errorf("bot with token %s should have a cancelled context ", b.Token)
 	}
 }

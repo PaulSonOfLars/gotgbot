@@ -213,7 +213,7 @@ func (bot *Bot) AnswerPreCheckoutQueryWithContext(ctx context.Context, preChecko
 type AnswerShippingQueryOpts struct {
 	// Required if ok is True. A JSON-serialized array of available shipping options.
 	ShippingOptions []ShippingOption
-	// Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable'). Telegram will display this message to the user.
+	// Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable"). Telegram will display this message to the user.
 	ErrorMessage string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -327,6 +327,49 @@ func (bot *Bot) ApproveChatJoinRequestWithContext(ctx context.Context, chatId in
 	}
 
 	r, err := bot.RequestWithContext(ctx, "approveChatJoinRequest", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// ApproveSuggestedPostOpts is the set of optional fields for Bot.ApproveSuggestedPost and Bot.ApproveSuggestedPostWithContext.
+type ApproveSuggestedPostOpts struct {
+	// Point in time (Unix timestamp) when the post is expected to be published; omit if the date has already been specified when the suggested post was created. If specified, then the date must be not more than 2678400 seconds (30 days) in the future
+	SendDate int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ApproveSuggestedPost (https://core.telegram.org/bots/api#approvesuggestedpost)
+//
+// Use this method to approve a suggested post in a direct messages chat. The bot must have the 'can_post_messages' administrator right in the corresponding channel chat. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target direct messages chat
+//   - messageId (type int64): Identifier of a suggested post message to approve
+//   - opts (type ApproveSuggestedPostOpts): All optional parameters.
+func (bot *Bot) ApproveSuggestedPost(chatId int64, messageId int64, opts *ApproveSuggestedPostOpts) (bool, error) {
+	return bot.ApproveSuggestedPostWithContext(context.Background(), chatId, messageId, opts)
+}
+
+// ApproveSuggestedPostWithContext is the same as Bot.ApproveSuggestedPost, but with a context.Context parameter
+func (bot *Bot) ApproveSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *ApproveSuggestedPostOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
+	if opts != nil {
+		if opts.SendDate != 0 {
+			v["send_date"] = strconv.FormatInt(opts.SendDate, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "approveSuggestedPost", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -519,10 +562,50 @@ func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId in
 	return b, json.Unmarshal(r, &b)
 }
 
+// ConvertGiftToStarsOpts is the set of optional fields for Bot.ConvertGiftToStars and Bot.ConvertGiftToStarsWithContext.
+type ConvertGiftToStarsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ConvertGiftToStars (https://core.telegram.org/bots/api#convertgifttostars)
+//
+// Converts a given regular gift to Telegram Stars. Requires the can_convert_gifts_to_stars business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be converted to Telegram Stars
+//   - opts (type ConvertGiftToStarsOpts): All optional parameters.
+func (bot *Bot) ConvertGiftToStars(businessConnectionId string, ownedGiftId string, opts *ConvertGiftToStarsOpts) (bool, error) {
+	return bot.ConvertGiftToStarsWithContext(context.Background(), businessConnectionId, ownedGiftId, opts)
+}
+
+// ConvertGiftToStarsWithContext is the same as Bot.ConvertGiftToStars, but with a context.Context parameter
+func (bot *Bot) ConvertGiftToStarsWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, opts *ConvertGiftToStarsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "convertGiftToStars", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // CopyMessageOpts is the set of optional fields for Bot.CopyMessage and Bot.CopyMessageWithContext.
 type CopyMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
+	// New start timestamp for the copied video in the message
+	VideoStartTimestamp int64
 	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
 	Caption *string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
@@ -537,6 +620,8 @@ type CopyMessageOpts struct {
 	ProtectContent bool
 	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
 	AllowPaidBroadcast bool
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -566,6 +651,12 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = strconv.FormatInt(opts.VideoStartTimestamp, 10)
+		}
 		if opts.Caption != nil {
 			v["caption"] = *opts.Caption
 		}
@@ -581,6 +672,13 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -615,6 +713,8 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 type CopyMessagesOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Sends the messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
@@ -651,6 +751,9 @@ func (bot *Bot) CopyMessagesWithContext(ctx context.Context, chatId int64, fromC
 	if opts != nil {
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -736,7 +839,7 @@ type CreateChatSubscriptionInviteLinkOpts struct {
 // Use this method to create a subscription invite link for a channel chat. The bot must have the can_invite_users administrator rights. The link can be edited using the method editChatSubscriptionInviteLink or revoked using the method revokeChatInviteLink. Returns the new invite link as a ChatInviteLink object.
 //   - chatId (type int64): Unique identifier for the target channel chat
 //   - subscriptionPeriod (type int64): The number of seconds the subscription will be active for before the next payment. Currently, it must always be 2592000 (30 days).
-//   - subscriptionPrice (type int64): The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
+//   - subscriptionPrice (type int64): The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-10000
 //   - opts (type CreateChatSubscriptionInviteLinkOpts): All optional parameters.
 func (bot *Bot) CreateChatSubscriptionInviteLink(chatId int64, subscriptionPeriod int64, subscriptionPrice int64, opts *CreateChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	return bot.CreateChatSubscriptionInviteLinkWithContext(context.Background(), chatId, subscriptionPeriod, subscriptionPrice, opts)
@@ -814,8 +917,12 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink and Bot.CreateInvoiceLinkWithContext.
 type CreateInvoiceLinkOpts struct {
+	// Unique identifier of the business connection on behalf of which the link will be created. For payments in Telegram Stars only.
+	BusinessConnectionId string
 	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string
+	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 10000 Telegram Stars.
+	SubscriptionPeriod int64
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
@@ -876,7 +983,11 @@ func (bot *Bot) CreateInvoiceLinkWithContext(ctx context.Context, title string, 
 		v["prices"] = string(bs)
 	}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		v["provider_token"] = opts.ProviderToken
+		if opts.SubscriptionPeriod != 0 {
+			v["subscription_period"] = strconv.FormatInt(opts.SubscriptionPeriod, 10)
+		}
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
@@ -1020,6 +1131,89 @@ func (bot *Bot) DeclineChatJoinRequestWithContext(ctx context.Context, chatId in
 	return b, json.Unmarshal(r, &b)
 }
 
+// DeclineSuggestedPostOpts is the set of optional fields for Bot.DeclineSuggestedPost and Bot.DeclineSuggestedPostWithContext.
+type DeclineSuggestedPostOpts struct {
+	// Comment for the creator of the suggested post; 0-128 characters
+	Comment string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeclineSuggestedPost (https://core.telegram.org/bots/api#declinesuggestedpost)
+//
+// Use this method to decline a suggested post in a direct messages chat. The bot must have the 'can_manage_direct_messages' administrator right in the corresponding channel chat. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target direct messages chat
+//   - messageId (type int64): Identifier of a suggested post message to decline
+//   - opts (type DeclineSuggestedPostOpts): All optional parameters.
+func (bot *Bot) DeclineSuggestedPost(chatId int64, messageId int64, opts *DeclineSuggestedPostOpts) (bool, error) {
+	return bot.DeclineSuggestedPostWithContext(context.Background(), chatId, messageId, opts)
+}
+
+// DeclineSuggestedPostWithContext is the same as Bot.DeclineSuggestedPost, but with a context.Context parameter
+func (bot *Bot) DeclineSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeclineSuggestedPostOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
+	if opts != nil {
+		v["comment"] = opts.Comment
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "declineSuggestedPost", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteBusinessMessagesOpts is the set of optional fields for Bot.DeleteBusinessMessages and Bot.DeleteBusinessMessagesWithContext.
+type DeleteBusinessMessagesOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteBusinessMessages (https://core.telegram.org/bots/api#deletebusinessmessages)
+//
+// Delete messages on behalf of a business account. Requires the can_delete_sent_messages business bot right to delete messages sent by the bot itself, or the can_delete_all_messages business bot right to delete any message. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which to delete the messages
+//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. All messages must be from the same chat. See deleteMessage for limitations on which messages can be deleted
+//   - opts (type DeleteBusinessMessagesOpts): All optional parameters.
+func (bot *Bot) DeleteBusinessMessages(businessConnectionId string, messageIds []int64, opts *DeleteBusinessMessagesOpts) (bool, error) {
+	return bot.DeleteBusinessMessagesWithContext(context.Background(), businessConnectionId, messageIds, opts)
+}
+
+// DeleteBusinessMessagesWithContext is the same as Bot.DeleteBusinessMessages, but with a context.Context parameter
+func (bot *Bot) DeleteBusinessMessagesWithContext(ctx context.Context, businessConnectionId string, messageIds []int64, opts *DeleteBusinessMessagesOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if messageIds != nil {
+		bs, err := json.Marshal(messageIds)
+		if err != nil {
+			return false, fmt.Errorf("failed to marshal field message_ids: %w", err)
+		}
+		v["message_ids"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "deleteBusinessMessages", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // DeleteChatPhotoOpts is the set of optional fields for Bot.DeleteChatPhoto and Bot.DeleteChatPhotoWithContext.
 type DeleteChatPhotoOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1140,7 +1334,8 @@ type DeleteMessageOpts struct {
 //   - Bots can delete incoming messages in private chats.
 //   - Bots granted can_post_messages permissions can delete outgoing messages in channels.
 //   - If the bot is an administrator of a group, it can delete any message there.
-//   - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.
+//   - If the bot has can_delete_messages administrator right in a supergroup or a channel, it can delete any message there.
+//   - If the bot has can_manage_direct_messages administrator right in a channel, it can delete any message in the corresponding direct messages chat.
 //
 // Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
@@ -1265,23 +1460,30 @@ type DeleteStickerFromSetOpts struct {
 // DeleteStickerFromSet (https://core.telegram.org/bots/api#deletestickerfromset)
 //
 // Use this method to delete a sticker from a set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type DeleteStickerFromSetOpts): All optional parameters.
-func (bot *Bot) DeleteStickerFromSet(sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
+func (bot *Bot) DeleteStickerFromSet(sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	return bot.DeleteStickerFromSetWithContext(context.Background(), sticker, opts)
 }
 
 // DeleteStickerFromSetWithContext is the same as Bot.DeleteStickerFromSet, but with a context.Context parameter
-func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker string, opts *DeleteStickerFromSetOpts) (bool, error) {
+func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "deleteStickerFromSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1316,6 +1518,42 @@ func (bot *Bot) DeleteStickerSetWithContext(ctx context.Context, name string, op
 	}
 
 	r, err := bot.RequestWithContext(ctx, "deleteStickerSet", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteStoryOpts is the set of optional fields for Bot.DeleteStory and Bot.DeleteStoryWithContext.
+type DeleteStoryOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteStory (https://core.telegram.org/bots/api#deletestory)
+//
+// Deletes a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - storyId (type int64): Unique identifier of the story to delete
+//   - opts (type DeleteStoryOpts): All optional parameters.
+func (bot *Bot) DeleteStory(businessConnectionId string, storyId int64, opts *DeleteStoryOpts) (bool, error) {
+	return bot.DeleteStoryWithContext(context.Background(), businessConnectionId, storyId, opts)
+}
+
+// DeleteStoryWithContext is the same as Bot.DeleteStory, but with a context.Context parameter
+func (bot *Bot) DeleteStoryWithContext(ctx context.Context, businessConnectionId string, storyId int64, opts *DeleteStoryOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["story_id"] = strconv.FormatInt(storyId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "deleteStory", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1619,6 +1857,59 @@ func (bot *Bot) EditMessageCaptionWithContext(ctx context.Context, opts *EditMes
 	}
 	return &m, true, nil
 
+}
+
+// EditMessageChecklistOpts is the set of optional fields for Bot.EditMessageChecklist and Bot.EditMessageChecklistWithContext.
+type EditMessageChecklistOpts struct {
+	// A JSON-serialized object for the new inline keyboard for the message
+	ReplyMarkup InlineKeyboardMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditMessageChecklist (https://core.telegram.org/bots/api#editmessagechecklist)
+//
+// Use this method to edit a checklist on behalf of a connected business account. On success, the edited Message is returned.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which the message will be sent
+//   - chatId (type int64): Unique identifier for the target chat
+//   - messageId (type int64): Unique identifier for the target message
+//   - checklist (type InputChecklist): A JSON-serialized object for the new checklist
+//   - opts (type EditMessageChecklistOpts): All optional parameters.
+func (bot *Bot) EditMessageChecklist(businessConnectionId string, chatId int64, messageId int64, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
+	return bot.EditMessageChecklistWithContext(context.Background(), businessConnectionId, chatId, messageId, checklist, opts)
+}
+
+// EditMessageChecklistWithContext is the same as Bot.EditMessageChecklist, but with a context.Context parameter
+func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
+	bs, err := json.Marshal(checklist)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field checklist: %w", err)
+	}
+	v["checklist"] = string(bs)
+	if opts != nil {
+		bs, err := json.Marshal(opts.ReplyMarkup)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v["reply_markup"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editMessageChecklist", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m Message
+	return &m, json.Unmarshal(r, &m)
 }
 
 // EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation and Bot.EditMessageLiveLocationWithContext.
@@ -1935,6 +2226,112 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opt
 
 }
 
+// EditStoryOpts is the set of optional fields for Bot.EditStory and Bot.EditStoryWithContext.
+type EditStoryOpts struct {
+	// Caption of the story, 0-2048 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the story caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// A JSON-serialized list of clickable areas to be shown on the story
+	Areas []StoryArea
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditStory (https://core.telegram.org/bots/api#editstory)
+//
+// Edits a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - storyId (type int64): Unique identifier of the story to edit
+//   - content (type InputStoryContent): Content of the story
+//   - opts (type EditStoryOpts): All optional parameters.
+func (bot *Bot) EditStory(businessConnectionId string, storyId int64, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	return bot.EditStoryWithContext(context.Background(), businessConnectionId, storyId, content, opts)
+}
+
+// EditStoryWithContext is the same as Bot.EditStory, but with a context.Context parameter
+func (bot *Bot) EditStoryWithContext(ctx context.Context, businessConnectionId string, storyId int64, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["story_id"] = strconv.FormatInt(storyId, 10)
+	bs, err := json.Marshal(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field content: %w", err)
+	}
+	v["content"] = string(bs)
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		if opts.Areas != nil {
+			bs, err := json.Marshal(opts.Areas)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field areas: %w", err)
+			}
+			v["areas"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editStory", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s Story
+	return &s, json.Unmarshal(r, &s)
+}
+
+// EditUserStarSubscriptionOpts is the set of optional fields for Bot.EditUserStarSubscription and Bot.EditUserStarSubscriptionWithContext.
+type EditUserStarSubscriptionOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditUserStarSubscription (https://core.telegram.org/bots/api#edituserstarsubscription)
+//
+// Allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars. Returns True on success.
+//   - userId (type int64): Identifier of the user whose subscription will be edited
+//   - telegramPaymentChargeId (type string): Telegram payment identifier for the subscription
+//   - isCanceled (type bool): Pass True to cancel extension of the user subscription; the subscription must be active up to the end of the current subscription period. Pass False to allow the user to re-enable a subscription that was previously canceled by the bot.
+//   - opts (type EditUserStarSubscriptionOpts): All optional parameters.
+func (bot *Bot) EditUserStarSubscription(userId int64, telegramPaymentChargeId string, isCanceled bool, opts *EditUserStarSubscriptionOpts) (bool, error) {
+	return bot.EditUserStarSubscriptionWithContext(context.Background(), userId, telegramPaymentChargeId, isCanceled, opts)
+}
+
+// EditUserStarSubscriptionWithContext is the same as Bot.EditUserStarSubscription, but with a context.Context parameter
+func (bot *Bot) EditUserStarSubscriptionWithContext(ctx context.Context, userId int64, telegramPaymentChargeId string, isCanceled bool, opts *EditUserStarSubscriptionOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["telegram_payment_charge_id"] = telegramPaymentChargeId
+	v["is_canceled"] = strconv.FormatBool(isCanceled)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editUserStarSubscription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // ExportChatInviteLinkOpts is the set of optional fields for Bot.ExportChatInviteLink and Bot.ExportChatInviteLinkWithContext.
 type ExportChatInviteLinkOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1973,10 +2370,16 @@ func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int6
 type ForwardMessageOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be forwarded; required if the message is forwarded to a direct messages chat
+	DirectMessagesTopicId int64
+	// New start timestamp for the forwarded video in the message
+	VideoStartTimestamp int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the forwarded message from forwarding and saving
 	ProtectContent bool
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only
+	SuggestedPostParameters *SuggestedPostParameters
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -2002,8 +2405,21 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = strconv.FormatInt(opts.VideoStartTimestamp, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -2024,6 +2440,8 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 type ForwardMessagesOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the messages will be forwarded; required if the messages are forwarded to a direct messages chat
+	DirectMessagesTopicId int64
 	// Sends the messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the forwarded messages from forwarding and saving
@@ -2059,6 +2477,9 @@ func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fr
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 	}
@@ -2075,6 +2496,134 @@ func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fr
 
 	var m []MessageId
 	return m, json.Unmarshal(r, &m)
+}
+
+// GetAvailableGiftsOpts is the set of optional fields for Bot.GetAvailableGifts and Bot.GetAvailableGiftsWithContext.
+type GetAvailableGiftsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetAvailableGifts (https://core.telegram.org/bots/api#getavailablegifts)
+//
+// Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a Gifts object.
+//   - opts (type GetAvailableGiftsOpts): All optional parameters.
+func (bot *Bot) GetAvailableGifts(opts *GetAvailableGiftsOpts) (*Gifts, error) {
+	return bot.GetAvailableGiftsWithContext(context.Background(), opts)
+}
+
+// GetAvailableGiftsWithContext is the same as Bot.GetAvailableGifts, but with a context.Context parameter
+func (bot *Bot) GetAvailableGiftsWithContext(ctx context.Context, opts *GetAvailableGiftsOpts) (*Gifts, error) {
+	v := map[string]string{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getAvailableGifts", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var g Gifts
+	return &g, json.Unmarshal(r, &g)
+}
+
+// GetBusinessAccountGiftsOpts is the set of optional fields for Bot.GetBusinessAccountGifts and Bot.GetBusinessAccountGiftsWithContext.
+type GetBusinessAccountGiftsOpts struct {
+	// Pass True to exclude gifts that aren't saved to the account's profile page
+	ExcludeUnsaved bool
+	// Pass True to exclude gifts that are saved to the account's profile page
+	ExcludeSaved bool
+	// Pass True to exclude gifts that can be purchased an unlimited number of times
+	ExcludeUnlimited bool
+	// Pass True to exclude gifts that can be purchased a limited number of times
+	ExcludeLimited bool
+	// Pass True to exclude unique gifts
+	ExcludeUnique bool
+	// Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
+	SortByPrice bool
+	// Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
+	Offset string
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetBusinessAccountGifts (https://core.telegram.org/bots/api#getbusinessaccountgifts)
+//
+// Returns the gifts received and owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns OwnedGifts on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type GetBusinessAccountGiftsOpts): All optional parameters.
+func (bot *Bot) GetBusinessAccountGifts(businessConnectionId string, opts *GetBusinessAccountGiftsOpts) (*OwnedGifts, error) {
+	return bot.GetBusinessAccountGiftsWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// GetBusinessAccountGiftsWithContext is the same as Bot.GetBusinessAccountGifts, but with a context.Context parameter
+func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, businessConnectionId string, opts *GetBusinessAccountGiftsOpts) (*OwnedGifts, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["exclude_unsaved"] = strconv.FormatBool(opts.ExcludeUnsaved)
+		v["exclude_saved"] = strconv.FormatBool(opts.ExcludeSaved)
+		v["exclude_unlimited"] = strconv.FormatBool(opts.ExcludeUnlimited)
+		v["exclude_limited"] = strconv.FormatBool(opts.ExcludeLimited)
+		v["exclude_unique"] = strconv.FormatBool(opts.ExcludeUnique)
+		v["sort_by_price"] = strconv.FormatBool(opts.SortByPrice)
+		v["offset"] = opts.Offset
+		if opts.Limit != 0 {
+			v["limit"] = strconv.FormatInt(opts.Limit, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountGifts", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var o OwnedGifts
+	return &o, json.Unmarshal(r, &o)
+}
+
+// GetBusinessAccountStarBalanceOpts is the set of optional fields for Bot.GetBusinessAccountStarBalance and Bot.GetBusinessAccountStarBalanceWithContext.
+type GetBusinessAccountStarBalanceOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetBusinessAccountStarBalance (https://core.telegram.org/bots/api#getbusinessaccountstarbalance)
+//
+// Returns the amount of Telegram Stars owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns StarAmount on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type GetBusinessAccountStarBalanceOpts): All optional parameters.
+func (bot *Bot) GetBusinessAccountStarBalance(businessConnectionId string, opts *GetBusinessAccountStarBalanceOpts) (*StarAmount, error) {
+	return bot.GetBusinessAccountStarBalanceWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// GetBusinessAccountStarBalanceWithContext is the same as Bot.GetBusinessAccountStarBalance, but with a context.Context parameter
+func (bot *Bot) GetBusinessAccountStarBalanceWithContext(ctx context.Context, businessConnectionId string, opts *GetBusinessAccountStarBalanceOpts) (*StarAmount, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getBusinessAccountStarBalance", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s StarAmount
+	return &s, json.Unmarshal(r, &s)
 }
 
 // GetBusinessConnectionOpts is the set of optional fields for Bot.GetBusinessConnection and Bot.GetBusinessConnectionWithContext.
@@ -2665,6 +3214,38 @@ func (bot *Bot) GetMyShortDescriptionWithContext(ctx context.Context, opts *GetM
 	return &b, json.Unmarshal(r, &b)
 }
 
+// GetMyStarBalanceOpts is the set of optional fields for Bot.GetMyStarBalance and Bot.GetMyStarBalanceWithContext.
+type GetMyStarBalanceOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetMyStarBalance (https://core.telegram.org/bots/api#getmystarbalance)
+//
+// A method to get the current Telegram Stars balance of the bot. Requires no parameters. On success, returns a StarAmount object.
+//   - opts (type GetMyStarBalanceOpts): All optional parameters.
+func (bot *Bot) GetMyStarBalance(opts *GetMyStarBalanceOpts) (*StarAmount, error) {
+	return bot.GetMyStarBalanceWithContext(context.Background(), opts)
+}
+
+// GetMyStarBalanceWithContext is the same as Bot.GetMyStarBalance, but with a context.Context parameter
+func (bot *Bot) GetMyStarBalanceWithContext(ctx context.Context, opts *GetMyStarBalanceOpts) (*StarAmount, error) {
+	v := map[string]string{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getMyStarBalance", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s StarAmount
+	return &s, json.Unmarshal(r, &s)
+}
+
 // GetStarTransactionsOpts is the set of optional fields for Bot.GetStarTransactions and Bot.GetStarTransactionsWithContext.
 type GetStarTransactionsOpts struct {
 	// Number of transactions to skip in the response
@@ -2751,7 +3332,7 @@ type GetUpdatesOpts struct {
 	Limit int64
 	// Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling. Should be positive, short polling should be used for testing purposes only.
 	Timeout int64
-	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to the getUpdates, so unwanted updates may be received for a short period of time.
+	// A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to getUpdates, so unwanted updates may be received for a short period of time.
 	AllowedUpdates []string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2915,6 +3496,61 @@ func (bot *Bot) GetWebhookInfoWithContext(ctx context.Context, opts *GetWebhookI
 	return &w, json.Unmarshal(r, &w)
 }
 
+// GiftPremiumSubscriptionOpts is the set of optional fields for Bot.GiftPremiumSubscription and Bot.GiftPremiumSubscriptionWithContext.
+type GiftPremiumSubscriptionOpts struct {
+	// Text that will be shown along with the service message about the subscription; 0-128 characters
+	Text string
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextParseMode string
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities []MessageEntity
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GiftPremiumSubscription (https://core.telegram.org/bots/api#giftpremiumsubscription)
+//
+// Gifts a Telegram Premium subscription to the given user. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user who will receive a Telegram Premium subscription
+//   - monthCount (type int64): Number of months the Telegram Premium subscription will be active for the user; must be one of 3, 6, or 12
+//   - starCount (type int64): Number of Telegram Stars to pay for the Telegram Premium subscription; must be 1000 for 3 months, 1500 for 6 months, and 2500 for 12 months
+//   - opts (type GiftPremiumSubscriptionOpts): All optional parameters.
+func (bot *Bot) GiftPremiumSubscription(userId int64, monthCount int64, starCount int64, opts *GiftPremiumSubscriptionOpts) (bool, error) {
+	return bot.GiftPremiumSubscriptionWithContext(context.Background(), userId, monthCount, starCount, opts)
+}
+
+// GiftPremiumSubscriptionWithContext is the same as Bot.GiftPremiumSubscription, but with a context.Context parameter
+func (bot *Bot) GiftPremiumSubscriptionWithContext(ctx context.Context, userId int64, monthCount int64, starCount int64, opts *GiftPremiumSubscriptionOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["month_count"] = strconv.FormatInt(monthCount, 10)
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+	if opts != nil {
+		v["text"] = opts.Text
+		v["text_parse_mode"] = opts.TextParseMode
+		if opts.TextEntities != nil {
+			bs, err := json.Marshal(opts.TextEntities)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field text_entities: %w", err)
+			}
+			v["text_entities"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "giftPremiumSubscription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // HideGeneralForumTopicOpts is the set of optional fields for Bot.HideGeneralForumTopic and Bot.HideGeneralForumTopicWithContext.
 type HideGeneralForumTopicOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2958,7 +3594,7 @@ type LeaveChatOpts struct {
 // LeaveChat (https://core.telegram.org/bots/api#leavechat)
 //
 // Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat. Channel direct messages chats aren't supported; leave the corresponding channel instead.
 //   - opts (type LeaveChatOpts): All optional parameters.
 func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 	return bot.LeaveChatWithContext(context.Background(), chatId, opts)
@@ -3027,7 +3663,7 @@ type PinChatMessageOpts struct {
 
 // PinChatMessage (https://core.telegram.org/bots/api#pinchatmessage)
 //
-// Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to add a message to the list of pinned messages in a chat. In private chats and channel direct messages chats, all non-service messages can be pinned. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to pin messages in groups and channels respectively. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageId (type int64): Identifier of a message to pin
 //   - opts (type PinChatMessageOpts): All optional parameters.
@@ -3059,11 +3695,85 @@ func (bot *Bot) PinChatMessageWithContext(ctx context.Context, chatId int64, mes
 	return b, json.Unmarshal(r, &b)
 }
 
+// PostStoryOpts is the set of optional fields for Bot.PostStory and Bot.PostStoryWithContext.
+type PostStoryOpts struct {
+	// Caption of the story, 0-2048 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the story caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// A JSON-serialized list of clickable areas to be shown on the story
+	Areas []StoryArea
+	// Pass True to keep the story accessible after it expires
+	PostToChatPage bool
+	// Pass True if the content of the story must be protected from forwarding and screenshotting
+	ProtectContent bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// PostStory (https://core.telegram.org/bots/api#poststory)
+//
+// Posts a story on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - content (type InputStoryContent): Content of the story
+//   - activePeriod (type int64): Period after which the story is moved to the archive, in seconds; must be one of 6 * 3600, 12 * 3600, 86400, or 2 * 86400
+//   - opts (type PostStoryOpts): All optional parameters.
+func (bot *Bot) PostStory(businessConnectionId string, content InputStoryContent, activePeriod int64, opts *PostStoryOpts) (*Story, error) {
+	return bot.PostStoryWithContext(context.Background(), businessConnectionId, content, activePeriod, opts)
+}
+
+// PostStoryWithContext is the same as Bot.PostStory, but with a context.Context parameter
+func (bot *Bot) PostStoryWithContext(ctx context.Context, businessConnectionId string, content InputStoryContent, activePeriod int64, opts *PostStoryOpts) (*Story, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	bs, err := json.Marshal(content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field content: %w", err)
+	}
+	v["content"] = string(bs)
+	v["active_period"] = strconv.FormatInt(activePeriod, 10)
+	if opts != nil {
+		v["caption"] = opts.Caption
+		v["parse_mode"] = opts.ParseMode
+		if opts.CaptionEntities != nil {
+			bs, err := json.Marshal(opts.CaptionEntities)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field caption_entities: %w", err)
+			}
+			v["caption_entities"] = string(bs)
+		}
+		if opts.Areas != nil {
+			bs, err := json.Marshal(opts.Areas)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field areas: %w", err)
+			}
+			v["areas"] = string(bs)
+		}
+		v["post_to_chat_page"] = strconv.FormatBool(opts.PostToChatPage)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "postStory", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s Story
+	return &s, json.Unmarshal(r, &s)
+}
+
 // PromoteChatMemberOpts is the set of optional fields for Bot.PromoteChatMember and Bot.PromoteChatMemberWithContext.
 type PromoteChatMemberOpts struct {
 	// Pass True if the administrator's presence in the chat is hidden
 	IsAnonymous bool
-	// Pass True if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
+	// Pass True if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages, ignore slow mode, and send messages to the chat without paying Telegram Stars. Implied by any other administrator privilege.
 	CanManageChat bool
 	// Pass True if the administrator can delete messages of other users
 	CanDeleteMessages bool
@@ -3083,7 +3793,7 @@ type PromoteChatMemberOpts struct {
 	CanEditStories bool
 	// Pass True if the administrator can delete stories posted by other users
 	CanDeleteStories bool
-	// Pass True if the administrator can post messages in the channel, or access channel statistics; for channels only
+	// Pass True if the administrator can post messages in the channel, approve suggested posts, or access channel statistics; for channels only
 	CanPostMessages bool
 	// Pass True if the administrator can edit messages of other users and can pin messages; for channels only
 	CanEditMessages bool
@@ -3091,6 +3801,8 @@ type PromoteChatMemberOpts struct {
 	CanPinMessages bool
 	// Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageTopics bool
+	// Pass True if the administrator can manage direct messages within the channel and decline suggested posts; for channels only
+	CanManageDirectMessages bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -3126,6 +3838,7 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 		v["can_edit_messages"] = strconv.FormatBool(opts.CanEditMessages)
 		v["can_pin_messages"] = strconv.FormatBool(opts.CanPinMessages)
 		v["can_manage_topics"] = strconv.FormatBool(opts.CanManageTopics)
+		v["can_manage_direct_messages"] = strconv.FormatBool(opts.CanManageDirectMessages)
 	}
 
 	var reqOpts *RequestOpts
@@ -3134,6 +3847,44 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 	}
 
 	r, err := bot.RequestWithContext(ctx, "promoteChatMember", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// ReadBusinessMessageOpts is the set of optional fields for Bot.ReadBusinessMessage and Bot.ReadBusinessMessageWithContext.
+type ReadBusinessMessageOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ReadBusinessMessage (https://core.telegram.org/bots/api#readbusinessmessage)
+//
+// Marks incoming message as read on behalf of a business account. Requires the can_read_messages business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which to read the message
+//   - chatId (type int64): Unique identifier of the chat in which the message was received. The chat must have been active in the last 24 hours.
+//   - messageId (type int64): Unique identifier of the message to mark as read
+//   - opts (type ReadBusinessMessageOpts): All optional parameters.
+func (bot *Bot) ReadBusinessMessage(businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
+	return bot.ReadBusinessMessageWithContext(context.Background(), businessConnectionId, chatId, messageId, opts)
+}
+
+// ReadBusinessMessageWithContext is the same as Bot.ReadBusinessMessage, but with a context.Context parameter
+func (bot *Bot) ReadBusinessMessageWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	v["message_id"] = strconv.FormatInt(messageId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "readBusinessMessage", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3170,6 +3921,113 @@ func (bot *Bot) RefundStarPaymentWithContext(ctx context.Context, userId int64, 
 	}
 
 	r, err := bot.RequestWithContext(ctx, "refundStarPayment", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// RemoveBusinessAccountProfilePhotoOpts is the set of optional fields for Bot.RemoveBusinessAccountProfilePhoto and Bot.RemoveBusinessAccountProfilePhotoWithContext.
+type RemoveBusinessAccountProfilePhotoOpts struct {
+	// Pass True to remove the public photo, which is visible even if the main photo is hidden by the business account's privacy settings. After the main photo is removed, the previous profile photo (if present) becomes the main photo.
+	IsPublic bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RemoveBusinessAccountProfilePhoto (https://core.telegram.org/bots/api#removebusinessaccountprofilephoto)
+//
+// Removes the current profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type RemoveBusinessAccountProfilePhotoOpts): All optional parameters.
+func (bot *Bot) RemoveBusinessAccountProfilePhoto(businessConnectionId string, opts *RemoveBusinessAccountProfilePhotoOpts) (bool, error) {
+	return bot.RemoveBusinessAccountProfilePhotoWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// RemoveBusinessAccountProfilePhotoWithContext is the same as Bot.RemoveBusinessAccountProfilePhoto, but with a context.Context parameter
+func (bot *Bot) RemoveBusinessAccountProfilePhotoWithContext(ctx context.Context, businessConnectionId string, opts *RemoveBusinessAccountProfilePhotoOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["is_public"] = strconv.FormatBool(opts.IsPublic)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "removeBusinessAccountProfilePhoto", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// RemoveChatVerificationOpts is the set of optional fields for Bot.RemoveChatVerification and Bot.RemoveChatVerificationWithContext.
+type RemoveChatVerificationOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RemoveChatVerification (https://core.telegram.org/bots/api#removechatverification)
+//
+// Removes verification from a chat that is currently verified on behalf of the organization represented by the bot. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - opts (type RemoveChatVerificationOpts): All optional parameters.
+func (bot *Bot) RemoveChatVerification(chatId int64, opts *RemoveChatVerificationOpts) (bool, error) {
+	return bot.RemoveChatVerificationWithContext(context.Background(), chatId, opts)
+}
+
+// RemoveChatVerificationWithContext is the same as Bot.RemoveChatVerification, but with a context.Context parameter
+func (bot *Bot) RemoveChatVerificationWithContext(ctx context.Context, chatId int64, opts *RemoveChatVerificationOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "removeChatVerification", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// RemoveUserVerificationOpts is the set of optional fields for Bot.RemoveUserVerification and Bot.RemoveUserVerificationWithContext.
+type RemoveUserVerificationOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RemoveUserVerification (https://core.telegram.org/bots/api#removeuserverification)
+//
+// Removes verification from a user who is currently verified on behalf of the organization represented by the bot. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type RemoveUserVerificationOpts): All optional parameters.
+func (bot *Bot) RemoveUserVerification(userId int64, opts *RemoveUserVerificationOpts) (bool, error) {
+	return bot.RemoveUserVerificationWithContext(context.Background(), userId, opts)
+}
+
+// RemoveUserVerificationWithContext is the same as Bot.RemoveUserVerification, but with a context.Context parameter
+func (bot *Bot) RemoveUserVerificationWithContext(ctx context.Context, userId int64, opts *RemoveUserVerificationOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "removeUserVerification", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -3381,12 +4239,68 @@ func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int6
 	return &c, json.Unmarshal(r, &c)
 }
 
+// SavePreparedInlineMessageOpts is the set of optional fields for Bot.SavePreparedInlineMessage and Bot.SavePreparedInlineMessageWithContext.
+type SavePreparedInlineMessageOpts struct {
+	// Pass True if the message can be sent to private chats with users
+	AllowUserChats bool
+	// Pass True if the message can be sent to private chats with bots
+	AllowBotChats bool
+	// Pass True if the message can be sent to group and supergroup chats
+	AllowGroupChats bool
+	// Pass True if the message can be sent to channel chats
+	AllowChannelChats bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SavePreparedInlineMessage (https://core.telegram.org/bots/api#savepreparedinlinemessage)
+//
+// Stores a message that can be sent by a user of a Mini App. Returns a PreparedInlineMessage object.
+//   - userId (type int64): Unique identifier of the target user that can use the prepared message
+//   - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
+//   - opts (type SavePreparedInlineMessageOpts): All optional parameters.
+func (bot *Bot) SavePreparedInlineMessage(userId int64, result InlineQueryResult, opts *SavePreparedInlineMessageOpts) (*PreparedInlineMessage, error) {
+	return bot.SavePreparedInlineMessageWithContext(context.Background(), userId, result, opts)
+}
+
+// SavePreparedInlineMessageWithContext is the same as Bot.SavePreparedInlineMessage, but with a context.Context parameter
+func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId int64, result InlineQueryResult, opts *SavePreparedInlineMessageOpts) (*PreparedInlineMessage, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	bs, err := json.Marshal(result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field result: %w", err)
+	}
+	v["result"] = string(bs)
+	if opts != nil {
+		v["allow_user_chats"] = strconv.FormatBool(opts.AllowUserChats)
+		v["allow_bot_chats"] = strconv.FormatBool(opts.AllowBotChats)
+		v["allow_group_chats"] = strconv.FormatBool(opts.AllowGroupChats)
+		v["allow_channel_chats"] = strconv.FormatBool(opts.AllowChannelChats)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "savePreparedInlineMessage", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var p PreparedInlineMessage
+	return &p, json.Unmarshal(r, &p)
+}
+
 // SendAnimationOpts is the set of optional fields for Bot.SendAnimation and Bot.SendAnimationWithContext.
 type SendAnimationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Duration of sent animation in seconds
 	Duration int64
 	// Animation width
@@ -3413,6 +4327,8 @@ type SendAnimationOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3448,6 +4364,9 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -3479,6 +4398,13 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3515,6 +4441,8 @@ type SendAudioOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Audio caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the audio caption. See formatting options for more details.
@@ -3537,6 +4465,8 @@ type SendAudioOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3573,6 +4503,9 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -3598,6 +4531,13 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3642,7 +4582,7 @@ type SendChatActionOpts struct {
 //
 // Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat. Channel chats and channel direct messages chats aren't supported.
 //   - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 //   - opts (type SendChatActionOpts): All optional parameters.
 func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
@@ -3675,12 +4615,83 @@ func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, act
 	return b, json.Unmarshal(r, &b)
 }
 
+// SendChecklistOpts is the set of optional fields for Bot.SendChecklist and Bot.SendChecklistWithContext.
+type SendChecklistOpts struct {
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message
+	MessageEffectId string
+	// A JSON-serialized object for description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// A JSON-serialized object for an inline keyboard
+	ReplyMarkup InlineKeyboardMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendChecklist (https://core.telegram.org/bots/api#sendchecklist)
+//
+// Use this method to send a checklist on behalf of a connected business account. On success, the sent Message is returned.
+//   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which the message will be sent
+//   - chatId (type int64): Unique identifier for the target chat
+//   - checklist (type InputChecklist): A JSON-serialized object for the checklist to send
+//   - opts (type SendChecklistOpts): All optional parameters.
+func (bot *Bot) SendChecklist(businessConnectionId string, chatId int64, checklist InputChecklist, opts *SendChecklistOpts) (*Message, error) {
+	return bot.SendChecklistWithContext(context.Background(), businessConnectionId, chatId, checklist, opts)
+}
+
+// SendChecklistWithContext is the same as Bot.SendChecklist, but with a context.Context parameter
+func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, checklist InputChecklist, opts *SendChecklistOpts) (*Message, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	bs, err := json.Marshal(checklist)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field checklist: %w", err)
+	}
+	v["checklist"] = string(bs)
+	if opts != nil {
+		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
+		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["message_effect_id"] = opts.MessageEffectId
+		if opts.ReplyParameters != nil {
+			bs, err := json.Marshal(opts.ReplyParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field reply_parameters: %w", err)
+			}
+			v["reply_parameters"] = string(bs)
+		}
+		bs, err := json.Marshal(opts.ReplyMarkup)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal field reply_markup: %w", err)
+		}
+		v["reply_markup"] = string(bs)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendChecklist", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m Message
+	return &m, json.Unmarshal(r, &m)
+}
+
 // SendContactOpts is the set of optional fields for Bot.SendContact and Bot.SendContactWithContext.
 type SendContactOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Contact's last name
 	LastName string
 	// Additional data about the contact in the form of a vCard, 0-2048 bytes
@@ -3693,6 +4704,8 @@ type SendContactOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3723,12 +4736,22 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["last_name"] = opts.LastName
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3765,6 +4788,8 @@ type SendDiceOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -3775,6 +4800,8 @@ type SendDiceOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3801,11 +4828,21 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3842,6 +4879,8 @@ type SendDocumentOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
@@ -3860,6 +4899,8 @@ type SendDocumentOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -3895,6 +4936,9 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		if opts.Thumbnail != nil {
 			err := opts.Thumbnail.Attach("thumbnail", data)
 			if err != nil {
@@ -3916,6 +4960,13 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -3971,7 +5022,7 @@ type SendGameOpts struct {
 // SendGame (https://core.telegram.org/bots/api#sendgame)
 //
 // Use this method to send a game. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat. Games can't be sent to channel direct messages chats and channel chats.
 //   - gameShortName (type string): Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather.
 //   - opts (type SendGameOpts): All optional parameters.
 func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
@@ -4020,10 +5071,76 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendGiftOpts is the set of optional fields for Bot.SendGift and Bot.SendGiftWithContext.
+type SendGiftOpts struct {
+	// Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
+	UserId int64
+	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift.
+	ChatId int64
+	// Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
+	PayForUpgrade bool
+	// Text that will be shown along with the gift; 0-128 characters
+	Text string
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextParseMode string
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities []MessageEntity
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendGift (https://core.telegram.org/bots/api#sendgift)
+//
+// Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
+//   - giftId (type string): Identifier of the gift
+//   - opts (type SendGiftOpts): All optional parameters.
+func (bot *Bot) SendGift(giftId string, opts *SendGiftOpts) (bool, error) {
+	return bot.SendGiftWithContext(context.Background(), giftId, opts)
+}
+
+// SendGiftWithContext is the same as Bot.SendGift, but with a context.Context parameter
+func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *SendGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["gift_id"] = giftId
+	if opts != nil {
+		if opts.UserId != 0 {
+			v["user_id"] = strconv.FormatInt(opts.UserId, 10)
+		}
+		if opts.ChatId != 0 {
+			v["chat_id"] = strconv.FormatInt(opts.ChatId, 10)
+		}
+		v["pay_for_upgrade"] = strconv.FormatBool(opts.PayForUpgrade)
+		v["text"] = opts.Text
+		v["text_parse_mode"] = opts.TextParseMode
+		if opts.TextEntities != nil {
+			bs, err := json.Marshal(opts.TextEntities)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field text_entities: %w", err)
+			}
+			v["text_entities"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendGift", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SendInvoiceOpts is the set of optional fields for Bot.SendInvoice and Bot.SendInvoiceWithContext.
 type SendInvoiceOpts struct {
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
@@ -4064,6 +5181,8 @@ type SendInvoiceOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
@@ -4105,6 +5224,9 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["provider_token"] = opts.ProviderToken
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
@@ -4139,6 +5261,13 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4173,6 +5302,8 @@ type SendLocationOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
 	// Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
@@ -4189,6 +5320,8 @@ type SendLocationOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4219,6 +5352,9 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		if opts.HorizontalAccuracy != 0.0 {
 			v["horizontal_accuracy"] = strconv.FormatFloat(opts.HorizontalAccuracy, 'f', -1, 64)
 		}
@@ -4235,6 +5371,13 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4271,6 +5414,8 @@ type SendMediaGroupOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Sends messages silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
@@ -4287,7 +5432,7 @@ type SendMediaGroupOpts struct {
 
 // SendMediaGroup (https://core.telegram.org/bots/api#sendmediagroup)
 //
-// Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
+// Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Message objects that were sent is returned.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - media (type []InputMedia): A JSON-serialized array describing messages to be sent, must include 2-10 items
 //   - opts (type SendMediaGroupOpts): All optional parameters.
@@ -4319,6 +5464,9 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 		v["business_connection_id"] = opts.BusinessConnectionId
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
@@ -4353,6 +5501,8 @@ type SendMessageOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
@@ -4367,6 +5517,8 @@ type SendMessageOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4395,6 +5547,9 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
 			bs, err := json.Marshal(opts.Entities)
@@ -4414,6 +5569,13 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4448,6 +5610,10 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 type SendPaidMediaOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
+	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
 	Payload string
 	// Media caption, 0-1024 characters after entities parsing
@@ -4464,6 +5630,8 @@ type SendPaidMediaOpts struct {
 	ProtectContent bool
 	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
 	AllowPaidBroadcast bool
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4476,7 +5644,7 @@ type SendPaidMediaOpts struct {
 //
 // Use this method to send paid media. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-2500
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-10000
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
 func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
@@ -4506,6 +5674,12 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["payload"] = opts.Payload
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -4520,6 +5694,13 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4556,6 +5737,8 @@ type SendPhotoOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the photo caption. See formatting options for more details.
@@ -4574,6 +5757,8 @@ type SendPhotoOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4609,6 +5794,9 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -4624,6 +5812,13 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4703,9 +5898,9 @@ type SendPollOpts struct {
 // SendPoll (https://core.telegram.org/bots/api#sendpoll)
 //
 // Use this method to send a native poll. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat. Polls can't be sent to channel direct messages chats.
 //   - question (type string): Poll question, 1-300 characters
-//   - options (type []InputPollOption): A JSON-serialized list of 2-10 answer options
+//   - options (type []InputPollOption): A JSON-serialized list of 2-12 answer options
 //   - opts (type SendPollOpts): All optional parameters.
 func (bot *Bot) SendPoll(chatId int64, question string, options []InputPollOption, opts *SendPollOpts) (*Message, error) {
 	return bot.SendPollWithContext(context.Background(), chatId, question, options, opts)
@@ -4799,6 +5994,8 @@ type SendStickerOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Emoji associated with the sticker; only for just uploaded stickers
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -4809,6 +6006,8 @@ type SendStickerOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4844,11 +6043,21 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4885,6 +6094,8 @@ type SendVenueOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Foursquare identifier of the venue
 	FoursquareId string
 	// Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
@@ -4901,6 +6112,8 @@ type SendVenueOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4935,6 +6148,9 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["foursquare_id"] = opts.FoursquareId
 		v["foursquare_type"] = opts.FoursquareType
 		v["google_place_id"] = opts.GooglePlaceId
@@ -4943,6 +6159,13 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4979,6 +6202,8 @@ type SendVideoOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width
@@ -4987,6 +6212,10 @@ type SendVideoOpts struct {
 	Height int64
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile
+	// Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover InputFileOrString
+	// Start timestamp for the video in the message
+	StartTimestamp int64
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
@@ -5007,6 +6236,8 @@ type SendVideoOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -5042,6 +6273,9 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -5057,6 +6291,16 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 				return nil, fmt.Errorf("failed to attach 'thumbnail' input file: %w", err)
 			}
 			v["thumbnail"] = opts.Thumbnail.getValue()
+		}
+		if opts.Cover != nil {
+			err := opts.Cover.Attach("cover", data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to attach 'cover' input file: %w", err)
+			}
+			v["cover"] = opts.Cover.getValue()
+		}
+		if opts.StartTimestamp != 0 {
+			v["start_timestamp"] = strconv.FormatInt(opts.StartTimestamp, 10)
 		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -5074,6 +6318,13 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -5110,6 +6361,8 @@ type SendVideoNoteOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width and height, i.e. diameter of the video message
@@ -5124,6 +6377,8 @@ type SendVideoNoteOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -5159,6 +6414,9 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		if opts.Duration != 0 {
 			v["duration"] = strconv.FormatInt(opts.Duration, 10)
 		}
@@ -5176,6 +6434,13 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -5212,6 +6477,8 @@ type SendVoiceOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
 	// Voice message caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the voice message caption. See formatting options for more details.
@@ -5228,6 +6495,8 @@ type SendVoiceOpts struct {
 	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -5263,6 +6532,9 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		if opts.MessageThreadId != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadId, 10)
 		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = strconv.FormatInt(opts.DirectMessagesTopicId, 10)
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -5279,6 +6551,13 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
 		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
+		if opts.SuggestedPostParameters != nil {
+			bs, err := json.Marshal(opts.SuggestedPostParameters)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal field suggested_post_parameters: %w", err)
+			}
+			v["suggested_post_parameters"] = string(bs)
+		}
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -5307,6 +6586,212 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 
 	var m Message
 	return &m, json.Unmarshal(r, &m)
+}
+
+// SetBusinessAccountBioOpts is the set of optional fields for Bot.SetBusinessAccountBio and Bot.SetBusinessAccountBioWithContext.
+type SetBusinessAccountBioOpts struct {
+	// The new value of the bio for the business account; 0-140 characters
+	Bio string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountBio (https://core.telegram.org/bots/api#setbusinessaccountbio)
+//
+// Changes the bio of a managed business account. Requires the can_change_bio business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type SetBusinessAccountBioOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountBio(businessConnectionId string, opts *SetBusinessAccountBioOpts) (bool, error) {
+	return bot.SetBusinessAccountBioWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// SetBusinessAccountBioWithContext is the same as Bot.SetBusinessAccountBio, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountBioWithContext(ctx context.Context, businessConnectionId string, opts *SetBusinessAccountBioOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["bio"] = opts.Bio
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountBio", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountGiftSettingsOpts is the set of optional fields for Bot.SetBusinessAccountGiftSettings and Bot.SetBusinessAccountGiftSettingsWithContext.
+type SetBusinessAccountGiftSettingsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountGiftSettings (https://core.telegram.org/bots/api#setbusinessaccountgiftsettings)
+//
+// Changes the privacy settings pertaining to incoming gifts in a managed business account. Requires the can_change_gift_settings business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - showGiftButton (type bool): Pass True, if a button for sending a gift to the user or by the business account must always be shown in the input field
+//   - acceptedGiftTypes (type AcceptedGiftTypes): Types of gifts accepted by the business account
+//   - opts (type SetBusinessAccountGiftSettingsOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountGiftSettings(businessConnectionId string, showGiftButton bool, acceptedGiftTypes AcceptedGiftTypes, opts *SetBusinessAccountGiftSettingsOpts) (bool, error) {
+	return bot.SetBusinessAccountGiftSettingsWithContext(context.Background(), businessConnectionId, showGiftButton, acceptedGiftTypes, opts)
+}
+
+// SetBusinessAccountGiftSettingsWithContext is the same as Bot.SetBusinessAccountGiftSettings, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountGiftSettingsWithContext(ctx context.Context, businessConnectionId string, showGiftButton bool, acceptedGiftTypes AcceptedGiftTypes, opts *SetBusinessAccountGiftSettingsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["show_gift_button"] = strconv.FormatBool(showGiftButton)
+	bs, err := json.Marshal(acceptedGiftTypes)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal field accepted_gift_types: %w", err)
+	}
+	v["accepted_gift_types"] = string(bs)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountGiftSettings", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountNameOpts is the set of optional fields for Bot.SetBusinessAccountName and Bot.SetBusinessAccountNameWithContext.
+type SetBusinessAccountNameOpts struct {
+	// The new value of the last name for the business account; 0-64 characters
+	LastName string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountName (https://core.telegram.org/bots/api#setbusinessaccountname)
+//
+// Changes the first and last name of a managed business account. Requires the can_change_name business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - firstName (type string): The new value of the first name for the business account; 1-64 characters
+//   - opts (type SetBusinessAccountNameOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountName(businessConnectionId string, firstName string, opts *SetBusinessAccountNameOpts) (bool, error) {
+	return bot.SetBusinessAccountNameWithContext(context.Background(), businessConnectionId, firstName, opts)
+}
+
+// SetBusinessAccountNameWithContext is the same as Bot.SetBusinessAccountName, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountNameWithContext(ctx context.Context, businessConnectionId string, firstName string, opts *SetBusinessAccountNameOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["first_name"] = firstName
+	if opts != nil {
+		v["last_name"] = opts.LastName
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountName", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountProfilePhotoOpts is the set of optional fields for Bot.SetBusinessAccountProfilePhoto and Bot.SetBusinessAccountProfilePhotoWithContext.
+type SetBusinessAccountProfilePhotoOpts struct {
+	// Pass True to set the public photo, which will be visible even if the main photo is hidden by the business account's privacy settings. An account can have only one public photo.
+	IsPublic bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountProfilePhoto (https://core.telegram.org/bots/api#setbusinessaccountprofilephoto)
+//
+// Changes the profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - photo (type InputProfilePhoto): The new profile photo to set
+//   - opts (type SetBusinessAccountProfilePhotoOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountProfilePhoto(businessConnectionId string, photo InputProfilePhoto, opts *SetBusinessAccountProfilePhotoOpts) (bool, error) {
+	return bot.SetBusinessAccountProfilePhotoWithContext(context.Background(), businessConnectionId, photo, opts)
+}
+
+// SetBusinessAccountProfilePhotoWithContext is the same as Bot.SetBusinessAccountProfilePhoto, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountProfilePhotoWithContext(ctx context.Context, businessConnectionId string, photo InputProfilePhoto, opts *SetBusinessAccountProfilePhotoOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	bs, err := json.Marshal(photo)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal field photo: %w", err)
+	}
+	v["photo"] = string(bs)
+	if opts != nil {
+		v["is_public"] = strconv.FormatBool(opts.IsPublic)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountProfilePhoto", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetBusinessAccountUsernameOpts is the set of optional fields for Bot.SetBusinessAccountUsername and Bot.SetBusinessAccountUsernameWithContext.
+type SetBusinessAccountUsernameOpts struct {
+	// The new value of the username for the business account; 0-32 characters
+	Username string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetBusinessAccountUsername (https://core.telegram.org/bots/api#setbusinessaccountusername)
+//
+// Changes the username of a managed business account. Requires the can_change_username business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - opts (type SetBusinessAccountUsernameOpts): All optional parameters.
+func (bot *Bot) SetBusinessAccountUsername(businessConnectionId string, opts *SetBusinessAccountUsernameOpts) (bool, error) {
+	return bot.SetBusinessAccountUsernameWithContext(context.Background(), businessConnectionId, opts)
+}
+
+// SetBusinessAccountUsernameWithContext is the same as Bot.SetBusinessAccountUsername, but with a context.Context parameter
+func (bot *Bot) SetBusinessAccountUsernameWithContext(ctx context.Context, businessConnectionId string, opts *SetBusinessAccountUsernameOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	if opts != nil {
+		v["username"] = opts.Username
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setBusinessAccountUsername", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // SetChatAdministratorCustomTitleOpts is the set of optional fields for Bot.SetChatAdministratorCustomTitle and Bot.SetChatAdministratorCustomTitleWithContext.
@@ -5708,7 +7193,7 @@ type SetMessageReactionOpts struct {
 
 // SetMessageReaction (https://core.telegram.org/bots/api#setmessagereaction)
 //
-// Use this method to change the chosen reactions on a message. Service messages can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
+// Use this method to change the chosen reactions on a message. Service messages of some types can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageId (type int64): Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
 //   - opts (type SetMessageReactionOpts): All optional parameters.
@@ -6016,17 +7501,24 @@ type SetStickerEmojiListOpts struct {
 // SetStickerEmojiList (https://core.telegram.org/bots/api#setstickeremojilist)
 //
 // Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - emojiList (type []string): A JSON-serialized list of 1-20 emoji associated with the sticker
 //   - opts (type SetStickerEmojiListOpts): All optional parameters.
-func (bot *Bot) SetStickerEmojiList(sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
+func (bot *Bot) SetStickerEmojiList(sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	return bot.SetStickerEmojiListWithContext(context.Background(), sticker, emojiList, opts)
 }
 
 // SetStickerEmojiListWithContext is the same as Bot.SetStickerEmojiList, but with a context.Context parameter
-func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker string, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
+func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if emojiList != nil {
 		bs, err := json.Marshal(emojiList)
 		if err != nil {
@@ -6040,7 +7532,7 @@ func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker stri
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerEmojiList", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6060,16 +7552,23 @@ type SetStickerKeywordsOpts struct {
 // SetStickerKeywords (https://core.telegram.org/bots/api#setstickerkeywords)
 //
 // Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type SetStickerKeywordsOpts): All optional parameters.
-func (bot *Bot) SetStickerKeywords(sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
+func (bot *Bot) SetStickerKeywords(sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	return bot.SetStickerKeywordsWithContext(context.Background(), sticker, opts)
 }
 
 // SetStickerKeywordsWithContext is the same as Bot.SetStickerKeywords, but with a context.Context parameter
-func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker string, opts *SetStickerKeywordsOpts) (bool, error) {
+func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if opts != nil {
 		if opts.Keywords != nil {
 			bs, err := json.Marshal(opts.Keywords)
@@ -6085,7 +7584,7 @@ func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker strin
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerKeywords", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6105,16 +7604,23 @@ type SetStickerMaskPositionOpts struct {
 // SetStickerMaskPosition (https://core.telegram.org/bots/api#setstickermaskposition)
 //
 // Use this method to change the mask position of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - opts (type SetStickerMaskPositionOpts): All optional parameters.
-func (bot *Bot) SetStickerMaskPosition(sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
+func (bot *Bot) SetStickerMaskPosition(sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	return bot.SetStickerMaskPositionWithContext(context.Background(), sticker, opts)
 }
 
 // SetStickerMaskPositionWithContext is the same as Bot.SetStickerMaskPosition, but with a context.Context parameter
-func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker string, opts *SetStickerMaskPositionOpts) (bool, error) {
+func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	if opts != nil {
 		if opts.MaskPosition != nil {
 			bs, err := json.Marshal(opts.MaskPosition)
@@ -6130,7 +7636,7 @@ func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker s
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerMaskPosition", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6148,17 +7654,24 @@ type SetStickerPositionInSetOpts struct {
 // SetStickerPositionInSet (https://core.telegram.org/bots/api#setstickerpositioninset)
 //
 // Use this method to move a sticker in a set created by the bot to a specific position. Returns True on success.
-//   - sticker (type string): File identifier of the sticker
+//   - sticker (type InputFileOrString): File identifier of the sticker
 //   - position (type int64): New sticker position in the set, zero-based
 //   - opts (type SetStickerPositionInSetOpts): All optional parameters.
-func (bot *Bot) SetStickerPositionInSet(sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
+func (bot *Bot) SetStickerPositionInSet(sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	return bot.SetStickerPositionInSetWithContext(context.Background(), sticker, position, opts)
 }
 
 // SetStickerPositionInSetWithContext is the same as Bot.SetStickerPositionInSet, but with a context.Context parameter
-func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker string, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
+func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["sticker"] = sticker
+	data := map[string]FileReader{}
+	if sticker != nil {
+		err := sticker.Attach("sticker", data)
+		if err != nil {
+			return false, fmt.Errorf("failed to attach 'sticker' input file: %w", err)
+		}
+		v["sticker"] = sticker.getValue()
+	}
 	v["position"] = strconv.FormatInt(position, 10)
 
 	var reqOpts *RequestOpts
@@ -6166,7 +7679,7 @@ func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker 
 		reqOpts = opts.RequestOpts
 	}
 
-	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, nil, reqOpts)
+	r, err := bot.RequestWithContext(ctx, "setStickerPositionInSet", v, data, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6177,7 +7690,7 @@ func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker 
 
 // SetStickerSetThumbnailOpts is the set of optional fields for Bot.SetStickerSetThumbnail and Bot.SetStickerSetThumbnailWithContext.
 type SetStickerSetThumbnailOpts struct {
-	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animation-requirements for animated sticker technical requirements), or a WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
+	// A .WEBP or .PNG image with the thumbnail, must be up to 128 kilobytes in size and have a width and height of exactly 100px, or a .TGS animation with a thumbnail up to 32 kilobytes in size (see https://core.telegram.org/stickers#animation-requirements for animated sticker technical requirements), or a .WEBM video with the thumbnail up to 32 kilobytes in size; see https://core.telegram.org/stickers#video-requirements for video sticker technical requirements. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Animated and video sticker set thumbnails can't be uploaded via HTTP URL. If omitted, then the thumbnail is dropped and the first sticker is used as the thumbnail.
 	Thumbnail InputFile
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6188,7 +7701,7 @@ type SetStickerSetThumbnailOpts struct {
 // Use this method to set the thumbnail of a regular or mask sticker set. The format of the thumbnail file must match the format of the stickers in the set. Returns True on success.
 //   - name (type string): Sticker set name
 //   - userId (type int64): User identifier of the sticker set owner
-//   - format (type string): Format of the thumbnail, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, or "video" for a WEBM video
+//   - format (type string): Format of the thumbnail, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, or "video" for a .WEBM video
 //   - opts (type SetStickerSetThumbnailOpts): All optional parameters.
 func (bot *Bot) SetStickerSetThumbnail(name string, userId int64, format string, opts *SetStickerSetThumbnailOpts) (bool, error) {
 	return bot.SetStickerSetThumbnailWithContext(context.Background(), name, userId, format, opts)
@@ -6261,6 +7774,50 @@ func (bot *Bot) SetStickerSetTitleWithContext(ctx context.Context, name string, 
 	return b, json.Unmarshal(r, &b)
 }
 
+// SetUserEmojiStatusOpts is the set of optional fields for Bot.SetUserEmojiStatus and Bot.SetUserEmojiStatusWithContext.
+type SetUserEmojiStatusOpts struct {
+	// Custom emoji identifier of the emoji status to set. Pass an empty string to remove the status.
+	EmojiStatusCustomEmojiId string
+	// Expiration date of the emoji status, if any
+	EmojiStatusExpirationDate int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetUserEmojiStatus (https://core.telegram.org/bots/api#setuseremojistatus)
+//
+// Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method requestEmojiStatusAccess. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type SetUserEmojiStatusOpts): All optional parameters.
+func (bot *Bot) SetUserEmojiStatus(userId int64, opts *SetUserEmojiStatusOpts) (bool, error) {
+	return bot.SetUserEmojiStatusWithContext(context.Background(), userId, opts)
+}
+
+// SetUserEmojiStatusWithContext is the same as Bot.SetUserEmojiStatus, but with a context.Context parameter
+func (bot *Bot) SetUserEmojiStatusWithContext(ctx context.Context, userId int64, opts *SetUserEmojiStatusOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	if opts != nil {
+		v["emoji_status_custom_emoji_id"] = opts.EmojiStatusCustomEmojiId
+		if opts.EmojiStatusExpirationDate != 0 {
+			v["emoji_status_expiration_date"] = strconv.FormatInt(opts.EmojiStatusExpirationDate, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setUserEmojiStatus", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SetWebhookOpts is the set of optional fields for Bot.SetWebhook and Bot.SetWebhookWithContext.
 type SetWebhookOpts struct {
 	// Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
@@ -6281,7 +7838,7 @@ type SetWebhookOpts struct {
 
 // SetWebhook (https://core.telegram.org/bots/api#setwebhook)
 //
-// Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
+// Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request (a request with response HTTP status code different from 2XY), we will repeat the request and give up after a reasonable amount of attempts. Returns True on success.
 // If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter secret_token. If specified, the request will contain a header "X-Telegram-Bot-Api-Secret-Token" with the secret token as content.
 //   - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
 //   - opts (type SetWebhookOpts): All optional parameters.
@@ -6444,6 +8001,87 @@ func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId
 	return &p, json.Unmarshal(r, &p)
 }
 
+// TransferBusinessAccountStarsOpts is the set of optional fields for Bot.TransferBusinessAccountStars and Bot.TransferBusinessAccountStarsWithContext.
+type TransferBusinessAccountStarsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// TransferBusinessAccountStars (https://core.telegram.org/bots/api#transferbusinessaccountstars)
+//
+// Transfers Telegram Stars from the business account balance to the bot's balance. Requires the can_transfer_stars business bot right. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - starCount (type int64): Number of Telegram Stars to transfer; 1-10000
+//   - opts (type TransferBusinessAccountStarsOpts): All optional parameters.
+func (bot *Bot) TransferBusinessAccountStars(businessConnectionId string, starCount int64, opts *TransferBusinessAccountStarsOpts) (bool, error) {
+	return bot.TransferBusinessAccountStarsWithContext(context.Background(), businessConnectionId, starCount, opts)
+}
+
+// TransferBusinessAccountStarsWithContext is the same as Bot.TransferBusinessAccountStars, but with a context.Context parameter
+func (bot *Bot) TransferBusinessAccountStarsWithContext(ctx context.Context, businessConnectionId string, starCount int64, opts *TransferBusinessAccountStarsOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["star_count"] = strconv.FormatInt(starCount, 10)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "transferBusinessAccountStars", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// TransferGiftOpts is the set of optional fields for Bot.TransferGift and Bot.TransferGiftWithContext.
+type TransferGiftOpts struct {
+	// The amount of Telegram Stars that will be paid for the transfer from the business account balance. If positive, then the can_transfer_stars business bot right is required.
+	StarCount int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// TransferGift (https://core.telegram.org/bots/api#transfergift)
+//
+// Transfers an owned unique gift to another user. Requires the can_transfer_and_upgrade_gifts business bot right. Requires can_transfer_stars business bot right if the transfer is paid. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be transferred
+//   - newOwnerChatId (type int64): Unique identifier of the chat which will own the gift. The chat must be active in the last 24 hours.
+//   - opts (type TransferGiftOpts): All optional parameters.
+func (bot *Bot) TransferGift(businessConnectionId string, ownedGiftId string, newOwnerChatId int64, opts *TransferGiftOpts) (bool, error) {
+	return bot.TransferGiftWithContext(context.Background(), businessConnectionId, ownedGiftId, newOwnerChatId, opts)
+}
+
+// TransferGiftWithContext is the same as Bot.TransferGift, but with a context.Context parameter
+func (bot *Bot) TransferGiftWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, newOwnerChatId int64, opts *TransferGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+	v["new_owner_chat_id"] = strconv.FormatInt(newOwnerChatId, 10)
+	if opts != nil {
+		if opts.StarCount != 0 {
+			v["star_count"] = strconv.FormatInt(opts.StarCount, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "transferGift", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // UnbanChatMemberOpts is the set of optional fields for Bot.UnbanChatMember and Bot.UnbanChatMemberWithContext.
 type UnbanChatMemberOpts struct {
 	// Do nothing if the user is not banned
@@ -6563,7 +8201,7 @@ type UnpinAllChatMessagesOpts struct {
 
 // UnpinAllChatMessages (https://core.telegram.org/bots/api#unpinallchatmessages)
 //
-// Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to clear the list of pinned messages in a chat. In private chats and channel direct messages chats, no additional rights are required to unpin all pinned messages. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to unpin all pinned messages in groups and channels respectively. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - opts (type UnpinAllChatMessagesOpts): All optional parameters.
 func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpts) (bool, error) {
@@ -6671,7 +8309,7 @@ type UnpinChatMessageOpts struct {
 
 // UnpinChatMessage (https://core.telegram.org/bots/api#unpinchatmessage)
 //
-// Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to remove a message from the list of pinned messages in a chat. In private chats and channel direct messages chats, all messages can be unpinned. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to unpin messages in groups and channels respectively. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - opts (type UnpinChatMessageOpts): All optional parameters.
 func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
@@ -6695,6 +8333,52 @@ func (bot *Bot) UnpinChatMessageWithContext(ctx context.Context, chatId int64, o
 	}
 
 	r, err := bot.RequestWithContext(ctx, "unpinChatMessage", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// UpgradeGiftOpts is the set of optional fields for Bot.UpgradeGift and Bot.UpgradeGiftWithContext.
+type UpgradeGiftOpts struct {
+	// Pass True to keep the original gift text, sender and receiver in the upgraded gift
+	KeepOriginalDetails bool
+	// The amount of Telegram Stars that will be paid for the upgrade from the business account balance. If gift.prepaid_upgrade_star_count > 0, then pass 0, otherwise, the can_transfer_stars business bot right is required and gift.upgrade_star_count must be passed.
+	StarCount int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// UpgradeGift (https://core.telegram.org/bots/api#upgradegift)
+//
+// Upgrades a given regular gift to a unique gift. Requires the can_transfer_and_upgrade_gifts business bot right. Additionally requires the can_transfer_stars business bot right if the upgrade is paid. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be upgraded to a unique one
+//   - opts (type UpgradeGiftOpts): All optional parameters.
+func (bot *Bot) UpgradeGift(businessConnectionId string, ownedGiftId string, opts *UpgradeGiftOpts) (bool, error) {
+	return bot.UpgradeGiftWithContext(context.Background(), businessConnectionId, ownedGiftId, opts)
+}
+
+// UpgradeGiftWithContext is the same as Bot.UpgradeGift, but with a context.Context parameter
+func (bot *Bot) UpgradeGiftWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, opts *UpgradeGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+	if opts != nil {
+		v["keep_original_details"] = strconv.FormatBool(opts.KeepOriginalDetails)
+		if opts.StarCount != 0 {
+			v["star_count"] = strconv.FormatInt(opts.StarCount, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "upgradeGift", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6746,4 +8430,82 @@ func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, 
 
 	var f File
 	return &f, json.Unmarshal(r, &f)
+}
+
+// VerifyChatOpts is the set of optional fields for Bot.VerifyChat and Bot.VerifyChatWithContext.
+type VerifyChatOpts struct {
+	// Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
+	CustomDescription string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// VerifyChat (https://core.telegram.org/bots/api#verifychat)
+//
+// Verifies a chat on behalf of the organization which is represented by the bot. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target chat. Channel direct messages chats can't be verified.
+//   - opts (type VerifyChatOpts): All optional parameters.
+func (bot *Bot) VerifyChat(chatId int64, opts *VerifyChatOpts) (bool, error) {
+	return bot.VerifyChatWithContext(context.Background(), chatId, opts)
+}
+
+// VerifyChatWithContext is the same as Bot.VerifyChat, but with a context.Context parameter
+func (bot *Bot) VerifyChatWithContext(ctx context.Context, chatId int64, opts *VerifyChatOpts) (bool, error) {
+	v := map[string]string{}
+	v["chat_id"] = strconv.FormatInt(chatId, 10)
+	if opts != nil {
+		v["custom_description"] = opts.CustomDescription
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "verifyChat", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// VerifyUserOpts is the set of optional fields for Bot.VerifyUser and Bot.VerifyUserWithContext.
+type VerifyUserOpts struct {
+	// Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
+	CustomDescription string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// VerifyUser (https://core.telegram.org/bots/api#verifyuser)
+//
+// Verifies a user on behalf of the organization which is represented by the bot. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type VerifyUserOpts): All optional parameters.
+func (bot *Bot) VerifyUser(userId int64, opts *VerifyUserOpts) (bool, error) {
+	return bot.VerifyUserWithContext(context.Background(), userId, opts)
+}
+
+// VerifyUserWithContext is the same as Bot.VerifyUser, but with a context.Context parameter
+func (bot *Bot) VerifyUserWithContext(ctx context.Context, userId int64, opts *VerifyUserOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	if opts != nil {
+		v["custom_description"] = opts.CustomDescription
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "verifyUser", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }

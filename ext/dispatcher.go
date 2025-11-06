@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -74,11 +74,10 @@ type Dispatcher struct {
 	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
 	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
 	// dispatcher actions.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	// Logger specifies an optional logger for unexpected behavior from handlers.
+	Logger *slog.Logger
 
 	// handlers represents all available handlers.
 	handlers handlerMapping
@@ -101,18 +100,17 @@ type DispatcherOpts struct {
 	// More info at Dispatcher.Error.
 	Error DispatcherErrorHandler
 	// Panic handles any panics that occur during handler execution.
-	// If no panic handlers are defined, the stack is logged to ErrorLog.
+	// If no panic handlers are defined, the stack is logged to the logger.
 	// More info at Dispatcher.Panic.
 	Panic DispatcherPanicHandler
 
 	// UnhandledErrFunc provides more flexibility for dealing with unhandled update processing errors.
 	// This includes errors when unmarshalling updates, unhandled panics during handler executions, or unknown
 	// dispatcher actions.
-	// If nil, the error goes to ErrorLog.
+	// If nil, the error goes to the logger.
 	UnhandledErrFunc ErrorFunc
-	// ErrorLog specifies an optional logger for unexpected behavior from handlers.
-	// If nil, logging is done via the log package's standard logger.
-	ErrorLog *log.Logger
+	// Logger specifies an optional logger for unexpected behavior from handlers.
+	Logger *slog.Logger
 
 	// MaxRoutines is used to decide how to limit the number of goroutines spawned by the dispatcher.
 	// This defines how many updates can be processed at the same time.
@@ -127,23 +125,19 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	var errHandler DispatcherErrorHandler
 	var panicHandler DispatcherPanicHandler
 	var unhandledErrFunc ErrorFunc
-	var errLog *log.Logger
+	logger := slog.Default()
 
 	maxRoutines := DefaultMaxRoutines
 	processor := Processor(BaseProcessor{})
 
 	if opts != nil {
-		if opts.MaxRoutines != 0 {
-			maxRoutines = opts.MaxRoutines
-		}
-		if opts.Processor != nil {
-			processor = opts.Processor
-		}
+		maxRoutines = iftrue(opts.MaxRoutines != 0, opts.MaxRoutines, maxRoutines)
+		processor = iftrue(opts.Processor != nil, opts.Processor, processor)
+		logger = iftrue(opts.Logger != nil, opts.Logger, logger)
 
 		errHandler = opts.Error
 		panicHandler = opts.Panic
 		unhandledErrFunc = opts.UnhandledErrFunc
-		errLog = opts.ErrorLog
 	}
 
 	var limiter chan struct{}
@@ -157,22 +151,14 @@ func NewDispatcher(opts *DispatcherOpts) *Dispatcher {
 	}
 
 	return &Dispatcher{
+		Logger:           logger.With("component", "dispatcher"),
 		Processor:        processor,
 		Error:            errHandler,
 		Panic:            panicHandler,
 		UnhandledErrFunc: unhandledErrFunc,
-		ErrorLog:         errLog,
 		handlers:         handlerMapping{},
 		limiter:          limiter,
 		waitGroup:        sync.WaitGroup{},
-	}
-}
-
-func (d *Dispatcher) logf(format string, args ...interface{}) {
-	if d.ErrorLog != nil {
-		d.ErrorLog.Printf(format, args...)
-	} else {
-		log.Printf(format, args...)
 	}
 }
 
@@ -215,7 +201,7 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates <-chan json.RawMessage) {
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
 				} else {
-					d.logf("Failed to process update: %s", err.Error())
+					d.Logger.Error("failed to process update", "error", err)
 				}
 			}
 
@@ -268,7 +254,7 @@ func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
 // This is also where we recover from any panics that are thrown by user code, to avoid taking down the bot.
 func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[string]interface{}) (err error) {
-	ctx := NewContext(u, data)
+	ctx := NewContext(b, u, data)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -299,8 +285,12 @@ func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) erro
 				continue
 			}
 
+			d.Logger.Debug("Handler matched on update", "handler", handler.Name())
+
 			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
+				d.Logger.Debug("Handler returned error", "handler", handler.Name(), "error", err)
+
 				if errors.Is(err, ContinueGroups) {
 					// Continue handling current group.
 					continue

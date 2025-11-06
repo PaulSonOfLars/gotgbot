@@ -152,6 +152,54 @@ func concurrentTest(t *testing.T) {
 	time.Sleep(delay * 2)
 }
 
+func TestUpdater_StopBot(t *testing.T) {
+	server := basicTestServer(t, map[string]*testEndpoint{
+		"getUpdates": {
+			delay: time.Second * 3, // server close will take 3s
+			reply: `{"ok": true, "result": []}`,
+		},
+	})
+	defer server.Close()
+
+	reqOpts := &gotgbot.RequestOpts{
+		APIURL:  server.URL,
+		Timeout: time.Second * 4,
+	}
+
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "SOME_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	d := ext.NewDispatcher(&ext.DispatcherOpts{MaxRoutines: 1})
+	u := ext.NewUpdater(d, nil)
+
+	err := u.StartPolling(b, &ext.PollingOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			RequestOpts: reqOpts,
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to start polling: %v", err)
+		return
+	}
+
+	// sleep to ensure polling is fully underway
+	time.Sleep(time.Millisecond * 500)
+
+	// Should still have lots of time until timeout, so... kill the bots.
+	start := time.Now()
+	u.StopAllBots()
+
+	// If it took longer than 1ms then we know something went wrong; ctx should've stopped immediately.
+	since := time.Since(start)
+	t.Logf("stopping took %dms", since.Milliseconds())
+	if since > 5*time.Millisecond {
+		t.Errorf("stopping all bots took %dms; shouldve taken less than 1ms", since.Milliseconds())
+	}
+}
+
 func TestUpdaterDisallowsEmptyWebhooks(t *testing.T) {
 	b := &gotgbot.Bot{
 		Token:     "SOME_TOKEN",
@@ -348,7 +396,6 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 	b1 := &gotgbot.Bot{
 		Token: "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{
-
 			DefaultRequestOpts: reqOpts,
 		},
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -32,6 +33,8 @@ func main() {
 		panic("failed to create new bot: " + err.Error())
 	}
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	// Create the dispatcher with our custom processor.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
 		// Collect metrics on the dispatcher's update processing
@@ -42,13 +45,14 @@ func main() {
 			return ext.DispatcherActionNoop
 		},
 		MaxRoutines: ext.DefaultMaxRoutines,
+		Logger:      logger,
 	})
 
 	// Collect metrics on the state of the dispatcher's buffer.
 	go monitorDispatcherBuffer(dispatcher)
 
 	// Create the updater with our customised dispatcher.
-	updater := ext.NewUpdater(dispatcher, nil)
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{Logger: logger})
 
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
@@ -66,7 +70,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()

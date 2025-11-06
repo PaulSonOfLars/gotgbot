@@ -28,5 +28,5 @@ func ChatID(bc *gotgbot.BusinessConnection, chatId int64) filters.BusinessConnec
 }
 
 func CanReply(bc *gotgbot.BusinessConnection) bool {
-	return bc.CanReply
+	return bc.Rights != nil && bc.Rights.CanReply
 }

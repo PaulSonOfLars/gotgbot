@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -14,6 +15,7 @@ import (
 )
 
 // This bot is as basic as it gets - it simply repeats everything you say.
+// The main_test.go file contains example code to demonstrate how to implement the gotgbot.BotClient interface for it to be used in tests.
 func main() {
 	// Get token from the environment variable
 	token := os.Getenv("TOKEN")
@@ -35,6 +37,8 @@ func main() {
 		panic("failed to create new bot: " + err.Error())
 	}
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	// Create updater and dispatcher.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
 		// If an error is returned by a handler, log it and continue going.
@@ -43,8 +47,9 @@ func main() {
 			return ext.DispatcherActionNoop
 		},
 		MaxRoutines: ext.DefaultMaxRoutines,
+		Logger:      logger,
 	})
-	updater := ext.NewUpdater(dispatcher, nil)
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{Logger: logger})
 
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
@@ -62,7 +67,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.User.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
