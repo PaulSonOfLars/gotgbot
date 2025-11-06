@@ -201,7 +201,7 @@ func (d *Dispatcher) Start(b *gotgbot.Bot, updates <-chan json.RawMessage) {
 				if d.UnhandledErrFunc != nil {
 					d.UnhandledErrFunc(err)
 				} else {
-					logError(d.Logger, "failed to process update", err)
+					d.Logger.Error("failed to process update", "error", err)
 				}
 			}
 
@@ -285,11 +285,11 @@ func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) erro
 				continue
 			}
 
-			logDebug(d.Logger, "Matched handler on update", "handler", handler.Name())
+			d.Logger.Debug("Handler matched on update", "handler", handler.Name())
 
 			err := handler.HandleUpdate(b, ctx)
 			if err != nil {
-				logDebug(d.Logger, "Update handling returned error", "handler", handler.Name(), "error", err.Error())
+				d.Logger.Debug("Handler returned error", "handler", handler.Name(), "error", err)
 
 				if errors.Is(err, ContinueGroups) {
 					// Continue handling current group.

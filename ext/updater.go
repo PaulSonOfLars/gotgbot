@@ -70,10 +70,7 @@ func NewUpdater(dispatcher UpdateDispatcher, opts *UpdaterOpts) *Updater {
 		Dispatcher:       dispatcher,
 		UnhandledErrFunc: unhandledErrFunc,
 		Logger:           logger.With("component", "updater"),
-		botMapping: botMapping{
-			errFunc: unhandledErrFunc,
-			logger:  logger.With("component", "botmapping"),
-		},
+		botMapping:       botMapping{},
 	}
 }
 
@@ -186,7 +183,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				logError(u.Logger, "failed to get updates; sleeping 1s", err)
+				u.Logger.Error("failed to get updates; sleeping 1s", "error", err)
 				time.Sleep(time.Second)
 			}
 			continue
@@ -200,7 +197,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				logError(u.Logger, "failed to unmarshal updates", err)
+				u.Logger.Error("failed to unmarshal updates", "error", err)
 			}
 			continue
 		}
@@ -218,7 +215,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 			if u.UnhandledErrFunc != nil {
 				u.UnhandledErrFunc(err)
 			} else {
-				logError(u.Logger, "failed to unmarshal last update", err)
+				u.Logger.Error("failed to unmarshal last update", "error", err)
 			}
 			continue
 		}
@@ -343,7 +340,7 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 // GetHandlerFunc returns the http.HandlerFunc responsible for processing incoming webhook updates.
 // It is provided to allow for an alternative to the StartServer method using a user-defined http server.
 func (u *Updater) GetHandlerFunc(pathPrefix string) http.HandlerFunc {
-	return u.botMapping.getHandlerFunc(pathPrefix)
+	return u.botMapping.getHandlerFunc(u.Logger, u.UnhandledErrFunc, pathPrefix)
 }
 
 // StartServer starts the webhook server for all the bots added via AddWebhook.

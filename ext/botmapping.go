@@ -43,11 +43,6 @@ type botMapping struct {
 	mux sync.RWMutex
 	// urlMapping allows us to keep track of the webhook urls that are in use.
 	urlMapping map[string]string
-
-	// errFunc fills the same purpose as Updater.UnhandledErrFunc.
-	errFunc ErrorFunc
-	// logger fills the same purpose as Updater.Logger.
-	logger *slog.Logger
 }
 
 var (
@@ -161,7 +156,7 @@ func (m *botMapping) getBotFromURL(urlPath string) (botData, bool) {
 	return bData, ok
 }
 
-func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWriter, request *http.Request) {
+func (m *botMapping) getHandlerFunc(logger *slog.Logger, errFunc ErrorFunc, prefix string) func(writer http.ResponseWriter, request *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == "*" {
 			if r.ProtoAtLeast(1, 1) {
@@ -195,10 +190,10 @@ func (m *botMapping) getHandlerFunc(prefix string) func(writer http.ResponseWrit
 
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			if m.errFunc != nil {
-				m.errFunc(err)
+			if errFunc != nil {
+				errFunc(err)
 			} else {
-				logError(m.logger, "failed to read incoming update contents", err)
+				logger.Error("failed to read getUpdates body", "error", err)
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
