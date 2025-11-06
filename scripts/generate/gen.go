@@ -154,6 +154,15 @@ func (m MethodDescription) docs() string {
 	return docs(strings.Title(m.Name), m.Href, m.Description)
 }
 
+func (m MethodDescription) hasField(f string) bool {
+	for _, ff := range m.Fields {
+		if ff.Name == f {
+			return true
+		}
+	}
+	return false
+}
+
 func (td TypeDescription) docs() string {
 	return docs(td.Name, td.Href, td.Description)
 }

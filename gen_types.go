@@ -6180,33 +6180,33 @@ type MaybeInaccessibleMessage interface {
 	maybeInaccessibleMessage()
 
 	// Helper methods shared across all subtypes of this interface.
-	// Copy Helper method for Bot.CopyMessage.
+	// Copy is a helper method for Bot.CopyMessage.
 	Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error)
-	// Delete Helper method for Bot.DeleteMessage.
+	// Delete is a helper method for Bot.DeleteMessage.
 	Delete(b *Bot, opts *DeleteMessageOpts) (bool, error)
-	// EditCaption Helper method for Bot.EditMessageCaption.
+	// EditCaption is a helper method for Bot.EditMessageCaption.
 	EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error)
-	// EditChecklist Helper method for Bot.EditMessageChecklist.
+	// EditChecklist is a helper method for Bot.EditMessageChecklist.
 	EditChecklist(b *Bot, businessConnectionId string, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error)
-	// EditLiveLocation Helper method for Bot.EditMessageLiveLocation.
+	// EditLiveLocation is a helper method for Bot.EditMessageLiveLocation.
 	EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error)
-	// EditMedia Helper method for Bot.EditMessageMedia.
+	// EditMedia is a helper method for Bot.EditMessageMedia.
 	EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error)
-	// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup.
+	// EditReplyMarkup is a helper method for Bot.EditMessageReplyMarkup.
 	EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error)
-	// EditText Helper method for Bot.EditMessageText.
+	// EditText is a helper method for Bot.EditMessageText.
 	EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error)
-	// Forward Helper method for Bot.ForwardMessage.
+	// Forward is a helper method for Bot.ForwardMessage.
 	Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error)
-	// Pin Helper method for Bot.PinChatMessage.
+	// Pin is a helper method for Bot.PinChatMessage.
 	Pin(b *Bot, opts *PinChatMessageOpts) (bool, error)
-	// ReadBusiness Helper method for Bot.ReadBusinessMessage.
+	// ReadBusiness is a helper method for Bot.ReadBusinessMessage.
 	ReadBusiness(b *Bot, businessConnectionId string, opts *ReadBusinessMessageOpts) (bool, error)
-	// SetReaction Helper method for Bot.SetMessageReaction.
+	// SetReaction is a helper method for Bot.SetMessageReaction.
 	SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error)
-	// StopLiveLocation Helper method for Bot.StopMessageLiveLocation.
+	// StopLiveLocation is a helper method for Bot.StopMessageLiveLocation.
 	StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error)
-	// Unpin Helper method for Bot.UnpinChatMessage.
+	// Unpin is a helper method for Bot.UnpinChatMessage.
 	Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error)
 }
 

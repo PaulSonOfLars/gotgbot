@@ -21,8 +21,7 @@ func index(webappURL string) func(writer http.ResponseWriter, request *http.Requ
 			WebAppURL: webappURL,
 		})
 		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			writer.Write([]byte(err.Error()))
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
 	}
 }
@@ -33,20 +32,18 @@ func validate(token string) func(writer http.ResponseWriter, request *http.Reque
 		// We parse this string as a URL query.
 		authQuery, err := url.ParseQuery(r.Header.Get("X-Auth"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("validation failed; failed to parse auth query: " + err.Error()))
+			http.Error(w, "validation failed; failed to parse auth query: "+err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		// We validate that the query has been hashed correctly, ensuring data can be trusted.
 		ok, err := ext.ValidateWebAppQuery(authQuery, token)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("validation failed; error: " + err.Error()))
+			http.Error(w, "validation failed; error: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if !ok {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("validation failed; data cannot be trusted."))
+			http.Error(w, "validation failed; data cannot be trusted.", http.StatusUnauthorized)
 			return
 		}
 
@@ -54,12 +51,11 @@ func validate(token string) func(writer http.ResponseWriter, request *http.Reque
 		var u gotgbot.User
 		err = json.Unmarshal([]byte(authQuery.Get("user")), &u)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("validation failed; failed to unmarshal user: " + err.Error()))
+			http.Error(w, "validation failed; failed to unmarshal user: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// And then we can choose to either return it, or work with it.
-		w.Write([]byte(fmt.Sprintf("validation success; user '%s' is authenticated (id: %d).", u.FirstName, u.Id)))
+		fmt.Fprintf(w, "validation success; user '%s' is authenticated (id: %d).", u.FirstName, u.Id)
 	}
 }
