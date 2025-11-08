@@ -210,61 +210,12 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 	}
 
 	for k, v := range params {
-		var strValue string
-
-		// Check if the value is a simple type that can be converted directly
-		switch val := v.(type) {
-		case string:
-			strValue = val
-		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
-			strValue = fmt.Sprint(val)
-		case InputMedia:
-			err := val.InputParams(k, w)
-			if err != nil {
-				return "", fmt.Errorf("failed to read input multipart field: %w", err)
-			}
-
-			bs, err := json.Marshal(val)
-			if err != nil {
-				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
-			}
-			strValue = string(bs)
-
-		case []InputMedia:
-			for idx, item := range val {
-				err := item.InputParams(k+"_"+strconv.Itoa(idx), w)
-				if err != nil {
-					return "", fmt.Errorf("failed to read input multipart field: %w", err)
-				}
-			}
-
-			bs, err := json.Marshal(val)
-			if err != nil {
-				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
-			}
-			strValue = string(bs)
-
-		case InputFile:
-			err := val.Attach(k, w)
-			if err != nil {
-				return "", fmt.Errorf("failed to attach field %s: %w", k, err)
-			}
-
-			err = w.WriteField(k, val.getValue())
-			if err != nil {
-				return "", fmt.Errorf("failed to write field %s to multipart field: %w", k, err)
-			}
-
-		default:
-			// For complex types (structs, maps, slices, etc.), marshal as JSON
-			bs, err := json.Marshal(val)
-			if err != nil {
-				return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
-			}
-			strValue = string(bs)
+		contents, err := getFieldContents(v, k, w)
+		if err != nil {
+			return "", err
 		}
 
-		if err := w.WriteField(k, strValue); err != nil {
+		if err := w.WriteField(k, contents); err != nil {
 			return "", fmt.Errorf("failed to write multipart field %s with value %v: %w", k, v, err)
 		}
 	}
@@ -274,6 +225,58 @@ func fillBuffer(buf *bytes.Buffer, params map[string]any) (string, error) {
 	}
 
 	return w.FormDataContentType(), nil
+}
+
+func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
+	// Check if the value is a simple type that can be converted directly
+	switch val := v.(type) {
+	case string:
+		return val, nil
+
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+		return fmt.Sprint(val), nil
+
+	case InputMedia:
+		err := val.InputParams(k, w)
+		if err != nil {
+			return "", fmt.Errorf("failed to read input multipart field: %w", err)
+		}
+
+		bs, err := json.Marshal(val)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+		}
+		return string(bs), nil
+
+	case []InputMedia:
+		for idx, item := range val {
+			err := item.InputParams(k+"_"+strconv.Itoa(idx), w)
+			if err != nil {
+				return "", fmt.Errorf("failed to read input multipart field: %w", err)
+			}
+		}
+
+		bs, err := json.Marshal(val)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+		}
+		return string(bs), nil
+
+	case InputFile:
+		err := val.Attach(k, w)
+		if err != nil {
+			return "", fmt.Errorf("failed to attach field %s: %w", k, err)
+		}
+		return val.getValue(), nil
+
+	default:
+		// For complex types (structs, maps, slices, etc.), marshal as JSON
+		bs, err := json.Marshal(val)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
+		}
+		return string(bs), nil
+	}
 }
 
 // GetAPIURL returns the currently used API endpoint.

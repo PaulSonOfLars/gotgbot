@@ -1359,7 +1359,9 @@ func (bot *Bot) DeleteStickerFromSet(sticker InputFileOrString, opts *DeleteStic
 // DeleteStickerFromSetWithContext is the same as Bot.DeleteStickerFromSet, but with a context.Context parameter
 func (bot *Bot) DeleteStickerFromSetWithContext(ctx context.Context, sticker InputFileOrString, opts *DeleteStickerFromSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1874,7 +1876,9 @@ func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (
 // EditMessageMediaWithContext is the same as Bot.EditMessageMedia, but with a context.Context parameter
 func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
 	v := map[string]any{}
-	v["media"] = media
+	if media != nil {
+		v["media"] = media
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["chat_id"] = opts.ChatId
@@ -4066,7 +4070,9 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["animation"] = animation
+	if animation != nil {
+		v["animation"] = animation
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -4074,7 +4080,9 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		v["duration"] = opts.Duration
 		v["width"] = opts.Width
 		v["height"] = opts.Height
-		v["thumbnail"] = opts.Thumbnail
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -4166,7 +4174,9 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["audio"] = audio
+	if audio != nil {
+		v["audio"] = audio
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -4179,7 +4189,9 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		v["duration"] = opts.Duration
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
-		v["thumbnail"] = opts.Thumbnail
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -4518,12 +4530,16 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["document"] = document
+	if document != nil {
+		v["document"] = document
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
 		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["thumbnail"] = opts.Thumbnail
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -5191,7 +5207,9 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["photo"] = photo
+	if photo != nil {
+		v["photo"] = photo
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5387,7 +5405,9 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5578,7 +5598,9 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["video"] = video
+	if video != nil {
+		v["video"] = video
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -5586,8 +5608,12 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		v["duration"] = opts.Duration
 		v["width"] = opts.Width
 		v["height"] = opts.Height
-		v["thumbnail"] = opts.Thumbnail
-		v["cover"] = opts.Cover
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
+		if opts.Cover != nil {
+			v["cover"] = opts.Cover
+		}
 		v["start_timestamp"] = opts.StartTimestamp
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -5672,14 +5698,18 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["video_note"] = videoNote
+	if videoNote != nil {
+		v["video_note"] = videoNote
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
 		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
 		v["duration"] = opts.Duration
 		v["length"] = opts.Length
-		v["thumbnail"] = opts.Thumbnail
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -5757,7 +5787,9 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["voice"] = voice
+	if voice != nil {
+		v["voice"] = voice
+	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["message_thread_id"] = opts.MessageThreadId
@@ -6175,7 +6207,9 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 func (bot *Bot) SetChatPhotoWithContext(ctx context.Context, chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
-	v["photo"] = photo
+	if photo != nil {
+		v["photo"] = photo
+	}
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -6673,7 +6707,9 @@ func (bot *Bot) SetStickerEmojiList(sticker InputFileOrString, emojiList []strin
 // SetStickerEmojiListWithContext is the same as Bot.SetStickerEmojiList, but with a context.Context parameter
 func (bot *Bot) SetStickerEmojiListWithContext(ctx context.Context, sticker InputFileOrString, emojiList []string, opts *SetStickerEmojiListOpts) (bool, error) {
 	v := map[string]any{}
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	if emojiList != nil {
 		v["emoji_list"] = emojiList
 	}
@@ -6712,7 +6748,9 @@ func (bot *Bot) SetStickerKeywords(sticker InputFileOrString, opts *SetStickerKe
 // SetStickerKeywordsWithContext is the same as Bot.SetStickerKeywords, but with a context.Context parameter
 func (bot *Bot) SetStickerKeywordsWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerKeywordsOpts) (bool, error) {
 	v := map[string]any{}
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	if opts != nil {
 		if opts.Keywords != nil {
 			v["keywords"] = opts.Keywords
@@ -6753,7 +6791,9 @@ func (bot *Bot) SetStickerMaskPosition(sticker InputFileOrString, opts *SetStick
 // SetStickerMaskPositionWithContext is the same as Bot.SetStickerMaskPosition, but with a context.Context parameter
 func (bot *Bot) SetStickerMaskPositionWithContext(ctx context.Context, sticker InputFileOrString, opts *SetStickerMaskPositionOpts) (bool, error) {
 	v := map[string]any{}
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	if opts != nil {
 		if opts.MaskPosition != nil {
 			v["mask_position"] = opts.MaskPosition
@@ -6793,7 +6833,9 @@ func (bot *Bot) SetStickerPositionInSet(sticker InputFileOrString, position int6
 // SetStickerPositionInSetWithContext is the same as Bot.SetStickerPositionInSet, but with a context.Context parameter
 func (bot *Bot) SetStickerPositionInSetWithContext(ctx context.Context, sticker InputFileOrString, position int64, opts *SetStickerPositionInSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	v["position"] = position
 
 	var reqOpts *RequestOpts
@@ -6836,7 +6878,9 @@ func (bot *Bot) SetStickerSetThumbnailWithContext(ctx context.Context, name stri
 	v["user_id"] = userId
 	v["format"] = format
 	if opts != nil {
-		v["thumbnail"] = opts.Thumbnail
+		if opts.Thumbnail != nil {
+			v["thumbnail"] = opts.Thumbnail
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -6964,7 +7008,9 @@ func (bot *Bot) SetWebhookWithContext(ctx context.Context, url string, opts *Set
 	v := map[string]any{}
 	v["url"] = url
 	if opts != nil {
-		v["certificate"] = opts.Certificate
+		if opts.Certificate != nil {
+			v["certificate"] = opts.Certificate
+		}
 		v["ip_address"] = opts.IpAddress
 		v["max_connections"] = opts.MaxConnections
 		if opts.AllowedUpdates != nil {
@@ -7492,7 +7538,9 @@ func (bot *Bot) UploadStickerFile(userId int64, sticker InputFile, stickerFormat
 func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, sticker InputFile, stickerFormat string, opts *UploadStickerFileOpts) (*File, error) {
 	v := map[string]any{}
 	v["user_id"] = userId
-	v["sticker"] = sticker
+	if sticker != nil {
+		v["sticker"] = sticker
+	}
 	v["sticker_format"] = stickerFormat
 
 	var reqOpts *RequestOpts

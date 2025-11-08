@@ -51,15 +51,19 @@ func Test_echo(t *testing.T) {
 			t.Fatalf("Only expected API calls to sendMessage, got %s", method)
 		}
 
-		sentText := params["text"]
-		if sentText != echoMessage {
+		sentText, ok := params["text"]
+		if !ok || sentText != echoMessage {
 			t.Errorf("expected text to be %s, got %s", echoMessage, sentText)
 		}
 
 		sendMessageCount++
+		text, ok := sentText.(string)
+		if !ok {
+			t.Errorf("expected text to be a string, got %T", sentText)
+		}
 		return json.Marshal(gotgbot.Message{
 			MessageId: rand.Int63(),
-			Text:      sentText.(string),
+			Text:      text,
 		})
 	})
 
