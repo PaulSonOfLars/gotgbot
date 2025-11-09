@@ -3,13 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-	"text/template"
-)
-
-var (
-	inputFileBranchTmpl        = template.Must(template.New("inputFileBranch").Parse(inputFileBranch))
-	inputParamsBranchTmpl      = template.Must(template.New("inputParamsBranch").Parse(inputParamsBranch))
-	inputArrayParamsBranchTmpl = template.Must(template.New("inputArrayParamsBranch").Parse(inputArrayParamsBranch))
 )
 
 func generateMethods(d APIDescription) error {
@@ -21,10 +14,8 @@ func generateMethods(d APIDescription) error {
 package gotgbot
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
 	"context"
+	"encoding/json"
 )
 `)
 
@@ -71,11 +62,8 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 		return "", fmt.Errorf("failed to generate method description for %s: %w", tgMethod.Name, err)
 	}
 
-	// Generate list of default return values (for error handling).
-	defaultRetVals := strings.Join(getDefaultReturnVals(d, retTypes), ", ")
-
 	// Generate method contents, setting up values in expected format
-	valueGen, hasData, err := tgMethod.argsToValues(d, tgMethod.Name, defaultRetVals)
+	valueGen, err := tgMethod.argsToValues(d, tgMethod.Name)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate url values for method %s: %w", tgMethod.Name, err)
 	}
@@ -96,7 +84,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 	method.WriteString("\n// " + strings.Title(tgMethod.Name) + "WithContext is the same as Bot." + strings.Title(tgMethod.Name) + ", but with a context.Context parameter")
 	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "WithContext(ctx context.Context, " + joinedArgs + ") (" + joinedRetTypes + ", error) {")
-	method.WriteString("\n	v := map[string]string{}")
+	method.WriteString("\n	v := map[string]any{}")
 	method.WriteString(valueGen)
 	method.WriteString("\n")
 
@@ -107,15 +95,10 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method.WriteString("\n")
 
 	// If sending data, we need to do it over POST
-	if hasData {
-		method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, data, reqOpts)")
-	} else {
-		method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, nil, reqOpts)")
-	}
-
-	method.WriteString("\n	if err != nil {")
-	method.WriteString("\n		return " + defaultRetVals + ", err")
-	method.WriteString("\n	}")
+	method.WriteString("\nr, err := bot.RequestWithContext(ctx, \"" + tgMethod.Name + "\", v, reqOpts)")
+	method.WriteString("\nif err != nil {")
+	method.WriteString("\n	return " + strings.Join(getDefaultReturnVals(d, retTypes), ", ") + ", err")
+	method.WriteString("\n}")
 	method.WriteString("\n")
 
 	method.WriteString(returnGen)
@@ -195,8 +178,7 @@ func (m MethodDescription) description(d APIDescription) (string, error) {
 	return description.String(), nil
 }
 
-func (m MethodDescription) argsToValues(d APIDescription, methodName string, defaultRetVal string) (string, bool, error) {
-	hasData := false
+func (m MethodDescription) argsToValues(d APIDescription, methodName string) (string, error) {
 	bd := strings.Builder{}
 
 	var optionals []Field
@@ -207,40 +189,34 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string, def
 			continue
 		}
 
-		contents, data, err := generateValue(d, methodName, f, goParam, defaultRetVal)
+		contents, err := generateValue(d, methodName, f, goParam)
 		if err != nil {
-			return "", false, err
+			return "", err
 		}
 		bd.WriteString(contents)
-		hasData = hasData || data
 	}
 
 	if len(optionals) > 0 {
 		bd.WriteString("\nif opts != nil {")
 		for _, f := range optionals {
 			goParam := "opts." + snakeToTitle(f.Name)
-			contents, data, err := generateValue(d, methodName, f, goParam, defaultRetVal)
+			contents, err := generateValue(d, methodName, f, goParam)
 			if err != nil {
-				return "", false, err
+				return "", err
 			}
 
 			bd.WriteString(contents)
-			hasData = hasData || data
 		}
 		bd.WriteString("\n}")
 	}
 
-	if hasData {
-		return "\ndata := map[string]FileReader{}" + bd.String(), true, nil
-	}
-
-	return bd.String(), false, nil
+	return bd.String(), nil
 }
 
-func generateValue(d APIDescription, methodName string, f Field, goParam string, defaultRetVal string) (string, bool, error) {
+func generateValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
 	fieldType, err := f.getPreferredType(d)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to get preferred type: %w", err)
+		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
 
 	stringer := goTypeStringer(fieldType)
@@ -260,101 +236,31 @@ func generateValue(d APIDescription, methodName string, f Field, goParam string,
 if opts.Type == "quiz" {
 	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
 	%s
-}`, addURLParam(f, stringer, goParam)), false, nil
+}`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
 				}
 
-				// TODO: Simplify this to avoid ANY unrequired default values instead of just int/float?
-				return fmt.Sprintf(`
-if %s != %s {
-	%s
-}`, goParam, getDefaultTypeVal(d, fieldType), addURLParam(f, stringer, goParam)), false, nil
+				return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 			}
 
 			if isPointer(fieldType) {
 				return fmt.Sprintf(`
 if %s != nil {
 	v["%s"] = %s
-}`, goParam, f.Name, fmt.Sprintf(goTypeStringer(fieldType), goParam)), false, nil
+}`, goParam, f.Name, goParam), nil
 			}
 		}
 
-		return "\n" + addURLParam(f, stringer, goParam), false, nil
-	}
-
-	complexString, hasData, err := stringComplexField(d, f, fieldType, goParam, defaultRetVal)
-	if err != nil {
-		return "", false, err
+		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 
 	if isPointer(fieldType) || isArray(fieldType) || fieldType == typeReplyMarkup {
 		return fmt.Sprintf(`
 if %s != nil {
-%s
-}`, goParam, strings.TrimSpace(complexString)), hasData, nil
+  v["%s"] = %s
+}`, goParam, f.Name, goParam), nil
 	}
 
-	return complexString, hasData, nil
-}
-
-// stringComplexField allows us to string any complex types.
-// This includes custom tg structs, as well anything which might contain data.
-func stringComplexField(d APIDescription, f Field, fieldType string, goParam string, defaultRetVal string) (string, bool, error) {
-	bd := strings.Builder{}
-
-	// Special case for InputFiles.
-	if fieldType == tgTypeInputFile || fieldType == typeInputFileOrString {
-		err := inputFileBranchTmpl.Execute(&bd, readerBranchesData{
-			GoParam:       goParam,
-			DefaultReturn: defaultRetVal,
-			Name:          f.Name,
-		})
-		if err != nil {
-			return "", false, fmt.Errorf("failed to execute branch reader template: %w", err)
-		}
-		return bd.String(), true, nil
-	}
-
-	hasData, err := fieldContainsInputFile(d, f)
-	if err != nil {
-		return "", false, fmt.Errorf("failed to check if field %s contains inputfiles: %w", f.Name, err)
-	}
-	if hasData {
-		// If the field contains data, it cannot be simply json marshalled, so we our own methods to include it.
-		// We need to do this slightly differently if we are dealing with arrays or not.
-		if isArray(fieldType) {
-			err = inputArrayParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker array branch template: %w", err)
-			}
-		} else {
-			err = inputParamsBranchTmpl.Execute(&bd, readerBranchesData{
-				GoParam:       goParam,
-				DefaultReturn: defaultRetVal,
-				Name:          f.Name,
-			})
-			if err != nil {
-				return "", false, fmt.Errorf("failed to execute inputmedia/inputsticker branch template: %w", err)
-			}
-		}
-		return bd.String(), true, nil
-	}
-
-	// If we aren't sending data, then we can just do it regularly.
-	bd.WriteString("\n	bs, err := json.Marshal(" + goParam + ")")
-	bd.WriteString("\n	if err != nil {")
-	bd.WriteString("\n		return " + defaultRetVal + ", fmt.Errorf(\"failed to marshal field " + f.Name + ": %w\", err)")
-	bd.WriteString("\n	}")
-	bd.WriteString("\n	v[\"" + f.Name + "\"] = string(bs)")
-
-	return bd.String(), false, nil
-}
-
-func addURLParam(f Field, stringer string, goParam string) string {
-	return fmt.Sprintf(`v["%s"] = %s`, f.Name, fmt.Sprintf(stringer, goParam))
+	return "\n	v[\"" + f.Name + "\"] = " + goParam, nil
 }
 
 func getRetVarName(retType string) string {
@@ -434,41 +340,3 @@ func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) 
 
 	return optionalsStructBuilder.String(), nil
 }
-
-type readerBranchesData struct {
-	GoParam       string
-	DefaultReturn string
-	Name          string
-}
-
-// TODO: Make sure this doesn't allow strings, ONLY readers!
-const inputFileBranch = `
-if {{.GoParam}} != nil {
-	err := {{.GoParam}}.Attach("{{.Name}}", data)
-	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to attach '{{.Name}}' input file: %w", err)
-	}
-	v["{{.Name}}"] = {{.GoParam}}.getValue()
-}`
-
-const inputParamsBranch = `
-inputBs, err := {{.GoParam}}.InputParams("{{.Name}}" , data)
-if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal field {{.Name}}: %w", err)
-}
-v["{{.Name}}"] = string(inputBs)`
-
-const inputArrayParamsBranch = `
-var rawList []json.RawMessage
-for idx, im := range {{.GoParam}} {
-	inputBs, err := im.InputParams("{{.Name}}" + strconv.Itoa(idx), data)
-	if err != nil {
-		return {{.DefaultReturn}}, fmt.Errorf("failed to marshal list item %d for field {{.Name}}: %w", idx, err)
-	}
-	rawList = append(rawList, inputBs)
-}
-bs, err := json.Marshal(rawList)
-if err != nil {
-	return {{.DefaultReturn}}, fmt.Errorf("failed to marshal raw json list for field: {{.Name}} %w", err)
-}
-v["{{.Name}}"] = string(bs)`

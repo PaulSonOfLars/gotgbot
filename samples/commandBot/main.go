@@ -68,21 +68,33 @@ func main() {
 
 func source(b *gotgbot.Bot, ctx *ext.Context) error {
 	// Sending a file by file handle
-	f, err := os.Open("samples/commandBot/main.go")
+	f, err := os.Open("main.go")
 	if err != nil {
 		return fmt.Errorf("failed to open source: %w", err)
 	}
+	defer f.Close()
 
 	m, err := b.SendDocument(ctx.EffectiveChat.Id,
 		gotgbot.InputFileByReader("source.go", f),
 		&gotgbot.SendDocumentOpts{
-			Caption: "Here is my source code, by file handle.",
+			Caption: "Here is my source code, sent by file handle.",
 			ReplyParameters: &gotgbot.ReplyParameters{
 				MessageId: ctx.EffectiveMessage.MessageId,
 			},
 		})
 	if err != nil {
 		return fmt.Errorf("failed to send source: %w", err)
+	}
+
+	_, err = b.SendMediaGroup(ctx.EffectiveChat.Id, []gotgbot.InputMedia{
+		gotgbot.InputMediaDocument{Media: gotgbot.InputFileByID(m.Document.FileId), Caption: "Here is my source code, sent as a mediagroup."},
+	}, &gotgbot.SendMediaGroupOpts{
+		ReplyParameters: &gotgbot.ReplyParameters{
+			MessageId: ctx.EffectiveMessage.MessageId,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to send mediagroup: %w", err)
 	}
 
 	// Or sending a file by file ID

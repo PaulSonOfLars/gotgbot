@@ -104,7 +104,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	//  - needing to re-allocate new url.values structs.
 	//  - needing to convert the 'opt' values to strings.
 	//  - unnecessary unmarshalling of multiple full Update structs.
-	v := map[string]string{}
+	v := map[string]any{}
 	var reqOpts *gotgbot.RequestOpts
 
 	if opts != nil {
@@ -164,7 +164,7 @@ func (u *Updater) StartPolling(b *gotgbot.Bot, opts *PollingOpts) error {
 	return nil
 }
 
-func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot.RequestOpts, v map[string]string) {
+func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot.RequestOpts, v map[string]any) {
 	for {
 		// Check if updater loop has been terminated.
 		if bData.shouldStopUpdates() {
@@ -173,7 +173,7 @@ func (u *Updater) pollingLoop(ctx context.Context, bData *botData, opts *gotgbot
 
 		// Manually craft the getUpdate calls to improve memory management, reduce json parsing overheads, and
 		// unnecessary reallocation of url.Values in the polling loop.
-		r, err := bData.bot.RequestWithContext(ctx, "getUpdates", v, nil, opts)
+		r, err := bData.bot.RequestWithContext(ctx, "getUpdates", v, opts)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				// context cancelled; means the bot was stopped gracefully through Updater.StopBot

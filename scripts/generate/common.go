@@ -86,7 +86,9 @@ func isTgArray(s string) bool {
 }
 
 func isPointer(s string) bool {
-	return strings.HasPrefix(s, "*")
+	return strings.HasPrefix(s, "*") ||
+		s == tgTypeInputFile || s == typeInputFileOrString || s == typeInputString ||
+		s == tgTypeInputMedia || s == tgTypeInputPaidMedia
 }
 
 func isArray(s string) bool {

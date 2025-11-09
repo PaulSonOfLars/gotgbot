@@ -11,7 +11,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
-type RequestFunc func(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.FileReader, opts *gotgbot.RequestOpts) (json.RawMessage, error)
+type RequestFunc func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error)
 
 // We define a TestBotClient which allows us to overwrite a single method on a per-test basis; meaning each test can verify specific behaviour.
 type TestBotClient struct {
@@ -29,11 +29,11 @@ func (b TestBotClient) FileURL(token string, tgFilePath string, opts *gotgbot.Re
 }
 
 // Define wrapper around existing RequestWithContext method.
-func (b TestBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.FileReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+func (b TestBotClient) RequestWithContext(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 	if b.RequestFunc == nil {
 		panic("no requestfunc provided for test")
 	}
-	return b.RequestFunc(ctx, token, method, params, data, opts)
+	return b.RequestFunc(ctx, token, method, params, opts)
 }
 
 func NewBotClient(f RequestFunc) gotgbot.BotClient {
@@ -46,20 +46,24 @@ func Test_echo(t *testing.T) {
 	const echoMessage = "Hello"
 	sendMessageCount := 0
 
-	b := testBot(func(ctx context.Context, token string, method string, params map[string]string, data map[string]gotgbot.FileReader, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+	b := testBot(func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
 		if method != "sendMessage" {
 			t.Fatalf("Only expected API calls to sendMessage, got %s", method)
 		}
 
-		sentText := params["text"]
-		if sentText != echoMessage {
+		sentText, ok := params["text"]
+		if !ok || sentText != echoMessage {
 			t.Errorf("expected text to be %s, got %s", echoMessage, sentText)
 		}
 
 		sendMessageCount++
+		text, ok := sentText.(string)
+		if !ok {
+			t.Errorf("expected text to be a string, got %T", sentText)
+		}
 		return json.Marshal(gotgbot.Message{
 			MessageId: rand.Int63(),
-			Text:      sentText,
+			Text:      text,
 		})
 	})
 

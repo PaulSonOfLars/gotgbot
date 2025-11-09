@@ -2,8 +2,9 @@ package gotgbot
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
+	"mime/multipart"
 )
 
 // InputFile (https://core.telegram.org/bots/api#inputfile)
@@ -20,7 +21,7 @@ type InputFile interface {
 // This object represents the contents of a file to be uploaded, or a publicly accessible URL to be reused.
 // Files must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
 type InputFileOrString interface {
-	Attach(name string, data map[string]FileReader) error
+	Attach(name string, w *multipart.Writer) error
 	getValue() string
 }
 
@@ -40,21 +41,29 @@ func (f *FileReader) MarshalJSON() ([]byte, error) {
 	return json.Marshal(f.getValue())
 }
 
-var ErrAttachmentKeyAlreadyExists = errors.New("key already exists")
-
 func (f *FileReader) justFiles() {}
 
-func (f *FileReader) Attach(key string, data map[string]FileReader) error {
+func (f *FileReader) Attach(key string, w *multipart.Writer) error {
 	if f.Data == nil {
 		// if no data, this must be a string; nothing to "attach".
 		return nil
 	}
 
-	if _, ok := data[key]; ok {
-		return ErrAttachmentKeyAlreadyExists
+	fileName := f.Name
+	if fileName == "" {
+		fileName = key
+	}
+
+	part, err := w.CreateFormFile(key, fileName)
+	if err != nil {
+		return fmt.Errorf("failed to create form file for field %s and fileName %s: %w", key, fileName, err)
+	}
+
+	_, err = io.Copy(part, f.Data)
+	if err != nil {
+		return fmt.Errorf("failed to copy file contents of field %s to form: %w", key, err)
 	}
 	f.value = "attach://" + key
-	data[key] = *f
 	return nil
 }
 

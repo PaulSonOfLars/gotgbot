@@ -26,6 +26,7 @@ package gotgbot
 import (
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 )
 `)
 
@@ -115,22 +116,6 @@ func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
 	}
 	bd.WriteString("\n)")
 	return bd.String()
-}
-
-// fieldContainsInputFile checks whether the field's type contains any inputfiles, and thus might be used to send data.
-func fieldContainsInputFile(d APIDescription, field Field) (bool, error) {
-	goType, err := field.getPreferredType(d)
-	if err != nil {
-		return false, err
-	}
-	cleanName := strings.TrimPrefix(goType, "[]")
-	tgType, ok := d.Types[cleanName]
-	if !ok {
-		return false, nil
-	}
-
-	ok, _, err = containsInputFile(d, tgType, map[string]bool{})
-	return ok, err
 }
 
 // containsInputFile returns a boolean to indicate whether or not tgType contains an InputFile.
@@ -499,7 +484,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 	if hasInputFile {
 		bd.WriteString("\n// InputParams allows for uploading attachments with files.")
-		bd.WriteString("\nInputParams(string, map[string]FileReader) ([]byte, error)")
+		bd.WriteString("\nInputParams(string, *multipart.Writer) error")
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
@@ -772,22 +757,22 @@ type inputParamsMethodData struct {
 }
 
 const inputParamsMethod = `
-func (v {{.Type}}) InputParams(mediaName string, data map[string]FileReader) ([]byte, error) {
+func (v {{.Type}}) InputParams(mediaName string, w *multipart.Writer) error {
 	if v.{{.Field}} != nil {
-		err := v.{{.Field}}.Attach(mediaName, data)
+		err := v.{{.Field}}.Attach(mediaName, w)
 		if err != nil {
-			return nil, fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 	{{ if .Thumbnail }}
 	if v.Thumbnail != nil {
-		err := v.Thumbnail.Attach(mediaName+"-thumbnail", data)
+		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
-			return nil, fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
+			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
 		}
 	}
 	{{- end }}
 
-	return json.Marshal(v)
+	return nil
 }
 `
