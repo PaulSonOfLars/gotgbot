@@ -239,7 +239,10 @@ if opts.Type == "quiz" {
 }`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
 				}
 
-				return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
+				return fmt.Sprintf(`
+if %s != 0 {
+	v["%s"] = %s
+}`, goParam, f.Name, goParam), nil
 			}
 
 			if isPointer(fieldType) {

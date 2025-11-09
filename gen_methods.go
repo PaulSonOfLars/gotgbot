@@ -77,7 +77,9 @@ func (bot *Bot) AnswerCallbackQueryWithContext(ctx context.Context, callbackQuer
 		v["text"] = opts.Text
 		v["show_alert"] = opts.ShowAlert
 		v["url"] = opts.Url
-		v["cache_time"] = opts.CacheTime
+		if opts.CacheTime != 0 {
+			v["cache_time"] = opts.CacheTime
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -127,7 +129,9 @@ func (bot *Bot) AnswerInlineQueryWithContext(ctx context.Context, inlineQueryId 
 		v["results"] = results
 	}
 	if opts != nil {
-		v["cache_time"] = opts.CacheTime
+		if opts.CacheTime != 0 {
+			v["cache_time"] = opts.CacheTime
+		}
 		v["is_personal"] = opts.IsPersonal
 		v["next_offset"] = opts.NextOffset
 		if opts.Button != nil {
@@ -332,7 +336,9 @@ func (bot *Bot) ApproveSuggestedPostWithContext(ctx context.Context, chatId int6
 	v["chat_id"] = chatId
 	v["message_id"] = messageId
 	if opts != nil {
-		v["send_date"] = opts.SendDate
+		if opts.SendDate != 0 {
+			v["send_date"] = opts.SendDate
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -375,7 +381,9 @@ func (bot *Bot) BanChatMemberWithContext(ctx context.Context, chatId int64, user
 	v["chat_id"] = chatId
 	v["user_id"] = userId
 	if opts != nil {
-		v["until_date"] = opts.UntilDate
+		if opts.UntilDate != 0 {
+			v["until_date"] = opts.UntilDate
+		}
 		v["revoke_messages"] = opts.RevokeMessages
 	}
 
@@ -617,9 +625,15 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["video_start_timestamp"] = opts.VideoStartTimestamp
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = opts.VideoStartTimestamp
+		}
 		if opts.Caption != nil {
 			v["caption"] = opts.Caption
 		}
@@ -692,8 +706,12 @@ func (bot *Bot) CopyMessagesWithContext(ctx context.Context, chatId int64, fromC
 		v["message_ids"] = messageIds
 	}
 	if opts != nil {
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["remove_caption"] = opts.RemoveCaption
@@ -742,8 +760,12 @@ func (bot *Bot) CreateChatInviteLinkWithContext(ctx context.Context, chatId int6
 	v["chat_id"] = chatId
 	if opts != nil {
 		v["name"] = opts.Name
-		v["expire_date"] = opts.ExpireDate
-		v["member_limit"] = opts.MemberLimit
+		if opts.ExpireDate != 0 {
+			v["expire_date"] = opts.ExpireDate
+		}
+		if opts.MemberLimit != 0 {
+			v["member_limit"] = opts.MemberLimit
+		}
 		v["creates_join_request"] = opts.CreatesJoinRequest
 	}
 
@@ -830,7 +852,9 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 	v["chat_id"] = chatId
 	v["name"] = name
 	if opts != nil {
-		v["icon_color"] = opts.IconColor
+		if opts.IconColor != 0 {
+			v["icon_color"] = opts.IconColor
+		}
 		v["icon_custom_emoji_id"] = opts.IconCustomEmojiId
 	}
 
@@ -914,16 +938,26 @@ func (bot *Bot) CreateInvoiceLinkWithContext(ctx context.Context, title string, 
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
 		v["provider_token"] = opts.ProviderToken
-		v["subscription_period"] = opts.SubscriptionPeriod
-		v["max_tip_amount"] = opts.MaxTipAmount
+		if opts.SubscriptionPeriod != 0 {
+			v["subscription_period"] = opts.SubscriptionPeriod
+		}
+		if opts.MaxTipAmount != 0 {
+			v["max_tip_amount"] = opts.MaxTipAmount
+		}
 		if opts.SuggestedTipAmounts != nil {
 			v["suggested_tip_amounts"] = opts.SuggestedTipAmounts
 		}
 		v["provider_data"] = opts.ProviderData
 		v["photo_url"] = opts.PhotoUrl
-		v["photo_size"] = opts.PhotoSize
-		v["photo_width"] = opts.PhotoWidth
-		v["photo_height"] = opts.PhotoHeight
+		if opts.PhotoSize != 0 {
+			v["photo_size"] = opts.PhotoSize
+		}
+		if opts.PhotoWidth != 0 {
+			v["photo_width"] = opts.PhotoWidth
+		}
+		if opts.PhotoHeight != 0 {
+			v["photo_height"] = opts.PhotoHeight
+		}
 		v["need_name"] = opts.NeedName
 		v["need_phone_number"] = opts.NeedPhoneNumber
 		v["need_email"] = opts.NeedEmail
@@ -1515,8 +1549,12 @@ func (bot *Bot) EditChatInviteLinkWithContext(ctx context.Context, chatId int64,
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		v["name"] = opts.Name
-		v["expire_date"] = opts.ExpireDate
-		v["member_limit"] = opts.MemberLimit
+		if opts.ExpireDate != 0 {
+			v["expire_date"] = opts.ExpireDate
+		}
+		if opts.MemberLimit != 0 {
+			v["member_limit"] = opts.MemberLimit
+		}
 		v["creates_join_request"] = opts.CreatesJoinRequest
 	}
 
@@ -1694,8 +1732,12 @@ func (bot *Bot) EditMessageCaptionWithContext(ctx context.Context, opts *EditMes
 	v := map[string]any{}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -1814,15 +1856,25 @@ func (bot *Bot) EditMessageLiveLocationWithContext(ctx context.Context, latitude
 	v["longitude"] = longitude
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		if opts.LivePeriod != nil {
 			v["live_period"] = opts.LivePeriod
 		}
-		v["horizontal_accuracy"] = opts.HorizontalAccuracy
-		v["heading"] = opts.Heading
-		v["proximity_alert_radius"] = opts.ProximityAlertRadius
+		if opts.HorizontalAccuracy != 0 {
+			v["horizontal_accuracy"] = opts.HorizontalAccuracy
+		}
+		if opts.Heading != 0 {
+			v["heading"] = opts.Heading
+		}
+		if opts.ProximityAlertRadius != 0 {
+			v["proximity_alert_radius"] = opts.ProximityAlertRadius
+		}
 		v["reply_markup"] = opts.ReplyMarkup
 	}
 
@@ -1881,8 +1933,12 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		v["reply_markup"] = opts.ReplyMarkup
 	}
@@ -1938,8 +1994,12 @@ func (bot *Bot) EditMessageReplyMarkupWithContext(ctx context.Context, opts *Edi
 	v := map[string]any{}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		v["reply_markup"] = opts.ReplyMarkup
 	}
@@ -2003,8 +2063,12 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opt
 	v["text"] = text
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
@@ -2202,9 +2266,15 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["video_start_timestamp"] = opts.VideoStartTimestamp
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.VideoStartTimestamp != 0 {
+			v["video_start_timestamp"] = opts.VideoStartTimestamp
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		if opts.SuggestedPostParameters != nil {
@@ -2260,8 +2330,12 @@ func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fr
 		v["message_ids"] = messageIds
 	}
 	if opts != nil {
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 	}
@@ -2355,7 +2429,9 @@ func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, business
 		v["exclude_unique"] = opts.ExcludeUnique
 		v["sort_by_price"] = opts.SortByPrice
 		v["offset"] = opts.Offset
-		v["limit"] = opts.Limit
+		if opts.Limit != 0 {
+			v["limit"] = opts.Limit
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -2743,8 +2819,12 @@ func (bot *Bot) GetGameHighScoresWithContext(ctx context.Context, userId int64, 
 	v := map[string]any{}
 	v["user_id"] = userId
 	if opts != nil {
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 	}
 
@@ -3036,8 +3116,12 @@ func (bot *Bot) GetStarTransactions(opts *GetStarTransactionsOpts) (*StarTransac
 func (bot *Bot) GetStarTransactionsWithContext(ctx context.Context, opts *GetStarTransactionsOpts) (*StarTransactions, error) {
 	v := map[string]any{}
 	if opts != nil {
-		v["offset"] = opts.Offset
-		v["limit"] = opts.Limit
+		if opts.Offset != 0 {
+			v["offset"] = opts.Offset
+		}
+		if opts.Limit != 0 {
+			v["limit"] = opts.Limit
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -3114,9 +3198,15 @@ func (bot *Bot) GetUpdates(opts *GetUpdatesOpts) ([]Update, error) {
 func (bot *Bot) GetUpdatesWithContext(ctx context.Context, opts *GetUpdatesOpts) ([]Update, error) {
 	v := map[string]any{}
 	if opts != nil {
-		v["offset"] = opts.Offset
-		v["limit"] = opts.Limit
-		v["timeout"] = opts.Timeout
+		if opts.Offset != 0 {
+			v["offset"] = opts.Offset
+		}
+		if opts.Limit != 0 {
+			v["limit"] = opts.Limit
+		}
+		if opts.Timeout != 0 {
+			v["timeout"] = opts.Timeout
+		}
 		if opts.AllowedUpdates != nil {
 			v["allowed_updates"] = opts.AllowedUpdates
 		}
@@ -3196,8 +3286,12 @@ func (bot *Bot) GetUserProfilePhotosWithContext(ctx context.Context, userId int6
 	v := map[string]any{}
 	v["user_id"] = userId
 	if opts != nil {
-		v["offset"] = opts.Offset
-		v["limit"] = opts.Limit
+		if opts.Offset != 0 {
+			v["offset"] = opts.Offset
+		}
+		if opts.Limit != 0 {
+			v["limit"] = opts.Limit
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -3909,7 +4003,9 @@ func (bot *Bot) RestrictChatMemberWithContext(ctx context.Context, chatId int64,
 	v["permissions"] = permissions
 	if opts != nil {
 		v["use_independent_chat_permissions"] = opts.UseIndependentChatPermissions
-		v["until_date"] = opts.UntilDate
+		if opts.UntilDate != 0 {
+			v["until_date"] = opts.UntilDate
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -4075,11 +4171,21 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["duration"] = opts.Duration
-		v["width"] = opts.Width
-		v["height"] = opts.Height
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.Duration != 0 {
+			v["duration"] = opts.Duration
+		}
+		if opts.Width != 0 {
+			v["width"] = opts.Width
+		}
+		if opts.Height != 0 {
+			v["height"] = opts.Height
+		}
 		if opts.Thumbnail != nil {
 			v["thumbnail"] = opts.Thumbnail
 		}
@@ -4179,14 +4285,20 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			v["caption_entities"] = opts.CaptionEntities
 		}
-		v["duration"] = opts.Duration
+		if opts.Duration != 0 {
+			v["duration"] = opts.Duration
+		}
 		v["performer"] = opts.Performer
 		v["title"] = opts.Title
 		if opts.Thumbnail != nil {
@@ -4249,7 +4361,9 @@ func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, act
 	v["action"] = action
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -4372,8 +4486,12 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 	v["first_name"] = firstName
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["last_name"] = opts.LastName
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = opts.DisableNotification
@@ -4448,8 +4566,12 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 	v["chat_id"] = chatId
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
@@ -4535,8 +4657,12 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		if opts.Thumbnail != nil {
 			v["thumbnail"] = opts.Thumbnail
 		}
@@ -4614,7 +4740,9 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 	v["game_short_name"] = gameShortName
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -4671,8 +4799,12 @@ func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *Se
 	v := map[string]any{}
 	v["gift_id"] = giftId
 	if opts != nil {
-		v["user_id"] = opts.UserId
-		v["chat_id"] = opts.ChatId
+		if opts.UserId != 0 {
+			v["user_id"] = opts.UserId
+		}
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
 		v["pay_for_upgrade"] = opts.PayForUpgrade
 		v["text"] = opts.Text
 		v["text_parse_mode"] = opts.TextParseMode
@@ -4777,19 +4909,31 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		v["prices"] = prices
 	}
 	if opts != nil {
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["provider_token"] = opts.ProviderToken
-		v["max_tip_amount"] = opts.MaxTipAmount
+		if opts.MaxTipAmount != 0 {
+			v["max_tip_amount"] = opts.MaxTipAmount
+		}
 		if opts.SuggestedTipAmounts != nil {
 			v["suggested_tip_amounts"] = opts.SuggestedTipAmounts
 		}
 		v["start_parameter"] = opts.StartParameter
 		v["provider_data"] = opts.ProviderData
 		v["photo_url"] = opts.PhotoUrl
-		v["photo_size"] = opts.PhotoSize
-		v["photo_width"] = opts.PhotoWidth
-		v["photo_height"] = opts.PhotoHeight
+		if opts.PhotoSize != 0 {
+			v["photo_size"] = opts.PhotoSize
+		}
+		if opts.PhotoWidth != 0 {
+			v["photo_width"] = opts.PhotoWidth
+		}
+		if opts.PhotoHeight != 0 {
+			v["photo_height"] = opts.PhotoHeight
+		}
 		v["need_name"] = opts.NeedName
 		v["need_phone_number"] = opts.NeedPhoneNumber
 		v["need_email"] = opts.NeedEmail
@@ -4877,12 +5021,24 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 	v["longitude"] = longitude
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["horizontal_accuracy"] = opts.HorizontalAccuracy
-		v["live_period"] = opts.LivePeriod
-		v["heading"] = opts.Heading
-		v["proximity_alert_radius"] = opts.ProximityAlertRadius
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.HorizontalAccuracy != 0 {
+			v["horizontal_accuracy"] = opts.HorizontalAccuracy
+		}
+		if opts.LivePeriod != 0 {
+			v["live_period"] = opts.LivePeriod
+		}
+		if opts.Heading != 0 {
+			v["heading"] = opts.Heading
+		}
+		if opts.ProximityAlertRadius != 0 {
+			v["proximity_alert_radius"] = opts.ProximityAlertRadius
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -4953,8 +5109,12 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -5027,8 +5187,12 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 	v["text"] = text
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["parse_mode"] = opts.ParseMode
 		if opts.Entities != nil {
 			v["entities"] = opts.Entities
@@ -5120,8 +5284,12 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["payload"] = opts.Payload
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
@@ -5212,8 +5380,12 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -5317,7 +5489,9 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
 		v["question_parse_mode"] = opts.QuestionParseMode
 		if opts.QuestionEntities != nil {
 			v["question_entities"] = opts.QuestionEntities
@@ -5334,8 +5508,12 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		if opts.ExplanationEntities != nil {
 			v["explanation_entities"] = opts.ExplanationEntities
 		}
-		v["open_period"] = opts.OpenPeriod
-		v["close_date"] = opts.CloseDate
+		if opts.OpenPeriod != 0 {
+			v["open_period"] = opts.OpenPeriod
+		}
+		if opts.CloseDate != 0 {
+			v["close_date"] = opts.CloseDate
+		}
 		v["is_closed"] = opts.IsClosed
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
@@ -5410,8 +5588,12 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
@@ -5499,8 +5681,12 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 	v["address"] = address
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["foursquare_id"] = opts.FoursquareId
 		v["foursquare_type"] = opts.FoursquareType
 		v["google_place_id"] = opts.GooglePlaceId
@@ -5603,18 +5789,30 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["duration"] = opts.Duration
-		v["width"] = opts.Width
-		v["height"] = opts.Height
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.Duration != 0 {
+			v["duration"] = opts.Duration
+		}
+		if opts.Width != 0 {
+			v["width"] = opts.Width
+		}
+		if opts.Height != 0 {
+			v["height"] = opts.Height
+		}
 		if opts.Thumbnail != nil {
 			v["thumbnail"] = opts.Thumbnail
 		}
 		if opts.Cover != nil {
 			v["cover"] = opts.Cover
 		}
-		v["start_timestamp"] = opts.StartTimestamp
+		if opts.StartTimestamp != 0 {
+			v["start_timestamp"] = opts.StartTimestamp
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
@@ -5703,10 +5901,18 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
-		v["duration"] = opts.Duration
-		v["length"] = opts.Length
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
+		if opts.Duration != 0 {
+			v["duration"] = opts.Duration
+		}
+		if opts.Length != 0 {
+			v["length"] = opts.Length
+		}
 		if opts.Thumbnail != nil {
 			v["thumbnail"] = opts.Thumbnail
 		}
@@ -5792,14 +5998,20 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 	}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["message_thread_id"] = opts.MessageThreadId
-		v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		if opts.MessageThreadId != 0 {
+			v["message_thread_id"] = opts.MessageThreadId
+		}
+		if opts.DirectMessagesTopicId != 0 {
+			v["direct_messages_topic_id"] = opts.DirectMessagesTopicId
+		}
 		v["caption"] = opts.Caption
 		v["parse_mode"] = opts.ParseMode
 		if opts.CaptionEntities != nil {
 			v["caption_entities"] = opts.CaptionEntities
 		}
-		v["duration"] = opts.Duration
+		if opts.Duration != 0 {
+			v["duration"] = opts.Duration
+		}
 		v["disable_notification"] = opts.DisableNotification
 		v["protect_content"] = opts.ProtectContent
 		v["allow_paid_broadcast"] = opts.AllowPaidBroadcast
@@ -6370,8 +6582,12 @@ func (bot *Bot) SetGameScoreWithContext(ctx context.Context, userId int64, score
 	if opts != nil {
 		v["force"] = opts.Force
 		v["disable_edit_message"] = opts.DisableEditMessage
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 	}
 
@@ -6958,7 +7174,9 @@ func (bot *Bot) SetUserEmojiStatusWithContext(ctx context.Context, userId int64,
 	v["user_id"] = userId
 	if opts != nil {
 		v["emoji_status_custom_emoji_id"] = opts.EmojiStatusCustomEmojiId
-		v["emoji_status_expiration_date"] = opts.EmojiStatusExpirationDate
+		if opts.EmojiStatusExpirationDate != 0 {
+			v["emoji_status_expiration_date"] = opts.EmojiStatusExpirationDate
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -7012,7 +7230,9 @@ func (bot *Bot) SetWebhookWithContext(ctx context.Context, url string, opts *Set
 			v["certificate"] = opts.Certificate
 		}
 		v["ip_address"] = opts.IpAddress
-		v["max_connections"] = opts.MaxConnections
+		if opts.MaxConnections != 0 {
+			v["max_connections"] = opts.MaxConnections
+		}
 		if opts.AllowedUpdates != nil {
 			v["allowed_updates"] = opts.AllowedUpdates
 		}
@@ -7063,8 +7283,12 @@ func (bot *Bot) StopMessageLiveLocationWithContext(ctx context.Context, opts *St
 	v := map[string]any{}
 	if opts != nil {
 		v["business_connection_id"] = opts.BusinessConnectionId
-		v["chat_id"] = opts.ChatId
-		v["message_id"] = opts.MessageId
+		if opts.ChatId != 0 {
+			v["chat_id"] = opts.ChatId
+		}
+		if opts.MessageId != 0 {
+			v["message_id"] = opts.MessageId
+		}
 		v["inline_message_id"] = opts.InlineMessageId
 		v["reply_markup"] = opts.ReplyMarkup
 	}
@@ -7197,7 +7421,9 @@ func (bot *Bot) TransferGiftWithContext(ctx context.Context, businessConnectionI
 	v["owned_gift_id"] = ownedGiftId
 	v["new_owner_chat_id"] = newOwnerChatId
 	if opts != nil {
-		v["star_count"] = opts.StarCount
+		if opts.StarCount != 0 {
+			v["star_count"] = opts.StarCount
+		}
 	}
 
 	var reqOpts *RequestOpts
@@ -7500,7 +7726,9 @@ func (bot *Bot) UpgradeGiftWithContext(ctx context.Context, businessConnectionId
 	v["owned_gift_id"] = ownedGiftId
 	if opts != nil {
 		v["keep_original_details"] = opts.KeepOriginalDetails
-		v["star_count"] = opts.StarCount
+		if opts.StarCount != 0 {
+			v["star_count"] = opts.StarCount
+		}
 	}
 
 	var reqOpts *RequestOpts
