@@ -236,6 +236,9 @@ if opts.Type == "quiz" {
 	// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
 	%s
 }`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
+
+	} else if strings.Contains(f.Description, "required for") {
+		return "", fmt.Errorf("method %s contains a 'required for' field %s which may require special handling", methodName, f.Name)
 	}
 
 	// Telegram types can't be compared; we just add them automatically
