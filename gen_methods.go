@@ -5158,7 +5158,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		addIfValueNotZero(v, "type", opts.Type, opts.Type == "")
 		addIfValueNotZero(v, "allows_multiple_answers", opts.AllowsMultipleAnswers, opts.AllowsMultipleAnswers == false)
 		if opts.Type == "quiz" {
-			// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
+			// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
 			v["correct_option_id"] = opts.CorrectOptionId
 		}
 		addIfValueNotZero(v, "explanation", opts.Explanation, opts.Explanation == "")

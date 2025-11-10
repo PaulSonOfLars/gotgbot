@@ -233,7 +233,7 @@ func generateValue(d APIDescription, methodName string, f Field, goParam string)
 		// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
 		return fmt.Sprintf(`
 if opts.Type == "quiz" {
-	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
+	// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
 	%s
 }`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
 	}
