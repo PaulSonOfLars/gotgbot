@@ -154,3 +154,12 @@ func unmarshalMaybeInaccessibleMessage(d json.RawMessage) (MaybeInaccessibleMess
 	}
 	return s, nil
 }
+
+// addIfValueNotZero is a helper method to avoid having thousands of if checks for each optional value.
+func addIfValueNotZero[T any](m map[string]any, k string, v T, isZero bool) {
+	if isZero {
+		return
+	}
+
+	m[k] = v
+}
