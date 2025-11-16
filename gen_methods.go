@@ -97,7 +97,7 @@ func (bot *Bot) AnswerCallbackQueryWithContext(ctx context.Context, callbackQuer
 // AnswerInlineQueryOpts is the set of optional fields for Bot.AnswerInlineQuery and Bot.AnswerInlineQueryWithContext.
 type AnswerInlineQueryOpts struct {
 	// The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300.
-	CacheTime int64
+	CacheTime *int64
 	// Pass True if results may be cached on the server side only for the user that sent the query. By default, results may be returned to any user who sends the same query.
 	IsPersonal bool
 	// Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don't support pagination. Offset length can't exceed 64 bytes.
@@ -125,7 +125,7 @@ func (bot *Bot) AnswerInlineQueryWithContext(ctx context.Context, inlineQueryId 
 	v["inline_query_id"] = inlineQueryId
 	v["results"] = results
 	if opts != nil {
-		addIfValueNotZero(v, "cache_time", opts.CacheTime, opts.CacheTime == 0)
+		addIfValueNotZero(v, "cache_time", opts.CacheTime, opts.CacheTime == nil)
 		addIfValueNotZero(v, "is_personal", opts.IsPersonal, opts.IsPersonal == false)
 		addIfValueNotZero(v, "next_offset", opts.NextOffset, opts.NextOffset == "")
 		addIfValueNotZero(v, "button", opts.Button, opts.Button == nil)
@@ -5097,7 +5097,7 @@ type SendPollOpts struct {
 	// A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
 	QuestionEntities []MessageEntity
 	// True, if the poll needs to be anonymous, defaults to True
-	IsAnonymous bool
+	IsAnonymous *bool
 	// Poll type, "quiz" or "regular", defaults to "regular"
 	Type string
 	// True, if the poll allows multiple answers, ignored for polls in quiz mode, defaults to False
@@ -5154,7 +5154,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "question_parse_mode", opts.QuestionParseMode, opts.QuestionParseMode == "")
 		addIfValueNotZero(v, "question_entities", opts.QuestionEntities, opts.QuestionEntities == nil)
-		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == false)
+		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == nil)
 		addIfValueNotZero(v, "type", opts.Type, opts.Type == "")
 		addIfValueNotZero(v, "allows_multiple_answers", opts.AllowsMultipleAnswers, opts.AllowsMultipleAnswers == false)
 		if opts.Type == "quiz" {
