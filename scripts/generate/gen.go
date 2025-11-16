@@ -199,6 +199,20 @@ type Field struct {
 	Description string   `json:"description"`
 }
 
+var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)`)
+
+func (f Field) hasDefault() (string, bool) {
+	if !strings.Contains(strings.ToLower(f.Description), "defaults to") {
+		return "", false
+	}
+
+	ms := defaultsMatcher.FindStringSubmatch(f.Description)
+	if len(ms) == 0 {
+		return "", true
+	}
+	return strings.ToLower(ms[1]), true
+}
+
 var usernameDocsMatcher = regexp.MustCompile(` +(or username.*)?\(.+ @[a-z]+\)`)
 
 func (f Field) GetDescription() string {
@@ -409,6 +423,14 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 			if f.Name == "text" && strings.Contains(f.Description, "nothing will be shown") {
 				return goType, nil
 			}
+			return "*" + goType, nil
+
+		} else if v, ok := f.hasDefault(); ok && v != "" && v != getDefaultTypeVal(d, goType) {
+			if goType == "int64" && strings.Contains(f.Description, "1-") {
+				// If we have a range of 1-X, it means that the default go-type of 0 is will be ignored the server
+				return goType, nil
+			}
+
 			return "*" + goType, nil
 		}
 

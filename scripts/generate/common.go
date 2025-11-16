@@ -88,7 +88,8 @@ func isTgArray(s string) bool {
 func isPointer(s string) bool {
 	return strings.HasPrefix(s, "*") ||
 		s == tgTypeInputFile || s == typeInputFileOrString || s == typeInputString ||
-		s == tgTypeInputMedia || s == tgTypeInputPaidMedia
+		s == tgTypeInputMedia || s == tgTypeInputPaidMedia ||
+		s == typeReplyMarkup
 }
 
 func isArray(s string) bool {
@@ -114,8 +115,8 @@ func getDefaultTypeVal(d APIDescription, s string) string {
 			return "nil"
 		}
 
-		// this isnt great
-		return s
+		// this isn't great
+		return s + "{}"
 	}
 }
 
@@ -125,30 +126,6 @@ func getDefaultReturnVals(d APIDescription, types []string) []string {
 		retVals = append(retVals, getDefaultTypeVal(d, retType))
 	}
 	return retVals
-}
-
-// goTypeStringer provides us with the fmt strings that allow us to convert basic types into strings.
-// For example, we define how to handle ints, bools, and strings.
-// More complicated types should be handled separately.
-func goTypeStringer(t string) string {
-	switch t {
-	case "int64":
-		return "strconv.FormatInt(%s, 10)"
-	case "*int64":
-		return "strconv.FormatInt(*%s, 10)"
-	case "float64":
-		return "strconv.FormatFloat(%s, 'f', -1, 64)"
-	case "bool":
-		return "strconv.FormatBool(%s)"
-	case "*bool":
-		return "strconv.FormatBool(*%s)"
-	case "string":
-		return "%s"
-	case "*string":
-		return "*%s"
-	default:
-		return ""
-	}
 }
 
 // getAllFields merges all the fields from list of types.

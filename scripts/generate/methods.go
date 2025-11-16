@@ -219,48 +219,35 @@ func generateValue(d APIDescription, methodName string, f Field, goParam string)
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
 
-	stringer := goTypeStringer(fieldType)
-	if stringer != "" {
-		if !f.Required {
-			// Ints and Floats should generally not be sent if they're 0.
-			if fieldType == "int64" || fieldType == "float64" {
-				// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
-				// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
-				// To avoid this, we want to make sure not to add default integers or floats to requests.
-				// This is a good rule of thumb, however... it doesn't ALWAYS work.
-				// So, any exceptions should go here:
-				if methodName == "sendPoll" && f.Name == "correct_option_id" {
-					// correct_option_id (in sendPoll) is dependent on the "type" field being "quiz".
-					// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
-					return fmt.Sprintf(`
-if opts.Type == "quiz" {
-	// correct_option_id should always be set when the type is "quiz" - it doesnt need to be set for type "regular".
-	%s
-}`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
-				}
-
-				return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
-			}
-
-			if isPointer(fieldType) {
-				return fmt.Sprintf(`
-if %s != nil {
-	v["%s"] = %s
-}`, goParam, f.Name, goParam), nil
-			}
-		}
-
+	if f.Required {
 		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 
-	if isPointer(fieldType) || isArray(fieldType) || fieldType == typeReplyMarkup {
+	// Editing an inline query requires the inline_message_id. However, if we send the empty chat_id with it,
+	// it'll fail with a "chat not found" error, since it believes were trying to access the chat with ID 0.
+	// To avoid this, we want to make sure not to add default integers or floats to requests.
+	// This is a good rule of thumb, however... it doesn't ALWAYS work.
+	// So, any exceptions should go here:
+	if methodName == "sendPoll" && f.Name == "correct_option_id" {
+		// correct_option_id (in sendPoll) is dependent on the "type" field being "quiz".
+		// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
 		return fmt.Sprintf(`
-if %s != nil {
-  v["%s"] = %s
-}`, goParam, f.Name, goParam), nil
+if opts.Type == "quiz" {
+	// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
+	%s
+}`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
+
+	} else if strings.Contains(f.Description, "required for") {
+		return "", fmt.Errorf("method %s contains a 'required for' field %s which may require special handling", methodName, f.Name)
 	}
 
-	return "\n	v[\"" + f.Name + "\"] = " + goParam, nil
+	// Telegram types can't be compared; we just add them automatically
+	if _, ok := d.Types[fieldType]; ok {
+		return "\n	v[\"" + f.Name + "\"] = " + goParam, nil
+	}
+
+	// otherwise, we only add the field if it's non-zero; this avoids us sending unnecessary data to tg
+	return fmt.Sprintf("\naddIfValueNotZero(v, \"%s\", %s, %s == %s)", f.Name, goParam, goParam, getDefaultTypeVal(d, fieldType)), nil
 }
 
 func getRetVarName(retType string) string {
