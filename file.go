@@ -43,6 +43,11 @@ func (f *FileReader) MarshalJSON() ([]byte, error) {
 
 func (f *FileReader) justFiles() {}
 
+// Attach will handle any requirements to write any files to the multipartwriter.
+// If FileReader.Data is nil, nothing happens.
+// if FileReader.Data is an io.Seeker, then we seek the start of the file to ensure that the entire thing is sent.
+// This also ensures that the request can be seamlessly retried.
+// A Seeker interface can be easily obtained by using an *os.File, *bytes.Reader, or *strings.Reader.
 func (f *FileReader) Attach(key string, w *multipart.Writer) error {
 	if f.Data == nil {
 		// if no data, this must be a string; nothing to "attach".
@@ -57,6 +62,14 @@ func (f *FileReader) Attach(key string, w *multipart.Writer) error {
 	part, err := w.CreateFormFile(key, fileName)
 	if err != nil {
 		return fmt.Errorf("failed to create form file for field %s and fileName %s: %w", key, fileName, err)
+	}
+
+	if seeker, ok := f.Data.(io.Seeker); ok {
+		// If this is a seeker, then we reset to the start of the file, to ensure retries work as expected.
+		_, err := seeker.Seek(0, io.SeekStart)
+		if err != nil {
+			return fmt.Errorf("failed to seek file for field %s and fileName %s: %w", key, fileName, err)
+		}
 	}
 
 	_, err = io.Copy(part, f.Data)
