@@ -44,31 +44,30 @@ func (m Message) SetAllowBusiness(allow bool) Message {
 }
 
 func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	if ctx.Message != nil {
+	// Handle NEW normal messages ONLY
+	if ctx.Message != nil && ctx.EditedMessage == nil {
 		return m.Filter == nil || m.Filter(ctx.Message)
 	}
-	// If edits are allowed, and message is edited.
+	// Handle EDITED normal messages ONLY if enabled
 	if m.AllowEdited && ctx.EditedMessage != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedMessage)
 	}
-
-	// If channel posts are allowed, and message is channel post.
-	if m.AllowChannel && ctx.ChannelPost != nil {
+	// Handle NEW channel posts ONLY
+	if m.AllowChannel && ctx.ChannelPost != nil && ctx.EditedChannelPost == nil {
 		return m.Filter == nil || m.Filter(ctx.ChannelPost)
 	}
-	// If channel posts and edits are allowed, and post is edited.
+	// Handle EDITED channel posts ONLY if both allowed
 	if m.AllowChannel && m.AllowEdited && ctx.EditedChannelPost != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedChannelPost)
 	}
-
-	// Same logic, for business messages
-	if m.AllowBusiness && ctx.BusinessMessage != nil {
+	// Handle NEW business messages ONLY
+	if m.AllowBusiness && ctx.BusinessMessage != nil && ctx.EditedBusinessMessage == nil {
 		return m.Filter == nil || m.Filter(ctx.BusinessMessage)
 	}
+	// Handle EDITED business messages ONLY if both allowed
 	if m.AllowBusiness && m.AllowEdited && ctx.EditedBusinessMessage != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedBusinessMessage)
 	}
-
 	return false
 }
 
