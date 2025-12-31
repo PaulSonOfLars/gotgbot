@@ -78,6 +78,11 @@ func (c Chat) GetAdministrators(b *Bot, opts *GetChatAdministratorsOpts) ([]Chat
 	return b.GetChatAdministrators(c.Id, opts)
 }
 
+// GetGifts is a helper method for Bot.GetChatGifts.
+func (c Chat) GetGifts(b *Bot, opts *GetChatGiftsOpts) (*OwnedGifts, error) {
+	return b.GetChatGifts(c.Id, opts)
+}
+
 // GetMember is a helper method for Bot.GetChatMember.
 func (c Chat) GetMember(b *Bot, userId int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	return b.GetChatMember(c.Id, userId, opts)
@@ -755,6 +760,11 @@ func (u User) EditStarSubscription(b *Bot, telegramPaymentChargeId string, isCan
 // GetChatBoosts is a helper method for Bot.GetUserChatBoosts.
 func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
 	return b.GetUserChatBoosts(chatId, u.Id, opts)
+}
+
+// GetGifts is a helper method for Bot.GetUserGifts.
+func (u User) GetGifts(b *Bot, opts *GetUserGiftsOpts) (*OwnedGifts, error) {
+	return b.GetUserGifts(u.Id, opts)
 }
 
 // GetProfilePhotos is a helper method for Bot.GetUserProfilePhotos.

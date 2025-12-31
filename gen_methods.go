@@ -563,7 +563,7 @@ func (bot *Bot) ConvertGiftToStarsWithContext(ctx context.Context, businessConne
 
 // CopyMessageOpts is the set of optional fields for Bot.CopyMessage and Bot.CopyMessageWithContext.
 type CopyMessageOpts struct {
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -583,6 +583,8 @@ type CopyMessageOpts struct {
 	ProtectContent bool
 	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
 	AllowPaidBroadcast bool
+	// Unique identifier of the message effect to be added to the message; only available when copying to private chats
+	MessageEffectId string
 	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
@@ -621,6 +623,7 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
 		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
 		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)
+		addIfValueNotZero(v, "message_effect_id", opts.MessageEffectId, opts.MessageEffectId == "")
 		addIfValueNotZero(v, "suggested_post_parameters", opts.SuggestedPostParameters, opts.SuggestedPostParameters == nil)
 		addIfValueNotZero(v, "reply_parameters", opts.ReplyParameters, opts.ReplyParameters == nil)
 		addIfValueNotZero(v, "reply_markup", opts.ReplyMarkup, opts.ReplyMarkup == nil)
@@ -642,7 +645,7 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 
 // CopyMessagesOpts is the set of optional fields for Bot.CopyMessages and Bot.CopyMessagesWithContext.
 type CopyMessagesOpts struct {
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -1162,7 +1165,7 @@ type DeleteForumTopicOpts struct {
 
 // DeleteForumTopic (https://core.telegram.org/bots/api#deleteforumtopic)
 //
-// Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
+// Use this method to delete a forum topic along with all its messages in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
 //   - opts (type DeleteForumTopicOpts): All optional parameters.
@@ -1557,7 +1560,7 @@ type EditForumTopicOpts struct {
 
 // EditForumTopic (https://core.telegram.org/bots/api#editforumtopic)
 //
-// Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// Use this method to edit name and icon of a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
 //   - opts (type EditForumTopicOpts): All optional parameters.
@@ -2122,7 +2125,7 @@ func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int6
 
 // ForwardMessageOpts is the set of optional fields for Bot.ForwardMessage and Bot.ForwardMessageWithContext.
 type ForwardMessageOpts struct {
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be forwarded; required if the message is forwarded to a direct messages chat
 	DirectMessagesTopicId int64
@@ -2132,6 +2135,8 @@ type ForwardMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the forwarded message from forwarding and saving
 	ProtectContent bool
+	// Unique identifier of the message effect to be added to the message; only available when forwarding to private chats
+	MessageEffectId string
 	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only
 	SuggestedPostParameters *SuggestedPostParameters
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2161,6 +2166,7 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 		addIfValueNotZero(v, "video_start_timestamp", opts.VideoStartTimestamp, opts.VideoStartTimestamp == 0)
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
 		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
+		addIfValueNotZero(v, "message_effect_id", opts.MessageEffectId, opts.MessageEffectId == "")
 		addIfValueNotZero(v, "suggested_post_parameters", opts.SuggestedPostParameters, opts.SuggestedPostParameters == nil)
 	}
 
@@ -2180,7 +2186,7 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 
 // ForwardMessagesOpts is the set of optional fields for Bot.ForwardMessages and Bot.ForwardMessagesWithContext.
 type ForwardMessagesOpts struct {
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the messages will be forwarded; required if the messages are forwarded to a direct messages chat
 	DirectMessagesTopicId int64
@@ -2270,10 +2276,14 @@ type GetBusinessAccountGiftsOpts struct {
 	ExcludeSaved bool
 	// Pass True to exclude gifts that can be purchased an unlimited number of times
 	ExcludeUnlimited bool
-	// Pass True to exclude gifts that can be purchased a limited number of times
-	ExcludeLimited bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can be upgraded to unique
+	ExcludeLimitedUpgradable bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can't be upgraded to unique
+	ExcludeLimitedNonUpgradable bool
 	// Pass True to exclude unique gifts
 	ExcludeUnique bool
+	// Pass True to exclude gifts that were assigned from the TON blockchain and can't be resold or transferred in Telegram
+	ExcludeFromBlockchain bool
 	// Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
 	SortByPrice bool
 	// Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
@@ -2301,8 +2311,10 @@ func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, business
 		addIfValueNotZero(v, "exclude_unsaved", opts.ExcludeUnsaved, opts.ExcludeUnsaved == false)
 		addIfValueNotZero(v, "exclude_saved", opts.ExcludeSaved, opts.ExcludeSaved == false)
 		addIfValueNotZero(v, "exclude_unlimited", opts.ExcludeUnlimited, opts.ExcludeUnlimited == false)
-		addIfValueNotZero(v, "exclude_limited", opts.ExcludeLimited, opts.ExcludeLimited == false)
+		addIfValueNotZero(v, "exclude_limited_upgradable", opts.ExcludeLimitedUpgradable, opts.ExcludeLimitedUpgradable == false)
+		addIfValueNotZero(v, "exclude_limited_non_upgradable", opts.ExcludeLimitedNonUpgradable, opts.ExcludeLimitedNonUpgradable == false)
 		addIfValueNotZero(v, "exclude_unique", opts.ExcludeUnique, opts.ExcludeUnique == false)
+		addIfValueNotZero(v, "exclude_from_blockchain", opts.ExcludeFromBlockchain, opts.ExcludeFromBlockchain == false)
 		addIfValueNotZero(v, "sort_by_price", opts.SortByPrice, opts.SortByPrice == false)
 		addIfValueNotZero(v, "offset", opts.Offset, opts.Offset == "")
 		addIfValueNotZero(v, "limit", opts.Limit, opts.Limit == 0)
@@ -2455,6 +2467,72 @@ func (bot *Bot) GetChatAdministratorsWithContext(ctx context.Context, chatId int
 	}
 
 	return unmarshalChatMemberArray(r)
+}
+
+// GetChatGiftsOpts is the set of optional fields for Bot.GetChatGifts and Bot.GetChatGiftsWithContext.
+type GetChatGiftsOpts struct {
+	// Pass True to exclude gifts that aren't saved to the chat's profile page. Always True, unless the bot has the can_post_messages administrator right in the channel.
+	ExcludeUnsaved bool
+	// Pass True to exclude gifts that are saved to the chat's profile page. Always False, unless the bot has the can_post_messages administrator right in the channel.
+	ExcludeSaved bool
+	// Pass True to exclude gifts that can be purchased an unlimited number of times
+	ExcludeUnlimited bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can be upgraded to unique
+	ExcludeLimitedUpgradable bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can't be upgraded to unique
+	ExcludeLimitedNonUpgradable bool
+	// Pass True to exclude gifts that were assigned from the TON blockchain and can't be resold or transferred in Telegram
+	ExcludeFromBlockchain bool
+	// Pass True to exclude unique gifts
+	ExcludeUnique bool
+	// Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
+	SortByPrice bool
+	// Offset of the first entry to return as received from the previous request; use an empty string to get the first chunk of results
+	Offset string
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetChatGifts (https://core.telegram.org/bots/api#getchatgifts)
+//
+// Returns the gifts owned by a chat. Returns OwnedGifts on success.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - opts (type GetChatGiftsOpts): All optional parameters.
+func (bot *Bot) GetChatGifts(chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts, error) {
+	return bot.GetChatGiftsWithContext(context.Background(), chatId, opts)
+}
+
+// GetChatGiftsWithContext is the same as Bot.GetChatGifts, but with a context.Context parameter
+func (bot *Bot) GetChatGiftsWithContext(ctx context.Context, chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts, error) {
+	v := map[string]any{}
+	v["chat_id"] = chatId
+	if opts != nil {
+		addIfValueNotZero(v, "exclude_unsaved", opts.ExcludeUnsaved, opts.ExcludeUnsaved == false)
+		addIfValueNotZero(v, "exclude_saved", opts.ExcludeSaved, opts.ExcludeSaved == false)
+		addIfValueNotZero(v, "exclude_unlimited", opts.ExcludeUnlimited, opts.ExcludeUnlimited == false)
+		addIfValueNotZero(v, "exclude_limited_upgradable", opts.ExcludeLimitedUpgradable, opts.ExcludeLimitedUpgradable == false)
+		addIfValueNotZero(v, "exclude_limited_non_upgradable", opts.ExcludeLimitedNonUpgradable, opts.ExcludeLimitedNonUpgradable == false)
+		addIfValueNotZero(v, "exclude_from_blockchain", opts.ExcludeFromBlockchain, opts.ExcludeFromBlockchain == false)
+		addIfValueNotZero(v, "exclude_unique", opts.ExcludeUnique, opts.ExcludeUnique == false)
+		addIfValueNotZero(v, "sort_by_price", opts.SortByPrice, opts.SortByPrice == false)
+		addIfValueNotZero(v, "offset", opts.Offset, opts.Offset == "")
+		addIfValueNotZero(v, "limit", opts.Limit, opts.Limit == 0)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getChatGifts", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var o OwnedGifts
+	return &o, json.Unmarshal(r, &o)
 }
 
 // GetChatMemberOpts is the set of optional fields for Bot.GetChatMember and Bot.GetChatMemberWithContext.
@@ -3116,6 +3194,66 @@ func (bot *Bot) GetUserChatBoostsWithContext(ctx context.Context, chatId int64, 
 	return &u, json.Unmarshal(r, &u)
 }
 
+// GetUserGiftsOpts is the set of optional fields for Bot.GetUserGifts and Bot.GetUserGiftsWithContext.
+type GetUserGiftsOpts struct {
+	// Pass True to exclude gifts that can be purchased an unlimited number of times
+	ExcludeUnlimited bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can be upgraded to unique
+	ExcludeLimitedUpgradable bool
+	// Pass True to exclude gifts that can be purchased a limited number of times and can't be upgraded to unique
+	ExcludeLimitedNonUpgradable bool
+	// Pass True to exclude gifts that were assigned from the TON blockchain and can't be resold or transferred in Telegram
+	ExcludeFromBlockchain bool
+	// Pass True to exclude unique gifts
+	ExcludeUnique bool
+	// Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
+	SortByPrice bool
+	// Offset of the first entry to return as received from the previous request; use an empty string to get the first chunk of results
+	Offset string
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetUserGifts (https://core.telegram.org/bots/api#getusergifts)
+//
+// Returns the gifts owned and hosted by a user. Returns OwnedGifts on success.
+//   - userId (type int64): Unique identifier of the user
+//   - opts (type GetUserGiftsOpts): All optional parameters.
+func (bot *Bot) GetUserGifts(userId int64, opts *GetUserGiftsOpts) (*OwnedGifts, error) {
+	return bot.GetUserGiftsWithContext(context.Background(), userId, opts)
+}
+
+// GetUserGiftsWithContext is the same as Bot.GetUserGifts, but with a context.Context parameter
+func (bot *Bot) GetUserGiftsWithContext(ctx context.Context, userId int64, opts *GetUserGiftsOpts) (*OwnedGifts, error) {
+	v := map[string]any{}
+	v["user_id"] = userId
+	if opts != nil {
+		addIfValueNotZero(v, "exclude_unlimited", opts.ExcludeUnlimited, opts.ExcludeUnlimited == false)
+		addIfValueNotZero(v, "exclude_limited_upgradable", opts.ExcludeLimitedUpgradable, opts.ExcludeLimitedUpgradable == false)
+		addIfValueNotZero(v, "exclude_limited_non_upgradable", opts.ExcludeLimitedNonUpgradable, opts.ExcludeLimitedNonUpgradable == false)
+		addIfValueNotZero(v, "exclude_from_blockchain", opts.ExcludeFromBlockchain, opts.ExcludeFromBlockchain == false)
+		addIfValueNotZero(v, "exclude_unique", opts.ExcludeUnique, opts.ExcludeUnique == false)
+		addIfValueNotZero(v, "sort_by_price", opts.SortByPrice, opts.SortByPrice == false)
+		addIfValueNotZero(v, "offset", opts.Offset, opts.Offset == "")
+		addIfValueNotZero(v, "limit", opts.Limit, opts.Limit == 0)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getUserGifts", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var o OwnedGifts
+	return &o, json.Unmarshal(r, &o)
+}
+
 // GetUserProfilePhotosOpts is the set of optional fields for Bot.GetUserProfilePhotos and Bot.GetUserProfilePhotosWithContext.
 type GetUserProfilePhotosOpts struct {
 	// Sequential number of the first photo to be returned. By default, all photos are returned.
@@ -3451,7 +3589,7 @@ type PromoteChatMemberOpts struct {
 	CanDeleteMessages bool
 	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
-	// Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics
+	// Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics. For backward compatibility, defaults to True for promotions of channel administrators
 	CanRestrictMembers bool
 	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
@@ -3818,6 +3956,54 @@ func (bot *Bot) ReplaceStickerInSetWithContext(ctx context.Context, userId int64
 	return b, json.Unmarshal(r, &b)
 }
 
+// RepostStoryOpts is the set of optional fields for Bot.RepostStory and Bot.RepostStoryWithContext.
+type RepostStoryOpts struct {
+	// Pass True to keep the story accessible after it expires
+	PostToChatPage bool
+	// Pass True if the content of the story must be protected from forwarding and screenshotting
+	ProtectContent bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RepostStory (https://core.telegram.org/bots/api#repoststory)
+//
+// Reposts a story on behalf of a business account from another business account. Both business accounts must be managed by the same bot, and the story on the source account must have been posted (or reposted) by the bot. Requires the can_manage_stories business bot right for both business accounts. Returns Story on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - fromChatId (type int64): Unique identifier of the chat which posted the story that should be reposted
+//   - fromStoryId (type int64): Unique identifier of the story that should be reposted
+//   - activePeriod (type int64): Period after which the story is moved to the archive, in seconds; must be one of 6 * 3600, 12 * 3600, 86400, or 2 * 86400
+//   - opts (type RepostStoryOpts): All optional parameters.
+func (bot *Bot) RepostStory(businessConnectionId string, fromChatId int64, fromStoryId int64, activePeriod int64, opts *RepostStoryOpts) (*Story, error) {
+	return bot.RepostStoryWithContext(context.Background(), businessConnectionId, fromChatId, fromStoryId, activePeriod, opts)
+}
+
+// RepostStoryWithContext is the same as Bot.RepostStory, but with a context.Context parameter
+func (bot *Bot) RepostStoryWithContext(ctx context.Context, businessConnectionId string, fromChatId int64, fromStoryId int64, activePeriod int64, opts *RepostStoryOpts) (*Story, error) {
+	v := map[string]any{}
+	v["business_connection_id"] = businessConnectionId
+	v["from_chat_id"] = fromChatId
+	v["from_story_id"] = fromStoryId
+	v["active_period"] = activePeriod
+	if opts != nil {
+		addIfValueNotZero(v, "post_to_chat_page", opts.PostToChatPage, opts.PostToChatPage == false)
+		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "repostStory", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var s Story
+	return &s, json.Unmarshal(r, &s)
+}
+
 // RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember and Bot.RestrictChatMemberWithContext.
 type RestrictChatMemberOpts struct {
 	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
@@ -3954,7 +4140,7 @@ func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId
 type SendAnimationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4049,7 +4235,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 type SendAudioOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4139,7 +4325,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 type SendChatActionOpts struct {
 	// Unique identifier of the business connection on behalf of which the action will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread; for supergroups only
+	// Unique identifier for the target message thread or topic of a forum; for supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4239,7 +4425,7 @@ func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnection
 type SendContactOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4315,7 +4501,7 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 type SendDiceOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4384,7 +4570,7 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 type SendDocumentOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4467,7 +4653,7 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 type SendGameOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -4546,7 +4732,7 @@ type SendGiftOpts struct {
 // SendGift (https://core.telegram.org/bots/api#sendgift)
 //
 // Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
-//   - giftId (type string): Identifier of the gift
+//   - giftId (type string): Identifier of the gift; limited gifts can't be sent to channel chats
 //   - opts (type SendGiftOpts): All optional parameters.
 func (bot *Bot) SendGift(giftId string, opts *SendGiftOpts) (bool, error) {
 	return bot.SendGiftWithContext(context.Background(), giftId, opts)
@@ -4581,7 +4767,7 @@ func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *Se
 
 // SendInvoiceOpts is the set of optional fields for Bot.SendInvoice and Bot.SendInvoiceWithContext.
 type SendInvoiceOpts struct {
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4704,7 +4890,7 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 type SendLocationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4786,7 +4972,7 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 type SendMediaGroupOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4848,7 +5034,7 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 type SendMessageOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4921,11 +5107,60 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 	return &m, json.Unmarshal(r, &m)
 }
 
+// SendMessageDraftOpts is the set of optional fields for Bot.SendMessageDraft and Bot.SendMessageDraftWithContext.
+type SendMessageDraftOpts struct {
+	// Unique identifier for the target message thread
+	MessageThreadId int64
+	// Mode for parsing entities in the message text. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
+	Entities []MessageEntity
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendMessageDraft (https://core.telegram.org/bots/api#sendmessagedraft)
+//
+// Use this method to stream a partial message to a user while the message is being generated; supported only for bots with forum topic mode enabled. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target private chat
+//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes of drafts with the same identifier are animated
+//   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
+//   - opts (type SendMessageDraftOpts): All optional parameters.
+func (bot *Bot) SendMessageDraft(chatId int64, draftId int64, text string, opts *SendMessageDraftOpts) (bool, error) {
+	return bot.SendMessageDraftWithContext(context.Background(), chatId, draftId, text, opts)
+}
+
+// SendMessageDraftWithContext is the same as Bot.SendMessageDraft, but with a context.Context parameter
+func (bot *Bot) SendMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, text string, opts *SendMessageDraftOpts) (bool, error) {
+	v := map[string]any{}
+	v["chat_id"] = chatId
+	v["draft_id"] = draftId
+	v["text"] = text
+	if opts != nil {
+		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
+		addIfValueNotZero(v, "entities", opts.Entities, opts.Entities == nil)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendMessageDraft", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SendPaidMediaOpts is the set of optional fields for Bot.SendPaidMedia and Bot.SendPaidMediaWithContext.
 type SendPaidMediaOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -4959,7 +5194,7 @@ type SendPaidMediaOpts struct {
 //
 // Use this method to send paid media. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-10000
+//   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-25000
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
 func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
@@ -5007,7 +5242,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 type SendPhotoOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -5090,7 +5325,7 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 type SendPollOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
 	QuestionParseMode string
@@ -5193,7 +5428,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 type SendStickerOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -5264,7 +5499,7 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 type SendVenueOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -5350,7 +5585,7 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 type SendVideoOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -5454,7 +5689,7 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 type SendVideoNoteOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -5531,7 +5766,7 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 type SendVoiceOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
@@ -7113,7 +7348,7 @@ type UnpinAllForumTopicMessagesOpts struct {
 
 // UnpinAllForumTopicMessages (https://core.telegram.org/bots/api#unpinallforumtopicmessages)
 //
-// Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
+// Use this method to clear the list of pinned messages in a forum topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - messageThreadId (type int64): Unique identifier for the target message thread of the forum topic
 //   - opts (type UnpinAllForumTopicMessagesOpts): All optional parameters.
