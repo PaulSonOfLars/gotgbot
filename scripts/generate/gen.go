@@ -206,6 +206,12 @@ func (f Field) hasDefault() (string, bool) {
 		return "", false
 	}
 
+	if strings.Contains(strings.ToLower(f.Description), "backward compatibility") ||
+		strings.Contains(strings.ToLower(f.Description), "backwards compatibility") {
+		// Backwards compatibility for "defaults" is a bad myth
+		return "", false
+	}
+
 	ms := defaultsMatcher.FindStringSubmatch(f.Description)
 	if len(ms) == 0 {
 		return "", true
