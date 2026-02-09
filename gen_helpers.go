@@ -767,6 +767,11 @@ func (u User) GetGifts(b *Bot, opts *GetUserGiftsOpts) (*OwnedGifts, error) {
 	return b.GetUserGifts(u.Id, opts)
 }
 
+// GetProfileAudios is a helper method for Bot.GetUserProfileAudios.
+func (u User) GetProfileAudios(b *Bot, opts *GetUserProfileAudiosOpts) (*UserProfileAudios, error) {
+	return b.GetUserProfileAudios(u.Id, opts)
+}
+
 // GetProfilePhotos is a helper method for Bot.GetUserProfilePhotos.
 func (u User) GetProfilePhotos(b *Bot, opts *GetUserProfilePhotosOpts) (*UserProfilePhotos, error) {
 	return b.GetUserProfilePhotos(u.Id, opts)
