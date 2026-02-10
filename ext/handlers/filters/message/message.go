@@ -207,6 +207,14 @@ func LeftChatMember(msg *gotgbot.Message) bool {
 	return msg.LeftChatMember != nil
 }
 
+func ChatOwnerLeft(msg *gotgbot.Message) bool {
+	return msg.ChatOwnerLeft != nil
+}
+
+func ChatOwnerChanged(msg *gotgbot.Message) bool {
+	return msg.ChatOwnerChanged != nil
+}
+
 func PinnedMessage(msg *gotgbot.Message) bool {
 	return msg.PinnedMessage != nil
 }
