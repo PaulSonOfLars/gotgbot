@@ -423,8 +423,7 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
-		skip := slices.Contains(constantFields, f.Name)
-		if skip {
+		if slices.Contains(constantFields, f.Name) {
 			continue
 		}
 
