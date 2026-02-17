@@ -233,6 +233,12 @@ func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
 	case string:
 		return val, nil
 
+	case *string:
+		if val == nil {
+			return "", nil
+		}
+		return *val, nil
+
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
 		return fmt.Sprint(val), nil
 

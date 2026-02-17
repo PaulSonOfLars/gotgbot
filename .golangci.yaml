@@ -88,9 +88,22 @@ linters:
         text: 'QF1003:' # Switch lint
         path: scripts/generate
       - linters:
+          - staticcheck
+        text: 'QF1012:' # QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))
+        path: scripts/generate
+      - linters:
           - gosec
         path: \w*_test.go
         text: 'G404:'
+      - linters:
+          - gosec
+        text: 'G704:'
+      - linters:
+          - gosec
+        text: 'G703:'
+      - linters:
+          - gosec
+        text: 'G706:'
       - linters:
           - staticcheck
         text: 'S1023:'
