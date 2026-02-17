@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -140,9 +141,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	defer cancel()
 
 	if opts != nil {
-		for k, v := range opts.OverrideParams {
-			params[k] = v
-		}
+		maps.Copy(params, opts.OverrideParams)
 	}
 
 	buf := bytes.NewBuffer(nil)

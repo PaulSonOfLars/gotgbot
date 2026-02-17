@@ -16,7 +16,7 @@ type Context struct {
 	// Data represents update-local storage.
 	// This can be used to pass data across handlers - for example, to cache operations relevant to the current update,
 	// such as admin checks.
-	Data map[string]interface{}
+	Data map[string]any
 
 	// EffectiveMessage is the message which triggered the update, if available.
 	// If the message is an InaccessibleMessage (eg, from a callbackquery), the message contents may be inaccessible.
@@ -40,7 +40,7 @@ type Context struct {
 
 // NewContext populates a context with the relevant fields from the current bot and update.
 // It takes a data field in the case where custom data needs to be passed.
-func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interface{}) *Context {
+func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Context {
 	var msg *gotgbot.Message
 	var chat *gotgbot.Chat
 	var user *gotgbot.User
@@ -149,7 +149,7 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]interfac
 	}
 
 	if data == nil {
-		data = make(map[string]interface{})
+		data = make(map[string]any)
 	}
 
 	if sender == nil {

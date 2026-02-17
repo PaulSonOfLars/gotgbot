@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template"
@@ -422,13 +423,7 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
-		skip := false
-		for _, constantField := range constantFields {
-			if f.Name == constantField {
-				skip = true
-				break
-			}
-		}
+		skip := slices.Contains(constantFields, f.Name)
 		if skip {
 			continue
 		}
@@ -471,7 +466,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	// If the inputfile is a common field, then the interface contains fields.
-	hasInputFile = hasInputFile && contains(fieldName, getFieldNames(commonFields))
+	hasInputFile = hasInputFile && slices.Contains(getFieldNames(commonFields), fieldName)
 
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
