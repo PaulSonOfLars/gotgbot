@@ -87,7 +87,7 @@ func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 //
 // NOTE: IF THIS FAILS, IT IS NOT A FLAKE! Investigate!
 func TestUpdaterPollingConcurrency(t *testing.T) {
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		t.Run(fmt.Sprintf("run_%d", i), func(t *testing.T) {
 			concurrentTest(t)
 		})
@@ -610,7 +610,7 @@ func benchmarkUpdaterWithNBots(b *testing.B, numBot int) {
 		return nil
 	}})
 
-	for i := 0; i < numBot; i++ {
+	for i := range numBot {
 		token := strconv.Itoa(i)
 		err := u.AddWebhook(&gotgbot.Bot{
 			Token:     token,

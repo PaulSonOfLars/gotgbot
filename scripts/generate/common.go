@@ -9,19 +9,10 @@ import (
 	"strings"
 )
 
-func contains(s string, ss []string) bool {
-	for _, str := range ss {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
 
-	for _, split := range strings.Split(s, "_") {
+	for split := range strings.SplitSeq(s, "_") {
 		bd.WriteString(strings.Title(split))
 	}
 

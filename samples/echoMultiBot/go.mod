@@ -1,6 +1,6 @@
 module github.com/PaulSonOfLars/gotgbot/samples/echoMultiBot
 
-go 1.22
+go 1.24
 
 require github.com/PaulSonOfLars/gotgbot/v2 v2.99.99
 

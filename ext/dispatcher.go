@@ -24,7 +24,7 @@ type (
 	// It takes the non-nil error returned by the handler.
 	DispatcherErrorHandler func(b *gotgbot.Bot, ctx *Context, err error) DispatcherAction
 	// DispatcherPanicHandler allows for handling goroutine panics, where the 'r' value contains the reason for the panic.
-	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, r interface{})
+	DispatcherPanicHandler func(b *gotgbot.Bot, ctx *Context, r any)
 )
 
 type DispatcherAction string
@@ -253,7 +253,7 @@ func (d *Dispatcher) processRawUpdate(b *gotgbot.Bot, r json.RawMessage) error {
 
 // ProcessUpdate iterates over the list of groups to execute the matching handlers.
 // This is also where we recover from any panics that are thrown by user code, to avoid taking down the bot.
-func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[string]interface{}) (err error) {
+func (d *Dispatcher) ProcessUpdate(b *gotgbot.Bot, u *gotgbot.Update, data map[string]any) (err error) {
 	ctx := NewContext(b, u, data)
 
 	defer func() {

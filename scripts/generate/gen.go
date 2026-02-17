@@ -5,6 +5,7 @@ import (
 	"go/format"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -92,7 +93,7 @@ func (td TypeDescription) isChildType(d APIDescription, t string, typeName strin
 		return true
 	}
 
-	if contains(t, skip) {
+	if slices.Contains(skip, t) {
 		return false
 	}
 
