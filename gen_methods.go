@@ -801,7 +801,7 @@ type CreateForumTopicOpts struct {
 
 // CreateForumTopic (https://core.telegram.org/bots/api#createforumtopic)
 //
-// Use this method to create a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns information about the created topic as a ForumTopic object.
+// Use this method to create a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator right. Returns information about the created topic as a ForumTopic object.
 //   - chatId (type int64): Unique identifier for the target chat
 //   - name (type string): Topic name, 1-128 characters
 //   - opts (type CreateForumTopicOpts): All optional parameters.
@@ -3254,6 +3254,48 @@ func (bot *Bot) GetUserGiftsWithContext(ctx context.Context, userId int64, opts 
 	return &o, json.Unmarshal(r, &o)
 }
 
+// GetUserProfileAudiosOpts is the set of optional fields for Bot.GetUserProfileAudios and Bot.GetUserProfileAudiosWithContext.
+type GetUserProfileAudiosOpts struct {
+	// Sequential number of the first audio to be returned. By default, all audios are returned.
+	Offset int64
+	// Limits the number of audios to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+	Limit int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetUserProfileAudios (https://core.telegram.org/bots/api#getuserprofileaudios)
+//
+// Use this method to get a list of profile audios for a user. Returns a UserProfileAudios object.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type GetUserProfileAudiosOpts): All optional parameters.
+func (bot *Bot) GetUserProfileAudios(userId int64, opts *GetUserProfileAudiosOpts) (*UserProfileAudios, error) {
+	return bot.GetUserProfileAudiosWithContext(context.Background(), userId, opts)
+}
+
+// GetUserProfileAudiosWithContext is the same as Bot.GetUserProfileAudios, but with a context.Context parameter
+func (bot *Bot) GetUserProfileAudiosWithContext(ctx context.Context, userId int64, opts *GetUserProfileAudiosOpts) (*UserProfileAudios, error) {
+	v := map[string]any{}
+	v["user_id"] = userId
+	if opts != nil {
+		addIfValueNotZero(v, "offset", opts.Offset, opts.Offset == 0)
+		addIfValueNotZero(v, "limit", opts.Limit, opts.Limit == 0)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getUserProfileAudios", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var u UserProfileAudios
+	return &u, json.Unmarshal(r, &u)
+}
+
 // GetUserProfilePhotosOpts is the set of optional fields for Bot.GetUserProfilePhotos and Bot.GetUserProfilePhotosWithContext.
 type GetUserProfilePhotosOpts struct {
 	// Sequential number of the first photo to be returned. By default, all photos are returned.
@@ -3804,6 +3846,38 @@ func (bot *Bot) RemoveChatVerificationWithContext(ctx context.Context, chatId in
 	}
 
 	r, err := bot.RequestWithContext(ctx, "removeChatVerification", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// RemoveMyProfilePhotoOpts is the set of optional fields for Bot.RemoveMyProfilePhoto and Bot.RemoveMyProfilePhotoWithContext.
+type RemoveMyProfilePhotoOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// RemoveMyProfilePhoto (https://core.telegram.org/bots/api#removemyprofilephoto)
+//
+// Removes the profile photo of the bot. Requires no parameters. Returns True on success.
+//   - opts (type RemoveMyProfilePhotoOpts): All optional parameters.
+func (bot *Bot) RemoveMyProfilePhoto(opts *RemoveMyProfilePhotoOpts) (bool, error) {
+	return bot.RemoveMyProfilePhotoWithContext(context.Background(), opts)
+}
+
+// RemoveMyProfilePhotoWithContext is the same as Bot.RemoveMyProfilePhoto, but with a context.Context parameter
+func (bot *Bot) RemoveMyProfilePhotoWithContext(ctx context.Context, opts *RemoveMyProfilePhotoOpts) (bool, error) {
+	v := map[string]any{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "removeMyProfilePhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -6604,6 +6678,40 @@ func (bot *Bot) SetMyNameWithContext(ctx context.Context, opts *SetMyNameOpts) (
 	}
 
 	r, err := bot.RequestWithContext(ctx, "setMyName", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMyProfilePhotoOpts is the set of optional fields for Bot.SetMyProfilePhoto and Bot.SetMyProfilePhotoWithContext.
+type SetMyProfilePhotoOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetMyProfilePhoto (https://core.telegram.org/bots/api#setmyprofilephoto)
+//
+// Changes the profile photo of the bot. Returns True on success.
+//   - photo (type InputProfilePhoto): The new profile photo to set
+//   - opts (type SetMyProfilePhotoOpts): All optional parameters.
+func (bot *Bot) SetMyProfilePhoto(photo InputProfilePhoto, opts *SetMyProfilePhotoOpts) (bool, error) {
+	return bot.SetMyProfilePhotoWithContext(context.Background(), photo, opts)
+}
+
+// SetMyProfilePhotoWithContext is the same as Bot.SetMyProfilePhoto, but with a context.Context parameter
+func (bot *Bot) SetMyProfilePhotoWithContext(ctx context.Context, photo InputProfilePhoto, opts *SetMyProfilePhotoOpts) (bool, error) {
+	v := map[string]any{}
+	v["photo"] = photo
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setMyProfilePhoto", v, reqOpts)
 	if err != nil {
 		return false, err
 	}

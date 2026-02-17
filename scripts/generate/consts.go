@@ -43,6 +43,12 @@ package gotgbot
 	}
 	consts.WriteString(chatTypeConsts)
 
+	buttonStyleConsts, err := generateButtonStyleConsts(d)
+	if err != nil {
+		return fmt.Errorf("failed to generate consts for button styles: %w", err)
+	}
+	consts.WriteString(buttonStyleConsts)
+
 	chatMemberStatuses, err := generateChatMemberStatusConsts(d)
 	if err != nil {
 		return fmt.Errorf("failed to generate consts for chat member statuses: %w", err)
@@ -98,21 +104,56 @@ func generateTypeConsts(d APIDescription, typeName string) (string, error) {
 	out := strings.Builder{}
 	out.WriteString("\n// The consts listed below represent all the " + strings.ToLower(typeName) + " types that can be obtained from telegram.")
 	out.WriteString("\nconst (")
+
+	types, err := getFieldQuotes(updType, "type")
+	if err != nil {
+		return "", fmt.Errorf("failed to get field quotes from %s: %w", typeName, err)
+	}
+
+	for _, t := range types {
+		out.WriteString(writeConst(typeName+"Type"+snakeToTitle(t), t))
+	}
+
+	out.WriteString(")\n\n")
+	return out.String(), nil
+}
+
+func generateButtonStyleConsts(d APIDescription) (string, error) {
+	keybType, ok := d.Types["KeyboardButton"]
+	if !ok {
+		return "", errors.New("missing KeyboardButton type data")
+	}
+	out := strings.Builder{}
+	out.WriteString("\n// The consts listed below represent all the KeyboardButton styles that can be sent.")
+	out.WriteString("\nconst (")
+
+	types, err := getFieldQuotes(keybType, "style")
+	if err != nil {
+		return "", fmt.Errorf("failed to get keyboard types: %w", err)
+	}
+
+	for _, t := range types {
+		out.WriteString(writeConst("KeyboardButtonStyle"+snakeToTitle(t), t))
+	}
+
+	out.WriteString(")\n\n")
+	return out.String(), nil
+}
+
+func getFieldQuotes(updType TypeDescription, fieldName string) ([]string, error) {
 	for _, f := range updType.Fields {
-		if f.Name != "type" {
+		if f.Name != fieldName {
 			// the field we want to look at is called "type", ignore all others.
 			continue
 		}
 		types, err := extractQuotedValues(f.Description)
 		if err != nil {
-			return "", fmt.Errorf("failed to get quoted types: %w", err)
+			return nil, fmt.Errorf("failed to get quoted values: %w", err)
 		}
-		for _, t := range types {
-			out.WriteString(writeConst(typeName+"Type"+snakeToTitle(t), t))
-		}
+		return types, nil
 	}
-	out.WriteString(")\n\n")
-	return out.String(), nil
+
+	return nil, fmt.Errorf("field '%s' not found", fieldName)
 }
 
 func generateParseModeConsts() string {
@@ -198,25 +239,14 @@ func generateChatMemberStatusConsts(d APIDescription) (string, error) {
 			continue
 		}
 
-		var statusValue string
-		for _, field := range subtype.Fields {
-			if field.Name != "status" {
-				continue
-			}
-			values, err := extractQuotedValues(field.Description)
-			if err != nil {
-				return "", fmt.Errorf("failed to extract status from %s: %w", subtypeName, err)
-			}
-			if len(values) != 1 {
-				return "", fmt.Errorf("unexpected multiple status values in %s", subtypeName)
-			}
-			statusValue = values[0]
-			break
+		values, err := getFieldQuotes(subtype, "status")
+		if err != nil {
+			return "", fmt.Errorf("failed to get status values: %w", err)
 		}
-
-		if statusValue == "" {
-			continue // no valid status found
+		if len(values) != 1 {
+			return "", fmt.Errorf("unexpected multiple status values in %s", subtypeName)
 		}
+		statusValue := values[0]
 
 		constName := "ChatMemberStatus" + strings.TrimPrefix(subtypeName, "ChatMember")
 		out.WriteString(writeConst(constName, statusValue))
