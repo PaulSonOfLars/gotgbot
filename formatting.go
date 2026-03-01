@@ -286,10 +286,9 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 		// ![22:45 tomorrow](tg://time?unix=1647531900&format=r)
 		// ![22:45 tomorrow](tg://time?unix=1647531900)
 		if ent.DateTimeFormat != "" {
-			return prevText + pre + "![" + cleanCntnt + "](tg://time?unix=" + ent.CustomEmojiId + "&format=" + ent.DateTimeFormat + ")" + post
+			return prevText + pre + "![" + cleanCntnt + "](tg://time?unix=" + strconv.FormatInt(ent.UnixTime, 10) + "&format=" + ent.DateTimeFormat + ")" + post
 		}
-
-		return prevText + pre + "![" + cleanCntnt + "](tg://time?unix=" + ent.CustomEmojiId + ")" + post
+		return prevText + pre + "![" + cleanCntnt + "](tg://time?unix=" + strconv.FormatInt(ent.UnixTime, 10) + ")" + post
 	case "text_mention":
 		// [inline mention of a user](tg://user?id=123456789)
 		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post
