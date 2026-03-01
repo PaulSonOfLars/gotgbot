@@ -3655,6 +3655,8 @@ type PromoteChatMemberOpts struct {
 	CanManageTopics bool
 	// Pass True if the administrator can manage direct messages within the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool
+	// Pass True if the administrator can edit the tags of regular members; for groups and supergroups only
+	CanManageTags bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -3691,6 +3693,7 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 		addIfValueNotZero(v, "can_pin_messages", opts.CanPinMessages, opts.CanPinMessages == false)
 		addIfValueNotZero(v, "can_manage_topics", opts.CanManageTopics, opts.CanManageTopics == false)
 		addIfValueNotZero(v, "can_manage_direct_messages", opts.CanManageDirectMessages, opts.CanManageDirectMessages == false)
+		addIfValueNotZero(v, "can_manage_tags", opts.CanManageTags, opts.CanManageTags == false)
 	}
 
 	var reqOpts *RequestOpts
@@ -5195,7 +5198,7 @@ type SendMessageDraftOpts struct {
 
 // SendMessageDraft (https://core.telegram.org/bots/api#sendmessagedraft)
 //
-// Use this method to stream a partial message to a user while the message is being generated; supported only for bots with forum topic mode enabled. Returns True on success.
+// Use this method to stream a partial message to a user while the message is being generated. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target private chat
 //   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes of drafts with the same identifier are animated
 //   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
@@ -6183,6 +6186,47 @@ func (bot *Bot) SetChatDescriptionWithContext(ctx context.Context, chatId int64,
 	}
 
 	r, err := bot.RequestWithContext(ctx, "setChatDescription", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetChatMemberTagOpts is the set of optional fields for Bot.SetChatMemberTag and Bot.SetChatMemberTagWithContext.
+type SetChatMemberTagOpts struct {
+	// New tag for the member; 0-16 characters, emoji are not allowed
+	Tag string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetChatMemberTag (https://core.telegram.org/bots/api#setchatmembertag)
+//
+// Use this method to set a tag for a regular member in a group or a supergroup. The bot must be an administrator in the chat for this to work and must have the can_manage_tags administrator right. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target chat
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type SetChatMemberTagOpts): All optional parameters.
+func (bot *Bot) SetChatMemberTag(chatId int64, userId int64, opts *SetChatMemberTagOpts) (bool, error) {
+	return bot.SetChatMemberTagWithContext(context.Background(), chatId, userId, opts)
+}
+
+// SetChatMemberTagWithContext is the same as Bot.SetChatMemberTag, but with a context.Context parameter
+func (bot *Bot) SetChatMemberTagWithContext(ctx context.Context, chatId int64, userId int64, opts *SetChatMemberTagOpts) (bool, error) {
+	v := map[string]any{}
+	v["chat_id"] = chatId
+	v["user_id"] = userId
+	if opts != nil {
+		addIfValueNotZero(v, "tag", opts.Tag, opts.Tag == "")
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setChatMemberTag", v, reqOpts)
 	if err != nil {
 		return false, err
 	}

@@ -156,6 +156,11 @@ func (c Chat) SetDescription(b *Bot, opts *SetChatDescriptionOpts) (bool, error)
 	return b.SetChatDescription(c.Id, opts)
 }
 
+// SetMemberTag is a helper method for Bot.SetChatMemberTag.
+func (c Chat) SetMemberTag(b *Bot, userId int64, opts *SetChatMemberTagOpts) (bool, error) {
+	return b.SetChatMemberTag(c.Id, userId, opts)
+}
+
 // SetMenuButton is a helper method for Bot.SetChatMenuButton.
 func (c Chat) SetMenuButton(b *Bot, opts *SetChatMenuButtonOpts) (bool, error) {
 	if opts == nil {

@@ -1260,6 +1260,8 @@ type ChatAdministratorRights struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
+	CanManageTags bool `json:"can_manage_tags,omitempty"`
 }
 
 // ChatBackground (https://core.telegram.org/bots/api#chatbackground)
@@ -1979,6 +1981,10 @@ type MergedChatMember struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only (Only for administrator)
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages. (Only for administrator)
+	CanManageTags bool `json:"can_manage_tags,omitempty"`
+	// Optional. Tag of the member (Only for member, restricted)
+	Tag string `json:"tag,omitempty"`
 	// Optional. Date when the user's subscription will expire; Unix time (Only for member, restricted, kicked)
 	UntilDate int64 `json:"until_date,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
@@ -2003,6 +2009,8 @@ type MergedChatMember struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
+	// Optional. True, if the user is allowed to edit their own tag (Only for restricted)
+	CanEditTag bool `json:"can_edit_tag,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -2156,6 +2164,8 @@ type ChatMemberAdministrator struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
+	CanManageTags bool `json:"can_manage_tags,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
 }
@@ -2192,6 +2202,7 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		CanPinMessages:          v.CanPinMessages,
 		CanManageTopics:         v.CanManageTopics,
 		CanManageDirectMessages: v.CanManageDirectMessages,
+		CanManageTags:           v.CanManageTags,
 		CustomTitle:             v.CustomTitle,
 	}
 }
@@ -2303,6 +2314,8 @@ func (v ChatMemberLeft) chatMember() {}
 //
 // Represents a chat member that has no additional privileges or restrictions.
 type ChatMemberMember struct {
+	// Optional. Tag of the member
+	Tag string `json:"tag,omitempty"`
 	// Information about the user
 	User User `json:"user"`
 	// Optional. Date when the user's subscription will expire; Unix time
@@ -2323,6 +2336,7 @@ func (v ChatMemberMember) GetUser() User {
 func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:    "member",
+		Tag:       v.Tag,
 		User:      v.User,
 		UntilDate: v.UntilDate,
 	}
@@ -2396,6 +2410,8 @@ func (v ChatMemberOwner) chatMember() {}
 //
 // Represents a chat member that is under certain restrictions in the chat. Supergroups only.
 type ChatMemberRestricted struct {
+	// Optional. Tag of the member
+	Tag string `json:"tag,omitempty"`
 	// Information about the user
 	User User `json:"user"`
 	// True, if the user is a member of the chat at the moment of the request
@@ -2420,6 +2436,8 @@ type ChatMemberRestricted struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages"`
 	// True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
+	// True, if the user is allowed to edit their own tag
+	CanEditTag bool `json:"can_edit_tag"`
 	// True, if the user is allowed to change the chat title, photo and other settings
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
@@ -2446,6 +2464,7 @@ func (v ChatMemberRestricted) GetUser() User {
 func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
 		Status:                "restricted",
+		Tag:                   v.Tag,
 		User:                  v.User,
 		IsMember:              v.IsMember,
 		CanSendMessages:       v.CanSendMessages,
@@ -2458,6 +2477,7 @@ func (v ChatMemberRestricted) MergeChatMember() MergedChatMember {
 		CanSendPolls:          v.CanSendPolls,
 		CanSendOtherMessages:  v.CanSendOtherMessages,
 		CanAddWebPagePreviews: v.CanAddWebPagePreviews,
+		CanEditTag:            v.CanEditTag,
 		CanChangeInfo:         v.CanChangeInfo,
 		CanInviteUsers:        v.CanInviteUsers,
 		CanPinMessages:        v.CanPinMessages,
@@ -2581,6 +2601,8 @@ type ChatPermissions struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
+	// Optional. True, if the user is allowed to edit their own tag
+	CanEditTag bool `json:"can_edit_tag,omitempty"`
 	// Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat
@@ -6530,6 +6552,8 @@ type Message struct {
 	SenderBoostCount int64 `json:"sender_boost_count,omitempty"`
 	// Optional. The bot that actually sent the message on behalf of the business account. Available only for outgoing messages sent on behalf of the connected business account.
 	SenderBusinessBot *User `json:"sender_business_bot,omitempty"`
+	// Optional. Tag or custom title of the sender of the message; for supergroups only
+	SenderTag string `json:"sender_tag,omitempty"`
 	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	Date int64 `json:"date"`
 	// Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
@@ -6562,7 +6586,7 @@ type Message struct {
 	IsFromOffline bool `json:"is_from_offline,omitempty"`
 	// Optional. True, if the message is a paid post. Note that such posts must not be deleted for 24 hours to receive the payment and can't be edited.
 	IsPaidPost bool `json:"is_paid_post,omitempty"`
-	// Optional. The unique identifier of a media message group this message belongs to
+	// Optional. The unique identifier inside this chat of a media message group this message belongs to
 	MediaGroupId string `json:"media_group_id,omitempty"`
 	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
 	AuthorSignature string `json:"author_signature,omitempty"`
@@ -6739,6 +6763,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		SenderChat                    *Chat                          `json:"sender_chat"`
 		SenderBoostCount              int64                          `json:"sender_boost_count"`
 		SenderBusinessBot             *User                          `json:"sender_business_bot"`
+		SenderTag                     string                         `json:"sender_tag"`
 		Date                          int64                          `json:"date"`
 		BusinessConnectionId          string                         `json:"business_connection_id"`
 		Chat                          Chat                           `json:"chat"`
@@ -6851,6 +6876,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.SenderChat = t.SenderChat
 	v.SenderBoostCount = t.SenderBoostCount
 	v.SenderBusinessBot = t.SenderBusinessBot
+	v.SenderTag = t.SenderTag
 	v.Date = t.Date
 	v.BusinessConnectionId = t.BusinessConnectionId
 	v.Chat = t.Chat
@@ -6989,7 +7015,7 @@ type MessageAutoDeleteTimerChanged struct {
 //
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 type MessageEntity struct {
-	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
+	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers), or "date_time" (for formatted date and time)
 	Type string `json:"type"`
 	// Offset in UTF-16 code units to the start of the entity
 	Offset int64 `json:"offset"`
@@ -7003,6 +7029,10 @@ type MessageEntity struct {
 	Language string `json:"language,omitempty"`
 	// Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
 	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
+	// Optional. For "date_time" only, the Unix time associated with the entity
+	UnixTime int64 `json:"unix_time,omitempty"`
+	// Optional. For "date_time" only, the string that defines the formatting of the date and time. See date-time entity formatting for more details.
+	DateTimeFormat string `json:"date_time_format,omitempty"`
 }
 
 // MessageId (https://core.telegram.org/bots/api#messageid)
