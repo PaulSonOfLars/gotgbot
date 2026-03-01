@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
+	"strconv"
 )
 
 type ReplyMarkup interface {
@@ -5050,8 +5051,8 @@ func (v InputLocationMessageContent) inputMessageContent() {}
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFileOrString
-	// InputParams allows for uploading attachments with files.
-	InputParams(string, *multipart.Writer) error
+	// Attach allows for uploading attachments with files.
+	Attach
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
 	// inputMedia exists to avoid external types implementing this interface.
@@ -5123,6 +5124,19 @@ func (v MergedInputMedia) MergeInputMedia() MergedInputMedia {
 	return v
 }
 
+type InputMedias []InputMedia
+
+func (ts InputMedias) Attach(k string, w *multipart.Writer) error {
+	for idx, item := range ts {
+		err := item.Attach(k+"_"+strconv.Itoa(idx), w)
+		if err != nil {
+			return fmt.Errorf("failed to attach to multipart field: %w", err)
+		}
+	}
+
+	return nil
+}
+
 // InputMediaAnimation (https://core.telegram.org/bots/api#inputmediaanimation)
 //
 // Represents an animation file (GIF or H.264/MPEG-4 AVC video without sound) to be sent.
@@ -5192,7 +5206,7 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 // InputMediaAnimation.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAnimation) inputMedia() {}
 
-func (v InputMediaAnimation) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputMediaAnimation) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5273,7 +5287,7 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 // InputMediaAudio.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaAudio) inputMedia() {}
 
-func (v InputMediaAudio) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputMediaAudio) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5348,7 +5362,7 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 // InputMediaDocument.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaDocument) inputMedia() {}
 
-func (v InputMediaDocument) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputMediaDocument) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5423,7 +5437,7 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputMediaPhoto.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaPhoto) inputMedia() {}
 
-func (v InputMediaPhoto) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputMediaPhoto) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5512,7 +5526,7 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 // InputMediaVideo.inputMedia is a dummy method to avoid interface implementation.
 func (v InputMediaVideo) inputMedia() {}
 
-func (v InputMediaVideo) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputMediaVideo) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5560,8 +5574,8 @@ var (
 type InputPaidMedia interface {
 	GetType() string
 	GetMedia() InputFileOrString
-	// InputParams allows for uploading attachments with files.
-	InputParams(string, *multipart.Writer) error
+	// Attach allows for uploading attachments with files.
+	Attach
 	// MergeInputPaidMedia returns a MergedInputPaidMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputPaidMedia() MergedInputPaidMedia
 	// inputPaidMedia exists to avoid external types implementing this interface.
@@ -5614,6 +5628,19 @@ func (v MergedInputPaidMedia) MergeInputPaidMedia() MergedInputPaidMedia {
 	return v
 }
 
+type InputPaidMedias []InputPaidMedia
+
+func (ts InputPaidMedias) Attach(k string, w *multipart.Writer) error {
+	for idx, item := range ts {
+		err := item.Attach(k+"_"+strconv.Itoa(idx), w)
+		if err != nil {
+			return fmt.Errorf("failed to attach to multipart field: %w", err)
+		}
+	}
+
+	return nil
+}
+
 // InputPaidMediaPhoto (https://core.telegram.org/bots/api#inputpaidmediaphoto)
 //
 // The paid media to send is a photo.
@@ -5656,7 +5683,7 @@ func (v InputPaidMediaPhoto) MarshalJSON() ([]byte, error) {
 // InputPaidMediaPhoto.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaPhoto) inputPaidMedia() {}
 
-func (v InputPaidMediaPhoto) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputPaidMediaPhoto) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5730,7 +5757,7 @@ func (v InputPaidMediaVideo) MarshalJSON() ([]byte, error) {
 // InputPaidMediaVideo.inputPaidMedia is a dummy method to avoid interface implementation.
 func (v InputPaidMediaVideo) inputPaidMedia() {}
 
-func (v InputPaidMediaVideo) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputPaidMediaVideo) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Media != nil {
 		err := v.Media.Attach(mediaName, w)
 		if err != nil {
@@ -5897,11 +5924,24 @@ type InputSticker struct {
 	Keywords []string `json:"keywords,omitempty"`
 }
 
-func (v InputSticker) InputParams(mediaName string, w *multipart.Writer) error {
+func (v InputSticker) Attach(mediaName string, w *multipart.Writer) error {
 	if v.Sticker != nil {
 		err := v.Sticker.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+		}
+	}
+
+	return nil
+}
+
+type InputStickers []InputSticker
+
+func (ts InputStickers) Attach(k string, w *multipart.Writer) error {
+	for idx, item := range ts {
+		err := item.Attach(k+"_"+strconv.Itoa(idx), w)
+		if err != nil {
+			return fmt.Errorf("failed to attach to multipart field: %w", err)
 		}
 	}
 
