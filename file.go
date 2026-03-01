@@ -25,6 +25,7 @@ type InputFileOrString interface {
 	getValue() string
 }
 
+// Attach is the core interface to attach items to a multipart writer. It gets reused across InputFile, InputMedia, etc.
 type Attach interface {
 	Attach(name string, w *multipart.Writer) error
 }
