@@ -294,6 +294,10 @@ func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
 			return nil, fmt.Errorf("failed to get preferred type: %w", err)
 		}
 
+		if coreType, isArray := strings.CutPrefix(fieldType, "[]"); isArray && isTgType(d, coreType) && needsArrayAttachment(d, d.Types[coreType]) {
+			fieldType = d.Types[coreType].Name + "s"
+		}
+
 		args = append(args, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))
 	}
 	return args, nil

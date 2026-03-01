@@ -40,7 +40,26 @@ func receiver(n string) string {
 	return strings.ToLower(string(rs))
 }
 
-func (td TypeDescription) sentByAPI(d APIDescription) bool {
+func (td TypeDescription) sentAsArray(d APIDescription) bool {
+	for _, v := range d.Methods {
+		for _, f := range v.Fields {
+			t, err := f.getPreferredType(d)
+			if err != nil {
+				return false
+			}
+			s, ok := strings.CutPrefix(t, "[]")
+			if !ok {
+				continue
+			}
+			if s == toGoType(td.Name) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (td TypeDescription) receivedFromAPI(d APIDescription) bool {
 	checked := map[string]bool{}
 
 	for _, m := range d.Methods {
