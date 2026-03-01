@@ -295,7 +295,9 @@ func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
 		}
 
 		if coreType, isArray := strings.CutPrefix(fieldType, "[]"); isArray && isTgType(d, coreType) && needsArrayAttachment(d, d.Types[coreType]) {
-			fieldType = d.Types[coreType].Name + "s"
+			// If we're passing in a telegram-type array for a type which uses our Attach interface, then we should use our pluralised version of it.
+			// This implements the Attach interface on the underlying list items, simplifying our sending logic.
+			fieldType = d.Types[coreType].pluralisedName()
 		}
 
 		args = append(args, fmt.Sprintf("%s %s", snakeToCamel(f.Name), fieldType))

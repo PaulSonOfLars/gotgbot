@@ -221,7 +221,6 @@ func generateParentType(d APIDescription, tgType TypeDescription) (string, error
 }
 
 func generateAttachableListType(tgType TypeDescription) string {
-	pluralName := tgType.Name + "s"
 	return fmt.Sprintf(`
 type %s []%s
 
@@ -235,7 +234,7 @@ func (ts %s) Attach(k string, w *multipart.Writer) error {
 
 	return nil
 }
-`, pluralName, tgType.Name, pluralName)
+`, tgType.pluralisedName(), tgType.Name, tgType.pluralisedName())
 }
 
 // Incoming types which marshal into interfaces need special handling to make sure the interfaces are

@@ -29,6 +29,10 @@ func (td TypeDescription) receiverName() string {
 	return receiver(td.Name)
 }
 
+func (td TypeDescription) pluralisedName() string {
+	return td.Name + "s"
+}
+
 func receiver(n string) string {
 	var rs []rune
 	for _, r := range n {
