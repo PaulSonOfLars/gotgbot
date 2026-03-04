@@ -946,12 +946,12 @@ type CreateNewStickerSetOpts struct {
 //   - title (type string): Sticker set title, 1-64 characters
 //   - stickers (type []InputSticker): A JSON-serialized list of 1-50 initial stickers to be added to the sticker set
 //   - opts (type CreateNewStickerSetOpts): All optional parameters.
-func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, stickers []InputSticker, opts *CreateNewStickerSetOpts) (bool, error) {
+func (bot *Bot) CreateNewStickerSet(userId int64, name string, title string, stickers InputStickers, opts *CreateNewStickerSetOpts) (bool, error) {
 	return bot.CreateNewStickerSetWithContext(context.Background(), userId, name, title, stickers, opts)
 }
 
 // CreateNewStickerSetWithContext is the same as Bot.CreateNewStickerSet, but with a context.Context parameter
-func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64, name string, title string, stickers []InputSticker, opts *CreateNewStickerSetOpts) (bool, error) {
+func (bot *Bot) CreateNewStickerSetWithContext(ctx context.Context, userId int64, name string, title string, stickers InputStickers, opts *CreateNewStickerSetOpts) (bool, error) {
 	v := map[string]any{}
 	v["user_id"] = userId
 	v["name"] = name
@@ -5073,12 +5073,12 @@ type SendMediaGroupOpts struct {
 //   - chatId (type int64): Unique identifier for the target chat
 //   - media (type []InputMedia): A JSON-serialized array describing messages to be sent, must include 2-10 items
 //   - opts (type SendMediaGroupOpts): All optional parameters.
-func (bot *Bot) SendMediaGroup(chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
+func (bot *Bot) SendMediaGroup(chatId int64, media InputMedias, opts *SendMediaGroupOpts) ([]Message, error) {
 	return bot.SendMediaGroupWithContext(context.Background(), chatId, media, opts)
 }
 
 // SendMediaGroupWithContext is the same as Bot.SendMediaGroup, but with a context.Context parameter
-func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
+func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, media InputMedias, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
 	v["media"] = media
@@ -5274,12 +5274,12 @@ type SendPaidMediaOpts struct {
 //   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-25000
 //   - media (type []InputPaidMedia): A JSON-serialized array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
-func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
+func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media InputPaidMedias, opts *SendPaidMediaOpts) (*Message, error) {
 	return bot.SendPaidMediaWithContext(context.Background(), chatId, starCount, media, opts)
 }
 
 // SendPaidMediaWithContext is the same as Bot.SendPaidMedia, but with a context.Context parameter
-func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, starCount int64, media []InputPaidMedia, opts *SendPaidMediaOpts) (*Message, error) {
+func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, starCount int64, media InputPaidMedias, opts *SendPaidMediaOpts) (*Message, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
 	v["star_count"] = starCount
