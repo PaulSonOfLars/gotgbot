@@ -11,7 +11,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -241,38 +240,23 @@ func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
 		return fmt.Sprint(val), nil
 
-	case InputMedia:
-		err := val.InputParams(k, w)
+	case Attach:
+		err := val.Attach(k, w)
 		if err != nil {
 			return "", fmt.Errorf("failed to read input multipart field: %w", err)
 		}
 
+		// In case of a simple inputfile attachment, rely on files
+		if inputFile, ok := val.(InputFile); ok {
+			return inputFile.getValue(), nil
+		}
+
+		// For complex types (structs, maps, slices, etc.), marshal as JSON
 		bs, err := json.Marshal(val)
 		if err != nil {
 			return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
 		}
 		return string(bs), nil
-
-	case []InputMedia:
-		for idx, item := range val {
-			err := item.InputParams(k+"_"+strconv.Itoa(idx), w)
-			if err != nil {
-				return "", fmt.Errorf("failed to read input multipart field: %w", err)
-			}
-		}
-
-		bs, err := json.Marshal(val)
-		if err != nil {
-			return "", fmt.Errorf("failed to marshal field %s to JSON: %w", k, err)
-		}
-		return string(bs), nil
-
-	case InputFile:
-		err := val.Attach(k, w)
-		if err != nil {
-			return "", fmt.Errorf("failed to attach field %s: %w", k, err)
-		}
-		return val.getValue(), nil
 
 	default:
 		// For complex types (structs, maps, slices, etc.), marshal as JSON
