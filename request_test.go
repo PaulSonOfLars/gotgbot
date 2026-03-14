@@ -3,7 +3,9 @@ package gotgbot
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
+	"mime"
 	"mime/multipart"
 	"strconv"
 	"testing"
@@ -69,7 +71,7 @@ func Test_getFieldContents(t *testing.T) {
 }
 
 type countingReader struct {
-	r         io.Reader
+	r         io.ReadSeeker
 	bytesRead int64
 }
 
@@ -77,6 +79,10 @@ func (c *countingReader) Read(p []byte) (n int, err error) {
 	n, err = c.r.Read(p)
 	c.bytesRead += int64(n)
 	return
+}
+
+func (c *countingReader) Seek(offset int64, whence int) (int64, error) {
+	return c.r.Seek(offset, whence)
 }
 
 func TestFileNotBufferedIntoMemory(t *testing.T) {
@@ -93,7 +99,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 		},
 	}
 
-	bs, _, err := buildMultipart(params)
+	r, _, err := buildMultipart(params)
 	if err != nil {
 		t.Fatalf("unexpected error building multipart: %v", err)
 	}
@@ -104,7 +110,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 	}
 
 	// Drain the multipart body as the HTTP transport would.
-	if _, err := io.Copy(io.Discard, bytes.NewBuffer(bs)); err != nil {
+	if _, err := io.Copy(io.Discard, r); err != nil {
 		t.Fatalf("unexpected error reading multipart body: %v", err)
 	}
 
@@ -141,6 +147,7 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read original body: %v", err)
 	}
+	origContentType := req.Header.Get("Content-Type")
 
 	if cr.bytesRead != int64(len(fileContents)) {
 		t.Errorf("expected file to be read exactly once after first attempt, got %d bytes read", cr.bytesRead)
@@ -155,12 +162,45 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read retry body: %v", err)
 	}
+	retryContentType := req.Header.Get("Content-Type")
 
 	if cr.bytesRead != int64(len(fileContents))*2 {
 		t.Errorf("expected file to be read exactly twice after retry, got %d bytes read", cr.bytesRead)
 	}
 
-	if !bytes.Equal(originalBody, retryBodyBytes) {
-		t.Errorf("retry body does not match original body")
+	originalFile := extractFileFromMultipart(t, origContentType, originalBody, "document")
+	retryFile := extractFileFromMultipart(t, retryContentType, retryBodyBytes, "document")
+	if !bytes.Equal(originalFile, retryFile) {
+		t.Errorf("retry file contents do not match original")
 	}
+}
+
+func extractFileFromMultipart(t *testing.T, contentType string, body []byte, formName string) []byte {
+	t.Helper()
+
+	_, mediaParams, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		t.Fatalf("failed to parse content-type: %v", err)
+	}
+
+	mr := multipart.NewReader(bytes.NewReader(body), mediaParams["boundary"])
+	for {
+		part, err := mr.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("failed to read multipart part: %v", err)
+		}
+
+		if part.FormName() == formName {
+			contents, err := io.ReadAll(part)
+			if err != nil {
+				t.Fatalf("failed to read file part: %v", err)
+			}
+			return contents
+		}
+	}
+	t.Fatalf("%s part not found in multipart body", formName)
+	return nil
 }
