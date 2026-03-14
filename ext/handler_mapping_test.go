@@ -62,11 +62,16 @@ func Test_handlerMappings_getGroupsConcurrentSafe(t *testing.T) {
 }
 
 func checkList(t *testing.T, name string, got []Handler, expected ...Handler) {
+	t.Helper()
+
 	if len(got) != len(expected) {
 		t.Errorf("mismatch on length of expected outputs for %s - got %d, expected %d", name, len(got), len(expected))
 	}
+
 	for idx, v := range got {
+		//nolint:gosec
 		if v.Name() != expected[idx].Name() {
+			//nolint:gosec
 			t.Errorf("unexpected output name for %s - IDX %d got %s, expected %s", name, idx, v.Name(), expected[idx].Name())
 		}
 	}

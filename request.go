@@ -104,7 +104,7 @@ func (bot *BaseBotClient) getTimeoutContext(parentCtx context.Context, opts *Req
 		}
 	}
 
-	return context.WithTimeout(parentCtx, DefaultTimeout)
+	return context.WithTimeout(parentCtx, DefaultTimeout) //nolint:gosec
 }
 
 func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Context, context.CancelFunc) {
@@ -118,7 +118,7 @@ func timeoutFromOpts(parentCtx context.Context, opts *RequestOpts) (context.Cont
 	}
 
 	if opts.Timeout > 0 {
-		return context.WithTimeout(parentCtx, opts.Timeout)
+		return context.WithTimeout(parentCtx, opts.Timeout) //nolint:gosec
 
 	} else if opts.Timeout < 0 {
 		// < 0  no timeout; infinite.
@@ -183,10 +183,7 @@ func allFilesSeekable(params map[string]any) bool {
 }
 
 func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Context, token string, method string, opts *RequestOpts) (*http.Request, error) {
-	body, contentType, err := buildMultipart(params)
-	if err != nil {
-		return nil, err
-	}
+	body, contentType := buildMultipart(params)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), body)
 	if err != nil {
@@ -197,10 +194,7 @@ func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Contex
 
 	if allFilesSeekable(params) {
 		req.GetBody = func() (io.ReadCloser, error) {
-			retryBody, contentType, err := buildMultipart(params)
-			if err != nil {
-				return nil, fmt.Errorf("failed to rebuild multipart body for retry: %w", err)
-			}
+			retryBody, contentType := buildMultipart(params)
 			req.Header.Set("Content-Type", contentType)
 			return io.NopCloser(retryBody), nil
 		}
@@ -209,7 +203,7 @@ func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Contex
 }
 
 // buildMultipart creates a lazy multipart reader/writer which only writes while it gets read.
-func buildMultipart(params map[string]any) (io.Reader, string, error) {
+func buildMultipart(params map[string]any) (io.Reader, string) {
 	pr, pw := io.Pipe()
 	w := multipart.NewWriter(pw)
 
@@ -241,7 +235,7 @@ func buildMultipart(params map[string]any) (io.Reader, string, error) {
 		pw.Close()
 	}()
 
-	return pr, w.FormDataContentType(), nil
+	return pr, w.FormDataContentType()
 }
 
 // Sanitize the error to avoid token leak.

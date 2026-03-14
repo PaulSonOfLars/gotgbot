@@ -99,10 +99,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 		},
 	}
 
-	r, _, err := buildMultipart(params)
-	if err != nil {
-		t.Fatalf("unexpected error building multipart: %v", err)
-	}
+	r, _ := buildMultipart(params)
 
 	// Before draining: file should not have been read yet (streaming, not buffered)
 	if cr.bytesRead != 0 {
