@@ -117,11 +117,12 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 // We want to make sure that retriable requests can in fact be retried - this simulates the HTTP2 GOAWAY state.
 func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	fileContents := []byte("hello, this is some file content")
+	cr := &countingReader{r: bytes.NewReader(fileContents)}
 
 	params := map[string]any{
 		"document": &FileReader{
 			Name: "test.txt",
-			Data: bytes.NewReader(fileContents),
+			Data: cr,
 		},
 	}
 
@@ -141,6 +142,10 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 		t.Fatalf("failed to read original body: %v", err)
 	}
 
+	if cr.bytesRead != int64(len(fileContents)) {
+		t.Errorf("expected file to be read exactly once after first attempt, got %d bytes read", cr.bytesRead)
+	}
+
 	retryBody, err := req.GetBody()
 	if err != nil {
 		t.Fatalf("GetBody returned error: %v", err)
@@ -149,6 +154,10 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	retryBodyBytes, err := io.ReadAll(retryBody)
 	if err != nil {
 		t.Fatalf("failed to read retry body: %v", err)
+	}
+
+	if cr.bytesRead != int64(len(fileContents))*2 {
+		t.Errorf("expected file to be read exactly twice after retry, got %d bytes read", cr.bytesRead)
 	}
 
 	if !bytes.Equal(originalBody, retryBodyBytes) {
