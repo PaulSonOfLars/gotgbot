@@ -101,7 +101,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 
 	r, _ := buildMultipart(params)
 
-	// Before draining: file should not have been read yet (streaming, not buffered)
+	// Before draining: file should not have been read yet (streaming, not buffered).
 	if cr.bytesRead != 0 {
 		t.Errorf("file was read during multipart construction: %d bytes read, expected 0", cr.bytesRead)
 	}
@@ -111,7 +111,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 		t.Fatalf("unexpected error reading multipart body: %v", err)
 	}
 
-	// Sanity check: file was actually sent (and was only read once)
+	// Which means that we should now have read the file.
 	if cr.bytesRead != int64(len(fileContents)) {
 		t.Errorf("file was read %d bytes after drain, expected exactly %d", cr.bytesRead, len(fileContents))
 	}
@@ -146,6 +146,7 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	}
 	origContentType := req.Header.Get("Content-Type")
 
+	// We should now have read the file once
 	if cr.bytesRead != int64(len(fileContents)) {
 		t.Errorf("expected file to be read exactly once after first attempt, got %d bytes read", cr.bytesRead)
 	}
@@ -161,14 +162,19 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 	}
 	retryContentType := req.Header.Get("Content-Type")
 
+	// Retry - we have now read the file twice
 	if cr.bytesRead != int64(len(fileContents))*2 {
 		t.Errorf("expected file to be read exactly twice after retry, got %d bytes read", cr.bytesRead)
 	}
 
 	originalFile := extractFileFromMultipart(t, origContentType, originalBody, "document")
+	if !bytes.Equal(fileContents, originalFile) {
+		t.Errorf("local file contents do not match original file")
+	}
+
 	retryFile := extractFileFromMultipart(t, retryContentType, retryBodyBytes, "document")
 	if !bytes.Equal(originalFile, retryFile) {
-		t.Errorf("retry file contents do not match original")
+		t.Errorf("retry file do not match original file")
 	}
 }
 
