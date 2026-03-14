@@ -143,23 +143,9 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 		maps.Copy(params, opts.OverrideParams)
 	}
 
-	buf := bytes.NewBuffer(nil)
-	contentType, err := fillBuffer(buf, params)
+	req, err := bot.buildRequest(params, ctx, token, method, opts)
 	if err != nil {
 		return nil, err
-	}
-	bodyData := buf.Bytes()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), bytes.NewReader(bodyData))
-	if err != nil {
-		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
-	}
-
-	req.Header.Set("Content-Type", contentType)
-	// Setup GetBody such that the request can be replayed and automatically retried by the HTTP client if necessary.
-	// This should handle HTTP2 GO_AWAY errors.
-	req.GetBody = func() (io.ReadCloser, error) {
-		return io.NopCloser(bytes.NewReader(bodyData)), nil
 	}
 
 	resp, err := bot.Client.Do(req)
@@ -184,6 +170,35 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	}
 
 	return r.Result, nil
+}
+
+func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Context, token string, method string, opts *RequestOpts) (*http.Request, error) {
+	bodyData, contentType, err := buildMultipart(params)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), bytes.NewReader(bodyData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to build POST request to %s: %w", method, err)
+	}
+
+	req.Header.Set("Content-Type", contentType)
+	// Setup GetBody such that the request can be replayed and automatically retried by the HTTP client if necessary.
+	// This should handle HTTP2 GO_AWAY errors.
+	req.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(bodyData)), nil
+	}
+	return req, nil
+}
+
+func buildMultipart(params map[string]any) ([]byte, string, error) {
+	buf := bytes.NewBuffer(nil)
+	contentType, err := fillBuffer(buf, params)
+	if err != nil {
+		return nil, "", err
+	}
+	return buf.Bytes(), contentType, err
 }
 
 // Sanitize the error to avoid token leak.
