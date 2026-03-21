@@ -1,6 +1,11 @@
 package gotgbot
 
 import (
+	"bytes"
+	"context"
+	"errors"
+	"io"
+	"mime"
 	"mime/multipart"
 	"strconv"
 	"testing"
@@ -63,4 +68,142 @@ func Test_getFieldContents(t *testing.T) {
 			}
 		})
 	}
+}
+
+type countingReader struct {
+	r         io.ReadSeeker
+	bytesRead int64
+}
+
+func (c *countingReader) Read(p []byte) (n int, err error) {
+	n, err = c.r.Read(p)
+	c.bytesRead += int64(n)
+	return
+}
+
+func (c *countingReader) Seek(offset int64, whence int) (int64, error) {
+	return c.r.Seek(offset, whence)
+}
+
+func TestFileNotBufferedIntoMemory(t *testing.T) {
+	fileContents := []byte("hello, this is some file content")
+
+	cr := &countingReader{r: bytes.NewReader(fileContents)}
+
+	// Wire up a FileReader with the counting reader as Data.
+	// Intentionally NOT an io.Seeker — we want to catch greedy reads.
+	params := map[string]any{
+		"document": &FileReader{
+			Name: "test.txt",
+			Data: cr,
+		},
+	}
+
+	r, _ := buildMultipart(params)
+
+	// Before draining: file should not have been read yet (streaming, not buffered).
+	if cr.bytesRead != 0 {
+		t.Errorf("file was read during multipart construction: %d bytes read, expected 0", cr.bytesRead)
+	}
+
+	// Drain the multipart body as the HTTP transport would.
+	if _, err := io.Copy(io.Discard, r); err != nil {
+		t.Fatalf("unexpected error reading multipart body: %v", err)
+	}
+
+	// Which means that we should now have read the file.
+	if cr.bytesRead != int64(len(fileContents)) {
+		t.Errorf("file was read %d bytes after drain, expected exactly %d", cr.bytesRead, len(fileContents))
+	}
+}
+
+// We want to make sure that retriable requests can in fact be retried - this simulates the HTTP2 GOAWAY state.
+func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
+	fileContents := []byte("hello, this is some file content")
+	cr := &countingReader{r: bytes.NewReader(fileContents)}
+
+	params := map[string]any{
+		"document": &FileReader{
+			Name: "test.txt",
+			Data: cr,
+		},
+	}
+
+	req, err := (&BaseBotClient{}).buildRequest(params, context.Background(), "test-token", "sendDocument", nil)
+	if err != nil {
+		t.Fatalf("unexpected error building request: %v", err)
+	}
+
+	if req.GetBody == nil {
+		t.Fatal("GetBody should be set for seekable files")
+	}
+
+	// Read the request body, simulating our "first request" hitting an HTTP2 GOAWAY
+	// GOAWAY would discard the body, but we store it to check equality.
+	originalBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		t.Fatalf("failed to read original body: %v", err)
+	}
+	origContentType := req.Header.Get("Content-Type")
+
+	// We should now have read the file once
+	if cr.bytesRead != int64(len(fileContents)) {
+		t.Errorf("expected file to be read exactly once after first attempt, got %d bytes read", cr.bytesRead)
+	}
+
+	retryBody, err := req.GetBody()
+	if err != nil {
+		t.Fatalf("GetBody returned error: %v", err)
+	}
+
+	retryBodyBytes, err := io.ReadAll(retryBody)
+	if err != nil {
+		t.Fatalf("failed to read retry body: %v", err)
+	}
+	retryContentType := req.Header.Get("Content-Type")
+
+	// Retry - we have now read the file twice
+	if cr.bytesRead != int64(len(fileContents))*2 {
+		t.Errorf("expected file to be read exactly twice after retry, got %d bytes read", cr.bytesRead)
+	}
+
+	originalFile := extractFileFromMultipart(t, origContentType, originalBody, "document")
+	if !bytes.Equal(fileContents, originalFile) {
+		t.Errorf("local file contents do not match original file")
+	}
+
+	retryFile := extractFileFromMultipart(t, retryContentType, retryBodyBytes, "document")
+	if !bytes.Equal(originalFile, retryFile) {
+		t.Errorf("retry file do not match original file")
+	}
+}
+
+func extractFileFromMultipart(t *testing.T, contentType string, body []byte, formName string) []byte {
+	t.Helper()
+
+	_, mediaParams, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		t.Fatalf("failed to parse content-type: %v", err)
+	}
+
+	mr := multipart.NewReader(bytes.NewReader(body), mediaParams["boundary"])
+	for {
+		part, err := mr.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("failed to read multipart part: %v", err)
+		}
+
+		if part.FormName() == formName {
+			contents, err := io.ReadAll(part)
+			if err != nil {
+				t.Fatalf("failed to read file part: %v", err)
+			}
+			return contents
+		}
+	}
+	t.Fatalf("%s part not found in multipart body", formName)
+	return nil
 }
