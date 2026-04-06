@@ -99,23 +99,28 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 	}
 
 	text := msg.GetText()
-
-	var cmd string
-	for _, t := range c.Triggers {
-		if r, _ := utf8.DecodeRuneInString(text); r != t {
-			continue
-		}
-
-		split := strings.Split(strings.ToLower(strings.Fields(text)[0]), "@")
-		if len(split) > 1 && split[1] != strings.ToLower(b.User.Username) {
-			return false
-		}
-		cmd = split[0][1:]
-		break
-	}
-	if cmd == "" {
+	fields := strings.Fields(text)
+	if len(fields) == 0 {
 		return false
 	}
 
-	return cmd == c.Command
+	split := strings.Split(strings.ToLower(fields[0]), "@")
+
+	// If the command targets a specific bot, ensure it's this one
+	if len(split) > 1 && split[1] != strings.ToLower(b.User.Username) {
+		return false
+	}
+
+	command := c.extractCommand(split[0])
+	return command != "" && command == c.Command
+}
+
+func (c Command) extractCommand(command string) string {
+	first, size := utf8.DecodeRuneInString(command)
+	for _, t := range c.Triggers {
+		if first == t {
+			return command[size:]
+		}
+	}
+	return ""
 }
