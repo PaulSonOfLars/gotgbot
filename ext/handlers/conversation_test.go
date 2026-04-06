@@ -341,7 +341,7 @@ func TestEmptyKeyConversation(t *testing.T) {
 			Question:              "Some question",
 			Type:                  "quiz",
 			AllowsMultipleAnswers: false,
-			CorrectOptionId:       0,
+			CorrectOptionIds:      []int64{0},
 			Explanation:           "",
 		},
 	}, nil)
