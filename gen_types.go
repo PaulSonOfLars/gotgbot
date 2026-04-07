@@ -6314,7 +6314,7 @@ type ManagedBotCreated struct {
 
 // ManagedBotUpdated (https://core.telegram.org/bots/api#managedbotupdated)
 //
-// This object contains information about the creation or token update of a bot that is managed by the current bot.
+// This object contains information about the creation, token update, or owner update of a bot that is managed by the current bot.
 type ManagedBotUpdated struct {
 	// User that created the bot
 	User User `json:"user"`
@@ -10737,7 +10737,7 @@ type Update struct {
 	ChatBoost *ChatBoostUpdated `json:"chat_boost,omitempty"`
 	// Optional. A boost was removed from a chat. The bot must be an administrator in the chat to receive these updates.
 	RemovedChatBoost *ChatBoostRemoved `json:"removed_chat_boost,omitempty"`
-	// Optional. A new bot was created to be managed by the bot or token of a bot was changed
+	// Optional. A new bot was created to be managed by the bot, or token or owner of a managed bot was changed
 	ManagedBot *ManagedBotUpdated `json:"managed_bot,omitempty"`
 }
 
