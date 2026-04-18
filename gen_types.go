@@ -6176,7 +6176,7 @@ type KeyboardButtonPollType struct {
 // This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the chat if appropriate. More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection.
 type KeyboardButtonRequestChat struct {
 	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
-	RequestId int64 `json:"request_id"`
+	RequestId int32 `json:"request_id"`
 	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
 	ChatIsChannel bool `json:"chat_is_channel"`
 	// Optional. Pass True to request a forum supergroup, pass False to request a non-forum chat. If not specified, no additional restrictions are applied.
@@ -6204,7 +6204,7 @@ type KeyboardButtonRequestChat struct {
 // This object defines the parameters for the creation of a managed bot. Information about the created bot will be shared with the bot using the update managed_bot and a Message with the field managed_bot_created.
 type KeyboardButtonRequestManagedBot struct {
 	// Signed 32-bit identifier of the request. Must be unique within the message
-	RequestId int64 `json:"request_id"`
+	RequestId int32 `json:"request_id"`
 	// Optional. Suggested name for the bot
 	SuggestedName string `json:"suggested_name,omitempty"`
 	// Optional. Suggested username for the bot
@@ -6216,7 +6216,7 @@ type KeyboardButtonRequestManagedBot struct {
 // This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
 type KeyboardButtonRequestUsers struct {
 	// Signed 32-bit identifier of the request that will be received back in the UsersShared object. Must be unique within the message
-	RequestId int64 `json:"request_id"`
+	RequestId int32 `json:"request_id"`
 	// Optional. Pass True to request bots, pass False to request regular users. If not specified, no additional restrictions are applied.
 	UserIsBot *bool `json:"user_is_bot,omitempty"`
 	// Optional. Pass True to request premium users, pass False to request non-premium users. If not specified, no additional restrictions are applied.

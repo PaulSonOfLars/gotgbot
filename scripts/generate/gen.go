@@ -428,6 +428,9 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 
 	if len(f.Types) == 1 {
 		goType := toGoType(f.Types[0])
+		if goType == "int64" && strings.Contains(f.Description, "Signed 32-bit") {
+			goType = "int32"
+		}
 
 		// Optional TG types should be pointers, unless they're already an interface type.
 		if !f.Required && isTgType(d, f.Types[0]) && !isArray(goType) && goType != tgTypeInputFile {
