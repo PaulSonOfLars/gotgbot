@@ -234,6 +234,11 @@ func (im InaccessibleMessage) Delete(b *Bot, opts *DeleteMessageOpts) (bool, err
 	return b.DeleteMessage(im.Chat.Id, im.MessageId, opts)
 }
 
+// DeleteReaction is a helper method for Bot.DeleteMessageReaction.
+func (im InaccessibleMessage) DeleteReaction(b *Bot, opts *DeleteMessageReactionOpts) (bool, error) {
+	return b.DeleteMessageReaction(im.Chat.Id, im.MessageId, opts)
+}
+
 // EditCaption is a helper method for Bot.EditMessageCaption.
 func (im InaccessibleMessage) EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	if opts == nil {
@@ -381,6 +386,11 @@ func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, 
 // Delete is a helper method for Bot.DeleteMessage.
 func (m Message) Delete(b *Bot, opts *DeleteMessageOpts) (bool, error) {
 	return b.DeleteMessage(m.Chat.Id, m.MessageId, opts)
+}
+
+// DeleteReaction is a helper method for Bot.DeleteMessageReaction.
+func (m Message) DeleteReaction(b *Bot, opts *DeleteMessageReactionOpts) (bool, error) {
+	return b.DeleteMessageReaction(m.Chat.Id, m.MessageId, opts)
 }
 
 // EditCaption is a helper method for Bot.EditMessageCaption.
@@ -616,6 +626,17 @@ func (m Message) ReplyInvoice(b *Bot, title string, description string, payload 
 	return b.SendInvoice(m.Chat.Id, title, description, payload, currency, prices, opts)
 }
 
+// ReplyLivePhoto is a shortcut to reply to the current message with a specific message type.
+func (m Message) ReplyLivePhoto(b *Bot, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendLivePhotoOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendLivePhoto(m.Chat.Id, livePhoto, photo, opts)
+}
+
 // ReplyLocation is a shortcut to reply to the current message with a specific message type.
 func (m Message) ReplyLocation(b *Bot, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	if opts == nil {
@@ -770,6 +791,11 @@ func (u User) GetChatBoosts(b *Bot, chatId int64, opts *GetUserChatBoostsOpts) (
 // GetGifts is a helper method for Bot.GetUserGifts.
 func (u User) GetGifts(b *Bot, opts *GetUserGiftsOpts) (*OwnedGifts, error) {
 	return b.GetUserGifts(u.Id, opts)
+}
+
+// GetPersonalChatMessages is a helper method for Bot.GetUserPersonalChatMessages.
+func (u User) GetPersonalChatMessages(b *Bot, limit int64, opts *GetUserPersonalChatMessagesOpts) ([]Message, error) {
+	return b.GetUserPersonalChatMessages(u.Id, limit, opts)
 }
 
 // GetProfileAudios is a helper method for Bot.GetUserProfileAudios.

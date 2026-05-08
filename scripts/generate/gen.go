@@ -283,6 +283,7 @@ const (
 	typeReplyMarkup       = "ReplyMarkup"
 	typeInputFileOrString = "InputFileOrString"
 	typeInputString       = "InputString"
+	typeSuffixMedia       = "Media"
 )
 
 func generate(d APIDescription) error {
@@ -383,11 +384,16 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 		// TODO: check against API description type
 		for _, t := range f.Types {
 			arrayType = arrayType || isTgArray(t)
+			if arrayType {
+				t = strings.TrimPrefix(t, "Array of ")
+			}
 
-			if strings.Contains(t, tgTypeInputMedia) {
+			if strings.HasPrefix(t, tgTypeInputMedia) {
 				mediaType = tgTypeInputMedia
-			} else if strings.Contains(t, tgTypeInputPaidMedia) {
+			} else if strings.HasPrefix(t, tgTypeInputPaidMedia) {
 				mediaType = tgTypeInputPaidMedia
+			} else if strings.HasSuffix(t, typeSuffixMedia) {
+				mediaType = t
 			} else {
 				return "", fmt.Errorf("mediatype %s is not of kind InputMedia/InputPaidMedia for field %s", t, f.Name)
 			}

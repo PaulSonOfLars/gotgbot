@@ -87,8 +87,8 @@ func generateUpdateTypeConsts(d APIDescription) (string, error) {
 		}
 		out.WriteString(fmt.Sprintf("\ncase u.%s != nil:", snakeToTitle(f.Name)))
 		out.WriteString("\nreturn UpdateType" + snakeToTitle(f.Name) + "\n")
-
 	}
+
 	out.WriteString("\ndefault:")
 	out.WriteString("\nreturn \"unknown\"")
 	out.WriteString("\n}")
