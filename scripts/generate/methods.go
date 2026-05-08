@@ -228,12 +228,12 @@ func generateValue(d APIDescription, methodName string, f Field, goParam string)
 	// To avoid this, we want to make sure not to add default integers or floats to requests.
 	// This is a good rule of thumb, however... it doesn't ALWAYS work.
 	// So, any exceptions should go here:
-	if methodName == "sendPoll" && f.Name == "correct_option_id" {
-		// correct_option_id (in sendPoll) is dependent on the "type" field being "quiz".
+	if methodName == "sendPoll" && f.Name == "correct_option_ids" {
+		// correct_option_ids (in sendPoll) is dependent on the "type" field being "quiz".
 		// It isn't used for "regular" polls. It still needs to be sent when the value is "0".
 		return fmt.Sprintf(`
 if opts.Type == "quiz" {
-	// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
+	// correct_option_ids should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
 	%s
 }`, fmt.Sprintf(`v["%s"] = %s`, f.Name, goParam)), nil
 

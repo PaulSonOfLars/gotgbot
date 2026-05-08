@@ -2786,6 +2786,40 @@ func (bot *Bot) GetGameHighScoresWithContext(ctx context.Context, userId int64, 
 	return g, json.Unmarshal(r, &g)
 }
 
+// GetManagedBotTokenOpts is the set of optional fields for Bot.GetManagedBotToken and Bot.GetManagedBotTokenWithContext.
+type GetManagedBotTokenOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetManagedBotToken (https://core.telegram.org/bots/api#getmanagedbottoken)
+//
+// Use this method to get the token of a managed bot. Returns the token as String on success.
+//   - userId (type int64): User identifier of the managed bot whose token will be returned
+//   - opts (type GetManagedBotTokenOpts): All optional parameters.
+func (bot *Bot) GetManagedBotToken(userId int64, opts *GetManagedBotTokenOpts) (string, error) {
+	return bot.GetManagedBotTokenWithContext(context.Background(), userId, opts)
+}
+
+// GetManagedBotTokenWithContext is the same as Bot.GetManagedBotToken, but with a context.Context parameter
+func (bot *Bot) GetManagedBotTokenWithContext(ctx context.Context, userId int64, opts *GetManagedBotTokenOpts) (string, error) {
+	v := map[string]any{}
+	v["user_id"] = userId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getManagedBotToken", v, reqOpts)
+	if err != nil {
+		return "", err
+	}
+
+	var s string
+	return s, json.Unmarshal(r, &s)
+}
+
 // GetMeOpts is the set of optional fields for Bot.GetMe and Bot.GetMeWithContext.
 type GetMeOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -3374,9 +3408,9 @@ func (bot *Bot) GetWebhookInfoWithContext(ctx context.Context, opts *GetWebhookI
 type GiftPremiumSubscriptionOpts struct {
 	// Text that will be shown along with the service message about the subscription; 0-128 characters
 	Text string
-	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", "custom_emoji", and "date_time" are ignored.
 	TextParseMode string
-	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", "custom_emoji", and "date_time" are ignored.
 	TextEntities []MessageEntity
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3993,6 +4027,40 @@ func (bot *Bot) ReopenGeneralForumTopicWithContext(ctx context.Context, chatId i
 	return b, json.Unmarshal(r, &b)
 }
 
+// ReplaceManagedBotTokenOpts is the set of optional fields for Bot.ReplaceManagedBotToken and Bot.ReplaceManagedBotTokenWithContext.
+type ReplaceManagedBotTokenOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// ReplaceManagedBotToken (https://core.telegram.org/bots/api#replacemanagedbottoken)
+//
+// Use this method to revoke the current token of a managed bot and generate a new one. Returns the new token as String on success.
+//   - userId (type int64): User identifier of the managed bot whose token will be replaced
+//   - opts (type ReplaceManagedBotTokenOpts): All optional parameters.
+func (bot *Bot) ReplaceManagedBotToken(userId int64, opts *ReplaceManagedBotTokenOpts) (string, error) {
+	return bot.ReplaceManagedBotTokenWithContext(context.Background(), userId, opts)
+}
+
+// ReplaceManagedBotTokenWithContext is the same as Bot.ReplaceManagedBotToken, but with a context.Context parameter
+func (bot *Bot) ReplaceManagedBotTokenWithContext(ctx context.Context, userId int64, opts *ReplaceManagedBotTokenOpts) (string, error) {
+	v := map[string]any{}
+	v["user_id"] = userId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "replaceManagedBotToken", v, reqOpts)
+	if err != nil {
+		return "", err
+	}
+
+	var s string
+	return s, json.Unmarshal(r, &s)
+}
+
 // ReplaceStickerInSetOpts is the set of optional fields for Bot.ReplaceStickerInSet and Bot.ReplaceStickerInSetWithContext.
 type ReplaceStickerInSetOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -4210,6 +4278,42 @@ func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId
 	}
 
 	var p PreparedInlineMessage
+	return &p, json.Unmarshal(r, &p)
+}
+
+// SavePreparedKeyboardButtonOpts is the set of optional fields for Bot.SavePreparedKeyboardButton and Bot.SavePreparedKeyboardButtonWithContext.
+type SavePreparedKeyboardButtonOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SavePreparedKeyboardButton (https://core.telegram.org/bots/api#savepreparedkeyboardbutton)
+//
+// Stores a keyboard button that can be used by a user within a Mini App. Returns a PreparedKeyboardButton object.
+//   - userId (type int64): Unique identifier of the target user that can use the button
+//   - button (type KeyboardButton): A JSON-serialized object describing the button to be saved. The button must be of the type request_users, request_chat, or request_managed_bot
+//   - opts (type SavePreparedKeyboardButtonOpts): All optional parameters.
+func (bot *Bot) SavePreparedKeyboardButton(userId int64, button KeyboardButton, opts *SavePreparedKeyboardButtonOpts) (*PreparedKeyboardButton, error) {
+	return bot.SavePreparedKeyboardButtonWithContext(context.Background(), userId, button, opts)
+}
+
+// SavePreparedKeyboardButtonWithContext is the same as Bot.SavePreparedKeyboardButton, but with a context.Context parameter
+func (bot *Bot) SavePreparedKeyboardButtonWithContext(ctx context.Context, userId int64, button KeyboardButton, opts *SavePreparedKeyboardButtonOpts) (*PreparedKeyboardButton, error) {
+	v := map[string]any{}
+	v["user_id"] = userId
+	v["button"] = button
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "savePreparedKeyboardButton", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var p PreparedKeyboardButton
 	return &p, json.Unmarshal(r, &p)
 }
 
@@ -4798,9 +4902,9 @@ type SendGiftOpts struct {
 	PayForUpgrade bool
 	// Text that will be shown along with the gift; 0-128 characters
 	Text string
-	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", "custom_emoji", and "date_time" are ignored.
 	TextParseMode string
-	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", "custom_emoji", and "date_time" are ignored.
 	TextEntities []MessageEntity
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5412,22 +5516,36 @@ type SendPollOpts struct {
 	IsAnonymous *bool
 	// Poll type, "quiz" or "regular", defaults to "regular"
 	Type string
-	// True, if the poll allows multiple answers, ignored for polls in quiz mode, defaults to False
+	// Pass True, if the poll allows multiple answers, defaults to False
 	AllowsMultipleAnswers bool
-	// 0-based identifier of the correct answer option, required for polls in quiz mode
-	CorrectOptionId int64
+	// Pass True, if the poll allows to change chosen answer options, defaults to False for quizzes and to True for regular polls
+	AllowsRevoting bool
+	// Pass True, if the poll options must be shown in random order
+	ShuffleOptions bool
+	// Pass True, if answer options can be added to the poll after creation; not supported for anonymous polls and quizzes
+	AllowAddingOptions bool
+	// Pass True, if poll results must be shown only after the poll closes
+	HideResultsUntilCloses bool
+	// A JSON-serialized list of monotonically increasing 0-based identifiers of the correct answer options, required for polls in quiz mode
+	CorrectOptionIds []int64
 	// Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll, 0-200 characters with at most 2 line feeds after entities parsing
 	Explanation string
 	// Mode for parsing entities in the explanation. See formatting options for more details.
 	ExplanationParseMode string
 	// A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode
 	ExplanationEntities []MessageEntity
-	// Amount of time in seconds the poll will be active after creation, 5-600. Can't be used together with close_date.
+	// Amount of time in seconds the poll will be active after creation, 5-2628000. Can't be used together with close_date.
 	OpenPeriod int64
-	// Point in time (Unix timestamp) when the poll will be automatically closed. Must be at least 5 and no more than 600 seconds in the future. Can't be used together with open_period.
+	// Point in time (Unix timestamp) when the poll will be automatically closed. Must be at least 5 and no more than 2628000 seconds in the future. Can't be used together with open_period.
 	CloseDate int64
 	// Pass True if the poll needs to be immediately closed. This can be useful for poll preview.
 	IsClosed bool
+	// Description of the poll to be sent, 0-1024 characters after entities parsing
+	Description string
+	// Mode for parsing entities in the poll description. See formatting options for more details.
+	DescriptionParseMode string
+	// A JSON-serialized list of special entities that appear in the poll description, which can be specified instead of description_parse_mode
+	DescriptionEntities []MessageEntity
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -5469,9 +5587,13 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == nil)
 		addIfValueNotZero(v, "type", opts.Type, opts.Type == "")
 		addIfValueNotZero(v, "allows_multiple_answers", opts.AllowsMultipleAnswers, opts.AllowsMultipleAnswers == false)
+		addIfValueNotZero(v, "allows_revoting", opts.AllowsRevoting, opts.AllowsRevoting == false)
+		addIfValueNotZero(v, "shuffle_options", opts.ShuffleOptions, opts.ShuffleOptions == false)
+		addIfValueNotZero(v, "allow_adding_options", opts.AllowAddingOptions, opts.AllowAddingOptions == false)
+		addIfValueNotZero(v, "hide_results_until_closes", opts.HideResultsUntilCloses, opts.HideResultsUntilCloses == false)
 		if opts.Type == "quiz" {
-			// correct_option_id should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
-			v["correct_option_id"] = opts.CorrectOptionId
+			// correct_option_ids should always be set when the type is "quiz" - it doesn't need to be set for type "regular".
+			v["correct_option_ids"] = opts.CorrectOptionIds
 		}
 		addIfValueNotZero(v, "explanation", opts.Explanation, opts.Explanation == "")
 		addIfValueNotZero(v, "explanation_parse_mode", opts.ExplanationParseMode, opts.ExplanationParseMode == "")
@@ -5479,6 +5601,9 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		addIfValueNotZero(v, "open_period", opts.OpenPeriod, opts.OpenPeriod == 0)
 		addIfValueNotZero(v, "close_date", opts.CloseDate, opts.CloseDate == 0)
 		addIfValueNotZero(v, "is_closed", opts.IsClosed, opts.IsClosed == false)
+		addIfValueNotZero(v, "description", opts.Description, opts.Description == "")
+		addIfValueNotZero(v, "description_parse_mode", opts.DescriptionParseMode, opts.DescriptionParseMode == "")
+		addIfValueNotZero(v, "description_entities", opts.DescriptionEntities, opts.DescriptionEntities == nil)
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
 		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
 		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)

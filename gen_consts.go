@@ -28,6 +28,7 @@ const (
 	UpdateTypeChatJoinRequest         = "chat_join_request"
 	UpdateTypeChatBoost               = "chat_boost"
 	UpdateTypeRemovedChatBoost        = "removed_chat_boost"
+	UpdateTypeManagedBot              = "managed_bot"
 )
 
 // GetType is a helper method to easily identify the type of update that is being received.
@@ -101,6 +102,9 @@ func (u Update) GetType() string {
 
 	case u.RemovedChatBoost != nil:
 		return UpdateTypeRemovedChatBoost
+
+	case u.ManagedBot != nil:
+		return UpdateTypeManagedBot
 
 	default:
 		return "unknown"
