@@ -163,3 +163,12 @@ func addIfValueNotZero[T any](m map[string]any, k string, v T, isZero bool) {
 
 	m[k] = v
 }
+
+// GetInaccessibleMessage creates an InaccessibleMessage from the available reaction data.
+func (mru *MessageReactionUpdated) GetInaccessibleMessage() InaccessibleMessage {
+	return InaccessibleMessage{
+		Chat:      mru.Chat,
+		MessageId: mru.MessageId,
+		Date:      0, // We don't have the message date, and cannot convert this to an "accessible" message.
+	}
+}
