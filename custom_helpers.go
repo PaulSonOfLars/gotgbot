@@ -172,3 +172,19 @@ func (mru *MessageReactionUpdated) GetInaccessibleMessage() InaccessibleMessage 
 		Date:      0, // We don't have the message date, and cannot convert this to an "accessible" message.
 	}
 }
+
+func (mru *MessageReactionUpdated) DeleteReaction(b *Bot, opts *DeleteMessageReactionOpts) (bool, error) {
+	if opts == nil {
+		opts = &DeleteMessageReactionOpts{}
+	}
+
+	if opts.UserId == 0 && opts.ActorChatId == 0 {
+		if mru.User != nil {
+			opts.UserId = mru.User.Id
+		} else if mru.ActorChat != nil {
+			opts.ActorChatId = mru.ActorChat.Id
+		}
+	}
+
+	return b.DeleteMessageReaction(mru.Chat.Id, mru.MessageId, opts)
+}
