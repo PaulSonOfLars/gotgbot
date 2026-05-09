@@ -46,6 +46,10 @@ func (pa PollAnswer) GetSender() *Sender {
 }
 
 func (m Message) GetGuestBotCallerSender() *Sender {
+	if m.GuestBotCallerUser == nil && m.GuestBotCallerChat == nil {
+		return nil
+	}
+
 	return &Sender{
 		User:   m.GuestBotCallerUser,
 		Chat:   m.GuestBotCallerChat,
