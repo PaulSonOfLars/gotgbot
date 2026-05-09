@@ -8076,6 +8076,8 @@ func (v *PaidMediaInfo) UnmarshalJSON(b []byte) error {
 }
 
 // PaidMediaLivePhoto (https://core.telegram.org/bots/api#paidmedialivephoto)
+//
+// The paid media is a live photo.
 type PaidMediaLivePhoto struct {
 	// The photo
 	LivePhoto LivePhoto `json:"live_photo"`
