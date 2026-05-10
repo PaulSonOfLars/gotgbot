@@ -3863,7 +3863,7 @@ type PromoteChatMemberOpts struct {
 	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
 	// Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics. For backward compatibility, defaults to True for promotions of channel administrators
-	CanRestrictMembers bool
+	CanRestrictMembers *bool
 	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
 	// Pass True if the administrator can change chat title, photo and other settings
@@ -3912,7 +3912,7 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 		addIfValueNotZero(v, "can_manage_chat", opts.CanManageChat, opts.CanManageChat == false)
 		addIfValueNotZero(v, "can_delete_messages", opts.CanDeleteMessages, opts.CanDeleteMessages == false)
 		addIfValueNotZero(v, "can_manage_video_chats", opts.CanManageVideoChats, opts.CanManageVideoChats == false)
-		addIfValueNotZero(v, "can_restrict_members", opts.CanRestrictMembers, opts.CanRestrictMembers == false)
+		addIfValueNotZero(v, "can_restrict_members", opts.CanRestrictMembers, opts.CanRestrictMembers == nil)
 		addIfValueNotZero(v, "can_promote_members", opts.CanPromoteMembers, opts.CanPromoteMembers == false)
 		addIfValueNotZero(v, "can_change_info", opts.CanChangeInfo, opts.CanChangeInfo == false)
 		addIfValueNotZero(v, "can_invite_users", opts.CanInviteUsers, opts.CanInviteUsers == false)

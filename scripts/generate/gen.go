@@ -236,12 +236,6 @@ func (f Field) requiresExplicitDefault(d APIDescription, goType string) bool {
 		return true
 	}
 
-	if strings.Contains(desc, "backward compatibility") ||
-		strings.Contains(desc, "backwards compatibility") {
-		// Backwards compatibility for "defaults" is a bad myth
-		return false
-	}
-
 	if goType == "string" {
 		// empty strings handled as defaults
 		return false
