@@ -165,7 +165,7 @@ func addIfValueNotZero[T any](m map[string]any, k string, v T, isZero bool) {
 }
 
 // GetInaccessibleMessage creates an InaccessibleMessage from the available reaction data.
-func (mru *MessageReactionUpdated) GetInaccessibleMessage() InaccessibleMessage {
+func (mru MessageReactionUpdated) GetInaccessibleMessage() InaccessibleMessage {
 	return InaccessibleMessage{
 		Chat:      mru.Chat,
 		MessageId: mru.MessageId,
@@ -173,7 +173,7 @@ func (mru *MessageReactionUpdated) GetInaccessibleMessage() InaccessibleMessage 
 	}
 }
 
-func (mru *MessageReactionUpdated) DeleteReaction(b *Bot, opts *DeleteMessageReactionOpts) (bool, error) {
+func (mru MessageReactionUpdated) DeleteReaction(b *Bot, opts *DeleteMessageReactionOpts) (bool, error) {
 	if opts == nil {
 		opts = &DeleteMessageReactionOpts{}
 	}
@@ -187,4 +187,44 @@ func (mru *MessageReactionUpdated) DeleteReaction(b *Bot, opts *DeleteMessageRea
 	}
 
 	return b.DeleteMessageReaction(mru.Chat.Id, mru.MessageId, opts)
+}
+
+func (mcm ChatMemberAdministrator) GetCanManageTags() bool {
+	return mcm.MergeChatMember().GetCanManageTags()
+}
+
+func (mcm MergedChatMember) GetCanManageTags() bool {
+	if mcm.Status != "administrator" {
+		return false
+	}
+
+	if mcm.CanManageTags == nil {
+		return mcm.CanPinMessages
+	}
+
+	return *mcm.CanManageTags
+}
+
+func (cp ChatPermissions) GetCanReactToMessages() bool {
+	if cp.CanReactToMessages == nil {
+		return cp.CanSendMessages
+	}
+
+	return *cp.CanReactToMessages
+}
+
+func (cp ChatPermissions) GetCanEditTag() bool {
+	if cp.CanEditTag == nil {
+		return cp.CanPinMessages
+	}
+
+	return *cp.CanEditTag
+}
+
+func (cp ChatPermissions) GetCanManageTopics() bool {
+	if cp.CanManageTopics == nil {
+		return cp.CanPinMessages
+	}
+
+	return *cp.CanManageTopics
 }
