@@ -1272,7 +1272,7 @@ type ChatAdministratorRights struct {
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
-	CanManageTags bool `json:"can_manage_tags,omitempty"`
+	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 }
 
 // ChatBackground (https://core.telegram.org/bots/api#chatbackground)
@@ -1993,7 +1993,7 @@ type MergedChatMember struct {
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only (Only for administrator)
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages. (Only for administrator)
-	CanManageTags bool `json:"can_manage_tags,omitempty"`
+	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 	// Optional. Tag of the member (Only for member, restricted)
 	Tag string `json:"tag,omitempty"`
 	// Optional. Date when the user's subscription will expire; Unix time (Only for member, restricted, kicked)
@@ -2178,7 +2178,7 @@ type ChatMemberAdministrator struct {
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
 	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
-	CanManageTags bool `json:"can_manage_tags,omitempty"`
+	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
 }
@@ -2618,9 +2618,9 @@ type ChatPermissions struct {
 	// Optional. True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
 	// Optional. True, if the user is allowed to react to messages. If omitted, defaults to the value of can_send_messages.
-	CanReactToMessages bool `json:"can_react_to_messages,omitempty"`
+	CanReactToMessages *bool `json:"can_react_to_messages,omitempty"`
 	// Optional. True, if the user is allowed to edit their own tag. If omitted, defaults to the value of can_pin_messages.
-	CanEditTag bool `json:"can_edit_tag,omitempty"`
+	CanEditTag *bool `json:"can_edit_tag,omitempty"`
 	// Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat
@@ -2628,7 +2628,7 @@ type ChatPermissions struct {
 	// Optional. True, if the user is allowed to pin messages. Ignored in public supergroups
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create forum topics. If omitted defaults to the value of can_pin_messages
-	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	CanManageTopics *bool `json:"can_manage_topics,omitempty"`
 }
 
 // ChatPhoto (https://core.telegram.org/bots/api#chatphoto)

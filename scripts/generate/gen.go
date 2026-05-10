@@ -225,22 +225,44 @@ type Field struct {
 
 var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)`)
 
-func (f Field) hasDefault() (string, bool) {
-	if !strings.Contains(strings.ToLower(f.Description), "defaults to") {
-		return "", false
+func (f Field) requiresExplicitDefault(d APIDescription, goType string) bool {
+	desc := strings.ToLower(f.Description)
+	if !strings.Contains(desc, "defaults to") {
+		return false
 	}
 
-	if strings.Contains(strings.ToLower(f.Description), "backward compatibility") ||
-		strings.Contains(strings.ToLower(f.Description), "backwards compatibility") {
+	if strings.Contains(desc, "defaults to the value of") {
+		// Needs special handling.
+		return true
+	}
+
+	if strings.Contains(desc, "backward compatibility") ||
+		strings.Contains(desc, "backwards compatibility") {
 		// Backwards compatibility for "defaults" is a bad myth
-		return "", false
+		return false
 	}
 
+	if goType == "string" {
+		// empty strings handled as defaults
+		return false
+	}
+
+	expectedDefault := getDefaultTypeVal(d, goType)
 	ms := defaultsMatcher.FindStringSubmatch(f.Description)
 	if len(ms) == 0 {
-		return "", true
+		return expectedDefault != "nil"
 	}
-	return strings.ToLower(ms[1]), true
+
+	if strings.ToLower(ms[1]) == expectedDefault {
+		return false
+	}
+
+	if goType == "int64" && strings.Contains(f.Description, "1-") {
+		// 1-X means that the go default of 0 will get ignored by the server. Can ignore.
+		return false
+	}
+
+	return true
 }
 
 var usernameDocsMatcher = regexp.MustCompile(` +(or username.*)?\(.+ @[a-z]+\)`)
@@ -464,12 +486,7 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 			}
 			return "*" + goType, nil
 
-		} else if v, ok := f.hasDefault(); ok && v != "" && v != getDefaultTypeVal(d, goType) {
-			if goType == "int64" && strings.Contains(f.Description, "1-") {
-				// If we have a range of 1-X, it means that the default go-type of 0 is will be ignored the server
-				return goType, nil
-			}
-
+		} else if f.requiresExplicitDefault(d, goType) {
 			return "*" + goType, nil
 		}
 
