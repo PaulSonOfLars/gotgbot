@@ -223,7 +223,10 @@ type Field struct {
 	Description string   `json:"description"`
 }
 
-var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)`)
+// Default matcher for cases where:
+// - we have true/false, floats, or numbers.
+// - at the end of a sentence, line, or followed by a comma.
+var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)(?:\.|,|$)`)
 
 func (f Field) requiresExplicitDefault(d APIDescription, goType string) bool {
 	desc := strings.ToLower(f.Description)

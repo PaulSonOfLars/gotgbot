@@ -5802,7 +5802,7 @@ type SendPollOpts struct {
 	// Pass True, if the poll allows multiple answers, defaults to False
 	AllowsMultipleAnswers bool
 	// Pass True, if the poll allows to change chosen answer options, defaults to False for quizzes and to True for regular polls
-	AllowsRevoting bool
+	AllowsRevoting *bool
 	// Pass True, if the poll options must be shown in random order
 	ShuffleOptions bool
 	// Pass True, if answer options can be added to the poll after creation; not supported for anonymous polls and quizzes
@@ -5878,7 +5878,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == nil)
 		addIfValueNotZero(v, "type", opts.Type, opts.Type == "")
 		addIfValueNotZero(v, "allows_multiple_answers", opts.AllowsMultipleAnswers, opts.AllowsMultipleAnswers == false)
-		addIfValueNotZero(v, "allows_revoting", opts.AllowsRevoting, opts.AllowsRevoting == false)
+		addIfValueNotZero(v, "allows_revoting", opts.AllowsRevoting, opts.AllowsRevoting == nil)
 		addIfValueNotZero(v, "shuffle_options", opts.ShuffleOptions, opts.ShuffleOptions == false)
 		addIfValueNotZero(v, "allow_adding_options", opts.AllowAddingOptions, opts.AllowAddingOptions == false)
 		addIfValueNotZero(v, "hide_results_until_closes", opts.HideResultsUntilCloses, opts.HideResultsUntilCloses == false)
