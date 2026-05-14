@@ -12,6 +12,7 @@ type Message struct {
 	AllowEdited   bool
 	AllowChannel  bool
 	AllowBusiness bool
+	AllowBot      bool
 	Filter        filters.Message
 	Response      Response
 }
@@ -41,9 +42,20 @@ func (m Message) SetAllowChannel(allow bool) Message {
 func (m Message) SetAllowBusiness(allow bool) Message {
 	m.AllowBusiness = allow
 	return m
+
+}
+
+// SetAllowBot Enables bot messages for this handler.
+func (m Message) SetAllowBot(allow bool) Message {
+	m.AllowBot = allow
+	return m
 }
 
 func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.EffectiveSender != nil && ctx.EffectiveSender.IsBot() && !m.AllowBot {
+		return false
+	}
+
 	if ctx.Message != nil {
 		return m.Filter == nil || m.Filter(ctx.Message)
 	}
@@ -56,6 +68,7 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if m.AllowChannel && ctx.ChannelPost != nil {
 		return m.Filter == nil || m.Filter(ctx.ChannelPost)
 	}
+
 	// If channel posts and edits are allowed, and post is edited.
 	if m.AllowChannel && m.AllowEdited && ctx.EditedChannelPost != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedChannelPost)
@@ -65,6 +78,7 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if m.AllowBusiness && ctx.BusinessMessage != nil {
 		return m.Filter == nil || m.Filter(ctx.BusinessMessage)
 	}
+
 	if m.AllowBusiness && m.AllowEdited && ctx.EditedBusinessMessage != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedBusinessMessage)
 	}

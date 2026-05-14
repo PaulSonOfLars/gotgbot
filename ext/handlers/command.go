@@ -16,6 +16,7 @@ type Command struct {
 	Triggers     []rune
 	AllowEdited  bool
 	AllowChannel bool
+	AllowBot     bool
 	Command      string // set to a lowercase value for case-insensitivity
 	Response     Response
 }
@@ -28,6 +29,7 @@ func NewCommand(c string, r Response) Command {
 		Triggers:     []rune{'/'},
 		AllowEdited:  false,
 		AllowChannel: false,
+		AllowBot:     false,
 		Command:      strings.ToLower(c),
 		Response:     r,
 	}
@@ -45,6 +47,12 @@ func (c Command) SetAllowChannel(allow bool) Command {
 	return c
 }
 
+// SetAllowBot Enables bot messages for this handler.
+func (c Command) SetAllowBot(allow bool) Command {
+	c.AllowBot = allow
+	return c
+}
+
 // SetTriggers sets the list of triggers to be used with this command.
 func (c Command) SetTriggers(triggers []rune) Command {
 	c.Triggers = triggers
@@ -52,6 +60,10 @@ func (c Command) SetTriggers(triggers []rune) Command {
 }
 
 func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx.EffectiveSender != nil && ctx.EffectiveSender.IsBot() && !c.AllowBot {
+		return false
+	}
+
 	if ctx.Message != nil {
 		if ctx.Message.GetText() == "" {
 			return false
