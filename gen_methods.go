@@ -48,7 +48,7 @@ func (bot *Bot) AddStickerToSetWithContext(ctx context.Context, userId int64, na
 
 // AnswerCallbackQueryOpts is the set of optional fields for Bot.AnswerCallbackQuery and Bot.AnswerCallbackQueryWithContext.
 type AnswerCallbackQueryOpts struct {
-	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
+	// Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters.
 	Text string
 	// If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
 	ShowAlert bool
@@ -340,7 +340,7 @@ func (bot *Bot) ApproveChatJoinRequestWithContext(ctx context.Context, chatId in
 
 // ApproveSuggestedPostOpts is the set of optional fields for Bot.ApproveSuggestedPost and Bot.ApproveSuggestedPostWithContext.
 type ApproveSuggestedPostOpts struct {
-	// Point in time (Unix timestamp) when the post is expected to be published; omit if the date has already been specified when the suggested post was created. If specified, then the date must be not more than 2678400 seconds (30 days) in the future
+	// Point in time (Unix timestamp) when the post is expected to be published; omit if the date has already been specified when the suggested post was created. If specified, then the date must be not more than 2678400 seconds (30 days) in the future.
 	SendDate int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -605,7 +605,7 @@ type CopyMessageOpts struct {
 	DirectMessagesTopicId int64
 	// New start timestamp for the copied video in the message
 	VideoStartTimestamp int64
-	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
+	// New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept.
 	Caption *string
 	// Mode for parsing entities in the new caption. See formatting options for more details.
 	ParseMode string
@@ -625,7 +625,7 @@ type CopyMessageOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -742,7 +742,7 @@ type CreateChatInviteLinkOpts struct {
 	ExpireDate int64
 	// The maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
-	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified.
 	CreatesJoinRequest bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -827,7 +827,7 @@ func (bot *Bot) CreateChatSubscriptionInviteLinkWithContext(ctx context.Context,
 
 // CreateForumTopicOpts is the set of optional fields for Bot.CreateForumTopic and Bot.CreateForumTopicWithContext.
 type CreateForumTopicOpts struct {
-	// Color of the topic icon in RGB format. Currently, must be one of 7322096 (0x6FB9F0), 16766590 (0xFFD67E), 13338331 (0xCB86DB), 9367192 (0x8EEE98), 16749490 (0xFF93B2), or 16478047 (0xFB6F5F)
+	// Color of the topic icon in RGB format. Currently, must be one of 7322096 (0x6FB9F0), 16766590 (0xFFD67E), 13338331 (0xCB86DB), 9367192 (0x8EEE98), 16749490 (0xFF93B2), or 16478047 (0xFB6F5F).
 	IconColor int64
 	// Unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
 	IconCustomEmojiId string
@@ -1102,7 +1102,7 @@ type DeleteAllMessageReactionsOpts struct {
 // DeleteAllMessageReactions (https://core.telegram.org/bots/api#deleteallmessagereactions)
 //
 // Use this method to remove up to 10000 recent reactions in a group or a supergroup chat added by a given user or chat. The bot must have the 'can_delete_messages' administrator right in the chat. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
 //   - opts (type DeleteAllMessageReactionsOpts): All optional parameters.
 func (bot *Bot) DeleteAllMessageReactions(chatId int64, opts *DeleteAllMessageReactionsOpts) (bool, error) {
 	return bot.DeleteAllMessageReactionsWithContext(context.Background(), chatId, opts)
@@ -1141,7 +1141,7 @@ type DeleteBusinessMessagesOpts struct {
 //
 // Delete messages on behalf of a business account. Requires the can_delete_sent_messages business bot right to delete messages sent by the bot itself, or the can_delete_all_messages business bot right to delete any message. Returns True on success.
 //   - businessConnectionId (type string): Unique identifier of the business connection on behalf of which to delete the messages
-//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. All messages must be from the same chat. See deleteMessage for limitations on which messages can be deleted
+//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. All messages must be from the same chat. See deleteMessage for limitations on which messages can be deleted.
 //   - opts (type DeleteBusinessMessagesOpts): All optional parameters.
 func (bot *Bot) DeleteBusinessMessages(businessConnectionId string, messageIds []int64, opts *DeleteBusinessMessagesOpts) (bool, error) {
 	return bot.DeleteBusinessMessagesWithContext(context.Background(), businessConnectionId, messageIds, opts)
@@ -1331,7 +1331,7 @@ type DeleteMessageReactionOpts struct {
 // DeleteMessageReaction (https://core.telegram.org/bots/api#deletemessagereaction)
 //
 // Use this method to remove a reaction from a message in a group or a supergroup chat. The bot must have the 'can_delete_messages' administrator right in the chat. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
 //   - messageId (type int64): Identifier of the target message
 //   - opts (type DeleteMessageReactionOpts): All optional parameters.
 func (bot *Bot) DeleteMessageReaction(chatId int64, messageId int64, opts *DeleteMessageReactionOpts) (bool, error) {
@@ -1372,7 +1372,7 @@ type DeleteMessagesOpts struct {
 //
 // Use this method to delete multiple messages simultaneously. If some of the specified messages can't be found, they are skipped. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
-//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. See deleteMessage for limitations on which messages can be deleted
+//   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. See deleteMessage for limitations on which messages can be deleted.
 //   - opts (type DeleteMessagesOpts): All optional parameters.
 func (bot *Bot) DeleteMessages(chatId int64, messageIds []int64, opts *DeleteMessagesOpts) (bool, error) {
 	return bot.DeleteMessagesWithContext(context.Background(), chatId, messageIds, opts)
@@ -1402,7 +1402,7 @@ func (bot *Bot) DeleteMessagesWithContext(ctx context.Context, chatId int64, mes
 type DeleteMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
 	Scope BotCommandScope
-	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands.
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1587,7 +1587,7 @@ type EditChatInviteLinkOpts struct {
 	ExpireDate int64
 	// The maximum number of users that can be members of the chat simultaneously after joining the chat via this invite link; 1-99999
 	MemberLimit int64
-	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
+	// True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified.
 	CreatesJoinRequest bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1672,9 +1672,9 @@ func (bot *Bot) EditChatSubscriptionInviteLinkWithContext(ctx context.Context, c
 
 // EditForumTopicOpts is the set of optional fields for Bot.EditForumTopic and Bot.EditForumTopicWithContext.
 type EditForumTopicOpts struct {
-	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept
+	// New topic name, 0-128 characters. If not specified or empty, the current name of the topic will be kept.
 	Name string
-	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
+	// New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept.
 	IconCustomEmojiId *string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1756,9 +1756,9 @@ type EditMessageCaptionOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message to edit
+	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
 	// New caption of the message, 0-1024 characters after entities parsing
 	Caption string
@@ -1768,7 +1768,7 @@ type EditMessageCaptionOpts struct {
 	CaptionEntities []MessageEntity
 	// Pass True, if the caption must be shown above the message media. Supported only for animation, photo and video messages.
 	ShowCaptionAboveMedia bool
-	// A JSON-serialized object for an inline keyboard.
+	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1870,11 +1870,11 @@ type EditMessageLiveLocationOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message to edit
+	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
-	// New period in seconds during which the location can be updated, starting from the message send date. If 0x7FFFFFFF is specified, then the location can be updated forever. Otherwise, the new value must not exceed the current live_period by more than a day, and the live location expiration date must remain within the next 90 days. If not specified, then live_period remains unchanged
+	// New period in seconds during which the location can be updated, starting from the message send date. If 0x7FFFFFFF is specified, then the location can be updated forever. Otherwise, the new value must not exceed the current live_period by more than a day, and the live location expiration date must remain within the next 90 days. If not specified, then live_period remains unchanged.
 	LivePeriod *int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
@@ -1882,7 +1882,7 @@ type EditMessageLiveLocationOpts struct {
 	Heading int64
 	// The maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
 	ProximityAlertRadius int64
-	// A JSON-serialized object for a new inline keyboard.
+	// A JSON-serialized object for a new inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -1943,11 +1943,11 @@ type EditMessageMediaOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message to edit
+	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
-	// A JSON-serialized object for a new inline keyboard.
+	// A JSON-serialized object for a new inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2002,11 +2002,11 @@ type EditMessageReplyMarkupOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message to edit
+	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
-	// A JSON-serialized object for an inline keyboard.
+	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2059,9 +2059,9 @@ type EditMessageTextOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message to edit
+	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
@@ -2069,7 +2069,7 @@ type EditMessageTextOpts struct {
 	Entities []MessageEntity
 	// Link preview generation options for the message
 	LinkPreviewOptions *LinkPreviewOptions
-	// A JSON-serialized object for an inline keyboard.
+	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2410,7 +2410,7 @@ type GetBusinessAccountGiftsOpts struct {
 	SortByPrice bool
 	// Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
 	Offset string
-	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100.
 	Limit int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2616,7 +2616,7 @@ type GetChatGiftsOpts struct {
 	SortByPrice bool
 	// Offset of the first entry to return as received from the previous request; use an empty string to get the first chunk of results
 	Offset string
-	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100.
 	Limit int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2733,7 +2733,7 @@ func (bot *Bot) GetChatMemberCountWithContext(ctx context.Context, chatId int64,
 
 // GetChatMenuButtonOpts is the set of optional fields for Bot.GetChatMenuButton and Bot.GetChatMenuButtonWithContext.
 type GetChatMenuButtonOpts struct {
-	// Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
+	// Unique identifier for the target private chat. If not specified, the bot's default menu button will be returned.
 	ChatId *int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -2870,11 +2870,11 @@ func (bot *Bot) GetForumTopicIconStickersWithContext(ctx context.Context, opts *
 
 // GetGameHighScoresOpts is the set of optional fields for Bot.GetGameHighScores and Bot.GetGameHighScoresWithContext.
 type GetGameHighScoresOpts struct {
-	// Required if inline_message_id is not specified. Unique identifier for the target chat
+	// Required if inline_message_id is not specified. Unique identifier for the target chat.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the sent message
+	// Required if inline_message_id is not specified. Identifier of the sent message.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3405,7 +3405,7 @@ type GetUserGiftsOpts struct {
 	SortByPrice bool
 	// Offset of the first entry to return as received from the previous request; use an empty string to get the first chunk of results
 	Offset string
-	// The maximum number of gifts to be returned; 1-100. Defaults to 100
+	// The maximum number of gifts to be returned; 1-100. Defaults to 100.
 	Limit int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -3862,7 +3862,7 @@ type PromoteChatMemberOpts struct {
 	CanDeleteMessages bool
 	// Pass True if the administrator can manage video chats
 	CanManageVideoChats bool
-	// Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics. For backward compatibility, defaults to True for promotions of channel administrators
+	// Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics. For backward compatibility, defaults to True for promotions of channel administrators.
 	CanRestrictMembers *bool
 	// Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
 	CanPromoteMembers bool
@@ -4350,7 +4350,7 @@ func (bot *Bot) RepostStoryWithContext(ctx context.Context, businessConnectionId
 type RestrictChatMemberOpts struct {
 	// Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
 	UseIndependentChatPermissions bool
-	// Date when restrictions will be lifted for the user; Unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
+	// Date when restrictions will be lifted for the user; Unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever.
 	UntilDate int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4488,7 +4488,7 @@ type SavePreparedKeyboardButtonOpts struct {
 //
 // Stores a keyboard button that can be used by a user within a Mini App. Returns a PreparedKeyboardButton object.
 //   - userId (type int64): Unique identifier of the target user that can use the button
-//   - button (type KeyboardButton): A JSON-serialized object describing the button to be saved. The button must be of the type request_users, request_chat, or request_managed_bot
+//   - button (type KeyboardButton): A JSON-serialized object describing the button to be saved. The button must be of the type request_users, request_chat, or request_managed_bot.
 //   - opts (type SavePreparedKeyboardButtonOpts): All optional parameters.
 func (bot *Bot) SavePreparedKeyboardButton(userId int64, button KeyboardButton, opts *SavePreparedKeyboardButtonOpts) (*PreparedKeyboardButton, error) {
 	return bot.SavePreparedKeyboardButtonWithContext(context.Background(), userId, button, opts)
@@ -4552,7 +4552,7 @@ type SendAnimationOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4643,7 +4643,7 @@ type SendAudioOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4713,7 +4713,7 @@ type SendChatActionOpts struct {
 //
 // Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username. Channel chats and channel direct messages chats aren't supported.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot or supergroup in the format @username. Channel chats and channel direct messages chats aren't supported.
 //   - action (type string): Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 //   - opts (type SendChatActionOpts): All optional parameters.
 func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
@@ -4823,7 +4823,7 @@ type SendContactOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4883,7 +4883,7 @@ type SendDiceOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
+	// Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲".
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
@@ -4897,7 +4897,7 @@ type SendDiceOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -4974,7 +4974,7 @@ type SendDocumentOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5155,7 +5155,7 @@ type SendInvoiceOpts struct {
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	SuggestedTipAmounts []int64
-	// Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter
+	// Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter.
 	StartParameter string
 	// JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
 	ProviderData string
@@ -5359,7 +5359,7 @@ type SendLocationOpts struct {
 	DirectMessagesTopicId int64
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
-	// Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+	// Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely
 	LivePeriod int64
 	// For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
 	Heading int64
@@ -5377,7 +5377,7 @@ type SendLocationOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5519,7 +5519,7 @@ type SendMessageOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5648,7 +5648,7 @@ type SendPaidMediaOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5732,7 +5732,7 @@ type SendPhotoOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5791,9 +5791,9 @@ type SendPollOpts struct {
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
-	// Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
+	// Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed.
 	QuestionParseMode string
-	// A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
+	// A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode.
 	QuestionEntities []MessageEntity
 	// True, if the poll needs to be anonymous, defaults to True
 	IsAnonymous *bool
@@ -5811,7 +5811,7 @@ type SendPollOpts struct {
 	HideResultsUntilCloses bool
 	// Pass True, if voting is limited to users who have been members of the chat where the poll is being sent for more than 24 hours; for channel chats only
 	MembersOnly bool
-	// A JSON-serialized list of 0-12 two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which users can vote in the poll; for channel chats only. If omitted or empty, then users from any country can participate in the poll.
+	// A JSON-serialized list of 0-12 two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which users can vote in the poll; for channel chats only. Use "FT" as a country code to allow users with anonymous numbers to vote. If omitted or empty, then users from any country can participate in the poll.
 	CountryCodes []string
 	// A JSON-serialized list of monotonically increasing 0-based identifiers of the correct answer options, required for polls in quiz mode
 	CorrectOptionIds []int64
@@ -5819,7 +5819,7 @@ type SendPollOpts struct {
 	Explanation string
 	// Mode for parsing entities in the explanation. See formatting options for more details.
 	ExplanationParseMode string
-	// A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode
+	// A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode.
 	ExplanationEntities []MessageEntity
 	// Media added to the quiz explanation
 	ExplanationMedia InputPollMedia
@@ -5847,7 +5847,7 @@ type SendPollOpts struct {
 	MessageEffectId string
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -5943,7 +5943,7 @@ type SendStickerOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6020,7 +6020,7 @@ type SendVenueOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6122,7 +6122,7 @@ type SendVideoOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6208,7 +6208,7 @@ type SendVideoNoteOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6218,7 +6218,7 @@ type SendVideoNoteOpts struct {
 //
 // As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
-//   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
+//   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported.
 //   - opts (type SendVideoNoteOpts): All optional parameters.
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	return bot.SendVideoNoteWithContext(context.Background(), chatId, videoNote, opts)
@@ -6287,7 +6287,7 @@ type SendVoiceOpts struct {
 	SuggestedPostParameters *SuggestedPostParameters
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
-	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
 	ReplyMarkup ReplyMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6657,9 +6657,9 @@ func (bot *Bot) SetChatMemberTagWithContext(ctx context.Context, chatId int64, u
 
 // SetChatMenuButtonOpts is the set of optional fields for Bot.SetChatMenuButton and Bot.SetChatMenuButtonWithContext.
 type SetChatMenuButtonOpts struct {
-	// Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
+	// Unique identifier for the target private chat. If not specified, the bot's default menu button will be changed.
 	ChatId *int64
-	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
+	// A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault.
 	MenuButton MenuButton
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6846,7 +6846,7 @@ func (bot *Bot) SetChatTitleWithContext(ctx context.Context, chatId int64, title
 
 // SetCustomEmojiStickerSetThumbnailOpts is the set of optional fields for Bot.SetCustomEmojiStickerSetThumbnail and Bot.SetCustomEmojiStickerSetThumbnailWithContext.
 type SetCustomEmojiStickerSetThumbnailOpts struct {
-	// Custom emoji identifier of a sticker from the sticker set; pass an empty string to drop the thumbnail and use the first sticker as the thumbnail.
+	// Custom emoji identifier of a sticker from the sticker set; pass an empty string to drop the thumbnail and use the first sticker as the thumbnail
 	CustomEmojiId string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -6885,15 +6885,15 @@ func (bot *Bot) SetCustomEmojiStickerSetThumbnailWithContext(ctx context.Context
 
 // SetGameScoreOpts is the set of optional fields for Bot.SetGameScore and Bot.SetGameScoreWithContext.
 type SetGameScoreOpts struct {
-	// Pass True if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters
+	// Pass True if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters.
 	Force bool
 	// Pass True if the game message should not be automatically edited to include the current scoreboard
 	DisableEditMessage bool
-	// Required if inline_message_id is not specified. Unique identifier for the target chat
+	// Required if inline_message_id is not specified. Unique identifier for the target chat.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the sent message
+	// Required if inline_message_id is not specified. Identifier of the sent message.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -7033,7 +7033,7 @@ func (bot *Bot) SetMessageReactionWithContext(ctx context.Context, chatId int64,
 type SetMyCommandsOpts struct {
 	// A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
 	Scope BotCommandScope
-	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	// A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands.
 	LanguageCode string
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -7595,7 +7595,7 @@ type SetWebhookOpts struct {
 //
 // Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request (a request with response HTTP status code different from 2XY), we will repeat the request and give up after a reasonable amount of attempts. Returns True on success.
 // If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter secret_token. If specified, the request will contain a header "X-Telegram-Bot-Api-Secret-Token" with the secret token as content.
-//   - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration
+//   - url (type string): HTTPS URL to send updates to. Use an empty string to remove webhook integration.
 //   - opts (type SetWebhookOpts): All optional parameters.
 func (bot *Bot) SetWebhook(url string, opts *SetWebhookOpts) (bool, error) {
 	return bot.SetWebhookWithContext(context.Background(), url, opts)
@@ -7634,11 +7634,11 @@ type StopMessageLiveLocationOpts struct {
 	BusinessConnectionId string
 	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
 	ChatId int64
-	// Required if inline_message_id is not specified. Identifier of the message with live location to stop
+	// Required if inline_message_id is not specified. Identifier of the message with live location to stop.
 	MessageId int64
-	// Required if chat_id and message_id are not specified. Identifier of the inline message
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
-	// A JSON-serialized object for a new inline keyboard.
+	// A JSON-serialized object for a new inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -7689,7 +7689,7 @@ func (bot *Bot) StopMessageLiveLocationWithContext(ctx context.Context, opts *St
 type StopPollOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// A JSON-serialized object for a new message inline keyboard.
+	// A JSON-serialized object for a new message inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts

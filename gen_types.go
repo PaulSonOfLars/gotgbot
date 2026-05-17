@@ -378,7 +378,7 @@ type MergedBackgroundType struct {
 	IsMoving bool `json:"is_moving,omitempty"`
 	// Optional. Intensity of the pattern when it is shown above the filled background; 0-100 (Only for pattern)
 	Intensity int64 `json:"intensity,omitempty"`
-	// Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only (Only for pattern)
+	// Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only. (Only for pattern)
 	IsInverted bool `json:"is_inverted,omitempty"`
 	// Optional. Name of the chat theme, which is usually an emoji (Only for chat_theme)
 	ThemeName string `json:"theme_name,omitempty"`
@@ -583,7 +583,7 @@ type BackgroundTypePattern struct {
 	Fill BackgroundFill `json:"fill"`
 	// Intensity of the pattern when it is shown above the filled background; 0-100
 	Intensity int64 `json:"intensity"`
-	// Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only
+	// Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only.
 	IsInverted bool `json:"is_inverted,omitempty"`
 	// Optional. True, if the background moves slightly when the device is tilted
 	IsMoving bool `json:"is_moving,omitempty"`
@@ -724,7 +724,7 @@ type BotAccessSettings struct {
 type BotCommand struct {
 	// Text of the command; 1-32 characters. Can contain only lowercase English letters, digits and underscores.
 	Command string `json:"command"`
-	// Description of the command; 1-256 characters.
+	// Description of the command; 1-256 characters
 	Description string `json:"description"`
 }
 
@@ -1171,7 +1171,7 @@ type CallbackQuery struct {
 	From User `json:"from"`
 	// Optional. Message sent by the bot with the callback button that originated the query
 	Message MaybeInaccessibleMessage `json:"message,omitempty"`
-	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
+	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query
 	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
 	ChatInstance string `json:"chat_instance"`
@@ -1742,7 +1742,7 @@ type ChatFullInfo struct {
 	FirstProfileAudio *Audio `json:"first_profile_audio,omitempty"`
 	// Optional. The color scheme based on a unique gift that must be used for the chat's name, message replies and link previews
 	UniqueGiftColors *UniqueGiftColors `json:"unique_gift_colors,omitempty"`
-	// Optional. The number of Telegram Stars a general user have to pay to send a message to the chat
+	// Optional. The number of Telegram Stars a general user has to pay to send a message to the chat
 	PaidMessageStarCount int64 `json:"paid_message_star_count,omitempty"`
 }
 
@@ -1906,7 +1906,7 @@ type ChatJoinRequest struct {
 	UserChatId int64 `json:"user_chat_id"`
 	// Date the request was sent in Unix time
 	Date int64 `json:"date"`
-	// Optional. Bio of the user.
+	// Optional. Bio of the user
 	Bio string `json:"bio,omitempty"`
 	// Optional. Chat invite link that was used by the user to send the join request
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
@@ -2242,7 +2242,7 @@ func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 type ChatMemberBanned struct {
 	// Information about the user
 	User User `json:"user"`
-	// Date when restrictions will be lifted for this user; Unix time. If 0, then the user is banned forever
+	// Date when restrictions will be lifted for this user; Unix time. If 0, then the user is banned forever.
 	UntilDate int64 `json:"until_date"`
 }
 
@@ -2461,7 +2461,7 @@ type ChatMemberRestricted struct {
 	CanPinMessages bool `json:"can_pin_messages"`
 	// True, if the user is allowed to create forum topics
 	CanManageTopics bool `json:"can_manage_topics"`
-	// Date when restrictions will be lifted for this user; Unix time. If 0, then the user is restricted forever
+	// Date when restrictions will be lifted for this user; Unix time. If 0, then the user is restricted forever.
 	UntilDate int64 `json:"until_date"`
 }
 
@@ -2532,7 +2532,7 @@ type ChatMemberUpdated struct {
 	OldChatMember ChatMember `json:"old_chat_member"`
 	// New information about the chat member
 	NewChatMember ChatMember `json:"new_chat_member"`
-	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
+	// Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
 	// Optional. True, if the user joined the chat after sending a direct join request without using an invite link and being approved by an administrator
 	ViaJoinRequest bool `json:"via_join_request,omitempty"`
@@ -2621,13 +2621,13 @@ type ChatPermissions struct {
 	CanReactToMessages *bool `json:"can_react_to_messages,omitempty"`
 	// Optional. True, if the user is allowed to edit their own tag. If omitted, defaults to the value of can_pin_messages.
 	CanEditTag *bool `json:"can_edit_tag,omitempty"`
-	// Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups
+	// Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups.
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// Optional. True, if the user is allowed to pin messages. Ignored in public supergroups
+	// Optional. True, if the user is allowed to pin messages. Ignored in public supergroups.
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the user is allowed to create forum topics. If omitted defaults to the value of can_pin_messages
+	// Optional. True, if the user is allowed to create forum topics. If omitted defaults to the value of can_pin_messages.
 	CanManageTopics *bool `json:"can_manage_topics,omitempty"`
 }
 
@@ -2653,9 +2653,9 @@ type ChatShared struct {
 	RequestId int64 `json:"request_id"`
 	// Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
 	ChatId int64 `json:"chat_id"`
-	// Optional. Title of the chat, if the title was requested by the bot.
+	// Optional. Title of the chat, if the title was requested by the bot
 	Title string `json:"title,omitempty"`
-	// Optional. Username of the chat, if the username was requested by the bot and available.
+	// Optional. Username of the chat, if the username was requested by the bot and available
 	Username string `json:"username,omitempty"`
 	// Optional. Available sizes of the chat photo, if the photo was requested by the bot
 	Photo []PhotoSize `json:"photo,omitempty"`
@@ -2784,7 +2784,7 @@ type DirectMessagePriceChanged struct {
 type DirectMessagesTopic struct {
 	// Unique identifier of the topic. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
 	TopicId int64 `json:"topic_id"`
-	// Optional. Information about the user that created the topic. Currently, it is always present
+	// Optional. Information about the user that created the topic. Currently, it is always present.
 	User *User `json:"user,omitempty"`
 }
 
@@ -3059,13 +3059,13 @@ type Game struct {
 	Title string `json:"title"`
 	// Description of the game
 	Description string `json:"description"`
-	// Photo that will be displayed in the game message in chats.
+	// Photo that will be displayed in the game message in chats
 	Photo []PhotoSize `json:"photo,omitempty"`
 	// Optional. Brief description of the game or high scores included in the game message. Can be automatically edited to include current high scores for the game when the bot calls setGameScore, or manually edited using editMessageText. 0-4096 characters.
 	Text string `json:"text,omitempty"`
 	// Optional. Special entities that appear in text, such as usernames, URLs, bot commands, etc.
 	TextEntities []MessageEntity `json:"text_entities,omitempty"`
-	// Optional. Animation that will be displayed in the game message in chats. Upload via BotFather
+	// Optional. Animation that will be displayed in the game message in chats. Upload via BotFather.
 	Animation *Animation `json:"animation,omitempty"`
 }
 
@@ -3157,7 +3157,7 @@ type GiftInfo struct {
 	Entities []MessageEntity `json:"entities,omitempty"`
 	// Optional. True, if the sender and gift text are shown only to the gift receiver; otherwise, everyone will be able to see them
 	IsPrivate bool `json:"is_private,omitempty"`
-	// Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift
+	// Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift.
 	UniqueGiftNumber int64 `json:"unique_gift_number,omitempty"`
 }
 
@@ -3299,7 +3299,7 @@ type InlineKeyboardButton struct {
 	SwitchInlineQueryCurrentChat *string `json:"switch_inline_query_current_chat,omitempty"`
 	// Optional. If set, pressing the button will prompt the user to select one of their chats of the specified type, open that chat and insert the bot's username and the specified inline query in the input field. Not supported for messages sent in channel direct messages chats and on behalf of a business account.
 	SwitchInlineQueryChosenChat *SwitchInlineQueryChosenChat `json:"switch_inline_query_chosen_chat,omitempty"`
-	// Optional. Description of the button that copies the specified text to the clipboard.
+	// Optional. Description of the button that copies the specified text to the clipboard
 	CopyText *CopyTextButton `json:"copy_text,omitempty"`
 	// Optional. Description of the game that will be launched when the user presses the button. NOTE: This type of button must always be the first button in the first row.
 	CallbackGame *CallbackGame `json:"callback_game,omitempty"`
@@ -3330,7 +3330,7 @@ type InlineQuery struct {
 	Query string `json:"query"`
 	// Offset of the results to be returned, can be controlled by the bot
 	Offset string `json:"offset"`
-	// Optional. Type of the chat from which the inline query was sent. Can be either "sender" for a private chat with the inline query sender, "private", "group", "supergroup", or "channel". The chat type should be always known for requests sent from official clients and most third-party clients, unless the request was sent from a secret chat
+	// Optional. Type of the chat from which the inline query was sent. Can be either "sender" for a private chat with the inline query sender, "private", "group", "supergroup", or "channel". The chat type should be always known for requests sent from official clients and most third-party clients, unless the request was sent from a secret chat.
 	ChatType string `json:"chat_type,omitempty"`
 	// Optional. Sender location, only for bots that request user location
 	Location *Location `json:"location,omitempty"`
@@ -3468,7 +3468,7 @@ type MergedInlineQueryResult struct {
 	GifHeight int64 `json:"gif_height,omitempty"`
 	// Optional. Duration of the GIF in seconds (Only for gif)
 	GifDuration int64 `json:"gif_duration,omitempty"`
-	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg" (Only for gif, mpeg4_gif)
+	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg". (Only for gif, mpeg4_gif)
 	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Location latitude in degrees (Only for location, venue)
 	Latitude float64 `json:"latitude,omitempty"`
@@ -3476,7 +3476,7 @@ type MergedInlineQueryResult struct {
 	Longitude float64 `json:"longitude,omitempty"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500 (Only for location)
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
-	// Optional. Period in seconds during which the location can be updated, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely. (Only for location)
+	// Optional. Period in seconds during which the location can be updated, must be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely (Only for location)
 	LivePeriod int64 `json:"live_period,omitempty"`
 	// Optional. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified. (Only for location)
 	Heading int64 `json:"heading,omitempty"`
@@ -3490,7 +3490,7 @@ type MergedInlineQueryResult struct {
 	Mpeg4Height int64 `json:"mpeg4_height,omitempty"`
 	// Optional. Video duration in seconds (Only for mpeg4_gif)
 	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
-	// Optional. A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB (Only for photo)
+	// Optional. A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB. (Only for photo)
 	PhotoUrl string `json:"photo_url,omitempty"`
 	// Optional. Width of the photo (Only for photo)
 	PhotoWidth int64 `json:"photo_width,omitempty"`
@@ -4394,7 +4394,7 @@ type InlineQueryResultGif struct {
 	GifDuration int64 `json:"gif_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbnailUrl string `json:"thumbnail_url"`
-	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
+	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg".
 	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
@@ -4473,7 +4473,7 @@ type InlineQueryResultLocation struct {
 	Title string `json:"title"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
-	// Optional. Period in seconds during which the location can be updated, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+	// Optional. Period in seconds during which the location can be updated, must be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely
 	LivePeriod int64 `json:"live_period,omitempty"`
 	// Optional. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
 	Heading int64 `json:"heading,omitempty"`
@@ -4553,7 +4553,7 @@ type InlineQueryResultMpeg4Gif struct {
 	Mpeg4Duration int64 `json:"mpeg4_duration,omitempty"`
 	// URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbnailUrl string `json:"thumbnail_url"`
-	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
+	// Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg".
 	ThumbnailMimeType string `json:"thumbnail_mime_type,omitempty"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
@@ -4624,7 +4624,7 @@ func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 type InlineQueryResultPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
 	Id string `json:"id"`
-	// A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
+	// A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB.
 	PhotoUrl string `json:"photo_url"`
 	// URL of the thumbnail for the photo
 	ThumbnailUrl string `json:"thumbnail_url"`
@@ -5050,7 +5050,7 @@ type InputLocationMessageContent struct {
 	Longitude float64 `json:"longitude"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
-	// Optional. Period in seconds during which the location can be updated, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+	// Optional. Period in seconds during which the location can be updated, must be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely
 	LivePeriod int64 `json:"live_period,omitempty"`
 	// Optional. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
 	Heading int64 `json:"heading,omitempty"`
@@ -5892,9 +5892,9 @@ var (
 type InputPollOption struct {
 	// Option text, 1-100 characters
 	Text string `json:"text"`
-	// Optional. Mode for parsing entities in the text. See formatting options for more details. Currently, only custom emoji entities are allowed
+	// Optional. Mode for parsing entities in the text. See formatting options for more details. Currently, only custom emoji entities are allowed.
 	TextParseMode string `json:"text_parse_mode,omitempty"`
-	// Optional. A JSON-serialized list of special entities that appear in the poll option text. It can be specified instead of text_parse_mode
+	// Optional. A JSON-serialized list of special entities that appear in the poll option text. It can be specified instead of text_parse_mode.
 	TextEntities []MessageEntity `json:"text_entities,omitempty"`
 	// Optional. Media added to the poll option
 	Media InputPollOptionMedia `json:"media,omitempty"`
@@ -6281,7 +6281,7 @@ type Invoice struct {
 //
 // This object represents one button of the reply keyboard. At most one of the fields other than text, icon_custom_emoji_id, and style must be used to specify the type of the button. For simple text buttons, String can be used instead of this object to specify the button text.
 type KeyboardButton struct {
-	// Text of the button. If none of the fields other than text, icon_custom_emoji_id, and style are used, it will be sent as a message when the button is pressed
+	// Text of the button. If none of the fields other than text, icon_custom_emoji_id, and style are used, it will be sent as a message when the button is pressed.
 	Text string `json:"text"`
 	// Optional. Unique identifier of the custom emoji shown before the text of the button. Can only be used by bots that purchased additional usernames on Fragment or in the messages directly sent by the bot to private, group and supergroup chats if the owner of the bot has a Telegram Premium subscription.
 	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
@@ -6315,9 +6315,9 @@ type KeyboardButtonPollType struct {
 //
 // This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the chat if appropriate. More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection.
 type KeyboardButtonRequestChat struct {
-	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
+	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message.
 	RequestId int32 `json:"request_id"`
-	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
+	// Pass True to request a channel chat, pass False to request a group or a supergroup chat
 	ChatIsChannel bool `json:"chat_is_channel"`
 	// Optional. Pass True to request a forum supergroup, pass False to request a non-forum chat. If not specified, no additional restrictions are applied.
 	ChatIsForum *bool `json:"chat_is_forum,omitempty"`
@@ -6343,7 +6343,7 @@ type KeyboardButtonRequestChat struct {
 //
 // This object defines the parameters for the creation of a managed bot. Information about the created bot will be shared with the bot using the update managed_bot and a Message with the field managed_bot_created.
 type KeyboardButtonRequestManagedBot struct {
-	// Signed 32-bit identifier of the request. Must be unique within the message
+	// Signed 32-bit identifier of the request. Must be unique within the message.
 	RequestId int32 `json:"request_id"`
 	// Optional. Suggested name for the bot
 	SuggestedName string `json:"suggested_name,omitempty"`
@@ -6355,7 +6355,7 @@ type KeyboardButtonRequestManagedBot struct {
 //
 // This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
 type KeyboardButtonRequestUsers struct {
-	// Signed 32-bit identifier of the request that will be received back in the UsersShared object. Must be unique within the message
+	// Signed 32-bit identifier of the request that will be received back in the UsersShared object. Must be unique within the message.
 	RequestId int32 `json:"request_id"`
 	// Optional. Pass True to request bots, pass False to request regular users. If not specified, no additional restrictions are applied.
 	UserIsBot *bool `json:"user_is_bot,omitempty"`
@@ -6387,7 +6387,7 @@ type LabeledPrice struct {
 type LinkPreviewOptions struct {
 	// Optional. True, if the link preview is disabled
 	IsDisabled bool `json:"is_disabled,omitempty"`
-	// Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used
+	// Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used.
 	Url string `json:"url,omitempty"`
 	// Optional. True, if the media in the link preview is supposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferSmallMedia bool `json:"prefer_small_media,omitempty"`
@@ -6458,11 +6458,11 @@ type LocationAddress struct {
 type LoginUrl struct {
 	// An HTTPS URL to be opened with user authorization data added to the query string when the button is pressed. If the user refuses to provide authorization data, the original URL without information about the user will be opened. The data added is the same as described in Receiving authorization data. NOTE: You must always check the hash of the received data to verify the authentication and the integrity of the data as described in Checking authorization.
 	Url string `json:"url"`
-	// Optional. New text of the button in forwarded messages.
+	// Optional. New text of the button in forwarded messages
 	ForwardText string `json:"forward_text,omitempty"`
 	// Optional. Username of a bot, which will be used for user authorization. See Setting up a bot for more details. If not specified, the current bot's username will be assumed. The url's domain must be the same as the domain linked with the bot. See Linking your domain to the bot for more details.
 	BotUsername *string `json:"bot_username,omitempty"`
-	// Optional. Pass True to request the permission for your bot to send messages to the user.
+	// Optional. Pass True to request the permission for your bot to send messages to the user
 	RequestWriteAccess bool `json:"request_write_access,omitempty"`
 }
 
@@ -6774,13 +6774,13 @@ func (v MenuButtonWebApp) MarshalJSON() ([]byte, error) {
 //
 // This object represents a message.
 type Message struct {
-	// Unique message identifier inside this chat. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
+	// Unique message identifier inside this chat. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent.
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread or forum topic to which the message belongs; for supergroups and private chats only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
 	// Optional. Information about the direct messages chat topic that contains the message
 	DirectMessagesTopic *DirectMessagesTopic `json:"direct_messages_topic,omitempty"`
-	// Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats
+	// Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats.
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
@@ -6846,13 +6846,13 @@ type Message struct {
 	SuggestedPostInfo *SuggestedPostInfo `json:"suggested_post_info,omitempty"`
 	// Optional. Unique identifier of the message effect added to the message
 	EffectId string `json:"effect_id,omitempty"`
-	// Optional. Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set
+	// Optional. Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set.
 	Animation *Animation `json:"animation,omitempty"`
 	// Optional. Message is an audio file, information about the file
 	Audio *Audio `json:"audio,omitempty"`
 	// Optional. Message is a general file, information about the file
 	Document *Document `json:"document,omitempty"`
-	// Optional. Message is a live photo, information about the live photo. For backward compatibility, when this field is set, the photo field will also be set
+	// Optional. Message is a live photo, information about the live photo. For backward compatibility, when this field is set, the photo field will also be set.
 	LivePhoto *LivePhoto `json:"live_photo,omitempty"`
 	// Optional. Message contains paid media; information about the paid media
 	PaidMedia *PaidMediaInfo `json:"paid_media,omitempty"`
@@ -6886,7 +6886,7 @@ type Message struct {
 	Game *Game `json:"game,omitempty"`
 	// Optional. Message is a native poll, information about the poll
 	Poll *Poll `json:"poll,omitempty"`
-	// Optional. Message is a venue, information about the venue. For backward compatibility, when this field is set, the location field will also be set
+	// Optional. Message is a venue, information about the venue. For backward compatibility, when this field is set, the location field will also be set.
 	Venue *Venue `json:"venue,omitempty"`
 	// Optional. Message is a shared location, information about the location
 	Location *Location `json:"location,omitempty"`
@@ -7283,7 +7283,7 @@ type MessageAutoDeleteTimerChanged struct {
 //
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 type MessageEntity struct {
-	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers), or "date_time" (for formatted date and time)
+	// Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers), or "date_time" (for formatted date and time).
 	Type string `json:"type"`
 	// Offset in UTF-16 code units to the start of the entity
 	Offset int64 `json:"offset"`
@@ -7295,7 +7295,7 @@ type MessageEntity struct {
 	User *User `json:"user,omitempty"`
 	// Optional. For "pre" only, the programming language of the entity text
 	Language string `json:"language,omitempty"`
-	// Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
+	// Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker.
 	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
 	// Optional. For "date_time" only, the Unix time associated with the entity
 	UnixTime int64 `json:"unix_time,omitempty"`
@@ -7307,7 +7307,7 @@ type MessageEntity struct {
 //
 // This object represents a unique message identifier.
 type MessageId struct {
-	// Unique message identifier. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
+	// Unique message identifier. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent.
 	MessageId int64 `json:"message_id"`
 }
 
@@ -7831,7 +7831,7 @@ type OwnedGiftRegular struct {
 	PrepaidUpgradeStarCount int64 `json:"prepaid_upgrade_star_count,omitempty"`
 	// Optional. True, if the gift's upgrade was purchased after the gift was sent; for gifts received on behalf of business accounts only
 	IsUpgradeSeparate bool `json:"is_upgrade_separate,omitempty"`
-	// Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift
+	// Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift.
 	UniqueGiftNumber int64 `json:"unique_gift_number,omitempty"`
 }
 
@@ -7879,7 +7879,7 @@ type OwnedGiftUnique struct {
 	CanBeTransferred bool `json:"can_be_transferred,omitempty"`
 	// Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
 	TransferStarCount int64 `json:"transfer_star_count,omitempty"`
-	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
+	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now.
 	NextTransferDate int64 `json:"next_transfer_date,omitempty"`
 }
 
@@ -7917,7 +7917,7 @@ type OwnedGifts struct {
 	TotalCount int64 `json:"total_count"`
 	// The list of gifts
 	Gifts []OwnedGift `json:"gifts,omitempty"`
-	// Optional. Offset for the next request. If empty, then there are no more results
+	// Optional. Offset for the next request. If empty, then there are no more results.
 	NextOffset string `json:"next_offset,omitempty"`
 }
 
@@ -8837,7 +8837,7 @@ type Poll struct {
 	AllowsRevoting bool `json:"allows_revoting"`
 	// True if voting is limited to users who have been members of the chat where the poll was originally sent for more than 24 hours
 	MembersOnly bool `json:"members_only"`
-	// Optional. A list of two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which users can vote in the poll. If omitted, then users from any country can participate in the poll.
+	// Optional. A list of two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which users can vote in the poll. The country code "FT" is used for users with anonymous numbers. If omitted, then users from any country can participate in the poll.
 	CountryCodes []string `json:"country_codes,omitempty"`
 	// Optional. Array of 0-based identifiers of the correct answer options. Available only for polls in quiz mode which are closed or were sent (not forwarded) by the bot or to the private chat with the bot.
 	CorrectOptionIds []int64 `json:"correct_option_ids,omitempty"`
@@ -9027,7 +9027,7 @@ type PreCheckoutQuery struct {
 type PreparedInlineMessage struct {
 	// Unique identifier of the prepared message
 	Id string `json:"id"`
-	// Expiration date of the prepared message, in Unix time. Expired prepared messages can no longer be used
+	// Expiration date of the prepared message, in Unix time. Expired prepared messages can no longer be used.
 	ExpirationDate int64 `json:"expiration_date"`
 }
 
@@ -9108,7 +9108,7 @@ var (
 type MergedReactionType struct {
 	// Type of the reaction
 	Type string `json:"type"`
-	// Optional. Reaction emoji. Currently, it can be one of "❤", "👍", "👎", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡" (Only for emoji)
+	// Optional. Reaction emoji. Currently, it can be one of "❤", "👍", "👎", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡". (Only for emoji)
 	Emoji string `json:"emoji,omitempty"`
 	// Optional. Custom emoji identifier (Only for custom_emoji)
 	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
@@ -9237,7 +9237,7 @@ func (v ReactionTypeCustomEmoji) MarshalJSON() ([]byte, error) {
 //
 // The reaction is based on an emoji.
 type ReactionTypeEmoji struct {
-	// Reaction emoji. Currently, it can be one of "❤", "👍", "👎", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡"
+	// Reaction emoji. Currently, it can be one of "❤", "👍", "👎", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡".
 	Emoji string `json:"emoji"`
 }
 
@@ -9307,7 +9307,7 @@ func (v ReactionTypePaid) MarshalJSON() ([]byte, error) {
 //
 // This object contains basic information about a refunded payment.
 type RefundedPayment struct {
-	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars. Currently, always "XTR"
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars. Currently, always "XTR".
 	Currency string `json:"currency"`
 	// Total refunded price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45, total_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
 	TotalAmount int64 `json:"total_amount"`
@@ -9704,9 +9704,9 @@ type StarTransaction struct {
 	NanostarAmount int64 `json:"nanostar_amount,omitempty"`
 	// Date the transaction was created in Unix time
 	Date int64 `json:"date"`
-	// Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions
+	// Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions.
 	Source TransactionPartner `json:"source,omitempty"`
-	// Optional. Receiver of an outgoing transaction (e.g., a user for a purchase refund, Fragment for a withdrawal). Only for outgoing transactions
+	// Optional. Receiver of an outgoing transaction (e.g., a user for a purchase refund, Fragment for a withdrawal). Only for outgoing transactions.
 	Receiver TransactionPartner `json:"receiver,omitempty"`
 }
 
@@ -10186,7 +10186,7 @@ type SuggestedPostInfo struct {
 type SuggestedPostPaid struct {
 	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
 	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
-	// Currency in which the payment was made. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins
+	// Currency in which the payment was made. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins.
 	Currency string `json:"currency"`
 	// Optional. The amount of the currency that was received by the channel in nanotoncoins; for payments in toncoins only
 	Amount int64 `json:"amount,omitempty"`
@@ -10208,7 +10208,7 @@ type SuggestedPostParameters struct {
 //
 // Describes the price of a suggested post.
 type SuggestedPostPrice struct {
-	// Currency in which the post will be paid. Currently, must be one of "XTR" for Telegram Stars or "TON" for toncoins
+	// Currency in which the post will be paid. Currently, must be one of "XTR" for Telegram Stars or "TON" for toncoins.
 	Currency string `json:"currency"`
 	// The amount of the currency that will be paid for the post in the smallest units of the currency, i.e. Telegram Stars or nanotoncoins. Currently, price in Telegram Stars must be between 5 and 100000, and price in nanotoncoins must be between 10000000 and 10000000000000.
 	Amount int64 `json:"amount"`
@@ -10228,7 +10228,7 @@ type SuggestedPostRefunded struct {
 //
 // This object represents an inline button that switches the current user to inline mode in a chosen chat, with an optional default inline query.
 type SwitchInlineQueryChosenChat struct {
-	// Optional. The default inline query to be inserted in the input field. If left empty, only the bot's username will be inserted
+	// Optional. The default inline query to be inserted in the input field. If left empty, only the bot's username will be inserted.
 	Query string `json:"query,omitempty"`
 	// Optional. True, if private chats with users can be chosen
 	AllowUserChats bool `json:"allow_user_chats,omitempty"`
@@ -10776,7 +10776,7 @@ type UniqueGift struct {
 	GiftId string `json:"gift_id"`
 	// Human-readable name of the regular gift from which this unique gift was upgraded
 	BaseName string `json:"base_name"`
-	// Unique name of the gift. This name can be used in https://t.me/nft/... links and story areas
+	// Unique name of the gift. This name can be used in https://t.me/nft/... links and story areas.
 	Name string `json:"name"`
 	// Unique number of the upgraded gift among gifts upgraded from the same regular gift
 	Number int64 `json:"number"`
@@ -10848,7 +10848,7 @@ type UniqueGiftColors struct {
 type UniqueGiftInfo struct {
 	// Information about the gift
 	Gift UniqueGift `json:"gift"`
-	// Origin of the gift. Currently, either "upgrade" for gifts upgraded from regular gifts, "transfer" for gifts transferred from other users or channels, "resale" for gifts bought from other users, "gifted_upgrade" for upgrades purchased after the gift was sent, or "offer" for gifts bought or sold through gift purchase offers
+	// Origin of the gift. Currently, either "upgrade" for gifts upgraded from regular gifts, "transfer" for gifts transferred from other users or channels, "resale" for gifts bought from other users, "gifted_upgrade" for upgrades purchased after the gift was sent, or "offer" for gifts bought or sold through gift purchase offers.
 	Origin string `json:"origin"`
 	// Optional. For gifts bought from other users, the currency in which the payment for the gift was done. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins.
 	LastResaleCurrency string `json:"last_resale_currency,omitempty"`
@@ -10858,7 +10858,7 @@ type UniqueGiftInfo struct {
 	OwnedGiftId string `json:"owned_gift_id,omitempty"`
 	// Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
 	TransferStarCount int64 `json:"transfer_star_count,omitempty"`
-	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
+	// Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now.
 	NextTransferDate int64 `json:"next_transfer_date,omitempty"`
 }
 
@@ -10923,13 +10923,13 @@ type Update struct {
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 	// Optional. New incoming callback query
 	CallbackQuery *CallbackQuery `json:"callback_query,omitempty"`
-	// Optional. New incoming shipping query. Only for invoices with flexible price
+	// Optional. New incoming shipping query. Only for invoices with flexible price.
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
-	// Optional. New incoming pre-checkout query. Contains full information about checkout
+	// Optional. New incoming pre-checkout query. Contains full information about checkout.
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
 	// Optional. A user purchased paid media with a non-empty payload sent by the bot in a non-channel chat
 	PurchasedPaidMedia *PaidMediaPurchased `json:"purchased_paid_media,omitempty"`
-	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot
+	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot.
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
 	PollAnswer *PollAnswer `json:"poll_answer,omitempty"`
@@ -11035,7 +11035,7 @@ type UserRating struct {
 type UsersShared struct {
 	// Identifier of the request
 	RequestId int64 `json:"request_id"`
-	// Information about users shared with the bot.
+	// Information about users shared with the bot
 	Users []SharedUser `json:"users,omitempty"`
 }
 
@@ -11043,7 +11043,7 @@ type UsersShared struct {
 //
 // This object represents a venue.
 type Venue struct {
-	// Venue location. Can't be a live location
+	// Venue location. Can't be a live location.
 	Location Location `json:"location"`
 	// Name of the venue
 	Title string `json:"title"`
@@ -11208,7 +11208,7 @@ type WebhookInfo struct {
 	LastSynchronizationErrorDate int64 `json:"last_synchronization_error_date,omitempty"`
 	// Optional. The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
 	MaxConnections int64 `json:"max_connections,omitempty"`
-	// Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member
+	// Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member, message_reaction, and message_reaction_count.
 	AllowedUpdates []string `json:"allowed_updates,omitempty"`
 }
 
