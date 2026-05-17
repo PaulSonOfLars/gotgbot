@@ -9,12 +9,13 @@ import (
 )
 
 type Message struct {
-	AllowEdited   bool
-	AllowChannel  bool
-	AllowBusiness bool
-	AllowBot      bool
-	Filter        filters.Message
-	Response      Response
+	AllowEdited       bool
+	AllowChannel      bool
+	AllowBusiness     bool
+	AllowBot          bool
+	AllowGuestMessage bool
+	Filter            filters.Message
+	Response          Response
 }
 
 func NewMessage(f filters.Message, r Response) Message {
@@ -51,6 +52,12 @@ func (m Message) SetAllowBot(allow bool) Message {
 	return m
 }
 
+// SetAllowGuestMessage Enables guest messages messages for this handler.
+func (m Message) SetAllowGuestMessage(allow bool) Message {
+	m.AllowGuestMessage = allow
+	return m
+}
+
 func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	if ctx.EffectiveSender != nil && ctx.EffectiveSender.IsBot() && !m.AllowBot {
 		return false
@@ -81,6 +88,10 @@ func (m Message) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 
 	if m.AllowBusiness && m.AllowEdited && ctx.EditedBusinessMessage != nil {
 		return m.Filter == nil || m.Filter(ctx.EditedBusinessMessage)
+	}
+
+	if m.AllowGuestMessage && ctx.GuestMessage != nil {
+		return m.Filter == nil || m.Filter(ctx.GuestMessage)
 	}
 
 	return false
