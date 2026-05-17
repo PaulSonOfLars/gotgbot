@@ -57,6 +57,11 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 		chat = &update.EditedMessage.Chat
 		user = update.EditedMessage.From
 
+	case update.GuestMessage != nil:
+		msg = update.GuestMessage
+		chat = &update.GuestMessage.Chat
+		user = update.GuestMessage.From
+
 	case update.ChannelPost != nil:
 		msg = update.ChannelPost
 		chat = &update.ChannelPost.Chat
