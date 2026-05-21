@@ -142,7 +142,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 		maps.Copy(params, opts.OverrideParams)
 	}
 
-	req, err := bot.buildRequest(params, ctx, token, method, opts)
+	req, err := bot.buildRequest(ctx, params, token, method, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -182,8 +182,8 @@ func allFilesSeekable(params map[string]any) bool {
 	return true
 }
 
-func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Context, token string, method string, opts *RequestOpts) (*http.Request, error) {
-	body, contentType := buildMultipart(params)
+func (bot *BaseBotClient) buildRequest(ctx context.Context, params map[string]any, token string, method string, opts *RequestOpts) (*http.Request, error) {
+	body, contentType := buildMultipart(ctx, params)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), body)
 	if err != nil {
@@ -194,7 +194,7 @@ func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Contex
 
 	if allFilesSeekable(params) {
 		req.GetBody = func() (io.ReadCloser, error) {
-			retryBody, contentType := buildMultipart(params)
+			retryBody, contentType := buildMultipart(ctx, params)
 			req.Header.Set("Content-Type", contentType)
 			return io.NopCloser(retryBody), nil
 		}
@@ -203,11 +203,26 @@ func (bot *BaseBotClient) buildRequest(params map[string]any, ctx context.Contex
 }
 
 // buildMultipart creates a lazy multipart reader/writer which only writes while it gets read.
-func buildMultipart(params map[string]any) (io.Reader, string) {
+// If the ctx gets closed, so does this.
+func buildMultipart(ctx context.Context, params map[string]any) (io.Reader, string) {
 	pr, pw := io.Pipe()
 	w := multipart.NewWriter(pw)
 
 	go func() {
+		done := make(chan struct{})
+
+		go func() {
+			select {
+			case <-ctx.Done():
+				// If the context is done before we finish writing, abort the pipe.
+				// This unblocks any pw.Write() call and lets the goroutine exit.
+				pw.CloseWithError(ctx.Err())
+			case <-done:
+				// writer finished cleanly, nothing to do
+			}
+		}()
+		defer close(done)
+
 		if len(params) == 0 {
 			if err := w.WriteField("_empty", ""); err != nil {
 				pw.CloseWithError(fmt.Errorf("failed to write empty multipart field: %w", err))

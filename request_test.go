@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func Test_getFieldContents(t *testing.T) {
@@ -99,7 +100,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 		},
 	}
 
-	r, _ := buildMultipart(params)
+	r, _ := buildMultipart(context.Background(), params)
 
 	// Before draining: file should not have been read yet (streaming, not buffered).
 	if cr.bytesRead != 0 {
@@ -129,7 +130,7 @@ func TestGetBodyReturnsCorrectRetryReader(t *testing.T) {
 		},
 	}
 
-	req, err := (&BaseBotClient{}).buildRequest(params, context.Background(), "test-token", "sendDocument", nil)
+	req, err := (&BaseBotClient{}).buildRequest(context.Background(), params, "test-token", "sendDocument", nil)
 	if err != nil {
 		t.Fatalf("unexpected error building request: %v", err)
 	}
@@ -206,4 +207,67 @@ func extractFileFromMultipart(t *testing.T, contentType string, body []byte, for
 	}
 	t.Fatalf("%s part not found in multipart body", formName)
 	return nil
+}
+
+func TestBuildMultipartContextHandling(t *testing.T) {
+	params := map[string]any{
+		"chat_id": "123",
+		"text":    "hello",
+	}
+
+	t.Run("body is readable with active context", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		r, _ := buildMultipart(ctx, params)
+		_, err := io.ReadAll(r)
+		if err != nil {
+			t.Fatalf("expected clean read, got: %v", err)
+		}
+	})
+
+	t.Run("body read fails after context cancelled", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+
+		r, _ := buildMultipart(ctx, params)
+		cancel()
+		time.Sleep(10 * time.Millisecond)
+
+		_, err := io.ReadAll(r)
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("expected context.Canceled, got: %v", err)
+		}
+	})
+
+	t.Run("body read fails after context deadline exceeded", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+		defer cancel()
+
+		r, _ := buildMultipart(ctx, params)
+		time.Sleep(20 * time.Millisecond)
+
+		_, err := io.ReadAll(r)
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("expected context.DeadlineExceeded, got: %v", err)
+		}
+	})
+
+	t.Run("mid-read fails after context cancelled", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+
+		r, _ := buildMultipart(ctx, params)
+
+		buf := make([]byte, 4)
+		if _, err := r.Read(buf); err != nil {
+			t.Fatalf("unexpected error on first read: %v", err)
+		}
+
+		cancel()
+		time.Sleep(10 * time.Millisecond)
+
+		_, err := io.ReadAll(r)
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("expected context.Canceled after mid-read cancel, got: %v", err)
+		}
+	})
 }
