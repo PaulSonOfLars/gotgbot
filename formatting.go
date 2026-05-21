@@ -69,6 +69,21 @@ func (m Message) OriginalCaptionHTML() string {
 	return getOrigMsgHTML(utf16.Encode([]rune(m.Caption)), m.CaptionEntities)
 }
 
+// OriginalTextMD gets the original markdown formatting of a message text or caption.
+func (m Message) OriginalTextMD() string {
+	return getOrigMsgMD(utf16.Encode([]rune(m.GetText())), m.GetEntities())
+}
+
+// OriginalTextMDV2 gets the original markdownV2 formatting of a message text or caption.
+func (m Message) OriginalTextMDV2() string {
+	return getOrigMsgMDV2(utf16.Encode([]rune(m.GetText())), m.GetEntities())
+}
+
+// OriginalTextHTML gets the original HTML formatting of a message text caption.
+func (m Message) OriginalTextHTML() string {
+	return getOrigMsgHTML(utf16.Encode([]rune(m.GetText())), m.GetEntities())
+}
+
 // Does not support nesting. only look at upper entities.
 func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 	out := strings.Builder{}
