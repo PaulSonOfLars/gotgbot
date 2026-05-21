@@ -99,12 +99,20 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 	}
 
 	text := msg.GetText()
-	fields := strings.Fields(text)
-	if len(fields) == 0 {
+	if text == "" {
 		return false
 	}
 
-	split := strings.Split(strings.ToLower(fields[0]), "@")
+	// Find the end of the first field without scanning the whole string
+	end := strings.IndexAny(text, " \t\n\v\f\r")
+	var firstField string
+	if end == -1 {
+		firstField = text
+	} else {
+		firstField = text[:end]
+	}
+
+	split := strings.SplitN(strings.ToLower(firstField), "@", 2)
 
 	// If the command targets a specific bot, ensure it's this one
 	if len(split) > 1 && split[1] != strings.ToLower(b.User.Username) {
