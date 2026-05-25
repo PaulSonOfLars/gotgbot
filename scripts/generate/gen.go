@@ -223,24 +223,43 @@ type Field struct {
 	Description string   `json:"description"`
 }
 
-var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)`)
+// Default matcher for cases where:
+// - we have true/false, floats, or numbers.
+// - at the end of a sentence, line, or followed by a comma.
+var defaultsMatcher = regexp.MustCompile(`(?i)defaults to (true|false|\d+.\d+|\d+)(?:\.|,|$)`)
 
-func (f Field) hasDefault() (string, bool) {
-	if !strings.Contains(strings.ToLower(f.Description), "defaults to") {
-		return "", false
+func (f Field) requiresExplicitDefault(d APIDescription, goType string) bool {
+	desc := strings.ToLower(f.Description)
+	if !strings.Contains(desc, "defaults to") {
+		return false
 	}
 
-	if strings.Contains(strings.ToLower(f.Description), "backward compatibility") ||
-		strings.Contains(strings.ToLower(f.Description), "backwards compatibility") {
-		// Backwards compatibility for "defaults" is a bad myth
-		return "", false
+	if strings.Contains(desc, "defaults to the value of") {
+		// Needs special handling.
+		return true
 	}
 
+	if goType == "string" {
+		// empty strings handled as defaults
+		return false
+	}
+
+	expectedDefault := getDefaultTypeVal(d, goType)
 	ms := defaultsMatcher.FindStringSubmatch(f.Description)
 	if len(ms) == 0 {
-		return "", true
+		return expectedDefault != "nil"
 	}
-	return strings.ToLower(ms[1]), true
+
+	if strings.ToLower(ms[1]) == expectedDefault {
+		return false
+	}
+
+	if goType == "int64" && strings.Contains(f.Description, "1-") {
+		// 1-X means that the go default of 0 will get ignored by the server. Can ignore.
+		return false
+	}
+
+	return true
 }
 
 var usernameDocsMatcher = regexp.MustCompile(` +(or username.*)?\(.+ @[a-z]+\)`)
@@ -283,6 +302,7 @@ const (
 	typeReplyMarkup       = "ReplyMarkup"
 	typeInputFileOrString = "InputFileOrString"
 	typeInputString       = "InputString"
+	typeSuffixMedia       = "Media"
 )
 
 func generate(d APIDescription) error {
@@ -383,11 +403,16 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 		// TODO: check against API description type
 		for _, t := range f.Types {
 			arrayType = arrayType || isTgArray(t)
+			if arrayType {
+				t = strings.TrimPrefix(t, "Array of ")
+			}
 
-			if strings.Contains(t, tgTypeInputMedia) {
+			if strings.HasPrefix(t, tgTypeInputMedia) {
 				mediaType = tgTypeInputMedia
-			} else if strings.Contains(t, tgTypeInputPaidMedia) {
+			} else if strings.HasPrefix(t, tgTypeInputPaidMedia) {
 				mediaType = tgTypeInputPaidMedia
+			} else if strings.HasSuffix(t, typeSuffixMedia) {
+				mediaType = t
 			} else {
 				return "", fmt.Errorf("mediatype %s is not of kind InputMedia/InputPaidMedia for field %s", t, f.Name)
 			}
@@ -458,12 +483,7 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 			}
 			return "*" + goType, nil
 
-		} else if v, ok := f.hasDefault(); ok && v != "" && v != getDefaultTypeVal(d, goType) {
-			if goType == "int64" && strings.Contains(f.Description, "1-") {
-				// If we have a range of 1-X, it means that the default go-type of 0 is will be ignored the server
-				return goType, nil
-			}
-
+		} else if f.requiresExplicitDefault(d, goType) {
 			return "*" + goType, nil
 		}
 

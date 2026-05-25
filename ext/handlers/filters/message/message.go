@@ -373,3 +373,13 @@ func PaidPost(msg *gotgbot.Message) bool {
 func SuggestedPostInfo(msg *gotgbot.Message) bool {
 	return msg.SuggestedPostInfo != nil
 }
+
+// GuestBot represents messages sent by other guest bots.
+func GuestBot(msg *gotgbot.Message) bool {
+	return (msg.GuestBotCallerChat != nil || msg.GuestBotCallerUser != nil) && msg.GuestQueryId == ""
+}
+
+// GuestMessage represents messages sent to your bot by telegram's guestbot feature.
+func GuestMessage(msg *gotgbot.Message) bool {
+	return msg.GuestQueryId != ""
+}

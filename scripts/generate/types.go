@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"unicode"
 )
 
 var (
@@ -301,9 +302,76 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 	return bd.String(), nil
 }
 
+func splitByUpper(s string) []string {
+	var words []string
+	start := 0
+	for i, r := range s {
+		if unicode.IsUpper(r) && i != start {
+			words = append(words, s[start:i])
+			start = i
+		}
+	}
+	return append(words, s[start:])
+}
+
+// isSupersetOf returns true if b's words are all contained within a's words.
+func isSupersetOf(a, b string) bool {
+	if a == b {
+		return false
+	}
+	aWords := splitByUpper(a)
+	bWords := splitByUpper(b)
+
+	aSet := make(map[string]bool, len(aWords))
+	for _, w := range aWords {
+		aSet[w] = true
+	}
+	for _, w := range bWords {
+		if !aSet[w] {
+			return false
+		}
+	}
+	return true
+}
+
+// filterSupertypes takes:
+// - [InputPollMedia InputPollOptionMedia InputMedia AnotherType]
+// and returns:
+// - [InputMedia AnotherType], because [InputPollMedia InputPollOptionMedia]
+// because both the others contain {Input, Media}.
+func filterSupertypes(types []string) []string {
+	var result []string
+	for _, candidate := range types {
+		isSuperset := false
+		for _, other := range types {
+			if isSupersetOf(candidate, other) {
+				isSuperset = true
+				break
+			}
+		}
+		if !isSuperset {
+			result = append(result, candidate)
+		}
+	}
+	return result
+}
+
 func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
 	typeInterfaces := strings.Builder{}
+
+	// Collect supertypes to reduce the amount of implemented interfaces (causes duplicate shared fields)
+	supertypes := filterSupertypes(tgType.SubtypeOf)
+
 	for _, parentTypeName := range tgType.SubtypeOf {
+		// Implement our interface method for this parent type.
+		typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, parentTypeName))
+
+		// If this isn't a supertype; we're done.
+		if !slices.Contains(supertypes, parentTypeName) {
+			continue
+		}
+
+		// If it is - get the type, generate the common fields from it, and create helpers.
 		parentType, err := getTypeByName(d, parentTypeName)
 		if err != nil {
 			return "", fmt.Errorf("failed to get parent type %s of %s: %w", parentTypeName, tgType.Name, err)
@@ -315,8 +383,6 @@ func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (strin
 		}
 
 		typeInterfaces.WriteString(commonFields)
-
-		typeInterfaces.WriteString(generateGenericInterfaceMethod(tgType.Name, parentTypeName))
 	}
 
 	for _, t := range getReplyMarkupTypes(d) {
@@ -402,7 +468,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 		// We only generate the merge func if there is a common field, and if the types match across all children.
 		// If they didn't match, then compilation would fail.
-		if constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) {
+		if constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
 			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
 			if err != nil {
 				return "", err
@@ -524,7 +590,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
-	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) {
+	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
@@ -552,7 +618,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 	bd.WriteString(enforceTypeAssertion(name, subtypes))
 
-	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) {
+	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate merged struct: %w", err)
