@@ -33,5 +33,5 @@ func (cb ManagedBot) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 }
 
 func (cb ManagedBot) Name() string {
-	return fmt.Sprintf("callback_query_handler_%p", cb.Response)
+	return fmt.Sprintf("managed_bot_%p", cb.Response)
 }
