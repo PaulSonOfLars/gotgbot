@@ -94,6 +94,42 @@ func (bot *Bot) AnswerCallbackQueryWithContext(ctx context.Context, callbackQuer
 	return b, json.Unmarshal(r, &b)
 }
 
+// AnswerChatJoinRequestQueryOpts is the set of optional fields for Bot.AnswerChatJoinRequestQuery and Bot.AnswerChatJoinRequestQueryWithContext.
+type AnswerChatJoinRequestQueryOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// AnswerChatJoinRequestQuery (https://core.telegram.org/bots/api#answerchatjoinrequestquery)
+//
+// Use this method to process a received chat join request query. Returns True on success.
+//   - chatJoinRequestQueryId (type string): Unique identifier of the join request query
+//   - result (type string): Result of the query. Must be either "approve" to allow the user to join the chat, "decline" to disallow the user to join the chat, or "queue" to leave the decision to other administrators.
+//   - opts (type AnswerChatJoinRequestQueryOpts): All optional parameters.
+func (bot *Bot) AnswerChatJoinRequestQuery(chatJoinRequestQueryId string, result string, opts *AnswerChatJoinRequestQueryOpts) (bool, error) {
+	return bot.AnswerChatJoinRequestQueryWithContext(context.Background(), chatJoinRequestQueryId, result, opts)
+}
+
+// AnswerChatJoinRequestQueryWithContext is the same as Bot.AnswerChatJoinRequestQuery, but with a context.Context parameter
+func (bot *Bot) AnswerChatJoinRequestQueryWithContext(ctx context.Context, chatJoinRequestQueryId string, result string, opts *AnswerChatJoinRequestQueryOpts) (bool, error) {
+	v := map[string]any{}
+	v["chat_join_request_query_id"] = chatJoinRequestQueryId
+	v["result"] = result
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "answerChatJoinRequestQuery", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // AnswerGuestQueryOpts is the set of optional fields for Bot.AnswerGuestQuery and Bot.AnswerGuestQueryWithContext.
 type AnswerGuestQueryOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1955,7 +1991,7 @@ type EditMessageMediaOpts struct {
 
 // EditMessageMedia (https://core.telegram.org/bots/api#editmessagemedia)
 //
-// Use this method to edit animation, audio, document, live photo, photo, or video messages, or to add media to text messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo, a live photo, or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
+// Use this method to edit animation, audio, document, live photo, photo, or video messages, or to replace a text or a rich message with a media. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo, a live photo, or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - media (type InputMedia): A JSON-serialized object for a new media content of the message
 //   - opts (type EditMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
@@ -2063,12 +2099,16 @@ type EditMessageTextOpts struct {
 	MessageId int64
 	// Required if chat_id and message_id are not specified. Identifier of the inline message.
 	InlineMessageId string
+	// New text of the message, 1-4096 characters after entity parsing; required if rich_message isn't specified
+	Text string
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
 	Entities []MessageEntity
 	// Link preview generation options for the message
 	LinkPreviewOptions *LinkPreviewOptions
+	// New rich content of the message; required if text isn't specified
+	RichMessage *InputRichMessage
 	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2077,25 +2117,25 @@ type EditMessageTextOpts struct {
 
 // EditMessageText (https://core.telegram.org/bots/api#editmessagetext)
 //
-// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
-//   - text (type string): New text of the message, 1-4096 characters after entities parsing
+// Use this method to edit text, rich and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - opts (type EditMessageTextOpts): All optional parameters.
-func (bot *Bot) EditMessageText(text string, opts *EditMessageTextOpts) (*Message, bool, error) {
-	return bot.EditMessageTextWithContext(context.Background(), text, opts)
+func (bot *Bot) EditMessageText(opts *EditMessageTextOpts) (*Message, bool, error) {
+	return bot.EditMessageTextWithContext(context.Background(), opts)
 }
 
 // EditMessageTextWithContext is the same as Bot.EditMessageText, but with a context.Context parameter
-func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
+func (bot *Bot) EditMessageTextWithContext(ctx context.Context, opts *EditMessageTextOpts) (*Message, bool, error) {
 	v := map[string]any{}
-	v["text"] = text
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_id", opts.MessageId, opts.MessageId == 0)
 		addIfValueNotZero(v, "inline_message_id", opts.InlineMessageId, opts.InlineMessageId == "")
+		addIfValueNotZero(v, "text", opts.Text, opts.Text == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "entities", opts.Entities, opts.Entities == nil)
 		addIfValueNotZero(v, "link_preview_options", opts.LinkPreviewOptions, opts.LinkPreviewOptions == nil)
+		addIfValueNotZero(v, "rich_message", opts.RichMessage, opts.RichMessage == nil)
 		v["reply_markup"] = opts.ReplyMarkup
 	}
 
@@ -4744,6 +4784,42 @@ func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, act
 	return b, json.Unmarshal(r, &b)
 }
 
+// SendChatJoinRequestWebAppOpts is the set of optional fields for Bot.SendChatJoinRequestWebApp and Bot.SendChatJoinRequestWebAppWithContext.
+type SendChatJoinRequestWebAppOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendChatJoinRequestWebApp (https://core.telegram.org/bots/api#sendchatjoinrequestwebapp)
+//
+// Use this method to process a received chat join request query by showing a Mini App to the user before deciding the outcome. Returns True on success.
+//   - chatJoinRequestQueryId (type string): Unique identifier of the join request query
+//   - webAppUrl (type string): The URL of the Mini App to be opened
+//   - opts (type SendChatJoinRequestWebAppOpts): All optional parameters.
+func (bot *Bot) SendChatJoinRequestWebApp(chatJoinRequestQueryId string, webAppUrl string, opts *SendChatJoinRequestWebAppOpts) (bool, error) {
+	return bot.SendChatJoinRequestWebAppWithContext(context.Background(), chatJoinRequestQueryId, webAppUrl, opts)
+}
+
+// SendChatJoinRequestWebAppWithContext is the same as Bot.SendChatJoinRequestWebApp, but with a context.Context parameter
+func (bot *Bot) SendChatJoinRequestWebAppWithContext(ctx context.Context, chatJoinRequestQueryId string, webAppUrl string, opts *SendChatJoinRequestWebAppOpts) (bool, error) {
+	v := map[string]any{}
+	v["chat_join_request_query_id"] = chatJoinRequestQueryId
+	v["web_app_url"] = webAppUrl
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendChatJoinRequestWebApp", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // SendChecklistOpts is the set of optional fields for Bot.SendChecklist and Bot.SendChecklistWithContext.
 type SendChecklistOpts struct {
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -5919,6 +5995,117 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 
 	var m Message
 	return &m, json.Unmarshal(r, &m)
+}
+
+// SendRichMessageOpts is the set of optional fields for Bot.SendRichMessage and Bot.SendRichMessageWithContext.
+type SendRichMessageOpts struct {
+	// Unique identifier of the business connection on behalf of which the message will be sent
+	BusinessConnectionId string
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
+	MessageThreadId int64
+	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	DirectMessagesTopicId int64
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance.
+	AllowPaidBroadcast bool
+	// Unique identifier of the message effect to be added to the message; for private chats only
+	MessageEffectId string
+	// A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	SuggestedPostParameters *SuggestedPostParameters
+	// Description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
+	ReplyMarkup ReplyMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendRichMessage (https://core.telegram.org/bots/api#sendrichmessage)
+//
+// Use this method to send rich messages. If the message contains a block with a media element, then the bot must have the right to send the media to the chat. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - richMessage (type InputRichMessage): The message to be sent
+//   - opts (type SendRichMessageOpts): All optional parameters.
+func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
+	return bot.SendRichMessageWithContext(context.Background(), chatId, richMessage, opts)
+}
+
+// SendRichMessageWithContext is the same as Bot.SendRichMessage, but with a context.Context parameter
+func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
+	v := map[string]any{}
+	v["chat_id"] = chatId
+	v["rich_message"] = richMessage
+	if opts != nil {
+		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
+		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
+		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
+		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
+		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)
+		addIfValueNotZero(v, "message_effect_id", opts.MessageEffectId, opts.MessageEffectId == "")
+		addIfValueNotZero(v, "suggested_post_parameters", opts.SuggestedPostParameters, opts.SuggestedPostParameters == nil)
+		addIfValueNotZero(v, "reply_parameters", opts.ReplyParameters, opts.ReplyParameters == nil)
+		addIfValueNotZero(v, "reply_markup", opts.ReplyMarkup, opts.ReplyMarkup == nil)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendRichMessage", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m Message
+	return &m, json.Unmarshal(r, &m)
+}
+
+// SendRichMessageDraftOpts is the set of optional fields for Bot.SendRichMessageDraft and Bot.SendRichMessageDraftWithContext.
+type SendRichMessageDraftOpts struct {
+	// Unique identifier for the target message thread
+	MessageThreadId int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendRichMessageDraft (https://core.telegram.org/bots/api#sendrichmessagedraft)
+//
+// Use this method to stream a partial rich message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you must call sendRichMessage with the complete message to persist it in the user's chat. Returns True on success.
+//   - chatId (type int64): Unique identifier for the target private chat
+//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated.
+//   - richMessage (type InputRichMessage): The partial message to be streamed
+//   - opts (type SendRichMessageDraftOpts): All optional parameters.
+func (bot *Bot) SendRichMessageDraft(chatId int64, draftId int64, richMessage InputRichMessage, opts *SendRichMessageDraftOpts) (bool, error) {
+	return bot.SendRichMessageDraftWithContext(context.Background(), chatId, draftId, richMessage, opts)
+}
+
+// SendRichMessageDraftWithContext is the same as Bot.SendRichMessageDraft, but with a context.Context parameter
+func (bot *Bot) SendRichMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, richMessage InputRichMessage, opts *SendRichMessageDraftOpts) (bool, error) {
+	v := map[string]any{}
+	v["chat_id"] = chatId
+	v["draft_id"] = draftId
+	v["rich_message"] = richMessage
+	if opts != nil {
+		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendRichMessageDraft", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // SendStickerOpts is the set of optional fields for Bot.SendSticker and Bot.SendStickerWithContext.
