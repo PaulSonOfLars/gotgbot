@@ -82,8 +82,6 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 			return "", fmt.Errorf("failed to setup custom unmarshal for %s: %w", tgType.Name, err)
 		}
 		typeDef.WriteString(customUnmarshalDef)
-	} else {
-		fmt.Println("Not received", tgType.Name)
 	}
 
 	interfaces, err := fulfillParentTypeInterfaces(d, tgType)
@@ -294,7 +292,6 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 	}
 
 	if !generateCustomMarshal {
-		fmt.Println("Skipping custom unmarshal for", tgType.Name)
 		return "", nil
 	}
 

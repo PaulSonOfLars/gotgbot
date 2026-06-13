@@ -28,12 +28,9 @@ import "strings"
 			helpers.WriteString(helper)
 		}
 
-		richHelper, err := richContentHelper(d, tgType)
-		if err != nil {
-			return fmt.Errorf("failed to generate rich content helper for %s: %w", tgType.Name, err)
-		}
-		if richHelper != "" {
-			helpers.WriteString(richHelper)
+		richContentHelper := generateRichContentHelperDef(d, tgType)
+		if richContentHelper != "" {
+			helpers.WriteString(richContentHelper)
 		}
 	}
 
@@ -172,9 +169,9 @@ func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, er
 	return helperDef.String(), nil
 }
 
-func richContentHelper(d APIDescription, tgType TypeDescription) (string, error) {
+func generateRichContentHelperDef(d APIDescription, tgType TypeDescription) string {
 	if tgType.Name == tgTypeMessage {
-		return "", nil
+		return ""
 	}
 
 	var richBits bool
@@ -191,7 +188,7 @@ func richContentHelper(d APIDescription, tgType TypeDescription) (string, error)
 	}
 
 	if !richBits {
-		return "", nil
+		return ""
 	}
 
 	bd := strings.Builder{}
@@ -200,15 +197,15 @@ func richContentHelper(d APIDescription, tgType TypeDescription) (string, error)
 	if len(inputs) == 1 {
 		bd.WriteString(fmt.Sprintf("\treturn %s\n", inputs[0]))
 	} else {
-		bd.WriteString(fmt.Sprintf("\tbd := strings.Builder{}\n"))
+		bd.WriteString("\tbd := strings.Builder{}\n")
 		for _, r := range inputs {
 			bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", r))
 		}
-		bd.WriteString(fmt.Sprintf("\treturn bd.String()\n"))
+		bd.WriteString("\treturn bd.String()\n")
 	}
-	bd.WriteString(fmt.Sprintf("}\n"))
+	bd.WriteString("}\n")
 
-	return bd.String(), nil
+	return bd.String()
 }
 
 func hasFromChat(tgMethod MethodDescription) bool {
