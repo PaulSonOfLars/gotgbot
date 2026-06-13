@@ -84,7 +84,7 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		typeDef.WriteString(customUnmarshalDef)
 	}
 
-	interfaces, err := fulfilParentTypeInterfaces(d, tgType)
+	interfaces, err := fulfillParentTypeInterfaces(d, tgType)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate parent type interfaces %s: %w", tgType.Name, err)
 	}
@@ -360,7 +360,7 @@ func filterSupertypes(types []string) []string {
 	return result
 }
 
-func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
+func fulfillParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
 	typeInterfaces := strings.Builder{}
 
 	// Collect supertypes to reduce the amount of implemented interfaces (causes duplicate shared fields)
