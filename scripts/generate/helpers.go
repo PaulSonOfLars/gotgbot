@@ -51,7 +51,7 @@ func (d helperData) docs() string {
 func getHelpers(d APIDescription, typeName string, typeFields []Field) ([]helperData, error) {
 	receiver := receiver(typeName)
 	if typeName == "InaccessibleMessage" {
-		typeName = "Message"
+		typeName = tgTypeMessage
 	}
 
 	var methods []helperData
@@ -131,7 +131,7 @@ func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, er
 		}
 	}
 
-	if tgType.Name == "Message" {
+	if tgType.Name == tgTypeMessage {
 		// Implement reply helpers for all message types
 		for _, method := range orderedMethods(d) {
 			tgMethod := d.Methods[method]
