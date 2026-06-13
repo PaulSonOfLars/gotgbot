@@ -267,6 +267,14 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", coreType, tgType.Name, err)
 			}
 
+			// Resolve actual underlying type
+			if fieldType.Href == internalTypeRef {
+				fieldType, err = getTypeByName(d, fieldType.SubtypeOf[0])
+				if err != nil {
+					return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", fieldType.Name, fieldType.SubtypeOf[0], err)
+				}
+			}
+
 			if len(fieldType.Subtypes) > 0 {
 				subtypes, err := getTypesByName(d, fieldType.Name, fieldType.Subtypes)
 				if err != nil {
