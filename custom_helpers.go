@@ -194,7 +194,7 @@ func (mcm ChatMemberAdministrator) GetCanManageTags() bool {
 }
 
 func (mcm MergedChatMember) GetCanManageTags() bool {
-	if mcm.Status != "administrator" {
+	if mcm.Status != "administrator" && mcm.Status != "creator" {
 		return false
 	}
 
