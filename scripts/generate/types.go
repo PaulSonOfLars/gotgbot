@@ -255,7 +255,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 
 		fieldData := customUnmarshalFieldData{
 			Name:      snakeToTitle(f.Name),
-			Custom:    len(d.Types[prefType].Subtypes) > 0 || d.Types[prefType].Href == internalTypeRef,
+			Custom:    len(d.Types[prefType].Subtypes) > 0,
 			ArrayType: strings.TrimPrefix(prefType, "[]"),
 			Type:      prefType,
 			JSONTag:   fmt.Sprintf("`json:\"%s\"`", f.Name),

@@ -10061,7 +10061,7 @@ type RichBlockBlockQuotation struct {
 func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockBlockQuotation, with interface fields as json.RawMessage
 	type tmp struct {
-		Blocks json.RawMessage `json:"blocks"`
+		Blocks RichBlockArray  `json:"blocks"`
 		Credit json.RawMessage `json:"credit"`
 	}
 	t := tmp{}
@@ -10070,10 +10070,7 @@ func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal RichBlockBlockQuotation JSON into tmp struct: %w", err)
 	}
 
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
+	v.Blocks = t.Blocks
 	v.Credit, err = unmarshalRichText(t.Credit)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Credit: %w", err)
@@ -10186,7 +10183,7 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockDetails, with interface fields as json.RawMessage
 	type tmp struct {
 		Summary json.RawMessage `json:"summary"`
-		Blocks  json.RawMessage `json:"blocks"`
+		Blocks  RichBlockArray  `json:"blocks"`
 		IsOpen  bool            `json:"is_open"`
 	}
 	t := tmp{}
@@ -10199,10 +10196,7 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Summary: %w", err)
 	}
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
+	v.Blocks = t.Blocks
 	v.IsOpen = t.IsOpen
 
 	return nil
