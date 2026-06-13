@@ -174,16 +174,39 @@ func generateRichContentHelperDef(d APIDescription, tgType TypeDescription) stri
 		return ""
 	}
 
+	type input struct {
+		value       string
+		ifStatement string
+	}
+
 	var richBits bool
 
-	var inputs []string
+	var inputs []input
 	for _, f := range tgType.Fields {
 		_, fType := typeOfTgArray(f.Types[0])
+
 		if isRichTextType(fType) {
 			richBits = true
-			inputs = append(inputs, fmt.Sprintf("v.%s.GetText()", snakeToTitle(f.Name)))
+			inputs = append(inputs, input{
+				value: fmt.Sprintf("v.%s.GetText()", snakeToTitle(f.Name)),
+				ifStatement: func() string {
+					if f.Required {
+						return ""
+					}
+					return fmt.Sprintf("v.%s != nil", snakeToTitle(f.Name))
+				}(),
+			})
+
 		} else if t, err := f.getPreferredType(d); err == nil && t == "string" && f.Name != "type" {
-			inputs = append(inputs, fmt.Sprintf("v.%s", snakeToTitle(f.Name)))
+			inputs = append(inputs, input{
+				value: fmt.Sprintf("v.%s", snakeToTitle(f.Name)),
+				ifStatement: func() string {
+					if f.Required {
+						return ""
+					}
+					return fmt.Sprintf("v.%s != \"\"", snakeToTitle(f.Name))
+				}(),
+			})
 		}
 	}
 
@@ -195,11 +218,26 @@ func generateRichContentHelperDef(d APIDescription, tgType TypeDescription) stri
 	bd.WriteString(fmt.Sprintf("\nfunc (v %s) GetText() string {\n", tgType.Name))
 
 	if len(inputs) == 1 {
-		bd.WriteString(fmt.Sprintf("\treturn %s\n", inputs[0]))
+		in := inputs[0]
+		if in.ifStatement != "" {
+			bd.WriteString(fmt.Sprintf("\tif (%s) {\n", in.ifStatement))
+			bd.WriteString(fmt.Sprintf("\treturn %s\n", in.value))
+			bd.WriteString("\t}\n")
+			bd.WriteString("\treturn \"\"\n")
+		} else {
+			bd.WriteString(fmt.Sprintf("\treturn %s\n", in.value))
+
+		}
 	} else {
 		bd.WriteString("\tbd := strings.Builder{}\n")
-		for _, r := range inputs {
-			bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", r))
+		for _, in := range inputs {
+			if in.ifStatement != "" {
+				bd.WriteString(fmt.Sprintf("\tif (%s) {\n", in.ifStatement))
+				bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", in.value))
+				bd.WriteString("\t}\n")
+			} else {
+				bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", in.value))
+			}
 		}
 		bd.WriteString("\treturn bd.String()\n")
 	}

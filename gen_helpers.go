@@ -777,31 +777,43 @@ func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQuery
 }
 
 func (v RichBlockAnimation) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockAudio) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockBlockQuotation) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Blocks.GetText())
-	bd.WriteString(v.Credit.GetText())
+	if v.Credit != nil {
+		bd.WriteString(v.Credit.GetText())
+	}
 	return bd.String()
 }
 
 func (v RichBlockCaption) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Credit.GetText())
+	if v.Credit != nil {
+		bd.WriteString(v.Credit.GetText())
+	}
 	return bd.String()
 }
 
 func (v RichBlockCollage) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Blocks.GetText())
-	bd.WriteString(v.Caption.GetText())
+	if v.Caption != nil {
+		bd.WriteString(v.Caption.GetText())
+	}
 	return bd.String()
 }
 
@@ -828,7 +840,10 @@ func (v RichBlockListItem) GetText() string {
 }
 
 func (v RichBlockMap) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockParagraph) GetText() string {
@@ -836,20 +851,27 @@ func (v RichBlockParagraph) GetText() string {
 }
 
 func (v RichBlockPhoto) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockPreformatted) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Language)
+	if v.Language != "" {
+		bd.WriteString(v.Language)
+	}
 	return bd.String()
 }
 
 func (v RichBlockPullQuotation) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Credit.GetText())
+	if v.Credit != nil {
+		bd.WriteString(v.Credit.GetText())
+	}
 	return bd.String()
 }
 
@@ -860,17 +882,24 @@ func (v RichBlockSectionHeading) GetText() string {
 func (v RichBlockSlideshow) GetText() string {
 	bd := strings.Builder{}
 	bd.WriteString(v.Blocks.GetText())
-	bd.WriteString(v.Caption.GetText())
+	if v.Caption != nil {
+		bd.WriteString(v.Caption.GetText())
+	}
 	return bd.String()
 }
 
 func (v RichBlockTable) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockTableCell) GetText() string {
 	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
+	if v.Text != nil {
+		bd.WriteString(v.Text.GetText())
+	}
 	bd.WriteString(v.Align)
 	bd.WriteString(v.Valign)
 	return bd.String()
@@ -881,11 +910,17 @@ func (v RichBlockThinking) GetText() string {
 }
 
 func (v RichBlockVideo) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichBlockVoiceNote) GetText() string {
-	return v.Caption.GetText()
+	if v.Caption != nil {
+		return v.Caption.GetText()
+	}
+	return ""
 }
 
 func (v RichMessage) GetText() string {
