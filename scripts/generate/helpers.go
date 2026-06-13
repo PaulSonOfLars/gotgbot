@@ -197,16 +197,17 @@ func generateRichContentHelperDef(d APIDescription, tgType TypeDescription) stri
 				}(),
 			})
 
-		} else if t, err := f.getPreferredType(d); err == nil && t == "string" && f.Name != "type" {
-			inputs = append(inputs, input{
-				value: fmt.Sprintf("v.%s", snakeToTitle(f.Name)),
-				ifStatement: func() string {
-					if f.Required {
-						return ""
-					}
-					return fmt.Sprintf("v.%s != \"\"", snakeToTitle(f.Name))
-				}(),
-			})
+			// TODO: find a way to cleanly get all internal contents; same way we have entity parsing
+			//} else if t, err := f.getPreferredType(d); err == nil && t == "string" && f.Name != "type" {
+			//	inputs = append(inputs, input{
+			//		value: fmt.Sprintf("v.%s", snakeToTitle(f.Name)),
+			//		ifStatement: func() string {
+			//			if f.Required {
+			//				return ""
+			//			}
+			//			return fmt.Sprintf("v.%s != \"\"", snakeToTitle(f.Name))
+			//		}(),
+			//	})
 		}
 	}
 

@@ -833,10 +833,7 @@ func (v RichBlockList) GetText() string {
 }
 
 func (v RichBlockListItem) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Label)
-	bd.WriteString(v.Blocks.GetText())
-	return bd.String()
+	return v.Blocks.GetText()
 }
 
 func (v RichBlockMap) GetText() string {
@@ -858,12 +855,7 @@ func (v RichBlockPhoto) GetText() string {
 }
 
 func (v RichBlockPreformatted) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	if v.Language != "" {
-		bd.WriteString(v.Language)
-	}
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichBlockPullQuotation) GetText() string {
@@ -896,13 +888,10 @@ func (v RichBlockTable) GetText() string {
 }
 
 func (v RichBlockTableCell) GetText() string {
-	bd := strings.Builder{}
 	if v.Text != nil {
-		bd.WriteString(v.Text.GetText())
+		return v.Text.GetText()
 	}
-	bd.WriteString(v.Align)
-	bd.WriteString(v.Valign)
-	return bd.String()
+	return ""
 }
 
 func (v RichBlockThinking) GetText() string {
@@ -928,17 +917,11 @@ func (v RichMessage) GetText() string {
 }
 
 func (v RichTextAnchorLink) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.AnchorName)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextBankCardNumber) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.BankCardNumber)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextBold) GetText() string {
@@ -946,17 +929,11 @@ func (v RichTextBold) GetText() string {
 }
 
 func (v RichTextBotCommand) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.BotCommand)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextCashtag) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Cashtag)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextCode) GetText() string {
@@ -964,24 +941,15 @@ func (v RichTextCode) GetText() string {
 }
 
 func (v RichTextDateTime) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.DateTimeFormat)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextEmailAddress) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.EmailAddress)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextHashtag) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Hashtag)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextItalic) GetText() string {
@@ -993,31 +961,19 @@ func (v RichTextMarked) GetText() string {
 }
 
 func (v RichTextMention) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Username)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextPhoneNumber) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.PhoneNumber)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextReference) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Name)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextReferenceLink) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.ReferenceName)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 func (v RichTextSpoiler) GetText() string {
@@ -1045,10 +1001,7 @@ func (v RichTextUnderline) GetText() string {
 }
 
 func (v RichTextUrl) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	bd.WriteString(v.Url)
-	return bd.String()
+	return v.Text.GetText()
 }
 
 // Answer is a helper method for Bot.AnswerShippingQuery.
