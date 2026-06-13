@@ -35,7 +35,7 @@ type RichBlockArray []RichBlock
 func (r RichBlockArray) GetText() string {
 	bd := strings.Builder{}
 	for _, b := range r {
-		bd.WriteString(b.GetText())
+		bd.WriteString(b.GetText() + "\n")
 	}
 	return bd.String()
 }
