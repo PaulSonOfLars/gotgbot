@@ -11018,14 +11018,14 @@ func (v *RichMessage) UnmarshalJSON(b []byte) error {
 //   - RichTextReferenceLink
 type RichText interface {
 	GetType() string
-	// MergeRichText returns a MergedRichText struct to simplify working with complex telegram types in a non-generic world.
-	MergeRichText() MergedRichText
 	// richText exists to avoid external types implementing this interface.
 	richText()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
 var (
+	_ RichText = RichTextString("")
+	_ RichText = RichTextArray(nil)
 	_ RichText = RichTextBold{}
 	_ RichText = RichTextItalic{}
 	_ RichText = RichTextUnderline{}
@@ -11052,61 +11052,6 @@ var (
 	_ RichText = RichTextReference{}
 	_ RichText = RichTextReferenceLink{}
 )
-
-// MergedRichText is a helper type to simplify interactions with the various RichText subtypes.
-type MergedRichText struct {
-	// Type of the rich text
-	Type string `json:"type"`
-	// Optional. The text (Only for bold, italic, underline, strikethrough, spoiler, date_time, text_mention, subscript, superscript, marked, code, url, email_address, phone_number, bank_card_number, mention, hashtag, cashtag, bot_command, anchor_link, reference, reference_link)
-	Text RichText `json:"text,omitempty"`
-	// Optional. The Unix time associated with the entity (Only for date_time)
-	UnixTime int64 `json:"unix_time,omitempty"`
-	// Optional. The string that defines the formatting of the date and time. See date-time entity formatting for more details. (Only for date_time)
-	DateTimeFormat string `json:"date_time_format,omitempty"`
-	// Optional. The mentioned user (Only for text_mention)
-	User *User `json:"user,omitempty"`
-	// Optional. Unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker. (Only for custom_emoji)
-	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
-	// Optional. Alternative emoji for the custom emoji (Only for custom_emoji)
-	AlternativeText string `json:"alternative_text,omitempty"`
-	// Optional. The expression in LaTeX format (Only for mathematical_expression)
-	Expression string `json:"expression,omitempty"`
-	// Optional. URL of the link (Only for url)
-	Url string `json:"url,omitempty"`
-	// Optional. The email address (Only for email_address)
-	EmailAddress string `json:"email_address,omitempty"`
-	// Optional. The phone number (Only for phone_number)
-	PhoneNumber string `json:"phone_number,omitempty"`
-	// Optional. The bank card number (Only for bank_card_number)
-	BankCardNumber string `json:"bank_card_number,omitempty"`
-	// Optional. The username (Only for mention)
-	Username string `json:"username,omitempty"`
-	// Optional. The hashtag (Only for hashtag)
-	Hashtag string `json:"hashtag,omitempty"`
-	// Optional. The cashtag (Only for cashtag)
-	Cashtag string `json:"cashtag,omitempty"`
-	// Optional. The bot command (Only for bot_command)
-	BotCommand string `json:"bot_command,omitempty"`
-	// Optional. The name of the anchor (Only for anchor, reference)
-	Name string `json:"name,omitempty"`
-	// Optional. The name of the anchor. If the name is empty, then the link brings back to the top of the message. (Only for anchor_link)
-	AnchorName string `json:"anchor_name,omitempty"`
-	// Optional. The name of the reference (Only for reference_link)
-	ReferenceName string `json:"reference_name,omitempty"`
-}
-
-// GetType is a helper method to easily access the common fields of an interface.
-func (v MergedRichText) GetType() string {
-	return v.Type
-}
-
-// MergedRichText.richText is a dummy method to avoid interface implementation.
-func (v MergedRichText) richText() {}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v MergedRichText) MergeRichText() MergedRichText {
-	return v
-}
 
 // unmarshalRichTextArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalRichText.
@@ -11139,6 +11084,30 @@ func unmarshalRichText(d json.RawMessage) (RichText, error) {
 	if len(d) == 0 {
 		return nil, nil
 	}
+
+	// RichText types require special handling to cover the various type structures set up by telegram.
+	// Namely, we need to support unmarshalling into either a string, an array, or a JSON blob.
+	// We do this by doing an small double-unmarshal into an "any" type and letting the json unmarshaller figure it out.
+	var probe any
+	if err := json.Unmarshal(d, &probe); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal RichText: %w", err)
+	}
+
+	switch probe.(type) {
+	case string:
+		var s string
+		if err := json.Unmarshal(d, &s); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RichText as string: %w", err)
+		}
+		return RichTextString(s), nil
+	case []any:
+		vs, err := unmarshalRichTextArray(d)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal RichText as array: %w", err)
+		}
+		return RichTextArray(vs), nil
+	}
+	// Any other RichText types default to constant-field logic
 
 	t := struct {
 		Type string
@@ -11369,14 +11338,6 @@ func (v RichTextAnchor) GetType() string {
 	return "anchor"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextAnchor) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "anchor",
-		Name: v.Name,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextAnchor) MarshalJSON() ([]byte, error) {
 	type alias RichTextAnchor
@@ -11428,15 +11389,6 @@ func (v RichTextAnchorLink) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextAnchorLink) GetType() string {
 	return "anchor_link"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextAnchorLink) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:       "anchor_link",
-		Text:       v.Text,
-		AnchorName: v.AnchorName,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11492,15 +11444,6 @@ func (v RichTextBankCardNumber) GetType() string {
 	return "bank_card_number"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextBankCardNumber) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:           "bank_card_number",
-		Text:           v.Text,
-		BankCardNumber: v.BankCardNumber,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextBankCardNumber) MarshalJSON() ([]byte, error) {
 	type alias RichTextBankCardNumber
@@ -11548,14 +11491,6 @@ func (v RichTextBold) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextBold) GetType() string {
 	return "bold"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextBold) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "bold",
-		Text: v.Text,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11611,15 +11546,6 @@ func (v RichTextBotCommand) GetType() string {
 	return "bot_command"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextBotCommand) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:       "bot_command",
-		Text:       v.Text,
-		BotCommand: v.BotCommand,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextBotCommand) MarshalJSON() ([]byte, error) {
 	type alias RichTextBotCommand
@@ -11673,15 +11599,6 @@ func (v RichTextCashtag) GetType() string {
 	return "cashtag"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextCashtag) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:    "cashtag",
-		Text:    v.Text,
-		Cashtag: v.Cashtag,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextCashtag) MarshalJSON() ([]byte, error) {
 	type alias RichTextCashtag
@@ -11731,14 +11648,6 @@ func (v RichTextCode) GetType() string {
 	return "code"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextCode) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "code",
-		Text: v.Text,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextCode) MarshalJSON() ([]byte, error) {
 	type alias RichTextCode
@@ -11768,15 +11677,6 @@ func (v RichTextCustomEmoji) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextCustomEmoji) GetType() string {
 	return "custom_emoji"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextCustomEmoji) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:            "custom_emoji",
-		CustomEmojiId:   v.CustomEmojiId,
-		AlternativeText: v.AlternativeText,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11836,16 +11736,6 @@ func (v RichTextDateTime) GetType() string {
 	return "date_time"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextDateTime) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:           "date_time",
-		Text:           v.Text,
-		UnixTime:       v.UnixTime,
-		DateTimeFormat: v.DateTimeFormat,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextDateTime) MarshalJSON() ([]byte, error) {
 	type alias RichTextDateTime
@@ -11897,15 +11787,6 @@ func (v RichTextEmailAddress) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextEmailAddress) GetType() string {
 	return "email_address"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextEmailAddress) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:         "email_address",
-		Text:         v.Text,
-		EmailAddress: v.EmailAddress,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11961,15 +11842,6 @@ func (v RichTextHashtag) GetType() string {
 	return "hashtag"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextHashtag) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:    "hashtag",
-		Text:    v.Text,
-		Hashtag: v.Hashtag,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextHashtag) MarshalJSON() ([]byte, error) {
 	type alias RichTextHashtag
@@ -12017,14 +11889,6 @@ func (v RichTextItalic) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextItalic) GetType() string {
 	return "italic"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextItalic) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "italic",
-		Text: v.Text,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12076,14 +11940,6 @@ func (v RichTextMarked) GetType() string {
 	return "marked"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextMarked) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "marked",
-		Text: v.Text,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextMarked) MarshalJSON() ([]byte, error) {
 	type alias RichTextMarked
@@ -12111,14 +11967,6 @@ func (v RichTextMathematicalExpression) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextMathematicalExpression) GetType() string {
 	return "mathematical_expression"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextMathematicalExpression) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:       "mathematical_expression",
-		Expression: v.Expression,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12174,15 +12022,6 @@ func (v RichTextMention) GetType() string {
 	return "mention"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextMention) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:     "mention",
-		Text:     v.Text,
-		Username: v.Username,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextMention) MarshalJSON() ([]byte, error) {
 	type alias RichTextMention
@@ -12234,15 +12073,6 @@ func (v RichTextPhoneNumber) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextPhoneNumber) GetType() string {
 	return "phone_number"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextPhoneNumber) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:        "phone_number",
-		Text:        v.Text,
-		PhoneNumber: v.PhoneNumber,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12298,15 +12128,6 @@ func (v RichTextReference) GetType() string {
 	return "reference"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextReference) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "reference",
-		Text: v.Text,
-		Name: v.Name,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextReference) MarshalJSON() ([]byte, error) {
 	type alias RichTextReference
@@ -12360,15 +12181,6 @@ func (v RichTextReferenceLink) GetType() string {
 	return "reference_link"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextReferenceLink) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type:          "reference_link",
-		Text:          v.Text,
-		ReferenceName: v.ReferenceName,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextReferenceLink) MarshalJSON() ([]byte, error) {
 	type alias RichTextReferenceLink
@@ -12416,14 +12228,6 @@ func (v RichTextSpoiler) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextSpoiler) GetType() string {
 	return "spoiler"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextSpoiler) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "spoiler",
-		Text: v.Text,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12475,14 +12279,6 @@ func (v RichTextStrikethrough) GetType() string {
 	return "strikethrough"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextStrikethrough) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "strikethrough",
-		Text: v.Text,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextStrikethrough) MarshalJSON() ([]byte, error) {
 	type alias RichTextStrikethrough
@@ -12532,14 +12328,6 @@ func (v RichTextSubscript) GetType() string {
 	return "subscript"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextSubscript) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "subscript",
-		Text: v.Text,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextSubscript) MarshalJSON() ([]byte, error) {
 	type alias RichTextSubscript
@@ -12587,14 +12375,6 @@ func (v RichTextSuperscript) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextSuperscript) GetType() string {
 	return "superscript"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextSuperscript) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "superscript",
-		Text: v.Text,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12650,15 +12430,6 @@ func (v RichTextTextMention) GetType() string {
 	return "text_mention"
 }
 
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextTextMention) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "text_mention",
-		Text: v.Text,
-		User: &v.User,
-	}
-}
-
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextTextMention) MarshalJSON() ([]byte, error) {
 	type alias RichTextTextMention
@@ -12706,14 +12477,6 @@ func (v RichTextUnderline) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextUnderline) GetType() string {
 	return "underline"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextUnderline) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "underline",
-		Text: v.Text,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12767,15 +12530,6 @@ func (v RichTextUrl) richText() {}
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextUrl) GetType() string {
 	return "url"
-}
-
-// MergeRichText returns a MergedRichText struct to simplify working with types in a non-generic world.
-func (v RichTextUrl) MergeRichText() MergedRichText {
-	return MergedRichText{
-		Type: "url",
-		Text: v.Text,
-		Url:  v.Url,
-	}
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.

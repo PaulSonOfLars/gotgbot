@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const internalTypeRef = "GOTGBOT INTERNAL"
+
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
 
@@ -46,6 +48,10 @@ var tgToGoTypeMap = map[string]string{
 	tgTypeFloat:   "float64",
 	tgTypeBoolean: "bool",
 	tgTypeString:  "string",
+}
+
+func isCoreTGType(t string) bool {
+	return t == tgTypeString || t == tgTypeBoolean || t == tgTypeInteger || t == tgTypeFloat
 }
 
 func toGoType(s string) string {
@@ -287,10 +293,43 @@ func getTypeByName(d APIDescription, typeName string) (TypeDescription, error) {
 	return t, nil
 }
 
-func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+func getTypesByName(d APIDescription, parentType string, typeNames []string) ([]TypeDescription, error) {
 	var types []TypeDescription
 
 	for _, typeName := range typeNames {
+		if isCoreTGType(typeName) {
+			newTypeName := parentType + typeName
+			d.Types[newTypeName] = TypeDescription{
+				Name:        newTypeName,
+				Description: nil,
+				Fields: []Field{{
+					Name:        "type",
+					Types:       []string{tgTypeString},
+					Required:    true,
+					Description: "Field type. Always String.",
+				}},
+				Href:      internalTypeRef,
+				SubtypeOf: []string{typeName},
+			}
+			typeName = newTypeName
+
+		} else if isTgArray(typeName) {
+			newTypeName := parentType + "Array"
+			d.Types[newTypeName] = TypeDescription{
+				Name:        newTypeName,
+				Description: nil,
+				Fields: []Field{{
+					Name:        "type",
+					Types:       []string{tgTypeString},
+					Required:    true,
+					Description: "Field type. Always " + strings.ToLower(typeName) + ".",
+				}},
+				Href:      internalTypeRef,
+				SubtypeOf: []string{typeName},
+			}
+			typeName = newTypeName
+		}
+
 		t, err := getTypeByName(d, typeName)
 		if err != nil {
 			return nil, err
@@ -337,7 +376,7 @@ func checkAllChildrenFieldTypes(d APIDescription, parentType string, subtypes []
 }
 
 func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) bool {
-	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
+	subTypes, err := getTypesByName(d, parentType, d.Types[parentType].Subtypes)
 	if err != nil {
 		return false
 	}

@@ -162,7 +162,7 @@ func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (*Field, 
 		return nil, fmt.Errorf("expected %s to be a parent", td.Name)
 	}
 
-	subTypes, err := getTypesByName(d, td.Subtypes)
+	subTypes, err := getTypesByName(d, td.Name, td.Subtypes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
 	}
@@ -312,6 +312,7 @@ const (
 	tgTypeInputFile      = "InputFile"
 	tgTypeInputMedia     = "InputMedia"
 	tgTypeInputPaidMedia = "InputPaidMedia"
+	tgTypeRichText = "RichText"
 
 	// Custom types for this lib.
 	typeReplyMarkup       = "ReplyMarkup"
