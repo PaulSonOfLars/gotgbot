@@ -10771,6 +10771,36 @@ type RichBlockTableCell struct {
 	Valign string `json:"valign"`
 }
 
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *RichBlockTableCell) UnmarshalJSON(b []byte) error {
+	// All fields in RichBlockTableCell, with interface fields as json.RawMessage
+	type tmp struct {
+		Text     json.RawMessage `json:"text"`
+		IsHeader bool            `json:"is_header"`
+		Colspan  int64           `json:"colspan"`
+		Rowspan  int64           `json:"rowspan"`
+		Align    string          `json:"align"`
+		Valign   string          `json:"valign"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal RichBlockTableCell JSON into tmp struct: %w", err)
+	}
+
+	v.Text, err = unmarshalRichText(t.Text)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field Text: %w", err)
+	}
+	v.IsHeader = t.IsHeader
+	v.Colspan = t.Colspan
+	v.Rowspan = t.Rowspan
+	v.Align = t.Align
+	v.Valign = t.Valign
+
+	return nil
+}
+
 // RichBlockThinking (https://core.telegram.org/bots/api#richblockthinking)
 //
 // A block with a "Thinking..." placeholder, corresponding to the custom HTML tag <tg-thinking>. The block may be used only in sendRichMessageDraft, therefore it can't be received in messages. See https://t.me/addemoji/AIActions for examples of custom emoji, which are recommended for usage in the block.

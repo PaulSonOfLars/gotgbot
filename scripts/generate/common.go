@@ -60,10 +60,9 @@ func isRichTextType(t string) bool {
 
 func toGoType(s string) string {
 	pref := ""
-	ok, s := isTgArray(s)
-	for ok {
+	for isTgArray(s) {
 		pref += "[]"
-		ok, s = isTgArray(s)
+		_, s = typeOfTgArray(s)
 	}
 
 	if t, ok := tgToGoTypeMap[s]; ok {
@@ -83,9 +82,14 @@ func stripPointersAndArrays(retType string) string {
 	return retType
 }
 
-func isTgArray(s string) (bool, string) {
-	suffix := strings.TrimPrefix(s, "Array of ")
-	return suffix != s, suffix
+const tgArrayOfPrefix = "Array of "
+
+func isTgArray(s string) bool {
+	return strings.HasPrefix(s, tgArrayOfPrefix)
+}
+
+func typeOfTgArray(s string) (bool, string) {
+	return isTgArray(s), strings.TrimPrefix(s, tgArrayOfPrefix)
 }
 
 func isPointer(s string) bool {
@@ -308,7 +312,7 @@ func getTypesByName(d APIDescription, parentType string, typeNames []string) ([]
 			d.Types[newTypeName] = newTypeDescription(newTypeName, typeName, parentType)
 			typeName = newTypeName
 
-		} else if ok, _ := isTgArray(typeName); ok {
+		} else if isTgArray(typeName) {
 			newTypeName := parentType + "Array"
 			d.Types[newTypeName] = newTypeDescription(newTypeName, typeName, parentType)
 			typeName = newTypeName

@@ -181,7 +181,7 @@ func richContentHelper(d APIDescription, tgType TypeDescription) (string, error)
 
 	var inputs []string
 	for _, f := range tgType.Fields {
-		_, fType := isTgArray(f.Types[0])
+		_, fType := typeOfTgArray(f.Types[0])
 		if isRichTextType(fType) {
 			richBits = true
 			inputs = append(inputs, fmt.Sprintf("v.%s.GetText()", snakeToTitle(f.Name)))
