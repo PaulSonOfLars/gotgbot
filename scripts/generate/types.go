@@ -306,19 +306,6 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 	return bd.String(), nil
 }
 
-func filterFn(ss []string, fn func(string) bool) ([]string, []string) {
-	result := make([]string, 0, len(ss))
-	filtered := make([]string, 0, len(ss))
-	for _, s := range ss {
-		if fn(s) {
-			filtered = append(filtered, s)
-			continue
-		}
-		result = append(result, s)
-	}
-	return result, filtered
-}
-
 func splitByUpper(s string) []string {
 	var words []string
 	start := 0
