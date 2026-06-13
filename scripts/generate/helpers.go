@@ -28,7 +28,7 @@ import "strings"
 			helpers.WriteString(helper)
 		}
 
-		richContentHelper := generateRichContentHelperDef(d, tgType)
+		richContentHelper := generateRichContentHelperDef(tgType)
 		if richContentHelper != "" {
 			helpers.WriteString(richContentHelper)
 		}
@@ -169,7 +169,7 @@ func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, er
 	return helperDef.String(), nil
 }
 
-func generateRichContentHelperDef(d APIDescription, tgType TypeDescription) string {
+func generateRichContentHelperDef(tgType TypeDescription) string {
 	if tgType.Name == tgTypeMessage {
 		return ""
 	}
