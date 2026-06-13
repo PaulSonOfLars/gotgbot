@@ -22,6 +22,9 @@ func (m Message) GetLink() string {
 
 // GetText returns the message text, for both text messages and media messages. (Why is this not the telegram default!)
 func (m Message) GetText() string {
+	if m.RichMessage != nil {
+		return m.RichMessage.GetText()
+	}
 	if m.Caption != "" {
 		return m.Caption
 	}

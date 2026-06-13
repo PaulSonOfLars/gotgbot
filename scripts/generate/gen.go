@@ -69,9 +69,7 @@ func (td TypeDescription) receivedFromAPI(d APIDescription) bool {
 
 	for _, m := range d.Methods {
 		for _, r := range m.Returns {
-			if isTgArray(r) {
-				r = strings.TrimPrefix(r, "Array of ")
-			}
+			_, r := isTgArray(r)
 
 			if r == td.Name {
 				return true
@@ -94,9 +92,7 @@ func (td TypeDescription) receivedFromAPI(d APIDescription) bool {
 func (td TypeDescription) usesChildType(d APIDescription, typeName string, skip []string) bool {
 	for _, f := range td.Fields {
 		for _, t := range f.Types {
-			if isTgArray(t) {
-				t = strings.TrimPrefix(t, "Array of ")
-			}
+			_, t := isTgArray(t)
 
 			if td.isChildType(d, t, typeName, skip) {
 				return true
@@ -312,7 +308,7 @@ const (
 	tgTypeInputFile      = "InputFile"
 	tgTypeInputMedia     = "InputMedia"
 	tgTypeInputPaidMedia = "InputPaidMedia"
-	tgTypeRichText = "RichText"
+	tgTypeRichText       = "RichText"
 
 	// Custom types for this lib.
 	typeReplyMarkup       = "ReplyMarkup"
@@ -418,10 +414,7 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 		mediaType := tgTypeInputMedia
 		// TODO: check against API description type
 		for _, t := range f.Types {
-			arrayType = arrayType || isTgArray(t)
-			if arrayType {
-				t = strings.TrimPrefix(t, "Array of ")
-			}
+			arrayType, t = isTgArray(t)
 
 			if strings.HasPrefix(t, tgTypeInputMedia) {
 				mediaType = tgTypeInputMedia
@@ -468,6 +461,12 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 	}
 
 	if len(f.Types) == 1 {
+		if ok, fTypeName := isTgArray(f.Types[0]); ok && isRichTextType(fTypeName) {
+			newTypeName := fTypeName + "Array"
+			d.Types[newTypeName] = newTypeDescription(newTypeName, fTypeName, fTypeName)
+			return newTypeName, nil
+		}
+
 		goType := toGoType(f.Types[0])
 		if goType == "int64" && strings.Contains(f.Description, "Signed 32-bit") {
 			goType = "int32"

@@ -615,6 +615,11 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
 
+	if isRichTextType(name) {
+		bd.WriteString("\n// GetText gets the text-only contents of any rich formatting datatypes.")
+		bd.WriteString("\nGetText() string")
+	}
+
 	// create a dummy func to avoid external types implementing this interface
 	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
 	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))

@@ -9710,6 +9710,8 @@ func (v RevenueWithdrawalStateSucceeded) MarshalJSON() ([]byte, error) {
 //   - RichBlockThinking
 type RichBlock interface {
 	GetType() string
+	// GetText gets the text-only contents of any rich formatting datatypes.
+	GetText() string
 	// richBlock exists to avoid external types implementing this interface.
 	richBlock()
 }
@@ -10050,7 +10052,7 @@ func (v RichBlockAudio) MarshalJSON() ([]byte, error) {
 // A block quotation, corresponding to the HTML tag <blockquote>.
 type RichBlockBlockQuotation struct {
 	// Content of the block
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Credit of the block
 	Credit RichText `json:"credit,omitempty"`
 }
@@ -10059,7 +10061,7 @@ type RichBlockBlockQuotation struct {
 func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockBlockQuotation, with interface fields as json.RawMessage
 	type tmp struct {
-		Blocks json.RawMessage `json:"blocks"`
+		Blocks RichBlockArray  `json:"blocks"`
 		Credit json.RawMessage `json:"credit"`
 	}
 	t := tmp{}
@@ -10068,10 +10070,7 @@ func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal RichBlockBlockQuotation JSON into tmp struct: %w", err)
 	}
 
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
+	v.Blocks = t.Blocks
 	v.Credit, err = unmarshalRichText(t.Credit)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Credit: %w", err)
@@ -10141,31 +10140,9 @@ func (v *RichBlockCaption) UnmarshalJSON(b []byte) error {
 // A collage, corresponding to the custom HTML tag <tg-collage>.
 type RichBlockCollage struct {
 	// Elements of the collage
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
-}
-
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *RichBlockCollage) UnmarshalJSON(b []byte) error {
-	// All fields in RichBlockCollage, with interface fields as json.RawMessage
-	type tmp struct {
-		Blocks  json.RawMessage   `json:"blocks"`
-		Caption *RichBlockCaption `json:"caption"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal RichBlockCollage JSON into tmp struct: %w", err)
-	}
-
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
-	v.Caption = t.Caption
-
-	return nil
 }
 
 // RichBlockCollage.richBlock is a dummy method to avoid interface implementation.
@@ -10196,7 +10173,7 @@ type RichBlockDetails struct {
 	// Always shown summary of the block
 	Summary RichText `json:"summary"`
 	// Content of the block
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the content of the block is visible by default
 	IsOpen bool `json:"is_open,omitempty"`
 }
@@ -10206,7 +10183,7 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockDetails, with interface fields as json.RawMessage
 	type tmp struct {
 		Summary json.RawMessage `json:"summary"`
-		Blocks  json.RawMessage `json:"blocks"`
+		Blocks  RichBlockArray  `json:"blocks"`
 		IsOpen  bool            `json:"is_open"`
 	}
 	t := tmp{}
@@ -10219,10 +10196,7 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Summary: %w", err)
 	}
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
+	v.Blocks = t.Blocks
 	v.IsOpen = t.IsOpen
 
 	return nil
@@ -10329,7 +10303,7 @@ func (v RichBlockFooter) MarshalJSON() ([]byte, error) {
 // A list of blocks, corresponding to the HTML tag <ul> or <ol> with multiple nested tags <li>.
 type RichBlockList struct {
 	// Items of the list
-	Items []RichBlockListItem `json:"items,omitempty"`
+	Items RichBlockListItemArray `json:"items"`
 }
 
 // RichBlockList.richBlock is a dummy method to avoid interface implementation.
@@ -10360,7 +10334,7 @@ type RichBlockListItem struct {
 	// Label of the item
 	Label string `json:"label"`
 	// The content of the item
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the item has a checkbox
 	HasCheckbox bool `json:"has_checkbox,omitempty"`
 	// Optional. True, if the item has a checked checkbox
@@ -10369,36 +10343,6 @@ type RichBlockListItem struct {
 	Value int64 `json:"value,omitempty"`
 	// Optional. For ordered lists, the type of the item label; must be one of "a" for lowercase letters, "A" for uppercase letters, "i" for lowercase Roman numerals, "I" for uppercase Roman numerals, or "1" for decimal numbers
 	Type string `json:"type,omitempty"`
-}
-
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *RichBlockListItem) UnmarshalJSON(b []byte) error {
-	// All fields in RichBlockListItem, with interface fields as json.RawMessage
-	type tmp struct {
-		Label       string          `json:"label"`
-		Blocks      json.RawMessage `json:"blocks"`
-		HasCheckbox bool            `json:"has_checkbox"`
-		IsChecked   bool            `json:"is_checked"`
-		Value       int64           `json:"value"`
-		Type        string          `json:"type"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal RichBlockListItem JSON into tmp struct: %w", err)
-	}
-
-	v.Label = t.Label
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
-	v.HasCheckbox = t.HasCheckbox
-	v.IsChecked = t.IsChecked
-	v.Value = t.Value
-	v.Type = t.Type
-
-	return nil
 }
 
 // RichBlockMap (https://core.telegram.org/bots/api#richblockmap)
@@ -10716,31 +10660,9 @@ func (v RichBlockSectionHeading) MarshalJSON() ([]byte, error) {
 // A slideshow, corresponding to the custom HTML tag <tg-slideshow>.
 type RichBlockSlideshow struct {
 	// Elements of the slideshow
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
-}
-
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *RichBlockSlideshow) UnmarshalJSON(b []byte) error {
-	// All fields in RichBlockSlideshow, with interface fields as json.RawMessage
-	type tmp struct {
-		Blocks  json.RawMessage   `json:"blocks"`
-		Caption *RichBlockCaption `json:"caption"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal RichBlockSlideshow JSON into tmp struct: %w", err)
-	}
-
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
-	v.Caption = t.Caption
-
-	return nil
 }
 
 // RichBlockSlideshow.richBlock is a dummy method to avoid interface implementation.
@@ -10961,31 +10883,9 @@ func (v RichBlockVoiceNote) MarshalJSON() ([]byte, error) {
 // Rich formatted message.
 type RichMessage struct {
 	// Content of the message
-	Blocks []RichBlock `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the rich message must be shown right-to-left
 	IsRtl bool `json:"is_rtl,omitempty"`
-}
-
-// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
-func (v *RichMessage) UnmarshalJSON(b []byte) error {
-	// All fields in RichMessage, with interface fields as json.RawMessage
-	type tmp struct {
-		Blocks json.RawMessage `json:"blocks"`
-		IsRtl  bool            `json:"is_rtl"`
-	}
-	t := tmp{}
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal RichMessage JSON into tmp struct: %w", err)
-	}
-
-	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
-	}
-	v.IsRtl = t.IsRtl
-
-	return nil
 }
 
 // RichText (https://core.telegram.org/bots/api#richtext)
@@ -11018,6 +10918,8 @@ func (v *RichMessage) UnmarshalJSON(b []byte) error {
 //   - RichTextReferenceLink
 type RichText interface {
 	GetType() string
+	// GetText gets the text-only contents of any rich formatting datatypes.
+	GetText() string
 	// richText exists to avoid external types implementing this interface.
 	richText()
 }

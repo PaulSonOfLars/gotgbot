@@ -3,6 +3,8 @@
 
 package gotgbot
 
+import "strings"
+
 // Get is a helper method for Bot.GetBusinessConnection.
 func (bc BusinessConnection) Get(b *Bot, opts *GetBusinessConnectionOpts) (*BusinessConnection, error) {
 	return b.GetBusinessConnection(bc.Id, opts)
@@ -772,6 +774,246 @@ func (m Message) ReplyVoice(b *Bot, voice InputFileOrString, opts *SendVoiceOpts
 // Answer is a helper method for Bot.AnswerPreCheckoutQuery.
 func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
 	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
+}
+
+func (v RichBlockAnimation) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockAudio) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockBlockQuotation) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Blocks.GetText())
+	bd.WriteString(v.Credit.GetText())
+	return bd.String()
+}
+
+func (v RichBlockCaption) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Credit.GetText())
+	return bd.String()
+}
+
+func (v RichBlockCollage) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Blocks.GetText())
+	bd.WriteString(v.Caption.GetText())
+	return bd.String()
+}
+
+func (v RichBlockDetails) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Summary.GetText())
+	bd.WriteString(v.Blocks.GetText())
+	return bd.String()
+}
+
+func (v RichBlockFooter) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichBlockList) GetText() string {
+	return v.Items.GetText()
+}
+
+func (v RichBlockListItem) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Label)
+	bd.WriteString(v.Blocks.GetText())
+	return bd.String()
+}
+
+func (v RichBlockMap) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockParagraph) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichBlockPhoto) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockPreformatted) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Language)
+	return bd.String()
+}
+
+func (v RichBlockPullQuotation) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Credit.GetText())
+	return bd.String()
+}
+
+func (v RichBlockSectionHeading) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichBlockSlideshow) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Blocks.GetText())
+	bd.WriteString(v.Caption.GetText())
+	return bd.String()
+}
+
+func (v RichBlockTable) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockTableCell) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Align)
+	bd.WriteString(v.Valign)
+	return bd.String()
+}
+
+func (v RichBlockThinking) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichBlockVideo) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichBlockVoiceNote) GetText() string {
+	return v.Caption.GetText()
+}
+
+func (v RichMessage) GetText() string {
+	return v.Blocks.GetText()
+}
+
+func (v RichTextAnchorLink) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.AnchorName)
+	return bd.String()
+}
+
+func (v RichTextBankCardNumber) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.BankCardNumber)
+	return bd.String()
+}
+
+func (v RichTextBold) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextBotCommand) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.BotCommand)
+	return bd.String()
+}
+
+func (v RichTextCashtag) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Cashtag)
+	return bd.String()
+}
+
+func (v RichTextCode) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextDateTime) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.DateTimeFormat)
+	return bd.String()
+}
+
+func (v RichTextEmailAddress) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.EmailAddress)
+	return bd.String()
+}
+
+func (v RichTextHashtag) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Hashtag)
+	return bd.String()
+}
+
+func (v RichTextItalic) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextMarked) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextMention) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Username)
+	return bd.String()
+}
+
+func (v RichTextPhoneNumber) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.PhoneNumber)
+	return bd.String()
+}
+
+func (v RichTextReference) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Name)
+	return bd.String()
+}
+
+func (v RichTextReferenceLink) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.ReferenceName)
+	return bd.String()
+}
+
+func (v RichTextSpoiler) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextStrikethrough) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextSubscript) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextSuperscript) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextTextMention) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextUnderline) GetText() string {
+	return v.Text.GetText()
+}
+
+func (v RichTextUrl) GetText() string {
+	bd := strings.Builder{}
+	bd.WriteString(v.Text.GetText())
+	bd.WriteString(v.Url)
+	return bd.String()
 }
 
 // Answer is a helper method for Bot.AnswerShippingQuery.

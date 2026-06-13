@@ -14,6 +14,7 @@ func generateHelpers(d APIDescription) error {
 
 package gotgbot
 
+import "strings"
 `)
 
 	for _, tgTypeName := range orderedTgTypes(d) {
@@ -23,12 +24,17 @@ package gotgbot
 		if err != nil {
 			return fmt.Errorf("failed to generate type helpers for %s: %w", tgType.Name, err)
 		}
-
-		if helper == "" {
-			continue
+		if helper != "" {
+			helpers.WriteString(helper)
 		}
 
-		helpers.WriteString(helper)
+		richHelper, err := richContentHelper(d, tgType)
+		if err != nil {
+			return fmt.Errorf("failed to generate rich content helper for %s: %w", tgType.Name, err)
+		}
+		if richHelper != "" {
+			helpers.WriteString(richHelper)
+		}
 	}
 
 	return writeGenToFile(helpers, "gen_helpers.go")
@@ -164,6 +170,45 @@ func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, er
 	}
 
 	return helperDef.String(), nil
+}
+
+func richContentHelper(d APIDescription, tgType TypeDescription) (string, error) {
+	if tgType.Name == tgTypeMessage {
+		return "", nil
+	}
+
+	var richBits bool
+
+	var inputs []string
+	for _, f := range tgType.Fields {
+		_, fType := isTgArray(f.Types[0])
+		if isRichTextType(fType) {
+			richBits = true
+			inputs = append(inputs, fmt.Sprintf("v.%s.GetText()", snakeToTitle(f.Name)))
+		} else if t, err := f.getPreferredType(d); err == nil && t == "string" && f.Name != "type" {
+			inputs = append(inputs, fmt.Sprintf("v.%s", snakeToTitle(f.Name)))
+		}
+	}
+
+	if !richBits {
+		return "", nil
+	}
+
+	bd := strings.Builder{}
+	bd.WriteString(fmt.Sprintf("\nfunc (v %s) GetText() string {\n", tgType.Name))
+
+	if len(inputs) == 1 {
+		bd.WriteString(fmt.Sprintf("\treturn %s\n", inputs[0]))
+	} else {
+		bd.WriteString(fmt.Sprintf("\tbd := strings.Builder{}\n"))
+		for _, r := range inputs {
+			bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", r))
+		}
+		bd.WriteString(fmt.Sprintf("\treturn bd.String()\n"))
+	}
+	bd.WriteString(fmt.Sprintf("}\n"))
+
+	return bd.String(), nil
 }
 
 func hasFromChat(tgMethod MethodDescription) bool {
