@@ -150,6 +150,9 @@ func (td TypeDescription) getTypeNameFromParent(typeField string) (string, error
 		return "", errors.New("unable to determine type name")
 	}
 
+	if td.Href == internalTypeRef {
+		return td.SubtypeOf[0], nil
+	}
 	return "", errors.New("unable to determine type field")
 }
 

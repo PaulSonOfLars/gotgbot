@@ -331,23 +331,11 @@ func newTypeDescription(newTypeName string, typeName string, parentType string) 
 			Name:        "type",
 			Types:       []string{tgTypeString},
 			Required:    true,
-			Description: fmt.Sprintf("Field type. Always %s.", strings.ToLower(typeName)),
+			Description: fmt.Sprintf("Type of the %s, always \"%s\"", parentType, strings.ToLower(typeName)),
 		}},
 		Href:      internalTypeRef,
 		SubtypeOf: unique(typeName, parentType),
 	}
-}
-
-func unique(ss ...string) []string {
-	seen := make(map[string]struct{})
-	unique := make([]string, 0, len(ss))
-	for _, s := range ss {
-		if _, ok := seen[s]; !ok {
-			seen[s] = struct{}{}
-			unique = append(unique, s)
-		}
-	}
-	return unique
 }
 
 // extractQuotedValues is a very basic quote extraction method. It only works on normal double quotes ("), it does not

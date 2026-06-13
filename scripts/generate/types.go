@@ -255,7 +255,7 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 
 		fieldData := customUnmarshalFieldData{
 			Name:      snakeToTitle(f.Name),
-			Custom:    len(d.Types[prefType].Subtypes) > 0,
+			Custom:    len(d.Types[prefType].Subtypes) > 0 || d.Types[prefType].Href == internalTypeRef,
 			ArrayType: strings.TrimPrefix(prefType, "[]"),
 			Type:      prefType,
 			JSONTag:   fmt.Sprintf("`json:\"%s\"`", f.Name),
@@ -414,9 +414,10 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	}
 	if constantField == nil {
 		// We cover MaybeInaccessibleMessage manually.
-		if tgType.Name != "MaybeInaccessibleMessage" {
-			log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
+		if tgType.Name == "MaybeInaccessibleMessage" {
+			return "", nil
 		}
+		log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
 		return "", nil
 	}
 
@@ -424,9 +425,11 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	for _, subTypeName := range tgType.Subtypes {
 		shortName, err := d.Types[subTypeName].getTypeNameFromParent(constantField.Name)
 		if err != nil {
-			return "", fmt.Errorf("failed to get shortname for %s: %w", subTypeName, err)
+			if isRichTextType(tgType.Name) && (subTypeName == tgTypeString || subTypeName == "Array of RichText") {
+				continue
+			}
+			return "", fmt.Errorf("failed to get type shortname for %s: %w", subTypeName, err)
 		}
-
 		cases = append(cases, customStructUnmarshalCaseData{
 			ConstantFieldValue: shortName,
 			TypeName:           subTypeName,
@@ -483,7 +486,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		// We only generate the merge func if there is a common field, and if the types match across all children.
 		// If they didn't match, then compilation would fail.
 		if needsMergeFunc(d, constantField, parentType.Name, commonFields, subTypes) {
-			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
+			mergeFunc, err := generateMergeFunc(d, tgType, shortName, parentType.Name, constantField)
 			if err != nil {
 				return "", err
 			}
@@ -696,23 +699,23 @@ func (v %s) Get%s() %s {
 `, commonName, t, commonName, commonType, commonValue)
 }
 
-func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField *Field) (string, error) {
+func generateMergeFunc(d APIDescription, tgType TypeDescription, shortname string, parentType string, constantField *Field) (string, error) {
 	subTypes, err := getTypesByName(d, parentType, d.Types[parentType].Subtypes)
 	if err != nil {
-		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", typeName, err)
+		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
 	}
 
 	allParentFields, err := getAllFields(d, subTypes, parentType)
 	if err != nil {
-		return "", fmt.Errorf("failed to get all fields for %s with parent type %s: %w", typeName, parentType, err)
+		return "", fmt.Errorf("failed to get all fields for %s with parent type %s: %w", tgType.Name, parentType, err)
 	}
 
 	bd := strings.Builder{}
 
 	bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with types in a non-generic world.", parentType, parentType))
-	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", tgType.Name, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
-	for _, f := range fields {
+	for _, f := range tgType.Fields {
 		if constantField != nil && f.Name == constantField.Name {
 			bd.WriteString(fmt.Sprintf("\n\t%s: \"%s\",", snakeToTitle(f.Name), shortname))
 			continue

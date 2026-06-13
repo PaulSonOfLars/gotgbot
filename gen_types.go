@@ -5331,7 +5331,7 @@ func (v InputMediaLink) inputPollOptionMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaLink) GetType() string {
-	return "input_media_link"
+	return InputPollOptionMediaTypeLink
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5341,7 +5341,7 @@ func (v InputMediaLink) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_link",
+		Type:  InputPollOptionMediaTypeLink,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9790,19 +9790,19 @@ func unmarshalRichBlock(d json.RawMessage) (RichBlock, error) {
 		}
 		return s, nil
 
-	case "section_heading":
+	case "heading":
 		s := RichBlockSectionHeading{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'section_heading': %w", err)
+			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'heading': %w", err)
 		}
 		return s, nil
 
-	case "preformatted":
+	case "pre":
 		s := RichBlockPreformatted{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'preformatted': %w", err)
+			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'pre': %w", err)
 		}
 		return s, nil
 
@@ -9846,19 +9846,19 @@ func unmarshalRichBlock(d json.RawMessage) (RichBlock, error) {
 		}
 		return s, nil
 
-	case "block_quotation":
+	case "blockquote":
 		s := RichBlockBlockQuotation{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'block_quotation': %w", err)
+			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'blockquote': %w", err)
 		}
 		return s, nil
 
-	case "pull_quotation":
+	case "pullquote":
 		s := RichBlockPullQuotation{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'pull_quotation': %w", err)
+			return nil, fmt.Errorf("failed to unmarshal RichBlock for value 'pullquote': %w", err)
 		}
 		return s, nil
 
@@ -9967,7 +9967,7 @@ func (v RichBlockAnchor) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockAnchor) GetType() string {
-	return "anchor"
+	return RichBlockTypeAnchor
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -9977,7 +9977,7 @@ func (v RichBlockAnchor) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "anchor",
+		Type:  RichBlockTypeAnchor,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10000,7 +10000,7 @@ func (v RichBlockAnimation) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockAnimation) GetType() string {
-	return "animation"
+	return RichBlockTypeAnimation
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10010,7 +10010,7 @@ func (v RichBlockAnimation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "animation",
+		Type:  RichBlockTypeAnimation,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10031,7 +10031,7 @@ func (v RichBlockAudio) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockAudio) GetType() string {
-	return "audio"
+	return RichBlockTypeAudio
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10041,7 +10041,7 @@ func (v RichBlockAudio) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "audio",
+		Type:  RichBlockTypeAudio,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10061,7 +10061,7 @@ type RichBlockBlockQuotation struct {
 func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockBlockQuotation, with interface fields as json.RawMessage
 	type tmp struct {
-		Blocks RichBlockArray  `json:"blocks"`
+		Blocks json.RawMessage `json:"blocks"`
 		Credit json.RawMessage `json:"credit"`
 	}
 	t := tmp{}
@@ -10070,7 +10070,10 @@ func (v *RichBlockBlockQuotation) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal RichBlockBlockQuotation JSON into tmp struct: %w", err)
 	}
 
-	v.Blocks = t.Blocks
+	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
+	}
 	v.Credit, err = unmarshalRichText(t.Credit)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Credit: %w", err)
@@ -10084,7 +10087,7 @@ func (v RichBlockBlockQuotation) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockBlockQuotation) GetType() string {
-	return "block_quotation"
+	return RichBlockTypeBlockquote
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10094,7 +10097,7 @@ func (v RichBlockBlockQuotation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "block_quotation",
+		Type:  RichBlockTypeBlockquote,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10150,7 +10153,7 @@ func (v RichBlockCollage) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockCollage) GetType() string {
-	return "collage"
+	return RichBlockTypeCollage
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10160,7 +10163,7 @@ func (v RichBlockCollage) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "collage",
+		Type:  RichBlockTypeCollage,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10183,7 +10186,7 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockDetails, with interface fields as json.RawMessage
 	type tmp struct {
 		Summary json.RawMessage `json:"summary"`
-		Blocks  RichBlockArray  `json:"blocks"`
+		Blocks  json.RawMessage `json:"blocks"`
 		IsOpen  bool            `json:"is_open"`
 	}
 	t := tmp{}
@@ -10196,7 +10199,10 @@ func (v *RichBlockDetails) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Summary: %w", err)
 	}
-	v.Blocks = t.Blocks
+	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
+	}
 	v.IsOpen = t.IsOpen
 
 	return nil
@@ -10207,7 +10213,7 @@ func (v RichBlockDetails) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockDetails) GetType() string {
-	return "details"
+	return RichBlockTypeDetails
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10217,7 +10223,7 @@ func (v RichBlockDetails) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "details",
+		Type:  RichBlockTypeDetails,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10233,7 +10239,7 @@ func (v RichBlockDivider) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockDivider) GetType() string {
-	return "divider"
+	return RichBlockTypeDivider
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10243,7 +10249,7 @@ func (v RichBlockDivider) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "divider",
+		Type:  RichBlockTypeDivider,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10282,7 +10288,7 @@ func (v RichBlockFooter) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockFooter) GetType() string {
-	return "footer"
+	return RichBlockTypeFooter
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10292,7 +10298,7 @@ func (v RichBlockFooter) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "footer",
+		Type:  RichBlockTypeFooter,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10311,7 +10317,7 @@ func (v RichBlockList) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockList) GetType() string {
-	return "list"
+	return RichBlockTypeList
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10321,7 +10327,7 @@ func (v RichBlockList) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "list",
+		Type:  RichBlockTypeList,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10366,7 +10372,7 @@ func (v RichBlockMap) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockMap) GetType() string {
-	return "map"
+	return RichBlockTypeMap
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10376,7 +10382,7 @@ func (v RichBlockMap) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "map",
+		Type:  RichBlockTypeMap,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10395,7 +10401,7 @@ func (v RichBlockMathematicalExpression) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockMathematicalExpression) GetType() string {
-	return "mathematical_expression"
+	return RichBlockTypeMathematicalExpression
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10405,7 +10411,7 @@ func (v RichBlockMathematicalExpression) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "mathematical_expression",
+		Type:  RichBlockTypeMathematicalExpression,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10444,7 +10450,7 @@ func (v RichBlockParagraph) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockParagraph) GetType() string {
-	return "paragraph"
+	return RichBlockTypeParagraph
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10454,7 +10460,7 @@ func (v RichBlockParagraph) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "paragraph",
+		Type:  RichBlockTypeParagraph,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10477,7 +10483,7 @@ func (v RichBlockPhoto) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockPhoto) GetType() string {
-	return "photo"
+	return RichBlockTypePhoto
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10487,7 +10493,7 @@ func (v RichBlockPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  RichBlockTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10530,7 +10536,7 @@ func (v RichBlockPreformatted) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockPreformatted) GetType() string {
-	return "preformatted"
+	return RichBlockTypePre
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10540,7 +10546,7 @@ func (v RichBlockPreformatted) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "preformatted",
+		Type:  RichBlockTypePre,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10586,7 +10592,7 @@ func (v RichBlockPullQuotation) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockPullQuotation) GetType() string {
-	return "pull_quotation"
+	return RichBlockTypePullquote
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10596,7 +10602,7 @@ func (v RichBlockPullQuotation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "pull_quotation",
+		Type:  RichBlockTypePullquote,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10639,7 +10645,7 @@ func (v RichBlockSectionHeading) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockSectionHeading) GetType() string {
-	return "section_heading"
+	return RichBlockTypeHeading
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10649,7 +10655,7 @@ func (v RichBlockSectionHeading) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "section_heading",
+		Type:  RichBlockTypeHeading,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10670,7 +10676,7 @@ func (v RichBlockSlideshow) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockSlideshow) GetType() string {
-	return "slideshow"
+	return RichBlockTypeSlideshow
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10680,7 +10686,7 @@ func (v RichBlockSlideshow) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "slideshow",
+		Type:  RichBlockTypeSlideshow,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10731,7 +10737,7 @@ func (v RichBlockTable) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockTable) GetType() string {
-	return "table"
+	return RichBlockTypeTable
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10741,7 +10747,7 @@ func (v RichBlockTable) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "table",
+		Type:  RichBlockTypeTable,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10798,7 +10804,7 @@ func (v RichBlockThinking) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockThinking) GetType() string {
-	return "thinking"
+	return RichBlockTypeThinking
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10808,7 +10814,7 @@ func (v RichBlockThinking) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "thinking",
+		Type:  RichBlockTypeThinking,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10831,7 +10837,7 @@ func (v RichBlockVideo) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockVideo) GetType() string {
-	return "video"
+	return RichBlockTypeVideo
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10841,7 +10847,7 @@ func (v RichBlockVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  RichBlockTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10862,7 +10868,7 @@ func (v RichBlockVoiceNote) richBlock() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockVoiceNote) GetType() string {
-	return "voice_note"
+	return RichBlockTypeVoiceNote
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -10872,7 +10878,7 @@ func (v RichBlockVoiceNote) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "voice_note",
+		Type:  RichBlockTypeVoiceNote,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11237,7 +11243,7 @@ func (v RichTextAnchor) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextAnchor) GetType() string {
-	return "anchor"
+	return RichTextTypeAnchor
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11247,7 +11253,7 @@ func (v RichTextAnchor) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "anchor",
+		Type:  RichTextTypeAnchor,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11290,7 +11296,7 @@ func (v RichTextAnchorLink) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextAnchorLink) GetType() string {
-	return "anchor_link"
+	return RichTextTypeAnchorLink
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11300,7 +11306,7 @@ func (v RichTextAnchorLink) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "anchor_link",
+		Type:  RichTextTypeAnchorLink,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11343,7 +11349,7 @@ func (v RichTextBankCardNumber) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextBankCardNumber) GetType() string {
-	return "bank_card_number"
+	return RichTextTypeBankCardNumber
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11353,7 +11359,7 @@ func (v RichTextBankCardNumber) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "bank_card_number",
+		Type:  RichTextTypeBankCardNumber,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11392,7 +11398,7 @@ func (v RichTextBold) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextBold) GetType() string {
-	return "bold"
+	return RichTextTypeBold
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11402,7 +11408,7 @@ func (v RichTextBold) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "bold",
+		Type:  RichTextTypeBold,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11445,7 +11451,7 @@ func (v RichTextBotCommand) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextBotCommand) GetType() string {
-	return "bot_command"
+	return RichTextTypeBotCommand
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11455,7 +11461,7 @@ func (v RichTextBotCommand) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "bot_command",
+		Type:  RichTextTypeBotCommand,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11498,7 +11504,7 @@ func (v RichTextCashtag) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextCashtag) GetType() string {
-	return "cashtag"
+	return RichTextTypeCashtag
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11508,7 +11514,7 @@ func (v RichTextCashtag) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "cashtag",
+		Type:  RichTextTypeCashtag,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11547,7 +11553,7 @@ func (v RichTextCode) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextCode) GetType() string {
-	return "code"
+	return RichTextTypeCode
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11557,7 +11563,7 @@ func (v RichTextCode) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "code",
+		Type:  RichTextTypeCode,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11578,7 +11584,7 @@ func (v RichTextCustomEmoji) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextCustomEmoji) GetType() string {
-	return "custom_emoji"
+	return RichTextTypeCustomEmoji
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11588,7 +11594,7 @@ func (v RichTextCustomEmoji) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "custom_emoji",
+		Type:  RichTextTypeCustomEmoji,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11635,7 +11641,7 @@ func (v RichTextDateTime) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextDateTime) GetType() string {
-	return "date_time"
+	return RichTextTypeDateTime
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11645,7 +11651,7 @@ func (v RichTextDateTime) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "date_time",
+		Type:  RichTextTypeDateTime,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11688,7 +11694,7 @@ func (v RichTextEmailAddress) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextEmailAddress) GetType() string {
-	return "email_address"
+	return RichTextTypeEmailAddress
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11698,7 +11704,7 @@ func (v RichTextEmailAddress) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "email_address",
+		Type:  RichTextTypeEmailAddress,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11741,7 +11747,7 @@ func (v RichTextHashtag) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextHashtag) GetType() string {
-	return "hashtag"
+	return RichTextTypeHashtag
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11751,7 +11757,7 @@ func (v RichTextHashtag) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "hashtag",
+		Type:  RichTextTypeHashtag,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11790,7 +11796,7 @@ func (v RichTextItalic) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextItalic) GetType() string {
-	return "italic"
+	return RichTextTypeItalic
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11800,7 +11806,7 @@ func (v RichTextItalic) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "italic",
+		Type:  RichTextTypeItalic,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11839,7 +11845,7 @@ func (v RichTextMarked) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextMarked) GetType() string {
-	return "marked"
+	return RichTextTypeMarked
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11849,7 +11855,7 @@ func (v RichTextMarked) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "marked",
+		Type:  RichTextTypeMarked,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11868,7 +11874,7 @@ func (v RichTextMathematicalExpression) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextMathematicalExpression) GetType() string {
-	return "mathematical_expression"
+	return RichTextTypeMathematicalExpression
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11878,7 +11884,7 @@ func (v RichTextMathematicalExpression) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "mathematical_expression",
+		Type:  RichTextTypeMathematicalExpression,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11921,7 +11927,7 @@ func (v RichTextMention) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextMention) GetType() string {
-	return "mention"
+	return RichTextTypeMention
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11931,7 +11937,7 @@ func (v RichTextMention) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "mention",
+		Type:  RichTextTypeMention,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -11974,7 +11980,7 @@ func (v RichTextPhoneNumber) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextPhoneNumber) GetType() string {
-	return "phone_number"
+	return RichTextTypePhoneNumber
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -11984,7 +11990,7 @@ func (v RichTextPhoneNumber) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "phone_number",
+		Type:  RichTextTypePhoneNumber,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12027,7 +12033,7 @@ func (v RichTextReference) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextReference) GetType() string {
-	return "reference"
+	return RichTextTypeReference
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12037,7 +12043,7 @@ func (v RichTextReference) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "reference",
+		Type:  RichTextTypeReference,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12080,7 +12086,7 @@ func (v RichTextReferenceLink) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextReferenceLink) GetType() string {
-	return "reference_link"
+	return RichTextTypeReferenceLink
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12090,7 +12096,7 @@ func (v RichTextReferenceLink) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "reference_link",
+		Type:  RichTextTypeReferenceLink,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12129,7 +12135,7 @@ func (v RichTextSpoiler) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextSpoiler) GetType() string {
-	return "spoiler"
+	return RichTextTypeSpoiler
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12139,7 +12145,7 @@ func (v RichTextSpoiler) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "spoiler",
+		Type:  RichTextTypeSpoiler,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12178,7 +12184,7 @@ func (v RichTextStrikethrough) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextStrikethrough) GetType() string {
-	return "strikethrough"
+	return RichTextTypeStrikethrough
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12188,7 +12194,7 @@ func (v RichTextStrikethrough) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "strikethrough",
+		Type:  RichTextTypeStrikethrough,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12227,7 +12233,7 @@ func (v RichTextSubscript) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextSubscript) GetType() string {
-	return "subscript"
+	return RichTextTypeSubscript
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12237,7 +12243,7 @@ func (v RichTextSubscript) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "subscript",
+		Type:  RichTextTypeSubscript,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12276,7 +12282,7 @@ func (v RichTextSuperscript) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextSuperscript) GetType() string {
-	return "superscript"
+	return RichTextTypeSuperscript
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12286,7 +12292,7 @@ func (v RichTextSuperscript) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "superscript",
+		Type:  RichTextTypeSuperscript,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12329,7 +12335,7 @@ func (v RichTextTextMention) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextTextMention) GetType() string {
-	return "text_mention"
+	return RichTextTypeTextMention
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12339,7 +12345,7 @@ func (v RichTextTextMention) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "text_mention",
+		Type:  RichTextTypeTextMention,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12378,7 +12384,7 @@ func (v RichTextUnderline) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextUnderline) GetType() string {
-	return "underline"
+	return RichTextTypeUnderline
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12388,7 +12394,7 @@ func (v RichTextUnderline) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "underline",
+		Type:  RichTextTypeUnderline,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -12431,7 +12437,7 @@ func (v RichTextUrl) richText() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextUrl) GetType() string {
-	return "url"
+	return RichTextTypeUrl
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -12441,7 +12447,7 @@ func (v RichTextUrl) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "url",
+		Type:  RichTextTypeUrl,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)

@@ -268,6 +268,7 @@ const (
 // The consts listed below represent all the InputPollOptionMedia types.
 const (
 	InputPollOptionMediaTypeAnimation = "animation"
+	InputPollOptionMediaTypeLink      = "link"
 	InputPollOptionMediaTypeLivePhoto = "live_photo"
 	InputPollOptionMediaTypeLocation  = "location"
 	InputPollOptionMediaTypePhoto     = "photo"
@@ -342,6 +343,61 @@ const (
 	RevenueWithdrawalStateTypePending   = "pending"
 	RevenueWithdrawalStateTypeSucceeded = "succeeded"
 	RevenueWithdrawalStateTypeFailed    = "failed"
+)
+
+// The consts listed below represent all the RichBlock types.
+const (
+	RichBlockTypeParagraph              = "paragraph"
+	RichBlockTypeHeading                = "heading"
+	RichBlockTypePre                    = "pre"
+	RichBlockTypeFooter                 = "footer"
+	RichBlockTypeDivider                = "divider"
+	RichBlockTypeMathematicalExpression = "mathematical_expression"
+	RichBlockTypeAnchor                 = "anchor"
+	RichBlockTypeList                   = "list"
+	RichBlockTypeBlockquote             = "blockquote"
+	RichBlockTypePullquote              = "pullquote"
+	RichBlockTypeCollage                = "collage"
+	RichBlockTypeSlideshow              = "slideshow"
+	RichBlockTypeTable                  = "table"
+	RichBlockTypeDetails                = "details"
+	RichBlockTypeMap                    = "map"
+	RichBlockTypeAnimation              = "animation"
+	RichBlockTypeAudio                  = "audio"
+	RichBlockTypePhoto                  = "photo"
+	RichBlockTypeVideo                  = "video"
+	RichBlockTypeVoiceNote              = "voice_note"
+	RichBlockTypeThinking               = "thinking"
+)
+
+// The consts listed below represent all the RichText types.
+const (
+	RichTextTypeString                 = "string"
+	RichTextTypeBold                   = "bold"
+	RichTextTypeItalic                 = "italic"
+	RichTextTypeUnderline              = "underline"
+	RichTextTypeStrikethrough          = "strikethrough"
+	RichTextTypeSpoiler                = "spoiler"
+	RichTextTypeDateTime               = "date_time"
+	RichTextTypeTextMention            = "text_mention"
+	RichTextTypeSubscript              = "subscript"
+	RichTextTypeSuperscript            = "superscript"
+	RichTextTypeMarked                 = "marked"
+	RichTextTypeCode                   = "code"
+	RichTextTypeCustomEmoji            = "custom_emoji"
+	RichTextTypeMathematicalExpression = "mathematical_expression"
+	RichTextTypeUrl                    = "url"
+	RichTextTypeEmailAddress           = "email_address"
+	RichTextTypePhoneNumber            = "phone_number"
+	RichTextTypeBankCardNumber         = "bank_card_number"
+	RichTextTypeMention                = "mention"
+	RichTextTypeHashtag                = "hashtag"
+	RichTextTypeCashtag                = "cashtag"
+	RichTextTypeBotCommand             = "bot_command"
+	RichTextTypeAnchor                 = "anchor"
+	RichTextTypeAnchorLink             = "anchor_link"
+	RichTextTypeReference              = "reference"
+	RichTextTypeReferenceLink          = "reference_link"
 )
 
 // The consts listed below represent all the StoryAreaType types.
