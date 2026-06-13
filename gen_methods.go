@@ -5664,7 +5664,7 @@ type SendMessageDraftOpts struct {
 //
 // Use this method to stream a partial message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you must call sendMessage with the complete message to persist it in the user's chat. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target private chat
-//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes of drafts with the same identifier are animated.
+//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated.
 //   - opts (type SendMessageDraftOpts): All optional parameters.
 func (bot *Bot) SendMessageDraft(chatId int64, draftId int64, opts *SendMessageDraftOpts) (bool, error) {
 	return bot.SendMessageDraftWithContext(context.Background(), chatId, draftId, opts)
