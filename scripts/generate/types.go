@@ -872,9 +872,6 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 
 		switch t.{{.ConstantFieldName}} {
 		{{-  range $val := .CaseStatements }}
-		{{- if and $.IsRichText (eq $val.ConstantFieldValue "")}}
-		{{- continue }}
-		{{- end }}
 		case "{{ $val.ConstantFieldValue }}":
 			s := {{ $val.TypeName }}{}
 			err := json.Unmarshal(d, &s)
