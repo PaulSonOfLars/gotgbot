@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"text/template"
 )
@@ -31,6 +32,11 @@ import "strings"
 		richContentHelper := generateRichContentHelperDef(tgType)
 		if richContentHelper != "" {
 			helpers.WriteString(richContentHelper)
+		}
+
+		richWalkHelper := generateRichWalkHelperDef(d, tgType)
+		if richWalkHelper != "" {
+			helpers.WriteString(richWalkHelper)
 		}
 	}
 
@@ -407,3 +413,169 @@ func ({{.ReceiverName}} Message) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnTyp
 	return b.{{.MethodName}}({{.FuncCallArgs}})
 }
 `
+
+// generateRichWalkHelperDef generates Children()/RichTextChildren()/RichBlockChildren()
+// on any concrete type that is a RichText or RichBlock subtype, or that embeds rich
+// fields (e.g. RichBlockCaption, RichBlockTableCell).
+func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string {
+	// Only concrete types — interfaces are handled via generateGenericInterfaceType.
+	if len(tgType.Subtypes) != 0 || tgType.Href == internalTypeRef {
+		return ""
+	}
+
+	// Determine which rich interface(s) this type belongs to.
+	var parentRichType string
+	for _, parent := range tgType.SubtypeOf {
+		if parent == tgTypeRichText || parent == tgTypeRichBlock {
+			parentRichType = parent
+			break
+		}
+	}
+
+	// Also handle embedded-rich types that aren't direct interface subtypes
+	// (e.g. RichBlockCaption, RichBlockTableCell, RichBlockListItem).
+	hasAnyRichField := false
+	for _, f := range tgType.Fields {
+		_, fType := typeOfTgArray(f.Types[0])
+		if isRichTextType(fType) {
+			hasAnyRichField = true
+			break
+		}
+	}
+
+	if parentRichType == "" && !hasAnyRichField {
+		return ""
+	}
+
+	// Separate rich fields by which interface they belong to.
+	type richField struct {
+		goName      string
+		isArray     bool
+		required    bool
+		fieldParent string // "RichText" or "RichBlock"
+	}
+	var richFields []richField
+	for _, f := range tgType.Fields {
+		isArr, fType := typeOfTgArray(f.Types[0])
+		if !isRichTextType(fType) {
+			continue
+		}
+
+		var fp string
+		if strings.HasPrefix(fType, tgTypeRichBlock) {
+			if fieldType, ok := d.Types[fType]; ok && slices.Contains(fieldType.SubtypeOf, tgTypeRichBlock) {
+				fp = tgTypeRichBlock
+			}
+			// else: RichBlock-prefixed struct that isn't a RichBlock subtype
+			// (Caption, TableCell, ListItem) — skip, handled separately
+		} else if strings.HasPrefix(fType, tgTypeRichText) {
+			if fieldType, ok := d.Types[fType]; ok && slices.Contains(fieldType.SubtypeOf, tgTypeRichText) {
+				fp = tgTypeRichText
+			} else if fType == tgTypeRichText {
+				// The interface itself (field type is exactly "RichText")
+				fp = tgTypeRichText
+			}
+			// else: RichText-prefixed struct that isn't a RichText subtype — skip
+		}
+
+		if fp == "" {
+			continue // not a direct interface member, skip
+		}
+
+		richFields = append(richFields, richField{
+			goName:      snakeToTitle(f.Name),
+			isArray:     isArr,
+			required:    f.Required,
+			fieldParent: fp,
+		})
+	}
+
+	bd := strings.Builder{}
+
+	// Helper to emit one Children-style method.
+	emitMethod := func(receiverType, methodName, returnType string, fields []richField) {
+		if len(fields) == 0 {
+			bd.WriteString(fmt.Sprintf("\nfunc (v %s) %s() []%s {\n\treturn nil\n}\n",
+				receiverType, methodName, returnType))
+			return
+		}
+
+		bd.WriteString(fmt.Sprintf("\nfunc (v %s) %s() []%s {\n", receiverType, methodName, returnType))
+
+		if len(fields) == 1 {
+			f := fields[0]
+			if f.isArray {
+				if !f.required {
+					bd.WriteString(fmt.Sprintf("\tif len(v.%s) == 0 {\n\t\treturn nil\n\t}\n", f.goName))
+				}
+				bd.WriteString(fmt.Sprintf("\tout := make([]%s, len(v.%s))\n", returnType, f.goName))
+				bd.WriteString(fmt.Sprintf("\tfor i, c := range v.%s {\n\t\tout[i] = c\n\t}\n", f.goName))
+				bd.WriteString("\treturn out\n")
+			} else {
+				if !f.required {
+					bd.WriteString(fmt.Sprintf("\tif v.%s == nil {\n\t\treturn nil\n\t}\n", f.goName))
+				}
+				bd.WriteString(fmt.Sprintf("\treturn []%s{v.%s}\n", returnType, f.goName))
+			}
+		} else {
+			bd.WriteString(fmt.Sprintf("\tvar out []%s\n", returnType))
+			for _, f := range fields {
+				if f.isArray {
+					if !f.required {
+						bd.WriteString(fmt.Sprintf("\tfor _, c := range v.%s {\n\t\tout = append(out, c)\n\t}\n", f.goName))
+					} else {
+						bd.WriteString(fmt.Sprintf("\tfor _, c := range v.%s {\n\t\tout = append(out, c)\n\t}\n", f.goName))
+					}
+				} else {
+					if !f.required {
+						bd.WriteString(fmt.Sprintf("\tif v.%s != nil {\n\t\tout = append(out, v.%s)\n\t}\n", f.goName, f.goName))
+					} else {
+						bd.WriteString(fmt.Sprintf("\tout = append(out, v.%s)\n", f.goName))
+					}
+				}
+			}
+			bd.WriteString("\treturn out\n")
+		}
+		bd.WriteString("}\n")
+	}
+
+	switch parentRichType {
+	case tgTypeRichText:
+		// RichText subtypes: one Children() returning []RichText.
+		// All their rich fields must be RichText (the API doesn't mix Text/Block fields).
+		emitMethod(tgType.Name, "Children", tgTypeRichText, richFields)
+
+	case tgTypeRichBlock:
+		// RichBlock subtypes: two methods — split fields by which interface they satisfy.
+		var textFields, blockFields []richField
+		for _, f := range richFields {
+			if f.fieldParent == tgTypeRichText {
+				textFields = append(textFields, f)
+			} else {
+				blockFields = append(blockFields, f)
+			}
+		}
+		emitMethod(tgType.Name, "RichTextChildren", tgTypeRichText, textFields)
+		emitMethod(tgType.Name, "RichBlockChildren", tgTypeRichBlock, blockFields)
+
+	default:
+		// Embedded-rich struct (e.g. RichBlockCaption, RichBlockTableCell, RichBlockListItem).
+		// Not a direct interface subtype, but has RichText/RichBlock fields — emit both.
+		var textFields, blockFields []richField
+		for _, f := range richFields {
+			if f.fieldParent == tgTypeRichText {
+				textFields = append(textFields, f)
+			} else {
+				blockFields = append(blockFields, f)
+			}
+		}
+		if len(textFields) > 0 {
+			emitMethod(tgType.Name, "RichTextChildren", tgTypeRichText, textFields)
+		}
+		if len(blockFields) > 0 {
+			emitMethod(tgType.Name, "RichBlockChildren", tgTypeRichBlock, blockFields)
+		}
+	}
+
+	return bd.String()
+}

@@ -14,6 +14,8 @@ func (r RichTextString) GetText() string {
 
 func (r RichTextString) richText() {}
 
+func (v RichTextString) Children() []RichText { return nil }
+
 type RichTextArray []RichText
 
 func (r RichTextArray) GetType() string {
@@ -29,6 +31,8 @@ func (r RichTextArray) GetText() string {
 }
 
 func (r RichTextArray) richText() {}
+
+func (v RichTextArray) Children() []RichText { return []RichText(v) }
 
 type RichBlockArray []RichBlock
 

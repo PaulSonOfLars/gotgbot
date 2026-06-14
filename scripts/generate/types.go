@@ -629,6 +629,13 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	if isRichTextType(name) {
 		bd.WriteString("\n// GetText gets the text-only contents of any rich formatting datatypes.")
 		bd.WriteString("\nGetText() string")
+
+		if name == tgTypeRichText {
+			bd.WriteString("\nChildren() []RichText")
+		} else if name == tgTypeRichBlock {
+			bd.WriteString("\nRichTextChildren() []RichText")
+			bd.WriteString("\nRichBlockChildren() []RichBlock")
+		}
 	}
 
 	// create a dummy func to avoid external types implementing this interface

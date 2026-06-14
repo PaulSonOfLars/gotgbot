@@ -9712,6 +9712,8 @@ type RichBlock interface {
 	GetType() string
 	// GetText gets the text-only contents of any rich formatting datatypes.
 	GetText() string
+	RichTextChildren() []RichText
+	RichBlockChildren() []RichBlock
 	// richBlock exists to avoid external types implementing this interface.
 	richBlock()
 }
@@ -11052,6 +11054,7 @@ type RichText interface {
 	GetType() string
 	// GetText gets the text-only contents of any rich formatting datatypes.
 	GetText() string
+	Children() []RichText
 	// richText exists to avoid external types implementing this interface.
 	richText()
 }

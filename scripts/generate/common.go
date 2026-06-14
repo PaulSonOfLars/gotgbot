@@ -55,7 +55,8 @@ func isCoreTGType(t string) bool {
 }
 
 func isRichTextType(t string) bool {
-	return strings.HasPrefix(t, "Rich")
+	return t == tgTypeRichText || t == tgTypeRichBlock ||
+		strings.HasPrefix(t, tgTypeRichText) || strings.HasPrefix(t, tgTypeRichBlock)
 }
 
 func toGoType(s string) string {

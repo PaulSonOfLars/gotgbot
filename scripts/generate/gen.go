@@ -316,6 +316,7 @@ const (
 	tgTypeInputMedia     = "InputMedia"
 	tgTypeInputPaidMedia = "InputPaidMedia"
 	tgTypeRichText       = "RichText"
+	tgTypeRichBlock      = "RichBlock"
 
 	// Custom types for this lib.
 	typeReplyMarkup       = "ReplyMarkup"
