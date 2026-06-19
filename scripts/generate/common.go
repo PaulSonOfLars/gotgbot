@@ -278,15 +278,39 @@ func getTypeByName(d APIDescription, typeName string) (TypeDescription, error) {
 	return t, nil
 }
 
-func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+func splitTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, []string, error) {
 	var types []TypeDescription
+	var pseudoTypes []string
 
 	for _, typeName := range typeNames {
-		t, err := getTypeByName(d, typeName)
-		if err != nil {
-			return nil, err
+		if t, ok := d.Types[typeName]; ok {
+			types = append(types, t)
+		} else if isPseudoSubtype(d, typeName) {
+			pseudoTypes = append(pseudoTypes, typeName)
+		} else {
+			return nil, nil, fmt.Errorf("unknown typename %s", typeName)
 		}
-		types = append(types, t)
+	}
+
+	return types, pseudoTypes, nil
+}
+
+func isPseudoSubtype(d APIDescription, typeName string) bool {
+	if typeName == tgTypeString {
+		return true
+	}
+
+	if !isTgArray(typeName) {
+		return false
+	}
+
+	return isTgType(d, strings.TrimPrefix(typeName, "Array of "))
+}
+
+func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+	types, _, err := splitTypesByName(d, typeNames)
+	if err != nil {
+		return nil, err
 	}
 
 	return types, nil

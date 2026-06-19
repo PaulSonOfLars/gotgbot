@@ -26,15 +26,17 @@ func generateTypes(d APIDescription) error {
 package gotgbot
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"strconv"
+	"unicode"
 )
 `)
 
 	// the reply_markup field is weird; this allows it to support multiple types.
-	replyMarkupInterface, err := generateGenericInterfaceType(d, typeReplyMarkup, getReplyMarkupTypes(d))
+	replyMarkupInterface, err := generateGenericInterfaceType(d, typeReplyMarkup, getReplyMarkupTypes(d), nil)
 	if err != nil {
 		return fmt.Errorf("failed to generate reply_markup interface: %w", err)
 	}
@@ -118,14 +120,46 @@ func needsArrayAttachment(d APIDescription, tgType TypeDescription) bool {
 	return tgType.sentAsArray(d) && containsInputFile(d, tgType)
 }
 
-func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
+func enforceTypeAssertion(name string, subtypes []TypeDescription, pseudoSubtypes []string) string {
 	bd := strings.Builder{}
 	bd.WriteString("\n// Ensure that all subtypes correctly implement the parent interface.")
 	bd.WriteString("\nvar (")
 	for _, v := range subtypes {
 		bd.WriteString("\n_ " + name + " = " + v.Name + "{}")
 	}
+	for _, v := range pseudoSubtypes {
+		pseudoName := pseudoSubtypeName(name, v)
+		if isTgArray(v) {
+			bd.WriteString("\n_ " + name + " = " + pseudoName + "{}")
+		} else {
+			bd.WriteString("\n_ " + name + " = " + pseudoName + "(\"\")")
+		}
+	}
 	bd.WriteString("\n)")
+	return bd.String()
+}
+
+func pseudoSubtypeName(parentType string, pseudoSubtype string) string {
+	if isTgArray(pseudoSubtype) {
+		return parentType + "Array"
+	}
+
+	return parentType + pseudoSubtype
+}
+
+func generatePseudoSubtypeDefs(parentType string, pseudoSubtypes []string) string {
+	bd := strings.Builder{}
+	for _, subtype := range pseudoSubtypes {
+		name := pseudoSubtypeName(parentType, subtype)
+		if isTgArray(subtype) {
+			bd.WriteString(fmt.Sprintf("\n\ntype %s []%s", name, strings.TrimPrefix(subtype, "Array of ")))
+		} else {
+			bd.WriteString(fmt.Sprintf("\n\ntype %s %s", name, toGoType(subtype)))
+		}
+
+		bd.WriteString(generateGenericInterfaceMethod(name, parentType))
+	}
+
 	return bd.String()
 }
 
@@ -188,12 +222,12 @@ func containsThumbnail(tgType TypeDescription) bool {
 }
 
 func generateParentType(d APIDescription, tgType TypeDescription) (string, error) {
-	subTypes, err := getTypesByName(d, tgType.Subtypes)
+	subTypes, pseudoSubtypes, err := splitTypesByName(d, tgType.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
 	}
 
-	interfaceDefinition, err := generateGenericInterfaceType(d, tgType.Name, subTypes)
+	interfaceDefinition, err := generateGenericInterfaceType(d, tgType.Name, subTypes, pseudoSubtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate generic interface type for %s: %w", tgType.Name, err)
 	}
@@ -264,12 +298,12 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 			}
 
 			if len(fieldType.Subtypes) > 0 {
-				subtypes, err := getTypesByName(d, fieldType.Subtypes)
+				subtypes, pseudoSubtypes, err := splitTypesByName(d, fieldType.Subtypes)
 				if err != nil {
 					return "", fmt.Errorf("failed to get subtypes from %s: %w", fieldType.Name, err)
 				}
 
-				if len(getCommonFields(subtypes)) > 0 {
+				if len(pseudoSubtypes) > 0 || len(getCommonFields(subtypes)) > 0 {
 					generateCustomMarshal = true
 					fieldData.Custom = true
 				}
@@ -404,33 +438,53 @@ func (v %s) %s() {}
 }
 
 func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, error) {
+	objectSubtypes, pseudoSubtypes, err := splitTypesByName(d, tgType.Subtypes)
+	if err != nil {
+		return "", fmt.Errorf("failed to get subtypes for %s: %w", tgType.Name, err)
+	}
+
 	constantField, err := tgType.getConstantFieldFromParent(d)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate custom unmarshaller for %s: %w", tgType.Name, err)
 	}
 	if constantField == "" {
 		// We cover MaybeInaccessibleMessage manually.
-		if tgType.Name != "MaybeInaccessibleMessage" {
+		if tgType.Name != "MaybeInaccessibleMessage" && len(pseudoSubtypes) == 0 {
 			log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
 		}
-		return "", nil
+		if len(pseudoSubtypes) == 0 {
+			return "", nil
+		}
 	}
 
 	var cases []customStructUnmarshalCaseData
-	for _, subTypeName := range tgType.Subtypes {
-		shortName := d.Types[subTypeName].getTypeNameFromParent(tgType.Name)
+	for _, subType := range objectSubtypes {
+		shortName := subType.getTypeNameFromParent(tgType.Name)
 		cases = append(cases, customStructUnmarshalCaseData{
 			ConstantFieldValue: shortName,
-			TypeName:           subTypeName,
+			TypeName:           subType.Name,
 		})
+	}
+
+	var primitiveStringType string
+	var arrayType string
+	for _, subtype := range pseudoSubtypes {
+		if subtype == tgTypeString {
+			primitiveStringType = pseudoSubtypeName(tgType.Name, subtype)
+		}
+		if isTgArray(subtype) {
+			arrayType = pseudoSubtypeName(tgType.Name, subtype)
+		}
 	}
 
 	bd := strings.Builder{}
 	err = customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
-		UnmarshalFuncName: "unmarshal" + tgType.Name,
-		ParentType:        tgType.Name,
-		ConstantFieldName: snakeToTitle(constantField),
-		CaseStatements:    cases,
+		UnmarshalFuncName:   "unmarshal" + tgType.Name,
+		ParentType:          tgType.Name,
+		ConstantFieldName:   snakeToTitle(constantField),
+		CaseStatements:      cases,
+		PrimitiveStringType: primitiveStringType,
+		ArrayType:           arrayType,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to generate interface unmarshaller: %w", err)
@@ -443,7 +497,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	// Some items need a custom marshaller to handle the "type" field
 	shortName := tgType.getTypeNameFromParent(parentType.Name)
 
-	subTypes, err := getTypesByName(d, parentType.Subtypes)
+	subTypes, pseudoSubtypes, err := splitTypesByName(d, parentType.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes of parent type %s of %s: %w", parentType.Name, tgType.Name, err)
 	}
@@ -468,7 +522,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 		// We only generate the merge func if there is a common field, and if the types match across all children.
 		// If they didn't match, then compilation would fail.
-		if constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
+		if len(pseudoSubtypes) == 0 && constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
 			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
 			if err != nil {
 				return "", err
@@ -550,26 +604,33 @@ func generateStructFields(d APIDescription, fields []Field, constantFields []str
 	return typeFields.String(), nil
 }
 
-func generateGenericInterfaceType(d APIDescription, name string, subtypes []TypeDescription) (string, error) {
+func generateGenericInterfaceType(d APIDescription, name string, subtypes []TypeDescription, pseudoSubtypes []string) (string, error) {
 	// We handle inputfiles manually
 	if name == tgTypeInputFile {
 		return "", nil
 	}
 
-	if len(subtypes) == 0 {
+	if len(subtypes) == 0 && len(pseudoSubtypes) == 0 {
 		return "\ntype " + name + " interface{}", nil
 	}
 
 	commonFields := getCommonFields(subtypes)
+	if len(pseudoSubtypes) > 0 {
+		commonFields = nil
+	}
 
 	constantField, err := getConstantFieldFromCommons(d, commonFields)
 	if err != nil {
 		return "", fmt.Errorf("failed to get constant fields: %w", err)
 	}
 
-	hasInputFile, fieldName, err := findInputFile(d, subtypes[0], map[string]bool{})
-	if err != nil {
-		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
+	hasInputFile := false
+	fieldName := ""
+	if len(subtypes) > 0 {
+		hasInputFile, fieldName, err = findInputFile(d, subtypes[0], map[string]bool{})
+		if err != nil {
+			return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
+		}
 	}
 
 	// If the inputfile is a common field, then the interface contains fields.
@@ -599,24 +660,27 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	bd.WriteString(fmt.Sprintf("\n// %s exists to avoid external types implementing this interface.", titleToCamelCase(name)))
 	bd.WriteString(fmt.Sprintf("\n%s()", titleToCamelCase(name)))
 
-	// Only need to check type 0 as they all have the same fields
-	helpers, err := getHelpers(d, subtypes[0].Name, commonFields)
-	if err != nil {
-		return "", fmt.Errorf("failed to get helpers for %s: %w", name, err)
-	}
+	if len(commonFields) > 0 && len(subtypes) > 0 {
+		// Only need to check type 0 as they all have the same fields
+		helpers, err := getHelpers(d, subtypes[0].Name, commonFields)
+		if err != nil {
+			return "", fmt.Errorf("failed to get helpers for %s: %w", name, err)
+		}
 
-	if len(helpers) != 0 {
-		bd.WriteString("\n\n// Helper methods shared across all subtypes of this interface.")
-		for _, h := range helpers {
-			bd.WriteString(h.docs())
-			bd.WriteString(fmt.Sprintf("\n%s(%s) (%s, error)", h.newName, strings.Join(h.defArgList, ", "), strings.Join(h.returnTypes, ", ")))
+		if len(helpers) != 0 {
+			bd.WriteString("\n\n// Helper methods shared across all subtypes of this interface.")
+			for _, h := range helpers {
+				bd.WriteString(h.docs())
+				bd.WriteString(fmt.Sprintf("\n%s(%s) (%s, error)", h.newName, strings.Join(h.defArgList, ", "), strings.Join(h.returnTypes, ", ")))
+			}
 		}
 	}
 
 	// Close interface
 	bd.WriteString("\n}")
 
-	bd.WriteString(enforceTypeAssertion(name, subtypes))
+	bd.WriteString(generatePseudoSubtypeDefs(name, pseudoSubtypes))
+	bd.WriteString(enforceTypeAssertion(name, subtypes, pseudoSubtypes))
 
 	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
@@ -763,10 +827,12 @@ func (v *{{.Type}}) UnmarshalJSON(b []byte) error {
 `
 
 type customStructUnmarshalData struct {
-	UnmarshalFuncName string
-	ParentType        string
-	ConstantFieldName string
-	CaseStatements    []customStructUnmarshalCaseData
+	UnmarshalFuncName   string
+	ParentType          string
+	ConstantFieldName   string
+	CaseStatements      []customStructUnmarshalCaseData
+	PrimitiveStringType string
+	ArrayType           string
 }
 
 type customStructUnmarshalCaseData struct {
@@ -806,7 +872,31 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		if len(d) == 0 {
 			return nil, nil
 		}
+		d = bytes.TrimLeftFunc(d, unicode.IsSpace)
+		if len(d) == 0 || string(d) == "null" {
+			return nil, nil
+		}
+		{{ if .PrimitiveStringType }}
+		if d[0] == '"' {
+			var s string
+			err := json.Unmarshal(d, &s)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} string: %w", err)
+			}
+			return {{.PrimitiveStringType}}(s), nil
+		}
+		{{ end }}
+		{{ if .ArrayType }}
+		if d[0] == '[' {
+			vs, err := {{.UnmarshalFuncName}}Array(d)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} array: %w", err)
+			}
+			return {{.ArrayType}}(vs), nil
+		}
+		{{ end }}
 
+		{{ if .ConstantFieldName }}
 		t := struct {
 			{{.ConstantFieldName}} string
 		}{}
@@ -827,6 +917,9 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		{{ end }}
 		}
 		return nil, fmt.Errorf("unknown interface for {{.ParentType}} with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
+		{{ else }}
+		return nil, fmt.Errorf("unknown interface for {{.ParentType}} with leading byte %q", d[0])
+		{{ end }}
 }`
 
 type customMarshalData struct {

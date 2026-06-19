@@ -309,7 +309,7 @@ func (im InaccessibleMessage) EditReplyMarkup(b *Bot, opts *EditMessageReplyMark
 }
 
 // EditText is a helper method for Bot.EditMessageText.
-func (im InaccessibleMessage) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
+func (im InaccessibleMessage) EditText(b *Bot, opts *EditMessageTextOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageTextOpts{}
 	}
@@ -321,7 +321,7 @@ func (im InaccessibleMessage) EditText(b *Bot, text string, opts *EditMessageTex
 		opts.MessageId = im.MessageId
 	}
 
-	return b.EditMessageText(text, opts)
+	return b.EditMessageText(opts)
 }
 
 // Forward is a helper method for Bot.ForwardMessage.
@@ -463,7 +463,7 @@ func (m Message) EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Mes
 }
 
 // EditText is a helper method for Bot.EditMessageText.
-func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error) {
+func (m Message) EditText(b *Bot, opts *EditMessageTextOpts) (*Message, bool, error) {
 	if opts == nil {
 		opts = &EditMessageTextOpts{}
 	}
@@ -475,7 +475,7 @@ func (m Message) EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Mess
 		opts.MessageId = m.MessageId
 	}
 
-	return b.EditMessageText(text, opts)
+	return b.EditMessageText(opts)
 }
 
 // Forward is a helper method for Bot.ForwardMessage.
@@ -701,6 +701,17 @@ func (m Message) ReplyPoll(b *Bot, question string, options []InputPollOption, o
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
 	return b.SendPoll(m.Chat.Id, question, options, opts)
+}
+
+// ReplyRichMessage is a shortcut to reply to the current message with a specific message type.
+func (m Message) ReplyRichMessage(b *Bot, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendRichMessageOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendRichMessage(m.Chat.Id, richMessage, opts)
 }
 
 // ReplySticker is a shortcut to reply to the current message with a specific message type.
