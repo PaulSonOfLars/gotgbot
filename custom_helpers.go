@@ -231,3 +231,27 @@ func (cp ChatPermissions) GetCanManageTopics() bool {
 
 	return *cp.CanManageTopics
 }
+
+func (m RichMessage) PlainText() string {
+	var sb strings.Builder
+	for _, block := range m.Blocks {
+		sb.WriteString(RichBlockContent(block))
+	}
+	return sb.String()
+}
+
+func (m RichMessage) HTML() string {
+	var sb strings.Builder
+	for _, block := range m.Blocks {
+		sb.WriteString(RichBlockHTML(block))
+	}
+	return sb.String()
+}
+
+func (m RichMessage) Markdown() string {
+	var sb strings.Builder
+	for _, block := range m.Blocks {
+		sb.WriteString(RichBlockMarkdown(block))
+	}
+	return sb.String()
+}
