@@ -3,6 +3,7 @@ package gotgbot
 import (
 	"fmt"
 	"html"
+	"strconv"
 	"strings"
 )
 
@@ -53,7 +54,7 @@ func WalkRichMessage(m RichMessage, fnBlock func(RichBlock) bool, fnText func(Ri
 }
 
 // =============================================================================
-// RichTextContent — flat text extraction
+// RichTextContent - flat text extraction
 // =============================================================================
 
 // RichTextContent walks r and concatenates all RichTextString leaf nodes,
@@ -63,8 +64,13 @@ func WalkRichMessage(m RichMessage, fnBlock func(RichBlock) bool, fnText func(Ri
 func RichTextContent(r RichText) string {
 	var sb strings.Builder
 	WalkRichText(r, func(node RichText) bool {
-		if s, ok := node.(RichTextString); ok {
-			sb.WriteString(string(s))
+		switch v := node.(type) {
+		case RichTextString:
+			sb.WriteString(string(v))
+		case RichTextMathematicalExpression:
+			sb.WriteString(v.Expression)
+		case RichTextCustomEmoji:
+			sb.WriteString(v.AlternativeText)
 		}
 		return true
 	})
@@ -99,7 +105,6 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 			renderBlockText(child, sb)
 		}
 		if v.Credit != nil {
-			sb.WriteString("— ")
 			sb.WriteString(RichTextContent(v.Credit))
 			sb.WriteString("\n")
 		}
@@ -107,7 +112,6 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 		sb.WriteString(RichTextContent(v.Text))
 		sb.WriteString("\n")
 		if v.Credit != nil {
-			sb.WriteString("— ")
 			sb.WriteString(RichTextContent(v.Credit))
 			sb.WriteString("\n")
 		}
@@ -141,19 +145,14 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 		for _, child := range v.Blocks {
 			sb.WriteString(RichBlockContent(child))
 		}
-		if cap := blockCaption(b); cap != nil {
-			sb.WriteString(RichTextContent(cap.Text))
-			sb.WriteString("\n")
-		}
+		captionContent(v.Caption, sb)
+
 	case RichBlockSlideshow:
 		for _, child := range v.Blocks {
 			sb.WriteString(RichBlockContent(child))
 		}
-		// Media containers — caption only
-		if cap := blockCaption(b); cap != nil {
-			sb.WriteString(RichTextContent(cap.Text))
-			sb.WriteString("\n")
-		}
+		captionContent(v.Caption, sb)
+
 	case RichBlockThinking:
 		sb.WriteString(RichTextContent(v.Text))
 		sb.WriteString("\n")
@@ -164,18 +163,36 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 		sb.WriteString("\n")
 	case RichBlockAnchor:
 		// No text content.
-	case RichBlockPhoto, RichBlockAnimation, RichBlockVideo, RichBlockAudio,
-		RichBlockVoiceNote, RichBlockMap:
-		// Media blocks — emit caption if present.
-		if cap := blockCaption(b); cap != nil {
-			sb.WriteString(RichTextContent(cap.Text))
-			sb.WriteString("\n")
-		}
+	case RichBlockPhoto:
+		captionContent(v.Caption, sb)
+	case RichBlockAnimation:
+		captionContent(v.Caption, sb)
+	case RichBlockVideo:
+		captionContent(v.Caption, sb)
+	case RichBlockAudio:
+		captionContent(v.Caption, sb)
+	case RichBlockVoiceNote:
+		captionContent(v.Caption, sb)
+	case RichBlockMap:
+		captionContent(v.Caption, sb)
 	}
 }
 
+func captionContent(caption *RichBlockCaption, sb *strings.Builder) {
+	if caption == nil {
+		return
+	}
+
+	sb.WriteString(RichTextContent(caption.Text))
+	if caption.Credit != nil {
+		sb.WriteString("\n")
+		sb.WriteString(RichTextContent(caption.Credit))
+	}
+	sb.WriteString("\n")
+}
+
 // =============================================================================
-// RichTextHTML — HTML rendering
+// RichTextHTML - HTML rendering
 // =============================================================================
 
 // RichTextHTML renders r as an HTML string, using standard HTML tags for each
@@ -198,7 +215,7 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 			renderTextHTML(child, sb)
 		}
 
-	// Formatting wrappers — recurse into .Text
+	// Formatting wrappers - recurse into .Text
 	case RichTextBold:
 		sb.WriteString("<b>")
 		renderTextHTML(v.Text, sb)
@@ -242,13 +259,11 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextEmailAddress:
-		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf(`<a href="mailto:%s">`, html.EscapeString(text)))
+		sb.WriteString(fmt.Sprintf(`<a href="mailto:%s">`, html.EscapeString(v.EmailAddress)))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextPhoneNumber:
-		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf(`<a href="tel:%s">`, html.EscapeString(text)))
+		sb.WriteString(fmt.Sprintf(`<a href="tel:%s">`, html.EscapeString(v.PhoneNumber)))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextTextMention:
@@ -269,11 +284,11 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextReference:
-		sb.WriteString(fmt.Sprintf(`<span id="ref-%s">`, html.EscapeString(v.Name)))
+		sb.WriteString(fmt.Sprintf(`<tg-reference name="%s">`, html.EscapeString(v.Name)))
 		renderTextHTML(v.Text, sb)
-		sb.WriteString("</span>")
+		sb.WriteString("</tg-reference>")
 	case RichTextAnchor:
-		sb.WriteString(fmt.Sprintf(`<a id="%s"></a>`, html.EscapeString(v.Name)))
+		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`, html.EscapeString(v.Name)))
 
 	// Entities with no wrapping text child
 	case RichTextHashtag:
@@ -285,12 +300,12 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 	case RichTextBankCardNumber:
 		renderTextHTML(v.Text, sb)
 	case RichTextDateTime:
-		sb.WriteString(fmt.Sprintf(`<time data-unix="%d" data-format="%s">`,
+		sb.WriteString(fmt.Sprintf(`<tg-time unix="%d" format="%s">`,
 			v.UnixTime, html.EscapeString(v.DateTimeFormat)))
 		renderTextHTML(v.Text, sb)
-		sb.WriteString("</time>")
+		sb.WriteString("</tg-time>")
 	case RichTextCustomEmoji:
-		sb.WriteString(fmt.Sprintf(`<img src="tg://emoji?id=%s" alt="%s"/>`,
+		sb.WriteString(fmt.Sprintf(`<tg-emoji emoji-id="%s">%s</tg-emoji>`,
 			html.EscapeString(v.CustomEmojiId), html.EscapeString(v.AlternativeText)))
 	case RichTextMathematicalExpression:
 		sb.WriteString(fmt.Sprintf(`<tg-math>%s</tg-math>`,
@@ -361,20 +376,43 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		}
 		sb.WriteString("</details>\n")
 	case RichBlockList:
-		// Detect ordered vs unordered from the first item.
-		ordered := len(v.Items) > 0 && v.Items[0].Value != 0
-		if ordered {
-			sb.WriteString("<ol>\n")
-		} else {
-			sb.WriteString("<ul>\n")
+		if len(v.Items) == 0 {
+			return
 		}
+
+		// Detect ordered vs unordered from the first item.
+		first := v.Items[0]
+		tag := "ul"
+		listAttrs := ""
+		if first.Value > 0 {
+			tag = "ol"
+		}
+		if first.Value > 1 {
+			listAttrs += fmt.Sprintf(" start=\"%d\"", first.Value)
+		}
+		if first.Type != "" && first.Type != "1" {
+			listAttrs += fmt.Sprintf(" type=\"%s\"", first.Type)
+		}
+		if isReversed(v.Items) {
+			listAttrs += " reversed"
+		}
+
+		sb.WriteString(fmt.Sprintf("<%s%s>\n", tag, listAttrs))
 		for _, item := range v.Items {
-			sb.WriteString("<li>")
+			itemAttrs := ""
+			if tag == "ol" && item.Value > 1 {
+				itemAttrs += fmt.Sprintf(" value=\"%d\"", item.Value)
+			}
+			if tag == "ol" && item.Type != "" && item.Type != "1" {
+				itemAttrs += fmt.Sprintf(" type=\"%s\"", item.Type)
+			}
+
+			sb.WriteString(fmt.Sprintf("<li%s>", itemAttrs))
 			if item.HasCheckbox {
 				if item.IsChecked {
-					sb.WriteString(`<input type="checkbox" checked disabled> `)
+					sb.WriteString(`<input type="checkbox" checked> `)
 				} else {
-					sb.WriteString(`<input type="checkbox" disabled> `)
+					sb.WriteString(`<input type="checkbox"> `)
 				}
 			}
 			if len(item.Blocks) > 0 {
@@ -385,11 +423,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 			}
 			sb.WriteString("</li>\n")
 		}
-		if ordered {
-			sb.WriteString("</ol>\n")
-		} else {
-			sb.WriteString("</ul>\n")
-		}
+		sb.WriteString(fmt.Sprintf("</%s>\n", tag))
 	case RichBlockTable:
 		attrs := ""
 		if v.IsBordered {
@@ -406,22 +440,19 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				if cell.IsHeader {
 					tag = "th"
 				}
-				align := cell.Align
-				if align == "" {
-					align = "center"
-				}
 
-				valign := cell.Valign
-				if valign == "" {
-					valign = "middle"
+				attrs := ""
+				if cell.Align != "" && cell.Align != "center" {
+					attrs += fmt.Sprintf(" align=\"%s\"", cell.Align)
 				}
-
-				attrs := fmt.Sprintf(` align="%s" valign="%s"`, align, valign)
+				if cell.Valign != "" && cell.Valign != "middle" {
+					attrs += fmt.Sprintf(" valign=\"%s\"", cell.Valign)
+				}
 				if cell.Colspan > 1 {
-					attrs += fmt.Sprintf(` colspan="%d"`, cell.Colspan)
+					attrs += fmt.Sprintf(" colspan=\"%d\"", cell.Colspan)
 				}
 				if cell.Rowspan > 1 {
-					attrs += fmt.Sprintf(` rowspan="%d"`, cell.Rowspan)
+					attrs += fmt.Sprintf(" rowspan=\"%d\"", cell.Rowspan)
 				}
 				sb.WriteString(fmt.Sprintf("<%s%s>", tag, attrs))
 				if cell.Text != nil {
@@ -454,7 +485,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		sb.WriteString(fmt.Sprintf("<tg-math-block>%s</tg-math-block>\n",
 			html.EscapeString(v.Expression)))
 	case RichBlockDivider:
-		sb.WriteString("<hr>\n")
+		sb.WriteString("<hr/>\n")
 	case RichBlockAnchor:
 		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`+"\n", html.EscapeString(v.Name)))
 	case RichBlockPhoto:
@@ -462,62 +493,62 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgAnimation := fmt.Sprintf(`<img src="fileId://%s"%s></img>`, v.Photo[len(v.Photo)-1].FileId, attrs)
+		tgAnimation := fmt.Sprintf("<img src=\"fileId://%s\"%s></img>\n", v.Photo[len(v.Photo)-1].FileId, attrs)
 		if v.Caption != nil {
 			sb.WriteString("<figure>\n")
 			sb.WriteString(tgAnimation)
 			renderCaptionHTML(v.Caption, sb)
 			sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAnimation + "\n")
+			sb.WriteString(tgAnimation)
 		}
 	case RichBlockAnimation:
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgAnimation := fmt.Sprintf(`<video src="fileId://%s"%s></video>`, v.Animation.FileId, attrs)
+		tgAnimation := fmt.Sprintf("<video src=\"fileId://%s\"%s></video>\n", v.Animation.FileId, attrs)
 		if v.Caption != nil {
 			sb.WriteString("<figure>\n")
 			sb.WriteString(tgAnimation)
 			renderCaptionHTML(v.Caption, sb)
 			sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAnimation + "\n")
+			sb.WriteString(tgAnimation)
 		}
 	case RichBlockVideo:
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgVideo := fmt.Sprintf(`<video src="fileId://%s"%s></video>`, v.Video.FileId, attrs)
+		tgVideo := fmt.Sprintf("<video src=\"fileId://%s\"%s></video>\n", v.Video.FileId, attrs)
 		if v.Caption != nil {
 			sb.WriteString("<figure>\n")
 			sb.WriteString(tgVideo)
 			renderCaptionHTML(v.Caption, sb)
 			sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgVideo + "\n")
+			sb.WriteString(tgVideo)
 		}
 	case RichBlockAudio:
-		tgAudio := fmt.Sprintf(`<audio src="fileId://%s"></audio>`, v.Audio.FileId)
+		tgAudio := fmt.Sprintf("<audio src=\"fileId://%s\"></audio>\n", v.Audio.FileId)
 		if v.Caption != nil {
 			sb.WriteString("<figure>\n")
 			sb.WriteString(tgAudio)
 			renderCaptionHTML(v.Caption, sb)
 			sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAudio + "\n")
+			sb.WriteString(tgAudio)
 		}
 	case RichBlockVoiceNote:
-		tgAudio := fmt.Sprintf(`<audio src="fileId://%s"></audio>`, v.VoiceNote.FileId)
+		tgAudio := fmt.Sprintf("<audio src=\"fileId://%s\"></audio>\n", v.VoiceNote.FileId)
 		if v.Caption != nil {
 			sb.WriteString("<figure>\n")
 			sb.WriteString(tgAudio)
 			renderCaptionHTML(v.Caption, sb)
 			sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAudio + "\n")
+			sb.WriteString(tgAudio)
 		}
 	case RichBlockMap:
 		tgMap := fmt.Sprintf(
@@ -535,8 +566,18 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 	}
 }
 
+func isReversed(items RichBlockListItemArray) bool {
+	if len(items) == 0 {
+		return false
+	}
+	if len(items) == 1 {
+		return items[0].Value > 1
+	}
+	return items[0].Value > items[1].Value
+}
+
 // =============================================================================
-// RichTextMarkdown — Markdown rendering
+// RichTextMarkdown - Markdown rendering
 // =============================================================================
 
 // RichTextMarkdown renders r as a Markdown string.
@@ -603,10 +644,10 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 		sb.WriteString(")")
 	case RichTextEmailAddress:
 		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf("[%s](mailto:%s)", mdEscape(text), text))
+		sb.WriteString(fmt.Sprintf("[%s](mailto:%s)", mdEscape(text), v.EmailAddress))
 	case RichTextPhoneNumber:
 		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf("[%s](tel:%s)", mdEscape(text), text))
+		sb.WriteString(fmt.Sprintf("[%s](tel:%s)", mdEscape(text), v.PhoneNumber))
 	case RichTextTextMention:
 		sb.WriteString("[")
 		renderTextMarkdown(v.Text, sb)
@@ -628,15 +669,10 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 		// TODO: CHECK
 		sb.WriteString(fmt.Sprintf("<a name=\"%s\"></a>\n", html.EscapeString(v.Name)))
 	case RichTextHashtag:
-		// TODO: CHECK
-		sb.WriteString("\\#" + v.Hashtag)
 		renderTextMarkdown(v.Text, sb)
 	case RichTextCashtag:
-		// TODO: CHECK
 		renderTextMarkdown(v.Text, sb)
 	case RichTextBotCommand:
-		// TODO: CHECK
-		sb.WriteString(v.BotCommand)
 		renderTextMarkdown(v.Text, sb)
 	case RichTextBankCardNumber:
 		renderTextMarkdown(v.Text, sb)
@@ -692,7 +728,7 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 			sb.WriteString("<aside>")
 			sb.WriteString(RichTextMarkdown(v.Credit))
 			sb.WriteString("</aside>")
-			//	sb.WriteString("\n> — ")
+			//	sb.WriteString("\n> - ")
 			//	sb.WriteString(RichTextMarkdown(v.Credit))
 		}
 		sb.WriteString("\n")
@@ -711,7 +747,7 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 		//sb.WriteString("> ")
 		//sb.WriteString(RichTextMarkdown(v.Text))
 		//if v.Credit != nil {
-		//	sb.WriteString("\n> — ") // TODO: CHECK
+		//	sb.WriteString("\n> - ") // TODO: CHECK
 		//	sb.WriteString(RichTextMarkdown(v.Credit))
 		//}
 		//sb.WriteString("\n\n")
@@ -731,7 +767,25 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 		ordered := len(v.Items) > 0 && v.Items[0].Value != 0
 		for i, item := range v.Items {
 			if ordered {
-				sb.WriteString(fmt.Sprintf("%s%d. ", indent, i+1))
+				valInt := item.Value
+				if valInt == 0 {
+					valInt = int64(i) + 1
+				}
+
+				val := strconv.FormatInt(valInt, 10)
+				switch item.Type {
+				case "A":
+					val = toLetters(valInt)
+				case "a":
+					val = strings.ToLower(toLetters(valInt))
+				case "I":
+					val = toRoman(valInt)
+				case "i":
+					val = strings.ToLower(toRoman(valInt))
+				}
+
+				sb.WriteString(fmt.Sprintf("%s%s. ", indent, val))
+
 			} else {
 				sb.WriteString(indent + "- ")
 				if item.HasCheckbox {
@@ -812,19 +866,19 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 		if v.Caption != nil {
 			renderBlockHTML(v, sb)
 		} else {
-			sb.WriteString(fileLink( v.Photo[len(v.Photo)-1].FileId))
+			sb.WriteString(fileLink(v.Photo[len(v.Photo)-1].FileId))
 		}
 	case RichBlockAnimation:
 		if v.Caption != nil {
 			renderBlockHTML(v, sb)
 		} else {
-			sb.WriteString(fileLink( v.Animation.FileId))
+			sb.WriteString(fileLink(v.Animation.FileId))
 		}
 	case RichBlockVideo:
 		if v.Caption != nil {
 			renderBlockHTML(v, sb)
 		} else {
-			sb.WriteString(fileLink( v.Video.FileId))
+			sb.WriteString(fileLink(v.Video.FileId))
 		}
 	case RichBlockAudio:
 		if v.Caption != nil {
@@ -839,8 +893,18 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 			sb.WriteString(fileLink(v.VoiceNote.FileId))
 		}
 	case RichBlockMap:
-		// TODO: How to add captions? Support full `<figure><tg-map lat="41.9" long="12.5" zoom="14"/><figcaption>Map caption</figcaption></figure>` flow?
-		sb.WriteString(fmt.Sprintf("<tg-map lat=\"%g\" long=\"%g\" zoom=\"%d\"/>\n", v.Location.Latitude, v.Location.Longitude, v.Zoom))
+		tgMap := fmt.Sprintf(
+			`<tg-map lat="%g" long="%g" zoom="%d"/>`,
+			v.Location.Latitude, v.Location.Longitude, v.Zoom)
+		if v.Caption != nil {
+			sb.WriteString("<figure>")
+			sb.WriteString(tgMap)
+			renderCaptionHTML(v.Caption, sb)
+			sb.WriteString("</figure>")
+		} else {
+			sb.WriteString(tgMap)
+		}
+		sb.WriteString("\n")
 	}
 }
 
@@ -851,18 +915,6 @@ func fileLink(fileId string) string {
 // =============================================================================
 // Shared helpers
 // =============================================================================
-
-type captioned interface {
-	GetCaption() *RichBlockCaption
-}
-
-// blockCaption returns the caption of any block that carries one, or nil.
-func blockCaption(b RichBlock) *RichBlockCaption {
-	if c, ok := b.(captioned); ok {
-		return c.GetCaption()
-	}
-	return nil
-}
 
 func renderCaptionHTML(cap *RichBlockCaption, sb *strings.Builder) {
 	if cap == nil {
@@ -875,7 +927,18 @@ func renderCaptionHTML(cap *RichBlockCaption, sb *strings.Builder) {
 		renderTextHTML(cap.Credit, sb)
 		sb.WriteString("</cite>")
 	}
-	sb.WriteString("</figcaption>")
+	sb.WriteString("</figcaption>\n")
+}
+
+func renderCaptionContent(cap *RichBlockCaption, sb *strings.Builder) {
+	if cap == nil {
+		return
+	}
+
+	sb.WriteString(RichTextContent(cap.Text))
+	if cap.Credit != nil {
+		sb.WriteString(RichTextContent(cap.Credit))
+	}
 }
 
 // mdEscape escapes characters that have special meaning in CommonMark.
@@ -900,4 +963,33 @@ var mdSpecial = strings.NewReplacer(
 
 func mdEscape(s string) string {
 	return mdSpecial.Replace(s)
+}
+
+func toRoman(num int64) string {
+	values := []int64{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}
+	symbols := []string{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"}
+
+	result := ""
+	for i := 0; i < len(values); i++ {
+		for num >= values[i] {
+			result += symbols[i]
+			num -= values[i]
+		}
+	}
+	return result
+}
+
+func toLetters(num int64) string {
+	if num <= 0 {
+		return ""
+	}
+
+	result := ""
+	for num > 0 {
+		num-- // shift into 0-25 range for this digit
+		letter := rune('a' + (num % 26))
+		result = string(letter) + result
+		num /= 26
+	}
+	return result
 }
