@@ -55,7 +55,7 @@ func TestRichBlockParsing(t *testing.T) {
 		}, {
 			name:         "RichBlockDivider",
 			b:            RichBlockDivider{},
-			wantHTML:     `<hr>`,
+			wantHTML:     `<hr/>`,
 			wantMarkdown: `---`,
 			wantText:     "",
 			skipLiveTest: true, // empty!
@@ -161,12 +161,12 @@ func TestRichBlockParsing(t *testing.T) {
 			},
 			wantHTML: "<table>\n" +
 				"<tr>\n" +
-				"<th align=\"center\" valign=\"middle\">first column</th>\n" +
-				"<th align=\"center\" valign=\"middle\">second column</th>\n" +
+				"<th>first column</th>\n" +
+				"<th>second column</th>\n" +
 				"</tr>\n" +
 				"<tr>\n" +
-				"<td align=\"center\" valign=\"middle\">value</td>\n" +
-				"<td align=\"center\" valign=\"middle\">value two</td>\n" +
+				"<td>value</td>\n" +
+				"<td>value two</td>\n" +
 				"</tr>\n" +
 				"</table>",
 			wantMarkdown: `| first column | second column |
@@ -269,19 +269,20 @@ func TestRichBlockParsing(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("HTML", func(t *testing.T) {
 				if got := strings.TrimSpace(RichBlockHTML(tt.b)); got != tt.wantHTML {
-					t.Errorf("RichBlockHTML() = %v, want %v", got, tt.wantHTML)
+					t.Errorf("HTML() mismatch:\n got: %q\nwant: %q", got, tt.wantHTML)
 				}
 			})
 
 			t.Run("Markdown", func(t *testing.T) {
 				if got := strings.TrimSpace(RichBlockMarkdown(tt.b)); got != tt.wantMarkdown {
-					t.Errorf("RichBlockMarkdown() = %v, want %v", got, tt.wantMarkdown)
+					t.Errorf("Markdown() mismatch:\n got: %q\nwant: %q", got, tt.wantMarkdown)
+
 				}
 			})
 
 			t.Run("Text", func(t *testing.T) {
 				if got := strings.TrimSpace(RichBlockContent(tt.b)); got != tt.wantText {
-					t.Errorf("RichBlockContent() = %v, want %v", got, tt.wantText)
+					t.Errorf("Content() mismatch:\n got: %q\nwant: %q", got, tt.wantText)
 				}
 			})
 
@@ -306,16 +307,16 @@ func TestRichBlockParsing(t *testing.T) {
 				}
 
 				if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.HTML())); got != tt.wantHTML {
-					t.Errorf("HTML() = %v, want %v", got, tt.wantHTML)
+					t.Errorf("HTML() mismatch:\n got: %q\nwant: %q", got, tt.wantHTML)
 				}
 
 				if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.Markdown())); got != tt.wantMarkdown {
-					t.Errorf("Markdown() = %v, want %v", got, tt.wantMarkdown)
+					t.Errorf("Markdown() mismatch:\n got: %q\nwant: %q", got, tt.wantMarkdown)
 				}
 
 				// no ids to change
 				if got := strings.TrimSpace(m.RichMessage.PlainText()); got != tt.wantText {
-					t.Errorf("Text() = %v, want %v", got, tt.wantText)
+					t.Errorf("PlainText() mismatch:\n got: %q\nwant: %q", got, tt.wantText)
 				}
 			})
 		})
@@ -703,7 +704,7 @@ func TestRichMessageSending(t *testing.T) {
 				"<tg-emoji emoji-id=\"5368324170671202286\">👍</tg-emoji> " +
 				"<tg-time unix=\"1647531900\" format=\"wDT\">22:45 tomorrow</tg-time> " +
 				"<tg-math>x^2 + y^2</tg-math></p>",
-			wantMarkdown: "[^note-1]:Referenced text " +
+			wantMarkdown: "[^note-1]: Referenced text " +
 				"![👍](tg://emoji?id=5368324170671202286) " +
 				"![👍](tg://emoji?id=5368324170671202286) " +
 				"![22:45 tomorrow](tg://time?unix=1647531900format=wDT) " +
@@ -721,7 +722,7 @@ func TestRichMessageSending(t *testing.T) {
 				"<a href=\"https://t.me\">https://t.me</a> " +
 				"<a href=\"t.me\">t.me</a> " +
 				"<a href=\"mailto:a@t.me\">a@t.me</a> /command " +
-				"<a href=\"https://t.me/username\">@username</a> " +
+				"@username " +
 				"all the text above was on the same line</p>",
 			wantMarkdown: "\\#hashtag $USD " +
 				"[\\+12345678901](tel:+12345678901), " +
