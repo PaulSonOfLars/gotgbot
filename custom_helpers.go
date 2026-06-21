@@ -21,14 +21,21 @@ func (m Message) GetLink() string {
 }
 
 // GetText returns the message text, for both text messages and media messages. (Why is this not the telegram default!)
+// NOTE: Does NOT handle RichMessage text - use GetRawText() for this.
 func (m Message) GetText() string {
-	if m.RichMessage != nil {
-		return m.RichMessage.GetText()
-	}
 	if m.Caption != "" {
 		return m.Caption
 	}
 	return m.Text
+}
+
+// GetRawText returns any text content from a message; be it text, media, or rich.
+// Note: output depends on the rich message structure and so may not be stable.
+func (m Message) GetRawText() string {
+	if m.RichMessage != nil {
+		return m.RichMessage.GetText()
+	}
+	return m.GetText()
 }
 
 // GetEntities returns the message entities, for both text messages and media messages. (Why is this not the telegram default!)

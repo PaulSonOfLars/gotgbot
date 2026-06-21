@@ -7,6 +7,54 @@ import (
 	"strings"
 )
 
+func (m *Message) GetRichTextTypes(want ...func(RichText) bool) []RichText {
+	if m.RichMessage == nil {
+		return nil
+	}
+
+	var out []RichText
+	m.RichMessage.Walk(nil, func(node RichText) bool {
+		for _, w := range want {
+			if w(node) {
+				out = append(out, node)
+				break
+			}
+		}
+		return true
+	})
+	return out
+}
+
+// Checks
+func IsRichTextType[T RichText](n RichText) bool {
+	_, ok := n.(T)
+	return ok
+}
+
+// GetRichTexts allows for specifying a RichText type, walking over all the blocks, and extracting the result.
+func GetRichTexts[T RichText](m *RichMessage) []T {
+	var out []T
+	m.Walk(nil, func(text RichText) bool {
+		if v, ok := text.(T); ok {
+			out = append(out, v)
+		}
+		return true
+	})
+	return out
+}
+
+// GetRichBlocks allows for specifying a RichBlock type, walking over all the blocks, and extracting the result.
+func GetRichBlocks[T RichBlock](m *RichMessage) []T {
+	var out []T
+	m.Walk(func(block RichBlock) bool {
+		if v, ok := block.(T); ok {
+			out = append(out, v)
+		}
+		return true
+	}, nil)
+	return out
+}
+
 // WalkRichText recursively visits r and every descendant, calling fn on each node.
 // Returning false from fn skips that node's children (but not its siblings).
 func WalkRichText(r RichText, fn func(RichText) bool) {
@@ -39,9 +87,9 @@ func WalkRichBlock(b RichBlock, fnBlock func(RichBlock) bool, fnText func(RichTe
 	}
 }
 
-// WalkRichMessage visits every RichBlock and RichText node in a RichMessage.
+// Walk visits every RichBlock and RichText node in a RichMessage.
 // Pass nil for either callback to skip that class of node.
-func WalkRichMessage(m RichMessage, fnBlock func(RichBlock) bool, fnText func(RichText) bool) {
+func (m RichMessage) Walk(fnBlock func(RichBlock) bool, fnText func(RichText) bool) {
 	if fnBlock == nil {
 		fnBlock = func(RichBlock) bool { return true }
 	}
