@@ -306,18 +306,8 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 			sb.WriteString(fileLink(v.VoiceNote.FileId))
 		}
 	case RichBlockMap:
-		tgMap := fmt.Sprintf(
-			`<tg-map lat="%g" long="%g" zoom="%d"/>`,
-			v.Location.Latitude, v.Location.Longitude, v.Zoom)
-		if v.Caption != nil {
-			sb.WriteString("<figure>")
-			sb.WriteString(tgMap)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>")
-		} else {
-			sb.WriteString(tgMap)
-		}
-		sb.WriteString("\n")
+		// Maps aren't supported in markdown; require inline HTML.
+		renderBlockHTML(v, sb)
 	}
 }
 
