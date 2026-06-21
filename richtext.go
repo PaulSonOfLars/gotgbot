@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// GetRichTextTypes gets the list of all richtext types which match the "want" function.
+// Eg: m.GetRichTextTypes(IsRichTextType[RichTextString], IsRichTextType[RichTextUrl]).
 func (m *Message) GetRichTextTypes(want ...func(RichText) bool) []RichText {
 	if m.RichMessage == nil {
 		return nil
@@ -25,7 +27,8 @@ func (m *Message) GetRichTextTypes(want ...func(RichText) bool) []RichText {
 	return out
 }
 
-// Checks
+// Checks whether an input type is a specific kind of RichText.
+// Use like this: gotgbot.IsRichTextType[RichTextString](x).
 func IsRichTextType[T RichText](n RichText) bool {
 	_, ok := n.(T)
 	return ok
