@@ -255,35 +255,35 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 
 	// Links and references
 	case RichTextUrl:
-		sb.WriteString(fmt.Sprintf(`<a href="%s">`, html.EscapeString(v.Url)))
+		fmt.Fprintf(sb, `<a href="%s">`, html.EscapeString(v.Url))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextEmailAddress:
-		sb.WriteString(fmt.Sprintf(`<a href="mailto:%s">`, html.EscapeString(v.EmailAddress)))
+		fmt.Fprintf(sb, `<a href="mailto:%s">`, html.EscapeString(v.EmailAddress))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextPhoneNumber:
-		sb.WriteString(fmt.Sprintf(`<a href="tel:%s">`, html.EscapeString(v.PhoneNumber)))
+		fmt.Fprintf(sb, `<a href="tel:%s">`, html.EscapeString(v.PhoneNumber))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextTextMention:
-		sb.WriteString(fmt.Sprintf(`<a href="tg://user?id=%d">`, v.User.Id))
+		fmt.Fprintf(sb, `<a href="tg://user?id=%d">`, v.User.Id)
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextMention:
 		renderTextHTML(v.Text, sb)
 	case RichTextAnchor:
-		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`, html.EscapeString(v.Name)))
+		fmt.Fprintf(sb, `<a name="%s"></a>`, html.EscapeString(v.Name))
 	case RichTextAnchorLink:
-		sb.WriteString(fmt.Sprintf(`<a href="#%s">`, html.EscapeString(v.AnchorName)))
+		fmt.Fprintf(sb, `<a href="#%s">`, html.EscapeString(v.AnchorName))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextReference:
-		sb.WriteString(fmt.Sprintf(`<tg-reference name="%s">`, html.EscapeString(v.Name)))
+		fmt.Fprintf(sb, `<tg-reference name="%s">`, html.EscapeString(v.Name))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</tg-reference>")
 	case RichTextReferenceLink:
-		sb.WriteString(fmt.Sprintf(`<a href="#%s">`, html.EscapeString(v.ReferenceName)))
+		fmt.Fprintf(sb, `<a href="#%s">`, html.EscapeString(v.ReferenceName))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 
@@ -297,16 +297,13 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 	case RichTextBankCardNumber:
 		renderTextHTML(v.Text, sb)
 	case RichTextDateTime:
-		sb.WriteString(fmt.Sprintf(`<tg-time unix="%d" format="%s">`,
-			v.UnixTime, html.EscapeString(v.DateTimeFormat)))
+		fmt.Fprintf(sb, `<tg-time unix="%d" format="%s">`, v.UnixTime, html.EscapeString(v.DateTimeFormat))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</tg-time>")
 	case RichTextCustomEmoji:
-		sb.WriteString(fmt.Sprintf(`<tg-emoji emoji-id="%s">%s</tg-emoji>`,
-			html.EscapeString(v.CustomEmojiId), html.EscapeString(v.AlternativeText)))
+		fmt.Fprintf(sb, `<tg-emoji emoji-id="%s">%s</tg-emoji>`, html.EscapeString(v.CustomEmojiId), html.EscapeString(v.AlternativeText))
 	case RichTextMathematicalExpression:
-		sb.WriteString(fmt.Sprintf(`<tg-math>%s</tg-math>`,
-			html.EscapeString(v.Expression)))
+		fmt.Fprintf(sb, `<tg-math>%s</tg-math>`, html.EscapeString(v.Expression))
 	}
 }
 
@@ -330,7 +327,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		sb.WriteString("</" + tag + ">\n")
 	case RichBlockPreformatted:
 		if v.Language != "" {
-			sb.WriteString(fmt.Sprintf(`<pre><code class="language-%s">`, html.EscapeString(v.Language)))
+			fmt.Fprintf(sb, `<pre><code class="language-%s">`, html.EscapeString(v.Language))
 		} else {
 			sb.WriteString("<pre><code>")
 		}
@@ -394,7 +391,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 			listAttrs += " reversed"
 		}
 
-		sb.WriteString(fmt.Sprintf("<%s%s>\n", tag, listAttrs))
+		fmt.Fprintf(sb, "<%s%s>\n", tag, listAttrs)
 		for _, item := range v.Items {
 			itemAttrs := ""
 			if tag == "ol" && item.Value > 1 {
@@ -404,7 +401,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				itemAttrs += fmt.Sprintf(" type=\"%s\"", item.Type)
 			}
 
-			sb.WriteString(fmt.Sprintf("<li%s>", itemAttrs))
+			fmt.Fprintf(sb, "<li%s>", itemAttrs)
 			if item.HasCheckbox {
 				if item.IsChecked {
 					sb.WriteString(`<input type="checkbox" checked> `)
@@ -420,7 +417,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 			}
 			sb.WriteString("</li>\n")
 		}
-		sb.WriteString(fmt.Sprintf("</%s>\n", tag))
+		fmt.Fprintf(sb, "</%s>\n", tag)
 	case RichBlockTable:
 		attrs := ""
 		if v.IsBordered {
@@ -429,7 +426,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		if v.IsStriped {
 			attrs += " striped"
 		}
-		sb.WriteString(fmt.Sprintf("<table%s>\n", attrs))
+		fmt.Fprintf(sb, "<table%s>\n", attrs)
 		for _, row := range v.Cells {
 			sb.WriteString("<tr>\n")
 			for _, cell := range row {
@@ -451,11 +448,11 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				if cell.Rowspan > 1 {
 					attrs += fmt.Sprintf(" rowspan=\"%d\"", cell.Rowspan)
 				}
-				sb.WriteString(fmt.Sprintf("<%s%s>", tag, attrs))
+				fmt.Fprintf(sb, "<%s%s>", tag, attrs)
 				if cell.Text != nil {
 					renderTextHTML(cell.Text, sb)
 				}
-				sb.WriteString(fmt.Sprintf("</%s>\n", tag))
+				fmt.Fprintf(sb, "</%s>\n", tag)
 			}
 			sb.WriteString("</tr>\n")
 		}
@@ -479,12 +476,11 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</tg-thinking>\n")
 	case RichBlockMathematicalExpression:
-		sb.WriteString(fmt.Sprintf("<tg-math-block>%s</tg-math-block>\n",
-			html.EscapeString(v.Expression)))
+		fmt.Fprintf(sb, "<tg-math-block>%s</tg-math-block>\n", html.EscapeString(v.Expression))
 	case RichBlockDivider:
 		sb.WriteString("<hr/>\n")
 	case RichBlockAnchor:
-		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`+"\n", html.EscapeString(v.Name)))
+		fmt.Fprintf(sb, `<a name="%s"></a>`+"\n", html.EscapeString(v.Name))
 	case RichBlockPhoto:
 		attrs := ""
 		if v.HasSpoiler {
@@ -641,28 +637,28 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 		sb.WriteString(")")
 	case RichTextEmailAddress:
 		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf("[%s](mailto:%s)", mdEscape(text), v.EmailAddress))
+		fmt.Fprintf(sb, "[%s](mailto:%s)", mdEscape(text), v.EmailAddress)
 	case RichTextPhoneNumber:
 		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf("[%s](tel:%s)", mdEscape(text), v.PhoneNumber))
+		fmt.Fprintf(sb, "[%s](tel:%s)", mdEscape(text), v.PhoneNumber)
 	case RichTextTextMention:
 		sb.WriteString("[")
 		renderTextMarkdown(v.Text, sb)
-		sb.WriteString(fmt.Sprintf("](tg://user?id=%d)", v.User.Id))
+		fmt.Fprintf(sb, "](tg://user?id=%d)", v.User.Id)
 	case RichTextMention:
 		renderTextMarkdown(v.Text, sb)
 	case RichTextAnchor:
-		sb.WriteString(fmt.Sprintf("<a name=\"%s\"></a>\n", html.EscapeString(v.Name)))
+		fmt.Fprintf(sb, "<a name=\"%s\"></a>\n", html.EscapeString(v.Name))
 	case RichTextAnchorLink:
 		sb.WriteString("[")
 		renderTextMarkdown(v.Text, sb)
-		sb.WriteString(fmt.Sprintf("](#%s)", v.AnchorName))
+		fmt.Fprintf(sb, "](#%s)", v.AnchorName)
 	case RichTextReference:
-		sb.WriteString(fmt.Sprintf("[^%s]: ", v.Name))
+		fmt.Fprintf(sb, "[^%s]: ", v.Name)
 		renderTextMarkdown(v.Text, sb)
 	case RichTextReferenceLink:
 		renderTextMarkdown(v.Text, sb)
-		sb.WriteString(fmt.Sprintf("[^%s]", v.ReferenceName))
+		fmt.Fprintf(sb, "[^%s]", v.ReferenceName)
 	case RichTextHashtag:
 		renderTextMarkdown(v.Text, sb)
 	case RichTextCashtag:
@@ -674,9 +670,9 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 	case RichTextDateTime:
 		sb.WriteString("![")
 		renderTextMarkdown(v.Text, sb)
-		sb.WriteString(fmt.Sprintf("](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat))
+		fmt.Fprintf(sb, "](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat)
 	case RichTextCustomEmoji:
-		sb.WriteString(fmt.Sprintf("![%s](tg://emoji?id=%s)", v.AlternativeText, v.CustomEmojiId))
+		fmt.Fprintf(sb, "![%s](tg://emoji?id=%s)", v.AlternativeText, v.CustomEmojiId)
 	case RichTextMathematicalExpression:
 		sb.WriteString("$$")
 		sb.WriteString(v.Expression)
@@ -767,7 +763,7 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 					val = strings.ToLower(toRoman(valInt))
 				}
 
-				sb.WriteString(fmt.Sprintf("%s%s. ", indent, val))
+				fmt.Fprintf(sb, "%s%s. ", indent, val)
 
 			} else {
 				sb.WriteString(indent + "- ")
@@ -844,7 +840,7 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 	case RichBlockDivider:
 		sb.WriteString("---\n")
 	case RichBlockAnchor:
-		sb.WriteString(fmt.Sprintf("<a name=\"%s\"></a>\n", v.Name))
+		fmt.Fprintf(sb, "<a name=\"%s\"></a>\n", v.Name)
 	case RichBlockPhoto:
 		if v.Caption != nil {
 			renderBlockHTML(v, sb)
@@ -911,17 +907,6 @@ func renderCaptionHTML(cap *RichBlockCaption, sb *strings.Builder) {
 		sb.WriteString("</cite>")
 	}
 	sb.WriteString("</figcaption>\n")
-}
-
-func renderCaptionContent(cap *RichBlockCaption, sb *strings.Builder) {
-	if cap == nil {
-		return
-	}
-
-	sb.WriteString(RichTextContent(cap.Text))
-	if cap.Credit != nil {
-		sb.WriteString(RichTextContent(cap.Credit))
-	}
 }
 
 // mdEscape escapes characters that have special meaning in CommonMark.

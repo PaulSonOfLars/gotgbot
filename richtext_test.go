@@ -10,10 +10,7 @@ import (
 )
 
 func TestRichBlockParsing(t *testing.T) {
-	b, chatId, ok := getBot(t)
-	if !ok {
-		return
-	}
+	b, chatId := tryLocalBot(t)
 
 	tests := []struct {
 		name         string
@@ -302,7 +299,7 @@ func TestRichBlockParsing(t *testing.T) {
 				time.Sleep(time.Second) // sleep one second to avoid rate limits
 
 				m, err := b.SendRichMessage(chatId, InputRichMessage{
-					Html: strings.Replace(tt.wantHTML, "fileId://1234", getFile(t, tt.name), -1),
+					Html: strings.ReplaceAll(tt.wantHTML, "fileId://1234", getFile(t, tt.name)),
 				}, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -325,7 +322,7 @@ func TestRichBlockParsing(t *testing.T) {
 	}
 }
 
-func getBot(t *testing.T) (*Bot, int64, bool) {
+func tryLocalBot(t *testing.T) (*Bot, int64) {
 	t.Helper()
 
 	botToken := os.Getenv("BOT_TOKEN")
@@ -338,25 +335,24 @@ func getBot(t *testing.T) (*Bot, int64, bool) {
 		if err != nil {
 			t.Errorf("bot token provided, but failed to get bot: %s", err)
 			t.FailNow()
-			return nil, 0, false
 		}
+
 		chatId, err := strconv.ParseInt(chatIdStr, 10, 64)
 		if err != nil {
 			t.Errorf("failed to parse chat id as integer: %s", err)
 			t.FailNow()
-			return nil, 0, false
 		}
+
 		_, err = b.GetChat(chatId, nil)
 		if err != nil {
 			t.Errorf("failed to get chat: %s", err)
 			t.FailNow()
-			return nil, 0, false
 		}
 
-		return b, chatId, true
+		return b, chatId
 	}
 
-	return nil, 0, true
+	return nil, 0
 }
 
 var fileRe = regexp.MustCompile("fileId://[A-Za-z0-9_-]+")
@@ -582,8 +578,8 @@ func TestRichTextParsing(t *testing.T) {
 			wantMarkdown: "[^test]: some text",
 			wantText:     "some text",
 		}, {
-			name:         "RichTextReferenceLink",
-			r:            RichTextReferenceLink{
+			name: "RichTextReferenceLink",
+			r: RichTextReferenceLink{
 				Text:          RichTextString("some text"),
 				ReferenceName: "test",
 			},
@@ -616,10 +612,7 @@ func TestRichTextParsing(t *testing.T) {
 }
 
 func TestRichMessageSending(t *testing.T) {
-	b, chatId, ok := getBot(t)
-	if !ok {
-		return
-	}
+	b, chatId := tryLocalBot(t)
 
 	if b == nil {
 		t.Skip("Skiping message sending - no bot configured.")
