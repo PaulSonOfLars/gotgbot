@@ -46,12 +46,36 @@ func GetRichTexts[T RichText](m *RichMessage) []T {
 	return out
 }
 
+// MapRichTexts allows for extracting specific internals of a specific RichText type.
+func MapRichTexts[T RichText, R any](m *RichMessage, fn func(T) R) []R {
+	var out []R
+	m.Walk(nil, func(text RichText) bool {
+		if v, ok := text.(T); ok {
+			out = append(out, fn(v))
+		}
+		return true
+	})
+	return out
+}
+
 // GetRichBlocks allows for specifying a RichBlock type, walking over all the blocks, and extracting the result.
 func GetRichBlocks[T RichBlock](m *RichMessage) []T {
 	var out []T
 	m.Walk(func(block RichBlock) bool {
 		if v, ok := block.(T); ok {
 			out = append(out, v)
+		}
+		return true
+	}, nil)
+	return out
+}
+
+// MapRichBlocks allows for extracting specific internals of a specific RichBlock type.
+func MapRichBlocks[T RichBlock, R any](m *RichMessage, fn func(T) R) []R {
+	var out []R
+	m.Walk(func(block RichBlock) bool {
+		if v, ok := block.(T); ok {
+			out = append(out, fn(v))
 		}
 		return true
 	}, nil)
