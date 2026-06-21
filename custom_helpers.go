@@ -33,7 +33,7 @@ func (m Message) GetText() string {
 // Note: output depends on the rich message structure and so may not be stable.
 func (m Message) GetRawText() string {
 	if m.RichMessage != nil {
-		return m.RichMessage.GetText()
+		return m.RichMessage.PlainText()
 	}
 	return m.GetText()
 }

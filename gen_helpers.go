@@ -3,8 +3,6 @@
 
 package gotgbot
 
-import "strings"
-
 // Get is a helper method for Bot.GetBusinessConnection.
 func (bc BusinessConnection) Get(b *Bot, opts *GetBusinessConnectionOpts) (*BusinessConnection, error) {
 	return b.GetBusinessConnection(bc.Id, opts)
@@ -784,13 +782,6 @@ func (v RichBlockAnchor) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockAnimation) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
-}
-
 func (v RichBlockAnimation) RichTextChildren() []RichText {
 	return nil
 }
@@ -799,28 +790,12 @@ func (v RichBlockAnimation) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockAudio) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
-}
-
 func (v RichBlockAudio) RichTextChildren() []RichText {
 	return nil
 }
 
 func (v RichBlockAudio) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockBlockQuotation) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Blocks.GetText())
-	if v.Credit != nil {
-		bd.WriteString(v.Credit.GetText())
-	}
-	return bd.String()
 }
 
 func (v RichBlockBlockQuotation) RichTextChildren() []RichText {
@@ -834,15 +809,6 @@ func (v RichBlockBlockQuotation) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockCaption) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	if v.Credit != nil {
-		bd.WriteString(v.Credit.GetText())
-	}
-	return bd.String()
-}
-
 func (v RichBlockCaption) RichTextChildren() []RichText {
 	var out []RichText
 	out = append(out, v.Text)
@@ -852,28 +818,12 @@ func (v RichBlockCaption) RichTextChildren() []RichText {
 	return out
 }
 
-func (v RichBlockCollage) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Blocks.GetText())
-	if v.Caption != nil {
-		bd.WriteString(v.Caption.GetText())
-	}
-	return bd.String()
-}
-
 func (v RichBlockCollage) RichTextChildren() []RichText {
 	return nil
 }
 
 func (v RichBlockCollage) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockDetails) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Summary.GetText())
-	bd.WriteString(v.Blocks.GetText())
-	return bd.String()
 }
 
 func (v RichBlockDetails) RichTextChildren() []RichText {
@@ -892,10 +842,6 @@ func (v RichBlockDivider) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockFooter) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichBlockFooter) RichTextChildren() []RichText {
 	return []RichText{v.Text}
 }
@@ -904,27 +850,12 @@ func (v RichBlockFooter) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockList) GetText() string {
-	return v.Items.GetText()
-}
-
 func (v RichBlockList) RichTextChildren() []RichText {
 	return nil
 }
 
 func (v RichBlockList) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockListItem) GetText() string {
-	return v.Blocks.GetText()
-}
-
-func (v RichBlockMap) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
 }
 
 func (v RichBlockMap) RichTextChildren() []RichText {
@@ -943,23 +874,12 @@ func (v RichBlockMathematicalExpression) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockParagraph) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichBlockParagraph) RichTextChildren() []RichText {
 	return []RichText{v.Text}
 }
 
 func (v RichBlockParagraph) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockPhoto) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
 }
 
 func (v RichBlockPhoto) RichTextChildren() []RichText {
@@ -970,25 +890,12 @@ func (v RichBlockPhoto) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockPreformatted) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichBlockPreformatted) RichTextChildren() []RichText {
 	return []RichText{v.Text}
 }
 
 func (v RichBlockPreformatted) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockPullQuotation) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Text.GetText())
-	if v.Credit != nil {
-		bd.WriteString(v.Credit.GetText())
-	}
-	return bd.String()
 }
 
 func (v RichBlockPullQuotation) RichTextChildren() []RichText {
@@ -1004,10 +911,6 @@ func (v RichBlockPullQuotation) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockSectionHeading) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichBlockSectionHeading) RichTextChildren() []RichText {
 	return []RichText{v.Text}
 }
@@ -1016,28 +919,12 @@ func (v RichBlockSectionHeading) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockSlideshow) GetText() string {
-	bd := strings.Builder{}
-	bd.WriteString(v.Blocks.GetText())
-	if v.Caption != nil {
-		bd.WriteString(v.Caption.GetText())
-	}
-	return bd.String()
-}
-
 func (v RichBlockSlideshow) RichTextChildren() []RichText {
 	return nil
 }
 
 func (v RichBlockSlideshow) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockTable) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
 }
 
 func (v RichBlockTable) RichTextChildren() []RichText {
@@ -1051,22 +938,11 @@ func (v RichBlockTable) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockTableCell) GetText() string {
-	if v.Text != nil {
-		return v.Text.GetText()
-	}
-	return ""
-}
-
 func (v RichBlockTableCell) RichTextChildren() []RichText {
 	if v.Text == nil {
 		return nil
 	}
 	return []RichText{v.Text}
-}
-
-func (v RichBlockThinking) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichBlockThinking) RichTextChildren() []RichText {
@@ -1077,26 +953,12 @@ func (v RichBlockThinking) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichBlockVideo) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
-}
-
 func (v RichBlockVideo) RichTextChildren() []RichText {
 	return nil
 }
 
 func (v RichBlockVideo) RichBlockChildren() []RichBlock {
 	return nil
-}
-
-func (v RichBlockVoiceNote) GetText() string {
-	if v.Caption != nil {
-		return v.Caption.GetText()
-	}
-	return ""
 }
 
 func (v RichBlockVoiceNote) RichTextChildren() []RichText {
@@ -1107,56 +969,28 @@ func (v RichBlockVoiceNote) RichBlockChildren() []RichBlock {
 	return nil
 }
 
-func (v RichMessage) GetText() string {
-	return v.Blocks.GetText()
-}
-
 func (v RichTextAnchor) Children() []RichText {
 	return nil
-}
-
-func (v RichTextAnchorLink) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextAnchorLink) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextBankCardNumber) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextBankCardNumber) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextBold) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextBold) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextBotCommand) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextBotCommand) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextCashtag) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextCashtag) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextCode) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextCode) Children() []RichText {
@@ -1167,40 +1001,20 @@ func (v RichTextCustomEmoji) Children() []RichText {
 	return nil
 }
 
-func (v RichTextDateTime) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextDateTime) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextEmailAddress) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextEmailAddress) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextHashtag) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextHashtag) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextItalic) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextItalic) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextMarked) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextMarked) Children() []RichText {
@@ -1211,88 +1025,44 @@ func (v RichTextMathematicalExpression) Children() []RichText {
 	return nil
 }
 
-func (v RichTextMention) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextMention) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextPhoneNumber) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextPhoneNumber) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextReference) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextReference) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextReferenceLink) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextReferenceLink) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextSpoiler) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextSpoiler) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextStrikethrough) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextStrikethrough) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextSubscript) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextSubscript) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextSuperscript) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextSuperscript) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextTextMention) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextTextMention) Children() []RichText {
 	return []RichText{v.Text}
 }
 
-func (v RichTextUnderline) GetText() string {
-	return v.Text.GetText()
-}
-
 func (v RichTextUnderline) Children() []RichText {
 	return []RichText{v.Text}
-}
-
-func (v RichTextUrl) GetText() string {
-	return v.Text.GetText()
 }
 
 func (v RichTextUrl) Children() []RichText {

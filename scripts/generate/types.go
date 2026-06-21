@@ -627,9 +627,6 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	if isRichTextType(name) {
-		bd.WriteString("\n// GetText gets the text-only contents of any rich formatting datatypes.")
-		bd.WriteString("\nGetText() string")
-
 		if name == tgTypeRichText {
 			bd.WriteString("\nChildren() []RichText")
 		} else if name == tgTypeRichBlock {

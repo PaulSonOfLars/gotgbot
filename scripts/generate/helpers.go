@@ -14,8 +14,6 @@ func generateHelpers(d APIDescription) error {
 // Regen by running 'go generate' in the repo root.
 
 package gotgbot
-
-import "strings"
 `)
 
 	for _, tgTypeName := range orderedTgTypes(d) {
@@ -27,11 +25,6 @@ import "strings"
 		}
 		if helper != "" {
 			helpers.WriteString(helper)
-		}
-
-		richContentHelper := generateRichContentHelperDef(tgType)
-		if richContentHelper != "" {
-			helpers.WriteString(richContentHelper)
 		}
 
 		richWalkHelper := generateRichWalkHelperDef(d, tgType)
@@ -173,84 +166,6 @@ func generateTypeHelperDef(d APIDescription, tgType TypeDescription) (string, er
 	}
 
 	return helperDef.String(), nil
-}
-
-func generateRichContentHelperDef(tgType TypeDescription) string {
-	if tgType.Name == tgTypeMessage {
-		return ""
-	}
-
-	type input struct {
-		value       string
-		ifStatement string
-	}
-
-	var richBits bool
-
-	var inputs []input
-	for _, f := range tgType.Fields {
-		_, fType := typeOfTgArray(f.Types[0])
-
-		if isRichTextType(fType) {
-			richBits = true
-			inputs = append(inputs, input{
-				value: fmt.Sprintf("v.%s.GetText()", snakeToTitle(f.Name)),
-				ifStatement: func() string {
-					if f.Required {
-						return ""
-					}
-					return fmt.Sprintf("v.%s != nil", snakeToTitle(f.Name))
-				}(),
-			})
-
-			// TODO: find a way to cleanly get all internal contents; same way we have entity parsing
-			//} else if t, err := f.getPreferredType(d); err == nil && t == "string" && f.Name != "type" {
-			//	inputs = append(inputs, input{
-			//		value: fmt.Sprintf("v.%s", snakeToTitle(f.Name)),
-			//		ifStatement: func() string {
-			//			if f.Required {
-			//				return ""
-			//			}
-			//			return fmt.Sprintf("v.%s != \"\"", snakeToTitle(f.Name))
-			//		}(),
-			//	})
-		}
-	}
-
-	if !richBits {
-		return ""
-	}
-
-	bd := strings.Builder{}
-	bd.WriteString(fmt.Sprintf("\nfunc (v %s) GetText() string {\n", tgType.Name))
-
-	if len(inputs) == 1 {
-		in := inputs[0]
-		if in.ifStatement != "" {
-			bd.WriteString(fmt.Sprintf("\tif (%s) {\n", in.ifStatement))
-			bd.WriteString(fmt.Sprintf("\treturn %s\n", in.value))
-			bd.WriteString("\t}\n")
-			bd.WriteString("\treturn \"\"\n")
-		} else {
-			bd.WriteString(fmt.Sprintf("\treturn %s\n", in.value))
-
-		}
-	} else {
-		bd.WriteString("\tbd := strings.Builder{}\n")
-		for _, in := range inputs {
-			if in.ifStatement != "" {
-				bd.WriteString(fmt.Sprintf("\tif (%s) {\n", in.ifStatement))
-				bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", in.value))
-				bd.WriteString("\t}\n")
-			} else {
-				bd.WriteString(fmt.Sprintf("\tbd.WriteString(%s)\n", in.value))
-			}
-		}
-		bd.WriteString("\treturn bd.String()\n")
-	}
-	bd.WriteString("}\n")
-
-	return bd.String()
 }
 
 func hasFromChat(tgMethod MethodDescription) bool {

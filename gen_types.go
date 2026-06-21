@@ -9710,8 +9710,6 @@ func (v RevenueWithdrawalStateSucceeded) MarshalJSON() ([]byte, error) {
 //   - RichBlockThinking
 type RichBlock interface {
 	GetType() string
-	// GetText gets the text-only contents of any rich formatting datatypes.
-	GetText() string
 	RichTextChildren() []RichText
 	RichBlockChildren() []RichBlock
 	// richBlock exists to avoid external types implementing this interface.
@@ -11052,8 +11050,6 @@ func (v *RichMessage) UnmarshalJSON(b []byte) error {
 //   - RichTextReferenceLink
 type RichText interface {
 	GetType() string
-	// GetText gets the text-only contents of any rich formatting datatypes.
-	GetText() string
 	Children() []RichText
 	// richText exists to avoid external types implementing this interface.
 	richText()
