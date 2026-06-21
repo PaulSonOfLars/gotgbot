@@ -271,24 +271,21 @@ func renderTextHTML(r RichText, sb *strings.Builder) {
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextMention:
-		text := RichTextContent(v.Text)
-		sb.WriteString(fmt.Sprintf(`<a href="https://t.me/%s">`, html.EscapeString(strings.TrimPrefix(text, "@"))))
 		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+	case RichTextAnchor:
+		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`, html.EscapeString(v.Name)))
 	case RichTextAnchorLink:
 		sb.WriteString(fmt.Sprintf(`<a href="#%s">`, html.EscapeString(v.AnchorName)))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
-	case RichTextReferenceLink:
-		sb.WriteString(fmt.Sprintf(`<a href="#ref-%s">`, html.EscapeString(v.ReferenceName)))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</a>")
 	case RichTextReference:
 		sb.WriteString(fmt.Sprintf(`<tg-reference name="%s">`, html.EscapeString(v.Name)))
 		renderTextHTML(v.Text, sb)
 		sb.WriteString("</tg-reference>")
-	case RichTextAnchor:
-		sb.WriteString(fmt.Sprintf(`<a name="%s"></a>`, html.EscapeString(v.Name)))
+	case RichTextReferenceLink:
+		sb.WriteString(fmt.Sprintf(`<a href="#%s">`, html.EscapeString(v.ReferenceName)))
+		renderTextHTML(v.Text, sb)
+		sb.WriteString("</a>")
 
 	// Entities with no wrapping text child
 	case RichTextHashtag:
@@ -652,22 +649,20 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 		sb.WriteString("[")
 		renderTextMarkdown(v.Text, sb)
 		sb.WriteString(fmt.Sprintf("](tg://user?id=%d)", v.User.Id))
-	case RichTextMention: // TODO: CHECK
+	case RichTextMention:
 		renderTextMarkdown(v.Text, sb)
+	case RichTextAnchor:
+		sb.WriteString(fmt.Sprintf("<a name=\"%s\"></a>\n", html.EscapeString(v.Name)))
 	case RichTextAnchorLink:
 		sb.WriteString("[")
 		renderTextMarkdown(v.Text, sb)
 		sb.WriteString(fmt.Sprintf("](#%s)", v.AnchorName))
-	case RichTextReferenceLink:
-		renderTextMarkdown(v.Text, sb) // TODO: CHECK
-		sb.WriteString(fmt.Sprintf("[^%s]", v.ReferenceName))
 	case RichTextReference:
-		// TODO: CHECK
-		sb.WriteString(fmt.Sprintf("[^%s]:", v.Name))
+		sb.WriteString(fmt.Sprintf("[^%s]: ", v.Name))
 		renderTextMarkdown(v.Text, sb)
-	case RichTextAnchor:
-		// TODO: CHECK
-		sb.WriteString(fmt.Sprintf("<a name=\"%s\"></a>\n", html.EscapeString(v.Name)))
+	case RichTextReferenceLink:
+		renderTextMarkdown(v.Text, sb)
+		sb.WriteString(fmt.Sprintf("[^%s]", v.ReferenceName))
 	case RichTextHashtag:
 		renderTextMarkdown(v.Text, sb)
 	case RichTextCashtag:
@@ -676,7 +671,6 @@ func renderTextMarkdown(r RichText, sb *strings.Builder) {
 		renderTextMarkdown(v.Text, sb)
 	case RichTextBankCardNumber:
 		renderTextMarkdown(v.Text, sb)
-		sb.WriteString(v.BankCardNumber)
 	case RichTextDateTime:
 		sb.WriteString("![")
 		renderTextMarkdown(v.Text, sb)
@@ -724,16 +718,13 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 				sb.WriteString("> " + line + "\n")
 			}
 		}
-		if v.Credit != nil { // TODO: CHECK
+		if v.Credit != nil {
 			sb.WriteString("<aside>")
 			sb.WriteString(RichTextMarkdown(v.Credit))
 			sb.WriteString("</aside>")
-			//	sb.WriteString("\n> - ")
-			//	sb.WriteString(RichTextMarkdown(v.Credit))
 		}
 		sb.WriteString("\n")
 	case RichBlockPullQuotation:
-		// TODO: CHECK
 		sb.WriteString("<aside>")
 		sb.WriteString(RichTextMarkdown(v.Text))
 		if v.Credit != nil {
@@ -743,14 +734,6 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 		}
 		sb.WriteString("</aside>")
 		sb.WriteString("\n")
-
-		//sb.WriteString("> ")
-		//sb.WriteString(RichTextMarkdown(v.Text))
-		//if v.Credit != nil {
-		//	sb.WriteString("\n> - ") // TODO: CHECK
-		//	sb.WriteString(RichTextMarkdown(v.Credit))
-		//}
-		//sb.WriteString("\n\n")
 	case RichBlockDetails:
 		sb.WriteString("<details")
 		if v.IsOpen {
