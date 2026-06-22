@@ -79,6 +79,37 @@ func MapRichBlocks[T RichBlock, R any](m *RichMessage, fn func(T) R) []R {
 	return out
 }
 
+func HasEntityType(entity []MessageEntity, entType string) bool {
+	for _, v := range entity {
+		if v.Type == entType {
+			return true
+		}
+	}
+	return false
+}
+
+func HasRichType(m *RichMessage, entType string) bool {
+	if m == nil {
+		return false
+	}
+
+	found := false
+	m.Walk(func(block RichBlock) bool {
+		if block.GetType() == entType {
+			found = true
+			return false
+		}
+		return true
+	}, func(node RichText) bool {
+		if node.GetType() == entType {
+			found = true
+			return false
+		}
+		return true
+	})
+	return found
+}
+
 // WalkRichText recursively visits r and every descendant, calling fn on each node.
 // Returning false from fn skips that node's children (but not its siblings).
 func WalkRichText(r RichText, fn func(RichText) bool) {
