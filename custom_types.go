@@ -3,7 +3,7 @@ package gotgbot
 type RichTextString string
 
 func (r RichTextString) GetType() string {
-	return "string"
+	return RichTextTypeString
 }
 
 func (r RichTextString) richText() {}
