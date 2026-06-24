@@ -241,6 +241,14 @@ type Field struct {
 	Description string   `json:"description"`
 }
 
+func (f *Field) ConstantName(parentName string, shortName string) string {
+	return ConstantName(parentName, f.Name, shortName)
+}
+
+func ConstantName(parentName string, fieldName string, shortName string) string {
+	return snakeToTitle(parentName) + snakeToTitle(fieldName) + snakeToTitle(shortName)
+}
+
 // Default matcher for cases where:
 // - we have true/false, floats, or numbers.
 // - at the end of a sentence, line, or followed by a comma.
