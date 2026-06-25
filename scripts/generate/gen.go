@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"go/format"
 	"os"
@@ -128,50 +129,64 @@ func (td TypeDescription) isChildType(d APIDescription, t string, typeName strin
 	return false
 }
 
-func (td TypeDescription) getTypeNameFromParent(parentType string) string {
-	// Telegram inconsistencies
-	if td.Name == "ChatMemberOwner" {
-		return "creator"
-	} else if td.Name == "ChatMemberBanned" {
-		return "kicked"
+var typeMustBeMatcher = regexp.MustCompile(`, must be (\S+)$`)
+var typeAlwaysMatcher = regexp.MustCompile(`, always "(.+)"$`)
+
+func (td TypeDescription) getTypeNameFromParent(typeField string) (string, error) {
+	if td.Name == "" {
+		return "", fmt.Errorf("called on invalid type '%s'", td.Name)
 	}
 
-	typeName := strings.TrimPrefix(td.Name, parentType)
-	typeName = strings.TrimPrefix(typeName, "Cached") // some of them are "Cached"
-	typeName = strings.TrimSuffix(typeName, "Field")  // some of them are "Field"
-	return titleToSnake(typeName)
+	for _, f := range td.Fields {
+		if f.Name != typeField {
+			continue
+		}
+
+		m := typeAlwaysMatcher.FindStringSubmatch(f.Description)
+		if len(m) > 0 {
+			return m[1], nil
+		}
+
+		m = typeMustBeMatcher.FindStringSubmatch(f.Description)
+		if len(m) > 0 {
+			return m[1], nil
+		}
+		return "", errors.New("unable to determine type name")
+	}
+
+	return "", errors.New("unable to determine type field")
 }
 
-func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (string, error) {
+func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (*Field, error) {
 	if len(td.Subtypes) == 0 {
-		return "", fmt.Errorf("expected %s to be a parent", td.Name)
+		return nil, fmt.Errorf("expected %s to be a parent", td.Name)
 	}
 
 	subTypes, err := getTypesByName(d, td.Subtypes)
 	if err != nil {
-		return "", fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
+		return nil, fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
 	}
 
 	common := getCommonFields(subTypes)
 	if len(common) == 0 {
-		return "", fmt.Errorf("no common fields for parenttype %s", td.Name)
+		return nil, fmt.Errorf("no common fields for parenttype %s", td.Name)
 	}
 
 	return getConstantFieldFromCommons(d, common)
 }
 
-func getConstantFieldFromCommons(d APIDescription, common []Field) (string, error) {
+func getConstantFieldFromCommons(d APIDescription, common []Field) (*Field, error) {
 	for _, v := range common {
 		s, err := v.getPreferredType(d)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		// These may be better as hand-picked fields by name (type/status/source) rather than type
 		if s == "string" {
-			return v.Name, nil
+			return &v, nil
 		}
 	}
-	return "", nil
+	return nil, nil
 }
 
 func (m MethodDescription) docs() string {
@@ -274,10 +289,10 @@ func (f Field) GetDescription() string {
 func (f Field) isConstantField(d APIDescription, tgType TypeDescription) bool {
 	for _, parent := range tgType.SubtypeOf {
 		constantField, err := d.Types[parent].getConstantFieldFromParent(d)
-		if err != nil || constantField == "" {
+		if err != nil || constantField == nil {
 			continue
 		}
-		if constantField == f.Name {
+		if constantField.Name == f.Name {
 			return true
 		}
 	}

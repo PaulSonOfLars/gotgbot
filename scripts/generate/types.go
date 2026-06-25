@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"slices"
-	"strconv"
 	"strings"
 	"text/template"
 	"unicode"
@@ -408,7 +407,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	if err != nil {
 		return "", fmt.Errorf("failed to generate custom unmarshaller for %s: %w", tgType.Name, err)
 	}
-	if constantField == "" {
+	if constantField == nil {
 		// We cover MaybeInaccessibleMessage manually.
 		if tgType.Name != "MaybeInaccessibleMessage" {
 			log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
@@ -418,7 +417,11 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 
 	var cases []customStructUnmarshalCaseData
 	for _, subTypeName := range tgType.Subtypes {
-		shortName := d.Types[subTypeName].getTypeNameFromParent(tgType.Name)
+		shortName, err := d.Types[subTypeName].getTypeNameFromParent(constantField.Name)
+		if err != nil {
+			return "", fmt.Errorf("failed to get shortname for %s: %w", subTypeName, err)
+		}
+
 		cases = append(cases, customStructUnmarshalCaseData{
 			ConstantFieldValue: shortName,
 			TypeName:           subTypeName,
@@ -429,7 +432,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	err = customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
 		UnmarshalFuncName: "unmarshal" + tgType.Name,
 		ParentType:        tgType.Name,
-		ConstantFieldName: snakeToTitle(constantField),
+		ConstantFieldName: snakeToTitle(constantField.Name),
 		CaseStatements:    cases,
 	})
 	if err != nil {
@@ -441,8 +444,6 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 
 func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType TypeDescription) (string, error) {
 	// Some items need a custom marshaller to handle the "type" field
-	shortName := tgType.getTypeNameFromParent(parentType.Name)
-
 	subTypes, err := getTypesByName(d, parentType.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes of parent type %s of %s: %w", parentType.Name, tgType.Name, err)
@@ -458,9 +459,17 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		return "", fmt.Errorf("failed to get constant field from %s: %w", parentType.Name, err)
 	}
 
+	shortName := "UNSET"
+	if constantField != nil {
+		shortName, err = tgType.getTypeNameFromParent(constantField.Name)
+		if err != nil {
+			return "", fmt.Errorf("failed to get type name for %s: %w", tgType.Name, err)
+		}
+	}
+
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
-		commonGetMethods, err := generateAllCommonGetMethods(d, tgType.Name, commonFields, constantField, shortName)
+		commonGetMethods, err := generateAllCommonGetMethods(d, parentType.Name, tgType.Name, commonFields, constantField, shortName)
 		if err != nil {
 			return "", err
 		}
@@ -468,7 +477,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 		// We only generate the merge func if there is a common field, and if the types match across all children.
 		// If they didn't match, then compilation would fail.
-		if constantField != "" && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
+		if constantField != nil && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
 			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
 			if err != nil {
 				return "", err
@@ -477,12 +486,12 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		}
 	}
 
-	if constantField != "" {
+	if constantField != nil {
 		err = customMarshalTmpl.Execute(&bd, customMarshalData{
 			Type:                  tgType.Name,
-			ConstantFieldName:     strings.Title(constantField),
-			ConstantJSONFieldName: constantField,
-			ConstantValueName:     shortName,
+			ConstantFieldName:     strings.Title(constantField.Name),
+			ConstantJSONFieldName: constantField.Name,
+			ConstantValue:         constantField.ConstantName(parentType.Name, shortName),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -492,12 +501,12 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	return bd.String(), nil
 }
 
-func generateAllCommonGetMethods(d APIDescription, typeName string, commonFields []Field, constantField string, shortName string) (string, error) {
+func generateAllCommonGetMethods(d APIDescription, parentName string, typeName string, commonFields []Field, constantField *Field, shortName string) (string, error) {
 	bd := strings.Builder{}
 	for _, commonField := range commonFields {
 		commonValueName := "v." + snakeToTitle(commonField.Name)
-		if commonField.Name == constantField {
-			commonValueName = strconv.Quote(shortName)
+		if constantField != nil && commonField.Name == constantField.Name {
+			commonValueName = constantField.ConstantName(parentName, shortName)
 		}
 
 		prefType, err := commonField.getPreferredType(d)
@@ -590,7 +599,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
-	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
+	if len(commonFields) > 0 && constantField != nil && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
 	}
@@ -618,7 +627,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 	bd.WriteString(enforceTypeAssertion(name, subtypes))
 
-	if len(commonFields) > 0 && constantField != "" && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
+	if len(commonFields) > 0 && constantField != nil && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate merged struct: %w", err)
@@ -626,7 +635,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 		bd.WriteString("\n" + mergedStruct)
 
-		commonGetMethods, err := generateAllCommonGetMethods(d, "Merged"+name, commonFields, "", "")
+		commonGetMethods, err := generateAllCommonGetMethods(d, name, "Merged"+name, commonFields, nil, "")
 		if err != nil {
 			return "", fmt.Errorf("failed to generate common get methods: %w", err)
 		}
@@ -671,7 +680,7 @@ func (v %s) Get%s() %s {
 `, commonName, t, commonName, commonType, commonValue)
 }
 
-func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField string) (string, error) {
+func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField *Field) (string, error) {
 	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", typeName, err)
@@ -688,7 +697,7 @@ func generateMergeFunc(d APIDescription, typeName string, shortname string, fiel
 	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
 	for _, f := range fields {
-		if f.Name == constantField {
+		if constantField != nil && f.Name == constantField.Name {
 			bd.WriteString(fmt.Sprintf("\n\t%s: \"%s\",", snakeToTitle(f.Name), shortname))
 			continue
 		}
@@ -833,7 +842,7 @@ type customMarshalData struct {
 	Type                  string
 	ConstantFieldName     string
 	ConstantJSONFieldName string
-	ConstantValueName     string
+	ConstantValue         string
 }
 
 // The alias type is required to avoid infinite MarshalJSON loops.
@@ -845,7 +854,7 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 		{{.ConstantFieldName}} string ` + "`json:\"{{.ConstantJSONFieldName}}\"`" + `
 		alias
 	}{
-		{{.ConstantFieldName}}: "{{.ConstantValueName}}",
+		{{.ConstantFieldName}}: {{.ConstantValue}},
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)

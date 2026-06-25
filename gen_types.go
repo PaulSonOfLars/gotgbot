@@ -235,7 +235,7 @@ func (v BackgroundFillFreeformGradient) backgroundFill() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundFillFreeformGradient) GetType() string {
-	return "freeform_gradient"
+	return BackgroundFillTypeFreeformGradient
 }
 
 // MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
@@ -253,7 +253,7 @@ func (v BackgroundFillFreeformGradient) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "freeform_gradient",
+		Type:  BackgroundFillTypeFreeformGradient,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -276,7 +276,7 @@ func (v BackgroundFillGradient) backgroundFill() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundFillGradient) GetType() string {
-	return "gradient"
+	return BackgroundFillTypeGradient
 }
 
 // MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
@@ -296,7 +296,7 @@ func (v BackgroundFillGradient) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "gradient",
+		Type:  BackgroundFillTypeGradient,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -315,7 +315,7 @@ func (v BackgroundFillSolid) backgroundFill() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundFillSolid) GetType() string {
-	return "solid"
+	return BackgroundFillTypeSolid
 }
 
 // MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
@@ -333,7 +333,7 @@ func (v BackgroundFillSolid) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "solid",
+		Type:  BackgroundFillTypeSolid,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -487,7 +487,7 @@ func (v BackgroundTypeChatTheme) backgroundType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundTypeChatTheme) GetType() string {
-	return "chat_theme"
+	return BackgroundTypeTypeChatTheme
 }
 
 // MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
@@ -505,7 +505,7 @@ func (v BackgroundTypeChatTheme) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat_theme",
+		Type:  BackgroundTypeTypeChatTheme,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -548,7 +548,7 @@ func (v BackgroundTypeFill) backgroundType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundTypeFill) GetType() string {
-	return "fill"
+	return BackgroundTypeTypeFill
 }
 
 // MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
@@ -567,7 +567,7 @@ func (v BackgroundTypeFill) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "fill",
+		Type:  BackgroundTypeTypeFill,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -622,7 +622,7 @@ func (v BackgroundTypePattern) backgroundType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundTypePattern) GetType() string {
-	return "pattern"
+	return BackgroundTypeTypePattern
 }
 
 // MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
@@ -644,7 +644,7 @@ func (v BackgroundTypePattern) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "pattern",
+		Type:  BackgroundTypeTypePattern,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -669,7 +669,7 @@ func (v BackgroundTypeWallpaper) backgroundType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundTypeWallpaper) GetType() string {
-	return "wallpaper"
+	return BackgroundTypeTypeWallpaper
 }
 
 // MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
@@ -690,7 +690,7 @@ func (v BackgroundTypeWallpaper) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "wallpaper",
+		Type:  BackgroundTypeTypeWallpaper,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -790,7 +790,7 @@ func (v BotCommandScopeAllChatAdministrators) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllChatAdministrators) GetType() string {
-	return "all_chat_administrators"
+	return BotCommandScopeTypeAllChatAdministrators
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -807,7 +807,7 @@ func (v BotCommandScopeAllChatAdministrators) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "all_chat_administrators",
+		Type:  BotCommandScopeTypeAllChatAdministrators,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -823,7 +823,7 @@ func (v BotCommandScopeAllGroupChats) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllGroupChats) GetType() string {
-	return "all_group_chats"
+	return BotCommandScopeTypeAllGroupChats
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -840,7 +840,7 @@ func (v BotCommandScopeAllGroupChats) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "all_group_chats",
+		Type:  BotCommandScopeTypeAllGroupChats,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -856,7 +856,7 @@ func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeAllPrivateChats) GetType() string {
-	return "all_private_chats"
+	return BotCommandScopeTypeAllPrivateChats
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -873,7 +873,7 @@ func (v BotCommandScopeAllPrivateChats) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "all_private_chats",
+		Type:  BotCommandScopeTypeAllPrivateChats,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -892,7 +892,7 @@ func (v BotCommandScopeChat) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChat) GetType() string {
-	return "chat"
+	return BotCommandScopeTypeChat
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -910,7 +910,7 @@ func (v BotCommandScopeChat) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat",
+		Type:  BotCommandScopeTypeChat,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -929,7 +929,7 @@ func (v BotCommandScopeChatAdministrators) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChatAdministrators) GetType() string {
-	return "chat_administrators"
+	return BotCommandScopeTypeChatAdministrators
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -947,7 +947,7 @@ func (v BotCommandScopeChatAdministrators) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat_administrators",
+		Type:  BotCommandScopeTypeChatAdministrators,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -968,7 +968,7 @@ func (v BotCommandScopeChatMember) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeChatMember) GetType() string {
-	return "chat_member"
+	return BotCommandScopeTypeChatMember
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -987,7 +987,7 @@ func (v BotCommandScopeChatMember) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat_member",
+		Type:  BotCommandScopeTypeChatMember,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -1003,7 +1003,7 @@ func (v BotCommandScopeDefault) botCommandScope() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BotCommandScopeDefault) GetType() string {
-	return "default"
+	return BotCommandScopeTypeDefault
 }
 
 // MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
@@ -1020,7 +1020,7 @@ func (v BotCommandScopeDefault) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "default",
+		Type:  BotCommandScopeTypeDefault,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -1521,7 +1521,7 @@ func (v ChatBoostSourceGiftCode) chatBoostSource() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v ChatBoostSourceGiftCode) GetSource() string {
-	return "gift_code"
+	return ChatBoostSourceSourceGiftCode
 }
 
 // MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
@@ -1539,7 +1539,7 @@ func (v ChatBoostSourceGiftCode) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "gift_code",
+		Source: ChatBoostSourceSourceGiftCode,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -1564,7 +1564,7 @@ func (v ChatBoostSourceGiveaway) chatBoostSource() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v ChatBoostSourceGiveaway) GetSource() string {
-	return "giveaway"
+	return ChatBoostSourceSourceGiveaway
 }
 
 // MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
@@ -1585,7 +1585,7 @@ func (v ChatBoostSourceGiveaway) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "giveaway",
+		Source: ChatBoostSourceSourceGiveaway,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -1604,7 +1604,7 @@ func (v ChatBoostSourcePremium) chatBoostSource() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v ChatBoostSourcePremium) GetSource() string {
-	return "premium"
+	return ChatBoostSourceSourcePremium
 }
 
 // MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
@@ -1622,7 +1622,7 @@ func (v ChatBoostSourcePremium) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "premium",
+		Source: ChatBoostSourceSourcePremium,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2188,7 +2188,7 @@ func (v ChatMemberAdministrator) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberAdministrator) GetStatus() string {
-	return "administrator"
+	return ChatMemberStatusAdministrator
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2230,7 +2230,7 @@ func (v ChatMemberAdministrator) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "administrator",
+		Status: ChatMemberStatusAdministrator,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2251,7 +2251,7 @@ func (v ChatMemberBanned) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberBanned) GetStatus() string {
-	return "kicked"
+	return ChatMemberStatusKicked
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2275,7 +2275,7 @@ func (v ChatMemberBanned) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "kicked",
+		Status: ChatMemberStatusKicked,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2294,7 +2294,7 @@ func (v ChatMemberLeft) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberLeft) GetStatus() string {
-	return "left"
+	return ChatMemberStatusLeft
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2317,7 +2317,7 @@ func (v ChatMemberLeft) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "left",
+		Status: ChatMemberStatusLeft,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2340,7 +2340,7 @@ func (v ChatMemberMember) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberMember) GetStatus() string {
-	return "member"
+	return ChatMemberStatusMember
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2365,7 +2365,7 @@ func (v ChatMemberMember) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "member",
+		Status: ChatMemberStatusMember,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2388,7 +2388,7 @@ func (v ChatMemberOwner) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberOwner) GetStatus() string {
-	return "creator"
+	return ChatMemberStatusCreator
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2413,7 +2413,7 @@ func (v ChatMemberOwner) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "creator",
+		Status: ChatMemberStatusCreator,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -2470,7 +2470,7 @@ func (v ChatMemberRestricted) chatMember() {}
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberRestricted) GetStatus() string {
-	return "restricted"
+	return ChatMemberStatusRestricted
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -2512,7 +2512,7 @@ func (v ChatMemberRestricted) MarshalJSON() ([]byte, error) {
 		Status string `json:"status"`
 		alias
 	}{
-		Status: "restricted",
+		Status: ChatMemberStatusRestricted,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3567,7 +3567,7 @@ func (v InlineQueryResultArticle) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultArticle) GetType() string {
-	return "article"
+	return InlineQueryResultTypeArticle
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3598,7 +3598,7 @@ func (v InlineQueryResultArticle) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "article",
+		Type:  InlineQueryResultTypeArticle,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3635,7 +3635,7 @@ func (v InlineQueryResultAudio) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultAudio) GetType() string {
-	return "audio"
+	return InlineQueryResultTypeAudio
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3667,7 +3667,7 @@ func (v InlineQueryResultAudio) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "audio",
+		Type:  InlineQueryResultTypeAudio,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3698,7 +3698,7 @@ func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedAudio) GetType() string {
-	return "audio"
+	return InlineQueryResultTypeAudio
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3727,7 +3727,7 @@ func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "audio",
+		Type:  InlineQueryResultTypeAudio,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3762,7 +3762,7 @@ func (v InlineQueryResultCachedDocument) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedDocument) GetType() string {
-	return "document"
+	return InlineQueryResultTypeDocument
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3793,7 +3793,7 @@ func (v InlineQueryResultCachedDocument) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "document",
+		Type:  InlineQueryResultTypeDocument,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3828,7 +3828,7 @@ func (v InlineQueryResultCachedGif) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedGif) GetType() string {
-	return "gif"
+	return InlineQueryResultTypeGif
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3859,7 +3859,7 @@ func (v InlineQueryResultCachedGif) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "gif",
+		Type:  InlineQueryResultTypeGif,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3894,7 +3894,7 @@ func (v InlineQueryResultCachedMpeg4Gif) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
-	return "mpeg4_gif"
+	return InlineQueryResultTypeMpeg4Gif
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3925,7 +3925,7 @@ func (v InlineQueryResultCachedMpeg4Gif) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "mpeg4_gif",
+		Type:  InlineQueryResultTypeMpeg4Gif,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -3962,7 +3962,7 @@ func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedPhoto) GetType() string {
-	return "photo"
+	return InlineQueryResultTypePhoto
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -3994,7 +3994,7 @@ func (v InlineQueryResultCachedPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  InlineQueryResultTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4019,7 +4019,7 @@ func (v InlineQueryResultCachedSticker) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedSticker) GetType() string {
-	return "sticker"
+	return InlineQueryResultTypeSticker
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4045,7 +4045,7 @@ func (v InlineQueryResultCachedSticker) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "sticker",
+		Type:  InlineQueryResultTypeSticker,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4082,7 +4082,7 @@ func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVideo) GetType() string {
-	return "video"
+	return InlineQueryResultTypeVideo
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4114,7 +4114,7 @@ func (v InlineQueryResultCachedVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  InlineQueryResultTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4147,7 +4147,7 @@ func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultCachedVoice) GetType() string {
-	return "voice"
+	return InlineQueryResultTypeVoice
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4177,7 +4177,7 @@ func (v InlineQueryResultCachedVoice) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "voice",
+		Type:  InlineQueryResultTypeVoice,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4214,7 +4214,7 @@ func (v InlineQueryResultContact) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultContact) GetType() string {
-	return "contact"
+	return InlineQueryResultTypeContact
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4246,7 +4246,7 @@ func (v InlineQueryResultContact) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "contact",
+		Type:  InlineQueryResultTypeContact,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4289,7 +4289,7 @@ func (v InlineQueryResultDocument) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultDocument) GetType() string {
-	return "document"
+	return InlineQueryResultTypeDocument
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4324,7 +4324,7 @@ func (v InlineQueryResultDocument) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "document",
+		Type:  InlineQueryResultTypeDocument,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4347,7 +4347,7 @@ func (v InlineQueryResultGame) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGame) GetType() string {
-	return "game"
+	return InlineQueryResultTypeGame
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4372,7 +4372,7 @@ func (v InlineQueryResultGame) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "game",
+		Type:  InlineQueryResultTypeGame,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4417,7 +4417,7 @@ func (v InlineQueryResultGif) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultGif) GetType() string {
-	return "gif"
+	return InlineQueryResultTypeGif
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4453,7 +4453,7 @@ func (v InlineQueryResultGif) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "gif",
+		Type:  InlineQueryResultTypeGif,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4496,7 +4496,7 @@ func (v InlineQueryResultLocation) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultLocation) GetType() string {
-	return "location"
+	return InlineQueryResultTypeLocation
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4531,7 +4531,7 @@ func (v InlineQueryResultLocation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "location",
+		Type:  InlineQueryResultTypeLocation,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4576,7 +4576,7 @@ func (v InlineQueryResultMpeg4Gif) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultMpeg4Gif) GetType() string {
-	return "mpeg4_gif"
+	return InlineQueryResultTypeMpeg4Gif
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4612,7 +4612,7 @@ func (v InlineQueryResultMpeg4Gif) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "mpeg4_gif",
+		Type:  InlineQueryResultTypeMpeg4Gif,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4655,7 +4655,7 @@ func (v InlineQueryResultPhoto) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultPhoto) GetType() string {
-	return "photo"
+	return InlineQueryResultTypePhoto
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4690,7 +4690,7 @@ func (v InlineQueryResultPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  InlineQueryResultTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4735,7 +4735,7 @@ func (v InlineQueryResultVenue) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVenue) GetType() string {
-	return "venue"
+	return InlineQueryResultTypeVenue
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4771,7 +4771,7 @@ func (v InlineQueryResultVenue) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "venue",
+		Type:  InlineQueryResultTypeVenue,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4818,7 +4818,7 @@ func (v InlineQueryResultVideo) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVideo) GetType() string {
-	return "video"
+	return InlineQueryResultTypeVideo
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4855,7 +4855,7 @@ func (v InlineQueryResultVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  InlineQueryResultTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -4890,7 +4890,7 @@ func (v InlineQueryResultVoice) inlineQueryResult() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InlineQueryResultVoice) GetType() string {
-	return "voice"
+	return InlineQueryResultTypeVoice
 }
 
 // GetId is a helper method to easily access the common fields of an interface.
@@ -4921,7 +4921,7 @@ func (v InlineQueryResultVoice) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "voice",
+		Type:  InlineQueryResultTypeVoice,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5139,7 +5139,7 @@ func (v InputMediaAnimation) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaAnimation) GetType() string {
-	return "animation"
+	return InputMediaTypeAnimation
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5154,7 +5154,7 @@ func (v InputMediaAnimation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "animation",
+		Type:  InputMediaTypeAnimation,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5208,7 +5208,7 @@ func (v InputMediaAudio) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaAudio) GetType() string {
-	return "audio"
+	return InputMediaTypeAudio
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5223,7 +5223,7 @@ func (v InputMediaAudio) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "audio",
+		Type:  InputMediaTypeAudio,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5273,7 +5273,7 @@ func (v InputMediaDocument) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaDocument) GetType() string {
-	return "document"
+	return InputMediaTypeDocument
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5288,7 +5288,7 @@ func (v InputMediaDocument) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "document",
+		Type:  InputMediaTypeDocument,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5343,7 +5343,7 @@ func (v InputMediaLivePhoto) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaLivePhoto) GetType() string {
-	return "live_photo"
+	return InputMediaTypeLivePhoto
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5358,7 +5358,7 @@ func (v InputMediaLivePhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "live_photo",
+		Type:  InputMediaTypeLivePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5392,7 +5392,7 @@ func (v InputMediaLocation) inputPollMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaLocation) GetType() string {
-	return "input_media_location"
+	return InputPollMediaTypeLocation
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5402,7 +5402,7 @@ func (v InputMediaLocation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_location",
+		Type:  InputPollMediaTypeLocation,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5440,7 +5440,7 @@ func (v InputMediaPhoto) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaPhoto) GetType() string {
-	return "photo"
+	return InputMediaTypePhoto
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5455,7 +5455,7 @@ func (v InputMediaPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  InputMediaTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5487,7 +5487,7 @@ func (v InputMediaSticker) inputPollOptionMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaSticker) GetType() string {
-	return "input_media_sticker"
+	return InputPollOptionMediaTypeSticker
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5497,7 +5497,7 @@ func (v InputMediaSticker) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_sticker",
+		Type:  InputPollOptionMediaTypeSticker,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5541,7 +5541,7 @@ func (v InputMediaVenue) inputPollMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaVenue) GetType() string {
-	return "input_media_venue"
+	return InputPollMediaTypeVenue
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5551,7 +5551,7 @@ func (v InputMediaVenue) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_venue",
+		Type:  InputPollMediaTypeVenue,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5603,7 +5603,7 @@ func (v InputMediaVideo) inputMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaVideo) GetType() string {
-	return "video"
+	return InputMediaTypeVideo
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5618,7 +5618,7 @@ func (v InputMediaVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  InputMediaTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5714,7 +5714,7 @@ func (v InputPaidMediaLivePhoto) inputPaidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputPaidMediaLivePhoto) GetType() string {
-	return "live_photo"
+	return InputPaidMediaTypeLivePhoto
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5729,7 +5729,7 @@ func (v InputPaidMediaLivePhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "live_photo",
+		Type:  InputPaidMediaTypeLivePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5759,7 +5759,7 @@ func (v InputPaidMediaPhoto) inputPaidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputPaidMediaPhoto) GetType() string {
-	return "photo"
+	return InputPaidMediaTypePhoto
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5774,7 +5774,7 @@ func (v InputPaidMediaPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  InputPaidMediaTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5818,7 +5818,7 @@ func (v InputPaidMediaVideo) inputPaidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputPaidMediaVideo) GetType() string {
-	return "video"
+	return InputPaidMediaTypeVideo
 }
 
 // GetMedia is a helper method to easily access the common fields of an interface.
@@ -5833,7 +5833,7 @@ func (v InputPaidMediaVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  InputPaidMediaTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5986,7 +5986,7 @@ func (v InputProfilePhotoAnimated) inputProfilePhoto() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputProfilePhotoAnimated) GetType() string {
-	return "animated"
+	return InputProfilePhotoTypeAnimated
 }
 
 // MergeInputProfilePhoto returns a MergedInputProfilePhoto struct to simplify working with types in a non-generic world.
@@ -6005,7 +6005,7 @@ func (v InputProfilePhotoAnimated) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "animated",
+		Type:  InputProfilePhotoTypeAnimated,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6024,7 +6024,7 @@ func (v InputProfilePhotoStatic) inputProfilePhoto() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputProfilePhotoStatic) GetType() string {
-	return "static"
+	return InputProfilePhotoTypeStatic
 }
 
 // MergeInputProfilePhoto returns a MergedInputProfilePhoto struct to simplify working with types in a non-generic world.
@@ -6042,7 +6042,7 @@ func (v InputProfilePhotoStatic) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "static",
+		Type:  InputProfilePhotoTypeStatic,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6149,7 +6149,7 @@ func (v InputStoryContentPhoto) inputStoryContent() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputStoryContentPhoto) GetType() string {
-	return "photo"
+	return InputStoryContentTypePhoto
 }
 
 // MergeInputStoryContent returns a MergedInputStoryContent struct to simplify working with types in a non-generic world.
@@ -6167,7 +6167,7 @@ func (v InputStoryContentPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  InputStoryContentTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6192,7 +6192,7 @@ func (v InputStoryContentVideo) inputStoryContent() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputStoryContentVideo) GetType() string {
-	return "video"
+	return InputStoryContentTypeVideo
 }
 
 // MergeInputStoryContent returns a MergedInputStoryContent struct to simplify working with types in a non-generic world.
@@ -6213,7 +6213,7 @@ func (v InputStoryContentVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  InputStoryContentTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6674,7 +6674,7 @@ func (v MenuButtonCommands) menuButton() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MenuButtonCommands) GetType() string {
-	return "commands"
+	return MenuButtonTypeCommands
 }
 
 // MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
@@ -6691,7 +6691,7 @@ func (v MenuButtonCommands) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "commands",
+		Type:  MenuButtonTypeCommands,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6707,7 +6707,7 @@ func (v MenuButtonDefault) menuButton() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MenuButtonDefault) GetType() string {
-	return "default"
+	return MenuButtonTypeDefault
 }
 
 // MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
@@ -6724,7 +6724,7 @@ func (v MenuButtonDefault) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "default",
+		Type:  MenuButtonTypeDefault,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -6745,7 +6745,7 @@ func (v MenuButtonWebApp) menuButton() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MenuButtonWebApp) GetType() string {
-	return "web_app"
+	return MenuButtonTypeWebApp
 }
 
 // MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
@@ -6764,7 +6764,7 @@ func (v MenuButtonWebApp) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "web_app",
+		Type:  MenuButtonTypeWebApp,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7469,7 +7469,7 @@ func (v MessageOriginChannel) messageOrigin() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MessageOriginChannel) GetType() string {
-	return "channel"
+	return MessageOriginTypeChannel
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -7495,7 +7495,7 @@ func (v MessageOriginChannel) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "channel",
+		Type:  MessageOriginTypeChannel,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7518,7 +7518,7 @@ func (v MessageOriginChat) messageOrigin() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MessageOriginChat) GetType() string {
-	return "chat"
+	return MessageOriginTypeChat
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -7543,7 +7543,7 @@ func (v MessageOriginChat) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat",
+		Type:  MessageOriginTypeChat,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7564,7 +7564,7 @@ func (v MessageOriginHiddenUser) messageOrigin() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MessageOriginHiddenUser) GetType() string {
-	return "hidden_user"
+	return MessageOriginTypeHiddenUser
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -7588,7 +7588,7 @@ func (v MessageOriginHiddenUser) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "hidden_user",
+		Type:  MessageOriginTypeHiddenUser,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7609,7 +7609,7 @@ func (v MessageOriginUser) messageOrigin() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MessageOriginUser) GetType() string {
-	return "user"
+	return MessageOriginTypeUser
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -7633,7 +7633,7 @@ func (v MessageOriginUser) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "user",
+		Type:  MessageOriginTypeUser,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7840,7 +7840,7 @@ func (v OwnedGiftRegular) ownedGift() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v OwnedGiftRegular) GetType() string {
-	return "regular"
+	return OwnedGiftTypeRegular
 }
 
 // GetSendDate is a helper method to easily access the common fields of an interface.
@@ -7855,7 +7855,7 @@ func (v OwnedGiftRegular) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "regular",
+		Type:  OwnedGiftTypeRegular,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -7888,7 +7888,7 @@ func (v OwnedGiftUnique) ownedGift() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v OwnedGiftUnique) GetType() string {
-	return "unique"
+	return OwnedGiftTypeUnique
 }
 
 // GetSendDate is a helper method to easily access the common fields of an interface.
@@ -7903,7 +7903,7 @@ func (v OwnedGiftUnique) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "unique",
+		Type:  OwnedGiftTypeUnique,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8088,7 +8088,7 @@ func (v PaidMediaLivePhoto) paidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v PaidMediaLivePhoto) GetType() string {
-	return "live_photo"
+	return PaidMediaTypeLivePhoto
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -8098,7 +8098,7 @@ func (v PaidMediaLivePhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "live_photo",
+		Type:  PaidMediaTypeLivePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8117,7 +8117,7 @@ func (v PaidMediaPhoto) paidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v PaidMediaPhoto) GetType() string {
-	return "photo"
+	return PaidMediaTypePhoto
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -8127,7 +8127,7 @@ func (v PaidMediaPhoto) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "photo",
+		Type:  PaidMediaTypePhoto,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8150,7 +8150,7 @@ func (v PaidMediaPreview) paidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v PaidMediaPreview) GetType() string {
-	return "preview"
+	return PaidMediaTypePreview
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -8160,7 +8160,7 @@ func (v PaidMediaPreview) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "preview",
+		Type:  PaidMediaTypePreview,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8189,7 +8189,7 @@ func (v PaidMediaVideo) paidMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v PaidMediaVideo) GetType() string {
-	return "video"
+	return PaidMediaTypeVideo
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -8199,7 +8199,7 @@ func (v PaidMediaVideo) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "video",
+		Type:  PaidMediaTypeVideo,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8320,7 +8320,7 @@ func (v PassportElementErrorDataField) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorDataField) GetSource() string {
-	return "data"
+	return PassportElementErrorSourceData
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8351,7 +8351,7 @@ func (v PassportElementErrorDataField) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "data",
+		Source: PassportElementErrorSourceData,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8374,7 +8374,7 @@ func (v PassportElementErrorFile) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFile) GetSource() string {
-	return "file"
+	return PassportElementErrorSourceFile
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8404,7 +8404,7 @@ func (v PassportElementErrorFile) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "file",
+		Source: PassportElementErrorSourceFile,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8427,7 +8427,7 @@ func (v PassportElementErrorFiles) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFiles) GetSource() string {
-	return "files"
+	return PassportElementErrorSourceFiles
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8457,7 +8457,7 @@ func (v PassportElementErrorFiles) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "files",
+		Source: PassportElementErrorSourceFiles,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8480,7 +8480,7 @@ func (v PassportElementErrorFrontSide) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorFrontSide) GetSource() string {
-	return "front_side"
+	return PassportElementErrorSourceFrontSide
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8510,7 +8510,7 @@ func (v PassportElementErrorFrontSide) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "front_side",
+		Source: PassportElementErrorSourceFrontSide,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8533,7 +8533,7 @@ func (v PassportElementErrorReverseSide) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorReverseSide) GetSource() string {
-	return "reverse_side"
+	return PassportElementErrorSourceReverseSide
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8563,7 +8563,7 @@ func (v PassportElementErrorReverseSide) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "reverse_side",
+		Source: PassportElementErrorSourceReverseSide,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8586,7 +8586,7 @@ func (v PassportElementErrorSelfie) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorSelfie) GetSource() string {
-	return "selfie"
+	return PassportElementErrorSourceSelfie
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8616,7 +8616,7 @@ func (v PassportElementErrorSelfie) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "selfie",
+		Source: PassportElementErrorSourceSelfie,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8639,7 +8639,7 @@ func (v PassportElementErrorTranslationFile) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFile) GetSource() string {
-	return "translation_file"
+	return PassportElementErrorSourceTranslationFile
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8669,7 +8669,7 @@ func (v PassportElementErrorTranslationFile) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "translation_file",
+		Source: PassportElementErrorSourceTranslationFile,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8692,7 +8692,7 @@ func (v PassportElementErrorTranslationFiles) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorTranslationFiles) GetSource() string {
-	return "translation_files"
+	return PassportElementErrorSourceTranslationFiles
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8722,7 +8722,7 @@ func (v PassportElementErrorTranslationFiles) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "translation_files",
+		Source: PassportElementErrorSourceTranslationFiles,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -8745,7 +8745,7 @@ func (v PassportElementErrorUnspecified) passportElementError() {}
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v PassportElementErrorUnspecified) GetSource() string {
-	return "unspecified"
+	return PassportElementErrorSourceUnspecified
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8775,7 +8775,7 @@ func (v PassportElementErrorUnspecified) MarshalJSON() ([]byte, error) {
 		Source string `json:"source"`
 		alias
 	}{
-		Source: "unspecified",
+		Source: PassportElementErrorSourceUnspecified,
 		alias:  (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9209,7 +9209,7 @@ func (v ReactionTypeCustomEmoji) reactionType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v ReactionTypeCustomEmoji) GetType() string {
-	return "custom_emoji"
+	return ReactionTypeTypeCustomEmoji
 }
 
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
@@ -9227,7 +9227,7 @@ func (v ReactionTypeCustomEmoji) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "custom_emoji",
+		Type:  ReactionTypeTypeCustomEmoji,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9246,7 +9246,7 @@ func (v ReactionTypeEmoji) reactionType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v ReactionTypeEmoji) GetType() string {
-	return "emoji"
+	return ReactionTypeTypeEmoji
 }
 
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
@@ -9264,7 +9264,7 @@ func (v ReactionTypeEmoji) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "emoji",
+		Type:  ReactionTypeTypeEmoji,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9280,7 +9280,7 @@ func (v ReactionTypePaid) reactionType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v ReactionTypePaid) GetType() string {
-	return "paid"
+	return ReactionTypeTypePaid
 }
 
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
@@ -9297,7 +9297,7 @@ func (v ReactionTypePaid) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "paid",
+		Type:  ReactionTypeTypePaid,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9510,7 +9510,7 @@ func (v RevenueWithdrawalStateFailed) revenueWithdrawalState() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RevenueWithdrawalStateFailed) GetType() string {
-	return "failed"
+	return RevenueWithdrawalStateTypeFailed
 }
 
 // MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
@@ -9527,7 +9527,7 @@ func (v RevenueWithdrawalStateFailed) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "failed",
+		Type:  RevenueWithdrawalStateTypeFailed,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9543,7 +9543,7 @@ func (v RevenueWithdrawalStatePending) revenueWithdrawalState() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RevenueWithdrawalStatePending) GetType() string {
-	return "pending"
+	return RevenueWithdrawalStateTypePending
 }
 
 // MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
@@ -9560,7 +9560,7 @@ func (v RevenueWithdrawalStatePending) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "pending",
+		Type:  RevenueWithdrawalStateTypePending,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9581,7 +9581,7 @@ func (v RevenueWithdrawalStateSucceeded) revenueWithdrawalState() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RevenueWithdrawalStateSucceeded) GetType() string {
-	return "succeeded"
+	return RevenueWithdrawalStateTypeSucceeded
 }
 
 // MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
@@ -9600,7 +9600,7 @@ func (v RevenueWithdrawalStateSucceeded) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "succeeded",
+		Type:  RevenueWithdrawalStateTypeSucceeded,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9920,7 +9920,7 @@ func (v StoryAreaTypeLink) storyAreaType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v StoryAreaTypeLink) GetType() string {
-	return "link"
+	return StoryAreaTypeTypeLink
 }
 
 // MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
@@ -9938,7 +9938,7 @@ func (v StoryAreaTypeLink) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "link",
+		Type:  StoryAreaTypeTypeLink,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -9961,7 +9961,7 @@ func (v StoryAreaTypeLocation) storyAreaType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v StoryAreaTypeLocation) GetType() string {
-	return "location"
+	return StoryAreaTypeTypeLocation
 }
 
 // MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
@@ -9981,7 +9981,7 @@ func (v StoryAreaTypeLocation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "location",
+		Type:  StoryAreaTypeTypeLocation,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10004,7 +10004,7 @@ func (v StoryAreaTypeSuggestedReaction) storyAreaType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v StoryAreaTypeSuggestedReaction) GetType() string {
-	return "suggested_reaction"
+	return StoryAreaTypeTypeSuggestedReaction
 }
 
 // MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
@@ -10024,7 +10024,7 @@ func (v StoryAreaTypeSuggestedReaction) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "suggested_reaction",
+		Type:  StoryAreaTypeTypeSuggestedReaction,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10043,7 +10043,7 @@ func (v StoryAreaTypeUniqueGift) storyAreaType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v StoryAreaTypeUniqueGift) GetType() string {
-	return "unique_gift"
+	return StoryAreaTypeTypeUniqueGift
 }
 
 // MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
@@ -10061,7 +10061,7 @@ func (v StoryAreaTypeUniqueGift) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "unique_gift",
+		Type:  StoryAreaTypeTypeUniqueGift,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10084,7 +10084,7 @@ func (v StoryAreaTypeWeather) storyAreaType() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v StoryAreaTypeWeather) GetType() string {
-	return "weather"
+	return StoryAreaTypeTypeWeather
 }
 
 // MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
@@ -10104,7 +10104,7 @@ func (v StoryAreaTypeWeather) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "weather",
+		Type:  StoryAreaTypeTypeWeather,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10446,7 +10446,7 @@ func (v TransactionPartnerAffiliateProgram) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerAffiliateProgram) GetType() string {
-	return "affiliate_program"
+	return TransactionPartnerTypeAffiliateProgram
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10465,7 +10465,7 @@ func (v TransactionPartnerAffiliateProgram) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "affiliate_program",
+		Type:  TransactionPartnerTypeAffiliateProgram,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10486,7 +10486,7 @@ func (v TransactionPartnerChat) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerChat) GetType() string {
-	return "chat"
+	return TransactionPartnerTypeChat
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10505,7 +10505,7 @@ func (v TransactionPartnerChat) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "chat",
+		Type:  TransactionPartnerTypeChat,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10544,7 +10544,7 @@ func (v TransactionPartnerFragment) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerFragment) GetType() string {
-	return "fragment"
+	return TransactionPartnerTypeFragment
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10562,7 +10562,7 @@ func (v TransactionPartnerFragment) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "fragment",
+		Type:  TransactionPartnerTypeFragment,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10578,7 +10578,7 @@ func (v TransactionPartnerOther) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerOther) GetType() string {
-	return "other"
+	return TransactionPartnerTypeOther
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10595,7 +10595,7 @@ func (v TransactionPartnerOther) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "other",
+		Type:  TransactionPartnerTypeOther,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10611,7 +10611,7 @@ func (v TransactionPartnerTelegramAds) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerTelegramAds) GetType() string {
-	return "telegram_ads"
+	return TransactionPartnerTypeTelegramAds
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10628,7 +10628,7 @@ func (v TransactionPartnerTelegramAds) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "telegram_ads",
+		Type:  TransactionPartnerTypeTelegramAds,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10647,7 +10647,7 @@ func (v TransactionPartnerTelegramApi) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerTelegramApi) GetType() string {
-	return "telegram_api"
+	return TransactionPartnerTypeTelegramApi
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10665,7 +10665,7 @@ func (v TransactionPartnerTelegramApi) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "telegram_api",
+		Type:  TransactionPartnerTypeTelegramApi,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -10736,7 +10736,7 @@ func (v TransactionPartnerUser) transactionPartner() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerUser) GetType() string {
-	return "user"
+	return TransactionPartnerTypeUser
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
@@ -10762,7 +10762,7 @@ func (v TransactionPartnerUser) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "user",
+		Type:  TransactionPartnerTypeUser,
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)

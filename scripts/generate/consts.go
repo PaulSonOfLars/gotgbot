@@ -23,8 +23,6 @@ package gotgbot
 	}
 	consts.WriteString(updateConsts)
 
-	consts.WriteString(generateParseModeConsts())
-
 	chatActions, err := generateChatActionConsts(d)
 	if err != nil {
 		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
@@ -49,13 +47,71 @@ package gotgbot
 	}
 	consts.WriteString(buttonStyleConsts)
 
-	chatMemberStatuses, err := generateChatMemberStatusConsts(d)
+	msgEntConsts, err := generateTypeConsts(d, "MessageEntity")
 	if err != nil {
-		return fmt.Errorf("failed to generate consts for chat member statuses: %w", err)
+		return fmt.Errorf("failed to generate consts for MessageEntity types: %w", err)
 	}
-	consts.WriteString(chatMemberStatuses)
+	consts.WriteString(msgEntConsts)
+
+	for _, t := range orderedTgTypes(d) {
+		if len(d.Types[t].Subtypes) == 0 {
+			continue
+		}
+
+		typeName := "type"
+		switch t {
+		case "ChatBoostSource", "PassportElementError":
+			typeName = "source"
+		case "ChatMember":
+			typeName = "status"
+		case "InputMessageContent", "MaybeInaccessibleMessage":
+			continue // SKIP!
+		}
+
+		interfConsts, err := generateQuotedTypeFields(d, t, typeName)
+		if err != nil {
+			return fmt.Errorf("failed to generate consts for %s types: %w", t, err)
+		}
+		consts.WriteString(interfConsts)
+	}
 
 	return writeGenToFile(consts, "gen_consts.go")
+}
+
+func generateQuotedTypeFields(d APIDescription, interfaceName string, constantName string) (string, error) {
+	interfaceType, ok := d.Types[interfaceName]
+	if !ok {
+		return "", errors.New("interface not found")
+	}
+
+	consts := make([]string, 0, len(interfaceType.Subtypes))
+	for _, subT := range interfaceType.Subtypes {
+		t, ok := d.Types[subT]
+		if !ok {
+			if subT == tgTypeString {
+				consts = append(consts, writeConst(ConstantName(interfaceName, constantName, tgTypeString), strings.ToLower(tgTypeString)))
+				continue
+			} else if subT == "Array of RichText" {
+				continue
+			}
+
+			return "", fmt.Errorf("subtype %s not found", subT)
+		}
+
+		tName, err := t.getTypeNameFromParent(constantName)
+		if err != nil {
+			return "", fmt.Errorf("failed to get type name for subtype %s: %w", subT, err)
+		}
+		consts = append(consts, writeConst(ConstantName(interfaceName, constantName, tName), strings.ToLower(tName)))
+	}
+
+	out := strings.Builder{}
+	out.WriteString(fmt.Sprintf("\n// The consts listed below represent all the %s types.", interfaceName))
+	out.WriteString("\nconst (")
+	out.WriteString(strings.Join(unique(consts...), ""))
+	out.WriteString(")\n\n")
+
+	return out.String(), nil
 }
 
 func generateUpdateTypeConsts(d APIDescription) (string, error) {
@@ -156,26 +212,6 @@ func getFieldQuotes(updType TypeDescription, fieldName string) ([]string, error)
 	return nil, fmt.Errorf("field '%s' not found", fieldName)
 }
 
-func generateParseModeConsts() string {
-	// Adding these manually because they're not part of the spec, and theyre not going to change much anyway.
-	formattingTypes := []string{"HTML", "MarkdownV2", "Markdown", "None"}
-
-	out := strings.Builder{}
-	out.WriteString("\n// The consts listed below represent all the parse_mode options that can be sent to telegram.")
-	out.WriteString("\nconst (")
-	for _, t := range formattingTypes {
-		constName := "ParseMode" + t
-		if t == "None" {
-			// no parsemode == empty string value.
-			out.WriteString(writeConst(constName, ""))
-			continue
-		}
-		out.WriteString(writeConst(constName, t))
-	}
-	out.WriteString(")\n\n")
-	return out.String()
-}
-
 func generateChatActionConsts(d APIDescription) (string, error) {
 	methodName := "sendChatAction"
 	fieldName := "action"
@@ -220,39 +256,6 @@ func generateChatActionConsts(d APIDescription) (string, error) {
 
 	out.WriteString(")\n\n")
 
-	return out.String(), nil
-}
-
-func generateChatMemberStatusConsts(d APIDescription) (string, error) {
-	chatMemberType, ok := d.Types["ChatMember"]
-	if !ok {
-		return "", errors.New("missing 'ChatMember' type data")
-	}
-
-	out := strings.Builder{}
-	out.WriteString("\n// The consts below represent possible status values for a ChatMember.\n")
-	out.WriteString("const (")
-
-	for _, subtypeName := range chatMemberType.Subtypes {
-		subtype, ok := d.Types[subtypeName]
-		if !ok {
-			continue
-		}
-
-		values, err := getFieldQuotes(subtype, "status")
-		if err != nil {
-			return "", fmt.Errorf("failed to get status values: %w", err)
-		}
-		if len(values) != 1 {
-			return "", fmt.Errorf("unexpected multiple status values in %s", subtypeName)
-		}
-		statusValue := values[0]
-
-		constName := "ChatMemberStatus" + strings.TrimPrefix(subtypeName, "ChatMember")
-		out.WriteString(writeConst(constName, statusValue))
-	}
-
-	out.WriteString("\n)\n\n")
 	return out.String(), nil
 }
 
