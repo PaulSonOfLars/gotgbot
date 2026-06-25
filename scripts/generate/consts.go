@@ -259,39 +259,6 @@ func generateChatActionConsts(d APIDescription) (string, error) {
 	return out.String(), nil
 }
 
-func generateChatMemberStatusConsts(d APIDescription) (string, error) {
-	chatMemberType, ok := d.Types["ChatMember"]
-	if !ok {
-		return "", errors.New("missing 'ChatMember' type data")
-	}
-
-	out := strings.Builder{}
-	out.WriteString("\n// The consts below represent possible status values for a ChatMember.\n")
-	out.WriteString("const (")
-
-	for _, subtypeName := range chatMemberType.Subtypes {
-		subtype, ok := d.Types[subtypeName]
-		if !ok {
-			continue
-		}
-
-		values, err := getFieldQuotes(subtype, "status")
-		if err != nil {
-			return "", fmt.Errorf("failed to get status values: %w", err)
-		}
-		if len(values) != 1 {
-			return "", fmt.Errorf("unexpected multiple status values in %s", subtypeName)
-		}
-		statusValue := values[0]
-
-		constName := "ChatMemberStatus" + strings.TrimPrefix(subtypeName, "ChatMember")
-		out.WriteString(writeConst(constName, statusValue))
-	}
-
-	out.WriteString("\n)\n\n")
-	return out.String(), nil
-}
-
 func writeConst(name string, value string) string {
 	return fmt.Sprintf("\n%s = \"%s\"", name, value)
 }

@@ -358,7 +358,6 @@ func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) b
 	return true
 }
 
-
 func (f *Field) ConstantName(parentName string, shortName string) string {
 	return ConstantName(parentName, f.Name, shortName)
 }
