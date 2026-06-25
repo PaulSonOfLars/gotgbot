@@ -400,14 +400,6 @@ func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) b
 	return true
 }
 
-func (f *Field) ConstantName(parentName string, shortName string) string {
-	return ConstantName(parentName, f.Name, shortName)
-}
-
-func ConstantName(parentName string, fieldName string, shortName string) string {
-	return snakeToTitle(parentName) + snakeToTitle(fieldName) + snakeToTitle(shortName)
-}
-
 func unique(ss ...string) []string {
 	seen := make(map[string]struct{})
 	unique := make([]string, 0, len(ss))
