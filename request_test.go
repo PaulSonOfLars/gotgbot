@@ -3,11 +3,13 @@ package gotgbot
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"mime"
 	"mime/multipart"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -270,4 +272,127 @@ func TestBuildMultipartContextHandling(t *testing.T) {
 			t.Fatalf("expected context.Canceled after mid-read cancel, got: %v", err)
 		}
 	})
+}
+
+func TestHasUploads(t *testing.T) {
+	tests := []struct {
+		name string
+		val  any
+		want bool
+	}{
+		{
+			name: "string parameter",
+			val:  "hello",
+			want: false,
+		},
+		{
+			name: "integer parameter",
+			val:  42,
+			want: false,
+		},
+		{
+			name: "nil file reader",
+			val:  &FileReader{Data: nil},
+			want: false,
+		},
+		{
+			name: "non-nil file reader",
+			val:  &FileReader{Data: strings.NewReader("content")},
+			want: true,
+		},
+		{
+			name: "nested non-nil file reader in struct",
+			val: InputMediaPhoto{
+				Media: &FileReader{Data: strings.NewReader("content")},
+			},
+			want: true,
+		},
+		{
+			name: "nested nil file reader in struct",
+			val: InputMediaPhoto{
+				Media: &FileReader{Data: nil},
+			},
+			want: false,
+		},
+		{
+			name: "slice of media with file reader",
+			val: InputMedias{
+				InputMediaPhoto{
+					Media: &FileReader{Data: strings.NewReader("content")},
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := hasUploads(tt.val)
+			if got != tt.want {
+				t.Errorf("hasUploads(%v) = %v; want %v", tt.val, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJSONRequestSerialization(t *testing.T) {
+	params := map[string]any{
+		"chat_id": 123456,
+		"text":    "hello world",
+	}
+
+	bot := &BaseBotClient{}
+	req, err := bot.buildRequest(context.Background(), params, "token", "sendMessage", nil)
+	if err != nil {
+		t.Fatalf("failed to build request: %v", err)
+	}
+
+	if req.Header.Get("Content-Type") != "application/json" {
+		t.Errorf("expected Content-Type application/json, got %q", req.Header.Get("Content-Type"))
+	}
+
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		t.Fatalf("failed to read request body: %v", err)
+	}
+
+	var gotParams map[string]any
+	if err := json.Unmarshal(bodyBytes, &gotParams); err != nil {
+		t.Fatalf("failed to unmarshal request body: %v", err)
+	}
+
+	if gotParams["chat_id"].(float64) != 123456 || gotParams["text"] != "hello world" {
+		t.Errorf("unexpected parameters in JSON body: %v", gotParams)
+	}
+}
+
+func TestSanitizeError(t *testing.T) {
+	token := "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+	rawErr := &url.Error{
+		Op:  "parse",
+		URL: "https://api.telegram.org/bot" + token + "/sendMessage",
+		Err: errors.New("connection timeout"),
+	}
+
+	sanErr := sanitizeError(token, rawErr)
+	if sanErr == nil {
+		t.Fatal("expected non-nil error")
+	}
+
+	// Verify the error string does not contain the token
+	errStr := sanErr.Error()
+	if strings.Contains(errStr, token) {
+		t.Errorf("token leaked in error string: %s", errStr)
+	}
+	if !strings.Contains(errStr, "<TOKEN>") {
+		t.Errorf("expected error string to contain <TOKEN>: %s", errStr)
+	}
+
+	// Verify we can still unwrap and check the type of the underlying error
+	var urlErr *url.Error
+	if !errors.As(sanErr, &urlErr) {
+		t.Errorf("failed to unwrap and assert to *url.Error")
+	} else if urlErr.Op != "parse" {
+		t.Errorf("underlying error structure was not preserved")
+	}
 }

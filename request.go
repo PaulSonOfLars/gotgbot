@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,6 +11,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -183,7 +186,19 @@ func allFilesSeekable(params map[string]any) bool {
 }
 
 func (bot *BaseBotClient) buildRequest(ctx context.Context, params map[string]any, token string, method string, opts *RequestOpts) (*http.Request, error) {
-	body, contentType := buildMultipart(ctx, params)
+	var body io.Reader
+	var contentType string
+
+	if hasUploads(params) {
+		body, contentType = buildMultipart(ctx, params)
+	} else {
+		jsonData, err := json.Marshal(params)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal JSON parameters: %w", err)
+		}
+		body = bytes.NewReader(jsonData)
+		contentType = "application/json"
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), body)
 	if err != nil {
@@ -194,12 +209,80 @@ func (bot *BaseBotClient) buildRequest(ctx context.Context, params map[string]an
 
 	if allFilesSeekable(params) {
 		req.GetBody = func() (io.ReadCloser, error) {
-			retryBody, contentType := buildMultipart(ctx, params)
-			req.Header.Set("Content-Type", contentType)
-			return io.NopCloser(retryBody), nil
+			if hasUploads(params) {
+				retryBody, contentType := buildMultipart(ctx, params)
+				req.Header.Set("Content-Type", contentType)
+				return io.NopCloser(retryBody), nil
+			} else {
+				jsonData, _ := json.Marshal(params)
+				req.Header.Set("Content-Type", "application/json")
+				return io.NopCloser(bytes.NewReader(jsonData)), nil
+			}
 		}
 	}
 	return req, nil
+}
+
+func hasUploads(v any) bool {
+	if v == nil {
+		return false
+	}
+
+	switch v.(type) {
+	case string, *string, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+		return false
+	}
+
+	val := reflect.ValueOf(v)
+	return hasUploadsValue(val)
+}
+
+func hasUploadsValue(val reflect.Value) bool {
+	if !val.IsValid() {
+		return false
+	}
+
+	if val.Kind() == reflect.Pointer {
+		if val.IsNil() {
+			return false
+		}
+		if fr, ok := val.Interface().(*FileReader); ok {
+			return fr.Data != nil
+		}
+		return hasUploadsValue(val.Elem())
+	}
+
+	if val.Kind() == reflect.Interface {
+		if val.IsNil() {
+			return false
+		}
+		return hasUploadsValue(val.Elem())
+	}
+
+	switch val.Kind() {
+	case reflect.Struct:
+		if fr, ok := val.Interface().(FileReader); ok {
+			return fr.Data != nil
+		}
+		for i := 0; i < val.NumField(); i++ {
+			if hasUploadsValue(val.Field(i)) {
+				return true
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			if hasUploadsValue(val.Index(i)) {
+				return true
+			}
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			if hasUploadsValue(val.MapIndex(key)) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // buildMultipart creates a lazy multipart reader/writer which only writes while it gets read.
@@ -253,15 +336,25 @@ func buildMultipart(ctx context.Context, params map[string]any) (io.Reader, stri
 	return pr, w.FormDataContentType()
 }
 
+type sanitizedError struct {
+	err   error
+	token string
+}
+
+func (s *sanitizedError) Error() string {
+	return strings.ReplaceAll(s.err.Error(), s.token, "<TOKEN>")
+}
+
+func (s *sanitizedError) Unwrap() error {
+	return s.err
+}
+
 // Sanitize the error to avoid token leak.
 func sanitizeError(token string, err error) error {
-	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
-		urlErr.URL = strings.ReplaceAll(urlErr.URL, token, "<TOKEN>")
-		return urlErr
+	if err == nil {
+		return nil
 	}
-
-	return err
+	return &sanitizedError{err: err, token: token}
 }
 
 func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
@@ -276,8 +369,32 @@ func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
 		}
 		return *val, nil
 
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
-		return fmt.Sprint(val), nil
+	case int:
+		return strconv.Itoa(val), nil
+	case int8:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int16:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int32:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int64:
+		return strconv.FormatInt(val, 10), nil
+	case uint:
+		return strconv.FormatUint(uint64(val), 10), nil
+	case uint8:
+		return strconv.FormatUint(uint64(val), 10), nil
+	case uint16:
+		return strconv.FormatUint(uint64(val), 10), nil
+	case uint32:
+		return strconv.FormatUint(uint64(val), 10), nil
+	case uint64:
+		return strconv.FormatUint(val, 10), nil
+	case float32:
+		return strconv.FormatFloat(float64(val), 'f', -1, 32), nil
+	case float64:
+		return strconv.FormatFloat(val, 'f', -1, 64), nil
+	case bool:
+		return strconv.FormatBool(val), nil
 
 	case Attach:
 		err := val.Attach(k, w)
