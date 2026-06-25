@@ -1,8 +1,62 @@
 package gotgbot
 
 import (
+	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 )
+
+// note: maybe we should consolidate to [a-zA-Z0-9_-]+
+var fileIdFinder = regexp.MustCompile(`fileId://[^\s"'<>]+`)
+
+func ContainsRichTextFileIDs(t string) bool {
+	return fileIdFinder.FindString(t) != ""
+}
+
+type FileResolverFun func(s string) (string, error)
+
+// ResolveRichTextFileIDs finds and replaces all richtext file ids given an input.
+// This is required because telegram does not currently support sending by fileid; only by URL.
+// Example usage: ResolveRichTextFileIDs(m.RichMessage.HTML(), FileIDResolver(b, nil)).
+func ResolveRichTextFileIDs(t string, resolver FileResolverFun) (string, error) {
+	cache := map[string]string{}
+
+	var errs []error
+	result := fileIdFinder.ReplaceAllStringFunc(t, func(s string) string {
+		id := strings.TrimPrefix(s, "fileId://")
+
+		if v, ok := cache[id]; ok {
+			return v
+		}
+
+		ret, err := resolver(id)
+		if err != nil {
+			errs = append(errs, err)
+			return s // don't apply changes on failure
+		}
+
+		cache[id] = ret
+		return ret
+	})
+	return result, errors.Join(errs...)
+}
+
+// FileIDResolver returns a function used for resolving a fileID given a specific bot.
+func FileIDResolver(b *Bot, opts *GetFileOpts) func(s string) (string, error) {
+	return func(s string) (string, error) {
+		f, err := b.GetFile(s, opts)
+		if err != nil {
+			return "", fmt.Errorf("getting file: %w", err)
+		}
+
+		var reqOpts *RequestOpts
+		if opts.RequestOpts != nil {
+			reqOpts = opts.RequestOpts
+		}
+		return f.URL(b, reqOpts), nil
+	}
+}
 
 // GetRichTextTypes gets the list of all richtext types which match the "want" function.
 // Eg: m.GetRichTextTypes(IsRichTextType[RichTextString], IsRichTextType[RichTextUrl]).
