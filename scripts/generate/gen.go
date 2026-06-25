@@ -137,8 +137,6 @@ func (td TypeDescription) getTypeNameFromParent(typeField string) (string, error
 		return "", fmt.Errorf("called on invalid type '%s'", td.Name)
 	}
 
-	fmt.Println(td.Name, "type", typeField)
-
 	for _, f := range td.Fields {
 		if f.Name != typeField {
 			continue

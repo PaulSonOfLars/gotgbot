@@ -49,13 +49,71 @@ package gotgbot
 	}
 	consts.WriteString(buttonStyleConsts)
 
-	chatMemberStatuses, err := generateChatMemberStatusConsts(d)
+	msgEntConsts, err := generateTypeConsts(d, "MessageEntity")
 	if err != nil {
-		return fmt.Errorf("failed to generate consts for chat member statuses: %w", err)
+		return fmt.Errorf("failed to generate consts for MessageEntity types: %w", err)
 	}
-	consts.WriteString(chatMemberStatuses)
+	consts.WriteString(msgEntConsts)
+
+	for _, t := range orderedTgTypes(d) {
+		if len(d.Types[t].Subtypes) == 0 {
+			continue
+		}
+
+		typeName := "type"
+		switch t {
+		case "ChatBoostSource", "PassportElementError":
+			typeName = "source"
+		case "ChatMember":
+			typeName = "status"
+		case "InputMessageContent", "MaybeInaccessibleMessage":
+			continue // SKIP!
+		}
+
+		interfConsts, err := generateQuotedTypeFields(d, t, typeName)
+		if err != nil {
+			return fmt.Errorf("failed to generate consts for %s types: %w", t, err)
+		}
+		consts.WriteString(interfConsts)
+	}
 
 	return writeGenToFile(consts, "gen_consts.go")
+}
+
+func generateQuotedTypeFields(d APIDescription, interfaceName string, constantName string) (string, error) {
+	interfaceType, ok := d.Types[interfaceName]
+	if !ok {
+		return "", errors.New("interface not found")
+	}
+
+	consts := make([]string, 0, len(interfaceType.Subtypes))
+	for _, subT := range interfaceType.Subtypes {
+		t, ok := d.Types[subT]
+		if !ok {
+			if subT == tgTypeString {
+				consts = append(consts, writeConst(ConstantName(interfaceName, constantName, tgTypeString), strings.ToLower(tgTypeString)))
+				continue
+			} else if subT == "Array of RichText" {
+				continue
+			}
+
+			return "", fmt.Errorf("subtype %s not found", subT)
+		}
+
+		tName, err := t.getTypeNameFromParent(constantName)
+		if err != nil {
+			return "", fmt.Errorf("failed to get type name for subtype %s: %w", subT, err)
+		}
+		consts = append(consts, writeConst(ConstantName(interfaceName, constantName, tName), strings.ToLower(tName)))
+	}
+
+	out := strings.Builder{}
+	out.WriteString(fmt.Sprintf("\n// The consts listed below represent all the %s types.", interfaceName))
+	out.WriteString("\nconst (")
+	out.WriteString(strings.Join(unique(consts...), ""))
+	out.WriteString(")\n\n")
+
+	return out.String(), nil
 }
 
 func generateUpdateTypeConsts(d APIDescription) (string, error) {

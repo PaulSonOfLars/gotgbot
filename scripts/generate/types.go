@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"slices"
-	"strconv"
 	"strings"
 	"text/template"
 	"unicode"
@@ -470,7 +469,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
-		commonGetMethods, err := generateAllCommonGetMethods(d, tgType.Name, commonFields, constantField, shortName)
+		commonGetMethods, err := generateAllCommonGetMethods(d, parentType.Name, tgType.Name, commonFields, constantField, shortName)
 		if err != nil {
 			return "", err
 		}
@@ -492,7 +491,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 			Type:                  tgType.Name,
 			ConstantFieldName:     strings.Title(constantField.Name),
 			ConstantJSONFieldName: constantField.Name,
-			ConstantValueName:     shortName,
+			ConstantValue:         constantField.ConstantName(parentType.Name, shortName),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate custom marshal function for %s: %w", tgType.Name, err)
@@ -502,12 +501,12 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	return bd.String(), nil
 }
 
-func generateAllCommonGetMethods(d APIDescription, typeName string, commonFields []Field, constantField *Field, shortName string) (string, error) {
+func generateAllCommonGetMethods(d APIDescription, parentName string, typeName string, commonFields []Field, constantField *Field, shortName string) (string, error) {
 	bd := strings.Builder{}
 	for _, commonField := range commonFields {
 		commonValueName := "v." + snakeToTitle(commonField.Name)
 		if constantField != nil && commonField.Name == constantField.Name {
-			commonValueName = strconv.Quote(shortName)
+			commonValueName = constantField.ConstantName(parentName, shortName)
 		}
 
 		prefType, err := commonField.getPreferredType(d)
@@ -636,7 +635,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 		bd.WriteString("\n" + mergedStruct)
 
-		commonGetMethods, err := generateAllCommonGetMethods(d, "Merged"+name, commonFields, nil, "")
+		commonGetMethods, err := generateAllCommonGetMethods(d, name, "Merged"+name, commonFields, nil, "")
 		if err != nil {
 			return "", fmt.Errorf("failed to generate common get methods: %w", err)
 		}
@@ -843,7 +842,7 @@ type customMarshalData struct {
 	Type                  string
 	ConstantFieldName     string
 	ConstantJSONFieldName string
-	ConstantValueName     string
+	ConstantValue         string
 }
 
 // The alias type is required to avoid infinite MarshalJSON loops.
@@ -855,7 +854,7 @@ func (v {{.Type}}) MarshalJSON() ([]byte, error) {
 		{{.ConstantFieldName}} string ` + "`json:\"{{.ConstantJSONFieldName}}\"`" + `
 		alias
 	}{
-		{{.ConstantFieldName}}: "{{.ConstantValueName}}",
+		{{.ConstantFieldName}}: {{.ConstantValue}},
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)

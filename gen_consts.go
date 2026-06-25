@@ -160,12 +160,214 @@ const (
 	KeyboardButtonStylePrimary = "primary"
 )
 
-// The consts below represent possible status values for a ChatMember.
+// The consts listed below represent all the messageentity types that can be obtained from telegram.
 const (
-	ChatMemberStatusOwner         = "creator"
+	MessageEntityTypeMention              = "mention"
+	MessageEntityTypeHashtag              = "hashtag"
+	MessageEntityTypeCashtag              = "cashtag"
+	MessageEntityTypeBotCommand           = "bot_command"
+	MessageEntityTypeUrl                  = "url"
+	MessageEntityTypeEmail                = "email"
+	MessageEntityTypePhoneNumber          = "phone_number"
+	MessageEntityTypeBold                 = "bold"
+	MessageEntityTypeItalic               = "italic"
+	MessageEntityTypeUnderline            = "underline"
+	MessageEntityTypeStrikethrough        = "strikethrough"
+	MessageEntityTypeSpoiler              = "spoiler"
+	MessageEntityTypeBlockquote           = "blockquote"
+	MessageEntityTypeExpandableBlockquote = "expandable_blockquote"
+	MessageEntityTypeCode                 = "code"
+	MessageEntityTypePre                  = "pre"
+	MessageEntityTypeTextLink             = "text_link"
+	MessageEntityTypeTextMention          = "text_mention"
+	MessageEntityTypeCustomEmoji          = "custom_emoji"
+	MessageEntityTypeDateTime             = "date_time"
+)
+
+// The consts listed below represent all the BackgroundFill types.
+const (
+	BackgroundFillTypeSolid            = "solid"
+	BackgroundFillTypeGradient         = "gradient"
+	BackgroundFillTypeFreeformGradient = "freeform_gradient"
+)
+
+// The consts listed below represent all the BackgroundType types.
+const (
+	BackgroundTypeTypeFill      = "fill"
+	BackgroundTypeTypeWallpaper = "wallpaper"
+	BackgroundTypeTypePattern   = "pattern"
+	BackgroundTypeTypeChatTheme = "chat_theme"
+)
+
+// The consts listed below represent all the BotCommandScope types.
+const (
+	BotCommandScopeTypeDefault               = "default"
+	BotCommandScopeTypeAllPrivateChats       = "all_private_chats"
+	BotCommandScopeTypeAllGroupChats         = "all_group_chats"
+	BotCommandScopeTypeAllChatAdministrators = "all_chat_administrators"
+	BotCommandScopeTypeChat                  = "chat"
+	BotCommandScopeTypeChatAdministrators    = "chat_administrators"
+	BotCommandScopeTypeChatMember            = "chat_member"
+)
+
+// The consts listed below represent all the ChatBoostSource types.
+const (
+	ChatBoostSourceSourcePremium  = "premium"
+	ChatBoostSourceSourceGiftCode = "gift_code"
+	ChatBoostSourceSourceGiveaway = "giveaway"
+)
+
+// The consts listed below represent all the ChatMember types.
+const (
+	ChatMemberStatusCreator       = "creator"
 	ChatMemberStatusAdministrator = "administrator"
 	ChatMemberStatusMember        = "member"
 	ChatMemberStatusRestricted    = "restricted"
 	ChatMemberStatusLeft          = "left"
-	ChatMemberStatusBanned        = "kicked"
+	ChatMemberStatusKicked        = "kicked"
+)
+
+// The consts listed below represent all the InlineQueryResult types.
+const (
+	InlineQueryResultTypeAudio    = "audio"
+	InlineQueryResultTypeDocument = "document"
+	InlineQueryResultTypeGif      = "gif"
+	InlineQueryResultTypeMpeg4Gif = "mpeg4_gif"
+	InlineQueryResultTypePhoto    = "photo"
+	InlineQueryResultTypeSticker  = "sticker"
+	InlineQueryResultTypeVideo    = "video"
+	InlineQueryResultTypeVoice    = "voice"
+	InlineQueryResultTypeArticle  = "article"
+	InlineQueryResultTypeContact  = "contact"
+	InlineQueryResultTypeGame     = "game"
+	InlineQueryResultTypeLocation = "location"
+	InlineQueryResultTypeVenue    = "venue"
+)
+
+// The consts listed below represent all the InputMedia types.
+const (
+	InputMediaTypeAnimation = "animation"
+	InputMediaTypeAudio     = "audio"
+	InputMediaTypeDocument  = "document"
+	InputMediaTypeLivePhoto = "live_photo"
+	InputMediaTypePhoto     = "photo"
+	InputMediaTypeVideo     = "video"
+)
+
+// The consts listed below represent all the InputPaidMedia types.
+const (
+	InputPaidMediaTypeLivePhoto = "live_photo"
+	InputPaidMediaTypePhoto     = "photo"
+	InputPaidMediaTypeVideo     = "video"
+)
+
+// The consts listed below represent all the InputPollMedia types.
+const (
+	InputPollMediaTypeAnimation = "animation"
+	InputPollMediaTypeAudio     = "audio"
+	InputPollMediaTypeDocument  = "document"
+	InputPollMediaTypeLivePhoto = "live_photo"
+	InputPollMediaTypeLocation  = "location"
+	InputPollMediaTypePhoto     = "photo"
+	InputPollMediaTypeVenue     = "venue"
+	InputPollMediaTypeVideo     = "video"
+)
+
+// The consts listed below represent all the InputPollOptionMedia types.
+const (
+	InputPollOptionMediaTypeAnimation = "animation"
+	InputPollOptionMediaTypeLivePhoto = "live_photo"
+	InputPollOptionMediaTypeLocation  = "location"
+	InputPollOptionMediaTypePhoto     = "photo"
+	InputPollOptionMediaTypeSticker   = "sticker"
+	InputPollOptionMediaTypeVenue     = "venue"
+	InputPollOptionMediaTypeVideo     = "video"
+)
+
+// The consts listed below represent all the InputProfilePhoto types.
+const (
+	InputProfilePhotoTypeStatic   = "static"
+	InputProfilePhotoTypeAnimated = "animated"
+)
+
+// The consts listed below represent all the InputStoryContent types.
+const (
+	InputStoryContentTypePhoto = "photo"
+	InputStoryContentTypeVideo = "video"
+)
+
+// The consts listed below represent all the MenuButton types.
+const (
+	MenuButtonTypeCommands = "commands"
+	MenuButtonTypeWebApp   = "web_app"
+	MenuButtonTypeDefault  = "default"
+)
+
+// The consts listed below represent all the MessageOrigin types.
+const (
+	MessageOriginTypeUser       = "user"
+	MessageOriginTypeHiddenUser = "hidden_user"
+	MessageOriginTypeChat       = "chat"
+	MessageOriginTypeChannel    = "channel"
+)
+
+// The consts listed below represent all the OwnedGift types.
+const (
+	OwnedGiftTypeRegular = "regular"
+	OwnedGiftTypeUnique  = "unique"
+)
+
+// The consts listed below represent all the PaidMedia types.
+const (
+	PaidMediaTypeLivePhoto = "live_photo"
+	PaidMediaTypePhoto     = "photo"
+	PaidMediaTypePreview   = "preview"
+	PaidMediaTypeVideo     = "video"
+)
+
+// The consts listed below represent all the PassportElementError types.
+const (
+	PassportElementErrorSourceData             = "data"
+	PassportElementErrorSourceFrontSide        = "front_side"
+	PassportElementErrorSourceReverseSide      = "reverse_side"
+	PassportElementErrorSourceSelfie           = "selfie"
+	PassportElementErrorSourceFile             = "file"
+	PassportElementErrorSourceFiles            = "files"
+	PassportElementErrorSourceTranslationFile  = "translation_file"
+	PassportElementErrorSourceTranslationFiles = "translation_files"
+	PassportElementErrorSourceUnspecified      = "unspecified"
+)
+
+// The consts listed below represent all the ReactionType types.
+const (
+	ReactionTypeTypeEmoji       = "emoji"
+	ReactionTypeTypeCustomEmoji = "custom_emoji"
+	ReactionTypeTypePaid        = "paid"
+)
+
+// The consts listed below represent all the RevenueWithdrawalState types.
+const (
+	RevenueWithdrawalStateTypePending   = "pending"
+	RevenueWithdrawalStateTypeSucceeded = "succeeded"
+	RevenueWithdrawalStateTypeFailed    = "failed"
+)
+
+// The consts listed below represent all the StoryAreaType types.
+const (
+	StoryAreaTypeTypeLocation          = "location"
+	StoryAreaTypeTypeSuggestedReaction = "suggested_reaction"
+	StoryAreaTypeTypeLink              = "link"
+	StoryAreaTypeTypeWeather           = "weather"
+	StoryAreaTypeTypeUniqueGift        = "unique_gift"
+)
+
+// The consts listed below represent all the TransactionPartner types.
+const (
+	TransactionPartnerTypeUser             = "user"
+	TransactionPartnerTypeChat             = "chat"
+	TransactionPartnerTypeAffiliateProgram = "affiliate_program"
+	TransactionPartnerTypeFragment         = "fragment"
+	TransactionPartnerTypeTelegramAds      = "telegram_ads"
+	TransactionPartnerTypeTelegramApi      = "telegram_api"
+	TransactionPartnerTypeOther            = "other"
 )
