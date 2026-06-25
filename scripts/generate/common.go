@@ -125,23 +125,32 @@ func getAllFields(d APIDescription, types []TypeDescription, parentType string) 
 		return nil, nil
 	}
 
+	constantType, err := d.Types[parentType].getConstantFieldFromParent(d)
+	if err != nil {
+		return nil, fmt.Errorf("error getting field %s: %w", parentType, err)
+	}
+
 	var fieldNames []string            // Ordered, unique list of names for all fields across all types
 	presentIn := map[string][]string{} // Map of fields -> list of types which use it
 	fields := map[string]Field{}       // Map of fieldnames -> fields to use (using correct pointers)
 
 	for _, t := range types {
+		shortName, err := t.getTypeNameFromParent(constantType.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error getting shortname %s: %w", t.Name, err)
+		}
+
 		for _, f := range t.Fields {
-			typeName := t.getTypeNameFromParent(parentType)
-			presentIn[f.Name] = append(presentIn[f.Name], typeName)
+			presentIn[f.Name] = append(presentIn[f.Name], shortName)
 
 			// Some fields need to be cleaned up to be agnostic across all fields.
 			// eg: 	The BotCommandScopeDefault has a "Type" field saying 'Scope type, must be default'
 			// This is clearly only valid for the "default" scope; not the others - hence, clean it.
-			for _, replace := range []string{
-				fmt.Sprintf(", must be %s", typeName),
-				fmt.Sprintf(", always \"%s\"", typeName),
+			for _, replace := range []*regexp.Regexp{
+				typeAlwaysMatcher, // always "x"
+				typeMustBeMatcher, // must be x
 			} {
-				f.Description = strings.Replace(f.Description, replace, "", 1)
+				f.Description = replace.ReplaceAllString(f.Description, "")
 			}
 
 			// If this is the first time a field is found, add it to the list of field names

@@ -5392,7 +5392,7 @@ func (v InputMediaLocation) inputPollMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaLocation) GetType() string {
-	return "input_media_location"
+	return "location"
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5402,7 +5402,7 @@ func (v InputMediaLocation) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_location",
+		Type:  "location",
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5487,7 +5487,7 @@ func (v InputMediaSticker) inputPollOptionMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaSticker) GetType() string {
-	return "input_media_sticker"
+	return "sticker"
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5497,7 +5497,7 @@ func (v InputMediaSticker) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_sticker",
+		Type:  "sticker",
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
@@ -5541,7 +5541,7 @@ func (v InputMediaVenue) inputPollMedia() {}
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v InputMediaVenue) GetType() string {
-	return "input_media_venue"
+	return "venue"
 }
 
 // MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
@@ -5551,7 +5551,7 @@ func (v InputMediaVenue) MarshalJSON() ([]byte, error) {
 		Type string `json:"type"`
 		alias
 	}{
-		Type:  "input_media_venue",
+		Type:  "venue",
 		alias: (alias)(v),
 	}
 	return json.Marshal(a)
