@@ -23,8 +23,6 @@ package gotgbot
 	}
 	consts.WriteString(updateConsts)
 
-	consts.WriteString(generateParseModeConsts())
-
 	chatActions, err := generateChatActionConsts(d)
 	if err != nil {
 		return fmt.Errorf("failed to generate consts for chat actions: %w", err)
@@ -212,26 +210,6 @@ func getFieldQuotes(updType TypeDescription, fieldName string) ([]string, error)
 	}
 
 	return nil, fmt.Errorf("field '%s' not found", fieldName)
-}
-
-func generateParseModeConsts() string {
-	// Adding these manually because they're not part of the spec, and theyre not going to change much anyway.
-	formattingTypes := []string{"HTML", "MarkdownV2", "Markdown", "None"}
-
-	out := strings.Builder{}
-	out.WriteString("\n// The consts listed below represent all the parse_mode options that can be sent to telegram.")
-	out.WriteString("\nconst (")
-	for _, t := range formattingTypes {
-		constName := "ParseMode" + t
-		if t == "None" {
-			// no parsemode == empty string value.
-			out.WriteString(writeConst(constName, ""))
-			continue
-		}
-		out.WriteString(writeConst(constName, t))
-	}
-	out.WriteString(")\n\n")
-	return out.String()
 }
 
 func generateChatActionConsts(d APIDescription) (string, error) {

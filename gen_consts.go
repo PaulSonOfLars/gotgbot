@@ -115,14 +115,6 @@ func (u Update) GetType() string {
 	}
 }
 
-// The consts listed below represent all the parse_mode options that can be sent to telegram.
-const (
-	ParseModeHTML       = "HTML"
-	ParseModeMarkdownV2 = "MarkdownV2"
-	ParseModeMarkdown   = "Markdown"
-	ParseModeNone       = ""
-)
-
 // The consts listed below represent all the chat action options that can be sent to telegram.
 const (
 	ChatActionTyping          = "typing"
