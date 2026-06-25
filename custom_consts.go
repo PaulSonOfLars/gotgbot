@@ -8,5 +8,9 @@ const (
 	ParseModeNone       = ""
 )
 
-// ChatMemberStatusOwner is an alias to handle the commonly confused type names.
-const ChatMemberStatusOwner = ChatMemberStatusCreator
+// ChatMemberStatus contain some inconsistent naming schemes.
+// We add aliases here for API clarity + backwards compatibility.
+const (
+	ChatMemberStatusOwner  = ChatMemberStatusCreator
+	ChatMemberStatusBanned = ChatMemberStatusKicked
+)
