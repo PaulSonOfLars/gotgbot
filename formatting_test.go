@@ -87,6 +87,29 @@ func Test_entitiesToRichBlocks(t *testing.T) {
 				RichBlockPreformatted{Text: RichTextString("hello")},
 				RichBlockParagraph{Text: RichTextArray{RichTextString(" "), RichTextItalic{Text: RichTextString("there")}}},
 			},
+		}, {
+			name: "nested blockquote",
+			args: args{
+				text: "hello there you",
+				entities: []MessageEntity{{
+					Type:   "blockquote",
+					Offset: 0,
+					Length: 15,
+				}, {
+					Type:   "italic",
+					Offset: 6,
+					Length: 5,
+				}},
+			},
+			want: []RichBlock{
+				RichBlockBlockQuotation{Blocks: []RichBlock{
+					RichBlockParagraph{Text: RichTextArray{
+						RichTextString("hello "),
+						RichTextItalic{Text: RichTextString("there")},
+						RichTextString(" you"),
+					}},
+				}},
+			},
 		},
 	}
 	for _, tt := range tests {
