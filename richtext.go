@@ -8,7 +8,7 @@ import (
 )
 
 // note: maybe we should consolidate to [a-zA-Z0-9_-]+
-var fileIdFinder = regexp.MustCompile(`fileId://[^\s"'<>]+`)
+var fileIdFinder = regexp.MustCompile(`fileId://[^\s"'<>()]+`)
 
 func ContainsRichTextFileIDs(t string) bool {
 	return fileIdFinder.FindString(t) != ""
