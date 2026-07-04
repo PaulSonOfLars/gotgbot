@@ -51,7 +51,7 @@ func FileIDResolver(b *Bot, opts *GetFileOpts) func(s string) (string, error) {
 		}
 
 		var reqOpts *RequestOpts
-		if opts.RequestOpts != nil {
+		if opts != nil {
 			reqOpts = opts.RequestOpts
 		}
 		return f.URL(b, reqOpts), nil
