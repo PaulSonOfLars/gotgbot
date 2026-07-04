@@ -333,7 +333,7 @@ func ({{.ReceiverName}} Message) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnTyp
 // on any concrete type that is a RichText or RichBlock subtype, or that embeds rich
 // fields (e.g. RichBlockCaption, RichBlockTableCell).
 func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string {
-	// Only concrete types — interfaces are handled via generateGenericInterfaceType.
+	// Only concrete types - interfaces are handled via generateGenericInterfaceType.
 	if len(tgType.Subtypes) != 0 || tgType.Href == internalTypeRef {
 		return ""
 	}
@@ -382,7 +382,7 @@ func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string 
 				fp = tgTypeRichBlock
 			}
 			// else: RichBlock-prefixed struct that isn't a RichBlock subtype
-			// (Caption, TableCell, ListItem) — skip, handled separately
+			// (Caption, TableCell, ListItem) - skip, handled separately
 		} else if strings.HasPrefix(fType, tgTypeRichText) {
 			if fieldType, ok := d.Types[fType]; ok && slices.Contains(fieldType.SubtypeOf, tgTypeRichText) {
 				fp = tgTypeRichText
@@ -390,7 +390,7 @@ func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string 
 				// The interface itself (field type is exactly "RichText")
 				fp = tgTypeRichText
 			}
-			// else: RichText-prefixed struct that isn't a RichText subtype — skip
+			// else: RichText-prefixed struct that isn't a RichText subtype - skip
 		}
 
 		if fp == "" {
@@ -461,7 +461,7 @@ func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string 
 		emitMethod(tgType.Name, "Children", tgTypeRichText, richFields)
 
 	case tgTypeRichBlock:
-		// RichBlock subtypes: two methods — split fields by which interface they satisfy.
+		// RichBlock subtypes: two methods - split fields by which interface they satisfy.
 		var textFields, blockFields []richField
 		for _, f := range richFields {
 			if f.fieldParent == tgTypeRichText {
@@ -475,7 +475,7 @@ func generateRichWalkHelperDef(d APIDescription, tgType TypeDescription) string 
 
 	default:
 		// Embedded-rich struct (e.g. RichBlockCaption, RichBlockTableCell, RichBlockListItem).
-		// Not a direct interface subtype, but has RichText/RichBlock fields — emit both.
+		// Not a direct interface subtype, but has RichText/RichBlock fields - emit both.
 		var textFields, blockFields []richField
 		for _, f := range richFields {
 			if f.fieldParent == tgTypeRichText {
