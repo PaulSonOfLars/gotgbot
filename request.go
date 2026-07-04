@@ -149,7 +149,7 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 
 	resp, err := bot.Client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, sanitizeError(token, err))
+		return nil, fmt.Errorf("failed to execute POST request to %s: %w", method, &sanitizedError{err: err, token: token})
 	}
 	defer resp.Body.Close()
 
@@ -253,15 +253,17 @@ func buildMultipart(ctx context.Context, params map[string]any) (io.Reader, stri
 	return pr, w.FormDataContentType()
 }
 
-// Sanitize the error to avoid token leak.
-func sanitizeError(token string, err error) error {
-	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
-		urlErr.URL = strings.ReplaceAll(urlErr.URL, token, "<TOKEN>")
-		return urlErr
-	}
+type sanitizedError struct {
+	err   error
+	token string
+}
 
-	return err
+func (s *sanitizedError) Error() string {
+	return strings.ReplaceAll(s.err.Error(), s.token, "<TOKEN>")
+}
+
+func (s *sanitizedError) Unwrap() error {
+	return s.err
 }
 
 func getFieldContents(v any, k string, w *multipart.Writer) (string, error) {
