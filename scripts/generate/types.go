@@ -90,16 +90,22 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 	}
 	typeDef.WriteString(interfaces)
 
-	ok, fieldName, err := findInputFile(d, tgType, map[string]bool{})
+	inputField, err := findInputFile(d, tgType, map[string]bool{})
 	if err != nil {
 		return "", fmt.Errorf("failed to check if type requires special handling: %w", err)
 	}
-	if ok {
+	if inputField != nil {
+		fType, err := inputField.getPreferredType(d)
+		if err != nil {
+			return "", fmt.Errorf("failed to get type for %s: %w", tgType.Name, err)
+		}
+
 		// TODO: Investigate if thumbnails need special handling too.
 		err = attachTmpl.Execute(&typeDef, attachMethodData{
 			Type:      tgType.Name,
-			Field:     snakeToTitle(fieldName),
+			Field:     snakeToTitle(inputField.Name),
 			Thumbnail: containsThumbnail(tgType),
+			IsPointer: isPointer(fType),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate %s attachment methods: %w", tgType.Name, err)
@@ -135,51 +141,47 @@ func enforceTypeAssertion(d APIDescription, name string, subtypes []TypeDescript
 
 func containsInputFile(d APIDescription, tgType TypeDescription) bool {
 	for _, subtype := range tgType.Subtypes {
-		ok, _, _ := findInputFile(d, d.Types[subtype], map[string]bool{})
-		if ok {
+		inputF, _ := findInputFile(d, d.Types[subtype], map[string]bool{})
+		if inputF != nil {
 			return true
 		}
 	}
 
-	ok, _, _ := findInputFile(d, tgType, map[string]bool{})
-	return ok
+	inputF, _ := findInputFile(d, tgType, map[string]bool{})
+	return inputF != nil
 }
 
 // findInputFile returns a boolean to indicate whether or not tgType contains an InputFile.
 // If true, it also returns the field name of that inputfile.
-func findInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (bool, string, error) {
+func findInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (*Field, error) {
 	// If already checked, we don't need to check again. This avoids infinite recursive loops.
 	if checked[tgType.Name] {
-		return false, "", nil
+		return nil, nil
 	}
 	checked[tgType.Name] = true
-
-	if tgType.Name == tgTypeInputMedia || tgType.Name == tgTypeInputPaidMedia {
-		return true, "media", nil
-	}
 
 	for _, f := range tgType.Fields {
 		goType, err := f.getPreferredType(d)
 		if err != nil {
-			return false, "", err
+			return nil, err
 		}
 
 		if goType == tgTypeInputFile || goType == typeInputFileOrString || goType == typeInputString {
-			return true, f.Name, nil
+			return &f, nil
 		}
 
 		if isTgType(d, goType) {
-			ok, _, err := findInputFile(d, d.Types[goType], checked)
+			subFile, err := findInputFile(d, d.Types[goType], checked)
 			if err != nil {
-				return false, "", fmt.Errorf("failed to check if %s contains inputfiles: %w", goType, err)
+				return nil, fmt.Errorf("failed to check if %s contains inputfiles: %w", goType, err)
 			}
-			if ok {
-				// We return an error, because we can't actually handle this case yet.
-				return false, "", fmt.Errorf("no support for recursive checks of inputfiles yet for type %s with field %s", tgType.Name, f.Name)
+			if subFile != nil {
+				// return current, not subfile -> on purpose
+				return &f, nil
 			}
 		}
 	}
-	return false, "", nil
+	return nil, nil
 }
 
 func containsThumbnail(tgType TypeDescription) bool {
@@ -598,13 +600,12 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		return "", fmt.Errorf("failed to get constant fields: %w", err)
 	}
 
-	hasInputFile, fieldName, err := findInputFile(d, subtypes[0], map[string]bool{})
+	field, err := findInputFile(d, subtypes[0], map[string]bool{})
 	if err != nil {
 		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
 	}
-
 	// If the inputfile is a common field, then the interface contains fields.
-	hasInputFile = hasInputFile && slices.Contains(getFieldNames(commonFields), fieldName)
+	hasInputFile := field != nil && slices.Contains(getFieldNames(commonFields), field.Name)
 
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
@@ -923,16 +924,22 @@ type attachMethodData struct {
 	Type      string
 	Field     string
 	Thumbnail bool
+	IsPointer bool
 }
 
 const attachMethod = `
 func (v {{.Type}}) Attach(mediaName string, w *multipart.Writer) error {
+	{{- if .IsPointer }}
 	if v.{{.Field}} != nil {
+	{{- end }}
 		err := v.{{.Field}}.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
+	{{- if .IsPointer }}
 	}
+	{{- end }}
+
 	{{ if .Thumbnail }}
 	if v.Thumbnail != nil {
 		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
