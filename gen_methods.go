@@ -4792,7 +4792,7 @@ type SendChatJoinRequestWebAppOpts struct {
 
 // SendChatJoinRequestWebApp (https://core.telegram.org/bots/api#sendchatjoinrequestwebapp)
 //
-// Use this method to process a received chat join request query by showing a Mini App to the user before deciding the outcome. Returns True on success.
+// Use this method to process a received chat join request query by showing a Mini App to the user before deciding the outcome. Call answerChatJoinRequestQuery to resolve the join request query based on the user interaction with the Mini App. Returns True on success.
 //   - chatJoinRequestQueryId (type string): Unique identifier of the join request query
 //   - webAppUrl (type string): The URL of the Mini App to be opened
 //   - opts (type SendChatJoinRequestWebAppOpts): All optional parameters.
@@ -5999,7 +5999,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 
 // SendRichMessageOpts is the set of optional fields for Bot.SendRichMessage and Bot.SendRichMessageWithContext.
 type SendRichMessageOpts struct {
-	// Unique identifier of the business connection on behalf of which the message will be sent
+	// Unique identifier of the business connection on behalf of which the message will be sent. Bot can send rich messages on behalf of a business account only if the corresponding user can send rich messages.
 	BusinessConnectionId string
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64

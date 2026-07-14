@@ -1914,7 +1914,7 @@ type ChatJoinRequest struct {
 	Bio string `json:"bio,omitempty"`
 	// Optional. Chat invite link that was used by the user to send the join request
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
-	// Optional. Identifier of the join request query. If present, then the bot must call sendChatJoinRequestWebApp or directly call answerChatJoinRequestQuery within 10 seconds.
+	// Optional. Identifier of the join request query; for bots assigned to process join request only. If present, then the bot must call sendChatJoinRequestWebApp or directly call answerChatJoinRequestQuery within 10 seconds.
 	QueryId string `json:"query_id,omitempty"`
 }
 
@@ -10520,7 +10520,7 @@ func (v RichBlockParagraph) MarshalJSON() ([]byte, error) {
 
 // RichBlockPhoto (https://core.telegram.org/bots/api#richblockphoto)
 //
-// A block with a photo, corresponding to the HTML tag <photo>.
+// A block with a photo, corresponding to the HTML tag <img>.
 type RichBlockPhoto struct {
 	// Available sizes of the photo
 	Photo []PhotoSize `json:"photo,omitempty"`
@@ -13158,9 +13158,9 @@ type SuggestedPostInfo struct {
 type SuggestedPostPaid struct {
 	// Optional. Message containing the suggested post. Note that the Message object in this field will not contain the reply_to_message field even if it itself is a reply.
 	SuggestedPostMessage *Message `json:"suggested_post_message,omitempty"`
-	// Currency in which the payment was made. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins.
+	// Currency in which the payment was made. Currently, one of "XTR" for Telegram Stars or "TON" for TON grams.
 	Currency string `json:"currency"`
-	// Optional. The amount of the currency that was received by the channel in nanotoncoins; for payments in toncoins only
+	// Optional. The amount of the currency that was received by the channel in nanograms; for payments in TON grams only
 	Amount int64 `json:"amount,omitempty"`
 	// Optional. The amount of Telegram Stars that was received by the channel; for payments in Telegram Stars only
 	StarAmount *StarAmount `json:"star_amount,omitempty"`
@@ -13180,9 +13180,9 @@ type SuggestedPostParameters struct {
 //
 // Describes the price of a suggested post.
 type SuggestedPostPrice struct {
-	// Currency in which the post will be paid. Currently, must be one of "XTR" for Telegram Stars or "TON" for toncoins.
+	// Currency in which the post will be paid. Currently, must be one of "XTR" for Telegram Stars or "TON" for TON grams.
 	Currency string `json:"currency"`
-	// The amount of the currency that will be paid for the post in the smallest units of the currency, i.e. Telegram Stars or nanotoncoins. Currently, price in Telegram Stars must be between 5 and 100000, and price in nanotoncoins must be between 10000000 and 10000000000000.
+	// The amount of the currency that will be paid for the post in the smallest units of the currency, i.e. Telegram Stars or nanograms. Currently, price in Telegram Stars must be between 5 and 100000, and price in nanograms must be between 10000000 and 10000000000000.
 	Amount int64 `json:"amount"`
 }
 
@@ -13822,9 +13822,9 @@ type UniqueGiftInfo struct {
 	Gift UniqueGift `json:"gift"`
 	// Origin of the gift. Currently, either "upgrade" for gifts upgraded from regular gifts, "transfer" for gifts transferred from other users or channels, "resale" for gifts bought from other users, "gifted_upgrade" for upgrades purchased after the gift was sent, or "offer" for gifts bought or sold through gift purchase offers.
 	Origin string `json:"origin"`
-	// Optional. For gifts bought from other users, the currency in which the payment for the gift was done. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins.
+	// Optional. For gifts bought from other users, the currency in which the payment for the gift was done. Currently, one of "XTR" for Telegram Stars or "TON" for TON grams.
 	LastResaleCurrency string `json:"last_resale_currency,omitempty"`
-	// Optional. For gifts bought from other users, the price paid for the gift in either Telegram Stars or nanotoncoins
+	// Optional. For gifts bought from other users, the price paid for the gift in either Telegram Stars or nanograms
 	LastResaleAmount int64 `json:"last_resale_amount,omitempty"`
 	// Optional. Unique identifier of the received gift for the bot; only present for gifts received on behalf of business accounts
 	OwnedGiftId string `json:"owned_gift_id,omitempty"`
