@@ -378,6 +378,53 @@ func (iq InlineQuery) Answer(b *Bot, results []InlineQueryResult, opts *AnswerIn
 	return b.AnswerInlineQuery(iq.Id, results, opts)
 }
 
+func (v InputRichBlockBlockQuotation) RichTextChildren() []RichText {
+	if v.Credit == nil {
+		return nil
+	}
+	return []RichText{v.Credit}
+}
+
+func (v InputRichBlockDetails) RichTextChildren() []RichText {
+	return []RichText{v.Summary}
+}
+
+func (v InputRichBlockFooter) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
+func (v InputRichBlockParagraph) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
+func (v InputRichBlockPreformatted) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
+func (v InputRichBlockPullQuotation) RichTextChildren() []RichText {
+	var out []RichText
+	out = append(out, v.Text)
+	if v.Credit != nil {
+		out = append(out, v.Credit)
+	}
+	return out
+}
+
+func (v InputRichBlockSectionHeading) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
+func (v InputRichBlockTable) RichTextChildren() []RichText {
+	if v.Caption == nil {
+		return nil
+	}
+	return []RichText{v.Caption}
+}
+
+func (v InputRichBlockThinking) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
 // Copy is a helper method for Bot.CopyMessage.
 func (m Message) Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	return b.CopyMessage(chatId, m.Chat.Id, m.MessageId, opts)

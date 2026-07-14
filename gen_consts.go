@@ -30,6 +30,7 @@ const (
 	UpdateTypeChatBoost               = "chat_boost"
 	UpdateTypeRemovedChatBoost        = "removed_chat_boost"
 	UpdateTypeManagedBot              = "managed_bot"
+	UpdateTypeSubscription            = "subscription"
 )
 
 // GetType is a helper method to easily identify the type of update that is being received.
@@ -109,6 +110,9 @@ func (u Update) GetType() string {
 
 	case u.ManagedBot != nil:
 		return UpdateTypeManagedBot
+
+	case u.Subscription != nil:
+		return UpdateTypeSubscription
 
 	default:
 		return "unknown"
@@ -281,6 +285,31 @@ const (
 const (
 	InputProfilePhotoTypeStatic   = "static"
 	InputProfilePhotoTypeAnimated = "animated"
+)
+
+// The consts listed below represent all the InputRichBlock types.
+const (
+	InputRichBlockTypeParagraph              = "paragraph"
+	InputRichBlockTypeHeading                = "heading"
+	InputRichBlockTypePre                    = "pre"
+	InputRichBlockTypeFooter                 = "footer"
+	InputRichBlockTypeDivider                = "divider"
+	InputRichBlockTypeMathematicalExpression = "mathematical_expression"
+	InputRichBlockTypeAnchor                 = "anchor"
+	InputRichBlockTypeList                   = "list"
+	InputRichBlockTypeBlockquote             = "blockquote"
+	InputRichBlockTypePullquote              = "pullquote"
+	InputRichBlockTypeCollage                = "collage"
+	InputRichBlockTypeSlideshow              = "slideshow"
+	InputRichBlockTypeTable                  = "table"
+	InputRichBlockTypeDetails                = "details"
+	InputRichBlockTypeMap                    = "map"
+	InputRichBlockTypeAnimation              = "animation"
+	InputRichBlockTypeAudio                  = "audio"
+	InputRichBlockTypePhoto                  = "photo"
+	InputRichBlockTypeVideo                  = "video"
+	InputRichBlockTypeVoiceNote              = "voice_note"
+	InputRichBlockTypeThinking               = "thinking"
 )
 
 // The consts listed below represent all the InputStoryContent types.

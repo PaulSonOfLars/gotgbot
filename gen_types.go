@@ -726,6 +726,8 @@ type BotCommand struct {
 	Command string `json:"command"`
 	// Description of the command; 1-256 characters
 	Description string `json:"description"`
+	// Optional. True, if the command sends an ephemeral message, which can be seen only by the sender of the message and the bot
+	IsEphemeral bool `json:"is_ephemeral,omitempty"`
 }
 
 // BotCommandScope (https://core.telegram.org/bots/api#botcommandscope)
@@ -1050,6 +1052,18 @@ type BotShortDescription struct {
 	ShortDescription string `json:"short_description"`
 }
 
+// BotSubscriptionUpdated (https://core.telegram.org/bots/api#botsubscriptionupdated)
+//
+// This object contains information about changes to a user payment subscription toward the current bot.
+type BotSubscriptionUpdated struct {
+	// User who subscribed for payments toward the bot
+	User User `json:"user"`
+	// Bot-specified invoice payload
+	InvoicePayload string `json:"invoice_payload"`
+	// The new state of the subscription. Currently, it can be one of "canceled" if the user canceled the subscription, "active" if the user re-enabled a previously canceled subscription, or "failed" if payment for the subscription failed.
+	State string `json:"state"`
+}
+
 // BusinessBotRights (https://core.telegram.org/bots/api#businessbotrights)
 //
 // Represents the rights of a business bot.
@@ -1271,7 +1285,7 @@ type ChatAdministratorRights struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
-	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted, defaults to the value of can_pin_messages.
 	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 }
 
@@ -1746,6 +1760,8 @@ type ChatFullInfo struct {
 	PaidMessageStarCount int64 `json:"paid_message_star_count,omitempty"`
 	// Optional. The bot that processes join request queries in the chat. The field is only available to chat administrators.
 	GuardBot *User `json:"guard_bot,omitempty"`
+	// Optional. The Community to which the chat belongs
+	Community *Community `json:"community,omitempty"`
 }
 
 // UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
@@ -1804,6 +1820,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 		UniqueGiftColors                   *UniqueGiftColors     `json:"unique_gift_colors"`
 		PaidMessageStarCount               int64                 `json:"paid_message_star_count"`
 		GuardBot                           *User                 `json:"guard_bot"`
+		Community                          *Community            `json:"community"`
 	}
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
@@ -1866,6 +1883,7 @@ func (v *ChatFullInfo) UnmarshalJSON(b []byte) error {
 	v.UniqueGiftColors = t.UniqueGiftColors
 	v.PaidMessageStarCount = t.PaidMessageStarCount
 	v.GuardBot = t.GuardBot
+	v.Community = t.Community
 
 	return nil
 }
@@ -1914,7 +1932,7 @@ type ChatJoinRequest struct {
 	Bio string `json:"bio,omitempty"`
 	// Optional. Chat invite link that was used by the user to send the join request
 	InviteLink *ChatInviteLink `json:"invite_link,omitempty"`
-	// Optional. Identifier of the join request query; for bots assigned to process join request only. If present, then the bot must call sendChatJoinRequestWebApp or directly call answerChatJoinRequestQuery within 10 seconds.
+	// Optional. Identifier of the join request query; for bots assigned to process join requests only. If present, then the bot must call sendChatJoinRequestWebApp or directly call answerChatJoinRequestQuery within 10 seconds.
 	QueryId string `json:"query_id,omitempty"`
 }
 
@@ -1998,7 +2016,7 @@ type MergedChatMember struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only (Only for administrator)
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
-	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages. (Only for administrator)
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted, defaults to the value of can_pin_messages. (Only for administrator)
 	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 	// Optional. Tag of the member (Only for member, restricted)
 	Tag string `json:"tag,omitempty"`
@@ -2183,7 +2201,7 @@ type ChatMemberAdministrator struct {
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
-	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
+	// Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted, defaults to the value of can_pin_messages.
 	CanManageTags *bool `json:"can_manage_tags,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
@@ -2633,7 +2651,7 @@ type ChatPermissions struct {
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
 	// Optional. True, if the user is allowed to pin messages. Ignored in public supergroups.
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the user is allowed to create forum topics. If omitted defaults to the value of can_pin_messages.
+	// Optional. True, if the user is allowed to create forum topics. If omitted, defaults to the value of can_pin_messages.
 	CanManageTopics *bool `json:"can_manage_topics,omitempty"`
 }
 
@@ -2740,6 +2758,29 @@ type ChosenInlineResult struct {
 	Query string `json:"query"`
 }
 
+// Community (https://core.telegram.org/bots/api#community)
+//
+// Represents a community (a group of chats).
+type Community struct {
+	// Unique identifier for this community. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+	Id int64 `json:"id"`
+	// Name of the community
+	Name string `json:"name"`
+}
+
+// CommunityChatAdded (https://core.telegram.org/bots/api#communitychatadded)
+//
+// Describes a service message about a chat being added to a community.
+type CommunityChatAdded struct {
+	// The new community to which the chat belongs
+	Community Community `json:"community"`
+}
+
+// CommunityChatRemoved (https://core.telegram.org/bots/api#communitychatremoved)
+//
+// Describes a service message about a chat being removed from a community. Currently holds no information.
+type CommunityChatRemoved struct{}
+
 // Contact (https://core.telegram.org/bots/api#contact)
 //
 // This object represents a phone contact.
@@ -2778,7 +2819,7 @@ type Dice struct {
 //
 // Describes a service message about a change in the price of direct messages sent to a channel chat.
 type DirectMessagePriceChanged struct {
-	// True, if direct messages are enabled for the channel chat; false otherwise
+	// True, if direct messages are enabled for the channel chat; False otherwise
 	AreDirectMessagesEnabled bool `json:"are_direct_messages_enabled"`
 	// Optional. The new number of Telegram Stars that must be paid by users for each direct message sent to the channel. Does not apply to users who have been exempted by administrators. Defaults to 0.
 	DirectMessageStarCount int64 `json:"direct_message_star_count,omitempty"`
@@ -3426,7 +3467,7 @@ type MergedInlineQueryResult struct {
 	Description string `json:"description,omitempty"`
 	// Optional. A valid file identifier for the GIF file (Only for gif)
 	GifFileId string `json:"gif_file_id,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media (Only for gif, mpeg4_gif, photo, video, gif, mpeg4_gif, photo, video)
+	// Optional. Pass True if the caption must be shown above the message media (Only for gif, mpeg4_gif, photo, video, gif, mpeg4_gif, photo, video)
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. A valid file identifier for the MPEG4 file (Only for mpeg4_gif)
 	Mpeg4FileId string `json:"mpeg4_file_id,omitempty"`
@@ -3821,7 +3862,7 @@ type InlineQueryResultCachedGif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -3887,7 +3928,7 @@ type InlineQueryResultCachedMpeg4Gif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -3955,7 +3996,7 @@ type InlineQueryResultCachedPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -4075,7 +4116,7 @@ type InlineQueryResultCachedVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -4410,7 +4451,7 @@ type InlineQueryResultGif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -4569,7 +4610,7 @@ type InlineQueryResultMpeg4Gif struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -4648,7 +4689,7 @@ type InlineQueryResultPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
@@ -4803,7 +4844,7 @@ type InlineQueryResultVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Video width
 	VideoWidth int64 `json:"video_width,omitempty"`
@@ -5015,7 +5056,7 @@ type InputInvoiceMessageContent struct {
 	Prices []LabeledPrice `json:"prices,omitempty"`
 	// Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64 `json:"max_tip_amount,omitempty"`
-	// Optional. A JSON-serialized array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
+	// Optional. A JSON-serialized Array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	SuggestedTipAmounts []int64 `json:"suggested_tip_amounts,omitempty"`
 	// Optional. A JSON-serialized object for data about the invoice, which will be shared with the payment provider. A detailed description of the required fields should be provided by the payment provider.
 	ProviderData string `json:"provider_data,omitempty"`
@@ -5122,7 +5163,7 @@ type InputMediaAnimation struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Animation width
 	Width int64 `json:"width,omitempty"`
@@ -5361,7 +5402,7 @@ type InputMediaLivePhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Pass True if the live photo needs to be covered with a spoiler animation
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
@@ -5458,7 +5499,7 @@ type InputMediaPhoto struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Pass True if the photo needs to be covered with a spoiler animation
 	HasSpoiler bool `json:"has_spoiler,omitempty"`
@@ -5613,7 +5654,7 @@ type InputMediaVideo struct {
 	ParseMode string `json:"parse_mode,omitempty"`
 	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
-	// Optional. Pass True, if the caption must be shown above the message media
+	// Optional. Pass True if the caption must be shown above the message media
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// Optional. Video width
 	Width int64 `json:"width,omitempty"`
@@ -5671,6 +5712,35 @@ func (v InputMediaVideo) Attach(mediaName string, w *multipart.Writer) error {
 		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)
 		if err != nil {
 			return fmt.Errorf("failed to attach 'thumbnail' input file for %s: %w", mediaName, err)
+		}
+	}
+
+	return nil
+}
+
+// InputMediaVoiceNote (https://core.telegram.org/bots/api#inputmediavoicenote)
+//
+// Represents a voice message file to be sent.
+type InputMediaVoiceNote struct {
+	// Type of the media, must be voice_note
+	Type string `json:"type"`
+	// File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Media InputFileOrString `json:"media"`
+	// Optional. Caption of the voice message to be sent, 0-1024 characters after entities parsing
+	Caption string `json:"caption,omitempty"`
+	// Optional. Mode for parsing entities in the voice message caption. See formatting options for more details.
+	ParseMode string `json:"parse_mode,omitempty"`
+	// Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitempty"`
+	// Optional. Duration of the voice message in seconds
+	Duration int64 `json:"duration,omitempty"`
+}
+
+func (v InputMediaVoiceNote) Attach(mediaName string, w *multipart.Writer) error {
+	if v.Media != nil {
+		err := v.Media.Attach(mediaName, w)
+		if err != nil {
+			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
 	}
 
@@ -6087,14 +6157,780 @@ func (v InputProfilePhotoStatic) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
+// InputRichBlock (https://core.telegram.org/bots/api#inputrichblock)
+//
+// This object represents a block in a rich formatted message to be sent. Currently, it can be any of the following types:
+//   - InputRichBlockParagraph
+//   - InputRichBlockSectionHeading
+//   - InputRichBlockPreformatted
+//   - InputRichBlockFooter
+//   - InputRichBlockDivider
+//   - InputRichBlockMathematicalExpression
+//   - InputRichBlockAnchor
+//   - InputRichBlockList
+//   - InputRichBlockBlockQuotation
+//   - InputRichBlockPullQuotation
+//   - InputRichBlockCollage
+//   - InputRichBlockSlideshow
+//   - InputRichBlockTable
+//   - InputRichBlockDetails
+//   - InputRichBlockMap
+//   - InputRichBlockAnimation
+//   - InputRichBlockAudio
+//   - InputRichBlockPhoto
+//   - InputRichBlockVideo
+//   - InputRichBlockVoiceNote
+//   - InputRichBlockThinking
+type InputRichBlock interface {
+	GetType() string
+	// inputRichBlock exists to avoid external types implementing this interface.
+	inputRichBlock()
+}
+
+// Ensure that all subtypes correctly implement the parent interface.
+var (
+	_ InputRichBlock = InputRichBlockParagraph{}
+	_ InputRichBlock = InputRichBlockSectionHeading{}
+	_ InputRichBlock = InputRichBlockPreformatted{}
+	_ InputRichBlock = InputRichBlockFooter{}
+	_ InputRichBlock = InputRichBlockDivider{}
+	_ InputRichBlock = InputRichBlockMathematicalExpression{}
+	_ InputRichBlock = InputRichBlockAnchor{}
+	_ InputRichBlock = InputRichBlockList{}
+	_ InputRichBlock = InputRichBlockBlockQuotation{}
+	_ InputRichBlock = InputRichBlockPullQuotation{}
+	_ InputRichBlock = InputRichBlockCollage{}
+	_ InputRichBlock = InputRichBlockSlideshow{}
+	_ InputRichBlock = InputRichBlockTable{}
+	_ InputRichBlock = InputRichBlockDetails{}
+	_ InputRichBlock = InputRichBlockMap{}
+	_ InputRichBlock = InputRichBlockAnimation{}
+	_ InputRichBlock = InputRichBlockAudio{}
+	_ InputRichBlock = InputRichBlockPhoto{}
+	_ InputRichBlock = InputRichBlockVideo{}
+	_ InputRichBlock = InputRichBlockVoiceNote{}
+	_ InputRichBlock = InputRichBlockThinking{}
+)
+
+// InputRichBlockAnchor (https://core.telegram.org/bots/api#inputrichblockanchor)
+//
+// A block with an anchor, corresponding to the HTML tag <a> with the attribute name.
+type InputRichBlockAnchor struct {
+	// The name of the anchor
+	Name string `json:"name"`
+}
+
+// InputRichBlockAnchor.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockAnchor) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockAnchor) GetType() string {
+	return InputRichBlockTypeAnchor
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockAnchor) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockAnchor
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeAnchor,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockAnimation (https://core.telegram.org/bots/api#inputrichblockanimation)
+//
+// A block with an animation, corresponding to the HTML tag <video>.
+type InputRichBlockAnimation struct {
+	// The animation. Caption is ignored.
+	Animation InputMediaAnimation `json:"animation"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockAnimation.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockAnimation) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockAnimation) GetType() string {
+	return InputRichBlockTypeAnimation
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockAnimation) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockAnimation
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeAnimation,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputRichBlockAnimation) Attach(mediaName string, w *multipart.Writer) error {
+	err := v.Animation.Attach(mediaName, w)
+	if err != nil {
+		return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+	}
+
+	return nil
+}
+
+// InputRichBlockAudio (https://core.telegram.org/bots/api#inputrichblockaudio)
+//
+// A block with a music file, corresponding to the HTML tag <audio>.
+type InputRichBlockAudio struct {
+	// The audio. Caption is ignored.
+	Audio InputMediaAudio `json:"audio"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockAudio.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockAudio) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockAudio) GetType() string {
+	return InputRichBlockTypeAudio
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockAudio) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockAudio
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeAudio,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputRichBlockAudio) Attach(mediaName string, w *multipart.Writer) error {
+	err := v.Audio.Attach(mediaName, w)
+	if err != nil {
+		return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+	}
+
+	return nil
+}
+
+// InputRichBlockBlockQuotation (https://core.telegram.org/bots/api#inputrichblockblockquotation)
+//
+// A block quotation, corresponding to the HTML tag <blockquote>.
+type InputRichBlockBlockQuotation struct {
+	// Content of the block
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Credit of the block
+	Credit RichText `json:"credit,omitempty"`
+}
+
+// InputRichBlockBlockQuotation.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockBlockQuotation) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockBlockQuotation) GetType() string {
+	return InputRichBlockTypeBlockquote
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockBlockQuotation) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockBlockQuotation
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeBlockquote,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockCollage (https://core.telegram.org/bots/api#inputrichblockcollage)
+//
+// A collage, corresponding to the custom HTML tag <tg-collage>.
+type InputRichBlockCollage struct {
+	// Elements of the collage
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockCollage.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockCollage) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockCollage) GetType() string {
+	return InputRichBlockTypeCollage
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockCollage) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockCollage
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeCollage,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockDetails (https://core.telegram.org/bots/api#inputrichblockdetails)
+//
+// An expandable block for details disclosure, corresponding to the HTML tag <details>.
+type InputRichBlockDetails struct {
+	// Always shown summary of the block
+	Summary RichText `json:"summary"`
+	// Content of the block
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Pass True if the content of the block is visible by default
+	IsOpen bool `json:"is_open,omitempty"`
+}
+
+// InputRichBlockDetails.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockDetails) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockDetails) GetType() string {
+	return InputRichBlockTypeDetails
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockDetails) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockDetails
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeDetails,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockDivider (https://core.telegram.org/bots/api#inputrichblockdivider)
+//
+// A divider, corresponding to the HTML tag <hr/>.
+type InputRichBlockDivider struct{}
+
+// InputRichBlockDivider.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockDivider) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockDivider) GetType() string {
+	return InputRichBlockTypeDivider
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockDivider) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockDivider
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeDivider,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockFooter (https://core.telegram.org/bots/api#inputrichblockfooter)
+//
+// A footer, corresponding to the HTML tag <footer>.
+type InputRichBlockFooter struct {
+	// Text of the block
+	Text RichText `json:"text"`
+}
+
+// InputRichBlockFooter.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockFooter) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockFooter) GetType() string {
+	return InputRichBlockTypeFooter
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockFooter) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockFooter
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeFooter,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockList (https://core.telegram.org/bots/api#inputrichblocklist)
+//
+// A list of blocks, corresponding to the HTML tag <ul> or <ol> with multiple nested tags <li>.
+type InputRichBlockList struct {
+	// Items of the list
+	Items []InputRichBlockListItem `json:"items,omitempty"`
+}
+
+// InputRichBlockList.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockList) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockList) GetType() string {
+	return InputRichBlockTypeList
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockList) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockList
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeList,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockListItem (https://core.telegram.org/bots/api#inputrichblocklistitem)
+//
+// An item of a list to be sent.
+type InputRichBlockListItem struct {
+	// The content of the item
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Pass True if the item has a checkbox
+	HasCheckbox bool `json:"has_checkbox,omitempty"`
+	// Optional. Pass True if the item has a checked checkbox
+	IsChecked bool `json:"is_checked,omitempty"`
+	// Optional. For ordered lists, the numeric value of the item label
+	Value int64 `json:"value,omitempty"`
+	// Optional. For ordered lists, the type of the item label; must be one of "a" for lowercase letters, "A" for uppercase letters, "i" for lowercase Roman numerals, "I" for uppercase Roman numerals, or "1" for decimal numbers
+	Type string `json:"type,omitempty"`
+}
+
+// InputRichBlockMap (https://core.telegram.org/bots/api#inputrichblockmap)
+//
+// A block with a map, corresponding to the custom HTML tag <tg-map>. The map's width and height must not exceed 10000 in total. The width and height ratio must be at most 20.
+type InputRichBlockMap struct {
+	// Location of the center of the map
+	Location Location `json:"location"`
+	// Map zoom level; 0-24
+	Zoom int64 `json:"zoom"`
+	// Map width; 0-10000
+	Width int64 `json:"width"`
+	// Map height; 0-10000
+	Height int64 `json:"height"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockMap.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockMap) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockMap) GetType() string {
+	return InputRichBlockTypeMap
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockMap) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockMap
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeMap,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockMathematicalExpression (https://core.telegram.org/bots/api#inputrichblockmathematicalexpression)
+//
+// A block with a mathematical expression in LaTeX format, corresponding to the custom HTML tag <tg-math-block>.
+type InputRichBlockMathematicalExpression struct {
+	// The mathematical expression in LaTeX format
+	Expression string `json:"expression"`
+}
+
+// InputRichBlockMathematicalExpression.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockMathematicalExpression) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockMathematicalExpression) GetType() string {
+	return InputRichBlockTypeMathematicalExpression
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockMathematicalExpression) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockMathematicalExpression
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeMathematicalExpression,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockParagraph (https://core.telegram.org/bots/api#inputrichblockparagraph)
+//
+// A text paragraph, corresponding to the HTML tag <p>.
+type InputRichBlockParagraph struct {
+	// Text of the block
+	Text RichText `json:"text"`
+}
+
+// InputRichBlockParagraph.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockParagraph) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockParagraph) GetType() string {
+	return InputRichBlockTypeParagraph
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockParagraph) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockParagraph
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeParagraph,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockPhoto (https://core.telegram.org/bots/api#inputrichblockphoto)
+//
+// A block with a photo, corresponding to the HTML tag <img>.
+type InputRichBlockPhoto struct {
+	// The photo. Caption is ignored.
+	Photo InputMediaPhoto `json:"photo"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockPhoto.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockPhoto) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockPhoto) GetType() string {
+	return InputRichBlockTypePhoto
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockPhoto) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockPhoto
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypePhoto,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputRichBlockPhoto) Attach(mediaName string, w *multipart.Writer) error {
+	err := v.Photo.Attach(mediaName, w)
+	if err != nil {
+		return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+	}
+
+	return nil
+}
+
+// InputRichBlockPreformatted (https://core.telegram.org/bots/api#inputrichblockpreformatted)
+//
+// A preformatted text block, corresponding to the nested HTML tags <pre> and <code>.
+type InputRichBlockPreformatted struct {
+	// Text of the block
+	Text RichText `json:"text"`
+	// Optional. The programming language of the text
+	Language string `json:"language,omitempty"`
+}
+
+// InputRichBlockPreformatted.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockPreformatted) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockPreformatted) GetType() string {
+	return InputRichBlockTypePre
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockPreformatted) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockPreformatted
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypePre,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockPullQuotation (https://core.telegram.org/bots/api#inputrichblockpullquotation)
+//
+// A quotation with centered text, loosely corresponding to the HTML tag <aside>.
+type InputRichBlockPullQuotation struct {
+	// Text of the block
+	Text RichText `json:"text"`
+	// Optional. Credit of the block
+	Credit RichText `json:"credit,omitempty"`
+}
+
+// InputRichBlockPullQuotation.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockPullQuotation) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockPullQuotation) GetType() string {
+	return InputRichBlockTypePullquote
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockPullQuotation) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockPullQuotation
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypePullquote,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockSectionHeading (https://core.telegram.org/bots/api#inputrichblocksectionheading)
+//
+// A section heading, corresponding to the HTML tags <h1>, <h2>, <h3>, <h4>, <h5>, or <h6>.
+type InputRichBlockSectionHeading struct {
+	// Text of the block
+	Text RichText `json:"text"`
+	// Relative size of the text font; 1-6, 1 is the largest, 6 is the smallest
+	Size int64 `json:"size"`
+}
+
+// InputRichBlockSectionHeading.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockSectionHeading) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockSectionHeading) GetType() string {
+	return InputRichBlockTypeHeading
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockSectionHeading) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockSectionHeading
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeHeading,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockSlideshow (https://core.telegram.org/bots/api#inputrichblockslideshow)
+//
+// A slideshow, corresponding to the custom HTML tag <tg-slideshow>.
+type InputRichBlockSlideshow struct {
+	// Elements of the slideshow
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockSlideshow.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockSlideshow) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockSlideshow) GetType() string {
+	return InputRichBlockTypeSlideshow
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockSlideshow) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockSlideshow
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeSlideshow,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockTable (https://core.telegram.org/bots/api#inputrichblocktable)
+//
+// A table, corresponding to the HTML tag <table>.
+type InputRichBlockTable struct {
+	// Cells of the table
+	Cells [][]RichBlockTableCell `json:"cells,omitempty"`
+	// Optional. Pass True if the table has borders
+	IsBordered bool `json:"is_bordered,omitempty"`
+	// Optional. Pass True if the table is striped
+	IsStriped bool `json:"is_striped,omitempty"`
+	// Optional. Caption of the table
+	Caption RichText `json:"caption,omitempty"`
+}
+
+// InputRichBlockTable.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockTable) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockTable) GetType() string {
+	return InputRichBlockTypeTable
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockTable) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockTable
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeTable,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockThinking (https://core.telegram.org/bots/api#inputrichblockthinking)
+//
+// A block with a "Thinking..." placeholder, corresponding to the custom HTML tag <tg-thinking>. The block may be used only in sendRichMessageDraft, therefore it can't be received in messages. See https://t.me/addemoji/AIActions for examples of custom emoji that are recommended for usage in the block.
+type InputRichBlockThinking struct {
+	// Text of the block. See https://t.me/addemoji/AIActions for examples of custom emoji that are recommended for usage in the block.
+	Text RichText `json:"text"`
+}
+
+// InputRichBlockThinking.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockThinking) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockThinking) GetType() string {
+	return InputRichBlockTypeThinking
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockThinking) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockThinking
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeThinking,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// InputRichBlockVideo (https://core.telegram.org/bots/api#inputrichblockvideo)
+//
+// A block with a video, corresponding to the HTML tag <video>.
+type InputRichBlockVideo struct {
+	// The video. Caption is ignored.
+	Video InputMediaVideo `json:"video"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockVideo.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockVideo) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockVideo) GetType() string {
+	return InputRichBlockTypeVideo
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockVideo) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockVideo
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeVideo,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputRichBlockVideo) Attach(mediaName string, w *multipart.Writer) error {
+	err := v.Video.Attach(mediaName, w)
+	if err != nil {
+		return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+	}
+
+	return nil
+}
+
+// InputRichBlockVoiceNote (https://core.telegram.org/bots/api#inputrichblockvoicenote)
+//
+// A block with a voice note, corresponding to the HTML tag <audio>.
+type InputRichBlockVoiceNote struct {
+	// The voice note. Caption is ignored.
+	VoiceNote InputMediaVoiceNote `json:"voice_note"`
+	// Optional. Caption of the block
+	Caption *RichBlockCaption `json:"caption,omitempty"`
+}
+
+// InputRichBlockVoiceNote.inputRichBlock is a dummy method to avoid interface implementation.
+func (v InputRichBlockVoiceNote) inputRichBlock() {}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v InputRichBlockVoiceNote) GetType() string {
+	return InputRichBlockTypeVoiceNote
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v InputRichBlockVoiceNote) MarshalJSON() ([]byte, error) {
+	type alias InputRichBlockVoiceNote
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  InputRichBlockTypeVoiceNote,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+func (v InputRichBlockVoiceNote) Attach(mediaName string, w *multipart.Writer) error {
+	err := v.VoiceNote.Attach(mediaName, w)
+	if err != nil {
+		return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
+	}
+
+	return nil
+}
+
 // InputRichMessage (https://core.telegram.org/bots/api#inputrichmessage)
 //
-// Describes a rich message to be sent. Exactly one of the fields html or markdown must be used.
+// Describes a rich message to be sent. Exactly one of the fields html, markdown, or blocks must be used.
 type InputRichMessage struct {
-	// Optional. Content of the rich message to send described using HTML formatting. See rich message formatting options for more details.
+	// Optional. Content of the rich message to send described as a list of blocks
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
+	// Optional. Content of the rich message to send described using HTML formatting. See rich message formatting options for more details. Use media field to specify the media used in the message.
 	Html string `json:"html,omitempty"`
-	// Optional. Content of the rich message to send described using Markdown formatting. See rich message formatting options for more details.
+	// Optional. Content of the rich message to send described using Markdown formatting. See rich message formatting options for more details. Use media field to specify the media used in the message.
 	Markdown string `json:"markdown,omitempty"`
+	// Optional. List of media that are specified in the markdown or html fields using tg://photo?id=, tg://video?id=, and tg://audio?id= links
+	Media []InputRichMessageMedia `json:"media,omitempty"`
 	// Optional. Pass True if the rich message must be shown right-to-left
 	IsRtl bool `json:"is_rtl,omitempty"`
 	// Optional. Pass True to skip automatic detection of entities (e.g., URLs, email addresses, username mentions, hashtags, cashtags, bot commands, or phone numbers) in the text
@@ -6111,6 +6947,16 @@ type InputRichMessageContent struct {
 
 // InputRichMessageContent.inputMessageContent is a dummy method to avoid interface implementation.
 func (v InputRichMessageContent) inputMessageContent() {}
+
+// InputRichMessageMedia (https://core.telegram.org/bots/api#inputrichmessagemedia)
+//
+// Describes a media element embedded in an outgoing rich message.
+type InputRichMessageMedia struct {
+	// Unique identifier of the media used in a tg://photo?id=, tg://video?id=, or tg://audio?id= link. 1-64 characters, only A-Z, a-z, 0-9, _ and - are allowed.
+	Id string `json:"id"`
+	// The media to be sent. Everything except the media itself and its properties is ignored.
+	Media InputMedia `json:"media"`
+}
 
 // InputSticker (https://core.telegram.org/bots/api#inputsticker)
 //
@@ -6846,7 +7692,7 @@ func (v MenuButtonWebApp) MarshalJSON() ([]byte, error) {
 //
 // This object represents a message.
 type Message struct {
-	// Unique message identifier inside this chat. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent.
+	// Unique message identifier inside this chat; 0 for ephemeral messages. In specific instances (e.g., a message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent.
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread or forum topic to which the message belongs; for supergroups and private chats only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
@@ -6862,6 +7708,10 @@ type Message struct {
 	SenderBusinessBot *User `json:"sender_business_bot,omitempty"`
 	// Optional. Tag or custom title of the sender of the message; for supergroups only
 	SenderTag string `json:"sender_tag,omitempty"`
+	// Optional. For ephemeral messages, the user who received the message
+	ReceiverUser *User `json:"receiver_user,omitempty"`
+	// Optional. For ephemeral messages, identifier of the ephemeral message inside this chat. The identifier may be reused for another ephemeral message after the message is deleted or expires.
+	EphemeralMessageId int64 `json:"ephemeral_message_id,omitempty"`
 	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	Date int64 `json:"date"`
 	// Optional. The unique identifier for the guest query. Use this identifier with the method answerGuestQuery to send a response message. If non-empty, the message belongs to the chat where the guest bot was summoned, which may not coincide with other existing bot chats sharing the same identifier.
@@ -6876,7 +7726,7 @@ type Message struct {
 	IsTopicMessage bool `json:"is_topic_message,omitempty"`
 	// Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
 	IsAutomaticForward bool `json:"is_automatic_forward,omitempty"`
-	// Optional. For replies in the same chat and message thread, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
+	// Optional. For replies in the same chat and message thread, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply. If the message is a reply to an ephemeral message, then this field may be omitted.
 	ReplyToMessage *Message `json:"reply_to_message,omitempty"`
 	// Optional. Information about the message that is being replied to, which may come from another chat or forum topic
 	ExternalReply *ExternalReplyInfo `json:"external_reply,omitempty"`
@@ -7024,6 +7874,10 @@ type Message struct {
 	ChecklistTasksDone *ChecklistTasksDone `json:"checklist_tasks_done,omitempty"`
 	// Optional. Service message: tasks were added to a checklist
 	ChecklistTasksAdded *ChecklistTasksAdded `json:"checklist_tasks_added,omitempty"`
+	// Optional. Service message: chat added to a Community
+	CommunityChatAdded *CommunityChatAdded `json:"community_chat_added,omitempty"`
+	// Optional. Service message: chat removed from a Community
+	CommunityChatRemoved *CommunityChatRemoved `json:"community_chat_removed,omitempty"`
 	// Optional. Service message: the price for paid messages in the corresponding direct messages chat of a channel has changed
 	DirectMessagePriceChanged *DirectMessagePriceChanged `json:"direct_message_price_changed,omitempty"`
 	// Optional. Service message: forum topic created
@@ -7090,6 +7944,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		SenderBoostCount              int64                          `json:"sender_boost_count"`
 		SenderBusinessBot             *User                          `json:"sender_business_bot"`
 		SenderTag                     string                         `json:"sender_tag"`
+		ReceiverUser                  *User                          `json:"receiver_user"`
+		EphemeralMessageId            int64                          `json:"ephemeral_message_id"`
 		Date                          int64                          `json:"date"`
 		GuestQueryId                  string                         `json:"guest_query_id"`
 		BusinessConnectionId          string                         `json:"business_connection_id"`
@@ -7171,6 +8027,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		ChatBackgroundSet             *ChatBackground                `json:"chat_background_set"`
 		ChecklistTasksDone            *ChecklistTasksDone            `json:"checklist_tasks_done"`
 		ChecklistTasksAdded           *ChecklistTasksAdded           `json:"checklist_tasks_added"`
+		CommunityChatAdded            *CommunityChatAdded            `json:"community_chat_added"`
+		CommunityChatRemoved          *CommunityChatRemoved          `json:"community_chat_removed"`
 		DirectMessagePriceChanged     *DirectMessagePriceChanged     `json:"direct_message_price_changed"`
 		ForumTopicCreated             *ForumTopicCreated             `json:"forum_topic_created"`
 		ForumTopicEdited              *ForumTopicEdited              `json:"forum_topic_edited"`
@@ -7212,6 +8070,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.SenderBoostCount = t.SenderBoostCount
 	v.SenderBusinessBot = t.SenderBusinessBot
 	v.SenderTag = t.SenderTag
+	v.ReceiverUser = t.ReceiverUser
+	v.EphemeralMessageId = t.EphemeralMessageId
 	v.Date = t.Date
 	v.GuestQueryId = t.GuestQueryId
 	v.BusinessConnectionId = t.BusinessConnectionId
@@ -7299,6 +8159,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.ChatBackgroundSet = t.ChatBackgroundSet
 	v.ChecklistTasksDone = t.ChecklistTasksDone
 	v.ChecklistTasksAdded = t.ChecklistTasksAdded
+	v.CommunityChatAdded = t.CommunityChatAdded
+	v.CommunityChatRemoved = t.CommunityChatRemoved
 	v.DirectMessagePriceChanged = t.DirectMessagePriceChanged
 	v.ForumTopicCreated = t.ForumTopicCreated
 	v.ForumTopicEdited = t.ForumTopicEdited
@@ -9403,11 +10265,11 @@ type RefundedPayment struct {
 type ReplyKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of KeyboardButton objects
 	Keyboard [][]KeyboardButton `json:"keyboard,omitempty"`
-	// Optional. Requests clients to always show the keyboard when the regular keyboard is hidden. Defaults to false, in which case the custom keyboard can be hidden and opened with a keyboard icon.
+	// Optional. Requests clients to always show the keyboard when the regular keyboard is hidden. Defaults to False, in which case the custom keyboard can be hidden and opened with a keyboard icon.
 	IsPersistent bool `json:"is_persistent,omitempty"`
-	// Optional. Requests clients to resize the keyboard vertically for optimal fit (e.g., make the keyboard smaller if there are just two rows of buttons). Defaults to false, in which case the custom keyboard is always of the same height as the app's standard keyboard.
+	// Optional. Requests clients to resize the keyboard vertically for optimal fit (e.g., make the keyboard smaller if there are just two rows of buttons). Defaults to False, in which case the custom keyboard is always of the same height as the app's standard keyboard.
 	ResizeKeyboard bool `json:"resize_keyboard,omitempty"`
-	// Optional. Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat - the user can press a special button in the input field to see the custom keyboard again. Defaults to false.
+	// Optional. Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat - the user can press a special button in the input field to see the custom keyboard again. Defaults to False.
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 	// Optional. The placeholder to be shown in the input field when the keyboard is active; 1-64 characters
 	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
@@ -9435,13 +10297,15 @@ func (v ReplyKeyboardRemove) replyMarkup() {}
 //
 // Describes reply parameters for the message that is being sent.
 type ReplyParameters struct {
-	// Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
-	MessageId int64 `json:"message_id"`
-	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the bot, supergroup or channel in the format @username. Not supported for messages sent on behalf of a business account and messages from channel direct messages chats.
+	// Optional. Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified. Required if ephemeral_message_id isn't specified.
+	MessageId int64 `json:"message_id,omitempty"`
+	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the bot, supergroup or channel in the format @username. Not supported for messages sent on behalf of a business account, messages from channel direct messages chats and ephemeral messages.
 	ChatId int64 `json:"chat_id,omitempty"`
-	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic. Always True for messages sent on behalf of a business account.
+	// Optional. Identifier of the incoming ephemeral message that will be replied to in the current chat. A reply to an ephemeral message must itself be an ephemeral message. An ephemeral message may only be replied to within 15 seconds of being sent. Required if message_id isn't specified.
+	EphemeralMessageId int64 `json:"ephemeral_message_id,omitempty"`
+	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic, and sent ephemeral messages. Always True for messages sent on behalf of a business account.
 	AllowSendingWithoutReply bool `json:"allow_sending_without_reply,omitempty"`
-	// Optional. Quoted part of the message to be replied to; 0-1024 characters after entities parsing. The quote must be an exact substring of the message to be replied to, including bold, italic, underline, strikethrough, spoiler, custom_emoji, and date_time entities. The message will fail to send if the quote isn't found in the original message.
+	// Optional. Quoted part of the message to be replied to; 0-1024 characters after entities parsing. The quote must be an exact substring of the message to be replied to, including bold, italic, underline, strikethrough, spoiler, custom_emoji, and date_time entities. The message will fail to send if the quote isn't found in the original message. Ignored for ephemeral messages.
 	Quote string `json:"quote,omitempty"`
 	// Optional. Mode for parsing entities in the quote. See formatting options for more details.
 	QuoteParseMode string `json:"quote_parse_mode,omitempty"`
@@ -10877,9 +11741,9 @@ func (v *RichBlockTableCell) UnmarshalJSON(b []byte) error {
 
 // RichBlockThinking (https://core.telegram.org/bots/api#richblockthinking)
 //
-// A block with a "Thinking..." placeholder, corresponding to the custom HTML tag <tg-thinking>. The block may be used only in sendRichMessageDraft, therefore it can't be received in messages. See https://t.me/addemoji/AIActions for examples of custom emoji, which are recommended for usage in the block.
+// A block with a "Thinking..." placeholder, corresponding to the custom HTML tag <tg-thinking>. The block may be used only in sendRichMessageDraft, therefore it can't be received in messages. See https://t.me/addemoji/AIActions for examples of custom emoji that are recommended for usage in the block.
 type RichBlockThinking struct {
-	// Text of the block. See https://t.me/addemoji/AIActions for examples of custom emoji, which are recommended for usage in the block.
+	// Text of the block. See https://t.me/addemoji/AIActions for examples of custom emoji that are recommended for usage in the block.
 	Text RichText `json:"text"`
 }
 
@@ -13917,6 +14781,8 @@ type Update struct {
 	RemovedChatBoost *ChatBoostRemoved `json:"removed_chat_boost,omitempty"`
 	// Optional. A new bot was created to be managed by the bot, or token or owner of a managed bot was changed
 	ManagedBot *ManagedBotUpdated `json:"managed_bot,omitempty"`
+	// Optional. User payment subscription has changed
+	Subscription *BotSubscriptionUpdated `json:"subscription,omitempty"`
 }
 
 // User (https://core.telegram.org/bots/api#user)
