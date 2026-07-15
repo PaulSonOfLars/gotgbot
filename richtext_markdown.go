@@ -322,7 +322,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		if v.Caption != nil {
 			r.renderBlockHTML(v)
 		} else {
-			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("audio", InputMediaVoiceNote{Media: InputFileByID(v.VoiceNote.FileId)}))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("audio", InputMediaVoiceNote{Type: "voice_note", Media: InputFileByID(v.VoiceNote.FileId)}))
 		}
 	case RichBlockMap:
 		// Maps aren't supported in markdown; require inline HTML.

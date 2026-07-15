@@ -362,7 +362,7 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 			r.sb.WriteString(tgAudio)
 		}
 	case RichBlockVoiceNote:
-		tgAudio := fmt.Sprintf("<audio src=\"%s\"></audio>\n", r.addFile("audio", InputMediaVoiceNote{Media: InputFileByID(v.VoiceNote.FileId)}))
+		tgAudio := fmt.Sprintf("<audio src=\"%s\"></audio>\n", r.addFile("audio", InputMediaVoiceNote{Type: "voice_note", Media: InputFileByID(v.VoiceNote.FileId)}))
 		if v.Caption != nil {
 			r.sb.WriteString("<figure>\n")
 			r.sb.WriteString(tgAudio)

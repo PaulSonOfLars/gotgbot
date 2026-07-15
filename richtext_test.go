@@ -277,7 +277,7 @@ func TestRichBlockParsing(t *testing.T) {
 			wantText:     "",
 			skipLiveTest: true, // doesn't play nice with PMs
 			wantMedia: []InputRichMessageMedia{
-				{Id: "1", Media: InputMediaVoiceNote{Media: InputFileByID("1234")}},
+				{Id: "1", Media: InputMediaVoiceNote{Type: "voice_note", Media: InputFileByID("1234")}},
 			},
 		}, {
 			name:         "RichBlockThinking",
@@ -422,7 +422,7 @@ func getFile(t *testing.T, kind string) InputMedia {
 	case "RichBlockVideo":
 		return InputMediaVideo{Media: InputFileByURL("https://telegram.org/example/video.mp4")}
 	case "RichBlockVoiceNote":
-		return InputMediaVoiceNote{Media: InputFileByURL("https://telegram.org/example/audio.ogg")}
+		return InputMediaVoiceNote{Type: "voice_note", Media: InputFileByURL("https://telegram.org/example/audio.ogg")}
 	default:
 		// assume nothing?
 		return nil
