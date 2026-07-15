@@ -247,18 +247,18 @@ func (m RichMessage) PlainText() string {
 	return sb.String()
 }
 
-func (m RichMessage) HTML() string {
-	var sb strings.Builder
+func (m RichMessage) HTML() (string, []InputRichMessageMedia) {
+	var r renderCtx
 	for _, block := range m.Blocks {
-		sb.WriteString(RichBlockHTML(block))
+		r.renderBlockHTML(block)
 	}
-	return sb.String()
+	return r.sb.String(), r.media
 }
 
-func (m RichMessage) Markdown() string {
-	var sb strings.Builder
+func (m RichMessage) Markdown() (string, []InputRichMessageMedia) {
+	var r renderCtx
 	for _, block := range m.Blocks {
-		sb.WriteString(RichBlockMarkdown(block))
+		r.renderBlockMarkdown(block, 0)
 	}
-	return sb.String()
+	return r.sb.String(), r.media
 }

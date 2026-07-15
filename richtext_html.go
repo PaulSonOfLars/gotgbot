@@ -3,183 +3,182 @@ package gotgbot
 import (
 	"fmt"
 	"html"
-	"strings"
 )
 
 // RichTextHTML renders r as an HTML string, using standard HTML tags for each
 // RichText node type. The output is suitable for embedding in an HTML document.
-func RichTextHTML(r RichText) string {
-	var sb strings.Builder
-	renderTextHTML(r, &sb)
-	return sb.String()
+func RichTextHTML(rt RichText) string {
+	var r renderCtx
+	r.renderTextHTML(rt)
+	return r.sb.String()
 }
 
-func renderTextHTML(r RichText, sb *strings.Builder) {
+func (r *renderCtx) renderTextHTML(rt RichText) {
 	if r == nil {
 		return
 	}
-	switch v := r.(type) {
+	switch v := rt.(type) {
 	case RichTextString:
-		sb.WriteString(html.EscapeString(string(v)))
+		r.sb.WriteString(html.EscapeString(string(v)))
 	case RichTextArray:
 		for _, child := range v {
-			renderTextHTML(child, sb)
+			r.renderTextHTML(child)
 		}
 
 	// Formatting wrappers - recurse into .Text
 	case RichTextBold:
-		sb.WriteString("<b>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</b>")
+		r.sb.WriteString("<b>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</b>")
 	case RichTextItalic:
-		sb.WriteString("<i>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</i>")
+		r.sb.WriteString("<i>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</i>")
 	case RichTextUnderline:
-		sb.WriteString("<u>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</u>")
+		r.sb.WriteString("<u>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</u>")
 	case RichTextStrikethrough:
-		sb.WriteString("<s>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</s>")
+		r.sb.WriteString("<s>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</s>")
 	case RichTextSpoiler:
-		sb.WriteString(`<tg-spoiler>`)
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</tg-spoiler>")
+		r.sb.WriteString(`<tg-spoiler>`)
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</tg-spoiler>")
 	case RichTextMarked:
-		sb.WriteString("<mark>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</mark>")
+		r.sb.WriteString("<mark>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</mark>")
 	case RichTextSubscript:
-		sb.WriteString("<sub>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</sub>")
+		r.sb.WriteString("<sub>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</sub>")
 	case RichTextSuperscript:
-		sb.WriteString("<sup>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</sup>")
+		r.sb.WriteString("<sup>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</sup>")
 	case RichTextCode:
-		sb.WriteString("<code>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</code>")
+		r.sb.WriteString("<code>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</code>")
 
 	// Links and references
 	case RichTextUrl:
-		fmt.Fprintf(sb, `<a href="%s">`, html.EscapeString(v.Url))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="%s">`, html.EscapeString(v.Url))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 	case RichTextEmailAddress:
-		fmt.Fprintf(sb, `<a href="mailto:%s">`, html.EscapeString(v.EmailAddress))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="mailto:%s">`, html.EscapeString(v.EmailAddress))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 	case RichTextPhoneNumber:
-		fmt.Fprintf(sb, `<a href="tel:%s">`, html.EscapeString(v.PhoneNumber))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="tel:%s">`, html.EscapeString(v.PhoneNumber))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 	case RichTextTextMention:
-		fmt.Fprintf(sb, `<a href="tg://user?id=%d">`, v.User.Id)
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="tg://user?id=%d">`, v.User.Id)
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 	case RichTextMention:
-		renderTextHTML(v.Text, sb)
+		r.renderTextHTML(v.Text)
 	case RichTextAnchor:
-		fmt.Fprintf(sb, `<a name="%s"></a>`, html.EscapeString(v.Name))
+		fmt.Fprintf(&r.sb, `<a name="%s"></a>`, html.EscapeString(v.Name))
 	case RichTextAnchorLink:
-		fmt.Fprintf(sb, `<a href="#%s">`, html.EscapeString(v.AnchorName))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="#%s">`, html.EscapeString(v.AnchorName))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 	case RichTextReference:
-		fmt.Fprintf(sb, `<tg-reference name="%s">`, html.EscapeString(v.Name))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</tg-reference>")
+		fmt.Fprintf(&r.sb, `<tg-reference name="%s">`, html.EscapeString(v.Name))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</tg-reference>")
 	case RichTextReferenceLink:
-		fmt.Fprintf(sb, `<a href="#%s">`, html.EscapeString(v.ReferenceName))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</a>")
+		fmt.Fprintf(&r.sb, `<a href="#%s">`, html.EscapeString(v.ReferenceName))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</a>")
 
 	// Entities with no wrapping text child
 	case RichTextHashtag:
-		renderTextHTML(v.Text, sb)
+		r.renderTextHTML(v.Text)
 	case RichTextCashtag:
-		renderTextHTML(v.Text, sb)
+		r.renderTextHTML(v.Text)
 	case RichTextBotCommand:
-		renderTextHTML(v.Text, sb)
+		r.renderTextHTML(v.Text)
 	case RichTextBankCardNumber:
-		renderTextHTML(v.Text, sb)
+		r.renderTextHTML(v.Text)
 	case RichTextDateTime:
-		fmt.Fprintf(sb, `<tg-time unix="%d" format="%s">`, v.UnixTime, html.EscapeString(v.DateTimeFormat))
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</tg-time>")
+		fmt.Fprintf(&r.sb, `<tg-time unix="%d" format="%s">`, v.UnixTime, html.EscapeString(v.DateTimeFormat))
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</tg-time>")
 	case RichTextCustomEmoji:
-		fmt.Fprintf(sb, `<tg-emoji emoji-id="%s">%s</tg-emoji>`, html.EscapeString(v.CustomEmojiId), html.EscapeString(v.AlternativeText))
+		fmt.Fprintf(&r.sb, `<tg-emoji emoji-id="%s">%s</tg-emoji>`, html.EscapeString(v.CustomEmojiId), html.EscapeString(v.AlternativeText))
 	case RichTextMathematicalExpression:
-		fmt.Fprintf(sb, `<tg-math>%s</tg-math>`, html.EscapeString(v.Expression))
+		fmt.Fprintf(&r.sb, `<tg-math>%s</tg-math>`, html.EscapeString(v.Expression))
 	}
 }
 
 // RichBlockHTML renders a RichBlock and its descendants as an HTML fragment.
-func RichBlockHTML(b RichBlock) string {
-	var sb strings.Builder
-	renderBlockHTML(b, &sb)
-	return sb.String()
+func RichBlockHTML(b RichBlock) (string, []InputRichMessageMedia) {
+	var r renderCtx
+	r.renderBlockHTML(b)
+	return r.sb.String(), r.media
 }
 
-func renderBlockHTML(b RichBlock, sb *strings.Builder) {
+func (r *renderCtx) renderBlockHTML(b RichBlock) {
 	switch v := b.(type) {
 	case RichBlockParagraph:
-		sb.WriteString("<p>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</p>\n")
+		r.sb.WriteString("<p>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</p>\n")
 	case RichBlockSectionHeading:
 		tag := fmt.Sprintf("h%d", v.Size)
-		sb.WriteString("<" + tag + ">")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</" + tag + ">\n")
+		r.sb.WriteString("<" + tag + ">")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</" + tag + ">\n")
 	case RichBlockPreformatted:
 		if v.Language != "" {
-			fmt.Fprintf(sb, `<pre><code class="language-%s">`, html.EscapeString(v.Language))
+			fmt.Fprintf(&r.sb, `<pre><code class="language-%s">`, html.EscapeString(v.Language))
 		} else {
-			sb.WriteString("<pre><code>")
+			r.sb.WriteString("<pre><code>")
 		}
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</code></pre>\n")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</code></pre>\n")
 	case RichBlockFooter:
-		sb.WriteString("<footer>")
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</footer>\n")
+		r.sb.WriteString("<footer>")
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</footer>\n")
 	case RichBlockBlockQuotation:
-		sb.WriteString("<blockquote>\n")
+		r.sb.WriteString("<blockquote>\n")
 		for _, child := range v.Blocks {
-			renderBlockHTML(child, sb)
+			r.renderBlockHTML(child)
 		}
 		if v.Credit != nil {
-			sb.WriteString("<cite>")
-			renderTextHTML(v.Credit, sb)
-			sb.WriteString("</cite>\n")
+			r.sb.WriteString("<cite>")
+			r.renderTextHTML(v.Credit)
+			r.sb.WriteString("</cite>\n")
 		}
-		sb.WriteString("</blockquote>\n")
+		r.sb.WriteString("</blockquote>\n")
 	case RichBlockPullQuotation:
-		sb.WriteString(`<aside>`)
-		renderTextHTML(v.Text, sb)
+		r.sb.WriteString(`<aside>`)
+		r.renderTextHTML(v.Text)
 		if v.Credit != nil {
-			sb.WriteString("<cite>")
-			renderTextHTML(v.Credit, sb)
-			sb.WriteString("</cite>")
+			r.sb.WriteString("<cite>")
+			r.renderTextHTML(v.Credit)
+			r.sb.WriteString("</cite>")
 		}
-		sb.WriteString("</aside>\n")
+		r.sb.WriteString("</aside>\n")
 	case RichBlockDetails:
-		sb.WriteString("<details")
+		r.sb.WriteString("<details")
 		if v.IsOpen {
-			sb.WriteString(" open")
+			r.sb.WriteString(" open")
 		}
-		sb.WriteString(">\n<summary>")
-		renderTextHTML(v.Summary, sb)
-		sb.WriteString("</summary>\n")
+		r.sb.WriteString(">\n<summary>")
+		r.renderTextHTML(v.Summary)
+		r.sb.WriteString("</summary>\n")
 		for _, child := range v.Blocks {
-			renderBlockHTML(child, sb)
+			r.renderBlockHTML(child)
 		}
-		sb.WriteString("</details>\n")
+		r.sb.WriteString("</details>\n")
 	case RichBlockList:
 		if len(v.Items) == 0 {
 			return
@@ -202,7 +201,7 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 			listAttrs += " reversed"
 		}
 
-		fmt.Fprintf(sb, "<%s%s>\n", tag, listAttrs)
+		fmt.Fprintf(&r.sb, "<%s%s>\n", tag, listAttrs)
 		for _, item := range v.Items {
 			itemAttrs := ""
 			if tag == "ol" && item.Value > 1 {
@@ -212,23 +211,23 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				itemAttrs += fmt.Sprintf(" type=\"%s\"", item.Type)
 			}
 
-			fmt.Fprintf(sb, "<li%s>", itemAttrs)
+			fmt.Fprintf(&r.sb, "<li%s>", itemAttrs)
 			if item.HasCheckbox {
 				if item.IsChecked {
-					sb.WriteString(`<input type="checkbox" checked> `)
+					r.sb.WriteString(`<input type="checkbox" checked> `)
 				} else {
-					sb.WriteString(`<input type="checkbox"> `)
+					r.sb.WriteString(`<input type="checkbox"> `)
 				}
 			}
 			if len(item.Blocks) > 0 {
-				sb.WriteString("\n")
+				r.sb.WriteString("\n")
 				for _, child := range item.Blocks {
-					renderBlockHTML(child, sb)
+					r.renderBlockHTML(child)
 				}
 			}
-			sb.WriteString("</li>\n")
+			r.sb.WriteString("</li>\n")
 		}
-		fmt.Fprintf(sb, "</%s>\n", tag)
+		fmt.Fprintf(&r.sb, "</%s>\n", tag)
 	case RichBlockTable:
 		attrs := ""
 		if v.IsBordered {
@@ -237,9 +236,17 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 		if v.IsStriped {
 			attrs += " striped"
 		}
-		fmt.Fprintf(sb, "<table%s>\n", attrs)
+
+		fmt.Fprintf(&r.sb, "<table%s>\n", attrs)
+
+		if v.Caption != nil {
+			fmt.Fprintf(&r.sb, "<caption>")
+			r.renderTextHTML(v.Caption)
+			fmt.Fprintf(&r.sb, "</caption>\n")
+		}
+
 		for _, row := range v.Cells {
-			sb.WriteString("<tr>\n")
+			r.sb.WriteString("<tr>\n")
 			for _, cell := range row {
 				tag := "td"
 				if cell.IsHeader {
@@ -247,7 +254,11 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				}
 
 				attrs := ""
-				if cell.Align != "" && cell.Align != "center" {
+				if cell.Align != "" &&
+					// headers are "center" by default.
+					// non-headers are "left" by default.
+					((cell.IsHeader && cell.Align != "center") ||
+						(!cell.IsHeader && cell.Align != "left")) {
 					attrs += fmt.Sprintf(" align=\"%s\"", cell.Align)
 				}
 				if cell.Valign != "" && cell.Valign != "middle" {
@@ -259,123 +270,133 @@ func renderBlockHTML(b RichBlock, sb *strings.Builder) {
 				if cell.Rowspan > 1 {
 					attrs += fmt.Sprintf(" rowspan=\"%d\"", cell.Rowspan)
 				}
-				fmt.Fprintf(sb, "<%s%s>", tag, attrs)
+				fmt.Fprintf(&r.sb, "<%s%s>", tag, attrs)
 				if cell.Text != nil {
-					renderTextHTML(cell.Text, sb)
+					r.renderTextHTML(cell.Text)
 				}
-				fmt.Fprintf(sb, "</%s>\n", tag)
+				fmt.Fprintf(&r.sb, "</%s>\n", tag)
 			}
-			sb.WriteString("</tr>\n")
+			r.sb.WriteString("</tr>\n")
 		}
-		sb.WriteString("</table>\n")
+		r.sb.WriteString("</table>\n")
 	case RichBlockCollage:
-		sb.WriteString("<tg-collage>\n")
+		r.sb.WriteString("<tg-collage>\n")
 		for _, child := range v.Blocks {
-			renderBlockHTML(child, sb)
+			r.renderBlockHTML(child)
 		}
-		renderCaptionHTML(v.Caption, sb)
-		sb.WriteString("</tg-collage>\n")
+		r.renderCaptionHTML(v.Caption)
+		r.sb.WriteString("</tg-collage>\n")
 	case RichBlockSlideshow:
-		sb.WriteString("<tg-slideshow>\n")
+		r.sb.WriteString("<tg-slideshow>\n")
 		for _, child := range v.Blocks {
-			renderBlockHTML(child, sb)
+			r.renderBlockHTML(child)
 		}
-		renderCaptionHTML(v.Caption, sb)
-		sb.WriteString("</tg-slideshow>\n")
+		r.renderCaptionHTML(v.Caption)
+		r.sb.WriteString("</tg-slideshow>\n")
 	case RichBlockThinking:
-		sb.WriteString(`<tg-thinking>`)
-		renderTextHTML(v.Text, sb)
-		sb.WriteString("</tg-thinking>\n")
+		r.sb.WriteString(`<tg-thinking>`)
+		r.renderTextHTML(v.Text)
+		r.sb.WriteString("</tg-thinking>\n")
 	case RichBlockMathematicalExpression:
-		fmt.Fprintf(sb, "<tg-math-block>%s</tg-math-block>\n", html.EscapeString(v.Expression))
+		fmt.Fprintf(&r.sb, "<tg-math-block>%s</tg-math-block>\n", html.EscapeString(v.Expression))
 	case RichBlockDivider:
-		sb.WriteString("<hr/>\n")
+		r.sb.WriteString("<hr/>\n")
 	case RichBlockAnchor:
-		fmt.Fprintf(sb, `<a name="%s"></a>`+"\n", html.EscapeString(v.Name))
+		fmt.Fprintf(&r.sb, `<a name="%s"></a>`+"\n", html.EscapeString(v.Name))
 	case RichBlockPhoto:
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgAnimation := fmt.Sprintf("<img src=\"fileId://%s\"%s></img>\n", v.Photo[len(v.Photo)-1].FileId, attrs)
+
+		tgAnimation := fmt.Sprintf("<img src=\"%s\"%s></img>\n",
+			r.addFile("photo", InputMediaPhoto{Media: InputFileByID(v.Photo[len(v.Photo)-1].FileId)}), attrs)
+
 		if v.Caption != nil {
-			sb.WriteString("<figure>\n")
-			sb.WriteString(tgAnimation)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>\n")
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgAnimation)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAnimation)
+			r.sb.WriteString(tgAnimation)
 		}
 	case RichBlockAnimation:
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgAnimation := fmt.Sprintf("<video src=\"fileId://%s\"%s></video>\n", v.Animation.FileId, attrs)
+		tgAnimation := fmt.Sprintf("<video src=\"%s\"%s></video>\n",
+			r.addFile("video", InputMediaAnimation{Media: InputFileByID(v.Animation.FileId)}), attrs)
 		if v.Caption != nil {
-			sb.WriteString("<figure>\n")
-			sb.WriteString(tgAnimation)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>\n")
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgAnimation)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAnimation)
+			r.sb.WriteString(tgAnimation)
 		}
 	case RichBlockVideo:
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
-		tgVideo := fmt.Sprintf("<video src=\"fileId://%s\"%s></video>\n", v.Video.FileId, attrs)
+		tgVideo := fmt.Sprintf("<video src=\"%s\"%s></video>\n",
+			r.addFile("video", InputMediaVideo{Media: InputFileByID(v.Video.FileId)}), attrs)
 		if v.Caption != nil {
-			sb.WriteString("<figure>\n")
-			sb.WriteString(tgVideo)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>\n")
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgVideo)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgVideo)
+			r.sb.WriteString(tgVideo)
 		}
 	case RichBlockAudio:
-		tgAudio := fmt.Sprintf("<audio src=\"fileId://%s\"></audio>\n", v.Audio.FileId)
+		tgAudio := fmt.Sprintf("<audio src=\"%s\"></audio>\n",
+			r.addFile("audio", InputMediaAudio{Media: InputFileByID(v.Audio.FileId)}))
 		if v.Caption != nil {
-			sb.WriteString("<figure>\n")
-			sb.WriteString(tgAudio)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>\n")
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgAudio)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAudio)
+			r.sb.WriteString(tgAudio)
 		}
 	case RichBlockVoiceNote:
-		tgAudio := fmt.Sprintf("<audio src=\"fileId://%s\"></audio>\n", v.VoiceNote.FileId)
+		tgAudio := fmt.Sprintf("<audio src=\"%s\"></audio>\n", r.addFile("audio", InputMediaVoiceNote{Media: InputFileByID(v.VoiceNote.FileId)}))
 		if v.Caption != nil {
-			sb.WriteString("<figure>\n")
-			sb.WriteString(tgAudio)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>\n")
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgAudio)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
 		} else {
-			sb.WriteString(tgAudio)
+			r.sb.WriteString(tgAudio)
 		}
 	case RichBlockMap:
 		tgMap := fmt.Sprintf(
 			`<tg-map lat="%g" long="%g" zoom="%d"/>`,
 			v.Location.Latitude, v.Location.Longitude, v.Zoom)
 		if v.Caption != nil {
-			sb.WriteString("<figure>")
-			sb.WriteString(tgMap)
-			renderCaptionHTML(v.Caption, sb)
-			sb.WriteString("</figure>")
+			r.sb.WriteString("<figure>")
+			r.sb.WriteString(tgMap)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>")
 		} else {
-			sb.WriteString(tgMap)
+			r.sb.WriteString(tgMap)
 		}
-		sb.WriteString("\n")
+		r.sb.WriteString("\n")
 	}
 }
 
-func isReversed(items RichBlockListItemArray) bool {
-	if len(items) == 0 {
-		return false
+func (r *renderCtx) renderCaptionHTML(cap *RichBlockCaption) {
+	if cap == nil {
+		return
 	}
-	if len(items) == 1 {
-		return items[0].Value > 1
+	r.sb.WriteString("<figcaption>")
+	r.renderTextHTML(cap.Text)
+	if cap.Credit != nil {
+		r.sb.WriteString("<cite>")
+		r.renderTextHTML(cap.Credit)
+		r.sb.WriteString("</cite>")
 	}
-	return items[0].Value > items[1].Value
+	r.sb.WriteString("</figcaption>\n")
 }

@@ -9,173 +9,182 @@ import (
 
 // RichTextMarkdown renders r as a Markdown string.
 // Uses CommonMark conventions; for Telegram MarkdownV2 use RichTextMarkdownV2.
-func RichTextMarkdown(r RichText) string {
-	var sb strings.Builder
-	renderTextMarkdown(r, &sb)
-	return sb.String()
+func RichTextMarkdown(rt RichText) string {
+	var r renderCtx
+	r.renderTextMarkdown(rt)
+	return r.sb.String()
 }
 
-func renderTextMarkdown(r RichText, sb *strings.Builder) {
+func (r *renderCtx) renderTextMarkdown(rt RichText) {
 	if r == nil {
 		return
 	}
-	switch v := r.(type) {
+	switch v := rt.(type) {
 	case RichTextString:
-		sb.WriteString(mdEscape(string(v)))
+		r.sb.WriteString(mdEscape(string(v)))
 	case RichTextArray:
 		for _, child := range v {
-			renderTextMarkdown(child, sb)
+			r.renderTextMarkdown(child)
 		}
 	case RichTextBold:
-		sb.WriteString("**")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("**")
+		r.sb.WriteString("**")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("**")
 	case RichTextItalic:
-		sb.WriteString("_")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("_")
+		r.sb.WriteString("_")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("_")
 	case RichTextUnderline:
 		// No standard Markdown underline; use HTML fallback.
-		sb.WriteString("<u>")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("</u>")
+		r.sb.WriteString("<u>")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("</u>")
 	case RichTextStrikethrough:
-		sb.WriteString("~~")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("~~")
+		r.sb.WriteString("~~")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("~~")
 	case RichTextSpoiler:
-		sb.WriteString(`||`)
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("||")
+		r.sb.WriteString(`||`)
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("||")
 	case RichTextMarked:
-		sb.WriteString("==")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("==")
+		r.sb.WriteString("==")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("==")
 	case RichTextSubscript:
-		sb.WriteString("<sub>")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("</sub>")
+		r.sb.WriteString("<sub>")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("</sub>")
 	case RichTextSuperscript:
-		sb.WriteString("<sup>")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("</sup>")
+		r.sb.WriteString("<sup>")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("</sup>")
 	case RichTextCode:
-		sb.WriteString("`")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("`")
+		r.sb.WriteString("`")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("`")
 	case RichTextUrl:
-		sb.WriteString("[")
-		renderTextMarkdown(v.Text, sb)
-		sb.WriteString("](")
-		sb.WriteString(v.Url)
-		sb.WriteString(")")
+		r.sb.WriteString("[")
+		r.renderTextMarkdown(v.Text)
+		r.sb.WriteString("](")
+		r.sb.WriteString(v.Url)
+		r.sb.WriteString(")")
 	case RichTextEmailAddress:
 		text := RichTextContent(v.Text)
-		fmt.Fprintf(sb, "[%s](mailto:%s)", mdEscape(text), v.EmailAddress)
+		fmt.Fprintf(&r.sb, "[%s](mailto:%s)", mdEscape(text), v.EmailAddress)
 	case RichTextPhoneNumber:
 		text := RichTextContent(v.Text)
-		fmt.Fprintf(sb, "[%s](tel:%s)", mdEscape(text), v.PhoneNumber)
+		fmt.Fprintf(&r.sb, "[%s](tel:%s)", mdEscape(text), v.PhoneNumber)
 	case RichTextTextMention:
-		sb.WriteString("[")
-		renderTextMarkdown(v.Text, sb)
-		fmt.Fprintf(sb, "](tg://user?id=%d)", v.User.Id)
+		r.sb.WriteString("[")
+		r.renderTextMarkdown(v.Text)
+		fmt.Fprintf(&r.sb, "](tg://user?id=%d)", v.User.Id)
 	case RichTextMention:
-		renderTextMarkdown(v.Text, sb)
+		r.renderTextMarkdown(v.Text)
 	case RichTextAnchor:
-		fmt.Fprintf(sb, "<a name=\"%s\"></a>\n", html.EscapeString(v.Name))
+		fmt.Fprintf(&r.sb, "<a name=\"%s\"></a>\n", html.EscapeString(v.Name))
 	case RichTextAnchorLink:
-		sb.WriteString("[")
-		renderTextMarkdown(v.Text, sb)
-		fmt.Fprintf(sb, "](#%s)", v.AnchorName)
+		r.sb.WriteString("[")
+		r.renderTextMarkdown(v.Text)
+		fmt.Fprintf(&r.sb, "](#%s)", v.AnchorName)
 	case RichTextReference:
-		fmt.Fprintf(sb, "[^%s]: ", v.Name)
-		renderTextMarkdown(v.Text, sb)
+		fmt.Fprintf(&r.sb, "[^%s]: ", v.Name)
+		r.renderTextMarkdown(v.Text)
 	case RichTextReferenceLink:
-		renderTextMarkdown(v.Text, sb)
-		fmt.Fprintf(sb, "[^%s]", v.ReferenceName)
+		r.renderTextMarkdown(v.Text)
+		fmt.Fprintf(&r.sb, "[^%s]", v.ReferenceName)
 	case RichTextHashtag:
-		renderTextMarkdown(v.Text, sb)
+		r.renderTextMarkdown(v.Text)
 	case RichTextCashtag:
-		renderTextMarkdown(v.Text, sb)
+		r.renderTextMarkdown(v.Text)
 	case RichTextBotCommand:
-		renderTextMarkdown(v.Text, sb)
+		r.renderTextMarkdown(v.Text)
 	case RichTextBankCardNumber:
-		renderTextMarkdown(v.Text, sb)
+		r.renderTextMarkdown(v.Text)
 	case RichTextDateTime:
-		sb.WriteString("![")
-		renderTextMarkdown(v.Text, sb)
-		fmt.Fprintf(sb, "](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat)
+		r.sb.WriteString("![")
+		r.renderTextMarkdown(v.Text)
+		fmt.Fprintf(&r.sb, "](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat)
 	case RichTextCustomEmoji:
-		fmt.Fprintf(sb, "![%s](tg://emoji?id=%s)", v.AlternativeText, v.CustomEmojiId)
+		fmt.Fprintf(&r.sb, "![%s](tg://emoji?id=%s)", v.AlternativeText, v.CustomEmojiId)
 	case RichTextMathematicalExpression:
-		sb.WriteString("$$")
-		sb.WriteString(v.Expression)
-		sb.WriteString("$$")
+		r.sb.WriteString("$$")
+		r.sb.WriteString(v.Expression)
+		r.sb.WriteString("$$")
 	}
 }
 
 // RichBlockMarkdown renders a RichBlock as a Markdown string.
-func RichBlockMarkdown(b RichBlock) string {
-	var sb strings.Builder
-	renderBlockMarkdown(b, &sb, 0)
-	return sb.String()
+func RichBlockMarkdown(b RichBlock) (string, []InputRichMessageMedia) {
+	var r renderCtx
+	r.renderBlockMarkdown(b, 0)
+	return r.sb.String(), r.media
 }
 
-func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
+func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	indent := strings.Repeat("  ", depth)
 	switch v := b.(type) {
 	case RichBlockParagraph:
-		sb.WriteString(RichTextMarkdown(v.Text))
-		sb.WriteString("\n")
+		r.sb.WriteString(RichTextMarkdown(v.Text))
+		r.sb.WriteString("\n")
 	case RichBlockSectionHeading:
-		sb.WriteString(strings.Repeat("#", int(v.Size)) + " ")
-		sb.WriteString(RichTextMarkdown(v.Text))
-		sb.WriteString("\n")
+		r.sb.WriteString(strings.Repeat("#", int(v.Size)) + " ")
+		r.sb.WriteString(RichTextMarkdown(v.Text))
+		r.sb.WriteString("\n")
 	case RichBlockPreformatted:
-		sb.WriteString("```" + v.Language + "\n")
-		sb.WriteString(RichTextContent(v.Text)) // raw text, no escaping inside code blocks
-		sb.WriteString("\n```\n")
+		r.sb.WriteString("```" + v.Language + "\n")
+		r.sb.WriteString(RichTextContent(v.Text)) // raw text, no escaping inside code blocks
+		r.sb.WriteString("\n```\n")
 	case RichBlockFooter:
-		sb.WriteString("---\n")
-		sb.WriteString(RichTextMarkdown(v.Text))
-		sb.WriteString("\n")
+		r.sb.WriteString("---\n")
+		r.sb.WriteString(RichTextMarkdown(v.Text))
+		r.sb.WriteString("\n")
 	case RichBlockBlockQuotation:
+		// Prefix each line with "> "
 		for _, child := range v.Blocks {
-			// Prefix each line with "> "
-			inner := strings.Builder{}
-			renderBlockMarkdown(child, &inner, 0)
-			for _, line := range strings.Split(strings.TrimRight(inner.String(), "\n"), "\n") {
-				sb.WriteString("> " + line + "\n")
+			// create an internal render, only for the text
+			inner := renderCtx{
+				sb:      strings.Builder{},
+				media:   r.media,
+				counter: r.counter,
 			}
+			inner.renderBlockMarkdown(child, 0)
+
+			for _, line := range strings.Split(strings.TrimRight(inner.sb.String(), "\n"), "\n") {
+				r.sb.WriteString("> " + line + "\n")
+			}
+
+			r.media = inner.media
+			r.counter = inner.counter
 		}
 		if v.Credit != nil {
-			sb.WriteString("<aside>")
-			sb.WriteString(RichTextMarkdown(v.Credit))
-			sb.WriteString("</aside>")
+			r.sb.WriteString("<aside>")
+			r.sb.WriteString(RichTextMarkdown(v.Credit))
+			r.sb.WriteString("</aside>")
 		}
-		sb.WriteString("\n")
+		r.sb.WriteString("\n")
 	case RichBlockPullQuotation:
-		sb.WriteString("<aside>")
-		sb.WriteString(RichTextMarkdown(v.Text))
+		r.sb.WriteString("<aside>")
+		r.sb.WriteString(RichTextMarkdown(v.Text))
 		if v.Credit != nil {
-			sb.WriteString("<cite>")
-			sb.WriteString(RichTextMarkdown(v.Credit))
-			sb.WriteString("</cite>")
+			r.sb.WriteString("<cite>")
+			r.sb.WriteString(RichTextMarkdown(v.Credit))
+			r.sb.WriteString("</cite>")
 		}
-		sb.WriteString("</aside>")
-		sb.WriteString("\n")
+		r.sb.WriteString("</aside>")
+		r.sb.WriteString("\n")
 	case RichBlockDetails:
-		sb.WriteString("<details")
+		r.sb.WriteString("<details")
 		if v.IsOpen {
-			sb.WriteString(" open")
+			r.sb.WriteString(" open")
 		}
-		sb.WriteString(">\n<summary>")
-		sb.WriteString(RichTextMarkdown(v.Summary))
-		sb.WriteString("</summary>\n")
+		r.sb.WriteString(">\n<summary>")
+		r.sb.WriteString(RichTextMarkdown(v.Summary))
+		r.sb.WriteString("</summary>\n")
 		for _, child := range v.Blocks {
-			renderBlockMarkdown(child, sb, depth)
+			r.renderBlockMarkdown(child, depth)
 		}
-		sb.WriteString("</details>\n")
+		r.sb.WriteString("</details>\n")
 	case RichBlockList:
 		ordered := len(v.Items) > 0 && v.Items[0].Value != 0
 		for i, item := range v.Items {
@@ -197,120 +206,126 @@ func renderBlockMarkdown(b RichBlock, sb *strings.Builder, depth int) {
 					val = strings.ToLower(toRoman(valInt))
 				}
 
-				fmt.Fprintf(sb, "%s%s. ", indent, val)
+				fmt.Fprintf(&r.sb, "%s%s. ", indent, val)
 
 			} else {
-				sb.WriteString(indent + "- ")
+				r.sb.WriteString(indent + "- ")
 				if item.HasCheckbox {
 					if item.IsChecked {
-						sb.WriteString(indent + "[x] ")
+						r.sb.WriteString(indent + "[x] ")
 					} else {
-						sb.WriteString(indent + "[ ] ")
+						r.sb.WriteString(indent + "[ ] ")
 					}
 				}
 			}
 			for _, child := range item.Blocks {
-				renderBlockMarkdown(child, sb, depth+1)
+				r.renderBlockMarkdown(child, depth+1)
 			}
 		}
-		sb.WriteString("\n")
+		r.sb.WriteString("\n")
 	case RichBlockTable:
 		// Emit as a GFM table.
 		if len(v.Cells) == 0 {
 			break
 		}
+
+		// simple attempt at detecting lossy table behaviour
+		if row := v.Cells[0]; v.Caption != nil || len(row) == 0 || !row[0].IsHeader {
+			r.renderBlockHTML(b)
+			break
+		}
+
 		for i, row := range v.Cells {
-			sb.WriteString("|")
+			r.sb.WriteString("|")
 			for _, cell := range row {
 				text := ""
 				if cell.Text != nil {
 					text = RichTextMarkdown(cell.Text)
 				}
-				sb.WriteString(" " + text + " |")
+				r.sb.WriteString(" " + text + " |")
 			}
-			sb.WriteString("\n")
+			r.sb.WriteString("\n")
+
+			// NOTE: This builds the direction based on the first header row.
+			// HTML supports per-row ordering, markdown does not; this is lossy behaviour.
 			if i == 0 {
-				sb.WriteString("|")
+				r.sb.WriteString("|")
 				for _, cell := range row {
 					switch cell.Align {
 					case "right":
-						sb.WriteString("---:|")
+						r.sb.WriteString("---:|")
 					case "left":
-						sb.WriteString(":---|")
-					case "center", "":
-						sb.WriteString(":---:|")
+						r.sb.WriteString(":---|")
+					case "center":
+						r.sb.WriteString(":---:|")
 					default:
-						sb.WriteString("---|")
+						r.sb.WriteString("---|")
 					}
 				}
-				sb.WriteString("\n")
+				r.sb.WriteString("\n")
 			}
 		}
-		sb.WriteString("\n")
+		r.sb.WriteString("\n")
 	case RichBlockCollage:
-		sb.WriteString("<tg-collage>\n")
+		r.sb.WriteString("<tg-collage>\n")
 		for _, child := range v.Blocks {
-			renderBlockMarkdown(child, sb, depth+1)
+			r.renderBlockMarkdown(child, depth+1)
 		}
-		renderCaptionHTML(v.Caption, sb)
-		sb.WriteString("</tg-collage>\n")
+		r.renderCaptionHTML(v.Caption)
+		r.sb.WriteString("</tg-collage>\n")
 
 	case RichBlockSlideshow:
-		sb.WriteString("<tg-slideshow>\n")
+		r.sb.WriteString("<tg-slideshow>\n")
 		for _, child := range v.Blocks {
-			renderBlockMarkdown(child, sb, depth+1)
+			r.renderBlockMarkdown(child, depth+1)
 		}
-		renderCaptionHTML(v.Caption, sb)
-		sb.WriteString("</tg-slideshow>\n")
+		r.renderCaptionHTML(v.Caption)
+		r.sb.WriteString("</tg-slideshow>\n")
 
 	case RichBlockThinking:
-		sb.WriteString("<tg-thinking>")
-		sb.WriteString(RichTextMarkdown(v.Text))
-		sb.WriteString("\n</tg-thinking>\n")
+		r.sb.WriteString("<tg-thinking>")
+		r.sb.WriteString(RichTextMarkdown(v.Text))
+		r.sb.WriteString("\n</tg-thinking>\n")
 	case RichBlockMathematicalExpression:
-		sb.WriteString("$$\n")
-		sb.WriteString(v.Expression)
-		sb.WriteString("\n$$\n")
+		r.sb.WriteString("$$\n")
+		r.sb.WriteString(v.Expression)
+		r.sb.WriteString("\n$$\n")
 	case RichBlockDivider:
-		sb.WriteString("---\n")
+		r.sb.WriteString("---\n")
 	case RichBlockAnchor:
-		fmt.Fprintf(sb, "<a name=\"%s\"></a>\n", v.Name)
+		fmt.Fprintf(&r.sb, "<a name=\"%s\"></a>\n", v.Name)
 	case RichBlockPhoto:
 		if v.Caption != nil {
-			renderBlockHTML(v, sb)
+			r.renderBlockHTML(v)
 		} else {
-			sb.WriteString(fileLink(v.Photo[len(v.Photo)-1].FileId))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("photo", InputMediaPhoto{Media: InputFileByID(v.Photo[len(v.Photo)-1].FileId)}))
 		}
 	case RichBlockAnimation:
 		if v.Caption != nil {
-			renderBlockHTML(v, sb)
+			r.renderBlockHTML(v)
 		} else {
-			sb.WriteString(fileLink(v.Animation.FileId))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("video", InputMediaAnimation{Media: InputFileByID(v.Animation.FileId)}))
 		}
 	case RichBlockVideo:
 		if v.Caption != nil {
-			renderBlockHTML(v, sb)
+			r.renderBlockHTML(v)
 		} else {
-			sb.WriteString(fileLink(v.Video.FileId))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("video", InputMediaVideo{Media: InputFileByID(v.Video.FileId)}))
 		}
 	case RichBlockAudio:
 		if v.Caption != nil {
-			renderBlockHTML(v, sb)
+			r.renderBlockHTML(v)
 		} else {
-			sb.WriteString(fileLink(v.Audio.FileId))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("audio", InputMediaAudio{Media: InputFileByID(v.Audio.FileId)}))
 		}
 	case RichBlockVoiceNote:
 		if v.Caption != nil {
-			renderBlockHTML(v, sb)
+			r.renderBlockHTML(v)
 		} else {
-			sb.WriteString(fileLink(v.VoiceNote.FileId))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("audio", InputMediaVoiceNote{Media: InputFileByID(v.VoiceNote.FileId)}))
 		}
 	case RichBlockMap:
 		// Maps aren't supported in markdown; require inline HTML.
-		renderBlockHTML(v, sb)
+		r.renderBlockHTML(v)
 	}
-}
-
-func fileLink(fileId string) string {
-	return fmt.Sprintf("![](fileId://%s)\n", fileId)
 }

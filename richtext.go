@@ -1,8 +1,44 @@
 package gotgbot
 
 import (
+	"strconv"
 	"strings"
 )
+
+type renderCtx struct {
+	sb      strings.Builder
+	media   []InputRichMessageMedia
+	counter int64 // media counter
+}
+
+func (r *renderCtx) addMedia(m InputRichMessageMedia) {
+	r.media = append(r.media, m)
+}
+
+func (r *renderCtx) nextCounter() int64 {
+	r.counter++
+	return r.counter
+}
+
+func (r *renderCtx) addFile(strType string, v InputMedia) string {
+	sendFileId := strconv.FormatInt(r.nextCounter(), 10)
+	link := "tg://" + strType + "?id=" + sendFileId
+	r.addMedia(InputRichMessageMedia{
+		Id:    sendFileId,
+		Media: v,
+	})
+	return link
+}
+
+func isReversed(items RichBlockListItemArray) bool {
+	if len(items) == 0 {
+		return false
+	}
+	if len(items) == 1 {
+		return items[0].Value > 1
+	}
+	return items[0].Value > items[1].Value
+}
 
 // GetRichTextTypes gets the list of all richtext types which match the "want" function.
 // Eg: m.GetRichTextTypes(IsRichTextType[RichTextString], IsRichTextType[RichTextUrl]).
@@ -297,20 +333,6 @@ func captionContent(caption *RichBlockCaption, sb *strings.Builder) {
 // =============================================================================
 // Shared helpers
 // =============================================================================
-
-func renderCaptionHTML(cap *RichBlockCaption, sb *strings.Builder) {
-	if cap == nil {
-		return
-	}
-	sb.WriteString("<figcaption>")
-	renderTextHTML(cap.Text, sb)
-	if cap.Credit != nil {
-		sb.WriteString("<cite>")
-		renderTextHTML(cap.Credit, sb)
-		sb.WriteString("</cite>")
-	}
-	sb.WriteString("</figcaption>\n")
-}
 
 // mdEscape escapes characters that have special meaning in CommonMark.
 var mdSpecial = strings.NewReplacer(

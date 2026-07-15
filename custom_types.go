@@ -23,3 +23,15 @@ func (v RichTextArray) Children() []RichText { return []RichText(v) }
 type RichBlockArray []RichBlock
 
 type RichBlockListItemArray []RichBlockListItem
+
+// Voice note bits; technically NOT valid, since "voicenote" arent InputMedia (since they cant be edited message content).
+// Need to add better support for multi-type values in the future.
+func (v InputMediaVoiceNote) GetType() string {
+	return "voice_note"
+}
+
+func (v InputMediaVoiceNote) GetMedia() InputFileOrString {
+	return v.Media
+}
+
+func (v InputMediaVoiceNote) inputMedia() {}

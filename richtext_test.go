@@ -2,7 +2,6 @@ package gotgbot
 
 import (
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -18,6 +17,7 @@ func TestRichBlockParsing(t *testing.T) {
 		wantHTML     string
 		wantMarkdown string
 		wantText     string
+		wantMedia    []InputRichMessageMedia
 		skipLiveTest bool
 	}{
 		{
@@ -128,9 +128,13 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     "<tg-collage>\n<img src=\"fileId://1234\"></img>\n<img src=\"fileId://1234\"></img>\n</tg-collage>",
-			wantMarkdown: "<tg-collage>\n![](fileId://1234)\n![](fileId://1234)\n</tg-collage>",
+			wantHTML:     "<tg-collage>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-collage>",
+			wantMarkdown: "<tg-collage>\n![](tg://photo?id=1)\n![](tg://photo?id=2)\n</tg-collage>",
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
+				{Id: "2", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockSlideshow",
 			b: RichBlockSlideshow{
@@ -140,16 +144,20 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     "<tg-slideshow>\n<img src=\"fileId://1234\"></img>\n<img src=\"fileId://1234\"></img>\n</tg-slideshow>",
-			wantMarkdown: "<tg-slideshow>\n![](fileId://1234)\n![](fileId://1234)\n</tg-slideshow>",
+			wantHTML:     "<tg-slideshow>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-slideshow>",
+			wantMarkdown: "<tg-slideshow>\n![](tg://photo?id=1)\n![](tg://photo?id=2)\n</tg-slideshow>",
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
+				{Id: "2", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockTable",
 			b: RichBlockTable{
 				Cells: [][]RichBlockTableCell{
 					{
-						{Text: RichTextString("first column"), IsHeader: true, Colspan: 0, Rowspan: 0, Align: "", Valign: ""},
-						{Text: RichTextString("second column"), IsHeader: true, Colspan: 0, Rowspan: 0, Align: "", Valign: ""},
+						{Text: RichTextString("first column"), IsHeader: true, Colspan: 0, Rowspan: 0, Align: "left"},
+						{Text: RichTextString("second column"), IsHeader: true, Colspan: 0, Rowspan: 0, Align: "left"},
 					},
 					{
 						{Text: RichTextString("value")},
@@ -161,8 +169,8 @@ func TestRichBlockParsing(t *testing.T) {
 			},
 			wantHTML: "<table>\n" +
 				"<tr>\n" +
-				"<th>first column</th>\n" +
-				"<th>second column</th>\n" +
+				"<th align=\"left\">first column</th>\n" +
+				"<th align=\"left\">second column</th>\n" +
 				"</tr>\n" +
 				"<tr>\n" +
 				"<td>value</td>\n" +
@@ -170,7 +178,7 @@ func TestRichBlockParsing(t *testing.T) {
 				"</tr>\n" +
 				"</table>",
 			wantMarkdown: `| first column | second column |
-|:---:|:---:|
+|:---|:---|
 | value | value two |`,
 			wantText: "first column\tsecond column\nvalue\tvalue two",
 		}, {
@@ -206,9 +214,12 @@ func TestRichBlockParsing(t *testing.T) {
 				HasSpoiler: false,
 				Caption:    nil,
 			},
-			wantHTML:     `<video src="fileId://1234"></video>`,
-			wantMarkdown: `![](fileId://1234)`,
+			wantHTML:     `<video src="tg://video?id=1"></video>`,
+			wantMarkdown: `![](tg://video?id=1)`,
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaAnimation{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockAudio",
 			b: RichBlockAudio{
@@ -217,9 +228,12 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     `<audio src="fileId://1234"></audio>`,
-			wantMarkdown: `![](fileId://1234)`,
+			wantHTML:     `<audio src="tg://audio?id=1"></audio>`,
+			wantMarkdown: `![](tg://audio?id=1)`,
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaAudio{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockPhoto",
 			b: RichBlockPhoto{
@@ -229,9 +243,12 @@ func TestRichBlockParsing(t *testing.T) {
 				HasSpoiler: false,
 				Caption:    nil,
 			},
-			wantHTML:     `<img src="fileId://1234"></img>`,
-			wantMarkdown: `![](fileId://1234)`,
+			wantHTML:     `<img src="tg://photo?id=1"></img>`,
+			wantMarkdown: `![](tg://photo?id=1)`,
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockVideo",
 			b: RichBlockVideo{
@@ -241,9 +258,12 @@ func TestRichBlockParsing(t *testing.T) {
 				HasSpoiler: false,
 				Caption:    nil,
 			},
-			wantHTML:     `<video src="fileId://1234"></video>`,
-			wantMarkdown: `![](fileId://1234)`,
+			wantHTML:     `<video src="tg://video?id=1"></video>`,
+			wantMarkdown: `![](tg://video?id=1)`,
 			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaVideo{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name: "RichBlockVoiceNote",
 			b: RichBlockVoiceNote{
@@ -252,10 +272,13 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     `<audio src="fileId://1234"></audio>`,
-			wantMarkdown: `![](fileId://1234)`,
+			wantHTML:     `<audio src="tg://audio?id=1"></audio>`,
+			wantMarkdown: `![](tg://audio?id=1)`,
 			wantText:     "",
 			skipLiveTest: true, // doesn't play nice with PMs
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaVoiceNote{Media: InputFileByID("1234")}},
+			},
 		}, {
 			name:         "RichBlockThinking",
 			b:            RichBlockThinking{Text: RichTextString("Thinking...")},
@@ -268,16 +291,19 @@ func TestRichBlockParsing(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("HTML", func(t *testing.T) {
-				if got := strings.TrimSpace(RichBlockHTML(tt.b)); got != tt.wantHTML {
+				html, media := RichBlockHTML(tt.b)
+				if got := strings.TrimSpace(html); got != tt.wantHTML {
 					t.Errorf("HTML() mismatch:\n got: %q\nwant: %q", got, tt.wantHTML)
 				}
+				_ = media
 			})
 
 			t.Run("Markdown", func(t *testing.T) {
-				if got := strings.TrimSpace(RichBlockMarkdown(tt.b)); got != tt.wantMarkdown {
+				markdown, media := RichBlockMarkdown(tt.b)
+				if got := strings.TrimSpace(markdown); got != tt.wantMarkdown {
 					t.Errorf("Markdown() mismatch:\n got: %q\nwant: %q", got, tt.wantMarkdown)
-
 				}
+				_ = media
 			})
 
 			t.Run("Text", func(t *testing.T) {
@@ -300,19 +326,30 @@ func TestRichBlockParsing(t *testing.T) {
 				time.Sleep(time.Second) // sleep one second to avoid rate limits
 
 				m, err := b.SendRichMessage(chatId, InputRichMessage{
-					Html: strings.ReplaceAll(tt.wantHTML, "fileId://1234", getFile(t, tt.name)),
+					Html: tt.wantHTML,
+					Media: func() []InputRichMessageMedia {
+						var ms []InputRichMessageMedia
+						for idx := range tt.wantMedia {
+							ms = append(ms, InputRichMessageMedia{Id: strconv.Itoa(idx + 1), Media: getFile(t, tt.name)})
+						}
+						return ms
+					}(),
 				}, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.HTML())); got != tt.wantHTML {
+				html, htmlMedia := m.RichMessage.HTML()
+				if got := strings.TrimSpace(html); got != tt.wantHTML {
 					t.Errorf("HTML() mismatch:\n got: %q\nwant: %q", got, tt.wantHTML)
 				}
+				equalMedias(t, htmlMedia, tt.wantMedia)
 
-				if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.Markdown())); got != tt.wantMarkdown {
+				markdown, mdMedia := m.RichMessage.Markdown()
+				if got := strings.TrimSpace(markdown); got != tt.wantMarkdown {
 					t.Errorf("Markdown() mismatch:\n got: %q\nwant: %q", got, tt.wantMarkdown)
 				}
+				equalMedias(t, mdMedia, tt.wantMedia)
 
 				// no ids to change
 				if got := strings.TrimSpace(m.RichMessage.PlainText()); got != tt.wantText {
@@ -320,6 +357,23 @@ func TestRichBlockParsing(t *testing.T) {
 				}
 			})
 		})
+	}
+}
+
+func equalMedias(t *testing.T, got, want []InputRichMessageMedia) {
+	t.Helper()
+
+	if len(got) != len(want) {
+		t.Errorf("len(a) != len(b): got %d, want %d", len(got), len(want))
+	}
+	for idx, want := range want {
+		if want.Id != got[idx].Id {
+			t.Errorf("incorrect id got=%s, want=%s", got[idx].Id, want.Id)
+		}
+		if want.Media.GetType() != got[idx].Media.GetType() {
+			t.Errorf("incorrect type got=%s, want=%s", got[idx].Media.GetType(), want.Media.GetType())
+		}
+		// We don't need the media to match more than this; IDs will change.
 	}
 }
 
@@ -356,29 +410,22 @@ func tryLocalBot(t *testing.T) (*Bot, int64) {
 	return nil, 0
 }
 
-var fileRe = regexp.MustCompile("fileId://[A-Za-z0-9_-]+")
-
-func replaceLiveId(t *testing.T, text string) string {
-	t.Helper()
-	return fileRe.ReplaceAllString(text, `fileId://1234`)
-}
-
-func getFile(t *testing.T, kind string) string {
+func getFile(t *testing.T, kind string) InputMedia {
 	t.Helper()
 	switch kind {
 	case "RichBlockAudio":
-		return "https://telegram.org/example/audio.mp3"
+		return InputMediaAudio{Media: InputFileByURL("https://telegram.org/example/audio.mp3")}
 	case "RichBlockAnimation":
-		return "https://telegram.org/example/animation.gif"
+		return InputMediaAnimation{Media: InputFileByURL("https://telegram.org/example/animation.gif")}
 	case "RichBlockPhoto", "RichBlockCollage", "RichBlockSlideshow":
-		return "https://telegram.org/example/photo.jpg"
+		return InputMediaPhoto{Media: InputFileByURL("https://telegram.org/example/photo.jpg")}
 	case "RichBlockVideo":
-		return "https://telegram.org/example/video.mp4"
+		return InputMediaVideo{Media: InputFileByURL("https://telegram.org/example/video.mp4")}
 	case "RichBlockVoiceNote":
-		return "https://telegram.org/example/audio.ogg"
+		return InputMediaVoiceNote{Media: InputFileByURL("https://telegram.org/example/audio.ogg")}
 	default:
-		// assume ok!
-		return ""
+		// assume nothing?
+		return nil
 	}
 }
 
@@ -626,6 +673,7 @@ func TestRichMessageSending(t *testing.T) {
 		wantHTML     string
 		wantMarkdown string
 		wantText     string
+		wantMedia    []InputRichMessageMedia
 	}{
 		{
 			name: "basic 1",
@@ -825,14 +873,20 @@ func TestRichMessageSending(t *testing.T) {
 			<video src="https://telegram.org/example/video.mp4"></video>
 			<audio src="https://telegram.org/example/audio.mp3"></audio>
 			<video src="https://telegram.org/example/animation.gif"></video>`,
-			wantHTML: "<img src=\"fileId://1234\"></img>\n" +
-				"<video src=\"fileId://1234\"></video>\n" +
-				"<audio src=\"fileId://1234\"></audio>\n" +
-				"<video src=\"fileId://1234\"></video>",
-			wantMarkdown: "![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)",
+			wantHTML: "<img src=\"tg://photo?id=1\"></img>\n" +
+				"<video src=\"tg://video?id=2\"></video>\n" +
+				"<audio src=\"tg://audio?id=3\"></audio>\n" +
+				"<video src=\"tg://video?id=4\"></video>",
+			wantMarkdown: "![](tg://photo?id=1)\n" +
+				"![](tg://video?id=2)\n" +
+				"![](tg://audio?id=3)\n" +
+				"![](tg://video?id=4)",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{}},
+				{Id: "2", Media: InputMediaVideo{}},
+				{Id: "3", Media: InputMediaAudio{}},
+				{Id: "4", Media: InputMediaAnimation{}},
+			},
 		}, {
 			name: "captioned files",
 			// skipping <figure><audio src="https://telegram.org/example/audio.ogg"></audio><figcaption>Voice note caption</figcaption></figure>
@@ -840,24 +894,30 @@ func TestRichMessageSending(t *testing.T) {
 			<figure><video src="https://telegram.org/example/video.mp4" tg-spoiler></video><figcaption>Video caption</figcaption></figure>
 			<figure><audio src="https://telegram.org/example/audio.mp3"></audio><figcaption>Audio caption</figcaption></figure>
 			<figure><video src="https://telegram.org/example/animation.gif" tg-spoiler></video><figcaption>Animation caption</figcaption></figure>`,
-			wantHTML: "<figure>\n<img src=\"fileId://1234\" tg-spoiler></img>\n" +
+			wantHTML: "<figure>\n<img src=\"tg://photo?id=1\" tg-spoiler></img>\n" +
 				"<figcaption>Photo caption<cite>Photo credit</cite></figcaption>\n</figure>\n" +
-				"<figure>\n<video src=\"fileId://1234\" tg-spoiler></video>\n" +
+				"<figure>\n<video src=\"tg://video?id=2\" tg-spoiler></video>\n" +
 				"<figcaption>Video caption</figcaption>\n</figure>\n" +
-				"<figure>\n<audio src=\"fileId://1234\"></audio>\n" +
+				"<figure>\n<audio src=\"tg://audio?id=3\"></audio>\n" +
 				"<figcaption>Audio caption</figcaption>\n</figure>\n" +
-				"<figure>\n<video src=\"fileId://1234\" tg-spoiler></video>\n" +
+				"<figure>\n<video src=\"tg://video?id=4\" tg-spoiler></video>\n" +
 				"<figcaption>Animation caption</figcaption>\n</figure>",
-			wantMarkdown: "<figure>\n<img src=\"fileId://1234\" tg-spoiler></img>\n" +
+			wantMarkdown: "<figure>\n<img src=\"tg://photo?id=1\" tg-spoiler></img>\n" +
 				"<figcaption>Photo caption<cite>Photo credit</cite></figcaption>\n</figure>\n" +
-				"<figure>\n<video src=\"fileId://1234\" tg-spoiler></video>\n" +
+				"<figure>\n<video src=\"tg://video?id=2\" tg-spoiler></video>\n" +
 				"<figcaption>Video caption</figcaption>\n</figure>\n" +
-				"<figure>\n<audio src=\"fileId://1234\"></audio>\n" +
+				"<figure>\n<audio src=\"tg://audio?id=3\"></audio>\n" +
 				"<figcaption>Audio caption</figcaption>\n</figure>\n" +
-				"<figure>\n<video src=\"fileId://1234\" tg-spoiler></video>\n" +
+				"<figure>\n<video src=\"tg://video?id=4\" tg-spoiler></video>\n" +
 				"<figcaption>Animation caption</figcaption>\n</figure>",
 			wantText: "Photo caption\nPhoto credit\n" +
 				"Video caption\nAudio caption\nAnimation caption",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{}},
+				{Id: "2", Media: InputMediaVideo{}},
+				{Id: "3", Media: InputMediaAudio{}},
+				{Id: "4", Media: InputMediaAnimation{}},
+			},
 		}, {
 			name: "maps",
 			inputHTML: `<tg-map lat="41.9" long="12.5" zoom="14"/>
@@ -874,50 +934,63 @@ func TestRichMessageSending(t *testing.T) {
 			inputHTML: `<tg-collage><img src="https://telegram.org/example/photo.jpg"/><video src="https://telegram.org/example/video.mp4"/></tg-collage>
 			<tg-collage><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Collage caption</figcaption></tg-collage>`,
 			wantHTML: "<tg-collage>\n" +
-				"<img src=\"fileId://1234\"></img>\n" +
-				"<video src=\"fileId://1234\"></video>\n" +
+				"<img src=\"tg://photo?id=1\"></img>\n" +
+				"<video src=\"tg://video?id=2\"></video>\n" +
 				"</tg-collage>\n" +
 				"<tg-collage>\n" +
-				"<video src=\"fileId://1234\"></video>\n" +
-				"<img src=\"fileId://1234\"></img>\n" +
+				"<video src=\"tg://video?id=3\"></video>\n" +
+				"<img src=\"tg://photo?id=4\"></img>\n" +
 				"<figcaption>Collage caption</figcaption>\n" +
 				"</tg-collage>",
 			wantMarkdown: "<tg-collage>\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
+				"![](tg://photo?id=1)\n" +
+				"![](tg://video?id=2)\n" +
 				"</tg-collage>\n" +
 				"<tg-collage>\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
+				"![](tg://video?id=3)\n" +
+				"![](tg://photo?id=4)\n" +
 				"<figcaption>Collage caption</figcaption>\n" +
 				"</tg-collage>",
 			wantText: "Collage caption",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{}},
+				{Id: "2", Media: InputMediaVideo{}},
+				{Id: "3", Media: InputMediaVideo{}},
+				{Id: "4", Media: InputMediaPhoto{}},
+			},
 		}, {
 			name: "slideshow",
 			inputHTML: `<tg-slideshow><img src="https://telegram.org/example/photo.jpg"/><video src="https://telegram.org/example/video.mp4"/></tg-slideshow>
 			<tg-slideshow><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Slideshow caption</figcaption></tg-slideshow>`,
 			wantHTML: "<tg-slideshow>\n" +
-				"<img src=\"fileId://1234\"></img>\n" +
-				"<video src=\"fileId://1234\"></video>\n" +
+				"<img src=\"tg://photo?id=1\"></img>\n" +
+				"<video src=\"tg://video?id=2\"></video>\n" +
 				"</tg-slideshow>\n" +
 				"<tg-slideshow>\n" +
-				"<video src=\"fileId://1234\"></video>\n" +
-				"<img src=\"fileId://1234\"></img>\n" +
+				"<video src=\"tg://video?id=3\"></video>\n" +
+				"<img src=\"tg://photo?id=4\"></img>\n" +
 				"<figcaption>Slideshow caption</figcaption>\n" +
 				"</tg-slideshow>",
 			wantMarkdown: "<tg-slideshow>\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
+				"![](tg://photo?id=1)\n" +
+				"![](tg://video?id=2)\n" +
 				"</tg-slideshow>\n" +
 				"<tg-slideshow>\n" +
-				"![](fileId://1234)\n" +
-				"![](fileId://1234)\n" +
+				"![](tg://video?id=3)\n" +
+				"![](tg://photo?id=4)\n" +
 				"<figcaption>Slideshow caption</figcaption>\n" +
 				"</tg-slideshow>",
 			wantText: "Slideshow caption",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{}},
+				{Id: "2", Media: InputMediaVideo{}},
+				{Id: "3", Media: InputMediaVideo{}},
+				{Id: "4", Media: InputMediaPhoto{}},
+			},
 		}, {
 			name: "table",
-			inputHTML: `<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Value 1</td><td>Value 2</td></tr></table>
+			inputHTML: `<table><tr><th>Header 1</th><th>Header 2</th></tr>
+			<tr><td>Value 1</td><td>Value 2</td></tr></table>
 			<table bordered striped><caption>Table caption</caption>
 			<tr><td colspan="2" rowspan="2" align="left">Value</td><td align="center">Value2</td><td align="right">Value3</td></tr>
 			<tr><td valign="top">Value4</td><td valign="middle">Value5</td><td valign="bottom">Value6</td></tr>
@@ -926,28 +999,32 @@ func TestRichMessageSending(t *testing.T) {
 				"<th>Header 1</th>\n" +
 				"<th>Header 2</th>\n" +
 				"</tr>\n<tr>\n" +
-				"<td align=\"left\">Value 1</td>\n" +
-				"<td align=\"left\">Value 2</td>\n" +
+				"<td>Value 1</td>\n" +
+				"<td>Value 2</td>\n" +
 				"</tr>\n</table>\n" +
-				"<table bordered striped>\n<tr>\n" +
-				"<td align=\"left\" colspan=\"2\" rowspan=\"2\">Value</td>\n" +
-				"<td>Value2</td>\n" +
+				"<table bordered striped>\n" +
+				"<caption>Table caption</caption>\n" +
+				"<tr>\n" +
+				"<td colspan=\"2\" rowspan=\"2\">Value</td>\n" +
+				"<td align=\"center\">Value2</td>\n" +
 				"<td align=\"right\">Value3</td>\n" +
-				"<td align=\"left\" valign=\"top\"></td>\n" +
+				"<td valign=\"top\"></td>\n" +
 				"</tr>\n<tr>\n" +
-				"<td align=\"left\" valign=\"top\">Value4</td>\n" +
-				"<td align=\"left\">Value5</td>\n" +
-				"<td align=\"left\" valign=\"bottom\">Value6</td>\n" +
+				"<td valign=\"top\">Value4</td>\n" +
+				"<td>Value5</td>\n" +
+				"<td valign=\"bottom\">Value6</td>\n" +
 				"</tr>\n<tr>\n" +
-				"<td align=\"left\">Value7</td>\n" +
-				"<td align=\"left\" valign=\"top\" colspan=\"4\"></td>\n" +
+				"<td>Value7</td>\n" +
+				"<td valign=\"top\" colspan=\"4\"></td>\n" +
 				"</tr>\n</table>",
 			wantMarkdown: "| Header 1 | Header 2 |\n" +
 				"|:---:|:---:|\n" +
 				"| Value 1 | Value 2 |\n\n" +
-				"| Value | Value2 | Value3 |  |\n" +
-				"|:---|:---:|---:|:---|\n" +
-				"| Value4 | Value5 | Value6 |\n| Value7 |  |",
+				"<table bordered striped>\n<caption>Table caption</caption>\n<tr>\n" +
+				"<td colspan=\"2\" rowspan=\"2\">Value</td>\n<td align=\"center\">Value2</td>\n<td align=\"right\">Value3</td>\n<td valign=\"top\"></td>\n</tr>\n" +
+				"<tr>\n<td valign=\"top\">Value4</td>\n<td>Value5</td>\n<td valign=\"bottom\">Value6</td>\n</tr>\n" +
+				"<tr>\n<td>Value7</td>\n<td valign=\"top\" colspan=\"4\"></td>\n</tr>\n" +
+				"</table>",
 			wantText: "Header 1\tHeader 2\n" +
 				"Value 1\tValue 2\n\n" +
 				"Value\tValue2\tValue3\t\n" +
@@ -982,13 +1059,17 @@ func TestRichMessageSending(t *testing.T) {
 				return
 			}
 
-			if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.HTML())); got != tt.wantHTML {
+			html, htmlMedia := m.RichMessage.HTML()
+			if got := strings.TrimSpace(html); got != tt.wantHTML {
 				t.Errorf("HTML() mismatch:\n got: %q\nwant: %q", got, tt.wantHTML)
 			}
+			equalMedias(t, htmlMedia, tt.wantMedia)
 
-			if got := replaceLiveId(t, strings.TrimSpace(m.RichMessage.Markdown())); got != tt.wantMarkdown {
+			markdown, mdMedia := m.RichMessage.Markdown()
+			if got := strings.TrimSpace(markdown); got != tt.wantMarkdown {
 				t.Errorf("Markdown() mismatch:\n got: %q\nwant: %q", got, tt.wantMarkdown)
 			}
+			equalMedias(t, mdMedia, tt.wantMedia)
 
 			// no ids to change
 			if got := strings.TrimSpace(m.RichMessage.PlainText()); got != tt.wantText {
