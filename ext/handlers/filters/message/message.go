@@ -78,19 +78,19 @@ func ChatType(t string) filters.Message {
 }
 
 func Private(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "private"
+	return msg.Chat.Type == gotgbot.ChatTypePrivate
 }
 
 func Group(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "group"
+	return msg.Chat.Type == gotgbot.ChatTypeGroup
 }
 
 func Supergroup(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "supergroup"
+	return msg.Chat.Type == gotgbot.ChatTypeSupergroup
 }
 
 func Channel(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "channel"
+	return msg.Chat.Type == gotgbot.ChatTypeChannel
 }
 
 func Business(msg *gotgbot.Message) bool {
@@ -136,7 +136,7 @@ func Caption(msg *gotgbot.Message) bool {
 
 func Command(msg *gotgbot.Message) bool {
 	ents := msg.GetEntities()
-	return len(ents) > 0 && ents[0].Type == "bot_command" && ents[0].Offset == 0
+	return len(ents) > 0 && ents[0].Type == gotgbot.MessageEntityTypeBotCommand && ents[0].Offset == 0
 }
 
 func Animation(msg *gotgbot.Message) bool {
