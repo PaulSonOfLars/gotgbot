@@ -3,6 +3,7 @@ package gotgbot
 import (
 	"fmt"
 	"html"
+	"strings"
 )
 
 // RichTextHTML renders r as an HTML string, using standard HTML tags for each
@@ -19,7 +20,7 @@ func (r *renderCtx) renderTextHTML(rt RichText) {
 	}
 	switch v := rt.(type) {
 	case RichTextString:
-		r.sb.WriteString(html.EscapeString(string(v)))
+		r.sb.WriteString(strings.ReplaceAll(html.EscapeString(string(v)), "\n", "<br/>"))
 	case RichTextArray:
 		for _, child := range v {
 			r.renderTextHTML(child)

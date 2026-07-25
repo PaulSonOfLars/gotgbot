@@ -128,8 +128,9 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     "<tg-collage>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-collage>",
-			wantMarkdown: "<tg-collage>\n![](tg://photo?id=1)\n![](tg://photo?id=2)\n</tg-collage>",
+			wantHTML: "<tg-collage>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-collage>",
+			// collage unreliable in markdown
+			wantMarkdown: "<tg-collage>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-collage>",
 			wantText:     "",
 			wantMedia: []InputRichMessageMedia{
 				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
@@ -144,8 +145,9 @@ func TestRichBlockParsing(t *testing.T) {
 				},
 				Caption: nil,
 			},
-			wantHTML:     "<tg-slideshow>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-slideshow>",
-			wantMarkdown: "<tg-slideshow>\n![](tg://photo?id=1)\n![](tg://photo?id=2)\n</tg-slideshow>",
+			wantHTML: "<tg-slideshow>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-slideshow>",
+			// collage unreliable in markdown
+			wantMarkdown: "<tg-slideshow>\n<img src=\"tg://photo?id=1\"></img>\n<img src=\"tg://photo?id=2\"></img>\n</tg-slideshow>",
 			wantText:     "",
 			wantMedia: []InputRichMessageMedia{
 				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("1234")}},
@@ -188,8 +190,9 @@ func TestRichBlockParsing(t *testing.T) {
 				Blocks:  RichBlockArray{RichBlockParagraph{Text: RichTextString("some more text")}},
 				IsOpen:  false,
 			},
-			wantHTML:     "<details>\n<summary>some text</summary>\n<p>some more text</p>\n</details>",
-			wantMarkdown: "<details>\n<summary>some text</summary>\nsome more text\n</details>",
+			wantHTML: "<details>\n<summary>some text</summary>\n<p>some more text</p>\n</details>",
+			// identical; details can't be displayed in markdown.
+			wantMarkdown: "<details>\n<summary>some text</summary>\n<p>some more text</p>\n</details>",
 			wantText:     "some text\nsome more text",
 		}, {
 			name: "RichBlockMap",
@@ -283,7 +286,7 @@ func TestRichBlockParsing(t *testing.T) {
 			name:         "RichBlockThinking",
 			b:            RichBlockThinking{Text: RichTextString("Thinking...")},
 			wantHTML:     `<tg-thinking>Thinking...</tg-thinking>`,
-			wantMarkdown: "<tg-thinking>Thinking\\.\\.\\.\n</tg-thinking>",
+			wantMarkdown: "<tg-thinking>Thinking...</tg-thinking>",
 			wantText:     "Thinking...",
 			skipLiveTest: true, // only for sendRichMessageDraft
 		},
@@ -678,16 +681,16 @@ func TestRichMessageSending(t *testing.T) {
 		{
 			name: "basic 1",
 			inputHTML: `<a name="chapter-0"></a>
-			<b>bold text</b>, <strong>bold text</strong>
-			<i>italic text</i>, <em>italic text</em>
-			<u>underlined text</u>, <ins>underlined text</ins>
-			<s>strikethrough text</s>, <strike>strikethrough text</strike>, <del>strikethrough text</del>`,
+				<b>bold text</b>, <strong>bold text</strong>
+				<i>italic text</i>, <em>italic text</em>
+				<u>underlined text</u>, <ins>underlined text</ins>
+				<s>strikethrough text</s>, <strike>strikethrough text</strike>, <del>strikethrough text</del>`,
 			wantHTML: "<p><a name=\"chapter-0\"></a> " +
 				"<b>bold text</b>, <b>bold text</b> " +
 				"<i>italic text</i>, <i>italic text</i> " +
 				"<u>underlined text</u>, <u>underlined text</u> " +
 				"<s>strikethrough text</s>, <s>strikethrough text</s>, <s>strikethrough text</s></p>",
-			wantMarkdown: "<a name=\"chapter-0\"></a>\n " +
+			wantMarkdown: "<a name=\"chapter-0\"></a> " +
 				"**bold text**, **bold text** " +
 				"_italic text_, _italic text_ " +
 				"<u>underlined text</u>, <u>underlined text</u> " +
@@ -696,10 +699,10 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "basic 2",
 			inputHTML: `<code>inline fixed-width code</code>
-			<mark>marked text</mark>
-			<sub>subscript text</sub>
-			<sup>superscript text</sup>
-			<tg-spoiler>spoiler</tg-spoiler>`,
+				<mark>marked text</mark>
+				<sub>subscript text</sub>
+				<sup>superscript text</sup>
+				<tg-spoiler>spoiler</tg-spoiler>`,
 			wantHTML: "<p><code>inline fixed-width code</code> " +
 				"<mark>marked text</mark> " +
 				"<sub>subscript text</sub> " +
@@ -714,12 +717,12 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "anchors",
 			inputHTML: `<a href="#note-1">Reference</a>
-			<a href="https://t.me/">inline URL</a>
-			<a href="mailto:user@example.com">inline e-mail</a>
-			<a href="tel:+123456789">inline phone number</a>
-			<a href="tg://user?id=123456789">inline mention of a user</a>
-			<a href="#chapter-1">in-document link</a>
-			<a name="chapter-1"></a>`,
+				<a href="https://t.me/">inline URL</a>
+				<a href="mailto:user@example.com">inline e-mail</a>
+				<a href="tel:+123456789">inline phone number</a>
+				<a href="tg://user?id=123456789">inline mention of a user</a>
+				<a href="#chapter-1">in-document link</a>
+				<a name="chapter-1"></a>`,
 			wantHTML: "<p><a href=\"#note-1\">Reference</a> " +
 				"<a href=\"https://t.me/\">inline URL</a> " +
 				"<a href=\"mailto:user@example.com\">inline e-mail</a> " +
@@ -743,10 +746,10 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "tg-types",
 			inputHTML: `<tg-reference name="note-1">Referenced text</tg-reference>
-			<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>
-			<img src="tg://emoji?id=5368324170671202286" alt="👍"/>
-			<tg-time unix="1647531900" format="wDT">22:45 tomorrow</tg-time>
-			<tg-math>x^2 + y^2</tg-math>`,
+				<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>
+				<img src="tg://emoji?id=5368324170671202286" alt="👍"/>
+				<tg-time unix="1647531900" format="wDT">22:45 tomorrow</tg-time>
+				<tg-math>x^2 + y^2</tg-math>`,
 			wantHTML: "<p><tg-reference name=\"note-1\">Referenced text</tg-reference> " +
 				"<tg-emoji emoji-id=\"5368324170671202286\">👍</tg-emoji> " +
 				"<tg-emoji emoji-id=\"5368324170671202286\">👍</tg-emoji> " +
@@ -761,9 +764,9 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "tg-types strings",
 			inputHTML: `
-			#hashtag $USD +12345678901, card: 4242 4242 4242 4242, https://t.me t.me a@t.me /command @username
+				#hashtag $USD +12345678901, card: 4242 4242 4242 4242, https://t.me t.me a@t.me /command @username
 			
-			all the text above was on the same line`,
+				all the text above was on the same line`,
 			wantHTML: "<p>#hashtag $USD " +
 				"<a href=\"tel:+12345678901\">+12345678901</a>, " +
 				"card: 4242 4242 4242 4242, " +
@@ -789,29 +792,29 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "headings",
 			inputHTML: `<h1>Heading 1</h1>
-			<h2>Heading 2</h2>
-			<h3>Heading 3</h3>
-			<h4>Heading 4</h4>
-			<h5>Heading 5</h5>
-			<h6>Heading 6</h6>`,
+				<h2>Heading 2</h2>
+				<h3>Heading 3</h3>
+				<h4>Heading 4</h4>
+				<h5>Heading 5</h5>
+				<h6>Heading 6</h6>`,
 			wantHTML:     "<h1>Heading 1</h1>\n<h2>Heading 2</h2>\n<h3>Heading 3</h3>\n<h4>Heading 4</h4>\n<h5>Heading 5</h5>\n<h6>Heading 6</h6>",
 			wantMarkdown: "# Heading 1\n## Heading 2\n### Heading 3\n#### Heading 4\n##### Heading 5\n###### Heading 6",
 			wantText:     "Heading 1\nHeading 2\nHeading 3\nHeading 4\nHeading 5\nHeading 6",
 		}, {
 			name: "html basics",
 			inputHTML: `<p>Paragraph text</p>
-			<pre>pre-formatted fixed-width code block</pre>
-			<pre><code class="language-python">  print('pre-formatted fixed-width code block written in the Python programming language')</code></pre>
-			<footer>Footer text</footer>
-			<hr/>
-			<ul><li>unordered list item</li></ul>
-			<ol><li>ordered list item</li></ol>
-			<ol start="3" type="a" reversed><li>ordered list item</li></ol>
-			<ol><li value="7" type="i">ordered list item with explicit number</li></ol>
-			<ul>
-			<li><input type="checkbox" checked>Checked checkbox</li>
-			<li><input type="checkbox">Unchecked checkbox</li>
-			</ul>`,
+				<pre>pre-formatted fixed-width code block</pre>
+				<pre><code class="language-python">  print('pre-formatted fixed-width code block written in the Python programming language')</code></pre>
+				<footer>Footer text</footer>
+				<hr/>
+				<ul><li>unordered list item</li></ul>
+				<ol><li>ordered list item</li></ol>
+				<ol start="3" type="a" reversed><li>ordered list item</li></ol>
+				<ol><li value="7" type="i">ordered list item with explicit number</li></ol>
+				<ul>
+				<li><input type="checkbox" checked>Checked checkbox</li>
+				<li><input type="checkbox">Unchecked checkbox</li>
+				</ul>`,
 			wantHTML: "<p>Paragraph text</p>\n" +
 				"<pre><code>pre-formatted fixed-width code block</code></pre>\n" +
 				"<pre><code class=\"language-python\">  " +
@@ -851,28 +854,29 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "quotes",
 			inputHTML: `<blockquote>Block quotation started<br>Block quotation continued<br>The last line of the block quotation<cite>The Author</cite></blockquote>
-			<aside>Pull quote<cite>The Author</cite></aside>`,
+				<aside>Pull quote<cite>The Author</cite></aside>`,
 			wantHTML: "<blockquote>\n" +
-				"<p>Block quotation started\n" +
-				"Block quotation continued\n" +
+				"<p>Block quotation started<br/>" +
+				"Block quotation continued<br/>" +
 				"The last line of the block quotation</p>\n" +
 				"<cite>The Author</cite>\n" +
 				"</blockquote>\n" +
 				"<aside>Pull quote<cite>The Author</cite></aside>",
-			wantMarkdown: "> Block quotation started\n" +
-				"> Block quotation continued\n" +
-				"> The last line of the block quotation\n" +
-				"<aside>The Author</aside>\n" +
-				"<aside>Pull quote<cite>The Author</cite></aside>",
+			wantMarkdown: "<blockquote>\n" +
+				"<p>Block quotation started<br/>" +
+				"Block quotation continued<br/>" +
+				"The last line of the block quotation</p>\n" +
+				"<cite>The Author</cite>\n" +
+				"</blockquote>\n\n<aside>Pull quote<cite>The Author</cite></aside>",
 			wantText: "Block quotation started\nBlock quotation continued\nThe last line of the block quotation\nThe Author\nPull quote\nThe Author",
 		}, {
 			name: "files",
 			// Skip <audio src="https://telegram.org/example/audio.ogg"></audio>
 			// Can't send voice files in PM
 			inputHTML: `<img src="https://telegram.org/example/photo.jpg"/>
-			<video src="https://telegram.org/example/video.mp4"></video>
-			<audio src="https://telegram.org/example/audio.mp3"></audio>
-			<video src="https://telegram.org/example/animation.gif"></video>`,
+				<video src="https://telegram.org/example/video.mp4"></video>
+				<audio src="https://telegram.org/example/audio.mp3"></audio>
+				<video src="https://telegram.org/example/animation.gif"></video>`,
 			wantHTML: "<img src=\"tg://photo?id=1\"></img>\n" +
 				"<video src=\"tg://video?id=2\"></video>\n" +
 				"<audio src=\"tg://audio?id=3\"></audio>\n" +
@@ -891,9 +895,9 @@ func TestRichMessageSending(t *testing.T) {
 			name: "captioned files",
 			// skipping <figure><audio src="https://telegram.org/example/audio.ogg"></audio><figcaption>Voice note caption</figcaption></figure>
 			inputHTML: `<figure><img src="https://telegram.org/example/photo.jpg" tg-spoiler/><figcaption>Photo caption<cite>Photo credit</cite></figcaption></figure>
-			<figure><video src="https://telegram.org/example/video.mp4" tg-spoiler></video><figcaption>Video caption</figcaption></figure>
-			<figure><audio src="https://telegram.org/example/audio.mp3"></audio><figcaption>Audio caption</figcaption></figure>
-			<figure><video src="https://telegram.org/example/animation.gif" tg-spoiler></video><figcaption>Animation caption</figcaption></figure>`,
+				<figure><video src="https://telegram.org/example/video.mp4" tg-spoiler></video><figcaption>Video caption</figcaption></figure>
+				<figure><audio src="https://telegram.org/example/audio.mp3"></audio><figcaption>Audio caption</figcaption></figure>
+				<figure><video src="https://telegram.org/example/animation.gif" tg-spoiler></video><figcaption>Animation caption</figcaption></figure>`,
 			wantHTML: "<figure>\n<img src=\"tg://photo?id=1\" tg-spoiler></img>\n" +
 				"<figcaption>Photo caption<cite>Photo credit</cite></figcaption>\n</figure>\n" +
 				"<figure>\n<video src=\"tg://video?id=2\" tg-spoiler></video>\n" +
@@ -921,7 +925,7 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "maps",
 			inputHTML: `<tg-map lat="41.9" long="12.5" zoom="14"/>
-			<figure><tg-map lat="41.9" long="12.5" zoom="14"/><figcaption>Map caption</figcaption></figure>`,
+				<figure><tg-map lat="41.9" long="12.5" zoom="14"/><figcaption>Map caption</figcaption></figure>`,
 			wantHTML: "<tg-map lat=\"41.900006\" long=\"12.500002\" zoom=\"14\"/>\n" +
 				"<figure><tg-map lat=\"41.900006\" long=\"12.500002\" zoom=\"14\"/><figcaption>Map caption</figcaption>\n" +
 				"</figure>",
@@ -932,7 +936,7 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "collage",
 			inputHTML: `<tg-collage><img src="https://telegram.org/example/photo.jpg"/><video src="https://telegram.org/example/video.mp4"/></tg-collage>
-			<tg-collage><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Collage caption</figcaption></tg-collage>`,
+				<tg-collage><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Collage caption</figcaption></tg-collage>`,
 			wantHTML: "<tg-collage>\n" +
 				"<img src=\"tg://photo?id=1\"></img>\n" +
 				"<video src=\"tg://video?id=2\"></video>\n" +
@@ -943,12 +947,12 @@ func TestRichMessageSending(t *testing.T) {
 				"<figcaption>Collage caption</figcaption>\n" +
 				"</tg-collage>",
 			wantMarkdown: "<tg-collage>\n" +
-				"![](tg://photo?id=1)\n" +
-				"![](tg://video?id=2)\n" +
+				"<img src=\"tg://photo?id=1\"></img>\n" +
+				"<video src=\"tg://video?id=2\"></video>\n" +
 				"</tg-collage>\n" +
 				"<tg-collage>\n" +
-				"![](tg://video?id=3)\n" +
-				"![](tg://photo?id=4)\n" +
+				"<video src=\"tg://video?id=3\"></video>\n" +
+				"<img src=\"tg://photo?id=4\"></img>\n" +
 				"<figcaption>Collage caption</figcaption>\n" +
 				"</tg-collage>",
 			wantText: "Collage caption",
@@ -961,7 +965,7 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "slideshow",
 			inputHTML: `<tg-slideshow><img src="https://telegram.org/example/photo.jpg"/><video src="https://telegram.org/example/video.mp4"/></tg-slideshow>
-			<tg-slideshow><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Slideshow caption</figcaption></tg-slideshow>`,
+				<tg-slideshow><video src="https://telegram.org/example/video.mp4"/><img src="https://telegram.org/example/photo.jpg"/><figcaption>Slideshow caption</figcaption></tg-slideshow>`,
 			wantHTML: "<tg-slideshow>\n" +
 				"<img src=\"tg://photo?id=1\"></img>\n" +
 				"<video src=\"tg://video?id=2\"></video>\n" +
@@ -972,12 +976,12 @@ func TestRichMessageSending(t *testing.T) {
 				"<figcaption>Slideshow caption</figcaption>\n" +
 				"</tg-slideshow>",
 			wantMarkdown: "<tg-slideshow>\n" +
-				"![](tg://photo?id=1)\n" +
-				"![](tg://video?id=2)\n" +
+				"<img src=\"tg://photo?id=1\"></img>\n" +
+				"<video src=\"tg://video?id=2\"></video>\n" +
 				"</tg-slideshow>\n" +
 				"<tg-slideshow>\n" +
-				"![](tg://video?id=3)\n" +
-				"![](tg://photo?id=4)\n" +
+				"<video src=\"tg://video?id=3\"></video>\n" +
+				"<img src=\"tg://photo?id=4\"></img>\n" +
 				"<figcaption>Slideshow caption</figcaption>\n" +
 				"</tg-slideshow>",
 			wantText: "Slideshow caption",
@@ -990,11 +994,11 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "table",
 			inputHTML: `<table><tr><th>Header 1</th><th>Header 2</th></tr>
-			<tr><td>Value 1</td><td>Value 2</td></tr></table>
-			<table bordered striped><caption>Table caption</caption>
-			<tr><td colspan="2" rowspan="2" align="left">Value</td><td align="center">Value2</td><td align="right">Value3</td></tr>
-			<tr><td valign="top">Value4</td><td valign="middle">Value5</td><td valign="bottom">Value6</td></tr>
-			<tr><td>Value7</td></tr></table>`,
+				<tr><td>Value 1</td><td>Value 2</td></tr></table>
+				<table bordered striped><caption>Table caption</caption>
+				<tr><td colspan="2" rowspan="2" align="left">Value</td><td align="center">Value2</td><td align="right">Value3</td></tr>
+				<tr><td valign="top">Value4</td><td valign="middle">Value5</td><td valign="bottom">Value6</td></tr>
+				<tr><td>Value7</td></tr></table>`,
 			wantHTML: "<table>\n<tr>\n" +
 				"<th>Header 1</th>\n" +
 				"<th>Header 2</th>\n" +
@@ -1033,8 +1037,8 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "details",
 			inputHTML: `<details><summary>Title</summary>Content</details>
-			<details open><summary>Title</summary>Content</details>
-			<tg-math-block>E = mc^2</tg-math-block>`,
+				<details open><summary>Title</summary>Content</details>
+				<tg-math-block>E = mc^2</tg-math-block>`,
 			wantHTML: "<details>\n" +
 				"<summary>Title</summary>\n" +
 				"<p>Content</p>\n</details>\n" +
@@ -1043,11 +1047,25 @@ func TestRichMessageSending(t *testing.T) {
 				"<tg-math-block>E = mc^2</tg-math-block>",
 			wantMarkdown: "<details>\n" +
 				"<summary>Title</summary>\n" +
-				"Content\n</details>\n" +
+				"<p>Content</p>\n</details>\n" +
 				"<details open>\n<summary>Title</summary>\n" +
-				"Content\n</details>\n" +
+				"<p>Content</p>\n</details>\n" +
 				"$$\nE = mc^2\n$$",
 			wantText: "Title\nContent\nTitle\nContent\nE = mc^2",
+		}, {
+			name:         "simple newlines",
+			inputHTML:    "<p>test<br/>me</p>",
+			wantHTML:     "<p>test<br/>me</p>",
+			wantMarkdown: "test<br/>me", // Double the newlines for markdown to keep them.
+			wantText:     "test\nme",
+			wantMedia:    nil,
+		}, {
+			name:         "double newlines",
+			inputHTML:    "<p>test<br/><br/>me</p>",
+			wantHTML:     "<p>test<br/><br/>me</p>",
+			wantMarkdown: "test<br/><br/>me", // Double the newlines for markdown to keep them.
+			wantText:     "test\n\nme",
+			wantMedia:    nil,
 		},
 	}
 	for _, tt := range tests {

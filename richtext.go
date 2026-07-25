@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"html"
 	"strconv"
 	"strings"
 )
@@ -352,10 +353,11 @@ var mdSpecial = strings.NewReplacer(
 	".", `\.`,
 	"!", `\!`,
 	"|", `\|`,
+	"\n", "<br/>",
 )
 
 func mdEscape(s string) string {
-	return mdSpecial.Replace(s)
+	return mdSpecial.Replace(html.EscapeString(s))
 }
 
 func toRoman(num int64) string {

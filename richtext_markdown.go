@@ -2,7 +2,6 @@ package gotgbot
 
 import (
 	"fmt"
-	"html"
 	"strconv"
 	"strings"
 )
@@ -36,9 +35,7 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 		r.sb.WriteString("_")
 	case RichTextUnderline:
 		// No standard Markdown underline; use HTML fallback.
-		r.sb.WriteString("<u>")
-		r.renderTextMarkdown(v.Text)
-		r.sb.WriteString("</u>")
+		r.renderTextHTML(v)
 	case RichTextStrikethrough:
 		r.sb.WriteString("~~")
 		r.renderTextMarkdown(v.Text)
@@ -52,13 +49,9 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 		r.renderTextMarkdown(v.Text)
 		r.sb.WriteString("==")
 	case RichTextSubscript:
-		r.sb.WriteString("<sub>")
-		r.renderTextMarkdown(v.Text)
-		r.sb.WriteString("</sub>")
+		r.renderTextHTML(v)
 	case RichTextSuperscript:
-		r.sb.WriteString("<sup>")
-		r.renderTextMarkdown(v.Text)
-		r.sb.WriteString("</sup>")
+		r.renderTextHTML(v)
 	case RichTextCode:
 		r.sb.WriteString("`")
 		r.renderTextMarkdown(v.Text)
@@ -82,7 +75,7 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 	case RichTextMention:
 		r.renderTextMarkdown(v.Text)
 	case RichTextAnchor:
-		fmt.Fprintf(&r.sb, "<a name=\"%s\"></a>\n", html.EscapeString(v.Name))
+		r.renderTextHTML(v)
 	case RichTextAnchorLink:
 		r.sb.WriteString("[")
 		r.renderTextMarkdown(v.Text)
@@ -106,7 +99,7 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 		r.renderTextMarkdown(v.Text)
 		fmt.Fprintf(&r.sb, "](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat)
 	case RichTextCustomEmoji:
-		fmt.Fprintf(&r.sb, "![%s](tg://emoji?id=%s)", v.AlternativeText, v.CustomEmojiId)
+		fmt.Fprintf(&r.sb, "![%s](tg://emoji?id=%s)", mdEscape(v.AlternativeText), v.CustomEmojiId)
 	case RichTextMathematicalExpression:
 		r.sb.WriteString("$$")
 		r.sb.WriteString(v.Expression)
@@ -140,51 +133,19 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		r.sb.WriteString(RichTextMarkdown(v.Text))
 		r.sb.WriteString("\n")
 	case RichBlockBlockQuotation:
-		// Prefix each line with "> "
-		for _, child := range v.Blocks {
-			// create an internal render, only for the text
-			inner := renderCtx{
-				sb:      strings.Builder{},
-				media:   r.media,
-				counter: r.counter,
-			}
-			inner.renderBlockMarkdown(child, 0)
-
-			for _, line := range strings.Split(strings.TrimRight(inner.sb.String(), "\n"), "\n") {
-				r.sb.WriteString("> " + line + "\n")
-			}
-
-			r.media = inner.media
-			r.counter = inner.counter
-		}
 		if v.Credit != nil {
-			r.sb.WriteString("<aside>")
-			r.sb.WriteString(RichTextMarkdown(v.Credit))
-			r.sb.WriteString("</aside>")
+			r.renderBlockHTML(v)
+		} else {
+			for _, child := range v.Blocks {
+				r.sb.WriteString("> ")
+				r.renderBlockMarkdown(child, depth)
+			}
 		}
 		r.sb.WriteString("\n")
 	case RichBlockPullQuotation:
-		r.sb.WriteString("<aside>")
-		r.sb.WriteString(RichTextMarkdown(v.Text))
-		if v.Credit != nil {
-			r.sb.WriteString("<cite>")
-			r.sb.WriteString(RichTextMarkdown(v.Credit))
-			r.sb.WriteString("</cite>")
-		}
-		r.sb.WriteString("</aside>")
-		r.sb.WriteString("\n")
+		r.renderBlockHTML(v)
 	case RichBlockDetails:
-		r.sb.WriteString("<details")
-		if v.IsOpen {
-			r.sb.WriteString(" open")
-		}
-		r.sb.WriteString(">\n<summary>")
-		r.sb.WriteString(RichTextMarkdown(v.Summary))
-		r.sb.WriteString("</summary>\n")
-		for _, child := range v.Blocks {
-			r.renderBlockMarkdown(child, depth)
-		}
-		r.sb.WriteString("</details>\n")
+		r.renderBlockHTML(v)
 	case RichBlockList:
 		ordered := len(v.Items) > 0 && v.Items[0].Value != 0
 		for i, item := range v.Items {
@@ -267,25 +228,11 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		}
 		r.sb.WriteString("\n")
 	case RichBlockCollage:
-		r.sb.WriteString("<tg-collage>\n")
-		for _, child := range v.Blocks {
-			r.renderBlockMarkdown(child, depth+1)
-		}
-		r.renderCaptionHTML(v.Caption)
-		r.sb.WriteString("</tg-collage>\n")
-
+		r.renderBlockHTML(v)
 	case RichBlockSlideshow:
-		r.sb.WriteString("<tg-slideshow>\n")
-		for _, child := range v.Blocks {
-			r.renderBlockMarkdown(child, depth+1)
-		}
-		r.renderCaptionHTML(v.Caption)
-		r.sb.WriteString("</tg-slideshow>\n")
-
+		r.renderBlockHTML(v)
 	case RichBlockThinking:
-		r.sb.WriteString("<tg-thinking>")
-		r.sb.WriteString(RichTextMarkdown(v.Text))
-		r.sb.WriteString("\n</tg-thinking>\n")
+		r.renderBlockHTML(v)
 	case RichBlockMathematicalExpression:
 		r.sb.WriteString("$$\n")
 		r.sb.WriteString(v.Expression)
@@ -293,7 +240,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	case RichBlockDivider:
 		r.sb.WriteString("---\n")
 	case RichBlockAnchor:
-		fmt.Fprintf(&r.sb, "<a name=\"%s\"></a>\n", v.Name)
+		r.renderBlockHTML(v)
 	case RichBlockPhoto:
 		if v.Caption != nil {
 			r.renderBlockHTML(v)
