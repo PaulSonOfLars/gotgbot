@@ -778,9 +778,9 @@ func TestRichMessageSending(t *testing.T) {
 			wantMarkdown: "\\#hashtag $USD " +
 				"[\\+12345678901](tel:+12345678901), " +
 				"card: 4242 4242 4242 4242, " +
-				"[https://t\\.me](https://t.me) " +
-				"[t\\.me](t.me) " +
-				"[a@t\\.me](mailto:a@t.me) " +
+				"[https://t.me](https://t.me) " +
+				"[t.me](t.me) " +
+				"[a@t.me](mailto:a@t.me) " +
 				"/command " +
 				"@username " +
 				"all the text above was on the same line",
