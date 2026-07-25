@@ -161,10 +161,17 @@ func (c Command) matchRichNode(rt gotgbot.RichText, wholeText string) (string, b
 		return c.matchRichNode(v[0], wholeText)
 
 	case gotgbot.RichTextString:
-		return c.extractCommand(string(v)), true
+		cmd := c.extractCommand(string(v))
+		return cmd, cmd != ""
 
 	case gotgbot.RichTextBotCommand:
 		cmdString := gotgbot.RichTextContent(v) // rendered token, e.g. "/start@mybot"
+
+		cmd := c.extractCommand(cmdString)
+		if cmd == "" {
+			return "", false
+		}
+
 		return v.BotCommand, strings.HasPrefix(wholeText, cmdString)
 	}
 	return "", false
