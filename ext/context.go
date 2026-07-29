@@ -185,5 +185,9 @@ func (c *Context) Args() []string {
 		return nil
 	}
 
-	return strings.Fields(c.EffectiveMessage.GetText())
+	text := c.EffectiveMessage.GetText()
+	if c.EffectiveMessage.RichMessage != nil {
+		text = c.EffectiveMessage.RichMessage.PlainText()
+	}
+	return strings.Fields(text)
 }
