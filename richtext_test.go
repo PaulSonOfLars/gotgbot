@@ -50,7 +50,7 @@ func TestRichBlockParsing(t *testing.T) {
 				Text: RichTextString("hello"),
 			},
 			wantHTML:     "<footer>hello</footer>",
-			wantMarkdown: "---\nhello",
+			wantMarkdown: "<footer>hello</footer>", // HTML syntax
 			wantText:     "hello",
 		}, {
 			name:         "RichBlockDivider",
@@ -832,9 +832,8 @@ func TestRichMessageSending(t *testing.T) {
 			wantMarkdown: "Paragraph text\n" +
 				"```\npre-formatted fixed-width code block\n```\n" +
 				"```python\n  print('pre-formatted fixed-width code block written in the Python programming language')\n```" +
-				"\n---" +
-				"\nFooter text\n" +
-				"---\n" +
+				"\n<footer>Footer text</footer>\n" +
+				"\n---\n" +
 				"- unordered list item\n\n" +
 				"1. ordered list item\n\n" +
 				"c. ordered list item\n\n" +
@@ -1065,6 +1064,20 @@ func TestRichMessageSending(t *testing.T) {
 			wantHTML:     "<p>test<br/><br/>me</p>",
 			wantMarkdown: "test<br/><br/>me", // Double the newlines for markdown to keep them.
 			wantText:     "test\n\nme",
+			wantMedia:    nil,
+		}, {
+			name:         "divider",
+			inputHTML:    "<h1>title</h1><p>paragraph</p><hr/>",
+			wantHTML:     "<h1>title</h1>\n<p>paragraph</p>\n<hr/>",
+			wantMarkdown: "# title\nparagraph\n\n---", // Need 2 newlines to show as a divider
+			wantText:     "title\nparagraph",
+			wantMedia:    nil,
+		}, {
+			name:         "footer",
+			inputHTML:    "<h1>title</h1><p>paragraph</p><footer>Footer</footer>",
+			wantHTML:     "<h1>title</h1>\n<p>paragraph</p>\n<footer>Footer</footer>",
+			wantMarkdown: "# title\nparagraph\n<footer>Footer</footer>",
+			wantText:     "title\nparagraph\nFooter",
 			wantMedia:    nil,
 		},
 	}

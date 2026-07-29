@@ -129,9 +129,9 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		r.sb.WriteString(RichTextContent(v.Text)) // raw text, no escaping inside code blocks
 		r.sb.WriteString("\n```\n")
 	case RichBlockFooter:
-		r.sb.WriteString("---\n")
-		r.sb.WriteString(RichTextMarkdown(v.Text))
-		r.sb.WriteString("\n")
+		r.renderBlockHTML(b)
+	case RichBlockDivider:
+		r.sb.WriteString("\n---\n")
 	case RichBlockBlockQuotation:
 		if v.Credit != nil {
 			r.renderBlockHTML(v)
@@ -147,6 +147,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	case RichBlockDetails:
 		r.renderBlockHTML(v)
 	case RichBlockList:
+		// NOTE: this should probably be HTML
 		ordered := len(v.Items) > 0 && v.Items[0].Value != 0
 		for i, item := range v.Items {
 			if ordered {
@@ -191,7 +192,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		}
 
 		// simple attempt at detecting lossy table behaviour
-		if row := v.Cells[0]; v.Caption != nil || len(row) == 0 || !row[0].IsHeader {
+		if row := v.Cells[0]; v.Caption != nil || v.IsBordered || v.IsStriped || len(row) == 0 || !row[0].IsHeader {
 			r.renderBlockHTML(b)
 			break
 		}
@@ -237,8 +238,6 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		r.sb.WriteString("$$\n")
 		r.sb.WriteString(v.Expression)
 		r.sb.WriteString("\n$$\n")
-	case RichBlockDivider:
-		r.sb.WriteString("---\n")
 	case RichBlockAnchor:
 		r.renderBlockHTML(v)
 	case RichBlockPhoto:
