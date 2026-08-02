@@ -28,19 +28,19 @@ func ChatId(id int64) filters.ChatMember {
 }
 
 func Private(cm *gotgbot.ChatMemberUpdated) bool {
-	return cm.Chat.Type == "private"
+	return cm.Chat.Type == gotgbot.ChatTypePrivate
 }
 
 func Group(cm *gotgbot.ChatMemberUpdated) bool {
-	return cm.Chat.Type == "group"
+	return cm.Chat.Type == gotgbot.ChatTypeGroup
 }
 
 func Supergroup(cm *gotgbot.ChatMemberUpdated) bool {
-	return cm.Chat.Type == "supergroup"
+	return cm.Chat.Type == gotgbot.ChatTypeSupergroup
 }
 
 func Channel(cm *gotgbot.ChatMemberUpdated) bool {
-	return cm.Chat.Type == "channel"
+	return cm.Chat.Type == gotgbot.ChatTypeChannel
 }
 
 func InviteLink(cm *gotgbot.ChatMemberUpdated) bool {

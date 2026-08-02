@@ -78,19 +78,19 @@ func ChatType(t string) filters.Message {
 }
 
 func Private(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "private"
+	return msg.Chat.Type == gotgbot.ChatTypePrivate
 }
 
 func Group(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "group"
+	return msg.Chat.Type == gotgbot.ChatTypeGroup
 }
 
 func Supergroup(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "supergroup"
+	return msg.Chat.Type == gotgbot.ChatTypeSupergroup
 }
 
 func Channel(msg *gotgbot.Message) bool {
-	return msg.Chat.Type == "channel"
+	return msg.Chat.Type == gotgbot.ChatTypeChannel
 }
 
 func Business(msg *gotgbot.Message) bool {
@@ -136,7 +136,7 @@ func Caption(msg *gotgbot.Message) bool {
 
 func Command(msg *gotgbot.Message) bool {
 	ents := msg.GetEntities()
-	return len(ents) > 0 && ents[0].Type == "bot_command" && ents[0].Offset == 0
+	return len(ents) > 0 && ents[0].Type == gotgbot.MessageEntityTypeBotCommand && ents[0].Offset == 0
 }
 
 func Animation(msg *gotgbot.Message) bool {
@@ -231,12 +231,7 @@ func Entities(m *gotgbot.Message) bool {
 // Entity returns true if a specific entity is present in the message's text entities. To check gifts/polls etc, use AnyEntity.
 func Entity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		for _, ent := range m.Entities {
-			if ent.Type == entType {
-				return true
-			}
-		}
-		return false
+		return gotgbot.HasEntityType(m.Entities, entType)
 	}
 }
 
@@ -248,24 +243,29 @@ func CaptionEntities(m *gotgbot.Message) bool {
 // CaptionEntity returns true if a specific entity is present in the message's caption entities. To check gifts/polls etc, use AnyEntity.
 func CaptionEntity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		for _, ent := range m.CaptionEntities {
-			if ent.Type == entType {
-				return true
-			}
-		}
-		return false
+		return gotgbot.HasEntityType(m.CaptionEntities, entType)
 	}
 }
 
 // AnyEntities returns true if there are any message entities present (including gifts, polls, etc).
 func AnyEntities(m *gotgbot.Message) bool {
-	return len(m.ParseAnyEntities()) > 0
+	return len(m.GetEntities()) > 0
 }
 
 // AnyEntity returns true if a specific entity type is present anywhere in the message (including gifts, polls, etc).
 func AnyEntity(entType string) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return len(m.ParseAnyEntityTypes(map[string]struct{}{entType: {}})) > 0
+		return gotgbot.HasEntityType(m.GetEntities(), entType) || gotgbot.HasRichType(m.RichMessage, entType)
+	}
+}
+
+func RichMessage(msg *gotgbot.Message) bool {
+	return msg.RichMessage != nil
+}
+
+func RichEntity(entType string) filters.Message {
+	return func(m *gotgbot.Message) bool {
+		return gotgbot.HasRichType(m.RichMessage, entType)
 	}
 }
 

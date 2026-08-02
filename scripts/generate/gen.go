@@ -69,8 +69,8 @@ func (td TypeDescription) receivedFromAPI(d APIDescription) bool {
 
 	for _, m := range d.Methods {
 		for _, r := range m.Returns {
-			if isTgArray(r) {
-				r = strings.TrimPrefix(r, "Array of ")
+			for isTgArray(r) {
+				_, r = typeOfTgArray(r)
 			}
 
 			if r == td.Name {
@@ -94,8 +94,8 @@ func (td TypeDescription) receivedFromAPI(d APIDescription) bool {
 func (td TypeDescription) usesChildType(d APIDescription, typeName string, skip []string) bool {
 	for _, f := range td.Fields {
 		for _, t := range f.Types {
-			if isTgArray(t) {
-				t = strings.TrimPrefix(t, "Array of ")
+			for isTgArray(t) {
+				_, t = typeOfTgArray(t)
 			}
 
 			if td.isChildType(d, t, typeName, skip) {
@@ -154,6 +154,9 @@ func (td TypeDescription) getTypeNameFromParent(typeField string) (string, error
 		return "", errors.New("unable to determine type name")
 	}
 
+	if td.Href == internalTypeRef {
+		return td.SubtypeOf[0], nil
+	}
 	return "", errors.New("unable to determine type field")
 }
 
@@ -162,7 +165,7 @@ func (td TypeDescription) getConstantFieldFromParent(d APIDescription) (*Field, 
 		return nil, fmt.Errorf("expected %s to be a parent", td.Name)
 	}
 
-	subTypes, err := getTypesByName(d, td.Subtypes)
+	subTypes, err := getTypesByName(d, td.Name, td.Subtypes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get parent type %s: %w", td.Name, err)
 	}
@@ -236,6 +239,14 @@ type Field struct {
 	Types       []string `json:"types"`
 	Required    bool     `json:"required"`
 	Description string   `json:"description"`
+}
+
+func (f *Field) ConstantName(parentName string, shortName string) string {
+	return ConstantName(parentName, f.Name, shortName)
+}
+
+func ConstantName(parentName string, fieldName string, shortName string) string {
+	return snakeToTitle(parentName) + snakeToTitle(fieldName) + snakeToTitle(shortName)
 }
 
 // Default matcher for cases where:
@@ -312,6 +323,8 @@ const (
 	tgTypeInputFile      = "InputFile"
 	tgTypeInputMedia     = "InputMedia"
 	tgTypeInputPaidMedia = "InputPaidMedia"
+	tgTypeRichText       = "RichText"
+	tgTypeRichBlock      = "RichBlock"
 
 	// Custom types for this lib.
 	typeReplyMarkup       = "ReplyMarkup"
@@ -417,10 +430,7 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 		mediaType := tgTypeInputMedia
 		// TODO: check against API description type
 		for _, t := range f.Types {
-			arrayType = arrayType || isTgArray(t)
-			if arrayType {
-				t = strings.TrimPrefix(t, "Array of ")
-			}
+			arrayType, t = typeOfTgArray(t)
 
 			if strings.HasPrefix(t, tgTypeInputMedia) {
 				mediaType = tgTypeInputMedia
@@ -467,6 +477,12 @@ func (f Field) getPreferredType(d APIDescription) (string, error) {
 	}
 
 	if len(f.Types) == 1 {
+		if ok, fTypeName := typeOfTgArray(f.Types[0]); ok && isRichTextType(fTypeName) {
+			newTypeName := fTypeName + "Array"
+			d.Types[newTypeName] = newTypeDescription(newTypeName, fTypeName, fTypeName)
+			return newTypeName, nil
+		}
+
 		goType := toGoType(f.Types[0])
 		if goType == "int64" && strings.Contains(f.Description, "Signed 32-bit") {
 			goType = "int32"

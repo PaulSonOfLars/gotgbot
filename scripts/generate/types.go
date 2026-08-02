@@ -84,22 +84,28 @@ func generateTypeDef(d APIDescription, tgType TypeDescription) (string, error) {
 		typeDef.WriteString(customUnmarshalDef)
 	}
 
-	interfaces, err := fulfilParentTypeInterfaces(d, tgType)
+	interfaces, err := fulfillParentTypeInterfaces(d, tgType)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate parent type interfaces %s: %w", tgType.Name, err)
 	}
 	typeDef.WriteString(interfaces)
 
-	ok, fieldName, err := findInputFile(d, tgType, map[string]bool{})
+	inputField, err := findInputFile(d, tgType, map[string]bool{})
 	if err != nil {
 		return "", fmt.Errorf("failed to check if type requires special handling: %w", err)
 	}
-	if ok {
+	if inputField != nil {
+		fType, err := inputField.getPreferredType(d)
+		if err != nil {
+			return "", fmt.Errorf("failed to get type for %s: %w", tgType.Name, err)
+		}
+
 		// TODO: Investigate if thumbnails need special handling too.
 		err = attachTmpl.Execute(&typeDef, attachMethodData{
 			Type:      tgType.Name,
-			Field:     snakeToTitle(fieldName),
+			Field:     snakeToTitle(inputField.Name),
 			Thumbnail: containsThumbnail(tgType),
+			IsPointer: isPointer(fType),
 		})
 		if err != nil {
 			return "", fmt.Errorf("failed to generate %s attachment methods: %w", tgType.Name, err)
@@ -117,11 +123,16 @@ func needsArrayAttachment(d APIDescription, tgType TypeDescription) bool {
 	return tgType.sentAsArray(d) && containsInputFile(d, tgType)
 }
 
-func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
+func enforceTypeAssertion(d APIDescription, name string, subtypes []TypeDescription) string {
 	bd := strings.Builder{}
 	bd.WriteString("\n// Ensure that all subtypes correctly implement the parent interface.")
 	bd.WriteString("\nvar (")
 	for _, v := range subtypes {
+		if v.Href == internalTypeRef {
+			// edge case for custom types
+			bd.WriteString(fmt.Sprintf("\n_ %s = %s(%s)", name, v.Name, getDefaultTypeVal(d, toGoType(v.SubtypeOf[0]))))
+			continue
+		}
 		bd.WriteString("\n_ " + name + " = " + v.Name + "{}")
 	}
 	bd.WriteString("\n)")
@@ -130,51 +141,47 @@ func enforceTypeAssertion(name string, subtypes []TypeDescription) string {
 
 func containsInputFile(d APIDescription, tgType TypeDescription) bool {
 	for _, subtype := range tgType.Subtypes {
-		ok, _, _ := findInputFile(d, d.Types[subtype], map[string]bool{})
-		if ok {
+		inputF, _ := findInputFile(d, d.Types[subtype], map[string]bool{})
+		if inputF != nil {
 			return true
 		}
 	}
 
-	ok, _, _ := findInputFile(d, tgType, map[string]bool{})
-	return ok
+	inputF, _ := findInputFile(d, tgType, map[string]bool{})
+	return inputF != nil
 }
 
 // findInputFile returns a boolean to indicate whether or not tgType contains an InputFile.
 // If true, it also returns the field name of that inputfile.
-func findInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (bool, string, error) {
+func findInputFile(d APIDescription, tgType TypeDescription, checked map[string]bool) (*Field, error) {
 	// If already checked, we don't need to check again. This avoids infinite recursive loops.
 	if checked[tgType.Name] {
-		return false, "", nil
+		return nil, nil
 	}
 	checked[tgType.Name] = true
-
-	if tgType.Name == tgTypeInputMedia || tgType.Name == tgTypeInputPaidMedia {
-		return true, "media", nil
-	}
 
 	for _, f := range tgType.Fields {
 		goType, err := f.getPreferredType(d)
 		if err != nil {
-			return false, "", err
+			return nil, err
 		}
 
 		if goType == tgTypeInputFile || goType == typeInputFileOrString || goType == typeInputString {
-			return true, f.Name, nil
+			return &f, nil
 		}
 
 		if isTgType(d, goType) {
-			ok, _, err := findInputFile(d, d.Types[goType], checked)
+			subFile, err := findInputFile(d, d.Types[goType], checked)
 			if err != nil {
-				return false, "", fmt.Errorf("failed to check if %s contains inputfiles: %w", goType, err)
+				return nil, fmt.Errorf("failed to check if %s contains inputfiles: %w", goType, err)
 			}
-			if ok {
-				// We return an error, because we can't actually handle this case yet.
-				return false, "", fmt.Errorf("no support for recursive checks of inputfiles yet for type %s with field %s", tgType.Name, f.Name)
+			if subFile != nil {
+				// return current, not subfile -> on purpose
+				return &f, nil
 			}
 		}
 	}
-	return false, "", nil
+	return nil, nil
 }
 
 func containsThumbnail(tgType TypeDescription) bool {
@@ -187,7 +194,7 @@ func containsThumbnail(tgType TypeDescription) bool {
 }
 
 func generateParentType(d APIDescription, tgType TypeDescription) (string, error) {
-	subTypes, err := getTypesByName(d, tgType.Subtypes)
+	subTypes, err := getTypesByName(d, tgType.Name, tgType.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
 	}
@@ -262,8 +269,16 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 				return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", coreType, tgType.Name, err)
 			}
 
+			// Resolve actual underlying type
+			if fieldType.Href == internalTypeRef {
+				fieldType, err = getTypeByName(d, fieldType.SubtypeOf[0])
+				if err != nil {
+					return "", fmt.Errorf("failed to get type of parameter %s in %s: %w", fieldType.Name, fieldType.SubtypeOf[0], err)
+				}
+			}
+
 			if len(fieldType.Subtypes) > 0 {
-				subtypes, err := getTypesByName(d, fieldType.Subtypes)
+				subtypes, err := getTypesByName(d, fieldType.Name, fieldType.Subtypes)
 				if err != nil {
 					return "", fmt.Errorf("failed to get subtypes from %s: %w", fieldType.Name, err)
 				}
@@ -355,7 +370,7 @@ func filterSupertypes(types []string) []string {
 	return result
 }
 
-func fulfilParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
+func fulfillParentTypeInterfaces(d APIDescription, tgType TypeDescription) (string, error) {
 	typeInterfaces := strings.Builder{}
 
 	// Collect supertypes to reduce the amount of implemented interfaces (causes duplicate shared fields)
@@ -409,9 +424,10 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	}
 	if constantField == nil {
 		// We cover MaybeInaccessibleMessage manually.
-		if tgType.Name != "MaybeInaccessibleMessage" {
-			log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
+		if tgType.Name == "MaybeInaccessibleMessage" {
+			return "", nil
 		}
+		log.Println("skipping edge case type with no constant field; may need manual handling", tgType.Name)
 		return "", nil
 	}
 
@@ -419,9 +435,11 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	for _, subTypeName := range tgType.Subtypes {
 		shortName, err := d.Types[subTypeName].getTypeNameFromParent(constantField.Name)
 		if err != nil {
-			return "", fmt.Errorf("failed to get shortname for %s: %w", subTypeName, err)
+			if isRichTextType(tgType.Name) && (subTypeName == tgTypeString || subTypeName == "Array of RichText") {
+				continue
+			}
+			return "", fmt.Errorf("failed to get type shortname for %s: %w", subTypeName, err)
 		}
-
 		cases = append(cases, customStructUnmarshalCaseData{
 			ConstantFieldValue: shortName,
 			TypeName:           subTypeName,
@@ -434,6 +452,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 		ParentType:        tgType.Name,
 		ConstantFieldName: snakeToTitle(constantField.Name),
 		CaseStatements:    cases,
+		IsRichText:        tgType.Name == tgTypeRichText,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to generate interface unmarshaller: %w", err)
@@ -443,8 +462,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 }
 
 func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType TypeDescription) (string, error) {
-	// Some items need a custom marshaller to handle the "type" field
-	subTypes, err := getTypesByName(d, parentType.Subtypes)
+	subTypes, err := getTypesByName(d, parentType.Name, parentType.Subtypes)
 	if err != nil {
 		return "", fmt.Errorf("failed to get subtypes of parent type %s of %s: %w", parentType.Name, tgType.Name, err)
 	}
@@ -477,8 +495,8 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 		// We only generate the merge func if there is a common field, and if the types match across all children.
 		// If they didn't match, then compilation would fail.
-		if constantField != nil && checkAllChildrenFieldTypes(d, parentType.Name, subTypes) && !strings.HasSuffix(parentType.Name, typeSuffixMedia) {
-			mergeFunc, err := generateMergeFunc(d, tgType.Name, shortName, tgType.Fields, parentType.Name, constantField)
+		if needsMergeFunc(d, constantField, parentType.Name, commonFields, subTypes) {
+			mergeFunc, err := generateMergeFunc(d, tgType, shortName, parentType.Name, constantField)
 			if err != nil {
 				return "", err
 			}
@@ -499,6 +517,12 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 	}
 
 	return bd.String(), nil
+}
+
+func needsMergeFunc(d APIDescription, constantField *Field, parentName string, commonFields []Field, subTypes []TypeDescription) bool {
+	return len(commonFields) > 0 && constantField != nil &&
+		checkAllChildrenFieldTypes(d, parentName, subTypes) &&
+		!strings.HasSuffix(parentName, typeSuffixMedia) && parentName != tgTypeRichText
 }
 
 func generateAllCommonGetMethods(d APIDescription, parentName string, typeName string, commonFields []Field, constantField *Field, shortName string) (string, error) {
@@ -576,13 +600,12 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		return "", fmt.Errorf("failed to get constant fields: %w", err)
 	}
 
-	hasInputFile, fieldName, err := findInputFile(d, subtypes[0], map[string]bool{})
+	field, err := findInputFile(d, subtypes[0], map[string]bool{})
 	if err != nil {
 		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
 	}
-
 	// If the inputfile is a common field, then the interface contains fields.
-	hasInputFile = hasInputFile && slices.Contains(getFieldNames(commonFields), fieldName)
+	hasInputFile := field != nil && slices.Contains(getFieldNames(commonFields), field.Name)
 
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))
@@ -599,9 +622,18 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	}
 
 	// Only require merge funcs when there are common fields, one is a constant, and all types match across types.
-	if len(commonFields) > 0 && constantField != nil && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
+	if needsMergeFunc(d, constantField, name, commonFields, subtypes) {
 		bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with complex telegram types in a non-generic world.", name, name))
 		bd.WriteString(fmt.Sprintf("\nMerge%s() Merged%s", name, name))
+	}
+
+	if isRichTextType(name) {
+		if name == tgTypeRichText {
+			bd.WriteString("\nChildren() []RichText")
+		} else if name == tgTypeRichBlock {
+			bd.WriteString("\nRichTextChildren() []RichText")
+			bd.WriteString("\nRichBlockChildren() []RichBlock")
+		}
 	}
 
 	// create a dummy func to avoid external types implementing this interface
@@ -625,9 +657,9 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 	// Close interface
 	bd.WriteString("\n}")
 
-	bd.WriteString(enforceTypeAssertion(name, subtypes))
+	bd.WriteString(enforceTypeAssertion(d, name, subtypes))
 
-	if len(commonFields) > 0 && constantField != nil && checkAllChildrenFieldTypes(d, name, subtypes) && !strings.HasSuffix(name, typeSuffixMedia) {
+	if needsMergeFunc(d, constantField, name, commonFields, subtypes) {
 		mergedStruct, err := generateMergedStruct(d, name, subtypes)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate merged struct: %w", err)
@@ -680,23 +712,23 @@ func (v %s) Get%s() %s {
 `, commonName, t, commonName, commonType, commonValue)
 }
 
-func generateMergeFunc(d APIDescription, typeName string, shortname string, fields []Field, parentType string, constantField *Field) (string, error) {
-	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
+func generateMergeFunc(d APIDescription, tgType TypeDescription, shortname string, parentType string, constantField *Field) (string, error) {
+	subTypes, err := getTypesByName(d, parentType, d.Types[parentType].Subtypes)
 	if err != nil {
-		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", typeName, err)
+		return "", fmt.Errorf("failed to get subtypes by name for %s: %w", tgType.Name, err)
 	}
 
 	allParentFields, err := getAllFields(d, subTypes, parentType)
 	if err != nil {
-		return "", fmt.Errorf("failed to get all fields for %s with parent type %s: %w", typeName, parentType, err)
+		return "", fmt.Errorf("failed to get all fields for %s with parent type %s: %w", tgType.Name, parentType, err)
 	}
 
 	bd := strings.Builder{}
 
 	bd.WriteString(fmt.Sprintf("\n// Merge%s returns a Merged%s struct to simplify working with types in a non-generic world.", parentType, parentType))
-	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", typeName, parentType, parentType))
+	bd.WriteString(fmt.Sprintf("\nfunc (v %s) Merge%s() Merged%s {", tgType.Name, parentType, parentType))
 	bd.WriteString(fmt.Sprintf("\n\treturn Merged%s{", parentType))
-	for _, f := range fields {
+	for _, f := range tgType.Fields {
 		if constantField != nil && f.Name == constantField.Name {
 			bd.WriteString(fmt.Sprintf("\n\t%s: \"%s\",", snakeToTitle(f.Name), shortname))
 			continue
@@ -776,6 +808,7 @@ type customStructUnmarshalData struct {
 	ParentType        string
 	ConstantFieldName string
 	CaseStatements    []customStructUnmarshalCaseData
+	IsRichText        bool
 }
 
 type customStructUnmarshalCaseData struct {
@@ -815,6 +848,32 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 		if len(d) == 0 {
 			return nil, nil
 		}
+
+		{{ if .IsRichText }}
+		// RichText types require special handling to cover the various type structures set up by telegram.
+		// Namely, we need to support unmarshalling into either a string, an array, or a JSON blob.
+		// We do this by doing an small double-unmarshal into an "any" type and letting the json unmarshaller figure it out.
+		var probe any
+		if err := json.Unmarshal(d, &probe); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal {{.ParentType}}: %w", err)
+		}
+
+		switch probe.(type) {
+		case string:
+		   var s string
+		   if err := json.Unmarshal(d, &s); err != nil {
+			  return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} as string: %w", err)
+		   }
+		   return RichTextString(s), nil
+		case []any:
+		   vs, err := {{.UnmarshalFuncName}}Array(d)
+		   if err != nil {
+			  return nil, fmt.Errorf("failed to unmarshal {{.ParentType}} as array: %w", err)
+		   }
+		   return RichTextArray(vs), nil
+		}
+		// Any other RichText types default to constant-field logic
+		{{- end }}
 
 		t := struct {
 			{{.ConstantFieldName}} string
@@ -865,16 +924,22 @@ type attachMethodData struct {
 	Type      string
 	Field     string
 	Thumbnail bool
+	IsPointer bool
 }
 
 const attachMethod = `
 func (v {{.Type}}) Attach(mediaName string, w *multipart.Writer) error {
+	{{- if .IsPointer }}
 	if v.{{.Field}} != nil {
+	{{- end }}
 		err := v.{{.Field}}.Attach(mediaName, w)
 		if err != nil {
 			return fmt.Errorf("failed to attach input file for %s: %w", mediaName, err)
 		}
+	{{- if .IsPointer }}
 	}
+	{{- end }}
+
 	{{ if .Thumbnail }}
 	if v.Thumbnail != nil {
 		err := v.Thumbnail.Attach(mediaName+"-thumbnail", w)

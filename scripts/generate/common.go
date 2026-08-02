@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const internalTypeRef = "GOTGBOT INTERNAL"
+
 func snakeToTitle(s string) string {
 	bd := strings.Builder{}
 
@@ -48,11 +50,20 @@ var tgToGoTypeMap = map[string]string{
 	tgTypeString:  "string",
 }
 
+func isCoreTGType(t string) bool {
+	return t == tgTypeString || t == tgTypeBoolean || t == tgTypeInteger || t == tgTypeFloat
+}
+
+func isRichTextType(t string) bool {
+	return t == tgTypeRichText || t == tgTypeRichBlock ||
+		strings.HasPrefix(t, tgTypeRichText) || strings.HasPrefix(t, tgTypeRichBlock)
+}
+
 func toGoType(s string) string {
 	pref := ""
 	for isTgArray(s) {
 		pref += "[]"
-		s = strings.TrimPrefix(s, "Array of ")
+		_, s = typeOfTgArray(s)
 	}
 
 	if t, ok := tgToGoTypeMap[s]; ok {
@@ -72,8 +83,14 @@ func stripPointersAndArrays(retType string) string {
 	return retType
 }
 
+const tgArrayOfPrefix = "Array of "
+
 func isTgArray(s string) bool {
-	return strings.HasPrefix(s, "Array of ")
+	return strings.HasPrefix(s, tgArrayOfPrefix)
+}
+
+func typeOfTgArray(s string) (bool, string) {
+	return isTgArray(s), strings.TrimPrefix(s, tgArrayOfPrefix)
 }
 
 func isPointer(s string) bool {
@@ -287,10 +304,21 @@ func getTypeByName(d APIDescription, typeName string) (TypeDescription, error) {
 	return t, nil
 }
 
-func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, error) {
+func getTypesByName(d APIDescription, parentType string, typeNames []string) ([]TypeDescription, error) {
 	var types []TypeDescription
 
 	for _, typeName := range typeNames {
+		if isCoreTGType(typeName) {
+			newTypeName := parentType + typeName
+			d.Types[newTypeName] = newTypeDescription(newTypeName, typeName, parentType)
+			typeName = newTypeName
+
+		} else if isTgArray(typeName) {
+			newTypeName := parentType + "Array"
+			d.Types[newTypeName] = newTypeDescription(newTypeName, typeName, parentType)
+			typeName = newTypeName
+		}
+
 		t, err := getTypeByName(d, typeName)
 		if err != nil {
 			return nil, err
@@ -299,6 +327,20 @@ func getTypesByName(d APIDescription, typeNames []string) ([]TypeDescription, er
 	}
 
 	return types, nil
+}
+
+func newTypeDescription(newTypeName string, typeName string, parentType string) TypeDescription {
+	return TypeDescription{
+		Name: newTypeName,
+		Fields: []Field{{
+			Name:        "type",
+			Types:       []string{tgTypeString},
+			Required:    true,
+			Description: fmt.Sprintf("Type of the %s, always \"%s\"", parentType, strings.ToLower(typeName)),
+		}},
+		Href:      internalTypeRef,
+		SubtypeOf: unique(typeName, parentType),
+	}
 }
 
 // extractQuotedValues is a very basic quote extraction method. It only works on normal double quotes ("), it does not
@@ -337,7 +379,7 @@ func checkAllChildrenFieldTypes(d APIDescription, parentType string, subtypes []
 }
 
 func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) bool {
-	subTypes, err := getTypesByName(d, d.Types[parentType].Subtypes)
+	subTypes, err := getTypesByName(d, parentType, d.Types[parentType].Subtypes)
 	if err != nil {
 		return false
 	}
@@ -356,14 +398,6 @@ func childFieldTypesMatch(d APIDescription, parentType string, fields []Field) b
 	}
 
 	return true
-}
-
-func (f *Field) ConstantName(parentName string, shortName string) string {
-	return ConstantName(parentName, f.Name, shortName)
-}
-
-func ConstantName(parentName string, fieldName string, shortName string) string {
-	return snakeToTitle(parentName) + snakeToTitle(fieldName) + snakeToTitle(shortName)
 }
 
 func unique(ss ...string) []string {

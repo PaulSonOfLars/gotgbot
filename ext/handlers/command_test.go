@@ -11,24 +11,38 @@ func TestCheckMessage(t *testing.T) {
 	c := Command{Triggers: []rune{'!'}, Command: "start"}
 
 	tests := []struct {
-		name string
-		text string
-		want bool
+		name        string
+		text        string
+		richMessage *gotgbot.RichMessage
+		want        bool
 	}{
-		{"matching command", "!start", true},
-		{"matching command with target", "!start@MyBot", true},
-		{"wrong bot target", "!start@OtherBot", false},
-		{"wrong command", "!stop", false},
-		{"no trigger", "start", false},
-		{"empty text", "", false},
-		{"whitespace only", "   ", false},
-		{"command case insensitive", "!START", true}, // Command should be case-insensitive
-		{"bot username case insensitive", "!start@mybot", true},
+		{name: "matching command", text: "!start", want: true},
+		{name: "matching command with target", text: "!start@MyBot", want: true},
+		{name: "wrong bot target", text: "!start@OtherBot", want: false},
+		{name: "wrong command", text: "!stop", want: false},
+		{name: "no trigger", text: "start", want: false},
+		{name: "empty text", text: "", want: false},
+		{name: "whitespace only", text: "   ", want: false},
+		{name: "command case insensitive", text: "!START", want: true}, // Command should be case-insensitive
+		{name: "bot username case insensitive", text: "!start@mybot", want: true},
+		{name: "rich message / command", richMessage: &gotgbot.RichMessage{
+			Blocks: []gotgbot.RichBlock{
+				gotgbot.RichBlockParagraph{Text: gotgbot.RichTextBotCommand{
+					Text:       gotgbot.RichTextString("/start"),
+					BotCommand: "start",
+				}},
+			},
+		}, want: false}, // Only have ! enabled as a trigger
+		{name: "rich message ! command", richMessage: &gotgbot.RichMessage{
+			Blocks: []gotgbot.RichBlock{
+				gotgbot.RichBlockParagraph{Text: gotgbot.RichTextString("!start")},
+			},
+		}, want: true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := &gotgbot.Message{Text: tt.text}
+			msg := &gotgbot.Message{Text: tt.text, RichMessage: tt.richMessage}
 			got := c.checkMessage(bot, msg)
 			if got != tt.want {
 				t.Errorf("checkMessage(%q) = %v, want %v", tt.text, got, tt.want)

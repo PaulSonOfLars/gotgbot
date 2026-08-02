@@ -92,7 +92,7 @@ func TestFileNotBufferedIntoMemory(t *testing.T) {
 	cr := &countingReader{r: bytes.NewReader(fileContents)}
 
 	// Wire up a FileReader with the counting reader as Data.
-	// Intentionally NOT an io.Seeker — we want to catch greedy reads.
+	// Intentionally NOT an io.Seeker - we want to catch greedy reads.
 	params := map[string]any{
 		"document": &FileReader{
 			Name: "test.txt",

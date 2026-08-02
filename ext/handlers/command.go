@@ -65,31 +65,19 @@ func (c Command) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
 	}
 
 	if ctx.Message != nil {
-		if ctx.Message.GetText() == "" {
-			return false
-		}
 		return c.checkMessage(b, ctx.Message)
 	}
 
 	// if no edits and message is edited
 	if c.AllowEdited && ctx.EditedMessage != nil {
-		if ctx.EditedMessage.GetText() == "" {
-			return false
-		}
 		return c.checkMessage(b, ctx.EditedMessage)
 	}
 	// if no channel and message is channel message
 	if c.AllowChannel && ctx.ChannelPost != nil {
-		if ctx.ChannelPost.GetText() == "" {
-			return false
-		}
 		return c.checkMessage(b, ctx.ChannelPost)
 	}
 	// if no channel, no edits, and post is edited
 	if c.AllowChannel && c.AllowEdited && ctx.EditedChannelPost != nil {
-		if ctx.EditedChannelPost.GetText() == "" {
-			return false
-		}
 		return c.checkMessage(b, ctx.EditedChannelPost)
 	}
 
@@ -105,13 +93,18 @@ func (c Command) Name() string {
 }
 
 func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
-	ents := msg.GetEntities()
-	if len(ents) != 0 && ents[0].Offset == 0 && ents[0].Type != "bot_command" {
-		return false
+	if rich := msg.RichMessage; rich != nil {
+		cmd, _ := c.extractRichCommand(rich)
+		return cmd != "" && cmd == c.Command
 	}
 
 	text := msg.GetText()
 	if text == "" {
+		return false
+	}
+
+	ents := msg.GetEntities()
+	if len(ents) != 0 && ents[0].Offset == 0 && ents[0].Type != gotgbot.MessageEntityTypeBotCommand {
 		return false
 	}
 
@@ -143,4 +136,43 @@ func (c Command) extractCommand(command string) string {
 		}
 	}
 	return ""
+}
+
+func (c Command) extractRichCommand(rm *gotgbot.RichMessage) (command string, ok bool) {
+	if rm == nil || len(rm.Blocks) == 0 {
+		return "", false
+	}
+
+	paragraph, ok := rm.Blocks[0].(gotgbot.RichBlockParagraph)
+	if !ok {
+		return "", false
+	}
+
+	wholeText := strings.TrimLeft(gotgbot.RichBlockContent(paragraph), " \n\t")
+	return c.matchRichNode(paragraph.Text, wholeText)
+}
+
+func (c Command) matchRichNode(rt gotgbot.RichText, wholeText string) (string, bool) {
+	switch v := rt.(type) {
+	case gotgbot.RichTextArray:
+		if len(v) == 0 {
+			return "", false
+		}
+		return c.matchRichNode(v[0], wholeText)
+
+	case gotgbot.RichTextString:
+		cmd := c.extractCommand(string(v))
+		return cmd, cmd != ""
+
+	case gotgbot.RichTextBotCommand:
+		cmdString := gotgbot.RichTextContent(v) // rendered token, e.g. "/start@mybot"
+
+		cmd := c.extractCommand(cmdString)
+		if cmd == "" {
+			return "", false
+		}
+
+		return v.BotCommand, strings.HasPrefix(wholeText, cmdString)
+	}
+	return "", false
 }
