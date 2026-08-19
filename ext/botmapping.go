@@ -93,7 +93,9 @@ func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string
 	}
 
 	m.mapping[bData.bot.Token] = bData
-	m.urlMapping[bData.urlPath] = bData.bot.Token
+	if bData.urlPath != "" {
+		m.urlMapping[bData.urlPath] = bData.bot.Token
+	}
 	return &bData, nil
 }
 
