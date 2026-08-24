@@ -307,6 +307,9 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 		if v.IsStriped {
 			attrs += " striped"
 		}
+		if v.IsCompact {
+			attrs += " compact"
+		}
 
 		fmt.Fprintf(&r.sb, "<table%s>\n", attrs)
 
