@@ -105,6 +105,8 @@ func (r *renderCtx) renderTextHTML(rt RichText) {
 		r.renderTextHTML(v.Text)
 	case RichTextBotCommand:
 		r.renderTextHTML(v.Text)
+	case RichTextButton:
+		r.renderRichMessageButton(v.Button)
 	case RichTextBankCardNumber:
 		r.renderTextHTML(v.Text)
 	case RichTextDateTime:
@@ -116,6 +118,65 @@ func (r *renderCtx) renderTextHTML(rt RichText) {
 	case RichTextMathematicalExpression:
 		fmt.Fprintf(&r.sb, `<tg-math>%s</tg-math>`, html.EscapeString(v.Expression))
 	}
+}
+
+func (r *renderCtx) renderRichMessageButton(btn RichMessageButton) {
+	var args []string
+	if btn.Style != "" {
+		args = append(args, "style=\""+btn.Style+"\"")
+	}
+
+	btnType := "disabled"
+	switch {
+	case btn.Url != "":
+		btnType = "url"
+		args = append(args, "url=\""+btn.Url+"\"")
+	case btn.CallbackData != "":
+		btnType = "callback_data"
+		args = append(args, "data=\""+btn.CallbackData+"\"")
+	case btn.WebApp != nil:
+		btnType = "web_app"
+		args = append(args, "url=\""+btn.WebApp.Url+"\"")
+	case btn.LoginUrl != nil:
+		btnType = "login_url"
+		args = append(args, "url=\""+btn.LoginUrl.Url+"\"")
+		if btn.LoginUrl.ForwardText != "" {
+			args = append(args, "forward_text=\""+html.EscapeString(btn.LoginUrl.ForwardText)+"\"")
+		}
+		if btn.LoginUrl.RequestWriteAccess {
+			args = append(args, "request_write_access")
+		}
+	case btn.SwitchInlineQuery != nil:
+		btnType = "switch_inline_query"
+		args = append(args, "query=\""+*btn.SwitchInlineQuery+"\"")
+	case btn.SwitchInlineQueryCurrentChat != nil:
+		btnType = "switch_inline_query_current_chat"
+		args = append(args, "query=\""+*btn.SwitchInlineQueryCurrentChat+"\"")
+	case btn.SwitchInlineQueryChosenChat != nil:
+		btnType = "switch_inline_query_chosen_chat"
+		args = append(args, "query=\""+btn.SwitchInlineQueryChosenChat.Query+"\"")
+		if btn.SwitchInlineQueryChosenChat.AllowUserChats {
+			args = append(args, "allow_user_chats")
+		}
+		if btn.SwitchInlineQueryChosenChat.AllowBotChats {
+			args = append(args, "allow_bot_chats")
+		}
+		if btn.SwitchInlineQueryChosenChat.AllowGroupChats {
+			args = append(args, "allow_group_chats")
+		}
+		if btn.SwitchInlineQueryChosenChat.AllowChannelChats {
+			args = append(args, "allow_channel_chats")
+		}
+	case btn.CopyText != nil:
+		btnType = "copy_text"
+		args = append(args, "text=\""+html.EscapeString(btn.CopyText.Text)+"\"")
+	default:
+		// unknown
+	}
+
+	fmt.Fprintf(&r.sb, `<tg-button type="%s" %s>`, btnType, strings.Join(args, " "))
+	r.renderTextHTML(btn.Text)
+	r.sb.WriteString("</tg-button>")
 }
 
 // RichBlockHTML renders a RichBlock and its descendants as an HTML fragment.
@@ -153,6 +214,15 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 		for _, child := range v.Blocks {
 			r.renderBlockHTML(child)
 		}
+		if v.Credit != nil {
+			r.sb.WriteString("<cite>")
+			r.renderTextHTML(v.Credit)
+			r.sb.WriteString("</cite>\n")
+		}
+		r.sb.WriteString("</blockquote>\n")
+	case RichBlockExpandableBlockQuotation:
+		r.sb.WriteString("<blockquote collapsed>\n")
+		r.renderTextHTML(v.Text)
 		if v.Credit != nil {
 			r.sb.WriteString("<cite>")
 			r.renderTextHTML(v.Credit)
@@ -372,6 +442,16 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 		} else {
 			r.sb.WriteString(tgAudio)
 		}
+	case RichBlockDocument:
+		tgDoc := fmt.Sprintf("<tg-document src=\"%s\"></tg-document>\n", r.addFile("document", InputMediaDocument{Media: InputFileByID(v.Document.FileId)}))
+		if v.Caption != nil {
+			r.sb.WriteString("<figure>\n")
+			r.sb.WriteString(tgDoc)
+			r.renderCaptionHTML(v.Caption)
+			r.sb.WriteString("</figure>\n")
+		} else {
+			r.sb.WriteString(tgDoc)
+		}
 	case RichBlockMap:
 		tgMap := fmt.Sprintf(
 			`<tg-map lat="%g" long="%g" zoom="%d"/>`,
@@ -385,6 +465,18 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 			r.sb.WriteString(tgMap)
 		}
 		r.sb.WriteString("\n")
+	case RichBlockButtons:
+		var args string
+		if v.Align != "" {
+			args = "align=\"" + v.Align + "\""
+		}
+
+		r.sb.WriteString(fmt.Sprintf("<tg-button-row%s>", args))
+		for _, btn := range v.Buttons {
+			r.renderRichMessageButton(btn)
+		}
+
+		r.sb.WriteString("</tg-button-row>")
 	}
 }
 

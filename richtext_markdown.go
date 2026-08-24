@@ -92,6 +92,8 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 		r.renderTextMarkdown(v.Text)
 	case RichTextBotCommand:
 		r.renderTextMarkdown(v.Text)
+	case RichTextButton:
+		r.renderRichMessageButton(v.Button)
 	case RichTextBankCardNumber:
 		r.renderTextMarkdown(v.Text)
 	case RichTextDateTime:
@@ -142,6 +144,8 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 			}
 		}
 		r.sb.WriteString("\n")
+	case RichBlockExpandableBlockQuotation:
+		r.renderBlockHTML(v)
 	case RichBlockPullQuotation:
 		r.renderBlockHTML(v)
 	case RichBlockDetails:
@@ -270,8 +274,17 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		} else {
 			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("audio", InputMediaVoiceNote{Type: "voice_note", Media: InputFileByID(v.VoiceNote.FileId)}))
 		}
+	case RichBlockDocument:
+		if v.Caption != nil {
+			r.renderBlockHTML(v)
+		} else {
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("document", InputMediaDocument{Media: InputFileByID(v.Document.FileId)}))
+		}
 	case RichBlockMap:
 		// Maps aren't supported in markdown; require inline HTML.
+		r.renderBlockHTML(v)
+	case RichBlockButtons:
+		// Button aren't supported in markdown; require inline HTML.
 		r.renderBlockHTML(v)
 	}
 }
