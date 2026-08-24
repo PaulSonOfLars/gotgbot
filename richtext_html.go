@@ -468,15 +468,15 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 	case RichBlockButtons:
 		var args string
 		if v.Align != "" {
-			args = "align=\"" + v.Align + "\""
+			args = " align=\"" + v.Align + "\""
 		}
 
-		r.sb.WriteString(fmt.Sprintf("<tg-button-row%s>", args))
+		r.sb.WriteString("<tg-button-row" + args + ">\n")
 		for _, btn := range v.Buttons {
 			r.renderRichMessageButton(btn)
 		}
 
-		r.sb.WriteString("</tg-button-row>")
+		r.sb.WriteString("</tg-button-row>\n")
 	}
 }
 
