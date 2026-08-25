@@ -221,7 +221,7 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 		}
 		r.sb.WriteString("</blockquote>\n")
 	case RichBlockExpandableBlockQuotation:
-		r.sb.WriteString("<blockquote collapsed>\n")
+		r.sb.WriteString("<blockquote expandable>\n")
 		r.renderTextHTML(v.Text)
 		if v.Credit != nil {
 			r.sb.WriteString("<cite>")
