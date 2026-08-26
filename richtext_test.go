@@ -296,10 +296,10 @@ func TestRichBlockParsing(t *testing.T) {
 				Url:  "example.com",
 			}}},
 			wantHTML: `<tg-button-row>
-<tg-button type="url" url="http://example.com/">Button Text</tg-button>
+<tg-button type="url" url="example.com">Button Text</tg-button>
 </tg-button-row>`,
 			wantMarkdown: `<tg-button-row>
-<tg-button type="url" url="http://example.com/">Button Text</tg-button>
+<tg-button type="url" url="example.com">Button Text</tg-button>
 </tg-button-row>`,
 			wantText: "Button Text",
 		},
