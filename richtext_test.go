@@ -293,7 +293,8 @@ func TestRichBlockParsing(t *testing.T) {
 			name: "RichBlockButtonRow",
 			b: RichBlockButtons{Buttons: []RichMessageButton{{
 				Text: RichTextString("Button Text"),
-				Url:  "example.com",
+				// Telegram transforms URLs; sending "example.com" would return "http://example.com/"
+				Url: "http://example.com/",
 			}}},
 			wantHTML: `<tg-button-row>
 <tg-button type="url" url="http://example.com/">Button Text</tg-button>
