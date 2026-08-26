@@ -123,23 +123,23 @@ func (r *renderCtx) renderTextHTML(rt RichText) {
 func (r *renderCtx) renderRichMessageButton(btn RichMessageButton) {
 	var args []string
 	if btn.Style != "" {
-		args = append(args, "style=\""+btn.Style+"\"")
+		args = append(args, "style=\""+html.EscapeString(btn.Style)+"\"")
 	}
 
 	btnType := "disabled"
 	switch {
 	case btn.Url != "":
 		btnType = "url"
-		args = append(args, "url=\""+btn.Url+"\"")
+		args = append(args, "url=\""+html.EscapeString(btn.Url)+"\"")
 	case btn.CallbackData != "":
 		btnType = "callback_data"
-		args = append(args, "data=\""+btn.CallbackData+"\"")
+		args = append(args, "data=\""+html.EscapeString(btn.CallbackData)+"\"")
 	case btn.WebApp != nil:
 		btnType = "web_app"
-		args = append(args, "url=\""+btn.WebApp.Url+"\"")
+		args = append(args, "url=\""+html.EscapeString(btn.WebApp.Url)+"\"")
 	case btn.LoginUrl != nil:
 		btnType = "login_url"
-		args = append(args, "url=\""+btn.LoginUrl.Url+"\"")
+		args = append(args, "url=\""+html.EscapeString(btn.LoginUrl.Url)+"\"")
 		if btn.LoginUrl.ForwardText != "" {
 			args = append(args, "forward_text=\""+html.EscapeString(btn.LoginUrl.ForwardText)+"\"")
 		}
@@ -148,13 +148,13 @@ func (r *renderCtx) renderRichMessageButton(btn RichMessageButton) {
 		}
 	case btn.SwitchInlineQuery != nil:
 		btnType = "switch_inline_query"
-		args = append(args, "query=\""+*btn.SwitchInlineQuery+"\"")
+		args = append(args, "query=\""+html.EscapeString(*btn.SwitchInlineQuery)+"\"")
 	case btn.SwitchInlineQueryCurrentChat != nil:
 		btnType = "switch_inline_query_current_chat"
-		args = append(args, "query=\""+*btn.SwitchInlineQueryCurrentChat+"\"")
+		args = append(args, "query=\""+html.EscapeString(*btn.SwitchInlineQueryCurrentChat)+"\"")
 	case btn.SwitchInlineQueryChosenChat != nil:
 		btnType = "switch_inline_query_chosen_chat"
-		args = append(args, "query=\""+btn.SwitchInlineQueryChosenChat.Query+"\"")
+		args = append(args, "query=\""+html.EscapeString(btn.SwitchInlineQueryChosenChat.Query)+"\"")
 		if btn.SwitchInlineQueryChosenChat.AllowUserChats {
 			args = append(args, "allow_user_chats")
 		}
