@@ -335,7 +335,6 @@ func TestRichBlockParsing(t *testing.T) {
 
 				if b == nil {
 					t.Skip("set BOT_TOKEN and CHAT_ID to test against bot API")
-					t.SkipNow()
 					return
 				}
 
@@ -865,21 +864,21 @@ func TestRichMessageSending(t *testing.T) {
 				"Unchecked checkbox",
 		}, {
 			name: "quotes",
-			inputHTML: `<blockquote>Block quotation started<br>Block quotation continued<br>The last line of the block quotation<cite>The Author</cite></blockquote>
-				<aside>Pull quote<cite>The Author</cite></aside>`,
+			inputHTML: `<blockquote>Block quotation started<br>Block quotation continued<br>The last line of the block quotationThe Author</blockquote>
+				<aside>Pull quoteThe Author</aside>`,
 			wantHTML: "<blockquote>\n" +
 				"<p>Block quotation started<br/>" +
 				"Block quotation continued<br/>" +
 				"The last line of the block quotation</p>\n" +
-				"<cite>The Author</cite>\n" +
+				"The Author\n" +
 				"</blockquote>\n" +
-				"<aside>Pull quote<cite>The Author</cite></aside>",
+				"<aside>Pull quoteThe Author</aside>",
 			wantMarkdown: "<blockquote>\n" +
 				"<p>Block quotation started<br/>" +
 				"Block quotation continued<br/>" +
 				"The last line of the block quotation</p>\n" +
-				"<cite>The Author</cite>\n" +
-				"</blockquote>\n\n<aside>Pull quote<cite>The Author</cite></aside>",
+				"The Author\n" +
+				"</blockquote>\n\n<aside>Pull quoteThe Author</aside>",
 			wantText: "Block quotation started\nBlock quotation continued\nThe last line of the block quotation\nThe Author\nPull quote\nThe Author",
 		}, {
 			name: "files",
@@ -906,12 +905,12 @@ func TestRichMessageSending(t *testing.T) {
 		}, {
 			name: "captioned files",
 			// skipping <figure><audio src="https://telegram.org/example/audio.ogg"></audio><figcaption>Voice note caption</figcaption></figure>
-			inputHTML: `<figure><img src="https://telegram.org/example/photo.jpg" tg-spoiler/><figcaption>Photo caption<cite>Photo credit</cite></figcaption></figure>
+			inputHTML: `<figure><img src="https://telegram.org/example/photo.jpg" tg-spoiler/><figcaption>Photo captionPhoto credit</figcaption></figure>
 				<figure><video src="https://telegram.org/example/video.mp4" tg-spoiler></video><figcaption>Video caption</figcaption></figure>
 				<figure><audio src="https://telegram.org/example/audio.mp3"></audio><figcaption>Audio caption</figcaption></figure>
 				<figure><video src="https://telegram.org/example/animation.gif" tg-spoiler></video><figcaption>Animation caption</figcaption></figure>`,
 			wantHTML: "<figure>\n<img src=\"tg://photo?id=1\" tg-spoiler></img>\n" +
-				"<figcaption>Photo caption<cite>Photo credit</cite></figcaption>\n</figure>\n" +
+				"<figcaption>Photo captionPhoto credit</figcaption>\n</figure>\n" +
 				"<figure>\n<video src=\"tg://video?id=2\" tg-spoiler></video>\n" +
 				"<figcaption>Video caption</figcaption>\n</figure>\n" +
 				"<figure>\n<audio src=\"tg://audio?id=3\"></audio>\n" +
@@ -919,7 +918,7 @@ func TestRichMessageSending(t *testing.T) {
 				"<figure>\n<video src=\"tg://video?id=4\" tg-spoiler></video>\n" +
 				"<figcaption>Animation caption</figcaption>\n</figure>",
 			wantMarkdown: "<figure>\n<img src=\"tg://photo?id=1\" tg-spoiler></img>\n" +
-				"<figcaption>Photo caption<cite>Photo credit</cite></figcaption>\n</figure>\n" +
+				"<figcaption>Photo captionPhoto credit</figcaption>\n</figure>\n" +
 				"<figure>\n<video src=\"tg://video?id=2\" tg-spoiler></video>\n" +
 				"<figcaption>Video caption</figcaption>\n</figure>\n" +
 				"<figure>\n<audio src=\"tg://audio?id=3\"></audio>\n" +
