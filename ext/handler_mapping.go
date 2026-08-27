@@ -27,7 +27,11 @@ func (m *handlerMapping) add(h Handler, group int) {
 		m.handlerGroups = append(m.handlerGroups, group)
 		sort.Ints(m.handlerGroups)
 	}
-	m.handlers[group] = append(currHandlers, h)
+
+	newHandlers := make([]Handler, len(currHandlers)+1)
+	copy(newHandlers, currHandlers)
+	newHandlers[len(currHandlers)] = h
+	m.handlers[group] = newHandlers
 }
 
 func (m *handlerMapping) remove(name string, group int) bool {
