@@ -1,6 +1,7 @@
 package ext
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -73,7 +74,80 @@ func Test_botMapping(t *testing.T) {
 			t.FailNow()
 		}
 	})
+}
 
+func Test_botMapping_rootWebhookPath(t *testing.T) {
+	bm := botMapping{}
+
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "WEBHOOK_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	_, err := bm.addWebhookBot(b, "", "")
+	if err != nil {
+		t.Fatalf("expected root webhook bot to be added, got error: %s", err.Error())
+	}
+
+	bdata, ok := bm.getBotFromURL("")
+	if !ok {
+		t.Fatal("expected root webhook path to resolve to a bot")
+	}
+
+	if bdata.bot.Token != b.Token {
+		t.Errorf("expected bot token %s, got %s", b.Token, bdata.bot.Token)
+	}
+}
+
+func Test_botMapping_webhookPath(t *testing.T) {
+	bm := botMapping{}
+
+	b := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "WEBHOOK_TOKEN",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	_, err := bm.addWebhookBot(b, "/webhook", "")
+	if err != nil {
+		t.Fatalf("expected webhook bot to be added, got error: %s", err.Error())
+	}
+
+	bdata, ok := bm.getBotFromURL("webhook")
+	if !ok {
+		t.Fatal("expected webhook path to resolve to a bot")
+	}
+
+	if bdata.bot.Token != b.Token {
+		t.Errorf("expected bot token %s, got %s", b.Token, bdata.bot.Token)
+	}
+}
+
+func Test_botMapping_rootWebhookPathAlreadyExists(t *testing.T) {
+	bm := botMapping{}
+
+	b1 := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "WEBHOOK_TOKEN_1",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	b2 := &gotgbot.Bot{
+		User:      gotgbot.User{},
+		Token:     "WEBHOOK_TOKEN_2",
+		BotClient: &gotgbot.BaseBotClient{},
+	}
+
+	_, err := bm.addWebhookBot(b1, "", "")
+	if err != nil {
+		t.Fatalf("expected first root webhook bot to be added, got error: %v", err)
+	}
+
+	_, err = bm.addWebhookBot(b2, "", "")
+	if !errors.Is(err, ErrBotUrlPathAlreadyExists) {
+		t.Fatalf("expected ErrBotUrlPathAlreadyExists, got %v", err)
+	}
 }
 
 func Test_botData_isUpdateChannelStopped(t *testing.T) {
