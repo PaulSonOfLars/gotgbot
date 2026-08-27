@@ -199,22 +199,6 @@ func (mru MessageReactionUpdated) DeleteReaction(b *Bot, opts *DeleteMessageReac
 	return b.DeleteMessageReaction(mru.Chat.Id, mru.MessageId, opts)
 }
 
-func (mcm ChatMemberAdministrator) GetCanManageTags() bool {
-	return mcm.MergeChatMember().GetCanManageTags()
-}
-
-func (mcm MergedChatMember) GetCanManageTags() bool {
-	if mcm.Status != "administrator" && mcm.Status != "creator" {
-		return false
-	}
-
-	if mcm.CanManageTags == nil {
-		return mcm.CanPinMessages
-	}
-
-	return *mcm.CanManageTags
-}
-
 func (cp ChatPermissions) GetCanReactToMessages() bool {
 	if cp.CanReactToMessages == nil {
 		return cp.CanSendMessages
