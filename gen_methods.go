@@ -54,7 +54,7 @@ type AnswerCallbackQueryOpts struct {
 	ShowAlert bool
 	// URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
 	Url string
-	// The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
+	// The maximum amount of time in seconds that the result of the callback query may be cached client-side. Defaults to 0.
 	CacheTime int64
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
@@ -669,7 +669,7 @@ type CopyMessageOpts struct {
 
 // CopyMessage (https://core.telegram.org/bots/api#copymessage)
 //
-// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original message was sent
 //   - messageId (type int64): Message identifier in the chat specified in from_chat_id
@@ -733,7 +733,7 @@ type CopyMessagesOpts struct {
 
 // CopyMessages (https://core.telegram.org/bots/api#copymessages)
 //
-// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an Array of MessageId of the sent messages is returned.
+// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an Array of MessageId of the sent messages is returned.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original messages were sent
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
@@ -1752,6 +1752,8 @@ type EditEphemeralMessageCaptionOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
 	CaptionEntities []MessageEntity
+	// Pass True if the caption must be shown above the message media. Supported only for animation, photo and video messages.
+	ShowCaptionAboveMedia bool
 	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -1779,6 +1781,7 @@ func (bot *Bot) EditEphemeralMessageCaptionWithContext(ctx context.Context, chat
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
+		addIfValueNotZero(v, "show_caption_above_media", opts.ShowCaptionAboveMedia, opts.ShowCaptionAboveMedia == false)
 		v["reply_markup"] = opts.ReplyMarkup
 	}
 
@@ -1810,7 +1813,7 @@ type EditEphemeralMessageMediaOpts struct {
 //   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
 //   - receiverUserId (type int64): Identifier of the user who received the message
 //   - ephemeralMessageId (type int64): Identifier of the ephemeral message to edit
-//   - media (type InputMedia): A JSON-serialized object for the new media content of the message. A new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL.
+//   - media (type InputMedia): A JSON-serialized object for the new media content of the message
 //   - opts (type EditEphemeralMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditEphemeralMessageMedia(chatId int64, receiverUserId int64, ephemeralMessageId int64, media InputMedia, opts *EditEphemeralMessageMediaOpts) (bool, error) {
 	return bot.EditEphemeralMessageMediaWithContext(context.Background(), chatId, receiverUserId, ephemeralMessageId, media, opts)
@@ -1886,10 +1889,14 @@ func (bot *Bot) EditEphemeralMessageReplyMarkupWithContext(ctx context.Context, 
 
 // EditEphemeralMessageTextOpts is the set of optional fields for Bot.EditEphemeralMessageText and Bot.EditEphemeralMessageTextWithContext.
 type EditEphemeralMessageTextOpts struct {
+	// New text of the message, 1-4096 characters after entity parsing; required if rich_message isn't specified
+	Text string
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
 	Entities []MessageEntity
+	// New rich content of the message; required if text isn't specified
+	RichMessage *InputRichMessage
 	// Link preview generation options for the message
 	LinkPreviewOptions *LinkPreviewOptions
 	// A JSON-serialized object for an inline keyboard
@@ -1900,26 +1907,26 @@ type EditEphemeralMessageTextOpts struct {
 
 // EditEphemeralMessageText (https://core.telegram.org/bots/api#editephemeralmessagetext)
 //
-// Use this method to edit an ephemeral text message. Note that it is not guaranteed that the user will receive the message edit event, especially if they are offline. On success, True is returned.
+// Use this method to edit an ephemeral text or rich message. Note that it is not guaranteed that the user will receive the message edit event, especially if they are offline. On success, True is returned.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
 //   - receiverUserId (type int64): Identifier of the user who received the message
 //   - ephemeralMessageId (type int64): Identifier of the ephemeral message to edit
-//   - text (type string): New text of the message, 1-4096 characters after entity parsing
 //   - opts (type EditEphemeralMessageTextOpts): All optional parameters.
-func (bot *Bot) EditEphemeralMessageText(chatId int64, receiverUserId int64, ephemeralMessageId int64, text string, opts *EditEphemeralMessageTextOpts) (bool, error) {
-	return bot.EditEphemeralMessageTextWithContext(context.Background(), chatId, receiverUserId, ephemeralMessageId, text, opts)
+func (bot *Bot) EditEphemeralMessageText(chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageTextOpts) (bool, error) {
+	return bot.EditEphemeralMessageTextWithContext(context.Background(), chatId, receiverUserId, ephemeralMessageId, opts)
 }
 
 // EditEphemeralMessageTextWithContext is the same as Bot.EditEphemeralMessageText, but with a context.Context parameter
-func (bot *Bot) EditEphemeralMessageTextWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, text string, opts *EditEphemeralMessageTextOpts) (bool, error) {
+func (bot *Bot) EditEphemeralMessageTextWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageTextOpts) (bool, error) {
 	v := map[string]any{}
 	v["chat_id"] = chatId
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
-	v["text"] = text
 	if opts != nil {
+		addIfValueNotZero(v, "text", opts.Text, opts.Text == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "entities", opts.Entities, opts.Entities == nil)
+		addIfValueNotZero(v, "rich_message", opts.RichMessage, opts.RichMessage == nil)
 		addIfValueNotZero(v, "link_preview_options", opts.LinkPreviewOptions, opts.LinkPreviewOptions == nil)
 		v["reply_markup"] = opts.ReplyMarkup
 	}
@@ -2339,7 +2346,7 @@ type EditMessageTextOpts struct {
 	Entities []MessageEntity
 	// Link preview generation options for the message
 	LinkPreviewOptions *LinkPreviewOptions
-	// New rich content of the message; required if text isn't specified. Direct upload of new files isn't supported when an inline message is edited.
+	// New rich content of the message; required if text isn't specified. Direct upload of new files and explicit upload of files by a URL isn't supported when an inline message is edited.
 	RichMessage *InputRichMessage
 	// A JSON-serialized object for an inline keyboard
 	ReplyMarkup InlineKeyboardMarkup
@@ -4160,6 +4167,8 @@ type PromoteChatMemberOpts struct {
 	CanManageDirectMessages bool
 	// Pass True if the administrator can edit the tags of regular members; for groups and supergroups only
 	CanManageTags bool
+	// Pass True if the administrator can manage chat welcome messages or directly send them in the case of bots
+	CanSendWelcomeMessages bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -4197,6 +4206,7 @@ func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, 
 		addIfValueNotZero(v, "can_manage_topics", opts.CanManageTopics, opts.CanManageTopics == false)
 		addIfValueNotZero(v, "can_manage_direct_messages", opts.CanManageDirectMessages, opts.CanManageDirectMessages == false)
 		addIfValueNotZero(v, "can_manage_tags", opts.CanManageTags, opts.CanManageTags == false)
+		addIfValueNotZero(v, "can_send_welcome_messages", opts.CanSendWelcomeMessages, opts.CanSendWelcomeMessages == false)
 	}
 
 	var reqOpts *RequestOpts
@@ -4794,10 +4804,8 @@ type SendAnimationOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Duration of sent animation in seconds
 	Duration int64
 	// Animation width
@@ -4853,8 +4861,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "duration", opts.Duration, opts.Duration == 0)
 		addIfValueNotZero(v, "width", opts.Width, opts.Width == 0)
 		addIfValueNotZero(v, "height", opts.Height, opts.Height == 0)
@@ -4895,10 +4902,8 @@ type SendAudioOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Audio caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the audio caption. See formatting options for more details.
@@ -4951,8 +4956,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
@@ -5127,10 +5131,8 @@ type SendContactOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Contact's last name
 	LastName string
 	// Additional data about the contact in the form of a vCard, 0-2048 bytes
@@ -5174,8 +5176,7 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "last_name", opts.LastName, opts.LastName == "")
 		addIfValueNotZero(v, "vcard", opts.Vcard, opts.Vcard == "")
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
@@ -5278,10 +5279,8 @@ type SendDocumentOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Thumbnail InputFile
 	// Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
@@ -5329,8 +5328,7 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		v["thumbnail"] = opts.Thumbnail
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
@@ -5604,10 +5602,8 @@ type SendLivePhotoOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the video caption. See formatting options for more details.
@@ -5657,8 +5653,7 @@ func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, live
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
@@ -5695,10 +5690,8 @@ type SendLocationOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64
 	// Period in seconds during which the location will be updated (see Live Locations), must be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely. Must be 0 for ephemeral messages.
@@ -5746,8 +5739,7 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "horizontal_accuracy", opts.HorizontalAccuracy, opts.HorizontalAccuracy == 0.0)
 		addIfValueNotZero(v, "live_period", opts.LivePeriod, opts.LivePeriod == 0)
 		addIfValueNotZero(v, "heading", opts.Heading, opts.Heading == 0)
@@ -5845,10 +5837,8 @@ type SendMessageOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Mode for parsing entities in the message text. See formatting options for more details.
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
@@ -5892,8 +5882,7 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "entities", opts.Entities, opts.Entities == nil)
 		addIfValueNotZero(v, "link_preview_options", opts.LinkPreviewOptions, opts.LinkPreviewOptions == nil)
@@ -5930,6 +5919,10 @@ type SendMessageDraftOpts struct {
 	ParseMode string
 	// A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
 	Entities []MessageEntity
+	// Pass True to show the user a button to stop further drafts. The bot will receive an Update "stopped_message_generation" if the user presses the button.
+	CanStop bool
+	// Pass True to keep the draft in the chat when the button is pressed. The draft will still disappear after a short time or if the bot sends a message. To fully preserve the partial draft, the bot should send it as a new message.
+	KeepOnStop bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -5938,7 +5931,7 @@ type SendMessageDraftOpts struct {
 //
 // Use this method to stream a partial message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you must call sendMessage with the complete message to persist it in the user's chat. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target private chat
-//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated.
+//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated. Otherwise, the draft is replaced without animation.
 //   - opts (type SendMessageDraftOpts): All optional parameters.
 func (bot *Bot) SendMessageDraft(chatId int64, draftId int64, opts *SendMessageDraftOpts) (bool, error) {
 	return bot.SendMessageDraftWithContext(context.Background(), chatId, draftId, opts)
@@ -5954,6 +5947,8 @@ func (bot *Bot) SendMessageDraftWithContext(ctx context.Context, chatId int64, d
 		addIfValueNotZero(v, "text", opts.Text, opts.Text == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "entities", opts.Entities, opts.Entities == nil)
+		addIfValueNotZero(v, "can_stop", opts.CanStop, opts.CanStop == false)
+		addIfValueNotZero(v, "keep_on_stop", opts.KeepOnStop, opts.KeepOnStop == false)
 	}
 
 	var reqOpts *RequestOpts
@@ -6060,10 +6055,8 @@ type SendPhotoOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the photo caption. See formatting options for more details.
@@ -6111,8 +6104,7 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
@@ -6285,6 +6277,8 @@ type SendRichMessageOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Sends the message silently. Users will receive a notification with no sound.
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
@@ -6322,6 +6316,7 @@ func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, ri
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
 		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
 		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)
@@ -6349,6 +6344,10 @@ func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, ri
 type SendRichMessageDraftOpts struct {
 	// Unique identifier for the target message thread
 	MessageThreadId int64
+	// Pass True to show the user a button to stop further drafts. The bot will receive an Update "stopped_message_generation" if the user presses the button.
+	CanStop bool
+	// Pass True to keep the draft in the chat when the button is pressed. The draft will still disappear after a short time or if the bot sends a message. To fully preserve the partial draft, the bot should send it as a new message.
+	KeepOnStop bool
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -6357,8 +6356,8 @@ type SendRichMessageDraftOpts struct {
 //
 // Use this method to stream a partial rich message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you must call sendRichMessage with the complete message to persist it in the user's chat. Returns True on success.
 //   - chatId (type int64): Unique identifier for the target private chat
-//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated.
-//   - richMessage (type InputRichMessage): The partial message to be streamed. Direct upload of new files isn't supported.
+//   - draftId (type int64): Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated. Otherwise, the draft is replaced without animation.
+//   - richMessage (type InputRichMessage): The partial message to be streamed. Direct upload of new files and explicit upload of files by a URL isn't supported.
 //   - opts (type SendRichMessageDraftOpts): All optional parameters.
 func (bot *Bot) SendRichMessageDraft(chatId int64, draftId int64, richMessage InputRichMessage, opts *SendRichMessageDraftOpts) (bool, error) {
 	return bot.SendRichMessageDraftWithContext(context.Background(), chatId, draftId, richMessage, opts)
@@ -6372,6 +6371,8 @@ func (bot *Bot) SendRichMessageDraftWithContext(ctx context.Context, chatId int6
 	v["rich_message"] = richMessage
 	if opts != nil {
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+		addIfValueNotZero(v, "can_stop", opts.CanStop, opts.CanStop == false)
+		addIfValueNotZero(v, "keep_on_stop", opts.KeepOnStop, opts.KeepOnStop == false)
 	}
 
 	var reqOpts *RequestOpts
@@ -6396,10 +6397,8 @@ type SendStickerOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Emoji associated with the sticker; only for just uploaded stickers
 	Emoji string
 	// Sends the message silently. Users will receive a notification with no sound.
@@ -6439,8 +6438,7 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "emoji", opts.Emoji, opts.Emoji == "")
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
 		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
@@ -6473,10 +6471,8 @@ type SendVenueOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Foursquare identifier of the venue
 	FoursquareId string
 	// Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
@@ -6528,8 +6524,7 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "foursquare_id", opts.FoursquareId, opts.FoursquareId == "")
 		addIfValueNotZero(v, "foursquare_type", opts.FoursquareType, opts.FoursquareType == "")
 		addIfValueNotZero(v, "google_place_id", opts.GooglePlaceId, opts.GooglePlaceId == "")
@@ -6565,10 +6560,8 @@ type SendVideoOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width
@@ -6630,8 +6623,7 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "duration", opts.Duration, opts.Duration == 0)
 		addIfValueNotZero(v, "width", opts.Width, opts.Width == 0)
 		addIfValueNotZero(v, "height", opts.Height, opts.Height == 0)
@@ -6675,10 +6667,8 @@ type SendVideoNoteOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Duration of sent video in seconds
 	Duration int64
 	// Video width and height, i.e. diameter of the video message
@@ -6705,7 +6695,7 @@ type SendVideoNoteOpts struct {
 
 // SendVideoNote (https://core.telegram.org/bots/api#sendvideonote)
 //
-// As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
+// Use this method to send a rounded square MPEG4 video of up to 1 minute long. On success, the sent Message is returned.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
 //   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported.
 //   - opts (type SendVideoNoteOpts): All optional parameters.
@@ -6722,8 +6712,7 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "duration", opts.Duration, opts.Duration == 0)
 		addIfValueNotZero(v, "length", opts.Length, opts.Length == 0)
 		v["thumbnail"] = opts.Thumbnail
@@ -6758,10 +6747,8 @@ type SendVoiceOpts struct {
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
 	DirectMessagesTopicId int64
-	// For outgoing ephemeral messages, unique identifier of the user who will receive the message; for group and supergroup chats only. It is not guaranteed that the user will receive the message, especially if they are offline. See ephemeral message sending for more details.
-	ReceiverUserId int64
-	// For outgoing ephemeral messages, identifier of the callback query which triggerred the message if any
-	CallbackQueryId string
+	// A JSON-serialized object containing the parameters of the ephemeral message to send
+	EphemeralMessageParameters *EphemeralMessageParameters
 	// Voice message caption, 0-1024 characters after entities parsing
 	Caption string
 	// Mode for parsing entities in the voice message caption. See formatting options for more details.
@@ -6807,8 +6794,7 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
-		addIfValueNotZero(v, "receiver_user_id", opts.ReceiverUserId, opts.ReceiverUserId == 0)
-		addIfValueNotZero(v, "callback_query_id", opts.CallbackQueryId, opts.CallbackQueryId == "")
+		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
 		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
 		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
 		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)

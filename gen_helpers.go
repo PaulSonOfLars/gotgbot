@@ -389,6 +389,15 @@ func (v InputRichBlockDetails) RichTextChildren() []RichText {
 	return []RichText{v.Summary}
 }
 
+func (v InputRichBlockExpandableBlockQuotation) RichTextChildren() []RichText {
+	var out []RichText
+	out = append(out, v.Text)
+	if v.Credit != nil {
+		out = append(out, v.Credit)
+	}
+	return out
+}
+
 func (v InputRichBlockFooter) RichTextChildren() []RichText {
 	return []RichText{v.Text}
 }
@@ -856,6 +865,14 @@ func (v RichBlockBlockQuotation) RichBlockChildren() []RichBlock {
 	return nil
 }
 
+func (v RichBlockButtons) RichTextChildren() []RichText {
+	return nil
+}
+
+func (v RichBlockButtons) RichBlockChildren() []RichBlock {
+	return nil
+}
+
 func (v RichBlockCaption) RichTextChildren() []RichText {
 	var out []RichText
 	out = append(out, v.Text)
@@ -886,6 +903,27 @@ func (v RichBlockDivider) RichTextChildren() []RichText {
 }
 
 func (v RichBlockDivider) RichBlockChildren() []RichBlock {
+	return nil
+}
+
+func (v RichBlockDocument) RichTextChildren() []RichText {
+	return nil
+}
+
+func (v RichBlockDocument) RichBlockChildren() []RichBlock {
+	return nil
+}
+
+func (v RichBlockExpandableBlockQuotation) RichTextChildren() []RichText {
+	var out []RichText
+	out = append(out, v.Text)
+	if v.Credit != nil {
+		out = append(out, v.Credit)
+	}
+	return out
+}
+
+func (v RichBlockExpandableBlockQuotation) RichBlockChildren() []RichBlock {
 	return nil
 }
 
@@ -1016,6 +1054,10 @@ func (v RichBlockVoiceNote) RichBlockChildren() []RichBlock {
 	return nil
 }
 
+func (v RichMessageButton) RichTextChildren() []RichText {
+	return []RichText{v.Text}
+}
+
 func (v RichTextAnchor) Children() []RichText {
 	return nil
 }
@@ -1034,6 +1076,10 @@ func (v RichTextBold) Children() []RichText {
 
 func (v RichTextBotCommand) Children() []RichText {
 	return []RichText{v.Text}
+}
+
+func (v RichTextButton) Children() []RichText {
+	return nil
 }
 
 func (v RichTextCashtag) Children() []RichText {

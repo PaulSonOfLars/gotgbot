@@ -289,6 +289,20 @@ func TestRichBlockParsing(t *testing.T) {
 			wantMarkdown: "<tg-thinking>Thinking...</tg-thinking>",
 			wantText:     "Thinking...",
 			skipLiveTest: true, // only for sendRichMessageDraft
+		}, {
+			name: "RichBlockButtonRow",
+			b: RichBlockButtons{Buttons: []RichMessageButton{{
+				Text: RichTextString("Button Text"),
+				// Telegram transforms URLs; sending "example.com" would return "http://example.com/"
+				Url: "http://example.com/",
+			}}},
+			wantHTML: `<tg-button-row>
+<tg-button type="url" url="http://example.com/">Button Text</tg-button>
+</tg-button-row>`,
+			wantMarkdown: `<tg-button-row>
+<tg-button type="url" url="http://example.com/">Button Text</tg-button>
+</tg-button-row>`,
+			wantText: "Button Text",
 		},
 	}
 	for _, tt := range tests {
@@ -1079,6 +1093,24 @@ func TestRichMessageSending(t *testing.T) {
 			wantMarkdown: "# title\nparagraph\n<footer>Footer</footer>",
 			wantText:     "title\nparagraph\nFooter",
 			wantMedia:    nil,
+		}, {
+			name: "button rows",
+			inputHTML: `<tg-button-row>
+  <tg-button type="url" url="https://t.me">url</tg-button>
+  <tg-button type="copy_text" text="...copy">Copy</tg-button>
+  <tg-button type="disabled" style="primary">Disabled</tg-button>
+</tg-button-row>`,
+			wantHTML: `<tg-button-row>
+<tg-button type="url" url="https://t.me/">url</tg-button>
+<tg-button type="copy_text" text="...copy">Copy</tg-button>
+<tg-button type="disabled" style="primary">Disabled</tg-button>
+</tg-button-row>`,
+			wantMarkdown: `<tg-button-row>
+<tg-button type="url" url="https://t.me/">url</tg-button>
+<tg-button type="copy_text" text="...copy">Copy</tg-button>
+<tg-button type="disabled" style="primary">Disabled</tg-button>
+</tg-button-row>`,
+			wantText: "url\nCopy\n...copy\nDisabled",
 		},
 	}
 	for _, tt := range tests {

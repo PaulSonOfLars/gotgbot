@@ -315,6 +315,13 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 		captionContent(v.Caption, sb)
 	case RichBlockMap:
 		captionContent(v.Caption, sb)
+	case RichBlockButtons:
+		for _, btn := range v.Buttons {
+			sb.WriteString(RichTextContent(btn.Text) + "\n")
+			if btn.CopyText != nil {
+				sb.WriteString(btn.CopyText.Text + "\n")
+			}
+		}
 	}
 }
 
