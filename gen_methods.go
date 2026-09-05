@@ -2082,7 +2082,7 @@ func (bot *Bot) EditMessageCaptionWithContext(ctx context.Context, opts *EditMes
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -2090,7 +2090,7 @@ func (bot *Bot) EditMessageCaptionWithContext(ctx context.Context, opts *EditMes
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -2200,7 +2200,7 @@ func (bot *Bot) EditMessageLiveLocationWithContext(ctx context.Context, latitude
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -2208,7 +2208,7 @@ func (bot *Bot) EditMessageLiveLocationWithContext(ctx context.Context, latitude
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -2259,7 +2259,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -2267,7 +2267,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -2316,7 +2316,7 @@ func (bot *Bot) EditMessageReplyMarkupWithContext(ctx context.Context, opts *Edi
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -2324,7 +2324,7 @@ func (bot *Bot) EditMessageReplyMarkupWithContext(ctx context.Context, opts *Edi
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -2388,7 +2388,7 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, opts *EditMessag
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -2396,7 +2396,7 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, opts *EditMessag
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -7415,7 +7415,7 @@ func (bot *Bot) SetGameScoreWithContext(ctx context.Context, userId int64, score
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -7423,7 +7423,7 @@ func (bot *Bot) SetGameScoreWithContext(ctx context.Context, userId int64, score
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 
@@ -8156,7 +8156,7 @@ func (bot *Bot) StopMessageLiveLocationWithContext(ctx context.Context, opts *St
 		return nil, false, err
 	}
 
-	var m Message
+	var m *Message
 	if err := json.Unmarshal(r, &m); err != nil {
 		var b bool
 		if err := json.Unmarshal(r, &b); err != nil {
@@ -8164,7 +8164,7 @@ func (bot *Bot) StopMessageLiveLocationWithContext(ctx context.Context, opts *St
 		}
 		return nil, b, nil
 	}
-	return &m, true, nil
+	return m, true, nil
 
 }
 

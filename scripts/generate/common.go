@@ -119,7 +119,7 @@ func getDefaultTypeVal(d APIDescription, s string) string {
 	case "string":
 		return "\"\""
 	default:
-		if _, ok := d.Types[s]; ok {
+		if t, ok := d.Types[s]; ok && len(t.Subtypes) > 0 {
 			return "nil"
 		}
 
