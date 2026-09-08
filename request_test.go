@@ -7,7 +7,9 @@ import (
 	"io"
 	"mime"
 	"mime/multipart"
+	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -270,4 +272,32 @@ func TestBuildMultipartContextHandling(t *testing.T) {
 			t.Fatalf("expected context.Canceled after mid-read cancel, got: %v", err)
 		}
 	})
+}
+
+func TestSanitizeError(t *testing.T) {
+	token := "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+	rawErr := &url.Error{
+		Op:  "parse",
+		URL: "https://api.telegram.org/bot" + token + "/sendMessage",
+		Err: errors.New("connection timeout"),
+	}
+
+	var sanErr error = &sanitizedError{err: rawErr, token: token}
+
+	// Verify the error string does not contain the token
+	errStr := sanErr.Error()
+	if strings.Contains(errStr, token) {
+		t.Errorf("token leaked in error string: %s", errStr)
+	}
+	if !strings.Contains(errStr, "<TOKEN>") {
+		t.Errorf("expected error string to contain <TOKEN>: %s", errStr)
+	}
+
+	// Verify we can still unwrap and check the type of the underlying error
+	var urlErr *url.Error
+	if !errors.As(sanErr, &urlErr) {
+		t.Errorf("failed to unwrap and assert to *url.Error")
+	} else if urlErr.Op != "parse" {
+		t.Errorf("underlying error structure was not preserved")
+	}
 }
