@@ -447,6 +447,20 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	}
 
 	bd := strings.Builder{}
+	unknownType := getUnknownType(tgType.Name)
+	bd.WriteString(fmt.Sprintf(`
+type %s struct{
+	Raw%s string `+"`json:\"-\"`"+`
+	Data json.RawMessage
+}`, unknownType.Name, snakeToTitle(constantField.Name)))
+
+	unknownTypeDef, err := commonFieldGenerator(d, unknownType, tgType)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate unknown type for %s: %w", tgType.Name, err)
+	}
+	bd.WriteString(unknownTypeDef)
+	bd.WriteString(generateGenericInterfaceMethod(unknownType.Name, tgType.Name))
+
 	err = customStructUnmarshalTmpl.Execute(&bd, customStructUnmarshalData{
 		UnmarshalFuncName: "unmarshal" + tgType.Name,
 		ParentType:        tgType.Name,
@@ -459,6 +473,14 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	}
 
 	return bd.String(), nil
+}
+
+func getUnknownType(interfaceName string) TypeDescription {
+	return TypeDescription{
+		Name:      interfaceName + "Unknown",
+		Href:      internalTypeRef,
+		SubtypeOf: unique("Unknown"),
+	}
 }
 
 func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType TypeDescription) (string, error) {
@@ -487,7 +509,7 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 
 	bd := strings.Builder{}
 	if len(commonFields) > 0 {
-		commonGetMethods, err := generateAllCommonGetMethods(d, parentType.Name, tgType.Name, commonFields, constantField, shortName)
+		commonGetMethods, err := generateAllCommonGetMethods(d, parentType.Name, tgType.Name, commonFields, constantField, shortName, tgType.Href == internalTypeRef)
 		if err != nil {
 			return "", err
 		}
@@ -525,17 +547,19 @@ func needsMergeFunc(d APIDescription, constantField *Field, parentName string, c
 		!strings.HasSuffix(parentName, typeSuffixMedia) && parentName != tgTypeRichText
 }
 
-func generateAllCommonGetMethods(d APIDescription, parentName string, typeName string, commonFields []Field, constantField *Field, shortName string) (string, error) {
+func generateAllCommonGetMethods(d APIDescription, parentName string, typeName string, commonFields []Field, constantField *Field, shortName string, isUnknown bool) (string, error) {
 	bd := strings.Builder{}
 	for _, commonField := range commonFields {
-		commonValueName := "v." + snakeToTitle(commonField.Name)
-		if constantField != nil && commonField.Name == constantField.Name {
-			commonValueName = constantField.ConstantName(parentName, shortName)
-		}
-
 		prefType, err := commonField.getPreferredType(d)
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type for field %s of %s: %w", commonField.Name, typeName, err)
+		}
+
+		commonValueName := "v." + snakeToTitle(commonField.Name)
+		if constantField != nil && commonField.Name == constantField.Name {
+			commonValueName = constantField.ConstantName(parentName, shortName)
+		} else if isUnknown {
+			commonValueName = getDefaultTypeVal(d, prefType) + " // Return empty data for unknown entries."
 		}
 
 		bd.WriteString(generateCommonGetMethod(typeName, snakeToTitle(commonField.Name), prefType, commonValueName))
@@ -667,7 +691,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 
 		bd.WriteString("\n" + mergedStruct)
 
-		commonGetMethods, err := generateAllCommonGetMethods(d, name, "Merged"+name, commonFields, nil, "")
+		commonGetMethods, err := generateAllCommonGetMethods(d, name, "Merged"+name, commonFields, nil, "", false)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate common get methods: %w", err)
 		}
@@ -675,10 +699,10 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		bd.WriteString(commonGetMethods)
 		bd.WriteString(generateGenericInterfaceMethod("Merged"+name, name))
 		bd.WriteString(fmt.Sprintf(`
-// Merge%s returns a Merged%s struct to simplify working with types in a non-generic world.
+// Merge%s returns itself, as it is already merged.
 func (v Merged%s) Merge%s() Merged%s {
 	return v
-}`, name, name, name, name, name))
+}`, name, name, name, name))
 	}
 
 	return bd.String(), nil
@@ -894,7 +918,7 @@ func {{.UnmarshalFuncName}}(d json.RawMessage) ({{.ParentType}}, error) {
 			return s, nil
 		{{ end }}
 		}
-		return nil, fmt.Errorf("unknown interface for {{.ParentType}} with {{.ConstantFieldName}} %v", t.{{.ConstantFieldName}})
+		return {{.ParentType}}Unknown{ Raw{{.ConstantFieldName}}: t.{{.ConstantFieldName}}, Data: d}, nil
 }`
 
 type customMarshalData struct {

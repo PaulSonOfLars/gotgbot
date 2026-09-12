@@ -105,6 +105,11 @@ func generateQuotedTypeFields(d APIDescription, interfaceName string, constantNa
 		consts = append(consts, writeConst(ConstantName(interfaceName, constantName, tName), strings.ToLower(tName)))
 	}
 
+	// Add additional "unknown" type for unsupported types provided in by telegram
+	consts = append(consts,
+		"\n// This additional type is purely to remain forwards-compatible if telegram adds new types.",
+		writeConst(ConstantName(interfaceName, constantName, "unknown"), "unknown"))
+
 	out := strings.Builder{}
 	out.WriteString(fmt.Sprintf("\n// The consts listed below represent all the %s types.", interfaceName))
 	out.WriteString("\nconst (")

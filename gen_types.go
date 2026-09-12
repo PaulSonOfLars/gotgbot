@@ -148,10 +148,41 @@ func (v MergedBackgroundFill) GetType() string {
 // MergedBackgroundFill.backgroundFill is a dummy method to avoid interface implementation.
 func (v MergedBackgroundFill) backgroundFill() {}
 
-// MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
+// MergeBackgroundFill returns itself, as it is already merged.
 func (v MergedBackgroundFill) MergeBackgroundFill() MergedBackgroundFill {
 	return v
 }
+
+type BackgroundFillUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BackgroundFillUnknown) GetType() string {
+	return BackgroundFillTypeUnknown
+}
+
+// MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
+func (v BackgroundFillUnknown) MergeBackgroundFill() MergedBackgroundFill {
+	return MergedBackgroundFill{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BackgroundFillUnknown) MarshalJSON() ([]byte, error) {
+	type alias BackgroundFillUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  BackgroundFillTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BackgroundFillUnknown.backgroundFill is a dummy method to avoid interface implementation.
+func (v BackgroundFillUnknown) backgroundFill() {}
 
 // unmarshalBackgroundFillArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalBackgroundFill.
@@ -219,7 +250,7 @@ func unmarshalBackgroundFill(d json.RawMessage) (BackgroundFill, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for BackgroundFill with Type %v", t.Type)
+	return BackgroundFillUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // BackgroundFillFreeformGradient (https://core.telegram.org/bots/api#backgroundfillfreeformgradient)
@@ -392,10 +423,41 @@ func (v MergedBackgroundType) GetType() string {
 // MergedBackgroundType.backgroundType is a dummy method to avoid interface implementation.
 func (v MergedBackgroundType) backgroundType() {}
 
-// MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
+// MergeBackgroundType returns itself, as it is already merged.
 func (v MergedBackgroundType) MergeBackgroundType() MergedBackgroundType {
 	return v
 }
+
+type BackgroundTypeUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v BackgroundTypeUnknown) GetType() string {
+	return BackgroundTypeTypeUnknown
+}
+
+// MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
+func (v BackgroundTypeUnknown) MergeBackgroundType() MergedBackgroundType {
+	return MergedBackgroundType{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v BackgroundTypeUnknown) MarshalJSON() ([]byte, error) {
+	type alias BackgroundTypeUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  BackgroundTypeTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// BackgroundTypeUnknown.backgroundType is a dummy method to avoid interface implementation.
+func (v BackgroundTypeUnknown) backgroundType() {}
 
 // unmarshalBackgroundTypeArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalBackgroundType.
@@ -471,7 +533,7 @@ func unmarshalBackgroundType(d json.RawMessage) (BackgroundType, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for BackgroundType with Type %v", t.Type)
+	return BackgroundTypeUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // BackgroundTypeChatTheme (https://core.telegram.org/bots/api#backgroundtypechattheme)
@@ -777,7 +839,7 @@ func (v MergedBotCommandScope) GetType() string {
 // MergedBotCommandScope.botCommandScope is a dummy method to avoid interface implementation.
 func (v MergedBotCommandScope) botCommandScope() {}
 
-// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with types in a non-generic world.
+// MergeBotCommandScope returns itself, as it is already merged.
 func (v MergedBotCommandScope) MergeBotCommandScope() MergedBotCommandScope {
 	return v
 }
@@ -1450,10 +1512,41 @@ func (v MergedChatBoostSource) GetSource() string {
 // MergedChatBoostSource.chatBoostSource is a dummy method to avoid interface implementation.
 func (v MergedChatBoostSource) chatBoostSource() {}
 
-// MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
+// MergeChatBoostSource returns itself, as it is already merged.
 func (v MergedChatBoostSource) MergeChatBoostSource() MergedChatBoostSource {
 	return v
 }
+
+type ChatBoostSourceUnknown struct {
+	RawSource string `json:"-"`
+	Data      json.RawMessage
+}
+
+// GetSource is a helper method to easily access the common fields of an interface.
+func (v ChatBoostSourceUnknown) GetSource() string {
+	return ChatBoostSourceSourceUnknown
+}
+
+// MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
+func (v ChatBoostSourceUnknown) MergeChatBoostSource() MergedChatBoostSource {
+	return MergedChatBoostSource{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
+func (v ChatBoostSourceUnknown) MarshalJSON() ([]byte, error) {
+	type alias ChatBoostSourceUnknown
+	a := struct {
+		Source string `json:"source"`
+		alias
+	}{
+		Source: ChatBoostSourceSourceUnknown,
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatBoostSourceUnknown.chatBoostSource is a dummy method to avoid interface implementation.
+func (v ChatBoostSourceUnknown) chatBoostSource() {}
 
 // unmarshalChatBoostSourceArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatBoostSource.
@@ -1521,7 +1614,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for ChatBoostSource with Source %v", t.Source)
+	return ChatBoostSourceUnknown{RawSource: t.Source, Data: d}, nil
 }
 
 // ChatBoostSourceGiftCode (https://core.telegram.org/bots/api#chatboostsourcegiftcode)
@@ -2067,10 +2160,46 @@ func (v MergedChatMember) GetUser() User {
 // MergedChatMember.chatMember is a dummy method to avoid interface implementation.
 func (v MergedChatMember) chatMember() {}
 
-// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+// MergeChatMember returns itself, as it is already merged.
 func (v MergedChatMember) MergeChatMember() MergedChatMember {
 	return v
 }
+
+type ChatMemberUnknown struct {
+	RawStatus string `json:"-"`
+	Data      json.RawMessage
+}
+
+// GetStatus is a helper method to easily access the common fields of an interface.
+func (v ChatMemberUnknown) GetStatus() string {
+	return ChatMemberStatusUnknown
+}
+
+// GetUser is a helper method to easily access the common fields of an interface.
+func (v ChatMemberUnknown) GetUser() User {
+	return User{} // Return empty data for unknown entries.
+}
+
+// MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
+func (v ChatMemberUnknown) MergeChatMember() MergedChatMember {
+	return MergedChatMember{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
+func (v ChatMemberUnknown) MarshalJSON() ([]byte, error) {
+	type alias ChatMemberUnknown
+	a := struct {
+		Status string `json:"status"`
+		alias
+	}{
+		Status: ChatMemberStatusUnknown,
+		alias:  (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ChatMemberUnknown.chatMember is a dummy method to avoid interface implementation.
+func (v ChatMemberUnknown) chatMember() {}
 
 // unmarshalChatMemberArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatMember.
@@ -2162,7 +2291,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for ChatMember with Status %v", t.Status)
+	return ChatMemberUnknown{RawStatus: t.Status, Data: d}, nil
 }
 
 // ChatMemberAdministrator (https://core.telegram.org/bots/api#chatmemberadministrator)
@@ -3614,7 +3743,7 @@ func (v MergedInlineQueryResult) GetId() string {
 // MergedInlineQueryResult.inlineQueryResult is a dummy method to avoid interface implementation.
 func (v MergedInlineQueryResult) inlineQueryResult() {}
 
-// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
+// MergeInlineQueryResult returns itself, as it is already merged.
 func (v MergedInlineQueryResult) MergeInlineQueryResult() MergedInlineQueryResult {
 	return v
 }
@@ -6109,7 +6238,7 @@ func (v MergedInputProfilePhoto) GetType() string {
 // MergedInputProfilePhoto.inputProfilePhoto is a dummy method to avoid interface implementation.
 func (v MergedInputProfilePhoto) inputProfilePhoto() {}
 
-// MergeInputProfilePhoto returns a MergedInputProfilePhoto struct to simplify working with types in a non-generic world.
+// MergeInputProfilePhoto returns itself, as it is already merged.
 func (v MergedInputProfilePhoto) MergeInputProfilePhoto() MergedInputProfilePhoto {
 	return v
 }
@@ -7185,7 +7314,7 @@ func (v MergedInputStoryContent) GetType() string {
 // MergedInputStoryContent.inputStoryContent is a dummy method to avoid interface implementation.
 func (v MergedInputStoryContent) inputStoryContent() {}
 
-// MergeInputStoryContent returns a MergedInputStoryContent struct to simplify working with types in a non-generic world.
+// MergeInputStoryContent returns itself, as it is already merged.
 func (v MergedInputStoryContent) MergeInputStoryContent() MergedInputStoryContent {
 	return v
 }
@@ -7651,10 +7780,41 @@ func (v MergedMenuButton) GetType() string {
 // MergedMenuButton.menuButton is a dummy method to avoid interface implementation.
 func (v MergedMenuButton) menuButton() {}
 
-// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+// MergeMenuButton returns itself, as it is already merged.
 func (v MergedMenuButton) MergeMenuButton() MergedMenuButton {
 	return v
 }
+
+type MenuButtonUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MenuButtonUnknown) GetType() string {
+	return MenuButtonTypeUnknown
+}
+
+// MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
+func (v MenuButtonUnknown) MergeMenuButton() MergedMenuButton {
+	return MergedMenuButton{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v MenuButtonUnknown) MarshalJSON() ([]byte, error) {
+	type alias MenuButtonUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  MenuButtonTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// MenuButtonUnknown.menuButton is a dummy method to avoid interface implementation.
+func (v MenuButtonUnknown) menuButton() {}
 
 // unmarshalMenuButtonArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMenuButton.
@@ -7722,7 +7882,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for MenuButton with Type %v", t.Type)
+	return MenuButtonUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // MenuButtonCommands (https://core.telegram.org/bots/api#menubuttoncommands)
@@ -8465,10 +8625,46 @@ func (v MergedMessageOrigin) GetDate() int64 {
 // MergedMessageOrigin.messageOrigin is a dummy method to avoid interface implementation.
 func (v MergedMessageOrigin) messageOrigin() {}
 
-// MergeMessageOrigin returns a MergedMessageOrigin struct to simplify working with types in a non-generic world.
+// MergeMessageOrigin returns itself, as it is already merged.
 func (v MergedMessageOrigin) MergeMessageOrigin() MergedMessageOrigin {
 	return v
 }
+
+type MessageOriginUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v MessageOriginUnknown) GetType() string {
+	return MessageOriginTypeUnknown
+}
+
+// GetDate is a helper method to easily access the common fields of an interface.
+func (v MessageOriginUnknown) GetDate() int64 {
+	return 0 // Return empty data for unknown entries.
+}
+
+// MergeMessageOrigin returns a MergedMessageOrigin struct to simplify working with types in a non-generic world.
+func (v MessageOriginUnknown) MergeMessageOrigin() MergedMessageOrigin {
+	return MergedMessageOrigin{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v MessageOriginUnknown) MarshalJSON() ([]byte, error) {
+	type alias MessageOriginUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  MessageOriginTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// MessageOriginUnknown.messageOrigin is a dummy method to avoid interface implementation.
+func (v MessageOriginUnknown) messageOrigin() {}
 
 // unmarshalMessageOriginArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMessageOrigin.
@@ -8544,7 +8740,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for MessageOrigin with Type %v", t.Type)
+	return MessageOriginUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // MessageOriginChannel (https://core.telegram.org/bots/api#messageoriginchannel)
@@ -8837,6 +9033,37 @@ var (
 	_ OwnedGift = OwnedGiftUnique{}
 )
 
+type OwnedGiftUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v OwnedGiftUnknown) GetType() string {
+	return OwnedGiftTypeUnknown
+}
+
+// GetSendDate is a helper method to easily access the common fields of an interface.
+func (v OwnedGiftUnknown) GetSendDate() int64 {
+	return 0 // Return empty data for unknown entries.
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v OwnedGiftUnknown) MarshalJSON() ([]byte, error) {
+	type alias OwnedGiftUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  OwnedGiftTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// OwnedGiftUnknown.ownedGift is a dummy method to avoid interface implementation.
+func (v OwnedGiftUnknown) ownedGift() {}
+
 // unmarshalOwnedGiftArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalOwnedGift.
 func unmarshalOwnedGiftArray(d json.RawMessage) ([]OwnedGift, error) {
@@ -8895,7 +9122,7 @@ func unmarshalOwnedGift(d json.RawMessage) (OwnedGift, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for OwnedGift with Type %v", t.Type)
+	return OwnedGiftUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // OwnedGiftRegular (https://core.telegram.org/bots/api#ownedgiftregular)
@@ -9063,6 +9290,32 @@ var (
 	_ PaidMedia = PaidMediaVideo{}
 )
 
+type PaidMediaUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v PaidMediaUnknown) GetType() string {
+	return PaidMediaTypeUnknown
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v PaidMediaUnknown) MarshalJSON() ([]byte, error) {
+	type alias PaidMediaUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  PaidMediaTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// PaidMediaUnknown.paidMedia is a dummy method to avoid interface implementation.
+func (v PaidMediaUnknown) paidMedia() {}
+
 // unmarshalPaidMediaArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalPaidMedia.
 func unmarshalPaidMediaArray(d json.RawMessage) ([]PaidMedia, error) {
@@ -9137,7 +9390,7 @@ func unmarshalPaidMedia(d json.RawMessage) (PaidMedia, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for PaidMedia with Type %v", t.Type)
+	return PaidMediaUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // PaidMediaInfo (https://core.telegram.org/bots/api#paidmediainfo)
@@ -9393,7 +9646,7 @@ func (v MergedPassportElementError) GetMessage() string {
 // MergedPassportElementError.passportElementError is a dummy method to avoid interface implementation.
 func (v MergedPassportElementError) passportElementError() {}
 
-// MergePassportElementError returns a MergedPassportElementError struct to simplify working with types in a non-generic world.
+// MergePassportElementError returns itself, as it is already merged.
 func (v MergedPassportElementError) MergePassportElementError() MergedPassportElementError {
 	return v
 }
@@ -10221,10 +10474,41 @@ func (v MergedReactionType) GetType() string {
 // MergedReactionType.reactionType is a dummy method to avoid interface implementation.
 func (v MergedReactionType) reactionType() {}
 
-// MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
+// MergeReactionType returns itself, as it is already merged.
 func (v MergedReactionType) MergeReactionType() MergedReactionType {
 	return v
 }
+
+type ReactionTypeUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v ReactionTypeUnknown) GetType() string {
+	return ReactionTypeTypeUnknown
+}
+
+// MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
+func (v ReactionTypeUnknown) MergeReactionType() MergedReactionType {
+	return MergedReactionType{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v ReactionTypeUnknown) MarshalJSON() ([]byte, error) {
+	type alias ReactionTypeUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  ReactionTypeTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ReactionTypeUnknown.reactionType is a dummy method to avoid interface implementation.
+func (v ReactionTypeUnknown) reactionType() {}
 
 // unmarshalReactionTypeArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalReactionType.
@@ -10292,7 +10576,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for ReactionType with Type %v", t.Type)
+	return ReactionTypeUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // ReactionTypeCustomEmoji (https://core.telegram.org/bots/api#reactiontypecustomemoji)
@@ -10529,10 +10813,41 @@ func (v MergedRevenueWithdrawalState) GetType() string {
 // MergedRevenueWithdrawalState.revenueWithdrawalState is a dummy method to avoid interface implementation.
 func (v MergedRevenueWithdrawalState) revenueWithdrawalState() {}
 
-// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+// MergeRevenueWithdrawalState returns itself, as it is already merged.
 func (v MergedRevenueWithdrawalState) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
 	return v
 }
+
+type RevenueWithdrawalStateUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RevenueWithdrawalStateUnknown) GetType() string {
+	return RevenueWithdrawalStateTypeUnknown
+}
+
+// MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
+func (v RevenueWithdrawalStateUnknown) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
+	return MergedRevenueWithdrawalState{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RevenueWithdrawalStateUnknown) MarshalJSON() ([]byte, error) {
+	type alias RevenueWithdrawalStateUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  RevenueWithdrawalStateTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RevenueWithdrawalStateUnknown.revenueWithdrawalState is a dummy method to avoid interface implementation.
+func (v RevenueWithdrawalStateUnknown) revenueWithdrawalState() {}
 
 // unmarshalRevenueWithdrawalStateArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalRevenueWithdrawalState.
@@ -10600,7 +10915,7 @@ func unmarshalRevenueWithdrawalState(d json.RawMessage) (RevenueWithdrawalState,
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for RevenueWithdrawalState with Type %v", t.Type)
+	return RevenueWithdrawalStateUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // RevenueWithdrawalStateFailed (https://core.telegram.org/bots/api#revenuewithdrawalstatefailed)
@@ -10771,6 +11086,32 @@ var (
 	_ RichBlock = RichBlockVoiceNote{}
 	_ RichBlock = RichBlockThinking{}
 )
+
+type RichBlockUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RichBlockUnknown) GetType() string {
+	return RichBlockTypeUnknown
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RichBlockUnknown) MarshalJSON() ([]byte, error) {
+	type alias RichBlockUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  RichBlockTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RichBlockUnknown.richBlock is a dummy method to avoid interface implementation.
+func (v RichBlockUnknown) richBlock() {}
 
 // unmarshalRichBlockArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalRichBlock.
@@ -11006,7 +11347,7 @@ func unmarshalRichBlock(d json.RawMessage) (RichBlock, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for RichBlock with Type %v", t.Type)
+	return RichBlockUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // RichBlockAnchor (https://core.telegram.org/bots/api#richblockanchor)
@@ -12333,6 +12674,32 @@ var (
 	_ RichText = RichTextReferenceLink{}
 )
 
+type RichTextUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v RichTextUnknown) GetType() string {
+	return RichTextTypeUnknown
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v RichTextUnknown) MarshalJSON() ([]byte, error) {
+	type alias RichTextUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  RichTextTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// RichTextUnknown.richText is a dummy method to avoid interface implementation.
+func (v RichTextUnknown) richText() {}
+
 // unmarshalRichTextArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalRichText.
 func unmarshalRichTextArray(d json.RawMessage) ([]RichText, error) {
@@ -12607,7 +12974,7 @@ func unmarshalRichText(d json.RawMessage) (RichText, error) {
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for RichText with Type %v", t.Type)
+	return RichTextUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // RichTextAnchor (https://core.telegram.org/bots/api#richtextanchor)
@@ -14158,7 +14525,7 @@ func (v MergedStoryAreaType) GetType() string {
 // MergedStoryAreaType.storyAreaType is a dummy method to avoid interface implementation.
 func (v MergedStoryAreaType) storyAreaType() {}
 
-// MergeStoryAreaType returns a MergedStoryAreaType struct to simplify working with types in a non-generic world.
+// MergeStoryAreaType returns itself, as it is already merged.
 func (v MergedStoryAreaType) MergeStoryAreaType() MergedStoryAreaType {
 	return v
 }
@@ -14581,10 +14948,41 @@ func (v MergedTransactionPartner) GetType() string {
 // MergedTransactionPartner.transactionPartner is a dummy method to avoid interface implementation.
 func (v MergedTransactionPartner) transactionPartner() {}
 
-// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+// MergeTransactionPartner returns itself, as it is already merged.
 func (v MergedTransactionPartner) MergeTransactionPartner() MergedTransactionPartner {
 	return v
 }
+
+type TransactionPartnerUnknown struct {
+	RawType string `json:"-"`
+	Data    json.RawMessage
+}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v TransactionPartnerUnknown) GetType() string {
+	return TransactionPartnerTypeUnknown
+}
+
+// MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
+func (v TransactionPartnerUnknown) MergeTransactionPartner() MergedTransactionPartner {
+	return MergedTransactionPartner{}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v TransactionPartnerUnknown) MarshalJSON() ([]byte, error) {
+	type alias TransactionPartnerUnknown
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  TransactionPartnerTypeUnknown,
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// TransactionPartnerUnknown.transactionPartner is a dummy method to avoid interface implementation.
+func (v TransactionPartnerUnknown) transactionPartner() {}
 
 // unmarshalTransactionPartnerArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalTransactionPartner.
@@ -14684,7 +15082,7 @@ func unmarshalTransactionPartner(d json.RawMessage) (TransactionPartner, error) 
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface for TransactionPartner with Type %v", t.Type)
+	return TransactionPartnerUnknown{RawType: t.Type, Data: d}, nil
 }
 
 // TransactionPartnerAffiliateProgram (https://core.telegram.org/bots/api#transactionpartneraffiliateprogram)
