@@ -562,6 +562,9 @@ func generateAllCommonGetMethods(d APIDescription, parentName string, typeName s
 		commonValueName := "v." + snakeToTitle(commonField.Name)
 		if constantField != nil && commonField.Name == constantField.Name {
 			commonValueName = constantField.ConstantName(parentName, shortName)
+			if isUnknown {
+				commonValueName = "v.Raw" + strings.Title(constantField.Name)
+			}
 		} else if isUnknown {
 			commonValueName = getDefaultTypeVal(d, prefType) + " // Return empty data for unknown entries."
 		}

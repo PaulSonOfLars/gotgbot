@@ -54,10 +54,7 @@ func TestUnmarshalMessage_UnknownRichBlockType(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected second block to be RichBlockUnknown, got %T", msg.RichMessage.Blocks[1])
 	}
-	if unknown.GetType() != RichBlockTypeUnknown {
-		t.Fatalf("expected unknown gettype 'unknown', got %q", unknown.GetType())
-	}
-	if unknown.RawType != "THIS IS NEW" {
-		t.Fatalf("expected unknown raw type 'THIS IS NEW', got %q", unknown.RawType)
+	if unknown.GetType() != "THIS IS NEW" {
+		t.Fatalf("expected unknown raw type 'THIS IS NEW', got %q", unknown.GetType())
 	}
 }

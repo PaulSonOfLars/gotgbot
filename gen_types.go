@@ -160,7 +160,7 @@ type BackgroundFillUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundFillUnknown) GetType() string {
-	return BackgroundFillTypeUnknown
+	return v.RawType
 }
 
 // MergeBackgroundFill returns a MergedBackgroundFill struct to simplify working with types in a non-generic world.
@@ -425,7 +425,7 @@ type BackgroundTypeUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v BackgroundTypeUnknown) GetType() string {
-	return BackgroundTypeTypeUnknown
+	return v.RawType
 }
 
 // MergeBackgroundType returns a MergedBackgroundType struct to simplify working with types in a non-generic world.
@@ -1504,7 +1504,7 @@ type ChatBoostSourceUnknown struct {
 
 // GetSource is a helper method to easily access the common fields of an interface.
 func (v ChatBoostSourceUnknown) GetSource() string {
-	return ChatBoostSourceSourceUnknown
+	return v.RawSource
 }
 
 // MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with types in a non-generic world.
@@ -2142,7 +2142,7 @@ type ChatMemberUnknown struct {
 
 // GetStatus is a helper method to easily access the common fields of an interface.
 func (v ChatMemberUnknown) GetStatus() string {
-	return ChatMemberStatusUnknown
+	return v.RawStatus
 }
 
 // GetUser is a helper method to easily access the common fields of an interface.
@@ -7752,7 +7752,7 @@ type MenuButtonUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MenuButtonUnknown) GetType() string {
-	return MenuButtonTypeUnknown
+	return v.RawType
 }
 
 // MergeMenuButton returns a MergedMenuButton struct to simplify working with types in a non-generic world.
@@ -8587,7 +8587,7 @@ type MessageOriginUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v MessageOriginUnknown) GetType() string {
-	return MessageOriginTypeUnknown
+	return v.RawType
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -8980,7 +8980,7 @@ type OwnedGiftUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v OwnedGiftUnknown) GetType() string {
-	return OwnedGiftTypeUnknown
+	return v.RawType
 }
 
 // GetSendDate is a helper method to easily access the common fields of an interface.
@@ -9227,7 +9227,7 @@ type PaidMediaUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v PaidMediaUnknown) GetType() string {
-	return PaidMediaTypeUnknown
+	return v.RawType
 }
 func (v PaidMediaUnknown) MarshalJSON() ([]byte, error) {
 	return v.Data, nil
@@ -10406,7 +10406,7 @@ type ReactionTypeUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v ReactionTypeUnknown) GetType() string {
-	return ReactionTypeTypeUnknown
+	return v.RawType
 }
 
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
@@ -10735,7 +10735,7 @@ type RevenueWithdrawalStateUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RevenueWithdrawalStateUnknown) GetType() string {
-	return RevenueWithdrawalStateTypeUnknown
+	return v.RawType
 }
 
 // MergeRevenueWithdrawalState returns a MergedRevenueWithdrawalState struct to simplify working with types in a non-generic world.
@@ -10994,7 +10994,7 @@ type RichBlockUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichBlockUnknown) GetType() string {
-	return RichBlockTypeUnknown
+	return v.RawType
 }
 func (v RichBlockUnknown) MarshalJSON() ([]byte, error) {
 	return v.Data, nil
@@ -12571,7 +12571,7 @@ type RichTextUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v RichTextUnknown) GetType() string {
-	return RichTextTypeUnknown
+	return v.RawType
 }
 func (v RichTextUnknown) MarshalJSON() ([]byte, error) {
 	return v.Data, nil
@@ -14840,7 +14840,7 @@ type TransactionPartnerUnknown struct {
 
 // GetType is a helper method to easily access the common fields of an interface.
 func (v TransactionPartnerUnknown) GetType() string {
-	return TransactionPartnerTypeUnknown
+	return v.RawType
 }
 
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.

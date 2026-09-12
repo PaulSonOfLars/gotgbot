@@ -189,8 +189,6 @@ const (
 	BackgroundFillTypeSolid            = "solid"
 	BackgroundFillTypeGradient         = "gradient"
 	BackgroundFillTypeFreeformGradient = "freeform_gradient"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	BackgroundFillTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the BackgroundType types.
@@ -199,8 +197,6 @@ const (
 	BackgroundTypeTypeWallpaper = "wallpaper"
 	BackgroundTypeTypePattern   = "pattern"
 	BackgroundTypeTypeChatTheme = "chat_theme"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	BackgroundTypeTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the BotCommandScope types.
@@ -212,8 +208,6 @@ const (
 	BotCommandScopeTypeChat                  = "chat"
 	BotCommandScopeTypeChatAdministrators    = "chat_administrators"
 	BotCommandScopeTypeChatMember            = "chat_member"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	BotCommandScopeTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the ChatBoostSource types.
@@ -221,8 +215,6 @@ const (
 	ChatBoostSourceSourcePremium  = "premium"
 	ChatBoostSourceSourceGiftCode = "gift_code"
 	ChatBoostSourceSourceGiveaway = "giveaway"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	ChatBoostSourceSourceUnknown = "unknown"
 )
 
 // The consts listed below represent all the ChatMember types.
@@ -233,8 +225,6 @@ const (
 	ChatMemberStatusRestricted    = "restricted"
 	ChatMemberStatusLeft          = "left"
 	ChatMemberStatusKicked        = "kicked"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	ChatMemberStatusUnknown = "unknown"
 )
 
 // The consts listed below represent all the InlineQueryResult types.
@@ -252,8 +242,6 @@ const (
 	InlineQueryResultTypeGame     = "game"
 	InlineQueryResultTypeLocation = "location"
 	InlineQueryResultTypeVenue    = "venue"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InlineQueryResultTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputMedia types.
@@ -264,8 +252,6 @@ const (
 	InputMediaTypeLivePhoto = "live_photo"
 	InputMediaTypePhoto     = "photo"
 	InputMediaTypeVideo     = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputMediaTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputPaidMedia types.
@@ -273,8 +259,6 @@ const (
 	InputPaidMediaTypeLivePhoto = "live_photo"
 	InputPaidMediaTypePhoto     = "photo"
 	InputPaidMediaTypeVideo     = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputPaidMediaTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputPollMedia types.
@@ -287,8 +271,6 @@ const (
 	InputPollMediaTypePhoto     = "photo"
 	InputPollMediaTypeVenue     = "venue"
 	InputPollMediaTypeVideo     = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputPollMediaTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputPollOptionMedia types.
@@ -301,16 +283,12 @@ const (
 	InputPollOptionMediaTypeSticker   = "sticker"
 	InputPollOptionMediaTypeVenue     = "venue"
 	InputPollOptionMediaTypeVideo     = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputPollOptionMediaTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputProfilePhoto types.
 const (
 	InputProfilePhotoTypeStatic   = "static"
 	InputProfilePhotoTypeAnimated = "animated"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputProfilePhotoTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputRichBlock types.
@@ -339,16 +317,12 @@ const (
 	InputRichBlockTypeVideo                  = "video"
 	InputRichBlockTypeVoiceNote              = "voice_note"
 	InputRichBlockTypeThinking               = "thinking"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputRichBlockTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the InputStoryContent types.
 const (
 	InputStoryContentTypePhoto = "photo"
 	InputStoryContentTypeVideo = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	InputStoryContentTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the MenuButton types.
@@ -356,8 +330,6 @@ const (
 	MenuButtonTypeCommands = "commands"
 	MenuButtonTypeWebApp   = "web_app"
 	MenuButtonTypeDefault  = "default"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	MenuButtonTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the MessageOrigin types.
@@ -366,16 +338,12 @@ const (
 	MessageOriginTypeHiddenUser = "hidden_user"
 	MessageOriginTypeChat       = "chat"
 	MessageOriginTypeChannel    = "channel"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	MessageOriginTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the OwnedGift types.
 const (
 	OwnedGiftTypeRegular = "regular"
 	OwnedGiftTypeUnique  = "unique"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	OwnedGiftTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the PaidMedia types.
@@ -384,8 +352,6 @@ const (
 	PaidMediaTypePhoto     = "photo"
 	PaidMediaTypePreview   = "preview"
 	PaidMediaTypeVideo     = "video"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	PaidMediaTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the PassportElementError types.
@@ -399,8 +365,6 @@ const (
 	PassportElementErrorSourceTranslationFile  = "translation_file"
 	PassportElementErrorSourceTranslationFiles = "translation_files"
 	PassportElementErrorSourceUnspecified      = "unspecified"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	PassportElementErrorSourceUnknown = "unknown"
 )
 
 // The consts listed below represent all the ReactionType types.
@@ -408,8 +372,6 @@ const (
 	ReactionTypeTypeEmoji       = "emoji"
 	ReactionTypeTypeCustomEmoji = "custom_emoji"
 	ReactionTypeTypePaid        = "paid"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	ReactionTypeTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the RevenueWithdrawalState types.
@@ -417,8 +379,6 @@ const (
 	RevenueWithdrawalStateTypePending   = "pending"
 	RevenueWithdrawalStateTypeSucceeded = "succeeded"
 	RevenueWithdrawalStateTypeFailed    = "failed"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	RevenueWithdrawalStateTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the RichBlock types.
@@ -447,8 +407,6 @@ const (
 	RichBlockTypeVideo                  = "video"
 	RichBlockTypeVoiceNote              = "voice_note"
 	RichBlockTypeThinking               = "thinking"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	RichBlockTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the RichText types.
@@ -480,8 +438,6 @@ const (
 	RichTextTypeAnchorLink             = "anchor_link"
 	RichTextTypeReference              = "reference"
 	RichTextTypeReferenceLink          = "reference_link"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	RichTextTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the StoryAreaType types.
@@ -491,8 +447,6 @@ const (
 	StoryAreaTypeTypeLink              = "link"
 	StoryAreaTypeTypeWeather           = "weather"
 	StoryAreaTypeTypeUniqueGift        = "unique_gift"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	StoryAreaTypeTypeUnknown = "unknown"
 )
 
 // The consts listed below represent all the TransactionPartner types.
@@ -504,6 +458,4 @@ const (
 	TransactionPartnerTypeTelegramAds      = "telegram_ads"
 	TransactionPartnerTypeTelegramApi      = "telegram_api"
 	TransactionPartnerTypeOther            = "other"
-	// This additional type is purely to remain forwards-compatible if telegram adds new types.
-	TransactionPartnerTypeUnknown = "unknown"
 )
