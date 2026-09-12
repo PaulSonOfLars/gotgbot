@@ -154,7 +154,7 @@ func (v MergedBackgroundFill) MergeBackgroundFill() MergedBackgroundFill {
 }
 
 type BackgroundFillUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -419,7 +419,7 @@ func (v MergedBackgroundType) MergeBackgroundType() MergedBackgroundType {
 }
 
 type BackgroundTypeUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -1498,7 +1498,7 @@ func (v MergedChatBoostSource) MergeChatBoostSource() MergedChatBoostSource {
 }
 
 type ChatBoostSourceUnknown struct {
-	RawSource string `json:"-"`
+	RawSource string
 	Data      json.RawMessage
 }
 
@@ -2136,7 +2136,7 @@ func (v MergedChatMember) MergeChatMember() MergedChatMember {
 }
 
 type ChatMemberUnknown struct {
-	RawStatus string `json:"-"`
+	RawStatus string
 	Data      json.RawMessage
 }
 
@@ -7746,7 +7746,7 @@ func (v MergedMenuButton) MergeMenuButton() MergedMenuButton {
 }
 
 type MenuButtonUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -8581,7 +8581,7 @@ func (v MergedMessageOrigin) MergeMessageOrigin() MergedMessageOrigin {
 }
 
 type MessageOriginUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -8974,7 +8974,7 @@ var (
 )
 
 type OwnedGiftUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -9221,7 +9221,7 @@ var (
 )
 
 type PaidMediaUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -10400,7 +10400,7 @@ func (v MergedReactionType) MergeReactionType() MergedReactionType {
 }
 
 type ReactionTypeUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -10729,7 +10729,7 @@ func (v MergedRevenueWithdrawalState) MergeRevenueWithdrawalState() MergedRevenu
 }
 
 type RevenueWithdrawalStateUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -10988,7 +10988,7 @@ var (
 )
 
 type RichBlockUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -12565,7 +12565,7 @@ var (
 )
 
 type RichTextUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 
@@ -14834,7 +14834,7 @@ func (v MergedTransactionPartner) MergeTransactionPartner() MergedTransactionPar
 }
 
 type TransactionPartnerUnknown struct {
-	RawType string `json:"-"`
+	RawType string
 	Data    json.RawMessage
 }
 

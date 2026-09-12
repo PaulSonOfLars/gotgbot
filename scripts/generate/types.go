@@ -450,7 +450,7 @@ func interfaceUnmarshalFunc(d APIDescription, tgType TypeDescription) (string, e
 	unknownType := getUnknownType(tgType.Name)
 	bd.WriteString(fmt.Sprintf(`
 type %s struct{
-	Raw%s string `+"`json:\"-\"`"+`
+	Raw%s string
 	Data json.RawMessage
 }`, unknownType.Name, snakeToTitle(constantField.Name)))
 
