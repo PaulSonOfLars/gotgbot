@@ -241,10 +241,10 @@ func (u *Updater) Idle() {
 //
 // When using long polling, Stop() will wait for the getUpdates call to return, which may cause a delay due to the
 // request timeout.
-func (u *Updater) Stop() error {
+func (u *Updater) Stop(ctx context.Context) error {
 	// Stop any running servers.
 	if u.webhookServer != nil {
-		err := u.webhookServer.Shutdown(context.Background())
+		err := u.webhookServer.Shutdown(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to shutdown server: %w", err)
 		}

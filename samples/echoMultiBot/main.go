@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -186,7 +187,7 @@ func stopAll(b *gotgbot.Bot, ctx *ext.Context, updater *ext.Updater) error {
 
 	// We stop the updater in a separate goroutine, otherwise it would be stuck waiting for itself.
 	go func() {
-		err = updater.Stop()
+		err = updater.Stop(context.Background())
 		if err != nil {
 			ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Failed to stop updater: %s", err.Error()), nil)
 			return
