@@ -526,7 +526,11 @@ func commonFieldGenerator(d APIDescription, tgType TypeDescription, parentType T
 		}
 	}
 
-	if constantField != nil {
+	if tgType.Href == internalTypeRef {
+		bd.WriteString(fmt.Sprintf(`func (v %s) MarshalJSON() ([]byte, error) {
+	return v.Data, nil
+}`, tgType.Name))
+	} else if constantField != nil {
 		err = customMarshalTmpl.Execute(&bd, customMarshalData{
 			Type:                  tgType.Name,
 			ConstantFieldName:     strings.Title(constantField.Name),

@@ -167,18 +167,8 @@ func (v BackgroundFillUnknown) GetType() string {
 func (v BackgroundFillUnknown) MergeBackgroundFill() MergedBackgroundFill {
 	return MergedBackgroundFill{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BackgroundFillUnknown) MarshalJSON() ([]byte, error) {
-	type alias BackgroundFillUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  BackgroundFillTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // BackgroundFillUnknown.backgroundFill is a dummy method to avoid interface implementation.
@@ -442,18 +432,8 @@ func (v BackgroundTypeUnknown) GetType() string {
 func (v BackgroundTypeUnknown) MergeBackgroundType() MergedBackgroundType {
 	return MergedBackgroundType{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v BackgroundTypeUnknown) MarshalJSON() ([]byte, error) {
-	type alias BackgroundTypeUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  BackgroundTypeTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // BackgroundTypeUnknown.backgroundType is a dummy method to avoid interface implementation.
@@ -1531,18 +1511,8 @@ func (v ChatBoostSourceUnknown) GetSource() string {
 func (v ChatBoostSourceUnknown) MergeChatBoostSource() MergedChatBoostSource {
 	return MergedChatBoostSource{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Source value.
 func (v ChatBoostSourceUnknown) MarshalJSON() ([]byte, error) {
-	type alias ChatBoostSourceUnknown
-	a := struct {
-		Source string `json:"source"`
-		alias
-	}{
-		Source: ChatBoostSourceSourceUnknown,
-		alias:  (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // ChatBoostSourceUnknown.chatBoostSource is a dummy method to avoid interface implementation.
@@ -2184,18 +2154,8 @@ func (v ChatMemberUnknown) GetUser() User {
 func (v ChatMemberUnknown) MergeChatMember() MergedChatMember {
 	return MergedChatMember{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Status value.
 func (v ChatMemberUnknown) MarshalJSON() ([]byte, error) {
-	type alias ChatMemberUnknown
-	a := struct {
-		Status string `json:"status"`
-		alias
-	}{
-		Status: ChatMemberStatusUnknown,
-		alias:  (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // ChatMemberUnknown.chatMember is a dummy method to avoid interface implementation.
@@ -7799,18 +7759,8 @@ func (v MenuButtonUnknown) GetType() string {
 func (v MenuButtonUnknown) MergeMenuButton() MergedMenuButton {
 	return MergedMenuButton{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v MenuButtonUnknown) MarshalJSON() ([]byte, error) {
-	type alias MenuButtonUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  MenuButtonTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // MenuButtonUnknown.menuButton is a dummy method to avoid interface implementation.
@@ -8649,18 +8599,8 @@ func (v MessageOriginUnknown) GetDate() int64 {
 func (v MessageOriginUnknown) MergeMessageOrigin() MergedMessageOrigin {
 	return MergedMessageOrigin{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v MessageOriginUnknown) MarshalJSON() ([]byte, error) {
-	type alias MessageOriginUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  MessageOriginTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // MessageOriginUnknown.messageOrigin is a dummy method to avoid interface implementation.
@@ -9047,18 +8987,8 @@ func (v OwnedGiftUnknown) GetType() string {
 func (v OwnedGiftUnknown) GetSendDate() int64 {
 	return 0 // Return empty data for unknown entries.
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v OwnedGiftUnknown) MarshalJSON() ([]byte, error) {
-	type alias OwnedGiftUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  OwnedGiftTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // OwnedGiftUnknown.ownedGift is a dummy method to avoid interface implementation.
@@ -9299,18 +9229,8 @@ type PaidMediaUnknown struct {
 func (v PaidMediaUnknown) GetType() string {
 	return PaidMediaTypeUnknown
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v PaidMediaUnknown) MarshalJSON() ([]byte, error) {
-	type alias PaidMediaUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  PaidMediaTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // PaidMediaUnknown.paidMedia is a dummy method to avoid interface implementation.
@@ -10493,18 +10413,8 @@ func (v ReactionTypeUnknown) GetType() string {
 func (v ReactionTypeUnknown) MergeReactionType() MergedReactionType {
 	return MergedReactionType{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v ReactionTypeUnknown) MarshalJSON() ([]byte, error) {
-	type alias ReactionTypeUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  ReactionTypeTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // ReactionTypeUnknown.reactionType is a dummy method to avoid interface implementation.
@@ -10832,18 +10742,8 @@ func (v RevenueWithdrawalStateUnknown) GetType() string {
 func (v RevenueWithdrawalStateUnknown) MergeRevenueWithdrawalState() MergedRevenueWithdrawalState {
 	return MergedRevenueWithdrawalState{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RevenueWithdrawalStateUnknown) MarshalJSON() ([]byte, error) {
-	type alias RevenueWithdrawalStateUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  RevenueWithdrawalStateTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // RevenueWithdrawalStateUnknown.revenueWithdrawalState is a dummy method to avoid interface implementation.
@@ -11096,18 +10996,8 @@ type RichBlockUnknown struct {
 func (v RichBlockUnknown) GetType() string {
 	return RichBlockTypeUnknown
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichBlockUnknown) MarshalJSON() ([]byte, error) {
-	type alias RichBlockUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  RichBlockTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // RichBlockUnknown.richBlock is a dummy method to avoid interface implementation.
@@ -12683,18 +12573,8 @@ type RichTextUnknown struct {
 func (v RichTextUnknown) GetType() string {
 	return RichTextTypeUnknown
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v RichTextUnknown) MarshalJSON() ([]byte, error) {
-	type alias RichTextUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  RichTextTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // RichTextUnknown.richText is a dummy method to avoid interface implementation.
@@ -14967,18 +14847,8 @@ func (v TransactionPartnerUnknown) GetType() string {
 func (v TransactionPartnerUnknown) MergeTransactionPartner() MergedTransactionPartner {
 	return MergedTransactionPartner{}
 }
-
-// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
 func (v TransactionPartnerUnknown) MarshalJSON() ([]byte, error) {
-	type alias TransactionPartnerUnknown
-	a := struct {
-		Type string `json:"type"`
-		alias
-	}{
-		Type:  TransactionPartnerTypeUnknown,
-		alias: (alias)(v),
-	}
-	return json.Marshal(a)
+	return v.Data, nil
 }
 
 // TransactionPartnerUnknown.transactionPartner is a dummy method to avoid interface implementation.
