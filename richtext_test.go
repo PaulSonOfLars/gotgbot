@@ -99,7 +99,7 @@ func TestRichBlockParsing(t *testing.T) {
 				"<li>\n<p>some text</p>\n</li>\n" +
 				"<li>\n<p>some more text</p>\n</li>\n" +
 				"</ul>",
-			wantMarkdown: "- some text\n- some more text",
+			wantMarkdown: "- some text\n\n- some more text",
 			wantText:     "some text\nsome more text",
 		}, {
 			name: "RichBlockBlockQuotation",
