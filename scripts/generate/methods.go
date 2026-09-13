@@ -134,12 +134,6 @@ return %s, true, nil
 		return "", fmt.Errorf("no existing support for multiple return types of %v", retTypes)
 	}
 
-	addr := ""
-	if isPointer(retVarType) {
-		retVarType = strings.TrimLeft(retVarType, "*")
-		addr = "&"
-	}
-
 	returnString := strings.Builder{}
 
 	if rawType := strings.TrimPrefix(retType, "[]"); isArray(retType) && len(d.Types[rawType].Subtypes) != 0 {
@@ -152,7 +146,7 @@ return %s, true, nil
 
 	} else {
 		returnString.WriteString("\nvar " + retVarName + " " + retVarType)
-		returnString.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+		returnString.WriteString("\nreturn " + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 	}
 
 	return returnString.String(), nil

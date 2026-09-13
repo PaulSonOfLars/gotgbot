@@ -162,8 +162,8 @@ func (bot *Bot) AnswerGuestQueryWithContext(ctx context.Context, guestQueryId st
 		return nil, err
 	}
 
-	var s SentGuestMessage
-	return &s, json.Unmarshal(r, &s)
+	var s *SentGuestMessage
+	return s, json.Unmarshal(r, &s)
 }
 
 // AnswerInlineQueryOpts is the set of optional fields for Bot.AnswerInlineQuery and Bot.AnswerInlineQueryWithContext.
@@ -334,8 +334,8 @@ func (bot *Bot) AnswerWebAppQueryWithContext(ctx context.Context, webAppQueryId 
 		return nil, err
 	}
 
-	var s SentWebAppMessage
-	return &s, json.Unmarshal(r, &s)
+	var s *SentWebAppMessage
+	return s, json.Unmarshal(r, &s)
 }
 
 // ApproveChatJoinRequestOpts is the set of optional fields for Bot.ApproveChatJoinRequest and Bot.ApproveChatJoinRequestWithContext.
@@ -711,8 +711,8 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		return nil, err
 	}
 
-	var m MessageId
-	return &m, json.Unmarshal(r, &m)
+	var m *MessageId
+	return m, json.Unmarshal(r, &m)
 }
 
 // CopyMessagesOpts is the set of optional fields for Bot.CopyMessages and Bot.CopyMessagesWithContext.
@@ -814,8 +814,8 @@ func (bot *Bot) CreateChatInviteLinkWithContext(ctx context.Context, chatId int6
 		return nil, err
 	}
 
-	var c ChatInviteLink
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatInviteLink
+	return c, json.Unmarshal(r, &c)
 }
 
 // CreateChatSubscriptionInviteLinkOpts is the set of optional fields for Bot.CreateChatSubscriptionInviteLink and Bot.CreateChatSubscriptionInviteLinkWithContext.
@@ -857,8 +857,8 @@ func (bot *Bot) CreateChatSubscriptionInviteLinkWithContext(ctx context.Context,
 		return nil, err
 	}
 
-	var c ChatInviteLink
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatInviteLink
+	return c, json.Unmarshal(r, &c)
 }
 
 // CreateForumTopicOpts is the set of optional fields for Bot.CreateForumTopic and Bot.CreateForumTopicWithContext.
@@ -901,8 +901,8 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 		return nil, err
 	}
 
-	var f ForumTopic
-	return &f, json.Unmarshal(r, &f)
+	var f *ForumTopic
+	return f, json.Unmarshal(r, &f)
 }
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink and Bot.CreateInvoiceLinkWithContext.
@@ -1699,8 +1699,8 @@ func (bot *Bot) EditChatInviteLinkWithContext(ctx context.Context, chatId int64,
 		return nil, err
 	}
 
-	var c ChatInviteLink
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatInviteLink
+	return c, json.Unmarshal(r, &c)
 }
 
 // EditChatSubscriptionInviteLinkOpts is the set of optional fields for Bot.EditChatSubscriptionInviteLink and Bot.EditChatSubscriptionInviteLinkWithContext.
@@ -1740,8 +1740,8 @@ func (bot *Bot) EditChatSubscriptionInviteLinkWithContext(ctx context.Context, c
 		return nil, err
 	}
 
-	var c ChatInviteLink
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatInviteLink
+	return c, json.Unmarshal(r, &c)
 }
 
 // EditEphemeralMessageCaptionOpts is the set of optional fields for Bot.EditEphemeralMessageCaption and Bot.EditEphemeralMessageCaptionWithContext.
@@ -2135,8 +2135,8 @@ func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessCon
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // EditMessageLiveLocationOpts is the set of optional fields for Bot.EditMessageLiveLocation and Bot.EditMessageLiveLocationWithContext.
@@ -2448,8 +2448,8 @@ func (bot *Bot) EditStoryWithContext(ctx context.Context, businessConnectionId s
 		return nil, err
 	}
 
-	var s Story
-	return &s, json.Unmarshal(r, &s)
+	var s *Story
+	return s, json.Unmarshal(r, &s)
 }
 
 // EditUserStarSubscriptionOpts is the set of optional fields for Bot.EditUserStarSubscription and Bot.EditUserStarSubscriptionWithContext.
@@ -2581,8 +2581,8 @@ func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fro
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // ForwardMessagesOpts is the set of optional fields for Bot.ForwardMessages and Bot.ForwardMessagesWithContext.
@@ -2665,8 +2665,8 @@ func (bot *Bot) GetAvailableGiftsWithContext(ctx context.Context, opts *GetAvail
 		return nil, err
 	}
 
-	var g Gifts
-	return &g, json.Unmarshal(r, &g)
+	var g *Gifts
+	return g, json.Unmarshal(r, &g)
 }
 
 // GetBusinessAccountGiftsOpts is the set of optional fields for Bot.GetBusinessAccountGifts and Bot.GetBusinessAccountGiftsWithContext.
@@ -2731,8 +2731,8 @@ func (bot *Bot) GetBusinessAccountGiftsWithContext(ctx context.Context, business
 		return nil, err
 	}
 
-	var o OwnedGifts
-	return &o, json.Unmarshal(r, &o)
+	var o *OwnedGifts
+	return o, json.Unmarshal(r, &o)
 }
 
 // GetBusinessAccountStarBalanceOpts is the set of optional fields for Bot.GetBusinessAccountStarBalance and Bot.GetBusinessAccountStarBalanceWithContext.
@@ -2765,8 +2765,8 @@ func (bot *Bot) GetBusinessAccountStarBalanceWithContext(ctx context.Context, bu
 		return nil, err
 	}
 
-	var s StarAmount
-	return &s, json.Unmarshal(r, &s)
+	var s *StarAmount
+	return s, json.Unmarshal(r, &s)
 }
 
 // GetBusinessConnectionOpts is the set of optional fields for Bot.GetBusinessConnection and Bot.GetBusinessConnectionWithContext.
@@ -2799,8 +2799,8 @@ func (bot *Bot) GetBusinessConnectionWithContext(ctx context.Context, businessCo
 		return nil, err
 	}
 
-	var b BusinessConnection
-	return &b, json.Unmarshal(r, &b)
+	var b *BusinessConnection
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetChatOpts is the set of optional fields for Bot.GetChat and Bot.GetChatWithContext.
@@ -2833,8 +2833,8 @@ func (bot *Bot) GetChatWithContext(ctx context.Context, chatId int64, opts *GetC
 		return nil, err
 	}
 
-	var c ChatFullInfo
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatFullInfo
+	return c, json.Unmarshal(r, &c)
 }
 
 // GetChatAdministratorsOpts is the set of optional fields for Bot.GetChatAdministrators and Bot.GetChatAdministratorsWithContext.
@@ -2937,8 +2937,8 @@ func (bot *Bot) GetChatGiftsWithContext(ctx context.Context, chatId int64, opts 
 		return nil, err
 	}
 
-	var o OwnedGifts
-	return &o, json.Unmarshal(r, &o)
+	var o *OwnedGifts
+	return o, json.Unmarshal(r, &o)
 }
 
 // GetChatMemberOpts is the set of optional fields for Bot.GetChatMember and Bot.GetChatMemberWithContext.
@@ -3111,8 +3111,8 @@ func (bot *Bot) GetFileWithContext(ctx context.Context, fileId string, opts *Get
 		return nil, err
 	}
 
-	var f File
-	return &f, json.Unmarshal(r, &f)
+	var f *File
+	return f, json.Unmarshal(r, &f)
 }
 
 // GetForumTopicIconStickersOpts is the set of optional fields for Bot.GetForumTopicIconStickers and Bot.GetForumTopicIconStickersWithContext.
@@ -3222,8 +3222,8 @@ func (bot *Bot) GetManagedBotAccessSettingsWithContext(ctx context.Context, user
 		return nil, err
 	}
 
-	var b BotAccessSettings
-	return &b, json.Unmarshal(r, &b)
+	var b *BotAccessSettings
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetManagedBotTokenOpts is the set of optional fields for Bot.GetManagedBotToken and Bot.GetManagedBotTokenWithContext.
@@ -3288,8 +3288,8 @@ func (bot *Bot) GetMeWithContext(ctx context.Context, opts *GetMeOpts) (*User, e
 		return nil, err
 	}
 
-	var u User
-	return &u, json.Unmarshal(r, &u)
+	var u *User
+	return u, json.Unmarshal(r, &u)
 }
 
 // GetMyCommandsOpts is the set of optional fields for Bot.GetMyCommands and Bot.GetMyCommandsWithContext.
@@ -3365,8 +3365,8 @@ func (bot *Bot) GetMyDefaultAdministratorRightsWithContext(ctx context.Context, 
 		return nil, err
 	}
 
-	var c ChatAdministratorRights
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatAdministratorRights
+	return c, json.Unmarshal(r, &c)
 }
 
 // GetMyDescriptionOpts is the set of optional fields for Bot.GetMyDescription and Bot.GetMyDescriptionWithContext.
@@ -3402,8 +3402,8 @@ func (bot *Bot) GetMyDescriptionWithContext(ctx context.Context, opts *GetMyDesc
 		return nil, err
 	}
 
-	var b BotDescription
-	return &b, json.Unmarshal(r, &b)
+	var b *BotDescription
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetMyNameOpts is the set of optional fields for Bot.GetMyName and Bot.GetMyNameWithContext.
@@ -3439,8 +3439,8 @@ func (bot *Bot) GetMyNameWithContext(ctx context.Context, opts *GetMyNameOpts) (
 		return nil, err
 	}
 
-	var b BotName
-	return &b, json.Unmarshal(r, &b)
+	var b *BotName
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetMyShortDescriptionOpts is the set of optional fields for Bot.GetMyShortDescription and Bot.GetMyShortDescriptionWithContext.
@@ -3476,8 +3476,8 @@ func (bot *Bot) GetMyShortDescriptionWithContext(ctx context.Context, opts *GetM
 		return nil, err
 	}
 
-	var b BotShortDescription
-	return &b, json.Unmarshal(r, &b)
+	var b *BotShortDescription
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetMyStarBalanceOpts is the set of optional fields for Bot.GetMyStarBalance and Bot.GetMyStarBalanceWithContext.
@@ -3508,8 +3508,8 @@ func (bot *Bot) GetMyStarBalanceWithContext(ctx context.Context, opts *GetMyStar
 		return nil, err
 	}
 
-	var s StarAmount
-	return &s, json.Unmarshal(r, &s)
+	var s *StarAmount
+	return s, json.Unmarshal(r, &s)
 }
 
 // GetStarTransactionsOpts is the set of optional fields for Bot.GetStarTransactions and Bot.GetStarTransactionsWithContext.
@@ -3548,8 +3548,8 @@ func (bot *Bot) GetStarTransactionsWithContext(ctx context.Context, opts *GetSta
 		return nil, err
 	}
 
-	var s StarTransactions
-	return &s, json.Unmarshal(r, &s)
+	var s *StarTransactions
+	return s, json.Unmarshal(r, &s)
 }
 
 // GetStickerSetOpts is the set of optional fields for Bot.GetStickerSet and Bot.GetStickerSetWithContext.
@@ -3582,8 +3582,8 @@ func (bot *Bot) GetStickerSetWithContext(ctx context.Context, name string, opts 
 		return nil, err
 	}
 
-	var s StickerSet
-	return &s, json.Unmarshal(r, &s)
+	var s *StickerSet
+	return s, json.Unmarshal(r, &s)
 }
 
 // GetUpdatesOpts is the set of optional fields for Bot.GetUpdates and Bot.GetUpdatesWithContext.
@@ -3664,8 +3664,8 @@ func (bot *Bot) GetUserChatBoostsWithContext(ctx context.Context, chatId int64, 
 		return nil, err
 	}
 
-	var u UserChatBoosts
-	return &u, json.Unmarshal(r, &u)
+	var u *UserChatBoosts
+	return u, json.Unmarshal(r, &u)
 }
 
 // GetUserGiftsOpts is the set of optional fields for Bot.GetUserGifts and Bot.GetUserGiftsWithContext.
@@ -3724,8 +3724,8 @@ func (bot *Bot) GetUserGiftsWithContext(ctx context.Context, userId int64, opts 
 		return nil, err
 	}
 
-	var o OwnedGifts
-	return &o, json.Unmarshal(r, &o)
+	var o *OwnedGifts
+	return o, json.Unmarshal(r, &o)
 }
 
 // GetUserPersonalChatMessagesOpts is the set of optional fields for Bot.GetUserPersonalChatMessages and Bot.GetUserPersonalChatMessagesWithContext.
@@ -3802,8 +3802,8 @@ func (bot *Bot) GetUserProfileAudiosWithContext(ctx context.Context, userId int6
 		return nil, err
 	}
 
-	var u UserProfileAudios
-	return &u, json.Unmarshal(r, &u)
+	var u *UserProfileAudios
+	return u, json.Unmarshal(r, &u)
 }
 
 // GetUserProfilePhotosOpts is the set of optional fields for Bot.GetUserProfilePhotos and Bot.GetUserProfilePhotosWithContext.
@@ -3844,8 +3844,8 @@ func (bot *Bot) GetUserProfilePhotosWithContext(ctx context.Context, userId int6
 		return nil, err
 	}
 
-	var u UserProfilePhotos
-	return &u, json.Unmarshal(r, &u)
+	var u *UserProfilePhotos
+	return u, json.Unmarshal(r, &u)
 }
 
 // GetWebhookInfoOpts is the set of optional fields for Bot.GetWebhookInfo and Bot.GetWebhookInfoWithContext.
@@ -3876,8 +3876,8 @@ func (bot *Bot) GetWebhookInfoWithContext(ctx context.Context, opts *GetWebhookI
 		return nil, err
 	}
 
-	var w WebhookInfo
-	return &w, json.Unmarshal(r, &w)
+	var w *WebhookInfo
+	return w, json.Unmarshal(r, &w)
 }
 
 // GiftPremiumSubscriptionOpts is the set of optional fields for Bot.GiftPremiumSubscription and Bot.GiftPremiumSubscriptionWithContext.
@@ -4127,8 +4127,8 @@ func (bot *Bot) PostStoryWithContext(ctx context.Context, businessConnectionId s
 		return nil, err
 	}
 
-	var s Story
-	return &s, json.Unmarshal(r, &s)
+	var s *Story
+	return s, json.Unmarshal(r, &s)
 }
 
 // PromoteChatMemberOpts is the set of optional fields for Bot.PromoteChatMember and Bot.PromoteChatMemberWithContext.
@@ -4624,8 +4624,8 @@ func (bot *Bot) RepostStoryWithContext(ctx context.Context, businessConnectionId
 		return nil, err
 	}
 
-	var s Story
-	return &s, json.Unmarshal(r, &s)
+	var s *Story
+	return s, json.Unmarshal(r, &s)
 }
 
 // RestrictChatMemberOpts is the set of optional fields for Bot.RestrictChatMember and Bot.RestrictChatMemberWithContext.
@@ -4706,8 +4706,8 @@ func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int6
 		return nil, err
 	}
 
-	var c ChatInviteLink
-	return &c, json.Unmarshal(r, &c)
+	var c *ChatInviteLink
+	return c, json.Unmarshal(r, &c)
 }
 
 // SavePreparedInlineMessageOpts is the set of optional fields for Bot.SavePreparedInlineMessage and Bot.SavePreparedInlineMessageWithContext.
@@ -4756,8 +4756,8 @@ func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId
 		return nil, err
 	}
 
-	var p PreparedInlineMessage
-	return &p, json.Unmarshal(r, &p)
+	var p *PreparedInlineMessage
+	return p, json.Unmarshal(r, &p)
 }
 
 // SavePreparedKeyboardButtonOpts is the set of optional fields for Bot.SavePreparedKeyboardButton and Bot.SavePreparedKeyboardButtonWithContext.
@@ -4792,8 +4792,8 @@ func (bot *Bot) SavePreparedKeyboardButtonWithContext(ctx context.Context, userI
 		return nil, err
 	}
 
-	var p PreparedKeyboardButton
-	return &p, json.Unmarshal(r, &p)
+	var p *PreparedKeyboardButton
+	return p, json.Unmarshal(r, &p)
 }
 
 // SendAnimationOpts is the set of optional fields for Bot.SendAnimation and Bot.SendAnimationWithContext.
@@ -4890,8 +4890,8 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendAudioOpts is the set of optional fields for Bot.SendAudio and Bot.SendAudioWithContext.
@@ -4983,8 +4983,8 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendChatActionOpts is the set of optional fields for Bot.SendChatAction and Bot.SendChatActionWithContext.
@@ -5119,8 +5119,8 @@ func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnection
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendContactOpts is the set of optional fields for Bot.SendContact and Bot.SendContactWithContext.
@@ -5198,8 +5198,8 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendDiceOpts is the set of optional fields for Bot.SendDice and Bot.SendDiceWithContext.
@@ -5267,8 +5267,8 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendDocumentOpts is the set of optional fields for Bot.SendDocument and Bot.SendDocumentWithContext.
@@ -5353,8 +5353,8 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendGameOpts is the set of optional fields for Bot.SendGame and Bot.SendGameWithContext.
@@ -5415,8 +5415,8 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendGiftOpts is the set of optional fields for Bot.SendGift and Bot.SendGiftWithContext.
@@ -5590,8 +5590,8 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendLivePhotoOpts is the set of optional fields for Bot.SendLivePhoto and Bot.SendLivePhotoWithContext.
@@ -5678,8 +5678,8 @@ func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, live
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendLocationOpts is the set of optional fields for Bot.SendLocation and Bot.SendLocationWithContext.
@@ -5763,8 +5763,8 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendMediaGroupOpts is the set of optional fields for Bot.SendMediaGroup and Bot.SendMediaGroupWithContext.
@@ -5905,8 +5905,8 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendMessageDraftOpts is the set of optional fields for Bot.SendMessageDraft and Bot.SendMessageDraftWithContext.
@@ -6043,8 +6043,8 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendPhotoOpts is the set of optional fields for Bot.SendPhoto and Bot.SendPhotoWithContext.
@@ -6129,8 +6129,8 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendPollOpts is the set of optional fields for Bot.SendPoll and Bot.SendPollWithContext.
@@ -6265,8 +6265,8 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendRichMessageOpts is the set of optional fields for Bot.SendRichMessage and Bot.SendRichMessageWithContext.
@@ -6336,8 +6336,8 @@ func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, ri
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendRichMessageDraftOpts is the set of optional fields for Bot.SendRichMessageDraft and Bot.SendRichMessageDraftWithContext.
@@ -6459,8 +6459,8 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendVenueOpts is the set of optional fields for Bot.SendVenue and Bot.SendVenueWithContext.
@@ -6548,8 +6548,8 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendVideoOpts is the set of optional fields for Bot.SendVideo and Bot.SendVideoWithContext.
@@ -6655,8 +6655,8 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendVideoNoteOpts is the set of optional fields for Bot.SendVideoNote and Bot.SendVideoNoteWithContext.
@@ -6735,8 +6735,8 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendVoiceOpts is the set of optional fields for Bot.SendVoice and Bot.SendVoiceWithContext.
@@ -6818,8 +6818,8 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		return nil, err
 	}
 
-	var m Message
-	return &m, json.Unmarshal(r, &m)
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SetBusinessAccountBioOpts is the set of optional fields for Bot.SetBusinessAccountBio and Bot.SetBusinessAccountBioWithContext.
@@ -8208,8 +8208,8 @@ func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId
 		return nil, err
 	}
 
-	var p Poll
-	return &p, json.Unmarshal(r, &p)
+	var p *Poll
+	return p, json.Unmarshal(r, &p)
 }
 
 // TransferBusinessAccountStarsOpts is the set of optional fields for Bot.TransferBusinessAccountStars and Bot.TransferBusinessAccountStarsWithContext.
@@ -8626,8 +8626,8 @@ func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, 
 		return nil, err
 	}
 
-	var f File
-	return &f, json.Unmarshal(r, &f)
+	var f *File
+	return f, json.Unmarshal(r, &f)
 }
 
 // VerifyChatOpts is the set of optional fields for Bot.VerifyChat and Bot.VerifyChatWithContext.
