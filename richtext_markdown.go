@@ -121,7 +121,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	switch v := b.(type) {
 	case RichBlockParagraph:
 		r.sb.WriteString(RichTextMarkdown(v.Text))
-		r.sb.WriteString("\n")
+		r.sb.WriteString("\n\n")
 	case RichBlockSectionHeading:
 		r.sb.WriteString(strings.Repeat("#", int(v.Size)) + " ")
 		r.sb.WriteString(RichTextMarkdown(v.Text))
