@@ -1,6 +1,8 @@
 package ext
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 )
 
@@ -119,4 +121,146 @@ func Test_handlerMappings_remove(t *testing.T) {
 			t.Errorf("remove() = %v, want true", got)
 		}
 	})
+}
+
+// TestHandlerMapping_Add_DoesNotMutatePreviousSlice guards against add()
+// being used to do `append(currHandlers, h)` directly. When currHandlers
+// had spare capacity, that write landed in the same backing array referenced
+// by any slice a caller had already obtained from getGroups(), silently
+// corrupting it. The fix always copies into a freshly allocated slice.
+func TestHandlerMapping_Add_DoesNotMutatePreviousSlice(t *testing.T) {
+	m := &handlerMapping{}
+
+	m.add(DummyHandler{N: "first"}, 0)
+
+	// Snapshot the slice as observed *before* the second add().
+	before := m.getGroups()[0]
+
+	m.add(DummyHandler{N: "second"}, 0)
+
+	// The previously observed slice must be untouched by the later add().
+	if len(before) != 1 || before[0].Name() != "dummy_first" {
+		t.Fatalf("previously observed slice was mutated: got %+v", before)
+	}
+
+	after := m.getGroups()[0]
+	if len(after) != 2 || after[0].Name() != "dummy_first" || after[1].Name() != "dummy_second" {
+		t.Fatalf("unexpected handlers after add: got %+v", after)
+	}
+}
+
+// TestHandlerMapping_ConcurrentAddAndRead exercises add() and getGroups()
+// concurrently.
+func TestHandlerMapping_ConcurrentAddAndRead(t *testing.T) {
+	m := &handlerMapping{}
+	const group = 0
+	const n = 500
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Writer: keeps appending handlers to the same group.
+	go func() {
+		defer wg.Done()
+		for i := range n {
+			m.add(DummyHandler{N: fmt.Sprintf("h%d", i)}, group)
+		}
+	}()
+
+	// Reader: repeatedly reads and iterates over the current handlers.
+	go func() {
+		defer wg.Done()
+		for range n {
+			for _, handlers := range m.getGroups() {
+				for _, h := range handlers {
+					_ = h.Name()
+				}
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	final := m.getGroups()
+	if len(final) != 1 || len(final[0]) != n {
+		t.Fatalf("expected %d handlers in group %d, got %d", n, group, len(final[0]))
+	}
+}
+
+// TestHandlerMapping_ConcurrentAddRemoveAndRead exercises add(), remove(), and
+// getGroups() all at once under `go test -race`. remove() already copied its
+// slice before mutating it, so this mainly guards against a regression in that
+// pattern and against any new interaction between add() and remove() sharing
+// backing arrays.
+//
+// To keep the expected final count deterministic despite the concurrency, the
+// writer signals each handler's name over a channel right after adding it, and
+// the remover only ever removes handlers it knows have already been added.
+func TestHandlerMapping_ConcurrentAddRemoveAndRead(t *testing.T) {
+	m := &handlerMapping{}
+	const group = 0
+	const n = 500
+
+	added := make(chan string, n)
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	// Writer: adds n handlers to the group, signalling each name once added.
+	go func() {
+		defer wg.Done()
+		defer close(added)
+		for i := range n {
+			name := fmt.Sprintf("h%d", i)
+			m.add(DummyHandler{N: name}, group)
+			added <- name
+		}
+	}()
+
+	// Remover: removes every other handler as soon as it's confirmed added.
+	removed := 0
+	go func() {
+		defer wg.Done()
+		i := 0
+		for name := range added {
+			if i%2 == 0 {
+				if m.remove(name, group) {
+					removed++
+				}
+			}
+			i++
+		}
+	}()
+
+	// Reader: repeatedly reads and iterates over the current handlers while
+	// add() and remove() are both mutating the map concurrently.
+	go func() {
+		defer wg.Done()
+		for range n {
+			for _, handlers := range m.getGroups() {
+				for _, h := range handlers {
+					_ = h.Name()
+				}
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	wantCount := n - removed
+	final := m.getGroups()
+
+	var finalCount int
+	if wantCount > 0 {
+		if len(final) != 1 {
+			t.Fatalf("expected group %d to still be present, got groups: %+v", group, final)
+		}
+		finalCount = len(final[0])
+	} else if len(final) != 0 {
+		t.Fatalf("expected group %d to have been removed entirely, got groups: %+v", group, final)
+	}
+
+	if finalCount != wantCount {
+		t.Fatalf("expected %d handlers remaining, got %d (removed %d of %d)", wantCount, finalCount, removed, n)
+	}
 }

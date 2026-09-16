@@ -20,7 +20,7 @@ func (d DummyHandler) HandleUpdate(b *gotgbot.Bot, ctx *Context) error {
 }
 
 func (d DummyHandler) Name() string {
-	return "dummy" + d.N
+	return "dummy_" + d.N
 }
 
 var ErrBadDispatcher = errors.New("can only inject updates if the dispatcher is of type *Dispatcher")

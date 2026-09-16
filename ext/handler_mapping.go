@@ -27,6 +27,7 @@ func (m *handlerMapping) add(h Handler, group int) {
 		m.handlerGroups = append(m.handlerGroups, group)
 		sort.Ints(m.handlerGroups)
 	}
+
 	newHandlers := make([]Handler, len(currHandlers)+1)
 	copy(newHandlers, currHandlers)
 	newHandlers[len(currHandlers)] = h
