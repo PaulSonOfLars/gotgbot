@@ -78,8 +78,12 @@ func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string
 		return nil, ErrBotAlreadyExists
 	}
 
-	if _, ok := m.urlMapping[urlPath]; urlPath != "" && ok {
-		return nil, ErrBotUrlPathAlreadyExists
+	// Only webhook bots use urlMapping. This allows an empty urlPath
+	// to be used for a webhook registered at the root path.
+	if ctxClose == nil {
+		if _, ok := m.urlMapping[urlPath]; ok {
+			return nil, ErrBotUrlPathAlreadyExists
+		}
 	}
 
 	bData := botData{
@@ -93,7 +97,12 @@ func (m *botMapping) addBot(b *gotgbot.Bot, urlPath string, webhookSecret string
 	}
 
 	m.mapping[bData.bot.Token] = bData
-	m.urlMapping[bData.urlPath] = bData.bot.Token
+
+	// Register all webhook paths, including the root path.
+	if ctxClose == nil {
+		m.urlMapping[bData.urlPath] = bData.bot.Token
+	}
+
 	return &bData, nil
 }
 
