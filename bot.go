@@ -1,4 +1,3 @@
-// soon hhmmm
 package gotgbot
 
 import (
