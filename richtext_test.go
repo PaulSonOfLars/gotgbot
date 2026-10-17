@@ -685,12 +685,13 @@ func TestRichMessageSending(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		inputHTML    string
-		wantHTML     string
-		wantMarkdown string
-		wantText     string
-		wantMedia    []InputRichMessageMedia
+		name          string
+		inputHTML     string
+		inputMarkdown string
+		wantHTML      string
+		wantMarkdown  string
+		wantText      string
+		wantMedia     []InputRichMessageMedia
 	}{
 		{
 			name: "basic 1",
@@ -722,7 +723,7 @@ func TestRichMessageSending(t *testing.T) {
 				"<sub>subscript text</sub> " +
 				"<sup>superscript text</sup>" +
 				" <tg-spoiler>spoiler</tg-spoiler></p>",
-			wantMarkdown: "`inline fixed\\-width code` " +
+			wantMarkdown: "`inline fixed-width code` " +
 				"==marked text== " +
 				"<sub>subscript text</sub> " +
 				"<sup>superscript text</sup> " +
@@ -843,16 +844,16 @@ func TestRichMessageSending(t *testing.T) {
 				"<ul>\n<li><input type=\"checkbox\" checked> \n<p>Checked checkbox</p>\n</li>\n" +
 				"<li><input type=\"checkbox\"> \n<p>Unchecked checkbox</p>\n</li>\n" +
 				"</ul>",
-			wantMarkdown: "Paragraph text\n" +
+			wantMarkdown: "Paragraph text\n\n" +
 				"```\npre-formatted fixed-width code block\n```\n" +
 				"```python\n  print('pre-formatted fixed-width code block written in the Python programming language')\n```" +
 				"\n<footer>Footer text</footer>\n" +
-				"\n---\n" +
+				"---\n" +
 				"- unordered list item\n\n" +
 				"1. ordered list item\n\n" +
 				"c. ordered list item\n\n" +
 				"vii. ordered list item with explicit number\n\n" +
-				"- [x] Checked checkbox\n" +
+				"- [x] Checked checkbox\n\n" +
 				"- [ ] Unchecked checkbox",
 			wantText: "Paragraph text\n" +
 				"pre-formatted fixed-width code block\n" +
@@ -864,6 +865,22 @@ func TestRichMessageSending(t *testing.T) {
 				"ordered list item with explicit number\n\n" +
 				"Checked checkbox\n" +
 				"Unchecked checkbox",
+		}, {
+			name: "verify list newlines",
+			inputMarkdown: "- unordered list item\n\n" +
+				"1. ordered list item\n\n" +
+				"2. another ordered list item",
+			wantHTML: "<ul>\n<li>\n<p>unordered list item</p>\n</li>\n</ul>\n" +
+				"<ol>\n" +
+				"<li>\n<p>ordered list item</p>\n</li>\n" +
+				"<li value=\"2\">\n<p>another ordered list item</p>\n</li>\n" +
+				"</ol>",
+			wantMarkdown: "- unordered list item\n\n" +
+				"1. ordered list item\n\n" +
+				"2. another ordered list item",
+			wantText: "unordered list item\n\n" +
+				"ordered list item\n" +
+				"another ordered list item",
 		}, {
 			name: "quotes",
 			inputHTML: `<blockquote>Block quotation started<br>Block quotation continued<br>The last line of the block quotation<cite>The Author</cite></blockquote>
@@ -1080,6 +1097,13 @@ func TestRichMessageSending(t *testing.T) {
 			wantText:     "test\n\nme",
 			wantMedia:    nil,
 		}, {
+			name:          "double newlines (Markdown)",
+			inputMarkdown: "test<br/><br/>me", // Not a paragraph; just two newlines
+			wantHTML:      "<p>test<br/><br/>me</p>",
+			wantMarkdown:  "test<br/><br/>me", // Double the newlines for markdown to keep them.
+			wantText:      "test\n\nme",
+			wantMedia:     nil,
+		}, {
 			name:         "divider",
 			inputHTML:    "<h1>title</h1><p>paragraph</p><hr/>",
 			wantHTML:     "<h1>title</h1>\n<p>paragraph</p>\n<hr/>",
@@ -1087,18 +1111,29 @@ func TestRichMessageSending(t *testing.T) {
 			wantText:     "title\nparagraph",
 			wantMedia:    nil,
 		}, {
-			name:         "footer",
+			name:          "divider (Markdown)",
+			inputMarkdown: "# title\nparagraph\n\n---",
+			wantHTML:      "<h1>title</h1>\n<p>paragraph</p>\n<hr/>",
+			wantMarkdown:  "# title\nparagraph\n\n---", // Need 2 newlines to show as a divider
+			wantText:      "title\nparagraph",
+		}, {
+			name:         "footer (HTML)",
 			inputHTML:    "<h1>title</h1><p>paragraph</p><footer>Footer</footer>",
 			wantHTML:     "<h1>title</h1>\n<p>paragraph</p>\n<footer>Footer</footer>",
-			wantMarkdown: "# title\nparagraph\n<footer>Footer</footer>",
+			wantMarkdown: "# title\nparagraph\n\n<footer>Footer</footer>",
 			wantText:     "title\nparagraph\nFooter",
-			wantMedia:    nil,
+		}, {
+			name:          "footer (Markdown)",
+			inputMarkdown: "# title\nparagraph\n\n<footer>Footer</footer>",
+			wantHTML:      "<h1>title</h1>\n<p>paragraph</p>\n<footer>Footer</footer>",
+			wantMarkdown:  "# title\nparagraph\n\n<footer>Footer</footer>",
+			wantText:      "title\nparagraph\nFooter",
 		}, {
 			name: "button rows",
 			inputHTML: `<tg-button-row>
-  <tg-button type="url" url="https://t.me">url</tg-button>
-  <tg-button type="copy_text" text="...copy">Copy</tg-button>
-  <tg-button type="disabled" style="primary">Disabled</tg-button>
+<tg-button type="url" url="https://t.me">url</tg-button>
+<tg-button type="copy_text" text="...copy">Copy</tg-button>
+<tg-button type="disabled" style="primary">Disabled</tg-button>
 </tg-button-row>`,
 			wantHTML: `<tg-button-row>
 <tg-button type="url" url="https://t.me/">url</tg-button>
@@ -1111,12 +1146,45 @@ func TestRichMessageSending(t *testing.T) {
 <tg-button type="disabled" style="primary">Disabled</tg-button>
 </tg-button-row>`,
 			wantText: "url\nCopy\n...copy\nDisabled",
+		}, {
+			name:         "inline code doesn't escape markdown (HTML)",
+			inputHTML:    "<code>#Hello</code>",
+			wantHTML:     "<p><code>#Hello</code></p>",
+			wantMarkdown: "`#Hello`",
+			wantText:     "#Hello",
+		}, {
+			name:          "inline code doesn't escape markdown (Markdown)",
+			inputMarkdown: "`#Hello`",
+			wantHTML:      "<p><code>#Hello</code></p>",
+			wantMarkdown:  "`#Hello`",
+			wantText:      "#Hello",
+		}, {
+			name:          "dynamic ` count on code (Markdown)",
+			inputMarkdown: "``#hello ` there``",
+			wantHTML:      "<p><code>#hello ` there</code></p>",
+			wantMarkdown:  "``#hello ` there``",
+			wantText:      "#hello ` there",
+		}, {
+			name:         "dynamic ` count on codeblock (HTML)",
+			inputHTML:    "<pre><code>```\nhello\n```</code></pre>",
+			wantHTML:     "<pre><code>```<br/>hello<br/>```</code></pre>",
+			wantMarkdown: "````\n```\nhello\n```\n````",
+			wantText:     "```\nhello\n```",
+		}, {
+			name:          "dynamic ` count on codeblock (Markdown)",
+			inputMarkdown: "````\n```\nhello\n```\n````",
+			wantHTML:      "<pre><code>```<br/>hello<br/>```</code></pre>",
+			wantMarkdown:  "````\n```\nhello\n```\n````",
+			wantText:      "```\nhello\n```",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			time.Sleep(time.Second)
-			m, err := b.SendRichMessage(chatId, InputRichMessage{Html: tt.inputHTML}, nil)
+			m, err := b.SendRichMessage(chatId, InputRichMessage{
+				Html:     tt.inputHTML,
+				Markdown: tt.inputMarkdown,
+			}, nil)
 			if err != nil {
 				t.Fatal(err)
 				return
