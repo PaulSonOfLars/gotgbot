@@ -1,6 +1,7 @@
 package gotgbot
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -184,7 +185,20 @@ func allFilesSeekable(params map[string]any) bool {
 }
 
 func (bot *BaseBotClient) buildRequest(ctx context.Context, params map[string]any, token string, method string, opts *RequestOpts) (*http.Request, error) {
-	body, contentType := buildMultipart(ctx, params)
+	var body io.Reader
+	var contentType string
+
+	attachments := hasAttachments(params)
+	if attachments {
+		body, contentType = buildMultipart(ctx, params)
+	} else {
+		jsonData, err := json.Marshal(params)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal JSON parameters: %w", err)
+		}
+		body = bytes.NewReader(jsonData)
+		contentType = "application/json"
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, bot.methodEndpoint(token, method, opts), body)
 	if err != nil {
@@ -195,12 +209,29 @@ func (bot *BaseBotClient) buildRequest(ctx context.Context, params map[string]an
 
 	if allFilesSeekable(params) {
 		req.GetBody = func() (io.ReadCloser, error) {
-			retryBody, contentType := buildMultipart(ctx, params)
-			req.Header.Set("Content-Type", contentType)
-			return io.NopCloser(retryBody), nil
+			if attachments {
+				retryBody, contentType := buildMultipart(ctx, params)
+				req.Header.Set("Content-Type", contentType)
+				return io.NopCloser(retryBody), nil
+			}
+			jsonData, err := json.Marshal(params)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal JSON parameters for retry: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+			return io.NopCloser(bytes.NewReader(jsonData)), nil
 		}
 	}
 	return req, nil
+}
+
+func hasAttachments(params map[string]any) bool {
+	for _, v := range params {
+		if _, ok := v.(Attach); ok {
+			return true
+		}
+	}
+	return false
 }
 
 // buildMultipart creates a lazy multipart reader/writer which only writes while it gets read.

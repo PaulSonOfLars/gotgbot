@@ -3,11 +3,13 @@ package gotgbot
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"mime"
 	"mime/multipart"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -270,4 +272,87 @@ func TestBuildMultipartContextHandling(t *testing.T) {
 			t.Fatalf("expected context.Canceled after mid-read cancel, got: %v", err)
 		}
 	})
+}
+
+func TestHasAttachments(t *testing.T) {
+	tests := []struct {
+		name string
+		val  any
+		want bool
+	}{
+		{
+			name: "string parameter",
+			val:  "hello",
+			want: false,
+		},
+		{
+			name: "integer parameter",
+			val:  42,
+			want: false,
+		},
+		{
+			name: "file reader (implements Attach)",
+			val:  &FileReader{Data: nil},
+			want: true,
+		},
+		{
+			name: "media photo (implements Attach)",
+			val: InputMediaPhoto{
+				Media: &FileReader{Data: nil},
+			},
+			want: true,
+		},
+		{
+			name: "slice of media (implements Attach)",
+			val: InputMedias{
+				InputMediaPhoto{
+					Media: &FileReader{Data: nil},
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := map[string]any{
+				"test": tt.val,
+			}
+			got := hasAttachments(params)
+			if got != tt.want {
+				t.Errorf("hasAttachments(%v) = %v; want %v", tt.val, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJSONRequestSerialization(t *testing.T) {
+	params := map[string]any{
+		"chat_id": 123456,
+		"text":    "hello world",
+	}
+
+	bot := &BaseBotClient{}
+	req, err := bot.buildRequest(context.Background(), params, "token", "sendMessage", nil)
+	if err != nil {
+		t.Fatalf("failed to build request: %v", err)
+	}
+
+	if req.Header.Get("Content-Type") != "application/json" {
+		t.Errorf("expected Content-Type application/json, got %q", req.Header.Get("Content-Type"))
+	}
+
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		t.Fatalf("failed to read request body: %v", err)
+	}
+
+	var gotParams map[string]any
+	if err := json.Unmarshal(bodyBytes, &gotParams); err != nil {
+		t.Fatalf("failed to unmarshal request body: %v", err)
+	}
+
+	if gotParams["chat_id"].(float64) != 123456 || gotParams["text"] != "hello world" {
+		t.Errorf("unexpected parameters in JSON body: %v", gotParams)
+	}
 }
