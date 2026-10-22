@@ -13,6 +13,7 @@ var mdMap = map[string]string{
 	"bold":   "*",
 	"italic": "_",
 	"code":   "`",
+	"pre":    "```",
 }
 
 var mdV2Map = map[string]string{

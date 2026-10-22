@@ -130,3 +130,19 @@ func Test_entitiesToRichBlocks(t *testing.T) {
 		})
 	}
 }
+
+func Test_OriginalMD_Pre(t *testing.T) {
+	m := Message{
+		Text: "print('hello')",
+		Entities: []MessageEntity{{
+			Type:   "pre",
+			Offset: 0,
+			Length: 14,
+		}},
+	}
+	got := m.OriginalMD()
+	want := "```print('hello')```"
+	if got != want {
+		t.Errorf("OriginalMD() = %q, want %q", got, want)
+	}
+}
