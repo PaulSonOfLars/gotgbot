@@ -371,20 +371,20 @@ func getChildEntities(ent MessageEntity, ents []MessageEntity) []MessageEntity {
 func splitEdgeWhitespace(text string, ent MessageEntity) (pre string, cntnt string, post string) {
 	keepNewLines := ent.Type == "pre"
 
-	bd := strings.Builder{}
 	rText := []rune(text)
-	for i := 0; i < len(rText) && unicode.IsSpace(rText[i]) && (!keepNewLines || rText[i] != '\n'); i++ {
-		bd.WriteRune(rText[i])
+	start := 0
+	for start < len(rText) && unicode.IsSpace(rText[start]) && (!keepNewLines || rText[start] != '\n') {
+		start++
 	}
-	pre = bd.String()
+	pre = string(rText[:start])
 
-	text = strings.TrimPrefix(text, pre)
-	bd.Reset()
-	for i := len(rText) - 1; i >= 0 && unicode.IsSpace(rText[i]); i-- {
-		bd.WriteRune(rText[i])
+	end := len(rText)
+	for end > start && unicode.IsSpace(rText[end-1]) && (!keepNewLines || rText[end-1] != '\n') {
+		end--
 	}
-	post = bd.String()
-	return pre, strings.TrimSuffix(text, post), post
+	cntnt = string(rText[start:end])
+	post = string(rText[end:])
+	return pre, cntnt, post
 }
 
 func escapeContainedMDV1(data []rune, mdType []rune) string {

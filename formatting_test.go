@@ -130,3 +130,56 @@ func Test_entitiesToRichBlocks(t *testing.T) {
 		})
 	}
 }
+
+func Test_splitEdgeWhitespace(t *testing.T) {
+	tests := []struct {
+		name     string
+		text     string
+		ent      MessageEntity
+		wantPre  string
+		wantCont string
+		wantPost string
+	}{
+		{
+			name:     "regular",
+			text:     "  hello  ",
+			ent:      MessageEntity{Type: "bold"},
+			wantPre:  "  ",
+			wantCont: "hello",
+			wantPost: "  ",
+		},
+		{
+			name:     "multiple trailing whitespace types",
+			text:     "  hello \t\n ",
+			ent:      MessageEntity{Type: "bold"},
+			wantPre:  "  ",
+			wantCont: "hello",
+			wantPost: " \t\n ",
+		},
+		{
+			name:     "all whitespace",
+			text:     "   ",
+			ent:      MessageEntity{Type: "bold"},
+			wantPre:  "   ",
+			wantCont: "",
+			wantPost: "",
+		},
+		{
+			name:     "pre with newlines",
+			text:     " \ncode\n ",
+			ent:      MessageEntity{Type: "pre"},
+			wantPre:  " ",
+			wantCont: "\ncode\n",
+			wantPost: " ",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pre, cont, post := splitEdgeWhitespace(tt.text, tt.ent)
+			if pre != tt.wantPre || cont != tt.wantCont || post != tt.wantPost {
+				t.Errorf("splitEdgeWhitespace(%q) = (%q, %q, %q), want (%q, %q, %q)",
+					tt.text, pre, cont, post, tt.wantPre, tt.wantCont, tt.wantPost)
+			}
+		})
+	}
+}
