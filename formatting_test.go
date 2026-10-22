@@ -130,3 +130,18 @@ func Test_entitiesToRichBlocks(t *testing.T) {
 		})
 	}
 }
+
+func Test_wrapEntity_NilUser(t *testing.T) {
+	// Should not panic on nil User
+	ent := MessageEntity{
+		Type: MessageEntityTypeTextMention,
+	}
+	res := wrapEntity(ent, RichTextString("name"))
+	tm, ok := res.(RichTextTextMention)
+	if !ok {
+		t.Fatalf("expected RichTextTextMention, got %T", res)
+	}
+	if tm.User.Id != 0 {
+		t.Errorf("expected 0 user id, got %d", tm.User.Id)
+	}
+}

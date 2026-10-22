@@ -536,7 +536,11 @@ func wrapEntity(e MessageEntity, content RichText) RichText {
 	case MessageEntityTypePhoneNumber:
 		return RichTextPhoneNumber{Text: content, PhoneNumber: RichTextContent(content)}
 	case MessageEntityTypeTextMention:
-		return RichTextTextMention{Text: content, User: *e.User}
+		var u User
+		if e.User != nil {
+			u = *e.User
+		}
+		return RichTextTextMention{Text: content, User: u}
 	case MessageEntityTypeCustomEmoji:
 		return RichTextCustomEmoji{CustomEmojiId: e.CustomEmojiId, AlternativeText: RichTextContent(content)}
 	case MessageEntityTypeDateTime:
