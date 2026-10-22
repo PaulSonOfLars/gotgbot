@@ -111,11 +111,6 @@ func returnValues(d APIDescription, retTypes []string) (string, error) {
 	retType := retTypes[0]
 	retVarType := retType
 	retVarName := getRetVarName(retVarType)
-	addr := ""
-	if isPointer(retVarType) {
-		retVarType = strings.TrimLeft(retVarType, "*")
-		addr = "&"
-	}
 
 	if len(retTypes) == 2 && retTypes[1] == "bool" {
 		// Manual bit of code injected for dual returns of TYPE+bool.
@@ -133,7 +128,8 @@ if err := json.Unmarshal(r, &%s); err != nil {
 	return %s, b, nil
 }
 return %s, true, nil
-`, retVarName, retVarType, retVarName, defaultRetVal, defaultRetVal, addr+retVarName), nil
+`, retVarName, retVarType, retVarName, defaultRetVal, defaultRetVal, retVarName), nil
+
 	} else if len(retTypes) >= 2 {
 		return "", fmt.Errorf("no existing support for multiple return types of %v", retTypes)
 	}
@@ -143,12 +139,14 @@ return %s, true, nil
 	if rawType := strings.TrimPrefix(retType, "[]"); isArray(retType) && len(d.Types[rawType].Subtypes) != 0 {
 		// Handle interface array returns such as []ChatMember from GetChatAdministrators
 		returnString.WriteString(fmt.Sprintf("\nreturn unmarshal%sArray(r)", rawType))
+
 	} else if len(d.Types[retType].Subtypes) != 0 {
 		// Handle interface returns such as ChatMember from GetChatMember
 		returnString.WriteString(fmt.Sprintf("\nreturn unmarshal%s(r)", retType))
+
 	} else {
 		returnString.WriteString("\nvar " + retVarName + " " + retVarType)
-		returnString.WriteString("\nreturn " + addr + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
+		returnString.WriteString("\nreturn " + retVarName + ", json.Unmarshal(r, &" + retVarName + ")")
 	}
 
 	return returnString.String(), nil

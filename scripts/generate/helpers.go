@@ -27,11 +27,12 @@ package gotgbot
 			helpers.WriteString(helper)
 		}
 
-		richWalkHelper := generateRichWalkHelperDef(d, tgType)
-		if richWalkHelper != "" {
-			helpers.WriteString(richWalkHelper)
-		}
+		helpers.WriteString(generateRichWalkHelperDef(d, tgType))
 	}
+
+	// Also generate the unknown types for forward-compatibility
+	helpers.WriteString(generateRichWalkHelperDef(d, getUnknownType("RichBlock")))
+	helpers.WriteString(generateRichWalkHelperDef(d, getUnknownType("RichText")))
 
 	return writeGenToFile(helpers, "gen_helpers.go")
 }

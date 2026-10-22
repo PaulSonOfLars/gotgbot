@@ -14,6 +14,23 @@ func RichTextMarkdown(rt RichText) string {
 	return r.sb.String()
 }
 
+// longestRun returns the length of the longest consecutive run of target in s.
+// It returns 0 if target does not appear in s.
+func longestRun(s string, target rune) int {
+	longest, current := 0, 0
+	for _, r := range s {
+		if r == target {
+			current++
+			if current > longest {
+				longest = current
+			}
+		} else {
+			current = 0
+		}
+	}
+	return longest
+}
+
 func (r *renderCtx) renderTextMarkdown(rt RichText) {
 	if r == nil {
 		return
@@ -53,9 +70,13 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 	case RichTextSuperscript:
 		r.renderTextHTML(v)
 	case RichTextCode:
-		r.sb.WriteString("`")
-		r.renderTextMarkdown(v.Text)
-		r.sb.WriteString("`")
+		str := RichTextContent(v.Text) // raw text, no escaping inside code blocks
+		n := longestRun(str, '`')
+		boundary := strings.Repeat("`", n+1)
+
+		r.sb.WriteString(boundary)
+		r.sb.WriteString(str)
+		r.sb.WriteString(boundary)
 	case RichTextUrl:
 		r.sb.WriteString("[")
 		r.renderTextMarkdown(v.Text)
@@ -121,19 +142,23 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	switch v := b.(type) {
 	case RichBlockParagraph:
 		r.sb.WriteString(RichTextMarkdown(v.Text))
-		r.sb.WriteString("\n")
+		r.sb.WriteString("\n\n")
 	case RichBlockSectionHeading:
 		r.sb.WriteString(strings.Repeat("#", int(v.Size)) + " ")
 		r.sb.WriteString(RichTextMarkdown(v.Text))
 		r.sb.WriteString("\n")
 	case RichBlockPreformatted:
-		r.sb.WriteString("```" + v.Language + "\n")
-		r.sb.WriteString(RichTextContent(v.Text)) // raw text, no escaping inside code blocks
-		r.sb.WriteString("\n```\n")
+		str := RichTextContent(v.Text)
+		n := longestRun(str, '`')
+		boundary := strings.Repeat("`", max(3, n+1))
+
+		r.sb.WriteString(boundary + v.Language + "\n")
+		r.sb.WriteString(str) // raw text, no escaping inside code blocks
+		r.sb.WriteString("\n" + boundary + "\n")
 	case RichBlockFooter:
 		r.renderBlockHTML(b)
 	case RichBlockDivider:
-		r.sb.WriteString("\n---\n")
+		r.sb.WriteString("---\n")
 	case RichBlockBlockQuotation:
 		if v.Credit != nil {
 			r.renderBlockHTML(v)
@@ -188,7 +213,6 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 				r.renderBlockMarkdown(child, depth+1)
 			}
 		}
-		r.sb.WriteString("\n")
 	case RichBlockTable:
 		// Emit as a GFM table.
 		if len(v.Cells) == 0 {
@@ -198,6 +222,7 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 		// simple attempt at detecting lossy table behaviour
 		if row := v.Cells[0]; v.Caption != nil || v.IsBordered || v.IsStriped || len(row) == 0 || !row[0].IsHeader {
 			r.renderBlockHTML(b)
+			r.sb.WriteString("\n")
 			break
 		}
 
