@@ -303,6 +303,39 @@ func TestRichBlockParsing(t *testing.T) {
 <tg-button type="url" url="http://example.com/">Button Text</tg-button>
 </tg-button-row>`,
 			wantText: "Button Text",
+		}, {
+			name: "RichBlockPhotoEmptyPhoto",
+			b: RichBlockPhoto{
+				Photo: nil,
+			},
+			wantHTML:     `<img src="tg://photo?id=1"></img>`,
+			wantMarkdown: `![](tg://photo?id=1)`,
+			wantText:     "",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("")}},
+			},
+			skipLiveTest: true,
+		}, {
+			name: "RichBlockDocumentWithCaption",
+			b: RichBlockDocument{
+				Document: Document{FileId: "1234"},
+				Caption: &RichBlockCaption{
+					Text: RichTextString("My Document"),
+				},
+			},
+			wantHTML: `<figure>
+<tg-document src="tg://document?id=1"></tg-document>
+<figcaption>My Document</figcaption>
+</figure>`,
+			wantMarkdown: `<figure>
+<tg-document src="tg://document?id=1"></tg-document>
+<figcaption>My Document</figcaption>
+</figure>`,
+			wantText: "My Document",
+			wantMedia: []InputRichMessageMedia{
+				{Id: "1", Media: InputMediaDocument{Media: InputFileByID("1234")}},
+			},
+			skipLiveTest: true,
 		},
 	}
 	for _, tt := range tests {
@@ -492,7 +525,7 @@ func TestRichTextParsing(t *testing.T) {
 				DateTimeFormat: "wDT",
 			},
 			wantHTML:     "<tg-time unix=\"1647531900\" format=\"wDT\">22:45 tomorrow</tg-time>",
-			wantMarkdown: "![22:45 tomorrow](tg://time?unix=1647531900format=wDT)",
+			wantMarkdown: "![22:45 tomorrow](tg://time?unix=1647531900&format=wDT)",
 			wantText:     "22:45 tomorrow",
 		}, {
 			name: "RichTextTextMention",
@@ -651,6 +684,15 @@ func TestRichTextParsing(t *testing.T) {
 			wantHTML:     "<a href=\"#test\">some text</a>",
 			wantMarkdown: "some text[^test]",
 			wantText:     "some text",
+		}, {
+			name: "RichTextDateTimeWithoutFormat",
+			r: RichTextDateTime{
+				Text:     RichTextString("22:45 tomorrow"),
+				UnixTime: 1647531900,
+			},
+			wantHTML:     "<tg-time unix=\"1647531900\">22:45 tomorrow</tg-time>",
+			wantMarkdown: "![22:45 tomorrow](tg://time?unix=1647531900)",
+			wantText:     "22:45 tomorrow",
 		},
 	}
 	for _, tt := range tests {

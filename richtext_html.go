@@ -110,7 +110,11 @@ func (r *renderCtx) renderTextHTML(rt RichText) {
 	case RichTextBankCardNumber:
 		r.renderTextHTML(v.Text)
 	case RichTextDateTime:
-		fmt.Fprintf(&r.sb, `<tg-time unix="%d" format="%s">`, v.UnixTime, html.EscapeString(v.DateTimeFormat))
+		if v.DateTimeFormat != "" {
+			fmt.Fprintf(&r.sb, `<tg-time unix="%d" format="%s">`, v.UnixTime, html.EscapeString(v.DateTimeFormat))
+		} else {
+			fmt.Fprintf(&r.sb, `<tg-time unix="%d">`, v.UnixTime)
+		}
 		r.renderTextHTML(v.Text)
 		r.sb.WriteString("</tg-time>")
 	case RichTextCustomEmoji:
@@ -383,16 +387,20 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 			attrs += " tg-spoiler"
 		}
 
-		tgAnimation := fmt.Sprintf("<img src=\"%s\"%s></img>\n",
-			r.addFile("photo", InputMediaPhoto{Media: InputFileByID(v.Photo[len(v.Photo)-1].FileId)}), attrs)
+		var fileId string
+		if len(v.Photo) > 0 {
+			fileId = v.Photo[len(v.Photo)-1].FileId
+		}
+		tgPhoto := fmt.Sprintf("<img src=\"%s\"%s></img>\n",
+			r.addFile("photo", InputMediaPhoto{Media: InputFileByID(fileId)}), attrs)
 
 		if v.Caption != nil {
 			r.sb.WriteString("<figure>\n")
-			r.sb.WriteString(tgAnimation)
+			r.sb.WriteString(tgPhoto)
 			r.renderCaptionHTML(v.Caption)
 			r.sb.WriteString("</figure>\n")
 		} else {
-			r.sb.WriteString(tgAnimation)
+			r.sb.WriteString(tgPhoto)
 		}
 	case RichBlockAnimation:
 		attrs := ""
