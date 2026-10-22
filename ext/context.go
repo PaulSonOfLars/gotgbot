@@ -125,6 +125,9 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 	case update.PreCheckoutQuery != nil:
 		user = &update.PreCheckoutQuery.From
 
+	case update.PurchasedPaidMedia != nil:
+		user = &update.PurchasedPaidMedia.From
+
 	case update.Poll != nil:
 		// no data
 
@@ -146,11 +149,15 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 
 	case update.ChatBoost != nil:
 		chat = &update.ChatBoost.Chat
-		user = update.ChatBoost.Boost.Source.MergeChatBoostSource().User
+		if update.ChatBoost.Boost.Source != nil {
+			user = update.ChatBoost.Boost.Source.MergeChatBoostSource().User
+		}
 
 	case update.RemovedChatBoost != nil:
 		chat = &update.RemovedChatBoost.Chat
-		user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
+		if update.RemovedChatBoost.Source != nil {
+			user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
+		}
 	}
 
 	if data == nil {
