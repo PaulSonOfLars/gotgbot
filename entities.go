@@ -91,13 +91,15 @@ func (m Message) ParseCaptionEntity(entity MessageEntity) ParsedMessageEntity {
 }
 
 func parseEntity(entity MessageEntity, utf16Text []uint16) ParsedMessageEntity {
-	text := string(utf16.Decode(utf16Text[entity.Offset : entity.Offset+entity.Length]))
+	start := max(0, min(int(entity.Offset), len(utf16Text)))
+	end := max(start, min(int(entity.Offset+entity.Length), len(utf16Text)))
+	text := string(utf16.Decode(utf16Text[start:end]))
 
 	if entity.Type == "url" {
 		entity.Url = text
 	}
 
-	entity.Offset = int64(len(string(utf16.Decode(utf16Text[:entity.Offset]))))
+	entity.Offset = int64(len(string(utf16.Decode(utf16Text[:start]))))
 	entity.Length = int64(len(text))
 
 	return ParsedMessageEntity{
