@@ -39,10 +39,14 @@ func (mru MessageReactionUpdated) GetSender() *Sender {
 
 // GetSender populates the relevant fields of a Sender struct given a poll answer.
 func (pa PollAnswer) GetSender() *Sender {
-	return &Sender{
+	s := &Sender{
 		User: pa.User,
 		Chat: pa.VoterChat,
 	}
+	if pa.VoterChat != nil {
+		s.ChatId = pa.VoterChat.Id
+	}
+	return s
 }
 
 func (m Message) GetGuestBotCallerSender() *Sender {

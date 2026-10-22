@@ -271,3 +271,15 @@ func TestBuildMultipartContextHandling(t *testing.T) {
 		}
 	})
 }
+
+func TestNilParamsWithOverrideParams(t *testing.T) {
+	client := &BaseBotClient{}
+	opts := &RequestOpts{
+		OverrideParams: map[string]any{"foo": "bar"},
+	}
+	// Should not panic when params is nil
+	_, err := client.buildRequest(context.Background(), nil, "token", "getMe", opts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

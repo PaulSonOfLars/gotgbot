@@ -305,6 +305,8 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 		// No text content.
 	case RichBlockPhoto:
 		captionContent(v.Caption, sb)
+	case RichBlockDocument:
+		captionContent(v.Caption, sb)
 	case RichBlockAnimation:
 		captionContent(v.Caption, sb)
 	case RichBlockVideo:
