@@ -331,5 +331,9 @@ func (d *Dispatcher) iterateOverHandlerGroups(b *gotgbot.Bot, ctx *Context) erro
 // This is because historically, people see the library in the stack trace, and immediately blame it, when in fact it is
 // recovering their errors.
 func cleanedStack() string {
-	return strings.Join(strings.Split(string(debug.Stack()), "\n")[4:], "\n")
+	lines := strings.Split(string(debug.Stack()), "\n")
+	if len(lines) > 4 {
+		return strings.Join(lines[4:], "\n")
+	}
+	return string(debug.Stack())
 }

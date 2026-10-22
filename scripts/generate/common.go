@@ -23,7 +23,9 @@ func snakeToTitle(s string) string {
 
 func snakeToCamel(s string) string {
 	title := snakeToTitle(s)
-
+	if len(title) == 0 {
+		return ""
+	}
 	return strings.ToLower(title[:1]) + title[1:]
 }
 
@@ -40,6 +42,9 @@ func titleToSnake(str string) string {
 }
 
 func titleToCamelCase(str string) string {
+	if len(str) == 0 {
+		return ""
+	}
 	return strings.ToLower(str[0:1]) + str[1:]
 }
 
