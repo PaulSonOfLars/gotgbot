@@ -7,6 +7,8 @@ import (
 	"io"
 	"mime"
 	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
@@ -270,4 +272,28 @@ func TestBuildMultipartContextHandling(t *testing.T) {
 			t.Fatalf("expected context.Canceled after mid-read cancel, got: %v", err)
 		}
 	})
+}
+
+func TestRequestWithContext_NilParamsWithOverrides(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"ok":true,"result":true}`))
+	}))
+	defer ts.Close()
+
+	bot := &BaseBotClient{
+		Client: *ts.Client(),
+	}
+	opts := &RequestOpts{
+		APIURL:         ts.URL,
+		OverrideParams: map[string]any{"extra": "value"},
+	}
+
+	res, err := bot.RequestWithContext(context.Background(), "token", "getMe", nil, opts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(res) != "true" {
+		t.Errorf("got %s, want true", string(res))
+	}
 }

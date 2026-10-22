@@ -139,7 +139,11 @@ func (bot *BaseBotClient) RequestWithContext(parentCtx context.Context, token st
 	ctx, cancel := bot.getTimeoutContext(parentCtx, opts)
 	defer cancel()
 
-	if opts != nil {
+	if params == nil {
+		params = make(map[string]any)
+	}
+
+	if opts != nil && opts.OverrideParams != nil {
 		maps.Copy(params, opts.OverrideParams)
 	}
 
