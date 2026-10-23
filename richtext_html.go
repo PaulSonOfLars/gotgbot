@@ -382,17 +382,17 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 	case RichBlockAnchor:
 		fmt.Fprintf(&r.sb, `<a name="%s"></a>`+"\n", html.EscapeString(v.Name))
 	case RichBlockPhoto:
+		if len(v.Photo) == 0 {
+			return
+		}
+
 		attrs := ""
 		if v.HasSpoiler {
 			attrs += " tg-spoiler"
 		}
 
-		var fileId string
-		if len(v.Photo) > 0 {
-			fileId = v.Photo[len(v.Photo)-1].FileId
-		}
 		tgPhoto := fmt.Sprintf("<img src=\"%s\"%s></img>\n",
-			r.addFile("photo", InputMediaPhoto{Media: InputFileByID(fileId)}), attrs)
+			r.addFile("photo", InputMediaPhoto{Media: InputFileByID(v.Photo[len(v.Photo)-1].FileId)}), attrs)
 
 		if v.Caption != nil {
 			r.sb.WriteString("<figure>\n")

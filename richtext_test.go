@@ -308,12 +308,10 @@ func TestRichBlockParsing(t *testing.T) {
 			b: RichBlockPhoto{
 				Photo: nil,
 			},
-			wantHTML:     `<img src="tg://photo?id=1"></img>`,
-			wantMarkdown: `![](tg://photo?id=1)`,
+			wantHTML:     "",
+			wantMarkdown: "",
 			wantText:     "",
-			wantMedia: []InputRichMessageMedia{
-				{Id: "1", Media: InputMediaPhoto{Media: InputFileByID("")}},
-			},
+			wantMedia:    nil,
 			skipLiveTest: true,
 		}, {
 			name: "RichBlockDocumentWithCaption",

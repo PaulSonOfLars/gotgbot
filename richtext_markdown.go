@@ -274,14 +274,13 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	case RichBlockAnchor:
 		r.renderBlockHTML(v)
 	case RichBlockPhoto:
+		if len(v.Photo) == 0 {
+			return
+		}
 		if v.Caption != nil {
 			r.renderBlockHTML(v)
 		} else {
-			var fileId string
-			if len(v.Photo) > 0 {
-				fileId = v.Photo[len(v.Photo)-1].FileId
-			}
-			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("photo", InputMediaPhoto{Media: InputFileByID(fileId)}))
+			fmt.Fprintf(&r.sb, "![](%s)\n", r.addFile("photo", InputMediaPhoto{Media: InputFileByID(v.Photo[len(v.Photo)-1].FileId)}))
 		}
 	case RichBlockAnimation:
 		if v.Caption != nil {
