@@ -149,15 +149,11 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 
 	case update.ChatBoost != nil:
 		chat = &update.ChatBoost.Chat
-		if update.ChatBoost.Boost.Source != nil {
-			user = update.ChatBoost.Boost.Source.MergeChatBoostSource().User
-		}
+		user = update.ChatBoost.Boost.Source.MergeChatBoostSource().User
 
 	case update.RemovedChatBoost != nil:
 		chat = &update.RemovedChatBoost.Chat
-		if update.RemovedChatBoost.Source != nil {
-			user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
-		}
+		user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
 	}
 
 	if data == nil {
