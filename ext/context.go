@@ -125,6 +125,9 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 	case update.PreCheckoutQuery != nil:
 		user = &update.PreCheckoutQuery.From
 
+	case update.PurchasedPaidMedia != nil:
+		user = &update.PurchasedPaidMedia.From
+
 	case update.Poll != nil:
 		// no data
 
