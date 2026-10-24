@@ -15,13 +15,13 @@ func All(_ *gotgbot.Message) bool {
 
 func FromUserID(id int64) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.From.Id == id
+		return m.From != nil && m.From.Id == id
 	}
 }
 
 func FromUsername(name string) filters.Message {
 	return func(m *gotgbot.Message) bool {
-		return m.From.Username == name
+		return m.From != nil && m.From.Username == name
 	}
 }
 
