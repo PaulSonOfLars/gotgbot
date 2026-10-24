@@ -120,7 +120,7 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 	split := strings.SplitN(strings.ToLower(firstField), "@", 2)
 
 	// If the command targets a specific bot, ensure it's this one
-	if len(split) > 1 && split[1] != strings.ToLower(b.User.Username) {
+	if len(split) > 1 && !b.MatchesUsername(split[1]) {
 		return false
 	}
 
