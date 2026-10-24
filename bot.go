@@ -30,7 +30,6 @@ type Bot struct {
 	BotClient
 
 	// Any extra usernames that might be useful in command handler resolution.
-	// Falls back to User.Username if nil/empty.
 	additionalUsernames map[string]struct{}
 	usernamesMu         sync.RWMutex
 }
