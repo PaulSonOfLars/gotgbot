@@ -120,7 +120,11 @@ func (r *renderCtx) renderTextMarkdown(rt RichText) {
 	case RichTextDateTime:
 		r.sb.WriteString("![")
 		r.renderTextMarkdown(v.Text)
-		fmt.Fprintf(&r.sb, "](tg://time?unix=%dformat=%s)", v.UnixTime, v.DateTimeFormat)
+		if v.DateTimeFormat != "" {
+			fmt.Fprintf(&r.sb, "](tg://time?unix=%d&format=%s)", v.UnixTime, v.DateTimeFormat)
+		} else {
+			fmt.Fprintf(&r.sb, "](tg://time?unix=%d)", v.UnixTime)
+		}
 	case RichTextCustomEmoji:
 		fmt.Fprintf(&r.sb, "![%s](tg://emoji?id=%s)", mdEscape(v.AlternativeText), v.CustomEmojiId)
 	case RichTextMathematicalExpression:
@@ -203,9 +207,9 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 				r.sb.WriteString(indent + "- ")
 				if item.HasCheckbox {
 					if item.IsChecked {
-						r.sb.WriteString(indent + "[x] ")
+						r.sb.WriteString("[x] ")
 					} else {
-						r.sb.WriteString(indent + "[ ] ")
+						r.sb.WriteString("[ ] ")
 					}
 				}
 			}
@@ -270,6 +274,9 @@ func (r *renderCtx) renderBlockMarkdown(b RichBlock, depth int) {
 	case RichBlockAnchor:
 		r.renderBlockHTML(v)
 	case RichBlockPhoto:
+		if len(v.Photo) == 0 {
+			return
+		}
 		if v.Caption != nil {
 			r.renderBlockHTML(v)
 		} else {
