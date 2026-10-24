@@ -8,6 +8,8 @@ import (
 
 func TestCheckMessage(t *testing.T) {
 	bot := &gotgbot.Bot{User: gotgbot.User{Username: "MyBot"}}
+	bot.UpdateAdditionalUsernames([]string{"secondaryBot"})
+
 	c := Command{Triggers: []rune{'!'}, Command: "start"}
 
 	tests := []struct {
@@ -19,6 +21,7 @@ func TestCheckMessage(t *testing.T) {
 		{name: "matching command", text: "!start", want: true},
 		{name: "matching command with target", text: "!start@MyBot", want: true},
 		{name: "wrong bot target", text: "!start@OtherBot", want: false},
+		{name: "secondary username", text: "!start@secondaryBot", want: true},
 		{name: "wrong command", text: "!stop", want: false},
 		{name: "no trigger", text: "start", want: false},
 		{name: "empty text", text: "", want: false},

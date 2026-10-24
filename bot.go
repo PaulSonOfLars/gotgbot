@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -27,6 +28,10 @@ type Bot struct {
 	User
 	// The bot client to use to make requests
 	BotClient
+
+	// Any extra usernames that might be useful in command handler resolution.
+	additionalUsernames map[string]struct{}
+	usernamesMu         sync.RWMutex
 }
 
 // BotOpts declares all optional parameters for the NewBot function.
@@ -124,4 +129,41 @@ func (bot *Bot) RequestWithContext(ctx context.Context, method string, params ma
 	}
 
 	return bot.BotClient.RequestWithContext(ctx, bot.Token, method, params, opts)
+}
+
+// UpdateAdditionalUsernames replaces the usernames currently set for this bot.
+// This is relevant for any features which rely on Bot.MatchesUsername, such as command handlers.
+// Safe to call concurrently.
+func (bot *Bot) UpdateAdditionalUsernames(us []string) {
+	newUsernames := map[string]struct{}{}
+	for _, u := range us {
+		clean := strings.ToLower(strings.TrimPrefix(u, "@"))
+		if clean == "" {
+			continue
+		}
+
+		newUsernames[clean] = struct{}{}
+	}
+
+	bot.usernamesMu.Lock()
+	defer bot.usernamesMu.Unlock()
+	bot.additionalUsernames = newUsernames
+}
+
+// MatchesUsername assumes u does not include the @ prefix.
+// Safe to call concurrently.
+func (bot *Bot) MatchesUsername(u string) bool {
+	if u == "" {
+		return false
+	}
+
+	if strings.EqualFold(u, bot.User.Username) {
+		return true
+	}
+
+	bot.usernamesMu.RLock()
+	defer bot.usernamesMu.RUnlock()
+
+	_, ok := bot.additionalUsernames[strings.ToLower(u)]
+	return ok
 }
