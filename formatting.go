@@ -13,6 +13,7 @@ var mdMap = map[string]string{
 	"bold":   "*",
 	"italic": "_",
 	"code":   "`",
+	"pre":    "```",
 }
 
 var mdV2Map = map[string]string{
@@ -110,11 +111,7 @@ func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 		case "bold", "italic", "code":
 			out.WriteString(prevText + pre + mdMap[ent.Type] + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
 		case "pre":
-			if ent.Language == "" {
-				out.WriteString(prevText + pre + mdMap[ent.Type] + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
-			} else {
-				out.WriteString(prevText + pre + mdMap[ent.Type] + ent.Language + "\n" + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
-			}
+			out.WriteString(prevText + pre + mdMap[ent.Type] + ent.Language + "\n" + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
 		case "text_mention":
 			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post)
 		case "text_link":

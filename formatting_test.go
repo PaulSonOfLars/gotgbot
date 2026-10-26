@@ -130,3 +130,70 @@ func Test_entitiesToRichBlocks(t *testing.T) {
 		})
 	}
 }
+
+func Test_OriginalMD_Pre(t *testing.T) {
+	testCases := []struct {
+		name string
+		msg  Message
+		want string
+	}{
+		{
+			name: "single line pre",
+			msg: Message{
+				Text: "print('hello')",
+				Entities: []MessageEntity{{
+					Type:   "pre",
+					Offset: 0,
+					Length: 14,
+				}},
+			},
+			want: "```\nprint('hello')```",
+		},
+		{
+			name: "multiline pre",
+			msg: Message{
+				Text: "print('hello')\nprint('world')",
+				Entities: []MessageEntity{{
+					Type:   "pre",
+					Offset: 0,
+					Length: 29,
+				}},
+			},
+			want: "```\nprint('hello')\nprint('world')```",
+		},
+		{
+			name: "multiline pre with language",
+			msg: Message{
+				Text: "print('hello')\nprint('world')",
+				Entities: []MessageEntity{{
+					Type:     "pre",
+					Offset:   0,
+					Length:   29,
+					Language: "python",
+				}},
+			},
+			want: "```python\nprint('hello')\nprint('world')```",
+		},
+		{
+			name: "pre with prepended newline",
+			msg: Message{
+				Text: "\ntest",
+				Entities: []MessageEntity{{
+					Type:   "pre",
+					Offset: 0,
+					Length: 5,
+				}},
+			},
+			want: "```\n\ntest```",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := tc.msg.OriginalMD()
+			if got != tc.want {
+				t.Errorf("OriginalMD() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
