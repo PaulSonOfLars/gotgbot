@@ -147,7 +147,7 @@ func Test_OriginalMD_Pre(t *testing.T) {
 					Length: 14,
 				}},
 			},
-			want: "```print('hello')```",
+			want: "```\nprint('hello')```",
 		},
 		{
 			name: "multiline pre",
