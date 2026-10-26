@@ -174,6 +174,18 @@ func Test_OriginalMD_Pre(t *testing.T) {
 			},
 			want: "```python\nprint('hello')\nprint('world')```",
 		},
+		{
+			name: "pre with prepended newline",
+			msg: Message{
+				Text: "\ntest",
+				Entities: []MessageEntity{{
+					Type:   "pre",
+					Offset: 0,
+					Length: 5,
+				}},
+			},
+			want: "```\n\ntest```",
+		},
 	}
 
 	for _, tc := range testCases {
