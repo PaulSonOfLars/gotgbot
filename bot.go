@@ -47,6 +47,8 @@ type BotOpts struct {
 	// Request opts to use for checking token validity with Bot.GetMe. Can be slow - a high timeout (eg 10s) is
 	// recommended.
 	RequestOpts *RequestOpts
+	// AdditionalUsernames allows declaring extra bot usernames at creation time.
+	AdditionalUsernames []string
 }
 
 // NewBot returns a new Bot struct populated with the necessary defaults.
@@ -77,6 +79,10 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	b := Bot{
 		Token:     token,
 		BotClient: botClient,
+	}
+
+	if opts != nil && len(opts.AdditionalUsernames) > 0 {
+		b.UpdateAdditionalUsernames(opts.AdditionalUsernames)
 	}
 
 	if checkTokenValidity {
@@ -135,6 +141,10 @@ func (bot *Bot) RequestWithContext(ctx context.Context, method string, params ma
 // This is relevant for any features which rely on Bot.MatchesUsername, such as command handlers.
 // Safe to call concurrently.
 func (bot *Bot) UpdateAdditionalUsernames(us []string) {
+	if bot == nil {
+		return
+	}
+
 	newUsernames := map[string]struct{}{}
 	for _, u := range us {
 		clean := strings.ToLower(strings.TrimPrefix(u, "@"))
@@ -150,20 +160,48 @@ func (bot *Bot) UpdateAdditionalUsernames(us []string) {
 	bot.additionalUsernames = newUsernames
 }
 
-// MatchesUsername assumes u does not include the @ prefix.
+// AdditionalUsernames returns a copy of the additional usernames currently configured for this bot.
+// Safe to call concurrently.
+func (bot *Bot) AdditionalUsernames() []string {
+	if bot == nil {
+		return nil
+	}
+
+	bot.usernamesMu.RLock()
+	defer bot.usernamesMu.RUnlock()
+
+	if len(bot.additionalUsernames) == 0 {
+		return nil
+	}
+
+	usernames := make([]string, 0, len(bot.additionalUsernames))
+	for u := range bot.additionalUsernames {
+		usernames = append(usernames, u)
+	}
+	return usernames
+}
+
+// MatchesUsername checks whether u matches the bot's username or any additional usernames.
+// u may optionally include a leading '@' prefix.
 // Safe to call concurrently.
 func (bot *Bot) MatchesUsername(u string) bool {
-	if u == "" {
+	if bot == nil {
 		return false
 	}
 
-	if strings.EqualFold(u, bot.User.Username) {
+	clean := strings.ToLower(strings.TrimPrefix(u, "@"))
+	if clean == "" {
+		return false
+	}
+
+	botUsername := strings.ToLower(strings.TrimPrefix(bot.User.Username, "@"))
+	if botUsername != "" && botUsername != "<missing>" && clean == botUsername {
 		return true
 	}
 
 	bot.usernamesMu.RLock()
 	defer bot.usernamesMu.RUnlock()
 
-	_, ok := bot.additionalUsernames[strings.ToLower(u)]
+	_, ok := bot.additionalUsernames[clean]
 	return ok
 }
