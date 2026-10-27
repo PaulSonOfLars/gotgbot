@@ -323,7 +323,7 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 		// >Block quotation continued
 		// >Block quotation continued
 		// >The last line of the block quotation
-		return prevText + pre + ">" + strings.Join(strings.Split(cleanCntnt, "\n"), "\n>") + post
+		return prevText + pre + ">" + strings.ReplaceAll(cleanCntnt, "\n", "\n>") + post
 	case "expandable_blockquote":
 		// **>The expandable block quotation started right after the previous block quotation
 		// >It is separated from the previous block quotation by an empty bold entity
@@ -331,7 +331,7 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 		// >Hidden by default part of the expandable block quotation started
 		// >Expandable block quotation continued
 		// >The last line of the expandable block quotation with the expandability mark||
-		return prevText + pre + "**>" + strings.Join(strings.Split(cleanCntnt, "\n"), "\n>") + "||" + post
+		return prevText + pre + "**>" + strings.ReplaceAll(cleanCntnt, "\n", "\n>") + "||" + post
 	default:
 		return prevText + cntnt
 	}

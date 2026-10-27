@@ -330,7 +330,7 @@ func (u *Updater) SetAllBotWebhooks(domain string, opts *gotgbot.SetWebhookOpts)
 		_, err := data.bot.SetWebhook(strings.Join([]string{strings.TrimSuffix(domain, "/"), data.urlPath}, "/"), opts)
 		if err != nil {
 			// Extract the botID, so we don't intentionally log the token
-			botId := strings.Split(data.bot.Token, ":")[0]
+			botId, _, _ := strings.Cut(data.bot.Token, ":")
 			return fmt.Errorf("failed to set webhook for %s: %w", botId, err)
 		}
 	}

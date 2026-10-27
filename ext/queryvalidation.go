@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/url"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -65,7 +65,7 @@ func validateQuery(query url.Values, secretKey []byte) (bool, error) {
 	}
 
 	// Sort args to ensure consistency.
-	sort.Strings(args)
+	slices.Sort(args)
 
 	// Join data with newline, as defined by telegram.
 	dataCheck := strings.Join(args, "\n")
