@@ -376,7 +376,7 @@ func TestUpdaterAllowsWebhookDeletion(t *testing.T) {
 		return
 	}
 
-	err = u.Stop()
+	err = u.Stop(context.Background())
 	if err != nil {
 		t.Errorf("failed to stop updater: %v", err)
 		return
@@ -430,7 +430,7 @@ func TestUpdaterSupportsTwoPollingBots(t *testing.T) {
 		return
 	}
 
-	err = u.Stop()
+	err = u.Stop(context.Background())
 	if err != nil {
 		t.Errorf("failed to stop updater: %v", err)
 		return
@@ -478,7 +478,7 @@ func TestUpdaterThrowsErrorWhenSameLongPollAddedTwice(t *testing.T) {
 		return
 	}
 
-	err = u.Stop()
+	err = u.Stop(context.Background())
 	if err != nil {
 		t.Errorf("failed to stop updater: %v", err)
 		return
@@ -529,7 +529,7 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 		return
 	}
 
-	err = u.Stop()
+	err = u.Stop(context.Background())
 	if err != nil {
 		t.Errorf("failed to stop updater: %v", err)
 		return
