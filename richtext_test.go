@@ -813,7 +813,7 @@ func TestRichMessageSending(t *testing.T) {
 			wantMarkdown: "[^note-1]: Referenced text " +
 				"![👍](tg://emoji?id=5368324170671202286) " +
 				"![👍](tg://emoji?id=5368324170671202286) " +
-				"![22:45 tomorrow](tg://time?unix=1647531900format=wDT) " +
+				"![22:45 tomorrow](tg://time?unix=1647531900&format=wDT) " +
 				"$$x^2 + y^2$$",
 			wantText: `Referenced text 👍 👍 22:45 tomorrow x^2 + y^2`,
 		}, {
@@ -1103,7 +1103,8 @@ func TestRichMessageSending(t *testing.T) {
 				"Value 1\tValue 2\n\n" +
 				"Value\tValue2\tValue3\t\n" +
 				"Value4\tValue5\tValue6\n" +
-				"Value7",
+				"Value7\t\n" +
+				"Table caption",
 		}, {
 			name: "details",
 			inputHTML: `<details><summary>Title</summary>Content</details>

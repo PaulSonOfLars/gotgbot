@@ -180,7 +180,7 @@ func (r *renderCtx) renderRichMessageButton(btn RichMessageButton) {
 
 	fmt.Fprintf(&r.sb, `<tg-button type="%s" %s>`, btnType, strings.Join(args, " "))
 	r.renderTextHTML(btn.Text)
-	r.sb.WriteString("</tg-button>\n")
+	r.sb.WriteString("</tg-button>")
 }
 
 // RichBlockHTML renders a RichBlock and its descendants as an HTML fragment.
@@ -485,6 +485,7 @@ func (r *renderCtx) renderBlockHTML(b RichBlock) {
 		r.sb.WriteString("<tg-button-row" + args + ">\n")
 		for _, btn := range v.Buttons {
 			r.renderRichMessageButton(btn)
+			r.sb.WriteString("\n")
 		}
 
 		r.sb.WriteString("</tg-button-row>\n")
