@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -117,23 +118,21 @@ func (c Command) checkMessage(b *gotgbot.Bot, msg *gotgbot.Message) bool {
 		firstField = text[:end]
 	}
 
-	split := strings.SplitN(strings.ToLower(firstField), "@", 2)
+	cmdText, target, hasTarget := strings.Cut(strings.ToLower(firstField), "@")
 
 	// If the command targets a specific bot, ensure it's this one
-	if len(split) > 1 && !b.MatchesUsername(split[1]) {
+	if hasTarget && !b.MatchesUsername(target) {
 		return false
 	}
 
-	command := c.extractCommand(split[0])
+	command := c.extractCommand(cmdText)
 	return command != "" && command == c.Command
 }
 
 func (c Command) extractCommand(command string) string {
 	first, size := utf8.DecodeRuneInString(command)
-	for _, t := range c.Triggers {
-		if first == t {
-			return command[size:]
-		}
+	if slices.Contains(c.Triggers, first) {
+		return command[size:]
 	}
 	return ""
 }
