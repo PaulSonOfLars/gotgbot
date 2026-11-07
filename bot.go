@@ -102,9 +102,6 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		b.User = User{
 			Id:    id,
 			IsBot: true,
-			// We mark these fields as missing so we can know why they're not available
-			FirstName: "<missing>",
-			Username:  "<missing>",
 		}
 	}
 
