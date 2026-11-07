@@ -90,12 +90,12 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		b.User = *botUser
 	} else {
 		// If token checks are disabled, we populate the bot's ID from the token.
-		split := strings.Split(token, ":")
-		if len(split) != 2 {
+		idStr, secret, ok := strings.Cut(token, ":")
+		if !ok || strings.Contains(secret, ":") {
 			return nil, fmt.Errorf("%w: expected '123:abcd', got %s", ErrInvalidTokenFormat, token)
 		}
 
-		id, err := strconv.ParseInt(split[0], 10, 64)
+		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse bot ID from token: %w", err)
 		}
