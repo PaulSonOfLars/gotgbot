@@ -280,6 +280,9 @@ func renderBlockText(b RichBlock, sb *strings.Builder) {
 			}
 			sb.WriteString("\n")
 		}
+		if v.Caption != nil {
+			sb.WriteString(RichTextContent(v.Caption))
+		}
 		sb.WriteString("\n")
 	case RichBlockCollage:
 		for _, child := range v.Blocks {
