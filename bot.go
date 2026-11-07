@@ -47,6 +47,10 @@ type BotOpts struct {
 	// Request opts to use for checking token validity with Bot.GetMe. Can be slow - a high timeout (eg 10s) is
 	// recommended.
 	RequestOpts *RequestOpts
+	// AdditionalUsernames allows declaring extra bot usernames at creation time.
+	// This is used for internal command matching resolution (such as matching commands
+	// targeting secondary usernames); it does not change the bot's usernames on Telegram.
+	AdditionalUsernames []string
 }
 
 // NewBot returns a new Bot struct populated with the necessary defaults.
@@ -77,6 +81,10 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	b := Bot{
 		Token:     token,
 		BotClient: botClient,
+	}
+
+	if opts != nil && len(opts.AdditionalUsernames) > 0 {
+		b.UpdateAdditionalUsernames(opts.AdditionalUsernames)
 	}
 
 	if checkTokenValidity {
