@@ -101,7 +101,7 @@ func isPointer(s string) bool {
 }
 
 func isArray(s string) bool {
-	return strings.HasPrefix(s, "[]")
+	return strings.HasPrefix(s, "[]") || strings.HasSuffix(s, "Array")
 }
 
 func getDefaultTypeVal(d APIDescription, s string) string {
