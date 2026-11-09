@@ -324,6 +324,22 @@ func (im InaccessibleMessage) EditText(b *Bot, opts *EditMessageTextOpts) (*Mess
 	return b.EditMessageText(opts)
 }
 
+// EditWidgetData is a helper method for Bot.EditMessageWidgetData.
+func (im InaccessibleMessage) EditWidgetData(b *Bot, opts *EditMessageWidgetDataOpts) (bool, error) {
+	if opts == nil {
+		opts = &EditMessageWidgetDataOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = im.MessageId
+	}
+
+	return b.EditMessageWidgetData(opts)
+}
+
 // Forward is a helper method for Bot.ForwardMessage.
 func (im InaccessibleMessage) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
 	return b.ForwardMessage(chatId, im.Chat.Id, im.MessageId, opts)
@@ -534,6 +550,22 @@ func (m Message) EditText(b *Bot, opts *EditMessageTextOpts) (*Message, bool, er
 	return b.EditMessageText(opts)
 }
 
+// EditWidgetData is a helper method for Bot.EditMessageWidgetData.
+func (m Message) EditWidgetData(b *Bot, opts *EditMessageWidgetDataOpts) (bool, error) {
+	if opts == nil {
+		opts = &EditMessageWidgetDataOpts{}
+	}
+
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+	}
+	if opts.MessageId == 0 {
+		opts.MessageId = m.MessageId
+	}
+
+	return b.EditMessageWidgetData(opts)
+}
+
 // Forward is a helper method for Bot.ForwardMessage.
 func (m Message) Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error) {
 	return b.ForwardMessage(chatId, m.Chat.Id, m.MessageId, opts)
@@ -602,7 +634,7 @@ func (m Message) ReplyAnimation(b *Bot, animation InputFileOrString, opts *SendA
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendAnimation(m.Chat.Id, animation, opts)
+	return b.SendAnimation(animation, opts)
 }
 
 // ReplyAudio is a shortcut to reply to the current message with a specific message type.
@@ -613,7 +645,7 @@ func (m Message) ReplyAudio(b *Bot, audio InputFileOrString, opts *SendAudioOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendAudio(m.Chat.Id, audio, opts)
+	return b.SendAudio(audio, opts)
 }
 
 // ReplyChecklist is a shortcut to reply to the current message with a specific message type.
@@ -635,7 +667,7 @@ func (m Message) ReplyContact(b *Bot, phoneNumber string, firstName string, opts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendContact(m.Chat.Id, phoneNumber, firstName, opts)
+	return b.SendContact(phoneNumber, firstName, opts)
 }
 
 // ReplyDice is a shortcut to reply to the current message with a specific message type.
@@ -657,7 +689,7 @@ func (m Message) ReplyDocument(b *Bot, document InputFileOrString, opts *SendDoc
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendDocument(m.Chat.Id, document, opts)
+	return b.SendDocument(document, opts)
 }
 
 // ReplyGame is a shortcut to reply to the current message with a specific message type.
@@ -690,7 +722,7 @@ func (m Message) ReplyLivePhoto(b *Bot, livePhoto InputFileOrString, photo Input
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendLivePhoto(m.Chat.Id, livePhoto, photo, opts)
+	return b.SendLivePhoto(livePhoto, photo, opts)
 }
 
 // ReplyLocation is a shortcut to reply to the current message with a specific message type.
@@ -701,7 +733,7 @@ func (m Message) ReplyLocation(b *Bot, latitude float64, longitude float64, opts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendLocation(m.Chat.Id, latitude, longitude, opts)
+	return b.SendLocation(latitude, longitude, opts)
 }
 
 // ReplyMediaGroup is a shortcut to reply to the current message with a specific message type.
@@ -723,7 +755,7 @@ func (m Message) ReplyMessage(b *Bot, text string, opts *SendMessageOpts) (*Mess
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendMessage(m.Chat.Id, text, opts)
+	return b.SendMessage(text, opts)
 }
 
 // ReplyPaidMedia is a shortcut to reply to the current message with a specific message type.
@@ -745,7 +777,7 @@ func (m Message) ReplyPhoto(b *Bot, photo InputFileOrString, opts *SendPhotoOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendPhoto(m.Chat.Id, photo, opts)
+	return b.SendPhoto(photo, opts)
 }
 
 // ReplyPoll is a shortcut to reply to the current message with a specific message type.
@@ -767,7 +799,18 @@ func (m Message) ReplyRichMessage(b *Bot, richMessage InputRichMessage, opts *Se
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendRichMessage(m.Chat.Id, richMessage, opts)
+	return b.SendRichMessage(richMessage, opts)
+}
+
+// ReplySharedWidget is a shortcut to reply to the current message with a specific message type.
+func (m Message) ReplySharedWidget(b *Bot, widgetId string, opts *SendSharedWidgetOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendSharedWidgetOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendSharedWidget(m.Chat.Id, widgetId, opts)
 }
 
 // ReplySticker is a shortcut to reply to the current message with a specific message type.
@@ -778,7 +821,7 @@ func (m Message) ReplySticker(b *Bot, sticker InputFileOrString, opts *SendStick
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendSticker(m.Chat.Id, sticker, opts)
+	return b.SendSticker(sticker, opts)
 }
 
 // ReplyVenue is a shortcut to reply to the current message with a specific message type.
@@ -789,7 +832,7 @@ func (m Message) ReplyVenue(b *Bot, latitude float64, longitude float64, title s
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVenue(m.Chat.Id, latitude, longitude, title, address, opts)
+	return b.SendVenue(latitude, longitude, title, address, opts)
 }
 
 // ReplyVideo is a shortcut to reply to the current message with a specific message type.
@@ -800,7 +843,7 @@ func (m Message) ReplyVideo(b *Bot, video InputFileOrString, opts *SendVideoOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVideo(m.Chat.Id, video, opts)
+	return b.SendVideo(video, opts)
 }
 
 // ReplyVideoNote is a shortcut to reply to the current message with a specific message type.
@@ -811,7 +854,7 @@ func (m Message) ReplyVideoNote(b *Bot, videoNote InputFileOrString, opts *SendV
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVideoNote(m.Chat.Id, videoNote, opts)
+	return b.SendVideoNote(videoNote, opts)
 }
 
 // ReplyVoice is a shortcut to reply to the current message with a specific message type.
@@ -822,12 +865,34 @@ func (m Message) ReplyVoice(b *Bot, voice InputFileOrString, opts *SendVoiceOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVoice(m.Chat.Id, voice, opts)
+	return b.SendVoice(voice, opts)
+}
+
+// ReplyWidget is a shortcut to reply to the current message with a specific message type.
+func (m Message) ReplyWidget(b *Bot, html string, opts *SendWidgetOpts) (*Message, error) {
+	if opts == nil {
+		opts = &SendWidgetOpts{}
+	}
+
+	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+
+	return b.SendWidget(m.Chat.Id, html, opts)
 }
 
 // Answer is a helper method for Bot.AnswerPreCheckoutQuery.
 func (pcq PreCheckoutQuery) Answer(b *Bot, ok bool, opts *AnswerPreCheckoutQueryOpts) (bool, error) {
 	return b.AnswerPreCheckoutQuery(pcq.Id, ok, opts)
+}
+
+func (v ReplyParameters) RichTextChildren() []RichText {
+	if len(v.QuoteRichTexts) == 0 {
+		return nil
+	}
+	out := make([]RichText, len(v.QuoteRichTexts))
+	for i, c := range v.QuoteRichTexts {
+		out[i] = c
+	}
+	return out
 }
 
 func (v RichBlockAnchor) RichTextChildren() []RichText {
@@ -1154,6 +1219,10 @@ func (v RichTextTextMention) Children() []RichText {
 	return []RichText{v.Text}
 }
 
+func (v RichTextTonAddress) Children() []RichText {
+	return []RichText{v.Text}
+}
+
 func (v RichTextUnderline) Children() []RichText {
 	return []RichText{v.Text}
 }
@@ -1175,6 +1244,17 @@ func (s Story) Delete(b *Bot, businessConnectionId string, opts *DeleteStoryOpts
 // Edit is a helper method for Bot.EditStory.
 func (s Story) Edit(b *Bot, businessConnectionId string, content InputStoryContent, opts *EditStoryOpts) (*Story, error) {
 	return b.EditStory(businessConnectionId, s.Id, content, opts)
+}
+
+func (v TextQuote) RichTextChildren() []RichText {
+	if len(v.RichTexts) == 0 {
+		return nil
+	}
+	out := make([]RichText, len(v.RichTexts))
+	for i, c := range v.RichTexts {
+		out[i] = c
+	}
+	return out
 }
 
 // EditStarSubscription is a helper method for Bot.EditUserStarSubscription.
@@ -1220,4 +1300,19 @@ func (u User) SetEmojiStatus(b *Bot, opts *SetUserEmojiStatusOpts) (bool, error)
 // Verify is a helper method for Bot.VerifyUser.
 func (u User) Verify(b *Bot, opts *VerifyUserOpts) (bool, error) {
 	return b.VerifyUser(u.Id, opts)
+}
+
+// EditSharedData is a helper method for Bot.EditSharedWidgetData.
+func (w Widget) EditSharedData(b *Bot, publicData string, opts *EditSharedWidgetDataOpts) (bool, error) {
+	return b.EditSharedWidgetData(w.Id, publicData, opts)
+}
+
+// SendShared is a helper method for Bot.SendSharedWidget.
+func (w Widget) SendShared(b *Bot, chatId int64, opts *SendSharedWidgetOpts) (*Message, error) {
+	return b.SendSharedWidget(chatId, w.Id, opts)
+}
+
+// Answer is a helper method for Bot.AnswerWidgetQuery.
+func (wq WidgetQuery) Answer(b *Bot, opts *AnswerWidgetQueryOpts) (bool, error) {
+	return b.AnswerWidgetQuery(wq.Id, opts)
 }
