@@ -383,3 +383,8 @@ func GuestBot(msg *gotgbot.Message) bool {
 func GuestMessage(msg *gotgbot.Message) bool {
 	return msg.GuestQueryId != ""
 }
+
+// Widget represents messages containing an HTML widget.
+func Widget(msg *gotgbot.Message) bool {
+	return msg != nil && msg.Widget != nil
+}
