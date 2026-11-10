@@ -13,36 +13,36 @@ func All(_ *gotgbot.SharedWidgetQuery) bool {
 
 func Prefix(prefix string) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return strings.HasPrefix(swq.Data, prefix)
+		return swq != nil && strings.HasPrefix(swq.Data, prefix)
 	}
 }
 
 func Suffix(suffix string) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return strings.HasSuffix(swq.Data, suffix)
+		return swq != nil && strings.HasSuffix(swq.Data, suffix)
 	}
 }
 
 func Equal(match string) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return swq.Data == match
+		return swq != nil && swq.Data == match
 	}
 }
 
 func Contains(substr string) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return strings.Contains(swq.Data, substr)
+		return swq != nil && strings.Contains(swq.Data, substr)
 	}
 }
 
 func FromUserID(id int64) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return swq.From.Id == id
+		return swq != nil && swq.From.Id == id
 	}
 }
 
 func WidgetID(widgetID string) filters.SharedWidgetQuery {
 	return func(swq *gotgbot.SharedWidgetQuery) bool {
-		return swq.WidgetId == widgetID
+		return swq != nil && swq.WidgetId == widgetID
 	}
 }
