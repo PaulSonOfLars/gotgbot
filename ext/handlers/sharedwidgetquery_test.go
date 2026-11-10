@@ -39,6 +39,17 @@ func TestSharedWidgetQueryHandler(t *testing.T) {
 		t.Errorf("expected response function to run")
 	}
 
+	// Nil context check
+	if h.CheckUpdate(b, nil) {
+		t.Errorf("expected handler not to match nil context")
+	}
+
+	// Empty handler response
+	emptyHandler := handlers.SharedWidgetQuery{}
+	if err := emptyHandler.HandleUpdate(b, matchingUpd); err != nil {
+		t.Errorf("expected no error from empty handler: %v", err)
+	}
+
 	nonMatchingUpd := ext.NewContext(b, &gotgbot.Update{
 		SharedWidgetQuery: &gotgbot.SharedWidgetQuery{
 			Id:       "swq_2",
@@ -81,5 +92,25 @@ func TestSharedWidgetQueryFilters(t *testing.T) {
 	}
 	if !sharedwidgetquery.WidgetID("wid_555")(swq) {
 		t.Errorf("WidgetID filter failed")
+	}
+
+	// Nil safety checks
+	if sharedwidgetquery.Equal("test")(nil) {
+		t.Errorf("Equal filter should return false for nil")
+	}
+	if sharedwidgetquery.Prefix("test")(nil) {
+		t.Errorf("Prefix filter should return false for nil")
+	}
+	if sharedwidgetquery.Suffix("test")(nil) {
+		t.Errorf("Suffix filter should return false for nil")
+	}
+	if sharedwidgetquery.Contains("test")(nil) {
+		t.Errorf("Contains filter should return false for nil")
+	}
+	if sharedwidgetquery.FromUserID(123)(nil) {
+		t.Errorf("FromUserID filter should return false for nil")
+	}
+	if sharedwidgetquery.WidgetID("wid")(nil) {
+		t.Errorf("WidgetID filter should return false for nil")
 	}
 }
