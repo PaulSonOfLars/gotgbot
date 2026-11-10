@@ -22,17 +22,20 @@ func NewSharedWidgetQuery(filter filters.SharedWidgetQuery, r Response) SharedWi
 	}
 }
 
-func (s SharedWidgetQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
-	return s.Response(b, ctx)
+func (w SharedWidgetQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	if w.Response == nil {
+		return nil
+	}
+	return w.Response(b, ctx)
 }
 
-func (s SharedWidgetQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	if ctx.SharedWidgetQuery == nil {
+func (w SharedWidgetQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+	if ctx == nil || ctx.SharedWidgetQuery == nil {
 		return false
 	}
-	return s.Filter == nil || s.Filter(ctx.SharedWidgetQuery)
+	return w.Filter == nil || w.Filter(ctx.SharedWidgetQuery)
 }
 
-func (s SharedWidgetQuery) Name() string {
-	return fmt.Sprintf("shared_widget_query_%p", s.Response)
+func (w SharedWidgetQuery) Name() string {
+	return fmt.Sprintf("shared_widget_query_%p", w.Response)
 }

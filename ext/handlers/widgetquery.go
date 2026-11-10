@@ -23,11 +23,14 @@ func NewWidgetQuery(filter filters.WidgetQuery, r Response) WidgetQuery {
 }
 
 func (w WidgetQuery) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
+	if w.Response == nil {
+		return nil
+	}
 	return w.Response(b, ctx)
 }
 
 func (w WidgetQuery) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
-	if ctx.WidgetQuery == nil {
+	if ctx == nil || ctx.WidgetQuery == nil {
 		return false
 	}
 	return w.Filter == nil || w.Filter(ctx.WidgetQuery)

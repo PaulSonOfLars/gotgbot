@@ -39,6 +39,17 @@ func TestWidgetQueryHandler(t *testing.T) {
 		t.Errorf("expected response function to run")
 	}
 
+	// Nil context check
+	if h.CheckUpdate(b, nil) {
+		t.Errorf("expected handler not to match nil context")
+	}
+
+	// Empty handler response
+	emptyHandler := handlers.WidgetQuery{}
+	if err := emptyHandler.HandleUpdate(b, matchingUpd); err != nil {
+		t.Errorf("expected no error from empty handler: %v", err)
+	}
+
 	// Non-matching update
 	nonMatchingUpd := ext.NewContext(b, &gotgbot.Update{
 		WidgetQuery: &gotgbot.WidgetQuery{
@@ -97,5 +108,31 @@ func TestWidgetQueryFilters(t *testing.T) {
 	}
 	if !widgetquery.WidgetID("wid_1")(wq) {
 		t.Errorf("WidgetID filter failed")
+	}
+
+	// Nil safety checks
+	if widgetquery.Equal("test")(nil) {
+		t.Errorf("Equal filter should return false for nil")
+	}
+	if widgetquery.Prefix("test")(nil) {
+		t.Errorf("Prefix filter should return false for nil")
+	}
+	if widgetquery.Suffix("test")(nil) {
+		t.Errorf("Suffix filter should return false for nil")
+	}
+	if widgetquery.Contains("test")(nil) {
+		t.Errorf("Contains filter should return false for nil")
+	}
+	if widgetquery.FromUserID(123)(nil) {
+		t.Errorf("FromUserID filter should return false for nil")
+	}
+	if widgetquery.ChatInstance("inst")(nil) {
+		t.Errorf("ChatInstance filter should return false for nil")
+	}
+	if widgetquery.ChatType("private")(nil) {
+		t.Errorf("ChatType filter should return false for nil")
+	}
+	if widgetquery.WidgetID("wid")(nil) {
+		t.Errorf("WidgetID filter should return false for nil")
 	}
 }
