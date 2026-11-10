@@ -17,4 +17,6 @@ type (
 	BusinessConnection func(bc *gotgbot.BusinessConnection) bool
 	PurchasedPaidMedia func(pm *gotgbot.PaidMediaPurchased) bool
 	ManagedBot         func(pm *gotgbot.ManagedBotUpdated) bool
+	WidgetQuery        func(wq *gotgbot.WidgetQuery) bool
+	SharedWidgetQuery  func(swq *gotgbot.SharedWidgetQuery) bool
 )
