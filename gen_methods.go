@@ -5031,8 +5031,6 @@ func (bot *Bot) SavePreparedKeyboardButtonWithContext(ctx context.Context, userI
 type SendAnimationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5080,12 +5078,12 @@ type SendAnimationOpts struct {
 // Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
 //   - animation (type InputFileOrString): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAnimationOpts): All optional parameters.
-func (bot *Bot) SendAnimation(animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
-	return bot.SendAnimationWithContext(context.Background(), animation, opts)
+func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
+	return bot.SendAnimationWithContext(context.Background(), chatId, animation, opts)
 }
 
 // SendAnimationWithContext is the same as Bot.SendAnimation, but with a context.Context parameter
-func (bot *Bot) SendAnimationWithContext(ctx context.Context, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
+func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
 	v["animation"] = animation
 	if opts != nil {
@@ -5130,8 +5128,6 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, animation InputFil
 type SendAudioOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5176,12 +5172,12 @@ type SendAudioOpts struct {
 // For sending voice messages, use the sendVoice method instead.
 //   - audio (type InputFileOrString): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAudioOpts): All optional parameters.
-func (bot *Bot) SendAudio(audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
-	return bot.SendAudioWithContext(context.Background(), audio, opts)
+func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
+	return bot.SendAudioWithContext(context.Background(), chatId, audio, opts)
 }
 
 // SendAudioWithContext is the same as Bot.SendAudio, but with a context.Context parameter
-func (bot *Bot) SendAudioWithContext(ctx context.Context, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
+func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
 	v["audio"] = audio
 	if opts != nil {
@@ -5360,8 +5356,6 @@ func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnection
 type SendContactOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5396,12 +5390,12 @@ type SendContactOpts struct {
 //   - phoneNumber (type string): Contact's phone number
 //   - firstName (type string): Contact's first name
 //   - opts (type SendContactOpts): All optional parameters.
-func (bot *Bot) SendContact(phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
-	return bot.SendContactWithContext(context.Background(), phoneNumber, firstName, opts)
+func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
+	return bot.SendContactWithContext(context.Background(), chatId, phoneNumber, firstName, opts)
 }
 
 // SendContactWithContext is the same as Bot.SendContact, but with a context.Context parameter
-func (bot *Bot) SendContactWithContext(ctx context.Context, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
+func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]any{}
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
@@ -5509,8 +5503,6 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 type SendDocumentOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5550,12 +5542,12 @@ type SendDocumentOpts struct {
 // Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
 //   - document (type InputFileOrString): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendDocumentOpts): All optional parameters.
-func (bot *Bot) SendDocument(document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
-	return bot.SendDocumentWithContext(context.Background(), document, opts)
+func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
+	return bot.SendDocumentWithContext(context.Background(), chatId, document, opts)
 }
 
 // SendDocumentWithContext is the same as Bot.SendDocument, but with a context.Context parameter
-func (bot *Bot) SendDocumentWithContext(ctx context.Context, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
+func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
 	v["document"] = document
 	if opts != nil {
@@ -5658,8 +5650,6 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 type SendGiftOpts struct {
 	// Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
 	UserId int64
-	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift or username of the channel in the format @username.
-	ChatId int64
 	// Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
 	PayForUpgrade bool
 	// Text that will be shown along with the gift; 0-128 characters
@@ -5677,12 +5667,12 @@ type SendGiftOpts struct {
 // Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
 //   - giftId (type string): Identifier of the gift; limited gifts can't be sent to channel chats
 //   - opts (type SendGiftOpts): All optional parameters.
-func (bot *Bot) SendGift(giftId string, opts *SendGiftOpts) (bool, error) {
-	return bot.SendGiftWithContext(context.Background(), giftId, opts)
+func (bot *Bot) SendGift(chatId int64, giftId string, opts *SendGiftOpts) (bool, error) {
+	return bot.SendGiftWithContext(context.Background(), chatId, giftId, opts)
 }
 
 // SendGiftWithContext is the same as Bot.SendGift, but with a context.Context parameter
-func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *SendGiftOpts) (bool, error) {
+func (bot *Bot) SendGiftWithContext(ctx context.Context, chatId int64, giftId string, opts *SendGiftOpts) (bool, error) {
 	v := map[string]any{}
 	v["gift_id"] = giftId
 	if opts != nil {
@@ -5833,8 +5823,6 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 type SendLivePhotoOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5875,12 +5863,12 @@ type SendLivePhotoOpts struct {
 //   - livePhoto (type InputFileOrString): Live photo video to send. The video must be no longer than 10 seconds and must not exceed 10 MB in size. Pass a file_id as String to send a video that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - photo (type InputFileOrString): The static photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - opts (type SendLivePhotoOpts): All optional parameters.
-func (bot *Bot) SendLivePhoto(livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
-	return bot.SendLivePhotoWithContext(context.Background(), livePhoto, photo, opts)
+func (bot *Bot) SendLivePhoto(chatId int64, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
+	return bot.SendLivePhotoWithContext(context.Background(), chatId, livePhoto, photo, opts)
 }
 
 // SendLivePhotoWithContext is the same as Bot.SendLivePhoto, but with a context.Context parameter
-func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
+func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
 	v := map[string]any{}
 	v["live_photo"] = livePhoto
 	v["photo"] = photo
@@ -5922,8 +5910,6 @@ func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, livePhoto InputFil
 type SendLocationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -5962,12 +5948,12 @@ type SendLocationOpts struct {
 //   - latitude (type float64): Latitude of the location
 //   - longitude (type float64): Longitude of the location
 //   - opts (type SendLocationOpts): All optional parameters.
-func (bot *Bot) SendLocation(latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
-	return bot.SendLocationWithContext(context.Background(), latitude, longitude, opts)
+func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
+	return bot.SendLocationWithContext(context.Background(), chatId, latitude, longitude, opts)
 }
 
 // SendLocationWithContext is the same as Bot.SendLocation, but with a context.Context parameter
-func (bot *Bot) SendLocationWithContext(ctx context.Context, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
+func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]any{}
 	v["latitude"] = latitude
 	v["longitude"] = longitude
@@ -6070,8 +6056,6 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 type SendMessageOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6107,12 +6091,12 @@ type SendMessageOpts struct {
 // Use this method to send text messages. On success, the sent Message is returned.
 //   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
 //   - opts (type SendMessageOpts): All optional parameters.
-func (bot *Bot) SendMessage(text string, opts *SendMessageOpts) (*Message, error) {
-	return bot.SendMessageWithContext(context.Background(), text, opts)
+func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
+	return bot.SendMessageWithContext(context.Background(), chatId, text, opts)
 }
 
 // SendMessageWithContext is the same as Bot.SendMessage, but with a context.Context parameter
-func (bot *Bot) SendMessageWithContext(ctx context.Context, text string, opts *SendMessageOpts) (*Message, error) {
+func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]any{}
 	v["text"] = text
 	if opts != nil {
@@ -6289,8 +6273,6 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 type SendPhotoOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6330,12 +6312,12 @@ type SendPhotoOpts struct {
 // Use this method to send photos. On success, the sent Message is returned.
 //   - photo (type InputFileOrString): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendPhotoOpts): All optional parameters.
-func (bot *Bot) SendPhoto(photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
-	return bot.SendPhotoWithContext(context.Background(), photo, opts)
+func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
+	return bot.SendPhotoWithContext(context.Background(), chatId, photo, opts)
 }
 
 // SendPhotoWithContext is the same as Bot.SendPhoto, but with a context.Context parameter
-func (bot *Bot) SendPhotoWithContext(ctx context.Context, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
+func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
 	v["photo"] = photo
 	if opts != nil {
@@ -6512,8 +6494,6 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 type SendRichMessageOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent. Bot can send rich messages on behalf of a business account only if the corresponding user can send rich messages.
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6543,12 +6523,12 @@ type SendRichMessageOpts struct {
 // Use this method to send rich messages. If the message contains a block with a media element, then the bot must have the right to send the media to the chat. On success, the sent Message is returned.
 //   - richMessage (type InputRichMessage): The message to be sent
 //   - opts (type SendRichMessageOpts): All optional parameters.
-func (bot *Bot) SendRichMessage(richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
-	return bot.SendRichMessageWithContext(context.Background(), richMessage, opts)
+func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
+	return bot.SendRichMessageWithContext(context.Background(), chatId, richMessage, opts)
 }
 
 // SendRichMessageWithContext is the same as Bot.SendRichMessage, but with a context.Context parameter
-func (bot *Bot) SendRichMessageWithContext(ctx context.Context, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
+func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
 	v := map[string]any{}
 	v["rich_message"] = richMessage
 	if opts != nil {
@@ -6707,8 +6687,6 @@ func (bot *Bot) SendSharedWidgetWithContext(ctx context.Context, chatId int64, w
 type SendStickerOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6740,12 +6718,12 @@ type SendStickerOpts struct {
 // Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
 //   - sticker (type InputFileOrString): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
 //   - opts (type SendStickerOpts): All optional parameters.
-func (bot *Bot) SendSticker(sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
-	return bot.SendStickerWithContext(context.Background(), sticker, opts)
+func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
+	return bot.SendStickerWithContext(context.Background(), chatId, sticker, opts)
 }
 
 // SendStickerWithContext is the same as Bot.SendSticker, but with a context.Context parameter
-func (bot *Bot) SendStickerWithContext(ctx context.Context, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
+func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
 	v["sticker"] = sticker
 	if opts != nil {
@@ -6782,8 +6760,6 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, sticker InputFileOrS
 type SendVenueOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6824,12 +6800,12 @@ type SendVenueOpts struct {
 //   - title (type string): Name of the venue
 //   - address (type string): Address of the venue
 //   - opts (type SendVenueOpts): All optional parameters.
-func (bot *Bot) SendVenue(latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
-	return bot.SendVenueWithContext(context.Background(), latitude, longitude, title, address, opts)
+func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
+	return bot.SendVenueWithContext(context.Background(), chatId, latitude, longitude, title, address, opts)
 }
 
 // SendVenueWithContext is the same as Bot.SendVenue, but with a context.Context parameter
-func (bot *Bot) SendVenueWithContext(ctx context.Context, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
+func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]any{}
 	v["latitude"] = latitude
 	v["longitude"] = longitude
@@ -6872,8 +6848,6 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, latitude float64, long
 type SendVideoOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -6927,12 +6901,12 @@ type SendVideoOpts struct {
 // Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
 //   - video (type InputFileOrString): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVideoOpts): All optional parameters.
-func (bot *Bot) SendVideo(video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
-	return bot.SendVideoWithContext(context.Background(), video, opts)
+func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
+	return bot.SendVideoWithContext(context.Background(), chatId, video, opts)
 }
 
 // SendVideoWithContext is the same as Bot.SendVideo, but with a context.Context parameter
-func (bot *Bot) SendVideoWithContext(ctx context.Context, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
+func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
 	v["video"] = video
 	if opts != nil {
@@ -6980,8 +6954,6 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, video InputFileOrStrin
 type SendVideoNoteOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -7017,12 +6989,12 @@ type SendVideoNoteOpts struct {
 // Use this method to send a rounded square MPEG4 video of up to 1 minute long. On success, the sent Message is returned.
 //   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported.
 //   - opts (type SendVideoNoteOpts): All optional parameters.
-func (bot *Bot) SendVideoNote(videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
-	return bot.SendVideoNoteWithContext(context.Background(), videoNote, opts)
+func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
+	return bot.SendVideoNoteWithContext(context.Background(), chatId, videoNote, opts)
 }
 
 // SendVideoNoteWithContext is the same as Bot.SendVideoNote, but with a context.Context parameter
-func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
+func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
 	v["video_note"] = videoNote
 	if opts != nil {
@@ -7061,8 +7033,6 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, videoNote InputFil
 type SendVoiceOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionId string
-	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
-	ChatId int64
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
 	MessageThreadId int64
 	// Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
@@ -7100,12 +7070,12 @@ type SendVoiceOpts struct {
 // Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
 //   - voice (type InputFileOrString): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVoiceOpts): All optional parameters.
-func (bot *Bot) SendVoice(voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
-	return bot.SendVoiceWithContext(context.Background(), voice, opts)
+func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
+	return bot.SendVoiceWithContext(context.Background(), chatId, voice, opts)
 }
 
 // SendVoiceWithContext is the same as Bot.SendVoice, but with a context.Context parameter
-func (bot *Bot) SendVoiceWithContext(ctx context.Context, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
+func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
 	v["voice"] = voice
 	if opts != nil {

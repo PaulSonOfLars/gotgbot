@@ -259,7 +259,7 @@ type Fields []Field
 func (m MethodDescription) getRequiredFields() Fields {
 	var req []Field
 	for _, f := range m.Fields {
-		if f.Required {
+		if m.isFieldRequired(f) {
 			req = append(req, f)
 		}
 	}
@@ -283,10 +283,6 @@ func (fs Fields) getNames() []string {
 func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
 	var args []string
 	for _, f := range fs {
-		if !f.Required {
-			continue
-		}
-
 		fieldType, err := f.getPreferredType(d)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get preferred type: %w", err)
@@ -307,7 +303,7 @@ func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) 
 	optionals := strings.Builder{}
 
 	for _, f := range m.Fields {
-		if f.Required {
+		if m.isFieldRequired(f) {
 			continue
 		}
 
