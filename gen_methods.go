@@ -5076,6 +5076,7 @@ type SendAnimationOpts struct {
 // SendAnimation (https://core.telegram.org/bots/api#sendanimation)
 //
 // Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - animation (type InputFileOrString): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAnimationOpts): All optional parameters.
 func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
@@ -5170,6 +5171,7 @@ type SendAudioOpts struct {
 //
 // Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
 // For sending voice messages, use the sendVoice method instead.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - audio (type InputFileOrString): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAudioOpts): All optional parameters.
 func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
@@ -5387,6 +5389,7 @@ type SendContactOpts struct {
 // SendContact (https://core.telegram.org/bots/api#sendcontact)
 //
 // Use this method to send phone contacts. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - phoneNumber (type string): Contact's phone number
 //   - firstName (type string): Contact's first name
 //   - opts (type SendContactOpts): All optional parameters.
@@ -5540,6 +5543,7 @@ type SendDocumentOpts struct {
 // SendDocument (https://core.telegram.org/bots/api#senddocument)
 //
 // Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - document (type InputFileOrString): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendDocumentOpts): All optional parameters.
 func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
@@ -5862,6 +5866,7 @@ type SendLivePhotoOpts struct {
 // SendLivePhoto (https://core.telegram.org/bots/api#sendlivephoto)
 //
 // Use this method to send live photos. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - livePhoto (type InputFileOrString): Live photo video to send. The video must be no longer than 10 seconds and must not exceed 10 MB in size. Pass a file_id as String to send a video that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - photo (type InputFileOrString): The static photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - opts (type SendLivePhotoOpts): All optional parameters.
@@ -5947,6 +5952,7 @@ type SendLocationOpts struct {
 // SendLocation (https://core.telegram.org/bots/api#sendlocation)
 //
 // Use this method to send point on the map. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - latitude (type float64): Latitude of the location
 //   - longitude (type float64): Longitude of the location
 //   - opts (type SendLocationOpts): All optional parameters.
@@ -6091,6 +6097,7 @@ type SendMessageOpts struct {
 // SendMessage (https://core.telegram.org/bots/api#sendmessage)
 //
 // Use this method to send text messages. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
 //   - opts (type SendMessageOpts): All optional parameters.
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
@@ -6312,6 +6319,7 @@ type SendPhotoOpts struct {
 // SendPhoto (https://core.telegram.org/bots/api#sendphoto)
 //
 // Use this method to send photos. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - photo (type InputFileOrString): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendPhotoOpts): All optional parameters.
 func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
@@ -6523,6 +6531,7 @@ type SendRichMessageOpts struct {
 // SendRichMessage (https://core.telegram.org/bots/api#sendrichmessage)
 //
 // Use this method to send rich messages. If the message contains a block with a media element, then the bot must have the right to send the media to the chat. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - richMessage (type InputRichMessage): The message to be sent
 //   - opts (type SendRichMessageOpts): All optional parameters.
 func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
@@ -6718,6 +6727,7 @@ type SendStickerOpts struct {
 // SendSticker (https://core.telegram.org/bots/api#sendsticker)
 //
 // Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - sticker (type InputFileOrString): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
 //   - opts (type SendStickerOpts): All optional parameters.
 func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
@@ -6797,6 +6807,7 @@ type SendVenueOpts struct {
 // SendVenue (https://core.telegram.org/bots/api#sendvenue)
 //
 // Use this method to send information about a venue. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - latitude (type float64): Latitude of the venue
 //   - longitude (type float64): Longitude of the venue
 //   - title (type string): Name of the venue
@@ -6901,6 +6912,7 @@ type SendVideoOpts struct {
 // SendVideo (https://core.telegram.org/bots/api#sendvideo)
 //
 // Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - video (type InputFileOrString): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVideoOpts): All optional parameters.
 func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
@@ -6989,6 +7001,7 @@ type SendVideoNoteOpts struct {
 // SendVideoNote (https://core.telegram.org/bots/api#sendvideonote)
 //
 // Use this method to send a rounded square MPEG4 video of up to 1 minute long. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported.
 //   - opts (type SendVideoNoteOpts): All optional parameters.
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
@@ -7070,6 +7083,7 @@ type SendVoiceOpts struct {
 // SendVoice (https://core.telegram.org/bots/api#sendvoice)
 //
 // Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - voice (type InputFileOrString): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVoiceOpts): All optional parameters.
 func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {

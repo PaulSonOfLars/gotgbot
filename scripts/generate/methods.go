@@ -182,7 +182,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 	var optionals []Field
 	for _, f := range m.Fields {
 		goParam := snakeToCamel(f.Name)
-		if !m.isFieldRequired(f) {
+		if !f.Required {
 			optionals = append(optionals, f)
 			continue
 		}
@@ -217,7 +217,7 @@ func (m MethodDescription) generateFieldValue(d APIDescription, methodName strin
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
 
-	if m.isFieldRequired(f) {
+	if f.Required {
 		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 
@@ -259,7 +259,7 @@ type Fields []Field
 func (m MethodDescription) getRequiredFields() Fields {
 	var req []Field
 	for _, f := range m.Fields {
-		if m.isFieldRequired(f) {
+		if f.Required {
 			req = append(req, f)
 		}
 	}
@@ -303,7 +303,7 @@ func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) 
 	optionals := strings.Builder{}
 
 	for _, f := range m.Fields {
-		if m.isFieldRequired(f) {
+		if f.Required {
 			continue
 		}
 
