@@ -338,6 +338,45 @@ func (bot *Bot) AnswerWebAppQueryWithContext(ctx context.Context, webAppQueryId 
 	return s, json.Unmarshal(r, &s)
 }
 
+// AnswerWidgetQueryOpts is the set of optional fields for Bot.AnswerWidgetQuery and Bot.AnswerWidgetQueryWithContext.
+type AnswerWidgetQueryOpts struct {
+	// Data to be returned to the widget, 0-1024 bytes
+	Data string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// AnswerWidgetQuery (https://core.telegram.org/bots/api#answerwidgetquery)
+//
+// Use this method to send an answer to a query from a widget. The query must be answered within 15 seconds. The answer is received only by the widget that sent the query and doesn't change data of the widget; use editMessageWidgetData or editSharedWidgetData to change it. On success, True is returned.
+//   - widgetQueryId (type string): Unique identifier for the query to be answered
+//   - opts (type AnswerWidgetQueryOpts): All optional parameters.
+func (bot *Bot) AnswerWidgetQuery(widgetQueryId string, opts *AnswerWidgetQueryOpts) (bool, error) {
+	return bot.AnswerWidgetQueryWithContext(context.Background(), widgetQueryId, opts)
+}
+
+// AnswerWidgetQueryWithContext is the same as Bot.AnswerWidgetQuery, but with a context.Context parameter
+func (bot *Bot) AnswerWidgetQueryWithContext(ctx context.Context, widgetQueryId string, opts *AnswerWidgetQueryOpts) (bool, error) {
+	v := map[string]any{}
+	v["widget_query_id"] = widgetQueryId
+	if opts != nil {
+		addIfValueNotZero(v, "data", opts.Data, opts.Data == "")
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "answerWidgetQuery", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // ApproveChatJoinRequestOpts is the set of optional fields for Bot.ApproveChatJoinRequest and Bot.ApproveChatJoinRequestWithContext.
 type ApproveChatJoinRequestOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -357,7 +396,7 @@ func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *Approve
 // ApproveChatJoinRequestWithContext is the same as Bot.ApproveChatJoinRequest, but with a context.Context parameter
 func (bot *Bot) ApproveChatJoinRequestWithContext(ctx context.Context, chatId int64, userId int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -395,7 +434,7 @@ func (bot *Bot) ApproveSuggestedPost(chatId int64, messageId int64, opts *Approv
 // ApproveSuggestedPostWithContext is the same as Bot.ApproveSuggestedPost, but with a context.Context parameter
 func (bot *Bot) ApproveSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *ApproveSuggestedPostOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "send_date", opts.SendDate, opts.SendDate == 0)
@@ -438,7 +477,7 @@ func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpt
 // BanChatMemberWithContext is the same as Bot.BanChatMember, but with a context.Context parameter
 func (bot *Bot) BanChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "until_date", opts.UntilDate, opts.UntilDate == 0)
@@ -478,7 +517,7 @@ func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanCha
 // BanChatSenderChatWithContext is the same as Bot.BanChatSenderChat, but with a context.Context parameter
 func (bot *Bot) BanChatSenderChatWithContext(ctx context.Context, chatId int64, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sender_chat_id"] = senderChatId
 
 	var reqOpts *RequestOpts
@@ -546,7 +585,7 @@ func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *Close
 // CloseForumTopicWithContext is the same as Bot.CloseForumTopic, but with a context.Context parameter
 func (bot *Bot) CloseForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *CloseForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -581,7 +620,7 @@ func (bot *Bot) CloseGeneralForumTopic(chatId int64, opts *CloseGeneralForumTopi
 // CloseGeneralForumTopicWithContext is the same as Bot.CloseGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *CloseGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -669,8 +708,8 @@ type CopyMessageOpts struct {
 
 // CopyMessage (https://core.telegram.org/bots/api#copymessage)
 //
-// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, invoice messages, and widget messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original message was sent
 //   - messageId (type int64): Message identifier in the chat specified in from_chat_id
 //   - opts (type CopyMessageOpts): All optional parameters.
@@ -681,7 +720,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 // CopyMessageWithContext is the same as Bot.CopyMessage, but with a context.Context parameter
 func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
@@ -733,8 +772,8 @@ type CopyMessagesOpts struct {
 
 // CopyMessages (https://core.telegram.org/bots/api#copymessages)
 //
-// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an Array of MessageId of the sent messages is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, invoice messages, and widget messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_ids is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an Array of MessageId of the sent messages is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original messages were sent
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
 //   - opts (type CopyMessagesOpts): All optional parameters.
@@ -745,7 +784,7 @@ func (bot *Bot) CopyMessages(chatId int64, fromChatId int64, messageIds []int64,
 // CopyMessagesWithContext is the same as Bot.CopyMessages, but with a context.Context parameter
 func (bot *Bot) CopyMessagesWithContext(ctx context.Context, chatId int64, fromChatId int64, messageIds []int64, opts *CopyMessagesOpts) ([]MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_ids"] = messageIds
 	if opts != nil {
@@ -796,7 +835,7 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 // CreateChatInviteLinkWithContext is the same as Bot.CreateChatInviteLink, but with a context.Context parameter
 func (bot *Bot) CreateChatInviteLinkWithContext(ctx context.Context, chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
 		addIfValueNotZero(v, "expire_date", opts.ExpireDate, opts.ExpireDate == 0)
@@ -840,7 +879,7 @@ func (bot *Bot) CreateChatSubscriptionInviteLink(chatId int64, subscriptionPerio
 // CreateChatSubscriptionInviteLinkWithContext is the same as Bot.CreateChatSubscriptionInviteLink, but with a context.Context parameter
 func (bot *Bot) CreateChatSubscriptionInviteLinkWithContext(ctx context.Context, chatId int64, subscriptionPeriod int64, subscriptionPrice int64, opts *CreateChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["subscription_period"] = subscriptionPeriod
 	v["subscription_price"] = subscriptionPrice
 	if opts != nil {
@@ -873,7 +912,7 @@ type CreateForumTopicOpts struct {
 
 // CreateForumTopic (https://core.telegram.org/bots/api#createforumtopic)
 //
-// Use this method to create a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator right. Returns information about the created topic as a ForumTopic object.
+// Use this method to create a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator right. In the case of a private chat, a link to the topic can be created in the format https://t.me/<bot_username>/<message_thread_id>; the link opens the topic only for the user. Returns information about the created topic as a ForumTopic object.
 //   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
 //   - name (type string): Topic name, 1-128 characters
 //   - opts (type CreateForumTopicOpts): All optional parameters.
@@ -884,7 +923,7 @@ func (bot *Bot) CreateForumTopic(chatId int64, name string, opts *CreateForumTop
 // CreateForumTopicWithContext is the same as Bot.CreateForumTopic, but with a context.Context parameter
 func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, name string, opts *CreateForumTopicOpts) (*ForumTopic, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["name"] = name
 	if opts != nil {
 		addIfValueNotZero(v, "icon_color", opts.IconColor, opts.IconColor == 0)
@@ -1067,7 +1106,7 @@ func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64, opts *Decline
 // DeclineChatJoinRequestWithContext is the same as Bot.DeclineChatJoinRequest, but with a context.Context parameter
 func (bot *Bot) DeclineChatJoinRequestWithContext(ctx context.Context, chatId int64, userId int64, opts *DeclineChatJoinRequestOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -1105,7 +1144,7 @@ func (bot *Bot) DeclineSuggestedPost(chatId int64, messageId int64, opts *Declin
 // DeclineSuggestedPostWithContext is the same as Bot.DeclineSuggestedPost, but with a context.Context parameter
 func (bot *Bot) DeclineSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeclineSuggestedPostOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "comment", opts.Comment, opts.Comment == "")
@@ -1147,7 +1186,7 @@ func (bot *Bot) DeleteAllMessageReactions(chatId int64, opts *DeleteAllMessageRe
 // DeleteAllMessageReactionsWithContext is the same as Bot.DeleteAllMessageReactions, but with a context.Context parameter
 func (bot *Bot) DeleteAllMessageReactionsWithContext(ctx context.Context, chatId int64, opts *DeleteAllMessageReactionsOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "user_id", opts.UserId, opts.UserId == 0)
 		addIfValueNotZero(v, "actor_chat_id", opts.ActorChatId, opts.ActorChatId == 0)
@@ -1159,6 +1198,42 @@ func (bot *Bot) DeleteAllMessageReactionsWithContext(ctx context.Context, chatId
 	}
 
 	r, err := bot.RequestWithContext(ctx, "deleteAllMessageReactions", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// DeleteBusinessAccountGiftOpts is the set of optional fields for Bot.DeleteBusinessAccountGift and Bot.DeleteBusinessAccountGiftWithContext.
+type DeleteBusinessAccountGiftOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// DeleteBusinessAccountGift (https://core.telegram.org/bots/api#deletebusinessaccountgift)
+//
+// Deletes a regular gift owned by a managed business account without receiving Telegram Stars for it. Requires the can_convert_gifts_to_stars business bot right. The gift can be deleted only if it isn't limited (the field total_count of the Gift is omitted) and wasn't refunded. Returns True on success.
+//   - businessConnectionId (type string): Unique identifier of the business connection
+//   - ownedGiftId (type string): Unique identifier of the regular gift that should be deleted
+//   - opts (type DeleteBusinessAccountGiftOpts): All optional parameters.
+func (bot *Bot) DeleteBusinessAccountGift(businessConnectionId string, ownedGiftId string, opts *DeleteBusinessAccountGiftOpts) (bool, error) {
+	return bot.DeleteBusinessAccountGiftWithContext(context.Background(), businessConnectionId, ownedGiftId, opts)
+}
+
+// DeleteBusinessAccountGiftWithContext is the same as Bot.DeleteBusinessAccountGift, but with a context.Context parameter
+func (bot *Bot) DeleteBusinessAccountGiftWithContext(ctx context.Context, businessConnectionId string, ownedGiftId string, opts *DeleteBusinessAccountGiftOpts) (bool, error) {
+	v := map[string]any{}
+	v["business_connection_id"] = businessConnectionId
+	v["owned_gift_id"] = ownedGiftId
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "deleteBusinessAccountGift", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
@@ -1221,7 +1296,7 @@ func (bot *Bot) DeleteChatPhoto(chatId int64, opts *DeleteChatPhotoOpts) (bool, 
 // DeleteChatPhotoWithContext is the same as Bot.DeleteChatPhoto, but with a context.Context parameter
 func (bot *Bot) DeleteChatPhotoWithContext(ctx context.Context, chatId int64, opts *DeleteChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1255,7 +1330,7 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpt
 // DeleteChatStickerSetWithContext is the same as Bot.DeleteChatStickerSet, but with a context.Context parameter
 func (bot *Bot) DeleteChatStickerSetWithContext(ctx context.Context, chatId int64, opts *DeleteChatStickerSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1291,7 +1366,7 @@ func (bot *Bot) DeleteEphemeralMessage(chatId int64, receiverUserId int64, ephem
 // DeleteEphemeralMessageWithContext is the same as Bot.DeleteEphemeralMessage, but with a context.Context parameter
 func (bot *Bot) DeleteEphemeralMessageWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *DeleteEphemeralMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 
@@ -1328,7 +1403,7 @@ func (bot *Bot) DeleteForumTopic(chatId int64, messageThreadId int64, opts *Dele
 // DeleteForumTopicWithContext is the same as Bot.DeleteForumTopic, but with a context.Context parameter
 func (bot *Bot) DeleteForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *DeleteForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -1365,7 +1440,7 @@ type DeleteMessageOpts struct {
 //   - If the bot has can_manage_direct_messages administrator right in a channel, it can delete any message in the corresponding direct messages chat.
 //
 // Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - messageId (type int64): Identifier of the message to delete
 //   - opts (type DeleteMessageOpts): All optional parameters.
 func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessageOpts) (bool, error) {
@@ -1375,7 +1450,7 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessage
 // DeleteMessageWithContext is the same as Bot.DeleteMessage, but with a context.Context parameter
 func (bot *Bot) DeleteMessageWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeleteMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 
 	var reqOpts *RequestOpts
@@ -1415,7 +1490,7 @@ func (bot *Bot) DeleteMessageReaction(chatId int64, messageId int64, opts *Delet
 // DeleteMessageReactionWithContext is the same as Bot.DeleteMessageReaction, but with a context.Context parameter
 func (bot *Bot) DeleteMessageReactionWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeleteMessageReactionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "user_id", opts.UserId, opts.UserId == 0)
@@ -1445,7 +1520,7 @@ type DeleteMessagesOpts struct {
 // DeleteMessages (https://core.telegram.org/bots/api#deletemessages)
 //
 // Use this method to delete multiple messages simultaneously. If some of the specified messages can't be found, they are skipped. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages to delete. See deleteMessage for limitations on which messages can be deleted.
 //   - opts (type DeleteMessagesOpts): All optional parameters.
 func (bot *Bot) DeleteMessages(chatId int64, messageIds []int64, opts *DeleteMessagesOpts) (bool, error) {
@@ -1455,7 +1530,7 @@ func (bot *Bot) DeleteMessages(chatId int64, messageIds []int64, opts *DeleteMes
 // DeleteMessagesWithContext is the same as Bot.DeleteMessages, but with a context.Context parameter
 func (bot *Bot) DeleteMessagesWithContext(ctx context.Context, chatId int64, messageIds []int64, opts *DeleteMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_ids"] = messageIds
 
 	var reqOpts *RequestOpts
@@ -1680,7 +1755,7 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 // EditChatInviteLinkWithContext is the same as Bot.EditChatInviteLink, but with a context.Context parameter
 func (bot *Bot) EditChatInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -1724,7 +1799,7 @@ func (bot *Bot) EditChatSubscriptionInviteLink(chatId int64, inviteLink string, 
 // EditChatSubscriptionInviteLinkWithContext is the same as Bot.EditChatSubscriptionInviteLink, but with a context.Context parameter
 func (bot *Bot) EditChatSubscriptionInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *EditChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -1774,7 +1849,7 @@ func (bot *Bot) EditEphemeralMessageCaption(chatId int64, receiverUserId int64, 
 // EditEphemeralMessageCaptionWithContext is the same as Bot.EditEphemeralMessageCaption, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageCaptionWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageCaptionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -1822,7 +1897,7 @@ func (bot *Bot) EditEphemeralMessageMedia(chatId int64, receiverUserId int64, ep
 // EditEphemeralMessageMediaWithContext is the same as Bot.EditEphemeralMessageMedia, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageMediaWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, media InputMedia, opts *EditEphemeralMessageMediaOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	v["media"] = media
@@ -1866,7 +1941,7 @@ func (bot *Bot) EditEphemeralMessageReplyMarkup(chatId int64, receiverUserId int
 // EditEphemeralMessageReplyMarkupWithContext is the same as Bot.EditEphemeralMessageReplyMarkup, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageReplyMarkupWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageReplyMarkupOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -1919,7 +1994,7 @@ func (bot *Bot) EditEphemeralMessageText(chatId int64, receiverUserId int64, eph
 // EditEphemeralMessageTextWithContext is the same as Bot.EditEphemeralMessageText, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageTextWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageTextOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -1968,7 +2043,7 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 // EditForumTopicWithContext is the same as Bot.EditForumTopic, but with a context.Context parameter
 func (bot *Bot) EditForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *EditForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -2008,7 +2083,7 @@ func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGener
 // EditGeneralForumTopicWithContext is the same as Bot.EditGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) EditGeneralForumTopicWithContext(ctx context.Context, chatId int64, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["name"] = name
 
 	var reqOpts *RequestOpts
@@ -2029,7 +2104,7 @@ func (bot *Bot) EditGeneralForumTopicWithContext(ctx context.Context, chatId int
 type EditMessageCaptionOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
@@ -2118,7 +2193,7 @@ func (bot *Bot) EditMessageChecklist(businessConnectionId string, chatId int64, 
 func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	v["checklist"] = checklist
 	if opts != nil {
@@ -2143,7 +2218,7 @@ func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessCon
 type EditMessageLiveLocationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
@@ -2216,7 +2291,7 @@ func (bot *Bot) EditMessageLiveLocationWithContext(ctx context.Context, latitude
 type EditMessageMediaOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
@@ -2275,7 +2350,7 @@ func (bot *Bot) EditMessageMediaWithContext(ctx context.Context, media InputMedi
 type EditMessageReplyMarkupOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
@@ -2332,7 +2407,7 @@ func (bot *Bot) EditMessageReplyMarkupWithContext(ctx context.Context, opts *Edi
 type EditMessageTextOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message to edit.
 	MessageId int64
@@ -2398,6 +2473,96 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, opts *EditMessag
 	}
 	return m, true, nil
 
+}
+
+// EditMessageWidgetDataOpts is the set of optional fields for Bot.EditMessageWidgetData and Bot.EditMessageWidgetDataWithContext.
+type EditMessageWidgetDataOpts struct {
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target supergroup in the format @username.
+	ChatId int64
+	// Required if inline_message_id is not specified. Identifier of the message with the widget.
+	MessageId int64
+	// Required if chat_id and message_id are not specified. Identifier of the inline message.
+	InlineMessageId string
+	// New public data of the widget, 0-1024 bytes; pass an empty string to remove the public data. If omitted, then the public data isn't changed.
+	PublicData string
+	// New data of the widget, which is specific to the message, 0-1024 bytes; pass an empty string to remove the data. If omitted, then the data isn't changed.
+	ChatData string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditMessageWidgetData (https://core.telegram.org/bots/api#editmessagewidgetdata)
+//
+// Use this method to edit data of a widget in a message sent by the bot or via the bot (for inline bots). Public data of a shared widget can be changed at most once per second. On success, True is returned.
+//   - opts (type EditMessageWidgetDataOpts): All optional parameters.
+func (bot *Bot) EditMessageWidgetData(opts *EditMessageWidgetDataOpts) (bool, error) {
+	return bot.EditMessageWidgetDataWithContext(context.Background(), opts)
+}
+
+// EditMessageWidgetDataWithContext is the same as Bot.EditMessageWidgetData, but with a context.Context parameter
+func (bot *Bot) EditMessageWidgetDataWithContext(ctx context.Context, opts *EditMessageWidgetDataOpts) (bool, error) {
+	v := map[string]any{}
+	if opts != nil {
+		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
+		addIfValueNotZero(v, "message_id", opts.MessageId, opts.MessageId == 0)
+		addIfValueNotZero(v, "inline_message_id", opts.InlineMessageId, opts.InlineMessageId == "")
+		addIfValueNotZero(v, "public_data", opts.PublicData, opts.PublicData == "")
+		addIfValueNotZero(v, "chat_data", opts.ChatData, opts.ChatData == "")
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editMessageWidgetData", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// EditSharedWidgetDataOpts is the set of optional fields for Bot.EditSharedWidgetData and Bot.EditSharedWidgetDataWithContext.
+type EditSharedWidgetDataOpts struct {
+	// The maximum amount of time in seconds that the public data of the widget may be cached client-side; 5-3600. If omitted, then the current value is kept, which is 30 by default.
+	CacheTime int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditSharedWidgetData (https://core.telegram.org/bots/api#editsharedwidgetdata)
+//
+// Use this method to edit public data of a shared widget created by the bot. A shared widget can be edited at most once per second. On success, True is returned.
+//   - widgetId (type string): Unique identifier of the shared widget
+//   - publicData (type string): New public data of the widget, 0-1024 bytes; pass an empty string to remove the public data
+//   - opts (type EditSharedWidgetDataOpts): All optional parameters.
+func (bot *Bot) EditSharedWidgetData(widgetId string, publicData string, opts *EditSharedWidgetDataOpts) (bool, error) {
+	return bot.EditSharedWidgetDataWithContext(context.Background(), widgetId, publicData, opts)
+}
+
+// EditSharedWidgetDataWithContext is the same as Bot.EditSharedWidgetData, but with a context.Context parameter
+func (bot *Bot) EditSharedWidgetDataWithContext(ctx context.Context, widgetId string, publicData string, opts *EditSharedWidgetDataOpts) (bool, error) {
+	v := map[string]any{}
+	v["widget_id"] = widgetId
+	v["public_data"] = publicData
+	if opts != nil {
+		addIfValueNotZero(v, "cache_time", opts.CacheTime, opts.CacheTime == 0)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editSharedWidgetData", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // EditStoryOpts is the set of optional fields for Bot.EditStory and Bot.EditStoryWithContext.
@@ -2508,7 +2673,7 @@ func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpt
 // ExportChatInviteLinkWithContext is the same as Bot.ExportChatInviteLink, but with a context.Context parameter
 func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int64, opts *ExportChatInviteLinkOpts) (string, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -2547,7 +2712,7 @@ type ForwardMessageOpts struct {
 // ForwardMessage (https://core.telegram.org/bots/api#forwardmessage)
 //
 // Use this method to forward messages of any kind. Service messages and messages with protected content can't be forwarded. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original message was sent
 //   - messageId (type int64): Message identifier in the chat specified in from_chat_id
 //   - opts (type ForwardMessageOpts): All optional parameters.
@@ -2558,7 +2723,7 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 // ForwardMessageWithContext is the same as Bot.ForwardMessage, but with a context.Context parameter
 func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
@@ -2602,7 +2767,7 @@ type ForwardMessagesOpts struct {
 // ForwardMessages (https://core.telegram.org/bots/api#forwardmessages)
 //
 // Use this method to forward multiple messages of any kind. If some of the specified messages can't be found or forwarded, they are skipped. Service messages and messages with protected content can't be forwarded. Album grouping is kept for forwarded messages. On success, an Array of MessageId of the sent messages is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - fromChatId (type int64): Unique identifier for the chat where the original messages were sent
 //   - messageIds (type []int64): A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to forward. The identifiers must be specified in a strictly increasing order.
 //   - opts (type ForwardMessagesOpts): All optional parameters.
@@ -2613,7 +2778,7 @@ func (bot *Bot) ForwardMessages(chatId int64, fromChatId int64, messageIds []int
 // ForwardMessagesWithContext is the same as Bot.ForwardMessages, but with a context.Context parameter
 func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fromChatId int64, messageIds []int64, opts *ForwardMessagesOpts) ([]MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_ids"] = messageIds
 	if opts != nil {
@@ -2821,7 +2986,7 @@ func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*ChatFullInfo, error) 
 // GetChatWithContext is the same as Bot.GetChat, but with a context.Context parameter
 func (bot *Bot) GetChatWithContext(ctx context.Context, chatId int64, opts *GetChatOpts) (*ChatFullInfo, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -2857,7 +3022,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsO
 // GetChatAdministratorsWithContext is the same as Bot.GetChatAdministrators, but with a context.Context parameter
 func (bot *Bot) GetChatAdministratorsWithContext(ctx context.Context, chatId int64, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "return_bots", opts.ReturnBots, opts.ReturnBots == false)
 	}
@@ -2913,7 +3078,7 @@ func (bot *Bot) GetChatGifts(chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts,
 // GetChatGiftsWithContext is the same as Bot.GetChatGifts, but with a context.Context parameter
 func (bot *Bot) GetChatGiftsWithContext(ctx context.Context, chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "exclude_unsaved", opts.ExcludeUnsaved, opts.ExcludeUnsaved == false)
 		addIfValueNotZero(v, "exclude_saved", opts.ExcludeSaved, opts.ExcludeSaved == false)
@@ -2960,7 +3125,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64, opts *GetChatMemberOpt
 // GetChatMemberWithContext is the same as Bot.GetChatMember, but with a context.Context parameter
 func (bot *Bot) GetChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -2994,7 +3159,7 @@ func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (
 // GetChatMemberCountWithContext is the same as Bot.GetChatMemberCount, but with a context.Context parameter
 func (bot *Bot) GetChatMemberCountWithContext(ctx context.Context, chatId int64, opts *GetChatMemberCountOpts) (int64, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -3044,6 +3209,38 @@ func (bot *Bot) GetChatMenuButtonWithContext(ctx context.Context, opts *GetChatM
 	}
 
 	return unmarshalMenuButton(r)
+}
+
+// GetChatShareThemeBackdropsOpts is the set of optional fields for Bot.GetChatShareThemeBackdrops and Bot.GetChatShareThemeBackdropsWithContext.
+type GetChatShareThemeBackdropsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetChatShareThemeBackdrops (https://core.telegram.org/bots/api#getchatsharethemebackdrops)
+//
+// Use this method to get the list of backdrops, which can be used as the background of a theme of the screen for sharing a link to a user or a chat. Requires no parameters. Returns a ChatShareThemeBackdrops object.
+//   - opts (type GetChatShareThemeBackdropsOpts): All optional parameters.
+func (bot *Bot) GetChatShareThemeBackdrops(opts *GetChatShareThemeBackdropsOpts) (*ChatShareThemeBackdrops, error) {
+	return bot.GetChatShareThemeBackdropsWithContext(context.Background(), opts)
+}
+
+// GetChatShareThemeBackdropsWithContext is the same as Bot.GetChatShareThemeBackdrops, but with a context.Context parameter
+func (bot *Bot) GetChatShareThemeBackdropsWithContext(ctx context.Context, opts *GetChatShareThemeBackdropsOpts) (*ChatShareThemeBackdrops, error) {
+	v := map[string]any{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getChatShareThemeBackdrops", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var c *ChatShareThemeBackdrops
+	return c, json.Unmarshal(r, &c)
 }
 
 // GetCustomEmojiStickersOpts is the set of optional fields for Bot.GetCustomEmojiStickers and Bot.GetCustomEmojiStickersWithContext.
@@ -3586,6 +3783,40 @@ func (bot *Bot) GetStickerSetWithContext(ctx context.Context, name string, opts 
 	return s, json.Unmarshal(r, &s)
 }
 
+// GetUniqueGiftOpts is the set of optional fields for Bot.GetUniqueGift and Bot.GetUniqueGiftWithContext.
+type GetUniqueGiftOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetUniqueGift (https://core.telegram.org/bots/api#getuniquegift)
+//
+// Use this method to get information about a unique gift by its name. Returns a UniqueGift object on success.
+//   - name (type string): Unique name of the gift
+//   - opts (type GetUniqueGiftOpts): All optional parameters.
+func (bot *Bot) GetUniqueGift(name string, opts *GetUniqueGiftOpts) (*UniqueGift, error) {
+	return bot.GetUniqueGiftWithContext(context.Background(), name, opts)
+}
+
+// GetUniqueGiftWithContext is the same as Bot.GetUniqueGift, but with a context.Context parameter
+func (bot *Bot) GetUniqueGiftWithContext(ctx context.Context, name string, opts *GetUniqueGiftOpts) (*UniqueGift, error) {
+	v := map[string]any{}
+	v["name"] = name
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getUniqueGift", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var u *UniqueGift
+	return u, json.Unmarshal(r, &u)
+}
+
 // GetUpdatesOpts is the set of optional fields for Bot.GetUpdates and Bot.GetUpdatesWithContext.
 type GetUpdatesOpts struct {
 	// Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will be forgotten.
@@ -3651,7 +3882,7 @@ func (bot *Bot) GetUserChatBoosts(chatId int64, userId int64, opts *GetUserChatB
 // GetUserChatBoostsWithContext is the same as Bot.GetUserChatBoosts, but with a context.Context parameter
 func (bot *Bot) GetUserChatBoostsWithContext(ctx context.Context, chatId int64, userId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -3947,7 +4178,7 @@ func (bot *Bot) HideGeneralForumTopic(chatId int64, opts *HideGeneralForumTopicO
 // HideGeneralForumTopicWithContext is the same as Bot.HideGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) HideGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *HideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -3981,7 +4212,7 @@ func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 // LeaveChatWithContext is the same as Bot.LeaveChat, but with a context.Context parameter
 func (bot *Bot) LeaveChatWithContext(ctx context.Context, chatId int64, opts *LeaveChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4052,7 +4283,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 // PinChatMessageWithContext is the same as Bot.PinChatMessage, but with a context.Context parameter
 func (bot *Bot) PinChatMessageWithContext(ctx context.Context, chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -4186,7 +4417,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 // PromoteChatMemberWithContext is the same as Bot.PromoteChatMember, but with a context.Context parameter
 func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == false)
@@ -4244,7 +4475,7 @@ func (bot *Bot) ReadBusinessMessage(businessConnectionId string, chatId int64, m
 func (bot *Bot) ReadBusinessMessageWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 
 	var reqOpts *RequestOpts
@@ -4354,7 +4585,7 @@ func (bot *Bot) RemoveChatVerification(chatId int64, opts *RemoveChatVerificatio
 // RemoveChatVerificationWithContext is the same as Bot.RemoveChatVerification, but with a context.Context parameter
 func (bot *Bot) RemoveChatVerificationWithContext(ctx context.Context, chatId int64, opts *RemoveChatVerificationOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4455,7 +4686,7 @@ func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *Reop
 // ReopenForumTopicWithContext is the same as Bot.ReopenForumTopic, but with a context.Context parameter
 func (bot *Bot) ReopenForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *ReopenForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -4490,7 +4721,7 @@ func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTo
 // ReopenGeneralForumTopicWithContext is the same as Bot.ReopenGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) ReopenGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *ReopenGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4652,7 +4883,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 // RestrictChatMemberWithContext is the same as Bot.RestrictChatMember, but with a context.Context parameter
 func (bot *Bot) RestrictChatMemberWithContext(ctx context.Context, chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	v["permissions"] = permissions
 	if opts != nil {
@@ -4693,7 +4924,7 @@ func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *Revo
 // RevokeChatInviteLinkWithContext is the same as Bot.RevokeChatInviteLink, but with a context.Context parameter
 func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *RevokeChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 
 	var reqOpts *RequestOpts
@@ -4845,7 +5076,7 @@ type SendAnimationOpts struct {
 // SendAnimation (https://core.telegram.org/bots/api#sendanimation)
 //
 // Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - animation (type InputFileOrString): Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAnimationOpts): All optional parameters.
 func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
@@ -4855,7 +5086,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 // SendAnimationWithContext is the same as Bot.SendAnimation, but with a context.Context parameter
 func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["animation"] = animation
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -4940,7 +5171,7 @@ type SendAudioOpts struct {
 //
 // Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
 // For sending voice messages, use the sendVoice method instead.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - audio (type InputFileOrString): Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendAudioOpts): All optional parameters.
 func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
@@ -4950,7 +5181,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 // SendAudioWithContext is the same as Bot.SendAudio, but with a context.Context parameter
 func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["audio"] = audio
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5011,7 +5242,7 @@ func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatAction
 // SendChatActionWithContext is the same as Bot.SendChatAction, but with a context.Context parameter
 func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["action"] = action
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5099,7 +5330,7 @@ func (bot *Bot) SendChecklist(businessConnectionId string, chatId int64, checkli
 func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, checklist InputChecklist, opts *SendChecklistOpts) (*Message, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["checklist"] = checklist
 	if opts != nil {
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
@@ -5158,7 +5389,7 @@ type SendContactOpts struct {
 // SendContact (https://core.telegram.org/bots/api#sendcontact)
 //
 // Use this method to send phone contacts. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - phoneNumber (type string): Contact's phone number
 //   - firstName (type string): Contact's first name
 //   - opts (type SendContactOpts): All optional parameters.
@@ -5169,7 +5400,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 // SendContactWithContext is the same as Bot.SendContact, but with a context.Context parameter
 func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
 	if opts != nil {
@@ -5233,7 +5464,7 @@ type SendDiceOpts struct {
 // SendDice (https://core.telegram.org/bots/api#senddice)
 //
 // Use this method to send an animated emoji that will display a random value. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - opts (type SendDiceOpts): All optional parameters.
 func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 	return bot.SendDiceWithContext(context.Background(), chatId, opts)
@@ -5242,7 +5473,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 // SendDiceWithContext is the same as Bot.SendDice, but with a context.Context parameter
 func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -5312,7 +5543,7 @@ type SendDocumentOpts struct {
 // SendDocument (https://core.telegram.org/bots/api#senddocument)
 //
 // Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - document (type InputFileOrString): File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendDocumentOpts): All optional parameters.
 func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
@@ -5322,7 +5553,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 // SendDocumentWithContext is the same as Bot.SendDocument, but with a context.Context parameter
 func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["document"] = document
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5392,7 +5623,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 // SendGameWithContext is the same as Bot.SendGame, but with a context.Context parameter
 func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["game_short_name"] = gameShortName
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5423,7 +5654,7 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 type SendGiftOpts struct {
 	// Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
 	UserId int64
-	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift.
+	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift or username of the channel in the format @username.
 	ChatId int64
 	// Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
 	PayForUpgrade bool
@@ -5532,7 +5763,7 @@ type SendInvoiceOpts struct {
 // SendInvoice (https://core.telegram.org/bots/api#sendinvoice)
 //
 // Use this method to send invoices. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - title (type string): Product name, 1-32 characters
 //   - description (type string): Product description, 1-255 characters
 //   - payload (type string): Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
@@ -5546,7 +5777,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 // SendInvoiceWithContext is the same as Bot.SendInvoice, but with a context.Context parameter
 func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title string, description string, payload string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["title"] = title
 	v["description"] = description
 	v["payload"] = payload
@@ -5635,7 +5866,7 @@ type SendLivePhotoOpts struct {
 // SendLivePhoto (https://core.telegram.org/bots/api#sendlivephoto)
 //
 // Use this method to send live photos. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - livePhoto (type InputFileOrString): Live photo video to send. The video must be no longer than 10 seconds and must not exceed 10 MB in size. Pass a file_id as String to send a video that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - photo (type InputFileOrString): The static photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending live photos by a URL is currently unsupported.
 //   - opts (type SendLivePhotoOpts): All optional parameters.
@@ -5646,7 +5877,7 @@ func (bot *Bot) SendLivePhoto(chatId int64, livePhoto InputFileOrString, photo I
 // SendLivePhotoWithContext is the same as Bot.SendLivePhoto, but with a context.Context parameter
 func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["live_photo"] = livePhoto
 	v["photo"] = photo
 	if opts != nil {
@@ -5721,7 +5952,7 @@ type SendLocationOpts struct {
 // SendLocation (https://core.telegram.org/bots/api#sendlocation)
 //
 // Use this method to send point on the map. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - latitude (type float64): Latitude of the location
 //   - longitude (type float64): Longitude of the location
 //   - opts (type SendLocationOpts): All optional parameters.
@@ -5732,7 +5963,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 // SendLocationWithContext is the same as Bot.SendLocation, but with a context.Context parameter
 func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	if opts != nil {
@@ -5792,7 +6023,7 @@ type SendMediaGroupOpts struct {
 // SendMediaGroup (https://core.telegram.org/bots/api#sendmediagroup)
 //
 // Use this method to send a group of photos, live photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an Array of Message objects that were sent is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - media (type []InputMedia): A JSON-serialized Array describing messages to be sent, must include 2-10 items
 //   - opts (type SendMediaGroupOpts): All optional parameters.
 func (bot *Bot) SendMediaGroup(chatId int64, media InputMedias, opts *SendMediaGroupOpts) ([]Message, error) {
@@ -5802,7 +6033,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media InputMedias, opts *SendMediaG
 // SendMediaGroupWithContext is the same as Bot.SendMediaGroup, but with a context.Context parameter
 func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, media InputMedias, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["media"] = media
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5866,7 +6097,7 @@ type SendMessageOpts struct {
 // SendMessage (https://core.telegram.org/bots/api#sendmessage)
 //
 // Use this method to send text messages. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - text (type string): Text of the message to be sent, 1-4096 characters after entities parsing
 //   - opts (type SendMessageOpts): All optional parameters.
 func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
@@ -5876,7 +6107,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 // SendMessageWithContext is the same as Bot.SendMessage, but with a context.Context parameter
 func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["text"] = text
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5940,7 +6171,7 @@ func (bot *Bot) SendMessageDraft(chatId int64, draftId int64, opts *SendMessageD
 // SendMessageDraftWithContext is the same as Bot.SendMessageDraft, but with a context.Context parameter
 func (bot *Bot) SendMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, opts *SendMessageDraftOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["draft_id"] = draftId
 	if opts != nil {
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -6002,7 +6233,7 @@ type SendPaidMediaOpts struct {
 // SendPaidMedia (https://core.telegram.org/bots/api#sendpaidmedia)
 //
 // Use this method to send paid media. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username. If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
 //   - starCount (type int64): The number of Telegram Stars that must be paid to buy access to the media; 1-25000
 //   - media (type []InputPaidMedia): A JSON-serialized Array describing the media to be sent; up to 10 items
 //   - opts (type SendPaidMediaOpts): All optional parameters.
@@ -6013,7 +6244,7 @@ func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media InputPaidMedi
 // SendPaidMediaWithContext is the same as Bot.SendPaidMedia, but with a context.Context parameter
 func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, starCount int64, media InputPaidMedias, opts *SendPaidMediaOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["star_count"] = starCount
 	v["media"] = media
 	if opts != nil {
@@ -6088,7 +6319,7 @@ type SendPhotoOpts struct {
 // SendPhoto (https://core.telegram.org/bots/api#sendphoto)
 //
 // Use this method to send photos. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - photo (type InputFileOrString): Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendPhotoOpts): All optional parameters.
 func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
@@ -6098,7 +6329,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 // SendPhotoWithContext is the same as Bot.SendPhoto, but with a context.Context parameter
 func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["photo"] = photo
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6204,7 +6435,7 @@ type SendPollOpts struct {
 // SendPoll (https://core.telegram.org/bots/api#sendpoll)
 //
 // Use this method to send a native poll. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username. Polls can't be sent to channel direct messages chats.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username. Polls can't be sent to channel direct messages chats.
 //   - question (type string): Poll question, 1-300 characters
 //   - options (type []InputPollOption): A JSON-serialized list of 1-12 answer options
 //   - opts (type SendPollOpts): All optional parameters.
@@ -6215,7 +6446,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []InputPollOptio
 // SendPollWithContext is the same as Bot.SendPoll, but with a context.Context parameter
 func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question string, options []InputPollOption, opts *SendPollOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["question"] = question
 	v["options"] = options
 	if opts != nil {
@@ -6300,7 +6531,7 @@ type SendRichMessageOpts struct {
 // SendRichMessage (https://core.telegram.org/bots/api#sendrichmessage)
 //
 // Use this method to send rich messages. If the message contains a block with a media element, then the bot must have the right to send the media to the chat. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - richMessage (type InputRichMessage): The message to be sent
 //   - opts (type SendRichMessageOpts): All optional parameters.
 func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
@@ -6310,7 +6541,7 @@ func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts
 // SendRichMessageWithContext is the same as Bot.SendRichMessage, but with a context.Context parameter
 func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["rich_message"] = richMessage
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6366,7 +6597,7 @@ func (bot *Bot) SendRichMessageDraft(chatId int64, draftId int64, richMessage In
 // SendRichMessageDraftWithContext is the same as Bot.SendRichMessageDraft, but with a context.Context parameter
 func (bot *Bot) SendRichMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, richMessage InputRichMessage, opts *SendRichMessageDraftOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["draft_id"] = draftId
 	v["rich_message"] = richMessage
 	if opts != nil {
@@ -6387,6 +6618,80 @@ func (bot *Bot) SendRichMessageDraftWithContext(ctx context.Context, chatId int6
 
 	var b bool
 	return b, json.Unmarshal(r, &b)
+}
+
+// SendSharedWidgetOpts is the set of optional fields for Bot.SendSharedWidget and Bot.SendSharedWidgetWithContext.
+type SendSharedWidgetOpts struct {
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
+	MessageThreadId int64
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData string
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the widget caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia bool
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance.
+	AllowPaidBroadcast bool
+	// Unique identifier of the message effect to be added to the message; for private chats only
+	MessageEffectId string
+	// Description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
+	ReplyMarkup ReplyMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendSharedWidget (https://core.telegram.org/bots/api#sendsharedwidget)
+//
+// Use this method to send again a shared widget created by the bot. Currently, in the production environment, widgets can be sent only to private chats, and sent widgets automatically have protected content and therefore can't be forwarded. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
+//   - widgetId (type string): Unique identifier of the shared widget
+//   - opts (type SendSharedWidgetOpts): All optional parameters.
+func (bot *Bot) SendSharedWidget(chatId int64, widgetId string, opts *SendSharedWidgetOpts) (*Message, error) {
+	return bot.SendSharedWidgetWithContext(context.Background(), chatId, widgetId, opts)
+}
+
+// SendSharedWidgetWithContext is the same as Bot.SendSharedWidget, but with a context.Context parameter
+func (bot *Bot) SendSharedWidgetWithContext(ctx context.Context, chatId int64, widgetId string, opts *SendSharedWidgetOpts) (*Message, error) {
+	v := map[string]any{}
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
+	v["widget_id"] = widgetId
+	if opts != nil {
+		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+		addIfValueNotZero(v, "chat_data", opts.ChatData, opts.ChatData == "")
+		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
+		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
+		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
+		addIfValueNotZero(v, "show_caption_above_media", opts.ShowCaptionAboveMedia, opts.ShowCaptionAboveMedia == false)
+		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
+		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
+		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)
+		addIfValueNotZero(v, "message_effect_id", opts.MessageEffectId, opts.MessageEffectId == "")
+		addIfValueNotZero(v, "reply_parameters", opts.ReplyParameters, opts.ReplyParameters == nil)
+		addIfValueNotZero(v, "reply_markup", opts.ReplyMarkup, opts.ReplyMarkup == nil)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendSharedWidget", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m *Message
+	return m, json.Unmarshal(r, &m)
 }
 
 // SendStickerOpts is the set of optional fields for Bot.SendSticker and Bot.SendStickerWithContext.
@@ -6422,7 +6727,7 @@ type SendStickerOpts struct {
 // SendSticker (https://core.telegram.org/bots/api#sendsticker)
 //
 // Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - sticker (type InputFileOrString): Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
 //   - opts (type SendStickerOpts): All optional parameters.
 func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
@@ -6432,7 +6737,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 // SendStickerWithContext is the same as Bot.SendSticker, but with a context.Context parameter
 func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sticker"] = sticker
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6502,7 +6807,7 @@ type SendVenueOpts struct {
 // SendVenue (https://core.telegram.org/bots/api#sendvenue)
 //
 // Use this method to send information about a venue. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - latitude (type float64): Latitude of the venue
 //   - longitude (type float64): Longitude of the venue
 //   - title (type string): Name of the venue
@@ -6515,7 +6820,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 // SendVenueWithContext is the same as Bot.SendVenue, but with a context.Context parameter
 func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	v["title"] = title
@@ -6607,7 +6912,7 @@ type SendVideoOpts struct {
 // SendVideo (https://core.telegram.org/bots/api#sendvideo)
 //
 // Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - video (type InputFileOrString): Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVideoOpts): All optional parameters.
 func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
@@ -6617,7 +6922,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 // SendVideoWithContext is the same as Bot.SendVideo, but with a context.Context parameter
 func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["video"] = video
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6696,7 +7001,7 @@ type SendVideoNoteOpts struct {
 // SendVideoNote (https://core.telegram.org/bots/api#sendvideonote)
 //
 // Use this method to send a rounded square MPEG4 video of up to 1 minute long. On success, the sent Message is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - videoNote (type InputFileOrString): Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported.
 //   - opts (type SendVideoNoteOpts): All optional parameters.
 func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
@@ -6706,7 +7011,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 // SendVideoNoteWithContext is the same as Bot.SendVideoNote, but with a context.Context parameter
 func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["video_note"] = videoNote
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6778,7 +7083,7 @@ type SendVoiceOpts struct {
 // SendVoice (https://core.telegram.org/bots/api#sendvoice)
 //
 // Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username; required unless the message is sent as an ephemeral reply to a callback query
 //   - voice (type InputFileOrString): Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 //   - opts (type SendVoiceOpts): All optional parameters.
 func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
@@ -6788,7 +7093,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 // SendVoiceWithContext is the same as Bot.SendVoice, but with a context.Context parameter
 func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["voice"] = voice
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6814,6 +7119,95 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 	}
 
 	r, err := bot.RequestWithContext(ctx, "sendVoice", v, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var m *Message
+	return m, json.Unmarshal(r, &m)
+}
+
+// SendWidgetOpts is the set of optional fields for Bot.SendWidget and Bot.SendWidgetWithContext.
+type SendWidgetOpts struct {
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and private chats of bots with forum topic mode enabled only
+	MessageThreadId int64
+	// Width of the widget in logical pixels; omit if the widget must occupy the whole width of the message bubble. The width is clamped by the app to the range from 200 to the maximum width of the message bubble.
+	Width int64
+	// Height of the widget in logical pixels; omit if the height of the widget isn't fixed. The height is clamped by the app to the range 50-600.
+	Height int64
+	// Public data of the widget, 0-1024 bytes, which will be available wherever the widget is shown. If the widget is shared, then all messages with it will have the same public data.
+	PublicData string
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData string
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption string
+	// Mode for parsing entities in the widget caption. See formatting options for more details.
+	ParseMode string
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	CaptionEntities []MessageEntity
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia bool
+	// Pass True to allow the widget to send queries to the bot
+	AllowQueries bool
+	// Pass True to create a shared widget, which can be sent again using the method sendSharedWidget
+	IsShared bool
+	// Sends the message silently. Users will receive a notification with no sound.
+	DisableNotification bool
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance.
+	AllowPaidBroadcast bool
+	// Unique identifier of the message effect to be added to the message; for private chats only
+	MessageEffectId string
+	// Description of the message to reply to
+	ReplyParameters *ReplyParameters
+	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user.
+	ReplyMarkup ReplyMarkup
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendWidget (https://core.telegram.org/bots/api#sendwidget)
+//
+// Use this method to send a message with an HTML widget. Currently, in the production environment, widgets can be sent only to private chats, and sent widgets automatically have protected content and therefore can't be forwarded. On success, the sent Message is returned.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target supergroup in the format @username
+//   - html (type string): HTML code of the widget, 1-32768 bytes. The code must not exceed 4096 bytes when compressed by zlib with the maximum compression level.
+//   - opts (type SendWidgetOpts): All optional parameters.
+func (bot *Bot) SendWidget(chatId int64, html string, opts *SendWidgetOpts) (*Message, error) {
+	return bot.SendWidgetWithContext(context.Background(), chatId, html, opts)
+}
+
+// SendWidgetWithContext is the same as Bot.SendWidget, but with a context.Context parameter
+func (bot *Bot) SendWidgetWithContext(ctx context.Context, chatId int64, html string, opts *SendWidgetOpts) (*Message, error) {
+	v := map[string]any{}
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
+	v["html"] = html
+	if opts != nil {
+		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
+		addIfValueNotZero(v, "width", opts.Width, opts.Width == 0)
+		addIfValueNotZero(v, "height", opts.Height, opts.Height == 0)
+		addIfValueNotZero(v, "public_data", opts.PublicData, opts.PublicData == "")
+		addIfValueNotZero(v, "chat_data", opts.ChatData, opts.ChatData == "")
+		addIfValueNotZero(v, "caption", opts.Caption, opts.Caption == "")
+		addIfValueNotZero(v, "parse_mode", opts.ParseMode, opts.ParseMode == "")
+		addIfValueNotZero(v, "caption_entities", opts.CaptionEntities, opts.CaptionEntities == nil)
+		addIfValueNotZero(v, "show_caption_above_media", opts.ShowCaptionAboveMedia, opts.ShowCaptionAboveMedia == false)
+		addIfValueNotZero(v, "allow_queries", opts.AllowQueries, opts.AllowQueries == false)
+		addIfValueNotZero(v, "is_shared", opts.IsShared, opts.IsShared == false)
+		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
+		addIfValueNotZero(v, "protect_content", opts.ProtectContent, opts.ProtectContent == false)
+		addIfValueNotZero(v, "allow_paid_broadcast", opts.AllowPaidBroadcast, opts.AllowPaidBroadcast == false)
+		addIfValueNotZero(v, "message_effect_id", opts.MessageEffectId, opts.MessageEffectId == "")
+		addIfValueNotZero(v, "reply_parameters", opts.ReplyParameters, opts.ReplyParameters == nil)
+		addIfValueNotZero(v, "reply_markup", opts.ReplyMarkup, opts.ReplyMarkup == nil)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendWidget", v, reqOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -7040,7 +7434,7 @@ func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, cust
 // SetChatAdministratorCustomTitleWithContext is the same as Bot.SetChatAdministratorCustomTitle, but with a context.Context parameter
 func (bot *Bot) SetChatAdministratorCustomTitleWithContext(ctx context.Context, chatId int64, userId int64, customTitle string, opts *SetChatAdministratorCustomTitleOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	v["custom_title"] = customTitle
 
@@ -7078,7 +7472,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // SetChatDescriptionWithContext is the same as Bot.SetChatDescription, but with a context.Context parameter
 func (bot *Bot) SetChatDescriptionWithContext(ctx context.Context, chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "description", opts.Description, opts.Description == "")
 	}
@@ -7118,7 +7512,7 @@ func (bot *Bot) SetChatMemberTag(chatId int64, userId int64, opts *SetChatMember
 // SetChatMemberTagWithContext is the same as Bot.SetChatMemberTag, but with a context.Context parameter
 func (bot *Bot) SetChatMemberTagWithContext(ctx context.Context, chatId int64, userId int64, opts *SetChatMemberTagOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "tag", opts.Tag, opts.Tag == "")
@@ -7199,7 +7593,7 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, op
 // SetChatPermissionsWithContext is the same as Bot.SetChatPermissions, but with a context.Context parameter
 func (bot *Bot) SetChatPermissionsWithContext(ctx context.Context, chatId int64, permissions ChatPermissions, opts *SetChatPermissionsOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["permissions"] = permissions
 	if opts != nil {
 		addIfValueNotZero(v, "use_independent_chat_permissions", opts.UseIndependentChatPermissions, opts.UseIndependentChatPermissions == false)
@@ -7238,7 +7632,7 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 // SetChatPhotoWithContext is the same as Bot.SetChatPhoto, but with a context.Context parameter
 func (bot *Bot) SetChatPhotoWithContext(ctx context.Context, chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["photo"] = photo
 
 	var reqOpts *RequestOpts
@@ -7274,7 +7668,7 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string, opts *Set
 // SetChatStickerSetWithContext is the same as Bot.SetChatStickerSet, but with a context.Context parameter
 func (bot *Bot) SetChatStickerSetWithContext(ctx context.Context, chatId int64, stickerSetName string, opts *SetChatStickerSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sticker_set_name"] = stickerSetName
 
 	var reqOpts *RequestOpts
@@ -7310,7 +7704,7 @@ func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts)
 // SetChatTitleWithContext is the same as Bot.SetChatTitle, but with a context.Context parameter
 func (bot *Bot) SetChatTitleWithContext(ctx context.Context, chatId int64, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["title"] = title
 
 	var reqOpts *RequestOpts
@@ -7481,7 +7875,7 @@ type SetMessageReactionOpts struct {
 // SetMessageReaction (https://core.telegram.org/bots/api#setmessagereaction)
 //
 // Use this method to change the chosen reactions on a message. Service messages of some types can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - messageId (type int64): Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
 //   - opts (type SetMessageReactionOpts): All optional parameters.
 func (bot *Bot) SetMessageReaction(chatId int64, messageId int64, opts *SetMessageReactionOpts) (bool, error) {
@@ -7491,7 +7885,7 @@ func (bot *Bot) SetMessageReaction(chatId int64, messageId int64, opts *SetMessa
 // SetMessageReactionWithContext is the same as Bot.SetMessageReaction, but with a context.Context parameter
 func (bot *Bot) SetMessageReactionWithContext(ctx context.Context, chatId int64, messageId int64, opts *SetMessageReactionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "reaction", opts.Reaction, opts.Reaction == nil)
@@ -8115,7 +8509,7 @@ func (bot *Bot) SetWebhookWithContext(ctx context.Context, url string, opts *Set
 type StopMessageLiveLocationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was sent
 	BusinessConnectionId string
-	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username.
+	// Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username.
 	ChatId int64
 	// Required if inline_message_id is not specified. Identifier of the message with live location to stop.
 	MessageId int64
@@ -8181,7 +8575,7 @@ type StopPollOpts struct {
 // StopPoll (https://core.telegram.org/bots/api#stoppoll)
 //
 // Use this method to stop a poll which was sent by the bot. On success, the stopped Poll is returned.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username
 //   - messageId (type int64): Identifier of the original message with the poll
 //   - opts (type StopPollOpts): All optional parameters.
 func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
@@ -8191,7 +8585,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Po
 // StopPollWithContext is the same as Bot.StopPoll, but with a context.Context parameter
 func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -8312,7 +8706,7 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 // UnbanChatMemberWithContext is the same as Bot.UnbanChatMember, but with a context.Context parameter
 func (bot *Bot) UnbanChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "only_if_banned", opts.OnlyIfBanned, opts.OnlyIfBanned == false)
@@ -8351,7 +8745,7 @@ func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *Unba
 // UnbanChatSenderChatWithContext is the same as Bot.UnbanChatSenderChat, but with a context.Context parameter
 func (bot *Bot) UnbanChatSenderChatWithContext(ctx context.Context, chatId int64, senderChatId int64, opts *UnbanChatSenderChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sender_chat_id"] = senderChatId
 
 	var reqOpts *RequestOpts
@@ -8386,7 +8780,7 @@ func (bot *Bot) UnhideGeneralForumTopic(chatId int64, opts *UnhideGeneralForumTo
 // UnhideGeneralForumTopicWithContext is the same as Bot.UnhideGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) UnhideGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *UnhideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8420,7 +8814,7 @@ func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpt
 // UnpinAllChatMessagesWithContext is the same as Bot.UnpinAllChatMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllChatMessagesWithContext(ctx context.Context, chatId int64, opts *UnpinAllChatMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8455,7 +8849,7 @@ func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, 
 // UnpinAllForumTopicMessagesWithContext is the same as Bot.UnpinAllForumTopicMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllForumTopicMessagesWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -8490,7 +8884,7 @@ func (bot *Bot) UnpinAllGeneralForumTopicMessages(chatId int64, opts *UnpinAllGe
 // UnpinAllGeneralForumTopicMessagesWithContext is the same as Bot.UnpinAllGeneralForumTopicMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllGeneralForumTopicMessagesWithContext(ctx context.Context, chatId int64, opts *UnpinAllGeneralForumTopicMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8528,7 +8922,7 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 // UnpinChatMessageWithContext is the same as Bot.UnpinChatMessage, but with a context.Context parameter
 func (bot *Bot) UnpinChatMessageWithContext(ctx context.Context, chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_id", opts.MessageId, opts.MessageId == nil)
@@ -8634,6 +9028,10 @@ func (bot *Bot) UploadStickerFileWithContext(ctx context.Context, userId int64, 
 type VerifyChatOpts struct {
 	// Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 	CustomDescription string
+	// Mode for parsing entities in the custom description. See formatting options for more details. Only "text_link" entities are supported.
+	CustomDescriptionParseMode string
+	// A JSON-serialized list of special entities that appear in the custom description, which can be specified instead of custom_description_parse_mode. Only "text_link" entities are supported.
+	CustomDescriptionEntities []MessageEntity
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -8641,7 +9039,7 @@ type VerifyChatOpts struct {
 // VerifyChat (https://core.telegram.org/bots/api#verifychat)
 //
 // Verifies a chat on behalf of the organization which is represented by the bot. Returns True on success.
-//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup or channel in the format @username. Channel direct messages chats can't be verified.
+//   - chatId (type int64): Unique identifier for the target chat or username of the target bot, supergroup, or channel in the format @username. Channel direct messages chats can't be verified.
 //   - opts (type VerifyChatOpts): All optional parameters.
 func (bot *Bot) VerifyChat(chatId int64, opts *VerifyChatOpts) (bool, error) {
 	return bot.VerifyChatWithContext(context.Background(), chatId, opts)
@@ -8650,9 +9048,11 @@ func (bot *Bot) VerifyChat(chatId int64, opts *VerifyChatOpts) (bool, error) {
 // VerifyChatWithContext is the same as Bot.VerifyChat, but with a context.Context parameter
 func (bot *Bot) VerifyChatWithContext(ctx context.Context, chatId int64, opts *VerifyChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "custom_description", opts.CustomDescription, opts.CustomDescription == "")
+		addIfValueNotZero(v, "custom_description_parse_mode", opts.CustomDescriptionParseMode, opts.CustomDescriptionParseMode == "")
+		addIfValueNotZero(v, "custom_description_entities", opts.CustomDescriptionEntities, opts.CustomDescriptionEntities == nil)
 	}
 
 	var reqOpts *RequestOpts
@@ -8673,6 +9073,10 @@ func (bot *Bot) VerifyChatWithContext(ctx context.Context, chatId int64, opts *V
 type VerifyUserOpts struct {
 	// Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 	CustomDescription string
+	// Mode for parsing entities in the custom description. See formatting options for more details. Only "text_link" entities are supported.
+	CustomDescriptionParseMode string
+	// A JSON-serialized list of special entities that appear in the custom description, which can be specified instead of custom_description_parse_mode. Only "text_link" entities are supported.
+	CustomDescriptionEntities []MessageEntity
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
 	RequestOpts *RequestOpts
 }
@@ -8692,6 +9096,8 @@ func (bot *Bot) VerifyUserWithContext(ctx context.Context, userId int64, opts *V
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "custom_description", opts.CustomDescription, opts.CustomDescription == "")
+		addIfValueNotZero(v, "custom_description_parse_mode", opts.CustomDescriptionParseMode, opts.CustomDescriptionParseMode == "")
+		addIfValueNotZero(v, "custom_description_entities", opts.CustomDescriptionEntities, opts.CustomDescriptionEntities == nil)
 	}
 
 	var reqOpts *RequestOpts

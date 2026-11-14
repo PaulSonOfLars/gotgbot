@@ -334,6 +334,10 @@ const (
 )
 
 func generate(d APIDescription) error {
+	// Bot API 10.4 marks chat ids as optional.
+	// I disagree; they're required for most cases, EXCEPT ephemeral callbacks.
+	d = enforceChatIDs(d)
+
 	// TODO: Use golang templates instead of string builders
 	if err := generateTypes(d); err != nil {
 		return fmt.Errorf("failed to generate types: %w", err)
@@ -352,6 +356,24 @@ func generate(d APIDescription) error {
 	}
 
 	return nil
+}
+
+func enforceChatIDs(d APIDescription) APIDescription {
+	for _, m := range orderedMethods(d) {
+		if !strings.HasPrefix(m, "send") || m == "sendGift" {
+			// only apply chatId edits to sendX methods
+			continue
+		}
+
+		for idx, f := range d.Methods[m].Fields {
+			if f.Name == "chat_id" && !f.Required {
+				// enforce requirement
+				d.Methods[m].Fields[idx].Required = true
+			}
+		}
+	}
+
+	return d
 }
 
 func writeGenToFile(file strings.Builder, filename string) error {
