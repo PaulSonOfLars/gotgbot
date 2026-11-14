@@ -72,6 +72,9 @@ func (im InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) 
 		opts = &SendMessageOpts{}
 	}
 
+	if opts.ChatId == 0 {
+		opts.ChatId = im.Chat.Id
+	}
 	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
 		if opts.ReplyParameters == nil {
 			opts.ReplyParameters = &ReplyParameters{}
@@ -79,7 +82,7 @@ func (im InaccessibleMessage) Reply(b *Bot, text string, opts *SendMessageOpts) 
 		opts.ReplyParameters.MessageId = im.MessageId
 	}
 
-	return b.SendMessage(im.Chat.Id, text, opts)
+	return b.SendMessage(text, opts)
 }
 
 // ToMessage is a helper function to simplify dealing with telegram's message nonsense.
@@ -107,7 +110,11 @@ func (c ChatFullInfo) ToChat() Chat {
 
 // SendMessage is a helper function to easily call Bot.SendMessage in a chat.
 func (c Chat) SendMessage(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
-	return b.SendMessage(c.Id, text, opts)
+	if opts == nil {
+		opts = &SendMessageOpts{}
+	}
+	opts.ChatId = c.Id
+	return b.SendMessage(text, opts)
 }
 
 // Unban is a helper function to easily call Bot.UnbanChatMember in a chat.

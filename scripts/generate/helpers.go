@@ -305,7 +305,9 @@ func ({{.Receiver}} {{.TypeName}}) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnT
 }
 `
 
-var helperReplyFuncTmpl = template.Must(template.New("helperReplyFunc").Parse(helperReplyFunc))
+var helperReplyFuncTmpl = template.Must(template.New("helperReplyFunc").Funcs(
+	map[string]any{"contains": strings.Contains},
+).Parse(helperReplyFunc))
 
 type helperReplyFuncData struct {
 	ReceiverName string
@@ -324,7 +326,16 @@ func ({{.ReceiverName}} Message) {{.HelperName}}({{.FuncDefArgs}}) ({{.ReturnTyp
 		opts = &{{.OptsName}}{}
 	}
 
+	{{ if not (contains .FuncCallArgs ".Chat.Id")}}
+	if opts.ChatId == 0 {
+		opts.ChatId = {{.ReceiverName}}.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo({{.ReceiverName}})
+	} else if opts.ChatId == {{.ReceiverName}}.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo({{.ReceiverName}})
+	}
+	{{ else }}
 	opts.ReplyParameters = opts.ReplyParameters.replyTo({{.ReceiverName}})
+	{{ end }}
 
 	return b.{{.MethodName}}({{.FuncCallArgs}})
 }

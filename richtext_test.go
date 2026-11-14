@@ -373,7 +373,7 @@ func TestRichBlockParsing(t *testing.T) {
 
 				time.Sleep(time.Second) // sleep one second to avoid rate limits
 
-				m, err := b.SendRichMessage(chatId, InputRichMessage{
+				m, err := b.SendRichMessage(InputRichMessage{
 					Html: tt.wantHTML,
 					Media: func() []InputRichMessageMedia {
 						var ms []InputRichMessageMedia
@@ -382,7 +382,7 @@ func TestRichBlockParsing(t *testing.T) {
 						}
 						return ms
 					}(),
-				}, nil)
+				}, &SendRichMessageOpts{ChatId: chatId})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -1222,10 +1222,10 @@ func TestRichMessageSending(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			time.Sleep(time.Second)
-			m, err := b.SendRichMessage(chatId, InputRichMessage{
+			m, err := b.SendRichMessage(InputRichMessage{
 				Html:     tt.inputHTML,
 				Markdown: tt.inputMarkdown,
-			}, nil)
+			}, &SendRichMessageOpts{ChatId: chatId})
 			if err != nil {
 				t.Fatal(err)
 				return
