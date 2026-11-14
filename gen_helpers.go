@@ -632,7 +632,12 @@ func (m Message) ReplyAnimation(b *Bot, animation InputFileOrString, opts *SendA
 		opts = &SendAnimationOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendAnimation(animation, opts)
 }
@@ -643,7 +648,12 @@ func (m Message) ReplyAudio(b *Bot, audio InputFileOrString, opts *SendAudioOpts
 		opts = &SendAudioOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendAudio(audio, opts)
 }
@@ -665,7 +675,12 @@ func (m Message) ReplyContact(b *Bot, phoneNumber string, firstName string, opts
 		opts = &SendContactOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendContact(phoneNumber, firstName, opts)
 }
@@ -687,7 +702,12 @@ func (m Message) ReplyDocument(b *Bot, document InputFileOrString, opts *SendDoc
 		opts = &SendDocumentOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendDocument(document, opts)
 }
@@ -720,7 +740,12 @@ func (m Message) ReplyLivePhoto(b *Bot, livePhoto InputFileOrString, photo Input
 		opts = &SendLivePhotoOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendLivePhoto(livePhoto, photo, opts)
 }
@@ -731,7 +756,12 @@ func (m Message) ReplyLocation(b *Bot, latitude float64, longitude float64, opts
 		opts = &SendLocationOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendLocation(latitude, longitude, opts)
 }
@@ -753,7 +783,12 @@ func (m Message) ReplyMessage(b *Bot, text string, opts *SendMessageOpts) (*Mess
 		opts = &SendMessageOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendMessage(text, opts)
 }
@@ -775,7 +810,12 @@ func (m Message) ReplyPhoto(b *Bot, photo InputFileOrString, opts *SendPhotoOpts
 		opts = &SendPhotoOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendPhoto(photo, opts)
 }
@@ -797,7 +837,12 @@ func (m Message) ReplyRichMessage(b *Bot, richMessage InputRichMessage, opts *Se
 		opts = &SendRichMessageOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendRichMessage(richMessage, opts)
 }
@@ -819,7 +864,12 @@ func (m Message) ReplySticker(b *Bot, sticker InputFileOrString, opts *SendStick
 		opts = &SendStickerOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendSticker(sticker, opts)
 }
@@ -830,7 +880,12 @@ func (m Message) ReplyVenue(b *Bot, latitude float64, longitude float64, title s
 		opts = &SendVenueOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendVenue(latitude, longitude, title, address, opts)
 }
@@ -841,7 +896,12 @@ func (m Message) ReplyVideo(b *Bot, video InputFileOrString, opts *SendVideoOpts
 		opts = &SendVideoOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendVideo(video, opts)
 }
@@ -852,7 +912,12 @@ func (m Message) ReplyVideoNote(b *Bot, videoNote InputFileOrString, opts *SendV
 		opts = &SendVideoNoteOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendVideoNote(videoNote, opts)
 }
@@ -863,7 +928,12 @@ func (m Message) ReplyVoice(b *Bot, voice InputFileOrString, opts *SendVoiceOpts
 		opts = &SendVoiceOpts{}
 	}
 
-	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	if opts.ChatId == 0 {
+		opts.ChatId = m.Chat.Id
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	} else if opts.ChatId == m.Chat.Id {
+		opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
+	}
 
 	return b.SendVoice(voice, opts)
 }
