@@ -396,7 +396,7 @@ func (bot *Bot) ApproveChatJoinRequest(chatId int64, userId int64, opts *Approve
 // ApproveChatJoinRequestWithContext is the same as Bot.ApproveChatJoinRequest, but with a context.Context parameter
 func (bot *Bot) ApproveChatJoinRequestWithContext(ctx context.Context, chatId int64, userId int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -434,7 +434,7 @@ func (bot *Bot) ApproveSuggestedPost(chatId int64, messageId int64, opts *Approv
 // ApproveSuggestedPostWithContext is the same as Bot.ApproveSuggestedPost, but with a context.Context parameter
 func (bot *Bot) ApproveSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *ApproveSuggestedPostOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "send_date", opts.SendDate, opts.SendDate == 0)
@@ -477,7 +477,7 @@ func (bot *Bot) BanChatMember(chatId int64, userId int64, opts *BanChatMemberOpt
 // BanChatMemberWithContext is the same as Bot.BanChatMember, but with a context.Context parameter
 func (bot *Bot) BanChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *BanChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "until_date", opts.UntilDate, opts.UntilDate == 0)
@@ -517,7 +517,7 @@ func (bot *Bot) BanChatSenderChat(chatId int64, senderChatId int64, opts *BanCha
 // BanChatSenderChatWithContext is the same as Bot.BanChatSenderChat, but with a context.Context parameter
 func (bot *Bot) BanChatSenderChatWithContext(ctx context.Context, chatId int64, senderChatId int64, opts *BanChatSenderChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sender_chat_id"] = senderChatId
 
 	var reqOpts *RequestOpts
@@ -585,7 +585,7 @@ func (bot *Bot) CloseForumTopic(chatId int64, messageThreadId int64, opts *Close
 // CloseForumTopicWithContext is the same as Bot.CloseForumTopic, but with a context.Context parameter
 func (bot *Bot) CloseForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *CloseForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -620,7 +620,7 @@ func (bot *Bot) CloseGeneralForumTopic(chatId int64, opts *CloseGeneralForumTopi
 // CloseGeneralForumTopicWithContext is the same as Bot.CloseGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) CloseGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *CloseGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -720,7 +720,7 @@ func (bot *Bot) CopyMessage(chatId int64, fromChatId int64, messageId int64, opt
 // CopyMessageWithContext is the same as Bot.CopyMessage, but with a context.Context parameter
 func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromChatId int64, messageId int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
@@ -784,7 +784,7 @@ func (bot *Bot) CopyMessages(chatId int64, fromChatId int64, messageIds []int64,
 // CopyMessagesWithContext is the same as Bot.CopyMessages, but with a context.Context parameter
 func (bot *Bot) CopyMessagesWithContext(ctx context.Context, chatId int64, fromChatId int64, messageIds []int64, opts *CopyMessagesOpts) ([]MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_ids"] = messageIds
 	if opts != nil {
@@ -835,7 +835,7 @@ func (bot *Bot) CreateChatInviteLink(chatId int64, opts *CreateChatInviteLinkOpt
 // CreateChatInviteLinkWithContext is the same as Bot.CreateChatInviteLink, but with a context.Context parameter
 func (bot *Bot) CreateChatInviteLinkWithContext(ctx context.Context, chatId int64, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
 		addIfValueNotZero(v, "expire_date", opts.ExpireDate, opts.ExpireDate == 0)
@@ -879,7 +879,7 @@ func (bot *Bot) CreateChatSubscriptionInviteLink(chatId int64, subscriptionPerio
 // CreateChatSubscriptionInviteLinkWithContext is the same as Bot.CreateChatSubscriptionInviteLink, but with a context.Context parameter
 func (bot *Bot) CreateChatSubscriptionInviteLinkWithContext(ctx context.Context, chatId int64, subscriptionPeriod int64, subscriptionPrice int64, opts *CreateChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["subscription_period"] = subscriptionPeriod
 	v["subscription_price"] = subscriptionPrice
 	if opts != nil {
@@ -923,7 +923,7 @@ func (bot *Bot) CreateForumTopic(chatId int64, name string, opts *CreateForumTop
 // CreateForumTopicWithContext is the same as Bot.CreateForumTopic, but with a context.Context parameter
 func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, name string, opts *CreateForumTopicOpts) (*ForumTopic, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["name"] = name
 	if opts != nil {
 		addIfValueNotZero(v, "icon_color", opts.IconColor, opts.IconColor == 0)
@@ -1106,7 +1106,7 @@ func (bot *Bot) DeclineChatJoinRequest(chatId int64, userId int64, opts *Decline
 // DeclineChatJoinRequestWithContext is the same as Bot.DeclineChatJoinRequest, but with a context.Context parameter
 func (bot *Bot) DeclineChatJoinRequestWithContext(ctx context.Context, chatId int64, userId int64, opts *DeclineChatJoinRequestOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -1144,7 +1144,7 @@ func (bot *Bot) DeclineSuggestedPost(chatId int64, messageId int64, opts *Declin
 // DeclineSuggestedPostWithContext is the same as Bot.DeclineSuggestedPost, but with a context.Context parameter
 func (bot *Bot) DeclineSuggestedPostWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeclineSuggestedPostOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "comment", opts.Comment, opts.Comment == "")
@@ -1186,7 +1186,7 @@ func (bot *Bot) DeleteAllMessageReactions(chatId int64, opts *DeleteAllMessageRe
 // DeleteAllMessageReactionsWithContext is the same as Bot.DeleteAllMessageReactions, but with a context.Context parameter
 func (bot *Bot) DeleteAllMessageReactionsWithContext(ctx context.Context, chatId int64, opts *DeleteAllMessageReactionsOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "user_id", opts.UserId, opts.UserId == 0)
 		addIfValueNotZero(v, "actor_chat_id", opts.ActorChatId, opts.ActorChatId == 0)
@@ -1296,7 +1296,7 @@ func (bot *Bot) DeleteChatPhoto(chatId int64, opts *DeleteChatPhotoOpts) (bool, 
 // DeleteChatPhotoWithContext is the same as Bot.DeleteChatPhoto, but with a context.Context parameter
 func (bot *Bot) DeleteChatPhotoWithContext(ctx context.Context, chatId int64, opts *DeleteChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1330,7 +1330,7 @@ func (bot *Bot) DeleteChatStickerSet(chatId int64, opts *DeleteChatStickerSetOpt
 // DeleteChatStickerSetWithContext is the same as Bot.DeleteChatStickerSet, but with a context.Context parameter
 func (bot *Bot) DeleteChatStickerSetWithContext(ctx context.Context, chatId int64, opts *DeleteChatStickerSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -1366,7 +1366,7 @@ func (bot *Bot) DeleteEphemeralMessage(chatId int64, receiverUserId int64, ephem
 // DeleteEphemeralMessageWithContext is the same as Bot.DeleteEphemeralMessage, but with a context.Context parameter
 func (bot *Bot) DeleteEphemeralMessageWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *DeleteEphemeralMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 
@@ -1403,7 +1403,7 @@ func (bot *Bot) DeleteForumTopic(chatId int64, messageThreadId int64, opts *Dele
 // DeleteForumTopicWithContext is the same as Bot.DeleteForumTopic, but with a context.Context parameter
 func (bot *Bot) DeleteForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *DeleteForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -1450,7 +1450,7 @@ func (bot *Bot) DeleteMessage(chatId int64, messageId int64, opts *DeleteMessage
 // DeleteMessageWithContext is the same as Bot.DeleteMessage, but with a context.Context parameter
 func (bot *Bot) DeleteMessageWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeleteMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 
 	var reqOpts *RequestOpts
@@ -1490,7 +1490,7 @@ func (bot *Bot) DeleteMessageReaction(chatId int64, messageId int64, opts *Delet
 // DeleteMessageReactionWithContext is the same as Bot.DeleteMessageReaction, but with a context.Context parameter
 func (bot *Bot) DeleteMessageReactionWithContext(ctx context.Context, chatId int64, messageId int64, opts *DeleteMessageReactionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "user_id", opts.UserId, opts.UserId == 0)
@@ -1530,7 +1530,7 @@ func (bot *Bot) DeleteMessages(chatId int64, messageIds []int64, opts *DeleteMes
 // DeleteMessagesWithContext is the same as Bot.DeleteMessages, but with a context.Context parameter
 func (bot *Bot) DeleteMessagesWithContext(ctx context.Context, chatId int64, messageIds []int64, opts *DeleteMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_ids"] = messageIds
 
 	var reqOpts *RequestOpts
@@ -1755,7 +1755,7 @@ func (bot *Bot) EditChatInviteLink(chatId int64, inviteLink string, opts *EditCh
 // EditChatInviteLinkWithContext is the same as Bot.EditChatInviteLink, but with a context.Context parameter
 func (bot *Bot) EditChatInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -1799,7 +1799,7 @@ func (bot *Bot) EditChatSubscriptionInviteLink(chatId int64, inviteLink string, 
 // EditChatSubscriptionInviteLinkWithContext is the same as Bot.EditChatSubscriptionInviteLink, but with a context.Context parameter
 func (bot *Bot) EditChatSubscriptionInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *EditChatSubscriptionInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -1849,7 +1849,7 @@ func (bot *Bot) EditEphemeralMessageCaption(chatId int64, receiverUserId int64, 
 // EditEphemeralMessageCaptionWithContext is the same as Bot.EditEphemeralMessageCaption, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageCaptionWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageCaptionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -1897,7 +1897,7 @@ func (bot *Bot) EditEphemeralMessageMedia(chatId int64, receiverUserId int64, ep
 // EditEphemeralMessageMediaWithContext is the same as Bot.EditEphemeralMessageMedia, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageMediaWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, media InputMedia, opts *EditEphemeralMessageMediaOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	v["media"] = media
@@ -1941,7 +1941,7 @@ func (bot *Bot) EditEphemeralMessageReplyMarkup(chatId int64, receiverUserId int
 // EditEphemeralMessageReplyMarkupWithContext is the same as Bot.EditEphemeralMessageReplyMarkup, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageReplyMarkupWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageReplyMarkupOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -1994,7 +1994,7 @@ func (bot *Bot) EditEphemeralMessageText(chatId int64, receiverUserId int64, eph
 // EditEphemeralMessageTextWithContext is the same as Bot.EditEphemeralMessageText, but with a context.Context parameter
 func (bot *Bot) EditEphemeralMessageTextWithContext(ctx context.Context, chatId int64, receiverUserId int64, ephemeralMessageId int64, opts *EditEphemeralMessageTextOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["receiver_user_id"] = receiverUserId
 	v["ephemeral_message_id"] = ephemeralMessageId
 	if opts != nil {
@@ -2043,7 +2043,7 @@ func (bot *Bot) EditForumTopic(chatId int64, messageThreadId int64, opts *EditFo
 // EditForumTopicWithContext is the same as Bot.EditForumTopic, but with a context.Context parameter
 func (bot *Bot) EditForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *EditForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 	if opts != nil {
 		addIfValueNotZero(v, "name", opts.Name, opts.Name == "")
@@ -2083,7 +2083,7 @@ func (bot *Bot) EditGeneralForumTopic(chatId int64, name string, opts *EditGener
 // EditGeneralForumTopicWithContext is the same as Bot.EditGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) EditGeneralForumTopicWithContext(ctx context.Context, chatId int64, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["name"] = name
 
 	var reqOpts *RequestOpts
@@ -2193,7 +2193,7 @@ func (bot *Bot) EditMessageChecklist(businessConnectionId string, chatId int64, 
 func (bot *Bot) EditMessageChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, checklist InputChecklist, opts *EditMessageChecklistOpts) (*Message, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	v["checklist"] = checklist
 	if opts != nil {
@@ -2673,7 +2673,7 @@ func (bot *Bot) ExportChatInviteLink(chatId int64, opts *ExportChatInviteLinkOpt
 // ExportChatInviteLinkWithContext is the same as Bot.ExportChatInviteLink, but with a context.Context parameter
 func (bot *Bot) ExportChatInviteLinkWithContext(ctx context.Context, chatId int64, opts *ExportChatInviteLinkOpts) (string, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -2723,7 +2723,7 @@ func (bot *Bot) ForwardMessage(chatId int64, fromChatId int64, messageId int64, 
 // ForwardMessageWithContext is the same as Bot.ForwardMessage, but with a context.Context parameter
 func (bot *Bot) ForwardMessageWithContext(ctx context.Context, chatId int64, fromChatId int64, messageId int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_id"] = messageId
 	if opts != nil {
@@ -2778,7 +2778,7 @@ func (bot *Bot) ForwardMessages(chatId int64, fromChatId int64, messageIds []int
 // ForwardMessagesWithContext is the same as Bot.ForwardMessages, but with a context.Context parameter
 func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fromChatId int64, messageIds []int64, opts *ForwardMessagesOpts) ([]MessageId, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["from_chat_id"] = fromChatId
 	v["message_ids"] = messageIds
 	if opts != nil {
@@ -2986,7 +2986,7 @@ func (bot *Bot) GetChat(chatId int64, opts *GetChatOpts) (*ChatFullInfo, error) 
 // GetChatWithContext is the same as Bot.GetChat, but with a context.Context parameter
 func (bot *Bot) GetChatWithContext(ctx context.Context, chatId int64, opts *GetChatOpts) (*ChatFullInfo, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -3022,7 +3022,7 @@ func (bot *Bot) GetChatAdministrators(chatId int64, opts *GetChatAdministratorsO
 // GetChatAdministratorsWithContext is the same as Bot.GetChatAdministrators, but with a context.Context parameter
 func (bot *Bot) GetChatAdministratorsWithContext(ctx context.Context, chatId int64, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "return_bots", opts.ReturnBots, opts.ReturnBots == false)
 	}
@@ -3078,7 +3078,7 @@ func (bot *Bot) GetChatGifts(chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts,
 // GetChatGiftsWithContext is the same as Bot.GetChatGifts, but with a context.Context parameter
 func (bot *Bot) GetChatGiftsWithContext(ctx context.Context, chatId int64, opts *GetChatGiftsOpts) (*OwnedGifts, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "exclude_unsaved", opts.ExcludeUnsaved, opts.ExcludeUnsaved == false)
 		addIfValueNotZero(v, "exclude_saved", opts.ExcludeSaved, opts.ExcludeSaved == false)
@@ -3125,7 +3125,7 @@ func (bot *Bot) GetChatMember(chatId int64, userId int64, opts *GetChatMemberOpt
 // GetChatMemberWithContext is the same as Bot.GetChatMember, but with a context.Context parameter
 func (bot *Bot) GetChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -3159,7 +3159,7 @@ func (bot *Bot) GetChatMemberCount(chatId int64, opts *GetChatMemberCountOpts) (
 // GetChatMemberCountWithContext is the same as Bot.GetChatMemberCount, but with a context.Context parameter
 func (bot *Bot) GetChatMemberCountWithContext(ctx context.Context, chatId int64, opts *GetChatMemberCountOpts) (int64, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -3882,7 +3882,7 @@ func (bot *Bot) GetUserChatBoosts(chatId int64, userId int64, opts *GetUserChatB
 // GetUserChatBoostsWithContext is the same as Bot.GetUserChatBoosts, but with a context.Context parameter
 func (bot *Bot) GetUserChatBoostsWithContext(ctx context.Context, chatId int64, userId int64, opts *GetUserChatBoostsOpts) (*UserChatBoosts, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 
 	var reqOpts *RequestOpts
@@ -4178,7 +4178,7 @@ func (bot *Bot) HideGeneralForumTopic(chatId int64, opts *HideGeneralForumTopicO
 // HideGeneralForumTopicWithContext is the same as Bot.HideGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) HideGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *HideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4212,7 +4212,7 @@ func (bot *Bot) LeaveChat(chatId int64, opts *LeaveChatOpts) (bool, error) {
 // LeaveChatWithContext is the same as Bot.LeaveChat, but with a context.Context parameter
 func (bot *Bot) LeaveChatWithContext(ctx context.Context, chatId int64, opts *LeaveChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4283,7 +4283,7 @@ func (bot *Bot) PinChatMessage(chatId int64, messageId int64, opts *PinChatMessa
 // PinChatMessageWithContext is the same as Bot.PinChatMessage, but with a context.Context parameter
 func (bot *Bot) PinChatMessageWithContext(ctx context.Context, chatId int64, messageId int64, opts *PinChatMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -4417,7 +4417,7 @@ func (bot *Bot) PromoteChatMember(chatId int64, userId int64, opts *PromoteChatM
 // PromoteChatMemberWithContext is the same as Bot.PromoteChatMember, but with a context.Context parameter
 func (bot *Bot) PromoteChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "is_anonymous", opts.IsAnonymous, opts.IsAnonymous == false)
@@ -4475,7 +4475,7 @@ func (bot *Bot) ReadBusinessMessage(businessConnectionId string, chatId int64, m
 func (bot *Bot) ReadBusinessMessageWithContext(ctx context.Context, businessConnectionId string, chatId int64, messageId int64, opts *ReadBusinessMessageOpts) (bool, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 
 	var reqOpts *RequestOpts
@@ -4585,7 +4585,7 @@ func (bot *Bot) RemoveChatVerification(chatId int64, opts *RemoveChatVerificatio
 // RemoveChatVerificationWithContext is the same as Bot.RemoveChatVerification, but with a context.Context parameter
 func (bot *Bot) RemoveChatVerificationWithContext(ctx context.Context, chatId int64, opts *RemoveChatVerificationOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4686,7 +4686,7 @@ func (bot *Bot) ReopenForumTopic(chatId int64, messageThreadId int64, opts *Reop
 // ReopenForumTopicWithContext is the same as Bot.ReopenForumTopic, but with a context.Context parameter
 func (bot *Bot) ReopenForumTopicWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *ReopenForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -4721,7 +4721,7 @@ func (bot *Bot) ReopenGeneralForumTopic(chatId int64, opts *ReopenGeneralForumTo
 // ReopenGeneralForumTopicWithContext is the same as Bot.ReopenGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) ReopenGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *ReopenGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -4883,7 +4883,7 @@ func (bot *Bot) RestrictChatMember(chatId int64, userId int64, permissions ChatP
 // RestrictChatMemberWithContext is the same as Bot.RestrictChatMember, but with a context.Context parameter
 func (bot *Bot) RestrictChatMemberWithContext(ctx context.Context, chatId int64, userId int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	v["permissions"] = permissions
 	if opts != nil {
@@ -4924,7 +4924,7 @@ func (bot *Bot) RevokeChatInviteLink(chatId int64, inviteLink string, opts *Revo
 // RevokeChatInviteLinkWithContext is the same as Bot.RevokeChatInviteLink, but with a context.Context parameter
 func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int64, inviteLink string, opts *RevokeChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["invite_link"] = inviteLink
 
 	var reqOpts *RequestOpts
@@ -5086,7 +5086,7 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 // SendAnimationWithContext is the same as Bot.SendAnimation, but with a context.Context parameter
 func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["animation"] = animation
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5181,7 +5181,7 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 // SendAudioWithContext is the same as Bot.SendAudio, but with a context.Context parameter
 func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["audio"] = audio
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5242,7 +5242,7 @@ func (bot *Bot) SendChatAction(chatId int64, action string, opts *SendChatAction
 // SendChatActionWithContext is the same as Bot.SendChatAction, but with a context.Context parameter
 func (bot *Bot) SendChatActionWithContext(ctx context.Context, chatId int64, action string, opts *SendChatActionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["action"] = action
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5330,7 +5330,7 @@ func (bot *Bot) SendChecklist(businessConnectionId string, chatId int64, checkli
 func (bot *Bot) SendChecklistWithContext(ctx context.Context, businessConnectionId string, chatId int64, checklist InputChecklist, opts *SendChecklistOpts) (*Message, error) {
 	v := map[string]any{}
 	v["business_connection_id"] = businessConnectionId
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["checklist"] = checklist
 	if opts != nil {
 		addIfValueNotZero(v, "disable_notification", opts.DisableNotification, opts.DisableNotification == false)
@@ -5400,7 +5400,7 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 // SendContactWithContext is the same as Bot.SendContact, but with a context.Context parameter
 func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
 	if opts != nil {
@@ -5473,7 +5473,7 @@ func (bot *Bot) SendDice(chatId int64, opts *SendDiceOpts) (*Message, error) {
 // SendDiceWithContext is the same as Bot.SendDice, but with a context.Context parameter
 func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *SendDiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -5553,7 +5553,7 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 // SendDocumentWithContext is the same as Bot.SendDocument, but with a context.Context parameter
 func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["document"] = document
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5623,7 +5623,7 @@ func (bot *Bot) SendGame(chatId int64, gameShortName string, opts *SendGameOpts)
 // SendGameWithContext is the same as Bot.SendGame, but with a context.Context parameter
 func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShortName string, opts *SendGameOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["game_short_name"] = gameShortName
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -5777,7 +5777,7 @@ func (bot *Bot) SendInvoice(chatId int64, title string, description string, payl
 // SendInvoiceWithContext is the same as Bot.SendInvoice, but with a context.Context parameter
 func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title string, description string, payload string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["title"] = title
 	v["description"] = description
 	v["payload"] = payload
@@ -5877,7 +5877,7 @@ func (bot *Bot) SendLivePhoto(chatId int64, livePhoto InputFileOrString, photo I
 // SendLivePhotoWithContext is the same as Bot.SendLivePhoto, but with a context.Context parameter
 func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["live_photo"] = livePhoto
 	v["photo"] = photo
 	if opts != nil {
@@ -5963,7 +5963,7 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 // SendLocationWithContext is the same as Bot.SendLocation, but with a context.Context parameter
 func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	if opts != nil {
@@ -6033,7 +6033,7 @@ func (bot *Bot) SendMediaGroup(chatId int64, media InputMedias, opts *SendMediaG
 // SendMediaGroupWithContext is the same as Bot.SendMediaGroup, but with a context.Context parameter
 func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, media InputMedias, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["media"] = media
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6107,7 +6107,7 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 // SendMessageWithContext is the same as Bot.SendMessage, but with a context.Context parameter
 func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["text"] = text
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6171,7 +6171,7 @@ func (bot *Bot) SendMessageDraft(chatId int64, draftId int64, opts *SendMessageD
 // SendMessageDraftWithContext is the same as Bot.SendMessageDraft, but with a context.Context parameter
 func (bot *Bot) SendMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, opts *SendMessageDraftOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["draft_id"] = draftId
 	if opts != nil {
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -6244,7 +6244,7 @@ func (bot *Bot) SendPaidMedia(chatId int64, starCount int64, media InputPaidMedi
 // SendPaidMediaWithContext is the same as Bot.SendPaidMedia, but with a context.Context parameter
 func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, starCount int64, media InputPaidMedias, opts *SendPaidMediaOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["star_count"] = starCount
 	v["media"] = media
 	if opts != nil {
@@ -6329,7 +6329,7 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 // SendPhotoWithContext is the same as Bot.SendPhoto, but with a context.Context parameter
 func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["photo"] = photo
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6446,7 +6446,7 @@ func (bot *Bot) SendPoll(chatId int64, question string, options []InputPollOptio
 // SendPollWithContext is the same as Bot.SendPoll, but with a context.Context parameter
 func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question string, options []InputPollOption, opts *SendPollOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["question"] = question
 	v["options"] = options
 	if opts != nil {
@@ -6541,7 +6541,7 @@ func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts
 // SendRichMessageWithContext is the same as Bot.SendRichMessage, but with a context.Context parameter
 func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["rich_message"] = richMessage
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6597,7 +6597,7 @@ func (bot *Bot) SendRichMessageDraft(chatId int64, draftId int64, richMessage In
 // SendRichMessageDraftWithContext is the same as Bot.SendRichMessageDraft, but with a context.Context parameter
 func (bot *Bot) SendRichMessageDraftWithContext(ctx context.Context, chatId int64, draftId int64, richMessage InputRichMessage, opts *SendRichMessageDraftOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["draft_id"] = draftId
 	v["rich_message"] = richMessage
 	if opts != nil {
@@ -6663,7 +6663,7 @@ func (bot *Bot) SendSharedWidget(chatId int64, widgetId string, opts *SendShared
 // SendSharedWidgetWithContext is the same as Bot.SendSharedWidget, but with a context.Context parameter
 func (bot *Bot) SendSharedWidgetWithContext(ctx context.Context, chatId int64, widgetId string, opts *SendSharedWidgetOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["widget_id"] = widgetId
 	if opts != nil {
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -6737,7 +6737,7 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 // SendStickerWithContext is the same as Bot.SendSticker, but with a context.Context parameter
 func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sticker"] = sticker
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -6820,7 +6820,7 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 // SendVenueWithContext is the same as Bot.SendVenue, but with a context.Context parameter
 func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	v["title"] = title
@@ -6922,7 +6922,7 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 // SendVideoWithContext is the same as Bot.SendVideo, but with a context.Context parameter
 func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["video"] = video
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -7011,7 +7011,7 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 // SendVideoNoteWithContext is the same as Bot.SendVideoNote, but with a context.Context parameter
 func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["video_note"] = videoNote
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -7093,7 +7093,7 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 // SendVoiceWithContext is the same as Bot.SendVoice, but with a context.Context parameter
 func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["voice"] = voice
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -7180,7 +7180,7 @@ func (bot *Bot) SendWidget(chatId int64, html string, opts *SendWidgetOpts) (*Me
 // SendWidgetWithContext is the same as Bot.SendWidget, but with a context.Context parameter
 func (bot *Bot) SendWidgetWithContext(ctx context.Context, chatId int64, html string, opts *SendWidgetOpts) (*Message, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["html"] = html
 	if opts != nil {
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
@@ -7434,7 +7434,7 @@ func (bot *Bot) SetChatAdministratorCustomTitle(chatId int64, userId int64, cust
 // SetChatAdministratorCustomTitleWithContext is the same as Bot.SetChatAdministratorCustomTitle, but with a context.Context parameter
 func (bot *Bot) SetChatAdministratorCustomTitleWithContext(ctx context.Context, chatId int64, userId int64, customTitle string, opts *SetChatAdministratorCustomTitleOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	v["custom_title"] = customTitle
 
@@ -7472,7 +7472,7 @@ func (bot *Bot) SetChatDescription(chatId int64, opts *SetChatDescriptionOpts) (
 // SetChatDescriptionWithContext is the same as Bot.SetChatDescription, but with a context.Context parameter
 func (bot *Bot) SetChatDescriptionWithContext(ctx context.Context, chatId int64, opts *SetChatDescriptionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "description", opts.Description, opts.Description == "")
 	}
@@ -7512,7 +7512,7 @@ func (bot *Bot) SetChatMemberTag(chatId int64, userId int64, opts *SetChatMember
 // SetChatMemberTagWithContext is the same as Bot.SetChatMemberTag, but with a context.Context parameter
 func (bot *Bot) SetChatMemberTagWithContext(ctx context.Context, chatId int64, userId int64, opts *SetChatMemberTagOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "tag", opts.Tag, opts.Tag == "")
@@ -7593,7 +7593,7 @@ func (bot *Bot) SetChatPermissions(chatId int64, permissions ChatPermissions, op
 // SetChatPermissionsWithContext is the same as Bot.SetChatPermissions, but with a context.Context parameter
 func (bot *Bot) SetChatPermissionsWithContext(ctx context.Context, chatId int64, permissions ChatPermissions, opts *SetChatPermissionsOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["permissions"] = permissions
 	if opts != nil {
 		addIfValueNotZero(v, "use_independent_chat_permissions", opts.UseIndependentChatPermissions, opts.UseIndependentChatPermissions == false)
@@ -7632,7 +7632,7 @@ func (bot *Bot) SetChatPhoto(chatId int64, photo InputFile, opts *SetChatPhotoOp
 // SetChatPhotoWithContext is the same as Bot.SetChatPhoto, but with a context.Context parameter
 func (bot *Bot) SetChatPhotoWithContext(ctx context.Context, chatId int64, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["photo"] = photo
 
 	var reqOpts *RequestOpts
@@ -7668,7 +7668,7 @@ func (bot *Bot) SetChatStickerSet(chatId int64, stickerSetName string, opts *Set
 // SetChatStickerSetWithContext is the same as Bot.SetChatStickerSet, but with a context.Context parameter
 func (bot *Bot) SetChatStickerSetWithContext(ctx context.Context, chatId int64, stickerSetName string, opts *SetChatStickerSetOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sticker_set_name"] = stickerSetName
 
 	var reqOpts *RequestOpts
@@ -7704,7 +7704,7 @@ func (bot *Bot) SetChatTitle(chatId int64, title string, opts *SetChatTitleOpts)
 // SetChatTitleWithContext is the same as Bot.SetChatTitle, but with a context.Context parameter
 func (bot *Bot) SetChatTitleWithContext(ctx context.Context, chatId int64, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["title"] = title
 
 	var reqOpts *RequestOpts
@@ -7885,7 +7885,7 @@ func (bot *Bot) SetMessageReaction(chatId int64, messageId int64, opts *SetMessa
 // SetMessageReactionWithContext is the same as Bot.SetMessageReaction, but with a context.Context parameter
 func (bot *Bot) SetMessageReactionWithContext(ctx context.Context, chatId int64, messageId int64, opts *SetMessageReactionOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "reaction", opts.Reaction, opts.Reaction == nil)
@@ -8585,7 +8585,7 @@ func (bot *Bot) StopPoll(chatId int64, messageId int64, opts *StopPollOpts) (*Po
 // StopPollWithContext is the same as Bot.StopPoll, but with a context.Context parameter
 func (bot *Bot) StopPollWithContext(ctx context.Context, chatId int64, messageId int64, opts *StopPollOpts) (*Poll, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_id"] = messageId
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
@@ -8706,7 +8706,7 @@ func (bot *Bot) UnbanChatMember(chatId int64, userId int64, opts *UnbanChatMembe
 // UnbanChatMemberWithContext is the same as Bot.UnbanChatMember, but with a context.Context parameter
 func (bot *Bot) UnbanChatMemberWithContext(ctx context.Context, chatId int64, userId int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["user_id"] = userId
 	if opts != nil {
 		addIfValueNotZero(v, "only_if_banned", opts.OnlyIfBanned, opts.OnlyIfBanned == false)
@@ -8745,7 +8745,7 @@ func (bot *Bot) UnbanChatSenderChat(chatId int64, senderChatId int64, opts *Unba
 // UnbanChatSenderChatWithContext is the same as Bot.UnbanChatSenderChat, but with a context.Context parameter
 func (bot *Bot) UnbanChatSenderChatWithContext(ctx context.Context, chatId int64, senderChatId int64, opts *UnbanChatSenderChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["sender_chat_id"] = senderChatId
 
 	var reqOpts *RequestOpts
@@ -8780,7 +8780,7 @@ func (bot *Bot) UnhideGeneralForumTopic(chatId int64, opts *UnhideGeneralForumTo
 // UnhideGeneralForumTopicWithContext is the same as Bot.UnhideGeneralForumTopic, but with a context.Context parameter
 func (bot *Bot) UnhideGeneralForumTopicWithContext(ctx context.Context, chatId int64, opts *UnhideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8814,7 +8814,7 @@ func (bot *Bot) UnpinAllChatMessages(chatId int64, opts *UnpinAllChatMessagesOpt
 // UnpinAllChatMessagesWithContext is the same as Bot.UnpinAllChatMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllChatMessagesWithContext(ctx context.Context, chatId int64, opts *UnpinAllChatMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8849,7 +8849,7 @@ func (bot *Bot) UnpinAllForumTopicMessages(chatId int64, messageThreadId int64, 
 // UnpinAllForumTopicMessagesWithContext is the same as Bot.UnpinAllForumTopicMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllForumTopicMessagesWithContext(ctx context.Context, chatId int64, messageThreadId int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	v["message_thread_id"] = messageThreadId
 
 	var reqOpts *RequestOpts
@@ -8884,7 +8884,7 @@ func (bot *Bot) UnpinAllGeneralForumTopicMessages(chatId int64, opts *UnpinAllGe
 // UnpinAllGeneralForumTopicMessagesWithContext is the same as Bot.UnpinAllGeneralForumTopicMessages, but with a context.Context parameter
 func (bot *Bot) UnpinAllGeneralForumTopicMessagesWithContext(ctx context.Context, chatId int64, opts *UnpinAllGeneralForumTopicMessagesOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 
 	var reqOpts *RequestOpts
 	if opts != nil {
@@ -8922,7 +8922,7 @@ func (bot *Bot) UnpinChatMessage(chatId int64, opts *UnpinChatMessageOpts) (bool
 // UnpinChatMessageWithContext is the same as Bot.UnpinChatMessage, but with a context.Context parameter
 func (bot *Bot) UnpinChatMessageWithContext(ctx context.Context, chatId int64, opts *UnpinChatMessageOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
 		addIfValueNotZero(v, "message_id", opts.MessageId, opts.MessageId == nil)
@@ -9048,7 +9048,7 @@ func (bot *Bot) VerifyChat(chatId int64, opts *VerifyChatOpts) (bool, error) {
 // VerifyChatWithContext is the same as Bot.VerifyChat, but with a context.Context parameter
 func (bot *Bot) VerifyChatWithContext(ctx context.Context, chatId int64, opts *VerifyChatOpts) (bool, error) {
 	v := map[string]any{}
-	v["chat_id"] = chatId
+	addIfValueNotZero(v, "chat_id", chatId, chatId == 0)
 	if opts != nil {
 		addIfValueNotZero(v, "custom_description", opts.CustomDescription, opts.CustomDescription == "")
 		addIfValueNotZero(v, "custom_description_parse_mode", opts.CustomDescriptionParseMode, opts.CustomDescriptionParseMode == "")

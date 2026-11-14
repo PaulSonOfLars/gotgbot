@@ -218,6 +218,10 @@ func (m MethodDescription) generateFieldValue(d APIDescription, methodName strin
 	}
 
 	if f.Required {
+		if f.Name == "chat_id" {
+			// As of bot API 10.4, "chat_id" can be marked as optional. Since 0 is not a valid chatId, we skip it if unset.
+			return fmt.Sprintf("\naddIfValueNotZero(v, \"%s\", %s, %s == %s)", f.Name, goParam, goParam, getDefaultTypeVal(d, fieldType)), nil
+		}
 		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 
