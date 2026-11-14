@@ -154,6 +154,16 @@ func NewContext(b *gotgbot.Bot, update *gotgbot.Update, data map[string]any) *Co
 	case update.RemovedChatBoost != nil:
 		chat = &update.RemovedChatBoost.Chat
 		user = update.RemovedChatBoost.Source.MergeChatBoostSource().User
+
+	case update.WidgetQuery != nil:
+		user = &update.WidgetQuery.From
+		chat = update.WidgetQuery.Chat
+		if chat != nil {
+			sender = &gotgbot.Sender{User: user, ChatId: chat.Id}
+		}
+
+	case update.SharedWidgetQuery != nil:
+		user = &update.SharedWidgetQuery.From
 	}
 
 	if data == nil {

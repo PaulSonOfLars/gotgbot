@@ -61,3 +61,15 @@ func TestFromFilters(t *testing.T) {
 		})
 	}
 }
+
+func TestWidgetFilter(t *testing.T) {
+	if Widget(nil) {
+		t.Errorf("expected false for nil message")
+	}
+	if Widget(&gotgbot.Message{}) {
+		t.Errorf("expected false for message without widget")
+	}
+	if !Widget(&gotgbot.Message{Widget: &gotgbot.Widget{}}) {
+		t.Errorf("expected true for message with widget")
+	}
+}
