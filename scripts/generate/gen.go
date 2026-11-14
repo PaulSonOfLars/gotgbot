@@ -193,7 +193,7 @@ func getConstantFieldFromCommons(d APIDescription, common []Field) (*Field, erro
 }
 
 func (m MethodDescription) isFieldRequired(f Field) bool {
-	return f.Required || (f.Name == "chat_id" && strings.HasPrefix(m.Name, "send"))
+	return f.Required || (f.Name == "chat_id" && strings.HasPrefix(m.Name, "send") && m.Name != "sendGift")
 }
 
 func (m MethodDescription) docs() string {

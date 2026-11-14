@@ -5085,10 +5085,10 @@ func (bot *Bot) SendAnimation(chatId int64, animation InputFileOrString, opts *S
 // SendAnimationWithContext is the same as Bot.SendAnimation, but with a context.Context parameter
 func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, animation InputFileOrString, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["animation"] = animation
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -5179,10 +5179,10 @@ func (bot *Bot) SendAudio(chatId int64, audio InputFileOrString, opts *SendAudio
 // SendAudioWithContext is the same as Bot.SendAudio, but with a context.Context parameter
 func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio InputFileOrString, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["audio"] = audio
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -5397,11 +5397,11 @@ func (bot *Bot) SendContact(chatId int64, phoneNumber string, firstName string, 
 // SendContactWithContext is the same as Bot.SendContact, but with a context.Context parameter
 func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -5549,10 +5549,10 @@ func (bot *Bot) SendDocument(chatId int64, document InputFileOrString, opts *Sen
 // SendDocumentWithContext is the same as Bot.SendDocument, but with a context.Context parameter
 func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, document InputFileOrString, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["document"] = document
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -5650,6 +5650,8 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 type SendGiftOpts struct {
 	// Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
 	UserId int64
+	// Required if user_id is not specified. Unique identifier for the chat that will receive the gift or username of the channel in the format @username.
+	ChatId int64
 	// Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
 	PayForUpgrade bool
 	// Text that will be shown along with the gift; 0-128 characters
@@ -5667,12 +5669,12 @@ type SendGiftOpts struct {
 // Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
 //   - giftId (type string): Identifier of the gift; limited gifts can't be sent to channel chats
 //   - opts (type SendGiftOpts): All optional parameters.
-func (bot *Bot) SendGift(chatId int64, giftId string, opts *SendGiftOpts) (bool, error) {
-	return bot.SendGiftWithContext(context.Background(), chatId, giftId, opts)
+func (bot *Bot) SendGift(giftId string, opts *SendGiftOpts) (bool, error) {
+	return bot.SendGiftWithContext(context.Background(), giftId, opts)
 }
 
 // SendGiftWithContext is the same as Bot.SendGift, but with a context.Context parameter
-func (bot *Bot) SendGiftWithContext(ctx context.Context, chatId int64, giftId string, opts *SendGiftOpts) (bool, error) {
+func (bot *Bot) SendGiftWithContext(ctx context.Context, giftId string, opts *SendGiftOpts) (bool, error) {
 	v := map[string]any{}
 	v["gift_id"] = giftId
 	if opts != nil {
@@ -5870,11 +5872,11 @@ func (bot *Bot) SendLivePhoto(chatId int64, livePhoto InputFileOrString, photo I
 // SendLivePhotoWithContext is the same as Bot.SendLivePhoto, but with a context.Context parameter
 func (bot *Bot) SendLivePhotoWithContext(ctx context.Context, chatId int64, livePhoto InputFileOrString, photo InputFileOrString, opts *SendLivePhotoOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["live_photo"] = livePhoto
 	v["photo"] = photo
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -5955,11 +5957,11 @@ func (bot *Bot) SendLocation(chatId int64, latitude float64, longitude float64, 
 // SendLocationWithContext is the same as Bot.SendLocation, but with a context.Context parameter
 func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6098,10 +6100,10 @@ func (bot *Bot) SendMessage(chatId int64, text string, opts *SendMessageOpts) (*
 // SendMessageWithContext is the same as Bot.SendMessage, but with a context.Context parameter
 func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["text"] = text
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6319,10 +6321,10 @@ func (bot *Bot) SendPhoto(chatId int64, photo InputFileOrString, opts *SendPhoto
 // SendPhotoWithContext is the same as Bot.SendPhoto, but with a context.Context parameter
 func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo InputFileOrString, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["photo"] = photo
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6530,10 +6532,10 @@ func (bot *Bot) SendRichMessage(chatId int64, richMessage InputRichMessage, opts
 // SendRichMessageWithContext is the same as Bot.SendRichMessage, but with a context.Context parameter
 func (bot *Bot) SendRichMessageWithContext(ctx context.Context, chatId int64, richMessage InputRichMessage, opts *SendRichMessageOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["rich_message"] = richMessage
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6725,10 +6727,10 @@ func (bot *Bot) SendSticker(chatId int64, sticker InputFileOrString, opts *SendS
 // SendStickerWithContext is the same as Bot.SendSticker, but with a context.Context parameter
 func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticker InputFileOrString, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["sticker"] = sticker
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6807,13 +6809,13 @@ func (bot *Bot) SendVenue(chatId int64, latitude float64, longitude float64, tit
 // SendVenueWithContext is the same as Bot.SendVenue, but with a context.Context parameter
 func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["latitude"] = latitude
 	v["longitude"] = longitude
 	v["title"] = title
 	v["address"] = address
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6908,10 +6910,10 @@ func (bot *Bot) SendVideo(chatId int64, video InputFileOrString, opts *SendVideo
 // SendVideoWithContext is the same as Bot.SendVideo, but with a context.Context parameter
 func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video InputFileOrString, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["video"] = video
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -6996,10 +6998,10 @@ func (bot *Bot) SendVideoNote(chatId int64, videoNote InputFileOrString, opts *S
 // SendVideoNoteWithContext is the same as Bot.SendVideoNote, but with a context.Context parameter
 func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, videoNote InputFileOrString, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["video_note"] = videoNote
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)
@@ -7077,10 +7079,10 @@ func (bot *Bot) SendVoice(chatId int64, voice InputFileOrString, opts *SendVoice
 // SendVoiceWithContext is the same as Bot.SendVoice, but with a context.Context parameter
 func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice InputFileOrString, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]any{}
+	v["chat_id"] = chatId
 	v["voice"] = voice
 	if opts != nil {
 		addIfValueNotZero(v, "business_connection_id", opts.BusinessConnectionId, opts.BusinessConnectionId == "")
-		addIfValueNotZero(v, "chat_id", opts.ChatId, opts.ChatId == 0)
 		addIfValueNotZero(v, "message_thread_id", opts.MessageThreadId, opts.MessageThreadId == 0)
 		addIfValueNotZero(v, "direct_messages_topic_id", opts.DirectMessagesTopicId, opts.DirectMessagesTopicId == 0)
 		addIfValueNotZero(v, "ephemeral_message_parameters", opts.EphemeralMessageParameters, opts.EphemeralMessageParameters == nil)

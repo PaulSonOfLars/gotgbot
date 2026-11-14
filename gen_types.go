@@ -11218,7 +11218,7 @@ type ReplyParameters struct {
 	// Optional. A JSON-serialized list of special entities that appear in the quote. It can be specified instead of quote_parse_mode.
 	QuoteEntities []MessageEntity `json:"quote_entities,omitempty"`
 	// Optional. A JSON-serialized list of quoted parts of the rich message to be replied to. Must contain one element for each quoted text of the message in the order of their appearance. Each of the following is a separate quoted text: the text of a paragraph, a heading, a preformatted block, a footer, or a mathematical expression; the text and the credit of a block quotation or a pull quotation; the summary of a details block; the caption and each cell of a table; the text and the credit of a caption of a media block, a collage, a slideshow, or a map. Texts of blocks nested in lists, block quotations, details, collages, and slideshows are separate quoted texts too. The first and the last elements can contain only a part of the corresponding text; all other elements must contain the whole text. Formatting of the quoted parts must be kept, and rich texts must be nested in the same way as in the message received from the server. Mathematical expressions must be quoted entirely. Buttons in RichBlockButtons, anchors and dividers can't be quoted. Up to 32 quoted texts with total length up to 1024 characters can be specified. Only plain text, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextSubscript, RichTextSuperscript, RichTextDateTime, RichTextCustomEmoji, RichTextMathematicalExpression, and arrays of them are kept in the quote; other rich text types are replaced with their text. If non-empty, then quote, quote_parse_mode and quote_entities are ignored.
-	QuoteRichTexts *RichTextArray `json:"quote_rich_texts,omitempty"`
+	QuoteRichTexts RichTextArray `json:"quote_rich_texts,omitempty"`
 	// Optional. Position of the quote in the original message in UTF-16 code units. For quotes from rich messages, it is the position in the text formed by joining plain texts of all quotable texts of the message, separated by line feeds.
 	QuotePosition int64 `json:"quote_position,omitempty"`
 	// Optional. Identifier of the specific checklist task to be replied to
@@ -11891,7 +11891,7 @@ func (v RichBlockAudio) MarshalJSON() ([]byte, error) {
 // A block quotation, corresponding to the HTML tag <blockquote>.
 type RichBlockBlockQuotation struct {
 	// Content of the block
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. Credit of the block
 	Credit RichText `json:"credit,omitempty"`
 }
@@ -12013,7 +12013,7 @@ func (v *RichBlockCaption) UnmarshalJSON(b []byte) error {
 // A collage, corresponding to the custom HTML tag <tg-collage>.
 type RichBlockCollage struct {
 	// Elements of the collage
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
 }
@@ -12068,7 +12068,7 @@ type RichBlockDetails struct {
 	// Always shown summary of the block
 	Summary RichText `json:"summary"`
 	// Content of the block
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. True, if the content of the block is visible by default
 	IsOpen bool `json:"is_open,omitempty"`
 }
@@ -12288,7 +12288,7 @@ func (v RichBlockFooter) MarshalJSON() ([]byte, error) {
 // A list of blocks, corresponding to the HTML tag <ul> or <ol> with multiple nested tags <li>.
 type RichBlockList struct {
 	// Items of the list
-	Items RichBlockListItemArray `json:"items"`
+	Items RichBlockListItemArray `json:"items,omitempty"`
 }
 
 // RichBlockList.richBlock is a dummy method to avoid interface implementation.
@@ -12319,7 +12319,7 @@ type RichBlockListItem struct {
 	// Label of the item
 	Label string `json:"label"`
 	// The content of the item
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. True, if the item has a checkbox
 	HasCheckbox bool `json:"has_checkbox,omitempty"`
 	// Optional. True, if the item has a checked checkbox
@@ -12675,7 +12675,7 @@ func (v RichBlockSectionHeading) MarshalJSON() ([]byte, error) {
 // A slideshow, corresponding to the custom HTML tag <tg-slideshow>.
 type RichBlockSlideshow struct {
 	// Elements of the slideshow
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
 }
@@ -12954,7 +12954,7 @@ func (v RichBlockVoiceNote) MarshalJSON() ([]byte, error) {
 // Rich formatted message.
 type RichMessage struct {
 	// Content of the message
-	Blocks RichBlockArray `json:"blocks"`
+	Blocks RichBlockArray `json:"blocks,omitempty"`
 	// Optional. True, if the rich message must be shown right-to-left
 	IsRtl bool `json:"is_rtl,omitempty"`
 }
@@ -15394,7 +15394,7 @@ type TextQuote struct {
 	// Optional. Special entities that appear in the quote. Currently, only bold, italic, underline, strikethrough, spoiler, custom_emoji, and date_time entities are kept in quotes.
 	Entities []MessageEntity `json:"entities,omitempty"`
 	// Optional. Rich text of the quote if it was chosen from a rich message. May contain only plain text, RichTextBold, RichTextItalic, RichTextUnderline, RichTextStrikethrough, RichTextSpoiler, RichTextSubscript, RichTextSuperscript, RichTextDateTime, RichTextCustomEmoji, RichTextMathematicalExpression, and arrays of them.
-	RichTexts *RichTextArray `json:"rich_texts,omitempty"`
+	RichTexts RichTextArray `json:"rich_texts,omitempty"`
 	// Approximate quote position in the original message in UTF-16 code units as specified by the sender. For quotes from rich messages, it is the position in the text formed by joining plain texts of all quotable texts of the message, separated by line feeds.
 	Position int64 `json:"position"`
 	// Optional. True, if the quote was chosen manually by the message sender. Otherwise, the quote was added automatically by the server.
@@ -15419,7 +15419,7 @@ func (v *TextQuote) UnmarshalJSON(b []byte) error {
 
 	v.Text = t.Text
 	v.Entities = t.Entities
-	v.RichTexts, err = unmarshalRichTextArrayArray(t.RichTexts)
+	v.RichTexts, err = unmarshalRichTextArray(t.RichTexts)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field RichTexts: %w", err)
 	}

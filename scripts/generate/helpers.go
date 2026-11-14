@@ -188,7 +188,7 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 	hasOpts := false
 
 	for _, mf := range tgMethod.Fields {
-		hasOpts = hasOpts || !mf.Required
+		hasOpts = hasOpts || !tgMethod.isFieldRequired(mf)
 
 		prefType, err := mf.getPreferredType(d)
 		if err != nil {
@@ -196,7 +196,7 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 		}
 
 		if fName, ok := fields[mf.Name]; ok {
-			if !mf.Required {
+			if !tgMethod.isFieldRequired(mf) {
 				defaultValue := getDefaultTypeVal(d, prefType)
 				optsContent.WriteString("\n	if opts." + snakeToTitle(mf.Name) + " == " + defaultValue + " {")
 				if isPointer(prefType) {
@@ -212,7 +212,7 @@ func generateHelperArguments(d APIDescription, tgMethod MethodDescription, recei
 			continue
 		}
 
-		if !mf.Required {
+		if !tgMethod.isFieldRequired(mf) {
 			continue
 		}
 

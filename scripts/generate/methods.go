@@ -182,12 +182,12 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 	var optionals []Field
 	for _, f := range m.Fields {
 		goParam := snakeToCamel(f.Name)
-		if !f.Required {
+		if !m.isFieldRequired(f) {
 			optionals = append(optionals, f)
 			continue
 		}
 
-		contents, err := generateValue(d, methodName, f, goParam)
+		contents, err := m.generateFieldValue(d, methodName, f, goParam)
 		if err != nil {
 			return "", err
 		}
@@ -198,7 +198,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 		bd.WriteString("\nif opts != nil {")
 		for _, f := range optionals {
 			goParam := "opts." + snakeToTitle(f.Name)
-			contents, err := generateValue(d, methodName, f, goParam)
+			contents, err := m.generateFieldValue(d, methodName, f, goParam)
 			if err != nil {
 				return "", err
 			}
@@ -211,13 +211,13 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 	return bd.String(), nil
 }
 
-func generateValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
+func (m MethodDescription) generateFieldValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
 	fieldType, err := f.getPreferredType(d)
 	if err != nil {
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
 
-	if f.Required {
+	if m.isFieldRequired(f) {
 		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 

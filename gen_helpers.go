@@ -634,7 +634,7 @@ func (m Message) ReplyAnimation(b *Bot, animation InputFileOrString, opts *SendA
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendAnimation(animation, opts)
+	return b.SendAnimation(m.Chat.Id, animation, opts)
 }
 
 // ReplyAudio is a shortcut to reply to the current message with a specific message type.
@@ -645,7 +645,7 @@ func (m Message) ReplyAudio(b *Bot, audio InputFileOrString, opts *SendAudioOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendAudio(audio, opts)
+	return b.SendAudio(m.Chat.Id, audio, opts)
 }
 
 // ReplyChecklist is a shortcut to reply to the current message with a specific message type.
@@ -667,7 +667,7 @@ func (m Message) ReplyContact(b *Bot, phoneNumber string, firstName string, opts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendContact(phoneNumber, firstName, opts)
+	return b.SendContact(m.Chat.Id, phoneNumber, firstName, opts)
 }
 
 // ReplyDice is a shortcut to reply to the current message with a specific message type.
@@ -689,7 +689,7 @@ func (m Message) ReplyDocument(b *Bot, document InputFileOrString, opts *SendDoc
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendDocument(document, opts)
+	return b.SendDocument(m.Chat.Id, document, opts)
 }
 
 // ReplyGame is a shortcut to reply to the current message with a specific message type.
@@ -722,7 +722,7 @@ func (m Message) ReplyLivePhoto(b *Bot, livePhoto InputFileOrString, photo Input
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendLivePhoto(livePhoto, photo, opts)
+	return b.SendLivePhoto(m.Chat.Id, livePhoto, photo, opts)
 }
 
 // ReplyLocation is a shortcut to reply to the current message with a specific message type.
@@ -733,7 +733,7 @@ func (m Message) ReplyLocation(b *Bot, latitude float64, longitude float64, opts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendLocation(latitude, longitude, opts)
+	return b.SendLocation(m.Chat.Id, latitude, longitude, opts)
 }
 
 // ReplyMediaGroup is a shortcut to reply to the current message with a specific message type.
@@ -755,7 +755,7 @@ func (m Message) ReplyMessage(b *Bot, text string, opts *SendMessageOpts) (*Mess
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendMessage(text, opts)
+	return b.SendMessage(m.Chat.Id, text, opts)
 }
 
 // ReplyPaidMedia is a shortcut to reply to the current message with a specific message type.
@@ -777,7 +777,7 @@ func (m Message) ReplyPhoto(b *Bot, photo InputFileOrString, opts *SendPhotoOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendPhoto(photo, opts)
+	return b.SendPhoto(m.Chat.Id, photo, opts)
 }
 
 // ReplyPoll is a shortcut to reply to the current message with a specific message type.
@@ -799,7 +799,7 @@ func (m Message) ReplyRichMessage(b *Bot, richMessage InputRichMessage, opts *Se
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendRichMessage(richMessage, opts)
+	return b.SendRichMessage(m.Chat.Id, richMessage, opts)
 }
 
 // ReplySharedWidget is a shortcut to reply to the current message with a specific message type.
@@ -821,7 +821,7 @@ func (m Message) ReplySticker(b *Bot, sticker InputFileOrString, opts *SendStick
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendSticker(sticker, opts)
+	return b.SendSticker(m.Chat.Id, sticker, opts)
 }
 
 // ReplyVenue is a shortcut to reply to the current message with a specific message type.
@@ -832,7 +832,7 @@ func (m Message) ReplyVenue(b *Bot, latitude float64, longitude float64, title s
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVenue(latitude, longitude, title, address, opts)
+	return b.SendVenue(m.Chat.Id, latitude, longitude, title, address, opts)
 }
 
 // ReplyVideo is a shortcut to reply to the current message with a specific message type.
@@ -843,7 +843,7 @@ func (m Message) ReplyVideo(b *Bot, video InputFileOrString, opts *SendVideoOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVideo(video, opts)
+	return b.SendVideo(m.Chat.Id, video, opts)
 }
 
 // ReplyVideoNote is a shortcut to reply to the current message with a specific message type.
@@ -854,7 +854,7 @@ func (m Message) ReplyVideoNote(b *Bot, videoNote InputFileOrString, opts *SendV
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVideoNote(videoNote, opts)
+	return b.SendVideoNote(m.Chat.Id, videoNote, opts)
 }
 
 // ReplyVoice is a shortcut to reply to the current message with a specific message type.
@@ -865,7 +865,7 @@ func (m Message) ReplyVoice(b *Bot, voice InputFileOrString, opts *SendVoiceOpts
 
 	opts.ReplyParameters = opts.ReplyParameters.replyTo(m)
 
-	return b.SendVoice(voice, opts)
+	return b.SendVoice(m.Chat.Id, voice, opts)
 }
 
 // ReplyWidget is a shortcut to reply to the current message with a specific message type.
