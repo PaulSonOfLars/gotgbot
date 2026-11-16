@@ -19,6 +19,8 @@ const (
 	UpdateTypeInlineQuery              = "inline_query"
 	UpdateTypeChosenInlineResult       = "chosen_inline_result"
 	UpdateTypeCallbackQuery            = "callback_query"
+	UpdateTypeWidgetQuery              = "widget_query"
+	UpdateTypeSharedWidgetQuery        = "shared_widget_query"
 	UpdateTypeShippingQuery            = "shipping_query"
 	UpdateTypePreCheckoutQuery         = "pre_checkout_query"
 	UpdateTypePurchasedPaidMedia       = "purchased_paid_media"
@@ -78,6 +80,12 @@ func (u Update) GetType() string {
 
 	case u.CallbackQuery != nil:
 		return UpdateTypeCallbackQuery
+
+	case u.WidgetQuery != nil:
+		return UpdateTypeWidgetQuery
+
+	case u.SharedWidgetQuery != nil:
+		return UpdateTypeSharedWidgetQuery
 
 	case u.ShippingQuery != nil:
 		return UpdateTypeShippingQuery
@@ -169,6 +177,8 @@ const (
 	MessageEntityTypeUrl                  = "url"
 	MessageEntityTypeEmail                = "email"
 	MessageEntityTypePhoneNumber          = "phone_number"
+	MessageEntityTypeBankCardNumber       = "bank_card_number"
+	MessageEntityTypeTonAddress           = "ton_address"
 	MessageEntityTypeBold                 = "bold"
 	MessageEntityTypeItalic               = "italic"
 	MessageEntityTypeUnderline            = "underline"
@@ -225,6 +235,18 @@ const (
 	ChatMemberStatusRestricted    = "restricted"
 	ChatMemberStatusLeft          = "left"
 	ChatMemberStatusKicked        = "kicked"
+)
+
+// The consts listed below represent all the ChatShareTheme types.
+const (
+	ChatShareThemeTypeEmoji      = "emoji"
+	ChatShareThemeTypeUniqueGift = "unique_gift"
+)
+
+// The consts listed below represent all the EmojiType types.
+const (
+	EmojiTypeTypeEmoji       = "emoji"
+	EmojiTypeTypeCustomEmoji = "custom_emoji"
 )
 
 // The consts listed below represent all the InlineQueryResult types.
@@ -429,6 +451,7 @@ const (
 	RichTextTypeEmailAddress           = "email_address"
 	RichTextTypePhoneNumber            = "phone_number"
 	RichTextTypeBankCardNumber         = "bank_card_number"
+	RichTextTypeTonAddress             = "ton_address"
 	RichTextTypeMention                = "mention"
 	RichTextTypeHashtag                = "hashtag"
 	RichTextTypeCashtag                = "cashtag"
@@ -458,4 +481,11 @@ const (
 	TransactionPartnerTypeTelegramAds      = "telegram_ads"
 	TransactionPartnerTypeTelegramApi      = "telegram_api"
 	TransactionPartnerTypeOther            = "other"
+)
+
+// The consts listed below represent all the WidgetQueryType types.
+const (
+	WidgetQueryTypeTypeData            = "data"
+	WidgetQueryTypeTypeSignData        = "sign_data"
+	WidgetQueryTypeTypeSentTransaction = "sent_transaction"
 )
