@@ -256,11 +256,16 @@ func setupCustomUnmarshal(d APIDescription, tgType TypeDescription) (string, err
 		}
 
 		fieldData := customUnmarshalFieldData{
-			Name:      snakeToTitle(f.Name),
-			Custom:    len(d.Types[prefType].Subtypes) > 0,
-			ArrayType: strings.TrimSuffix(strings.TrimPrefix(prefType, "[]"), "Array"),
-			Type:      prefType,
-			JSONTag:   fmt.Sprintf("`json:\"%s\"`", f.Name),
+			Name:   snakeToTitle(f.Name),
+			Custom: len(d.Types[prefType].Subtypes) > 0,
+			ArrayType: func() string {
+				if prefType == "RichTextArray" {
+					return "RichText"
+				}
+				return strings.TrimPrefix(prefType, "[]")
+			}(),
+			Type:    prefType,
+			JSONTag: fmt.Sprintf("`json:\"%s\"`", f.Name),
 		}
 
 		if coreType := strings.TrimPrefix(prefType, "[]"); isTgType(d, coreType) {

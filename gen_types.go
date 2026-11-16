@@ -11891,7 +11891,7 @@ func (v RichBlockAudio) MarshalJSON() ([]byte, error) {
 // A block quotation, corresponding to the HTML tag <blockquote>.
 type RichBlockBlockQuotation struct {
 	// Content of the block
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Credit of the block
 	Credit RichText `json:"credit,omitempty"`
 }
@@ -12013,7 +12013,7 @@ func (v *RichBlockCaption) UnmarshalJSON(b []byte) error {
 // A collage, corresponding to the custom HTML tag <tg-collage>.
 type RichBlockCollage struct {
 	// Elements of the collage
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
 }
@@ -12068,7 +12068,7 @@ type RichBlockDetails struct {
 	// Always shown summary of the block
 	Summary RichText `json:"summary"`
 	// Content of the block
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the content of the block is visible by default
 	IsOpen bool `json:"is_open,omitempty"`
 }
@@ -12288,7 +12288,7 @@ func (v RichBlockFooter) MarshalJSON() ([]byte, error) {
 // A list of blocks, corresponding to the HTML tag <ul> or <ol> with multiple nested tags <li>.
 type RichBlockList struct {
 	// Items of the list
-	Items RichBlockListItemArray `json:"items,omitempty"`
+	Items RichBlockListItemArray `json:"items"`
 }
 
 // RichBlockList.richBlock is a dummy method to avoid interface implementation.
@@ -12319,7 +12319,7 @@ type RichBlockListItem struct {
 	// Label of the item
 	Label string `json:"label"`
 	// The content of the item
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the item has a checkbox
 	HasCheckbox bool `json:"has_checkbox,omitempty"`
 	// Optional. True, if the item has a checked checkbox
@@ -12675,7 +12675,7 @@ func (v RichBlockSectionHeading) MarshalJSON() ([]byte, error) {
 // A slideshow, corresponding to the custom HTML tag <tg-slideshow>.
 type RichBlockSlideshow struct {
 	// Elements of the slideshow
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Caption of the block
 	Caption *RichBlockCaption `json:"caption,omitempty"`
 }
@@ -12954,7 +12954,7 @@ func (v RichBlockVoiceNote) MarshalJSON() ([]byte, error) {
 // Rich formatted message.
 type RichMessage struct {
 	// Content of the message
-	Blocks RichBlockArray `json:"blocks,omitempty"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. True, if the rich message must be shown right-to-left
 	IsRtl bool `json:"is_rtl,omitempty"`
 }
