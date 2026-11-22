@@ -9,7 +9,6 @@ import (
 func Test_botMapping(t *testing.T) {
 	bm := botMapping{}
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}
@@ -79,7 +78,6 @@ func Test_botMapping(t *testing.T) {
 func Test_botData_isUpdateChannelStopped(t *testing.T) {
 	bm := botMapping{}
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}

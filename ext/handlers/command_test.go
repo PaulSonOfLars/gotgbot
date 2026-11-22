@@ -7,7 +7,7 @@ import (
 )
 
 func TestCheckMessage(t *testing.T) {
-	bot := &gotgbot.Bot{User: gotgbot.User{Username: "MyBot"}}
+	bot := &gotgbot.Bot{BotFullInfo: gotgbot.BotFullInfo{Username: "MyBot"}}
 	bot.UpdateAdditionalUsernames([]string{"secondaryBot"})
 
 	c := Command{Triggers: []rune{'!'}, Command: "start"}

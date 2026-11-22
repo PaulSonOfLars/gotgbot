@@ -25,7 +25,7 @@ type Bot struct {
 	Token string
 
 	// The bot's User info, as returned by Bot.GetMe. Populated when created through the NewBot method.
-	User
+	BotFullInfo
 	// The bot client to use to make requests
 	BotClient
 
@@ -87,7 +87,7 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to check bot token: %w", err)
 		}
-		b.User = *botUser
+		b.BotFullInfo = *botUser
 	} else {
 		// If token checks are disabled, we populate the bot's ID from the token.
 		idStr, secret, ok := strings.Cut(token, ":")
@@ -99,12 +99,11 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse bot ID from token: %w", err)
 		}
-		b.User = User{
+		b.BotFullInfo = BotFullInfo{
 			Id:    id,
 			IsBot: true,
-			// We mark these fields as missing so we can know why they're not available
-			FirstName: "<missing>",
-			Username:  "<missing>",
+			// We mark this field as empty for context.
+			FirstName: "token-validity disabled",
 		}
 	}
 
@@ -157,8 +156,14 @@ func (bot *Bot) MatchesUsername(u string) bool {
 		return false
 	}
 
-	if strings.EqualFold(u, bot.User.Username) {
+	if strings.EqualFold(u, bot.BotFullInfo.Username) {
 		return true
+	}
+
+	for _, uName := range bot.BotFullInfo.ActiveUsernames {
+		if strings.EqualFold(u, uName) {
+			return true
+		}
 	}
 
 	bot.usernamesMu.RLock()

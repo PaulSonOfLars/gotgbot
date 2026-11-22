@@ -22,7 +22,6 @@ import (
 
 func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}
@@ -46,7 +45,6 @@ func TestUpdaterThrowsErrorWhenSameWebhookAddedTwice(t *testing.T) {
 
 func TestUpdaterSupportsWebhookReAdding(t *testing.T) {
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}
@@ -117,7 +115,6 @@ func concurrentTest(t *testing.T) {
 	}
 
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}
@@ -167,7 +164,6 @@ func TestUpdater_StopBot(t *testing.T) {
 	}
 
 	b := &gotgbot.Bot{
-		User:      gotgbot.User{},
 		Token:     "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{},
 	}
@@ -496,7 +492,6 @@ func TestUpdaterSupportsLongPollReAdding(t *testing.T) {
 	}
 
 	b := &gotgbot.Bot{
-		User:  gotgbot.User{},
 		Token: "SOME_TOKEN",
 		BotClient: &gotgbot.BaseBotClient{
 			DefaultRequestOpts: reqOpts,

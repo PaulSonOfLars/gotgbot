@@ -16,11 +16,10 @@ func NewTestBot() *gotgbot.Bot {
 	server := httptest.NewServer(nil)
 	return &gotgbot.Bot{
 		Token: "use-me",
-		User: gotgbot.User{
+		BotFullInfo: gotgbot.BotFullInfo{
 			Id:        rand.Int63(),
 			IsBot:     false,
 			FirstName: "gobot",
-			LastName:  "",
 			Username:  "gotgbot",
 		},
 		BotClient: &gotgbot.BaseBotClient{
