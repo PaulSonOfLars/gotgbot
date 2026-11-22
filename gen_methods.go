@@ -62,7 +62,7 @@ type AnswerCallbackQueryOpts struct {
 
 // AnswerCallbackQuery (https://core.telegram.org/bots/api#answercallbackquery)
 //
-// Use this method to send answers to callback queries sent from inline keyboards. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
+// Use this method to send answers to callback queries sent from inline keyboards or rich messages. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
 //   - callbackQueryId (type string): Unique identifier for the query to be answered
 //   - opts (type AnswerCallbackQueryOpts): All optional parameters.
 func (bot *Bot) AnswerCallbackQuery(callbackQueryId string, opts *AnswerCallbackQueryOpts) (bool, error) {
@@ -3465,14 +3465,14 @@ type GetMeOpts struct {
 
 // GetMe (https://core.telegram.org/bots/api#getme)
 //
-// A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
+// A simple method for testing your bot's authentication token. Requires no parameters. Returns information about the bot in form of a BotFullInfo object.
 //   - opts (type GetMeOpts): All optional parameters.
-func (bot *Bot) GetMe(opts *GetMeOpts) (*User, error) {
+func (bot *Bot) GetMe(opts *GetMeOpts) (*BotFullInfo, error) {
 	return bot.GetMeWithContext(context.Background(), opts)
 }
 
 // GetMeWithContext is the same as Bot.GetMe, but with a context.Context parameter
-func (bot *Bot) GetMeWithContext(ctx context.Context, opts *GetMeOpts) (*User, error) {
+func (bot *Bot) GetMeWithContext(ctx context.Context, opts *GetMeOpts) (*BotFullInfo, error) {
 	v := map[string]any{}
 
 	var reqOpts *RequestOpts
@@ -3485,8 +3485,8 @@ func (bot *Bot) GetMeWithContext(ctx context.Context, opts *GetMeOpts) (*User, e
 		return nil, err
 	}
 
-	var u *User
-	return u, json.Unmarshal(r, &u)
+	var b *BotFullInfo
+	return b, json.Unmarshal(r, &b)
 }
 
 // GetMyCommandsOpts is the set of optional fields for Bot.GetMyCommands and Bot.GetMyCommandsWithContext.
@@ -8094,6 +8094,85 @@ func (bot *Bot) SetMyProfilePhotoWithContext(ctx context.Context, photo InputPro
 	}
 
 	r, err := bot.RequestWithContext(ctx, "setMyProfilePhoto", v, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetMySettingsOpts is the set of optional fields for Bot.SetMySettings and Bot.SetMySettingsWithContext.
+type SetMySettingsOpts struct {
+	// Pass True to enable inline mode for the bot or False to disable it
+	SupportsInlineQueries bool
+	// New placeholder for inline queries, which is shown in the input field after the bot's username. Pass an empty string to use the default placeholder.
+	InlineQueryPlaceholder string
+	// Pass True to request the location of the user with every inline query to the bot or False to stop requesting it
+	NeedsInlineQueryLocation bool
+	// Denominator of the share of chosen inline results received by the bot; the bot receives 1 out of inline_feedback_share_denominator chosen results. Must be one of 1, 10, 100, or 1000. Pass 0 to stop receiving chosen inline results.
+	InlineFeedbackShareDenominator int64
+	// Pass True to allow adding the bot to groups or False to disallow it
+	CanJoinGroups bool
+	// Pass True to disable privacy mode for the bot or False to enable it
+	CanReadAllGroupMessages bool
+	// Pass True to allow connecting the bot to user accounts to manage them or False to disallow it
+	CanConnectToBusiness bool
+	// Pass True to allow creating other bots that will be controlled by the bot or False to disallow it
+	CanManageBots bool
+	// Pass True to allow guest queries to the bot from chats it isn't a member of or False to disallow them
+	SupportsGuestQueries bool
+	// Pass True to allow assigning the bot to process join request queries or False to disallow it
+	SupportsJoinRequestQueries bool
+	// Pass True to enable forum topic mode in private chats with the bot or False to disable it
+	HasTopicsEnabled bool
+	// Pass True to allow users to create and delete topics in private chats with the bot or False to disallow it
+	AllowsUsersToCreateTopics bool
+	// Pass True to show topics in private chats with the bot in a sidebar or False to stop showing them in a sidebar
+	HasTopicSidebar bool
+	// Pass True to allow the bot to communicate with other bots in groups, private chats, and through business accounts or False to disallow it
+	CanCommunicateWithBots bool
+	// Mode in which the bot receives callback queries from buttons in messages sent by the bot. Must be one of "default" (the field message is always used and contains an InaccessibleMessage if the message is inaccessible to the bot), "auto" (the field inline_message_id is used instead of the field message if the message is inaccessible to the bot; the field message can still contain an inaccessible message if the message has just been deleted), or "inline" (the field inline_message_id is always used instead of the field message).
+	CallbackQueryMode string
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetMySettings (https://core.telegram.org/bots/api#setmysettings)
+//
+// Use this method to change settings of the bot. Settings that aren't specified remain unchanged. Returns True on success.
+//   - opts (type SetMySettingsOpts): All optional parameters.
+func (bot *Bot) SetMySettings(opts *SetMySettingsOpts) (bool, error) {
+	return bot.SetMySettingsWithContext(context.Background(), opts)
+}
+
+// SetMySettingsWithContext is the same as Bot.SetMySettings, but with a context.Context parameter
+func (bot *Bot) SetMySettingsWithContext(ctx context.Context, opts *SetMySettingsOpts) (bool, error) {
+	v := map[string]any{}
+	if opts != nil {
+		addIfValueNotZero(v, "supports_inline_queries", opts.SupportsInlineQueries, opts.SupportsInlineQueries == false)
+		addIfValueNotZero(v, "inline_query_placeholder", opts.InlineQueryPlaceholder, opts.InlineQueryPlaceholder == "")
+		addIfValueNotZero(v, "needs_inline_query_location", opts.NeedsInlineQueryLocation, opts.NeedsInlineQueryLocation == false)
+		addIfValueNotZero(v, "inline_feedback_share_denominator", opts.InlineFeedbackShareDenominator, opts.InlineFeedbackShareDenominator == 0)
+		addIfValueNotZero(v, "can_join_groups", opts.CanJoinGroups, opts.CanJoinGroups == false)
+		addIfValueNotZero(v, "can_read_all_group_messages", opts.CanReadAllGroupMessages, opts.CanReadAllGroupMessages == false)
+		addIfValueNotZero(v, "can_connect_to_business", opts.CanConnectToBusiness, opts.CanConnectToBusiness == false)
+		addIfValueNotZero(v, "can_manage_bots", opts.CanManageBots, opts.CanManageBots == false)
+		addIfValueNotZero(v, "supports_guest_queries", opts.SupportsGuestQueries, opts.SupportsGuestQueries == false)
+		addIfValueNotZero(v, "supports_join_request_queries", opts.SupportsJoinRequestQueries, opts.SupportsJoinRequestQueries == false)
+		addIfValueNotZero(v, "has_topics_enabled", opts.HasTopicsEnabled, opts.HasTopicsEnabled == false)
+		addIfValueNotZero(v, "allows_users_to_create_topics", opts.AllowsUsersToCreateTopics, opts.AllowsUsersToCreateTopics == false)
+		addIfValueNotZero(v, "has_topic_sidebar", opts.HasTopicSidebar, opts.HasTopicSidebar == false)
+		addIfValueNotZero(v, "can_communicate_with_bots", opts.CanCommunicateWithBots, opts.CanCommunicateWithBots == false)
+		addIfValueNotZero(v, "callback_query_mode", opts.CallbackQueryMode, opts.CallbackQueryMode == "")
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setMySettings", v, reqOpts)
 	if err != nil {
 		return false, err
 	}
