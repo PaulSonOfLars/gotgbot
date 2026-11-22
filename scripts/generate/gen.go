@@ -443,6 +443,23 @@ func isTgStructType(d APIDescription, goType string) bool {
 	return len(t.Fields) != 0 && len(t.Subtypes) == 0
 }
 
+func (m MethodDescription) getPreferredFieldType(d APIDescription, f Field) (string, error) {
+	desc, err := m.description(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get description: %w", err)
+	}
+
+	fieldType, err := f.getPreferredType(d)
+	if err != nil {
+		return "", fmt.Errorf("failed to get preferred type: %w", err)
+	}
+
+	if !strings.HasPrefix(fieldType, "*") && strings.Contains(desc, "Settings that aren't specified remain unchanged.") {
+		return "*" + fieldType, nil
+	}
+	return fieldType, nil
+}
+
 func (f Field) getPreferredType(d APIDescription) (string, error) {
 	if f.Name == "media" {
 		if len(f.Types) == 1 && f.Types[0] == "String" {

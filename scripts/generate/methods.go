@@ -212,7 +212,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 }
 
 func (m MethodDescription) generateFieldValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
-	fieldType, err := f.getPreferredType(d)
+	fieldType, err := m.getPreferredFieldType(d, f)
 	if err != nil {
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
@@ -311,7 +311,7 @@ func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) 
 			continue
 		}
 
-		fieldType, err := f.getPreferredType(d)
+		fieldType, err := m.getPreferredFieldType(d, f)
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}
