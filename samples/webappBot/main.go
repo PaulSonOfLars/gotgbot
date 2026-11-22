@@ -100,7 +100,7 @@ func main() {
 		Addr:    "0.0.0.0:8080",
 	}
 
-	logger.Info("Bot has been started...", "bot_username", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.BotFullInfo.Username)
 	// Start the webserver displaying the page.
 	// Note: ListenAndServe is a blocking operation, so we don't need to call updater.Idle() here.
 	if err := server.ListenAndServe(); err != nil {
@@ -110,7 +110,7 @@ func main() {
 
 // start introduces the bot.
 func start(b *gotgbot.Bot, ctx *ext.Context, webappURL string) error {
-	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nYou can use me to run a (very) simple telegram webapp demo!", b.User.Username), &gotgbot.SendMessageOpts{
+	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nYou can use me to run a (very) simple telegram webapp demo!", b.BotFullInfo.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "HTML",
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{

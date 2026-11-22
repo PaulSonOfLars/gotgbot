@@ -78,7 +78,7 @@ func testBot(f RequestFunc) *gotgbot.Bot {
 
 	return &gotgbot.Bot{
 		Token: fmt.Sprintf("%d:TEST", id),
-		User: gotgbot.User{
+		BotFullInfo: gotgbot.BotFullInfo{
 			Id:        id,
 			IsBot:     true,
 			FirstName: "Testing",

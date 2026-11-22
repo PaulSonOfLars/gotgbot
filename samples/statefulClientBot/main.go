@@ -63,7 +63,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	logger.Info("Bot has been started...", "bot_username", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.BotFullInfo.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
