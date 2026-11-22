@@ -187,7 +187,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 			continue
 		}
 
-		contents, err := generateValue(d, methodName, f, goParam)
+		contents, err := m.generateFieldValue(d, methodName, f, goParam)
 		if err != nil {
 			return "", err
 		}
@@ -198,7 +198,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 		bd.WriteString("\nif opts != nil {")
 		for _, f := range optionals {
 			goParam := "opts." + snakeToTitle(f.Name)
-			contents, err := generateValue(d, methodName, f, goParam)
+			contents, err := m.generateFieldValue(d, methodName, f, goParam)
 			if err != nil {
 				return "", err
 			}
@@ -211,13 +211,17 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 	return bd.String(), nil
 }
 
-func generateValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
+func (m MethodDescription) generateFieldValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
 	fieldType, err := f.getPreferredType(d)
 	if err != nil {
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
 
 	if f.Required {
+		if f.Name == "chat_id" {
+			// As of bot API 10.4, "chat_id" can be marked as optional. Since 0 is not a valid chatId, we skip it if unset.
+			return fmt.Sprintf("\naddIfValueNotZero(v, \"%s\", %s, %s == %s)", f.Name, goParam, goParam, getDefaultTypeVal(d, fieldType)), nil
+		}
 		return fmt.Sprintf("\nv[\"%s\"] = %s", f.Name, goParam), nil
 	}
 
@@ -283,10 +287,6 @@ func (fs Fields) getNames() []string {
 func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
 	var args []string
 	for _, f := range fs {
-		if !f.Required {
-			continue
-		}
-
 		fieldType, err := f.getPreferredType(d)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get preferred type: %w", err)
