@@ -261,14 +261,6 @@ func getCommonFields(types []TypeDescription) []Field {
 	return fields
 }
 
-// getFieldNames turns a list of fields into a list of the field's names, as described.
-func getFieldNames(fs []Field) (out []string) {
-	for _, t := range fs {
-		out = append(out, t.Name)
-	}
-	return out
-}
-
 // getReplyMarkupTypes gets all the different types which are used in "reply_markup" fields.
 func getReplyMarkupTypes(d APIDescription) []TypeDescription {
 	typesMap := map[string]struct{}{}

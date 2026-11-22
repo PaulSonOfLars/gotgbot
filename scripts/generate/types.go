@@ -641,7 +641,7 @@ func generateGenericInterfaceType(d APIDescription, name string, subtypes []Type
 		return "", fmt.Errorf("failed to check if %s types all contain inputfiles: %w", name, err)
 	}
 	// If the inputfile is a common field, then the interface contains fields.
-	hasInputFile := field != nil && slices.Contains(getFieldNames(commonFields), field.Name)
+	hasInputFile := field != nil && slices.Contains(getFieldNames(commonFields), snakeToCamel(field.Name))
 
 	bd := strings.Builder{}
 	bd.WriteString(fmt.Sprintf("\ntype %s interface{", name))

@@ -444,10 +444,7 @@ func isTgStructType(d APIDescription, goType string) bool {
 }
 
 func (m MethodDescription) getPreferredFieldType(d APIDescription, f Field) (string, error) {
-	desc, err := m.description(d)
-	if err != nil {
-		return "", fmt.Errorf("failed to get description: %w", err)
-	}
+	desc := strings.Join(m.Description, "\n")
 
 	fieldType, err := f.getPreferredType(d)
 	if err != nil {
