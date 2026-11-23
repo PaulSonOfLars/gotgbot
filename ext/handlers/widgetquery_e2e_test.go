@@ -13,59 +13,16 @@ import (
 )
 
 func TestBotEndToEnd_WidgetUpdates(t *testing.T) {
-	var widgetQueryHandled bool
-	var sharedWidgetQueryHandled bool
-	var widgetMessageHandled bool
-	var answeredQueryId string
-
-	b := &gotgbot.Bot{
-		Token: "12345:mock_token",
-		User: gotgbot.User{
-			Id:        12345,
-			IsBot:     true,
-			FirstName: "WidgetTestBot",
-			Username:  "WidgetTestBot",
-		},
-		BotClient: &mockBotClient{
-			requestFunc: func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
-				if method == "answerWidgetQuery" {
-					if qId, ok := params["widget_query_id"].(string); ok {
-						answeredQueryId = qId
-					}
-					return json.Marshal(true)
-				}
-				return json.Marshal(true)
-			},
-		},
-	}
-
-	dispatcher := ext.NewDispatcher(nil)
-
-	dispatcher.AddHandler(handlers.NewWidgetQuery(widgetquery.Prefix("click_"), func(bot *gotgbot.Bot, ctx *ext.Context) error {
-		widgetQueryHandled = true
-		_, err := bot.AnswerWidgetQuery(ctx.WidgetQuery.Id, nil)
-		return err
-	}))
-
-	dispatcher.AddHandler(handlers.NewSharedWidgetQuery(sharedwidgetquery.Equal("share_action"), func(bot *gotgbot.Bot, ctx *ext.Context) error {
-		sharedWidgetQueryHandled = true
-		return nil
-	}))
-
-	dispatcher.AddHandler(handlers.NewMessage(func(msg *gotgbot.Message) bool {
-		return msg.Widget != nil
-	}, func(bot *gotgbot.Bot, ctx *ext.Context) error {
-		widgetMessageHandled = true
-		return nil
-	}))
-
 	tests := []struct {
-		name       string
-		update     *gotgbot.Update
-		checkState func(t *testing.T)
+		name                     string
+		update                   *gotgbot.Update
+		wantWidgetQueryHandled   bool
+		wantSharedQueryHandled   bool
+		wantWidgetMessageHandled bool
+		wantAnsweredQueryId      string
 	}{
 		{
-			name: "WidgetQuery",
+			name: "WidgetQuery matching",
 			update: &gotgbot.Update{
 				UpdateId: 1,
 				WidgetQuery: &gotgbot.WidgetQuery{
@@ -74,19 +31,25 @@ func TestBotEndToEnd_WidgetUpdates(t *testing.T) {
 					Data: "click_buy",
 				},
 			},
-			checkState: func(t *testing.T) {
-				if !widgetQueryHandled {
-					t.Errorf("expected WidgetQuery handler to run")
-				}
-				if answeredQueryId != "query_999" {
-					t.Errorf("expected answeredQueryId 'query_999', got %q", answeredQueryId)
-				}
-			},
+			wantWidgetQueryHandled: true,
+			wantAnsweredQueryId:    "query_999",
 		},
 		{
-			name: "SharedWidgetQuery",
+			name: "WidgetQuery non-matching prefix",
 			update: &gotgbot.Update{
 				UpdateId: 2,
+				WidgetQuery: &gotgbot.WidgetQuery{
+					Id:   "query_111",
+					From: gotgbot.User{Id: 42, FirstName: "Tester"},
+					Data: "other_prefix",
+				},
+			},
+			wantWidgetQueryHandled: false,
+		},
+		{
+			name: "SharedWidgetQuery matching",
+			update: &gotgbot.Update{
+				UpdateId: 3,
 				SharedWidgetQuery: &gotgbot.SharedWidgetQuery{
 					Id:       "shared_888",
 					From:     gotgbot.User{Id: 43, FirstName: "Sharer"},
@@ -94,16 +57,25 @@ func TestBotEndToEnd_WidgetUpdates(t *testing.T) {
 					WidgetId: "widget_abc",
 				},
 			},
-			checkState: func(t *testing.T) {
-				if !sharedWidgetQueryHandled {
-					t.Errorf("expected SharedWidgetQuery handler to run")
-				}
-			},
+			wantSharedQueryHandled: true,
 		},
 		{
-			name: "MessageWithWidget",
+			name: "SharedWidgetQuery non-matching",
 			update: &gotgbot.Update{
-				UpdateId: 3,
+				UpdateId: 4,
+				SharedWidgetQuery: &gotgbot.SharedWidgetQuery{
+					Id:       "shared_222",
+					From:     gotgbot.User{Id: 43, FirstName: "Sharer"},
+					Data:     "other_action",
+					WidgetId: "widget_abc",
+				},
+			},
+			wantSharedQueryHandled: false,
+		},
+		{
+			name: "Message with widget",
+			update: &gotgbot.Update{
+				UpdateId: 5,
 				Message: &gotgbot.Message{
 					MessageId: 101,
 					From:      &gotgbot.User{Id: 42},
@@ -111,16 +83,12 @@ func TestBotEndToEnd_WidgetUpdates(t *testing.T) {
 					Widget:    &gotgbot.Widget{},
 				},
 			},
-			checkState: func(t *testing.T) {
-				if !widgetMessageHandled {
-					t.Errorf("expected widget message handler to run")
-				}
-			},
+			wantWidgetMessageHandled: true,
 		},
 		{
-			name: "NormalMessageWithoutWidget",
+			name: "Normal message without widget",
 			update: &gotgbot.Update{
-				UpdateId: 4,
+				UpdateId: 6,
 				Message: &gotgbot.Message{
 					MessageId: 102,
 					From:      &gotgbot.User{Id: 42},
@@ -128,22 +96,75 @@ func TestBotEndToEnd_WidgetUpdates(t *testing.T) {
 					Text:      "plain text without widget",
 				},
 			},
-			checkState: func(t *testing.T) {
-				if widgetMessageHandled {
-					t.Errorf("widget message handler should not run for normal message")
-				}
-			},
+			wantWidgetMessageHandled: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			widgetMessageHandled = false
+			var widgetQueryHandled bool
+			var sharedWidgetQueryHandled bool
+			var widgetMessageHandled bool
+			var answeredQueryId string
+
+			b := &gotgbot.Bot{
+				Token: "12345:mock_token",
+				User: gotgbot.User{
+					Id:        12345,
+					IsBot:     true,
+					FirstName: "WidgetTestBot",
+					Username:  "WidgetTestBot",
+				},
+				BotClient: &mockBotClient{
+					requestFunc: func(ctx context.Context, token string, method string, params map[string]any, opts *gotgbot.RequestOpts) (json.RawMessage, error) {
+						if method == "answerWidgetQuery" {
+							if qId, ok := params["widget_query_id"].(string); ok {
+								answeredQueryId = qId
+							}
+							return json.Marshal(true)
+						}
+						return json.Marshal(true)
+					},
+				},
+			}
+
+			dispatcher := ext.NewDispatcher(nil)
+
+			dispatcher.AddHandler(handlers.NewWidgetQuery(widgetquery.Prefix("click_"), func(bot *gotgbot.Bot, ctx *ext.Context) error {
+				widgetQueryHandled = true
+				_, err := bot.AnswerWidgetQuery(ctx.WidgetQuery.Id, nil)
+				return err
+			}))
+
+			dispatcher.AddHandler(handlers.NewSharedWidgetQuery(sharedwidgetquery.Equal("share_action"), func(bot *gotgbot.Bot, ctx *ext.Context) error {
+				sharedWidgetQueryHandled = true
+				return nil
+			}))
+
+			dispatcher.AddHandler(handlers.NewMessage(func(msg *gotgbot.Message) bool {
+				return msg.Widget != nil
+			}, func(bot *gotgbot.Bot, ctx *ext.Context) error {
+				widgetMessageHandled = true
+				return nil
+			}))
+
 			err := dispatcher.ProcessUpdate(b, tt.update, nil)
 			if err != nil {
 				t.Fatalf("unexpected error processing update: %v", err)
 			}
-			tt.checkState(t)
+
+			if widgetQueryHandled != tt.wantWidgetQueryHandled {
+				t.Errorf("widgetQueryHandled = %v, want %v", widgetQueryHandled, tt.wantWidgetQueryHandled)
+			}
+			if answeredQueryId != tt.wantAnsweredQueryId {
+				t.Errorf("answeredQueryId = %q, want %q", answeredQueryId, tt.wantAnsweredQueryId)
+			}
+			if sharedWidgetQueryHandled != tt.wantSharedQueryHandled {
+				t.Errorf("sharedWidgetQueryHandled = %v, want %v", sharedWidgetQueryHandled, tt.wantSharedQueryHandled)
+			}
+			if widgetMessageHandled != tt.wantWidgetMessageHandled {
+				t.Errorf("widgetMessageHandled = %v, want %v", widgetMessageHandled, tt.wantWidgetMessageHandled)
+			}
 		})
 	}
 }

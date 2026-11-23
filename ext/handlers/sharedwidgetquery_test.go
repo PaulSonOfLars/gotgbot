@@ -6,6 +6,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/sharedwidgetquery"
 )
 
@@ -72,45 +73,39 @@ func TestSharedWidgetQueryFilters(t *testing.T) {
 		WidgetId: "wid_555",
 	}
 
-	if !sharedwidgetquery.All(swq) {
-		t.Errorf("All filter failed")
-	}
-	if !sharedwidgetquery.Equal("view_details_done")(swq) {
-		t.Errorf("Equal filter failed")
-	}
-	if !sharedwidgetquery.Prefix("view_")(swq) {
-		t.Errorf("Prefix filter failed")
-	}
-	if !sharedwidgetquery.Suffix("_done")(swq) {
-		t.Errorf("Suffix filter failed")
-	}
-	if !sharedwidgetquery.Contains("details")(swq) {
-		t.Errorf("Contains filter failed")
-	}
-	if !sharedwidgetquery.FromUserID(999)(swq) {
-		t.Errorf("FromUserID filter failed")
-	}
-	if !sharedwidgetquery.WidgetID("wid_555")(swq) {
-		t.Errorf("WidgetID filter failed")
+	tests := []struct {
+		name   string
+		filter filters.SharedWidgetQuery
+		input  *gotgbot.SharedWidgetQuery
+		want   bool
+	}{
+		{name: "All filter", filter: sharedwidgetquery.All, input: swq, want: true},
+		{name: "Equal filter match", filter: sharedwidgetquery.Equal("view_details_done"), input: swq, want: true},
+		{name: "Equal filter mismatch", filter: sharedwidgetquery.Equal("other"), input: swq, want: false},
+		{name: "Prefix filter match", filter: sharedwidgetquery.Prefix("view_"), input: swq, want: true},
+		{name: "Prefix filter mismatch", filter: sharedwidgetquery.Prefix("edit_"), input: swq, want: false},
+		{name: "Suffix filter match", filter: sharedwidgetquery.Suffix("_done"), input: swq, want: true},
+		{name: "Suffix filter mismatch", filter: sharedwidgetquery.Suffix("_start"), input: swq, want: false},
+		{name: "Contains filter match", filter: sharedwidgetquery.Contains("details"), input: swq, want: true},
+		{name: "Contains filter mismatch", filter: sharedwidgetquery.Contains("settings"), input: swq, want: false},
+		{name: "FromUserID filter match", filter: sharedwidgetquery.FromUserID(999), input: swq, want: true},
+		{name: "FromUserID filter mismatch", filter: sharedwidgetquery.FromUserID(111), input: swq, want: false},
+		{name: "WidgetID filter match", filter: sharedwidgetquery.WidgetID("wid_555"), input: swq, want: true},
+		{name: "WidgetID filter mismatch", filter: sharedwidgetquery.WidgetID("other_wid"), input: swq, want: false},
+		// Nil input checks
+		{name: "Equal nil", filter: sharedwidgetquery.Equal("test"), input: nil, want: false},
+		{name: "Prefix nil", filter: sharedwidgetquery.Prefix("test"), input: nil, want: false},
+		{name: "Suffix nil", filter: sharedwidgetquery.Suffix("test"), input: nil, want: false},
+		{name: "Contains nil", filter: sharedwidgetquery.Contains("test"), input: nil, want: false},
+		{name: "FromUserID nil", filter: sharedwidgetquery.FromUserID(123), input: nil, want: false},
+		{name: "WidgetID nil", filter: sharedwidgetquery.WidgetID("wid"), input: nil, want: false},
 	}
 
-	// Nil safety checks
-	if sharedwidgetquery.Equal("test")(nil) {
-		t.Errorf("Equal filter should return false for nil")
-	}
-	if sharedwidgetquery.Prefix("test")(nil) {
-		t.Errorf("Prefix filter should return false for nil")
-	}
-	if sharedwidgetquery.Suffix("test")(nil) {
-		t.Errorf("Suffix filter should return false for nil")
-	}
-	if sharedwidgetquery.Contains("test")(nil) {
-		t.Errorf("Contains filter should return false for nil")
-	}
-	if sharedwidgetquery.FromUserID(123)(nil) {
-		t.Errorf("FromUserID filter should return false for nil")
-	}
-	if sharedwidgetquery.WidgetID("wid")(nil) {
-		t.Errorf("WidgetID filter should return false for nil")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.filter(tt.input); got != tt.want {
+				t.Errorf("%s = %v, want %v", tt.name, got, tt.want)
+			}
+		})
 	}
 }

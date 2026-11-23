@@ -6,6 +6,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/widgetquery"
 )
 
@@ -82,57 +83,45 @@ func TestWidgetQueryFilters(t *testing.T) {
 		WidgetId:     "wid_1",
 	}
 
-	if !widgetquery.All(wq) {
-		t.Errorf("All filter should return true")
-	}
-	if !widgetquery.Equal("test_action_run")(wq) {
-		t.Errorf("Equal filter failed")
-	}
-	if !widgetquery.Prefix("test_")(wq) {
-		t.Errorf("Prefix filter failed")
-	}
-	if !widgetquery.Suffix("_run")(wq) {
-		t.Errorf("Suffix filter failed")
-	}
-	if !widgetquery.Contains("action")(wq) {
-		t.Errorf("Contains filter failed")
-	}
-	if !widgetquery.FromUserID(456)(wq) {
-		t.Errorf("FromUserID filter failed")
-	}
-	if !widgetquery.ChatInstance("inst_1")(wq) {
-		t.Errorf("ChatInstance filter failed")
-	}
-	if !widgetquery.ChatType("private")(wq) {
-		t.Errorf("ChatType filter failed")
-	}
-	if !widgetquery.WidgetID("wid_1")(wq) {
-		t.Errorf("WidgetID filter failed")
+	tests := []struct {
+		name   string
+		filter filters.WidgetQuery
+		input  *gotgbot.WidgetQuery
+		want   bool
+	}{
+		{name: "All filter", filter: widgetquery.All, input: wq, want: true},
+		{name: "Equal filter match", filter: widgetquery.Equal("test_action_run"), input: wq, want: true},
+		{name: "Equal filter mismatch", filter: widgetquery.Equal("other"), input: wq, want: false},
+		{name: "Prefix filter match", filter: widgetquery.Prefix("test_"), input: wq, want: true},
+		{name: "Prefix filter mismatch", filter: widgetquery.Prefix("other_"), input: wq, want: false},
+		{name: "Suffix filter match", filter: widgetquery.Suffix("_run"), input: wq, want: true},
+		{name: "Suffix filter mismatch", filter: widgetquery.Suffix("_stop"), input: wq, want: false},
+		{name: "Contains filter match", filter: widgetquery.Contains("action"), input: wq, want: true},
+		{name: "Contains filter mismatch", filter: widgetquery.Contains("other"), input: wq, want: false},
+		{name: "FromUserID filter match", filter: widgetquery.FromUserID(456), input: wq, want: true},
+		{name: "FromUserID filter mismatch", filter: widgetquery.FromUserID(999), input: wq, want: false},
+		{name: "ChatInstance filter match", filter: widgetquery.ChatInstance("inst_1"), input: wq, want: true},
+		{name: "ChatInstance filter mismatch", filter: widgetquery.ChatInstance("inst_2"), input: wq, want: false},
+		{name: "ChatType filter match", filter: widgetquery.ChatType("private"), input: wq, want: true},
+		{name: "ChatType filter mismatch", filter: widgetquery.ChatType("channel"), input: wq, want: false},
+		{name: "WidgetID filter match", filter: widgetquery.WidgetID("wid_1"), input: wq, want: true},
+		{name: "WidgetID filter mismatch", filter: widgetquery.WidgetID("wid_2"), input: wq, want: false},
+		// Nil input checks
+		{name: "Equal nil", filter: widgetquery.Equal("test"), input: nil, want: false},
+		{name: "Prefix nil", filter: widgetquery.Prefix("test"), input: nil, want: false},
+		{name: "Suffix nil", filter: widgetquery.Suffix("test"), input: nil, want: false},
+		{name: "Contains nil", filter: widgetquery.Contains("test"), input: nil, want: false},
+		{name: "FromUserID nil", filter: widgetquery.FromUserID(123), input: nil, want: false},
+		{name: "ChatInstance nil", filter: widgetquery.ChatInstance("inst"), input: nil, want: false},
+		{name: "ChatType nil", filter: widgetquery.ChatType("private"), input: nil, want: false},
+		{name: "WidgetID nil", filter: widgetquery.WidgetID("wid"), input: nil, want: false},
 	}
 
-	// Nil safety checks
-	if widgetquery.Equal("test")(nil) {
-		t.Errorf("Equal filter should return false for nil")
-	}
-	if widgetquery.Prefix("test")(nil) {
-		t.Errorf("Prefix filter should return false for nil")
-	}
-	if widgetquery.Suffix("test")(nil) {
-		t.Errorf("Suffix filter should return false for nil")
-	}
-	if widgetquery.Contains("test")(nil) {
-		t.Errorf("Contains filter should return false for nil")
-	}
-	if widgetquery.FromUserID(123)(nil) {
-		t.Errorf("FromUserID filter should return false for nil")
-	}
-	if widgetquery.ChatInstance("inst")(nil) {
-		t.Errorf("ChatInstance filter should return false for nil")
-	}
-	if widgetquery.ChatType("private")(nil) {
-		t.Errorf("ChatType filter should return false for nil")
-	}
-	if widgetquery.WidgetID("wid")(nil) {
-		t.Errorf("WidgetID filter should return false for nil")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.filter(tt.input); got != tt.want {
+				t.Errorf("%s = %v, want %v", tt.name, got, tt.want)
+			}
+		})
 	}
 }
