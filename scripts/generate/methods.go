@@ -37,7 +37,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 	method := strings.Builder{}
 
 	req := tgMethod.getRequiredFields()
-	reqArgs, err := req.getFunctionArgs(d)
+	reqArgs, err := tgMethod.getFunctionArgs(d, req)
 	if err != nil {
 		return "", fmt.Errorf("failed to get required arguments for %s: %w", tgMethod.Name, err)
 	}
@@ -79,7 +79,7 @@ func generateMethodDef(d APIDescription, tgMethod MethodDescription) (string, er
 
 	method.WriteString(desc)
 	method.WriteString("\nfunc (bot *Bot) " + strings.Title(tgMethod.Name) + "(" + joinedArgs + ") (" + joinedRetTypes + ", error) {")
-	method.WriteString("\n\treturn bot." + strings.Title(tgMethod.Name) + "WithContext(context.Background(), " + strings.Join(req.getNames(), ", ") + ")")
+	method.WriteString("\n\treturn bot." + strings.Title(tgMethod.Name) + "WithContext(context.Background(), " + strings.Join(getFieldNames(req), ", ") + ")")
 	method.WriteString("\n}")
 
 	method.WriteString("\n// " + strings.Title(tgMethod.Name) + "WithContext is the same as Bot." + strings.Title(tgMethod.Name) + ", but with a context.Context parameter")
@@ -162,7 +162,7 @@ func (m MethodDescription) description(d APIDescription) (string, error) {
 			continue
 		}
 
-		prefType, err := f.getPreferredType(d)
+		prefType, err := m.getPreferredFieldType(d, f)
 		if err != nil {
 			return "", err
 		}
@@ -212,7 +212,7 @@ func (m MethodDescription) argsToValues(d APIDescription, methodName string) (st
 }
 
 func (m MethodDescription) generateFieldValue(d APIDescription, methodName string, f Field, goParam string) (string, error) {
-	fieldType, err := f.getPreferredType(d)
+	fieldType, err := m.getPreferredFieldType(d, f)
 	if err != nil {
 		return "", fmt.Errorf("failed to get preferred type: %w", err)
 	}
@@ -258,9 +258,7 @@ func getRetVarName(retType string) string {
 	return strings.ToLower(retType[:1])
 }
 
-type Fields []Field
-
-func (m MethodDescription) getRequiredFields() Fields {
+func (m MethodDescription) getRequiredFields() []Field {
 	var req []Field
 	for _, f := range m.Fields {
 		if f.Required {
@@ -276,7 +274,8 @@ func (m MethodDescription) getRequiredFields() Fields {
 	return req
 }
 
-func (fs Fields) getNames() []string {
+// getFieldNames turns a list of fields into a list of the field's names, as described.
+func getFieldNames(fs []Field) []string {
 	var names []string
 	for _, f := range fs {
 		names = append(names, snakeToCamel(f.Name))
@@ -284,10 +283,10 @@ func (fs Fields) getNames() []string {
 	return names
 }
 
-func (fs Fields) getFunctionArgs(d APIDescription) ([]string, error) {
+func (m MethodDescription) getFunctionArgs(d APIDescription, reqFields []Field) ([]string, error) {
 	var args []string
-	for _, f := range fs {
-		fieldType, err := f.getPreferredType(d)
+	for _, f := range reqFields {
+		fieldType, err := m.getPreferredFieldType(d, f)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get preferred type: %w", err)
 		}
@@ -311,7 +310,7 @@ func (m MethodDescription) getOptionalsStruct(d APIDescription) (string, error) 
 			continue
 		}
 
-		fieldType, err := f.getPreferredType(d)
+		fieldType, err := m.getPreferredFieldType(d, f)
 		if err != nil {
 			return "", fmt.Errorf("failed to get preferred type: %w", err)
 		}

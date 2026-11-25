@@ -8,7 +8,7 @@ import (
 
 func TestNewContext_PurchasedPaidMedia(t *testing.T) {
 	b := &gotgbot.Bot{
-		User: gotgbot.User{Id: 1, IsBot: true, FirstName: "TestBot"},
+		BotFullInfo: gotgbot.BotFullInfo{Id: 1, IsBot: true, FirstName: "TestBot"},
 	}
 	upd := &gotgbot.Update{
 		PurchasedPaidMedia: &gotgbot.PaidMediaPurchased{

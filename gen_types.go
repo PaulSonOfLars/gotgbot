@@ -1096,6 +1096,48 @@ type BotDescription struct {
 	Description string `json:"description"`
 }
 
+// BotFullInfo (https://core.telegram.org/bots/api#botfullinfo)
+//
+// This object contains full information about the bot itself.
+type BotFullInfo struct {
+	// Unique identifier for this bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
+	Id int64 `json:"id"`
+	// Always True
+	IsBot bool `json:"is_bot"`
+	// Bot's first name
+	FirstName string `json:"first_name"`
+	// Optional. Bot's username
+	Username string `json:"username,omitempty"`
+	// Optional. If non-empty, the list of all active usernames of the bot
+	ActiveUsernames []string `json:"active_usernames,omitempty"`
+	// True, if the bot can be added to groups
+	CanJoinGroups bool `json:"can_join_groups"`
+	// True, if privacy mode is disabled for the bot
+	CanReadAllGroupMessages bool `json:"can_read_all_group_messages"`
+	// True, if the bot supports guest queries from chats it is not a member of
+	SupportsGuestQueries bool `json:"supports_guest_queries"`
+	// True, if the bot supports inline queries
+	SupportsInlineQueries bool `json:"supports_inline_queries"`
+	// Optional. Placeholder for inline queries, which is shown in the input field after the bot's username; omitted if the default placeholder is used
+	InlineQueryPlaceholder string `json:"inline_query_placeholder,omitempty"`
+	// True, if the bot requests the location of the user with every inline query
+	NeedsInlineQueryLocation bool `json:"needs_inline_query_location"`
+	// True, if the bot can be connected to a user account to manage it
+	CanConnectToBusiness bool `json:"can_connect_to_business"`
+	// True, if the bot has a main Web App
+	HasMainWebApp bool `json:"has_main_web_app"`
+	// True, if the bot has forum topic mode enabled in private chats
+	HasTopicsEnabled bool `json:"has_topics_enabled"`
+	// True, if the bot allows users to create and delete topics in private chats
+	AllowsUsersToCreateTopics bool `json:"allows_users_to_create_topics"`
+	// True, if topics in private chats with the bot are shown in a sidebar
+	HasTopicSidebar bool `json:"has_topic_sidebar"`
+	// True, if other bots can be created to be controlled by the bot
+	CanManageBots bool `json:"can_manage_bots"`
+	// True, if the bot supports join request queries and can be assigned to process them
+	SupportsJoinRequestQueries bool `json:"supports_join_request_queries"`
+}
+
 // BotName (https://core.telegram.org/bots/api#botname)
 //
 // This object represents the bot's name.
@@ -1237,7 +1279,7 @@ type CallbackGame struct{}
 
 // CallbackQuery (https://core.telegram.org/bots/api#callbackquery)
 //
-// This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
+// This object represents an incoming callback query from a callback button in an inline keyboard or in a rich message. If the button that originated the query belongs to a message sent by the bot, the field message will be present, unless the field inline_message_id is used instead as specified by the parameter callback_query_mode of the method setMySettings. If the button belongs to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
 type CallbackQuery struct {
 	// Unique identifier for this query
 	Id string `json:"id"`
@@ -1245,7 +1287,7 @@ type CallbackQuery struct {
 	From User `json:"from"`
 	// Optional. Message sent by the bot with the callback button that originated the query
 	Message MaybeInaccessibleMessage `json:"message,omitempty"`
-	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query
+	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query. Can also be present for messages sent by the bot, depending on the parameter callback_query_mode of the method setMySettings.
 	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
 	ChatInstance string `json:"chat_instance"`
@@ -3114,13 +3156,13 @@ type ChecklistTasksDone struct {
 // ChosenInlineResult (https://core.telegram.org/bots/api#choseninlineresult)
 //
 // Represents a result of an inline query that was chosen by the user and sent to their chat partner.
-// Note: It is necessary to enable inline feedback via @BotFather in order to receive these objects in updates.
+// Note: It is necessary to enable inline feedback via @BotFather or using the parameter inline_feedback_share_denominator of the method setMySettings in order to receive these objects in updates.
 type ChosenInlineResult struct {
 	// The unique identifier for the result that was chosen
 	ResultId string `json:"result_id"`
 	// The user that chose the result
 	From User `json:"from"`
-	// Optional. Sender location, only for bots that require user location
+	// Optional. Sender location, only for bots that enabled user location requests via @BotFather or using the parameter needs_inline_query_location of the method setMySettings
 	Location *Location `json:"location,omitempty"`
 	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message. Will be also received in callback queries and can be used to edit the message.
 	InlineMessageId string `json:"inline_message_id,omitempty"`
@@ -3978,7 +4020,7 @@ type InlineQuery struct {
 	Offset string `json:"offset"`
 	// Optional. Type of the chat from which the inline query was sent. Can be either "sender" for a private chat with the inline query sender, "private", "group", "supergroup", or "channel". The chat type should be always known for requests sent from official clients and most third-party clients, unless the request was sent from a secret chat.
 	ChatType string `json:"chat_type,omitempty"`
-	// Optional. Sender location, only for bots that request user location
+	// Optional. Sender location, only for bots that enabled user location requests via @BotFather or using the parameter needs_inline_query_location of the method setMySettings
 	Location *Location `json:"location,omitempty"`
 }
 
@@ -7127,7 +7169,7 @@ func (v InputRichBlockDocument) Attach(mediaName string, w *multipart.Writer) er
 // A block quotation, corresponding to the HTML tag <blockquote> with custom attribute "expandable".
 type InputRichBlockExpandableBlockQuotation struct {
 	// Content of the block
-	Text RichText `json:"text"`
+	Blocks []InputRichBlock `json:"blocks,omitempty"`
 	// Optional. Credit of the block
 	Credit RichText `json:"credit,omitempty"`
 }
@@ -7966,7 +8008,7 @@ type KeyboardButton struct {
 	RequestUsers *KeyboardButtonRequestUsers `json:"request_users,omitempty"`
 	// Optional. If specified, pressing the button will open a list of suitable chats. Tapping on a chat will send its identifier to the bot in a "chat_shared" service message. Available in private chats only.
 	RequestChat *KeyboardButtonRequestChat `json:"request_chat,omitempty"`
-	// Optional. If specified, pressing the button will ask the user to create and share a bot that will be managed by the current bot. Available for bots that enabled management of other bots in the @BotFather Mini App. Available in private chats only.
+	// Optional. If specified, pressing the button will ask the user to create and share a bot that will be managed by the current bot. Available for bots that enabled management of other bots in the @BotFather Mini App or using the parameter can_manage_bots of the method setMySettings. Available in private chats only.
 	RequestManagedBot *KeyboardButtonRequestManagedBot `json:"request_managed_bot,omitempty"`
 	// Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only.
 	RequestContact bool `json:"request_contact,omitempty"`
@@ -8649,7 +8691,7 @@ type Message struct {
 	GiftUpgradeSent *GiftInfo `json:"gift_upgrade_sent,omitempty"`
 	// Optional. The domain name of the website on which the user has logged in. More about Telegram Login: https://core.telegram.org/widgets/login
 	ConnectedWebsite string `json:"connected_website,omitempty"`
-	// Optional. Service message: the user allowed the bot to write messages after adding it to the attachment or side menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess
+	// Optional. Service message: the user allowed the bot to write messages after adding it to the attachment or side menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess, or the user was invited to the private chat with the bot by the owner of the bot
 	WriteAccessAllowed *WriteAccessAllowed `json:"write_access_allowed,omitempty"`
 	// Optional. Telegram Passport data
 	PassportData *PassportData `json:"passport_data,omitempty"`
@@ -12183,7 +12225,7 @@ func (v RichBlockDocument) MarshalJSON() ([]byte, error) {
 // A block quotation, corresponding to the HTML tag <blockquote> with custom attribute "expandable".
 type RichBlockExpandableBlockQuotation struct {
 	// Content of the block
-	Text RichText `json:"text"`
+	Blocks RichBlockArray `json:"blocks"`
 	// Optional. Credit of the block
 	Credit RichText `json:"credit,omitempty"`
 }
@@ -12192,7 +12234,7 @@ type RichBlockExpandableBlockQuotation struct {
 func (v *RichBlockExpandableBlockQuotation) UnmarshalJSON(b []byte) error {
 	// All fields in RichBlockExpandableBlockQuotation, with interface fields as json.RawMessage
 	type tmp struct {
-		Text   json.RawMessage `json:"text"`
+		Blocks json.RawMessage `json:"blocks"`
 		Credit json.RawMessage `json:"credit"`
 	}
 	t := tmp{}
@@ -12201,9 +12243,9 @@ func (v *RichBlockExpandableBlockQuotation) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal RichBlockExpandableBlockQuotation JSON into tmp struct: %w", err)
 	}
 
-	v.Text, err = unmarshalRichText(t.Text)
+	v.Blocks, err = unmarshalRichBlockArray(t.Blocks)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal custom JSON field Text: %w", err)
+		return fmt.Errorf("failed to unmarshal custom JSON field Blocks: %w", err)
 	}
 	v.Credit, err = unmarshalRichText(t.Credit)
 	if err != nil {
@@ -16189,7 +16231,7 @@ type Update struct {
 	MessageReactionCount *MessageReactionCountUpdated `json:"message_reaction_count,omitempty"`
 	// Optional. New incoming inline query
 	InlineQuery *InlineQuery `json:"inline_query,omitempty"`
-	// Optional. The result of an inline query that was chosen by a user and sent to their chat partner. Please see our documentation on the feedback collecting for details on how to enable these updates for your bot.
+	// Optional. The result of an inline query that was chosen by a user and sent to their chat partner. Please see our documentation on the feedback collecting for details on how to enable these updates for your bot. The updates can also be enabled using the parameter inline_feedback_share_denominator of the method setMySettings.
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 	// Optional. New incoming callback query
 	CallbackQuery *CallbackQuery `json:"callback_query,omitempty"`
@@ -16245,26 +16287,6 @@ type User struct {
 	IsPremium bool `json:"is_premium,omitempty"`
 	// Optional. True, if this user added the bot to the attachment menu
 	AddedToAttachmentMenu bool `json:"added_to_attachment_menu,omitempty"`
-	// Optional. True, if the bot can be invited to groups. Returned only in getMe.
-	CanJoinGroups bool `json:"can_join_groups,omitempty"`
-	// Optional. True, if privacy mode is disabled for the bot. Returned only in getMe.
-	CanReadAllGroupMessages bool `json:"can_read_all_group_messages,omitempty"`
-	// Optional. True, if the bot supports guest queries from chats it is not a member of. Returned only in getMe.
-	SupportsGuestQueries bool `json:"supports_guest_queries,omitempty"`
-	// Optional. True, if the bot supports inline queries. Returned only in getMe.
-	SupportsInlineQueries bool `json:"supports_inline_queries,omitempty"`
-	// Optional. True, if the bot can be connected to a user account to manage it. Returned only in getMe.
-	CanConnectToBusiness bool `json:"can_connect_to_business,omitempty"`
-	// Optional. True, if the bot has a main Web App. Returned only in getMe.
-	HasMainWebApp bool `json:"has_main_web_app,omitempty"`
-	// Optional. True, if the bot has forum topic mode enabled in private chats. Returned only in getMe.
-	HasTopicsEnabled bool `json:"has_topics_enabled,omitempty"`
-	// Optional. True, if the bot allows users to create and delete topics in private chats. Returned only in getMe.
-	AllowsUsersToCreateTopics bool `json:"allows_users_to_create_topics,omitempty"`
-	// Optional. True, if other bots can be created to be controlled by the bot. Returned only in getMe.
-	CanManageBots bool `json:"can_manage_bots,omitempty"`
-	// Optional. True, if the bot supports join request queries and can be assigned to process them. Returned only in getMe.
-	SupportsJoinRequestQueries bool `json:"supports_join_request_queries,omitempty"`
 }
 
 // UserChatBoosts (https://core.telegram.org/bots/api#userchatboosts)
@@ -16845,7 +16867,7 @@ type WidgetQueryWallet struct {
 
 // WriteAccessAllowed (https://core.telegram.org/bots/api#writeaccessallowed)
 //
-// This object represents a service message about a user allowing a bot to write messages after adding it to the attachment menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess.
+// This object represents a service message about a user allowing a bot to write messages after adding it to the attachment menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess, or about a user being invited to the private chat with the bot by the owner of the bot.
 type WriteAccessAllowed struct {
 	// Optional. True, if the access was granted after the user accepted an explicit request from a Web App sent by the method requestWriteAccess
 	FromRequest bool `json:"from_request,omitempty"`
@@ -16853,4 +16875,6 @@ type WriteAccessAllowed struct {
 	WebAppName string `json:"web_app_name,omitempty"`
 	// Optional. True, if the access was granted when the bot was added to the attachment or side menu
 	FromAttachmentMenu bool `json:"from_attachment_menu,omitempty"`
+	// Optional. The owner of the bot, if the access was granted when the owner invited the user to the private chat with the bot. Bot owners can invite up to 10 users at once by pressing the link https://t.me/botinvite/<bot_username>.
+	Inviter *User `json:"inviter,omitempty"`
 }

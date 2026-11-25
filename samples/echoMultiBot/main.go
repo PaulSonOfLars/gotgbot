@@ -112,7 +112,7 @@ func startLongPollingBots(updater *ext.Updater, bots []*gotgbot.Bot) error {
 			return fmt.Errorf("failed to start polling for bot %d: %w", idx, err)
 		}
 
-		log.Printf("bot %d: %s has started polling...\n", idx, b.User.Username)
+		log.Printf("bot %d: %s has started polling...\n", idx, b.BotFullInfo.Username)
 	}
 
 	return nil
@@ -138,7 +138,7 @@ func startWebhookBots(updater *ext.Updater, bots []*gotgbot.Bot, domain string, 
 			return fmt.Errorf("failed to add bot: %w", err)
 		}
 
-		log.Printf("bot %d: %s has been added to the updater\n", idx, b.User.Username)
+		log.Printf("bot %d: %s has been added to the updater\n", idx, b.BotFullInfo.Username)
 	}
 
 	// We set the webhooks for all the added bots, so telegram starts sending updates.

@@ -246,3 +246,12 @@ func (m RichMessage) Markdown() (string, []InputRichMessageMedia) {
 	}
 	return r.sb.String(), r.media
 }
+
+func (bfi BotFullInfo) ToUser() User {
+	return User{
+		Id:        bfi.Id,
+		IsBot:     bfi.IsBot,
+		FirstName: bfi.FirstName,
+		Username:  bfi.Username,
+	}
+}

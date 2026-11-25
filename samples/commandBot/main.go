@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	logger.Info("Bot has been started...", "bot_username", b.User.Username)
+	logger.Info("Bot has been started...", "bot_username", b.BotFullInfo.Username)
 
 	// Idle, to keep updates coming in, and avoid bot stopping.
 	updater.Idle()
@@ -115,7 +115,7 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // start introduces the bot.
 func start(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nI am a sample bot to demonstrate how file sending works.\n\nTry the /source command!", b.User.Username), &gotgbot.SendMessageOpts{
+	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s.\nI am a sample bot to demonstrate how file sending works.\n\nTry the /source command!", b.BotFullInfo.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "HTML",
 	})
 	if err != nil {

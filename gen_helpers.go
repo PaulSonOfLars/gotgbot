@@ -406,12 +406,10 @@ func (v InputRichBlockDetails) RichTextChildren() []RichText {
 }
 
 func (v InputRichBlockExpandableBlockQuotation) RichTextChildren() []RichText {
-	var out []RichText
-	out = append(out, v.Text)
-	if v.Credit != nil {
-		out = append(out, v.Credit)
+	if v.Credit == nil {
+		return nil
 	}
-	return out
+	return []RichText{v.Credit}
 }
 
 func (v InputRichBlockFooter) RichTextChildren() []RichText {
@@ -980,12 +978,10 @@ func (v RichBlockDocument) RichBlockChildren() []RichBlock {
 }
 
 func (v RichBlockExpandableBlockQuotation) RichTextChildren() []RichText {
-	var out []RichText
-	out = append(out, v.Text)
-	if v.Credit != nil {
-		out = append(out, v.Credit)
+	if v.Credit == nil {
+		return nil
 	}
-	return out
+	return []RichText{v.Credit}
 }
 
 func (v RichBlockExpandableBlockQuotation) RichBlockChildren() []RichBlock {
